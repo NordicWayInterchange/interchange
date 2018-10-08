@@ -15,14 +15,14 @@ docker build -t postgis .
 
 - ```-t``` gives the image the name  'postgis'. An optional tag can be added at this stage. A tag is added by giving the image a name in the 'name:tag' format.
 
-The output of the command ```docker images``` is now:
+
+This will build an image called ```postgis```. To see all the created images, use the command ```docker images```. By running this command we see our newly created image.
 
 ```
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 postgis             latest              c4a97b185132        3 minutes ago       666MB
 ```
 
-This will build an image called ```postgis```
 
 
 ### Running the PostGIS docker image 
