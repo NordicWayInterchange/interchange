@@ -63,7 +63,7 @@ To test a lookup, first login to the psql with the username (```-U```) we create
 root@1bbe9342922d:/# psql -U geolookup
 ```
 
-This gives the pqsl prompt for the database 'geolookup'. 
+This gives the psql prompt for the database 'geolookup'. 
 ```
 geolookup=# 
 ```
