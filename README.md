@@ -43,7 +43,7 @@ To access the container shell use the following command
 docker exec -it postgis_container /bin/bash
 ```
 - ```exec``` Runs a command in a running container
-- ```-it``` To flags: ````-i```, meaning interactive, keeps STDIN open even if the container is running in the background. ````-t```, meaning tty, allocates a pseudo-TTY. 
+- ```-it``` To flags: ```-i```, meaning interactive, keeps STDIN open even if the container is running in the background. ```-t```, meaning tty, allocates a pseudo-TTY. 
 
 
 Contact 
