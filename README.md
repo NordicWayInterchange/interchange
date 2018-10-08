@@ -8,7 +8,7 @@ Interchange node under the Nordic Way project
 ## PostGIS database container
 ### Building the PostGIS docker image
 
-From the directory containing the ```Dockerfile``` and the ```init.sql```` file, run the following command to build the PostGIS docker image
+From the directory containing the ```Dockerfile``` and the ```init.sql``` file, run the following command to build the PostGIS docker image
 ```
 docker build -t postgis .
 ```
