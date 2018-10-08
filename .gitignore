@@ -1,3 +1,4 @@
 .idea/
 *.cer
 *.iml
+.DS_Store
