@@ -1,0 +1,57 @@
+{
+  "id" : "9c9e9d11-240e-457e-a507-8a9005d1c03e",
+  "type" : "BDB",
+  "name" : "default",
+  "modelVersion" : "7.0",
+  "lastUpdatedTime" : 1539081427434,
+  "createdTime" : 1539081427434,
+  "exchanges" : [ {
+    "id" : "8b132a16-e85d-4cd4-98c7-03f309a5af49",
+    "name" : "amq.direct",
+    "type" : "direct",
+    "lastUpdatedTime" : 1539081427434,
+    "createdTime" : 1539081427434
+  }, {
+    "id" : "02a3544a-f923-4aaf-95df-47fb19315592",
+    "name" : "amq.fanout",
+    "type" : "fanout",
+    "lastUpdatedTime" : 1539081427434,
+    "createdTime" : 1539081427434
+  }, {
+    "id" : "15bd2917-8d3a-437a-9813-288ed9a6cc79",
+    "name" : "amq.match",
+    "type" : "headers",
+    "lastUpdatedTime" : 1539081427434,
+    "createdTime" : 1539081427434
+  }, {
+    "id" : "9daf6229-c1b3-40c3-94eb-41ce8e2a84cb",
+    "name" : "amq.topic",
+    "type" : "topic",
+    "lastUpdatedTime" : 1539081427434,
+    "createdTime" : 1539081427434
+  } ]
+  ,
+  "queues" : [ {
+    "id" : "2783f28f-09af-4a7a-9efb-27682fe3224e",
+    "name" : "onramp",
+    "type" : "standard",
+    "durable" : true,
+    "holdOnPublishEnabled" : false,
+    "owner" : null,
+    "lastUpdatedBy" : "admin",
+    "lastUpdatedTime" : 1538547045800,
+    "createdBy" : "admin",
+    "createdTime" : 1538547045800
+  }, {
+    "id" : "6dc5af84-c9e4-45e8-991b-fd71f86b72f7",
+    "name" : "test-out",
+    "type" : "standard",
+    "durable" : true,
+    "holdOnPublishEnabled" : false,
+    "owner" : null,
+    "lastUpdatedBy" : "admin",
+    "lastUpdatedTime" : 1538547055862,
+    "createdBy" : "admin",
+    "createdTime" : 1538547055862
+  } ]
+}
