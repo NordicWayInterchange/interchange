@@ -8,5 +8,5 @@
     <artifactId>interchange-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-
+    <modules><module>interchangenode</module></modules>
 </project>
