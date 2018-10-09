@@ -28,7 +28,7 @@ postgis             latest              c4a97b185132        3 minutes ago       
 ### Running the PostGIS docker image 
 The following command runs the postgis-image, and creates a container called ```postgis_container``` :
 ```
-docker run --name postgis_container -e POSTGRES_USER=geolookup -e POSTGRES_PASSWORD=geolookup -e POSTGRES_DB=geolookup -d postgis
+docker run --name postgis_container -e POSTGRES_USER=geolookup -e POSTGRES_PASSWORD=geolookup -e POSTGRES_DB=geolookup -p 5432:5432 -d postgis
 ```
 
 - ```-e``` Sets an environment variable in the container.
