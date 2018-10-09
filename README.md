@@ -95,6 +95,10 @@ docker run --name qpid_container -p 8080:8080/tcp -p 5672:5672/tcp qpid_image
 
 Access the managment web console at http://localhost:8080/ with the username/password admin/admin
 
+### Queues
+Queues created: 
+* onramp
+* test-out
 
 #Contact 
 christian.berg.skjetne@vegvesen.no
