@@ -81,5 +81,20 @@ iso2
 (1 row)
 ```
 
-Contact 
+## QPID Docker Container
+
+Create an image of the docker file
+```
+docker build -t qpid_image .
+```
+
+Run the container and expose the ports 
+```
+docker run --name qpid_container -p 8080:8080/tcp -p 5672:5672/tcp qpid_image
+````
+
+Access the managment web console at http://localhost:8080/ with the username/password admin/admin
+
+
+#Contact 
 christian.berg.skjetne@vegvesen.no
