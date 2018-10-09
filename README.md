@@ -52,12 +52,12 @@ To access the container shell use the following command
 docker exec -it postgis_container /bin/bash
 ```
 - ```exec``` Runs a command in a running container
-- ```-it``` To flags: ```-i```, meaning interactive, keeps STDIN open even if the container is running in the background. ```-t```, meaning tty, allocates a pseudo-TTY. 
+- ```-it``` Two flags: ```-i```, meaning interactive, keeps STDIN open even if the container is running in the background. ```-t``` allocates a pseudo-TTY. 
 
 
 ### Testing a lookup
 
-To test a lookup, first login to the psql with the username (```-U```) we created: 
+To test a lookup, first login to psql with the username (```-U```) we created: 
 
 ```
 root@1bbe9342922d:/# psql -U geolookup
