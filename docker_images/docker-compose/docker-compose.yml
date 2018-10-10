@@ -1,0 +1,62 @@
+version: '3'
+services:
+  postgis:
+    build: ./postgis
+    environment:
+      - POSTGRES_USER=geolookup
+      - POSTGRES_PASSWORD=geolookup
+      - POSTGRES_DB=geolookup
+    container_name: postgis
+    ports:
+      - 5432:5432
+    volumes:
+      - ./logs:/var/log/postgresqlv
+
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:${TAG}
+    container_name: filebeat
+    volumes:
+      - ./logs:/var/log/logfiles
+    networks:
+      - elknet
+    links:
+      - elasticsearch
+      - kibana
+
+  elasticsearch:
+    image: elasticsearch:${TAG}
+    container_name: elasticsearch
+    networks:
+      - elknet
+    ports:
+      - 9200:9200
+
+  kibana:
+    image: kibana:${TAG}
+    container_name: kibana
+    networks:
+      - elknet
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    ports:
+      - 5601:5601
+
+
+  # NOT IN USE yet
+  #logstash:
+    #build: docker.elastic.co/logstash/logstash:${TAG}
+    #container_name: logstash
+   # networks:
+   #   - elknet
+
+
+networks:
+  elknet:
+    driver: bridge
+
+
+
+

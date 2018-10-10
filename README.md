@@ -6,6 +6,10 @@ Interchange node under the Nordic Way project
 
 
 ## PostGIS database container
+To build and run the PostGIS image separately, 
+use the instructions below. To build all the containers, 
+use docker-compose. 
+
 ### Building the PostGIS docker image
 
 From the directory containing the ```Dockerfile``` and the ```init.sql``` file, run the following command to build the PostGIS docker image
@@ -114,8 +118,77 @@ Run the container:
 docker run --rm -it -p 9200:9200 -p 9300:9300 logstash_image
 ```
 
-###
-TODO
+
+
+## Docker compose
+To set up all the containers simeltaneously, use docker-compose.
+
+The ```docker-compose.yml``` describes the setup of
+four different docker images, and the local network.
+bridge 'elknet'. The images are:
+ * Postgis
+    * Holds the PostGIS database. Performs lookups and logging.
+ * Filebeat
+ * Elasticsearch
+ * Kibana
+
+To build all four containers, 
+navigate to the directory containing the Dockerfiles.
+and the ```docker-compose.yml``` file: 
+
+````
+.
+├── docker-compose.yml
+├── filebeat
+│   ├── Dockerfile
+│   └── filebeat.yml
+├── logs
+└── postgis
+    ├── Dockerfile
+    ├── init.sql
+    ├── postgresql.conf
+    └── time_log.sh
+
+``````
+
+Build the images listed in the ```docker-compose.yml``` by running the following command:
+
+
+```
+docker-compose build
+```
+
+This builds the images for all the containers.
+
+To run the images:
+````
+docker-compose up -d
+````
+
+You now have four running containers and a network
+called 'elknet':
+
+````
+CONTAINER ID        IMAGE                                    COMMAND                  CREATED             STATUS              PORTS                              NAMES
+2318f16c0ea4        docker.elastic.co/beats/filebeat:6.4.1   "/usr/local/bin/dock…"   25 seconds ago      Up 24 seconds                                          filebeat
+5999c0fd2305        kibana:6.4.1                             "/usr/local/bin/kiba…"   26 seconds ago      Up 25 seconds       0.0.0.0:5601->5601/tcp             kibana
+cf9773e8c583        elasticsearch:6.4.1                      "/usr/local/bin/dock…"   28 seconds ago      Up 26 seconds       0.0.0.0:9200->9200/tcp, 9300/tcp   elasticsearch
+9074535467ce        postgis-docker_postgis                   "docker-entrypoint.s…"   28 seconds ago      Up 26 seconds       0.0.0.0:5432->5432/tcp             postgis
+````
+
+````
+NETWORK ID          NAME                     DRIVER              SCOPE
+2b913cf8aa32        postgis-docker_elknet    bridge              local
+````
+
+### docker-compose TODO:
+* Setting up logstash container
+* Forwarding of logs from filebeat to logstash 
+ 
+--------------
+
+
+###TODO
 
  * network setup
  * pointing to the elasticsearch container
