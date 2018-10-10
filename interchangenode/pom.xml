@@ -20,6 +20,7 @@
 
 
 
+
     <dependencies>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -36,35 +37,7 @@
         </dependency>
 
         <!-- ==================== TEST SCOPE ==================== -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>RELEASE</version>
-            <scope>test</scope>
-        </dependency>
 
-<!--
-        &lt;!&ndash; Note that the below is qpid-broker-core and *not* qpid-broker. &ndash;&gt;
-        <dependency>
-            <groupId>org.apache.qpid</groupId>
-            <artifactId>qpid-broker-core</artifactId>
-            <version>${qpid-broker-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.qpid</groupId>
-            <artifactId>qpid-broker-plugins-amqp-1-0-protocol</artifactId>
-            <version>${qpid-broker-version}</version>
-            <scope>test</scope>
-        </dependency>
-        &lt;!&ndash; If a different store type is required it needs to be included here &ndash;&gt;
-        <dependency>
-            <groupId>org.apache.qpid</groupId>
-            <artifactId>qpid-broker-plugins-memory-store</artifactId>
-            <version>${qpid-broker-version}</version>
-            <scope>test</scope>
-        </dependency>
--->
 
 
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
@@ -81,8 +54,21 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.0-rc1</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
+
 
 
 </project>

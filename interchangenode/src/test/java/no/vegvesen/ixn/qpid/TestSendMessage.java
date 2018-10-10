@@ -1,20 +1,20 @@
 package no.vegvesen.ixn.qpid;
 
 import no.vegvesen.ixn.MessagingClient;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
-class TestSendMessage {
+public class TestSendMessage {
 
 	private MessagingClient messagingClient;
 
-	@BeforeEach
-	void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		System.setProperty("USER", "guest");
 		System.setProperty("PASSWORD", "guest");
 		messagingClient = new QpidMessagingClient();
@@ -22,7 +22,7 @@ class TestSendMessage {
 
 
 	@Test
-	void sendFiskToQueueOnrampAndWaitForReception() throws NamingException, JMSException {
+	public void sendFiskToQueueOnrampAndWaitForReception() throws NamingException, JMSException {
 		messagingClient.send("onramp", "fisk");
 		assertEquals("fisk", messagingClient.receive("onramp"));
 	}
