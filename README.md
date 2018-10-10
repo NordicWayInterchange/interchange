@@ -124,7 +124,7 @@ docker run --rm -it -p 9200:9200 -p 9300:9300 logstash_image
 To set up all the containers simeltaneously, use docker-compose.
 
 The ```docker-compose.yml``` describes the setup of
-four different docker images, and the local network.
+four different docker images, and the local network
 bridge 'elknet'. The images are:
  * Postgis
     * Holds the PostGIS database. Performs lookups and logging.
@@ -133,10 +133,11 @@ bridge 'elknet'. The images are:
  * Kibana
 
 To build all four containers, 
-navigate to the directory containing the Dockerfiles.
+navigate to the directory containing the Dockerfiles
 and the ```docker-compose.yml``` file: 
 
 ````
+docker-compose $tree
 .
 ├── docker-compose.yml
 ├── filebeat
@@ -146,8 +147,7 @@ and the ```docker-compose.yml``` file:
 └── postgis
     ├── Dockerfile
     ├── init.sql
-    ├── postgresql.conf
-    └── time_log.sh
+    └── postgresql.conf
 
 ``````
 
@@ -184,11 +184,10 @@ NETWORK ID          NAME                     DRIVER              SCOPE
 ### docker-compose TODO:
 * Setting up logstash container
 * Forwarding of logs from filebeat to logstash 
- 
---------------
 
 
-###TODO
+###
+TODO
 
  * network setup
  * pointing to the elasticsearch container
