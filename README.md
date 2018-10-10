@@ -95,6 +95,26 @@ docker run --name qpid_container -p 8080:8080/tcp -p 5672:5672/tcp qpid_image
 
 Access the managment web console at http://localhost:8080/ with the username/password admin/admin
 
+## Logstash container
+
+The Dockerfile is in the "logstash" directory.
+To create an image:
+```
+docker build -t logstash_image .
+```
+
+Run the container:
+```
+docker run --rm -it -p 9200:9200 -p 9300:9300 logstash_image
+```
+
+###
+TODO
+
+ * network setup
+ * pointing to the elasticsearch container
+ * pipeline configs.
+
 ### Queues
 Queues created: 
 * onramp
