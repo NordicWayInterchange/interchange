@@ -1,11 +1,15 @@
 package no.vegvesen.ixn.qpid;
 
 import no.vegvesen.ixn.MessagingClient;
+import no.vegvesen.ixn.model.DispatchMessage;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.jms.JMSException;
+import javax.jms.TextMessage;
 import javax.naming.NamingException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,11 +24,17 @@ public class TestSendMessage {
 		messagingClient = new QpidMessagingClient();
 	}
 
-
 	@Test
 	public void sendFiskToQueueOnrampAndWaitForReception() throws NamingException, JMSException {
-		messagingClient.send("onramp", "fisk");
-		assertEquals("fisk", messagingClient.receive("onramp"));
+		Map<String,String> properties = new HashMap<>();
+		properties.put("lat", "10");
+		properties.put("lon", "60");
+		String queue = "onramp";
+		String body = "fisk";
+		DispatchMessage dispatchMessage = new DispatchMessage(queue, properties, body);
+		messagingClient.send(dispatchMessage);
+		TextMessage received = messagingClient.receive(queue);
+		assertEquals("fisk", received.getText());
 	}
 
 }

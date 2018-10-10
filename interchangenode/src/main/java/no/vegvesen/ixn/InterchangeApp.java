@@ -1,6 +1,9 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.model.DispatchMessage;
+
 import javax.jms.JMSException;
+import javax.jms.TextMessage;
 import javax.naming.NamingException;
 
 public class InterchangeApp {
@@ -19,8 +22,8 @@ public class InterchangeApp {
 	}
 
 	void handleOneMessage() throws JMSException, NamingException {
-		String message = messagingClient.receive("onramp");
-		messagingClient.send("test-out", message);
+		TextMessage message = messagingClient.receive("onramp");
+		messagingClient.send(new DispatchMessage("test-out", message));
 	}
 
 	public void stop() {

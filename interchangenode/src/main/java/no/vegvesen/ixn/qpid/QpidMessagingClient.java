@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.qpid;
 
+import no.vegvesen.ixn.model.DispatchMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +26,7 @@ public class QpidMessagingClient implements no.vegvesen.ixn.MessagingClient {
 		logger.debug("started client");
 	}
 
-	@Override
-	public void send(String queueName, String body) throws JMSException, NamingException {
+	private void send(String queueName, String body) throws JMSException, NamingException {
 		logger.debug("sending to queue %s", queueName);
 		Destination queue = (Destination) context.lookup(queueName);
 		Connection connection = createConnection();
@@ -48,7 +48,7 @@ public class QpidMessagingClient implements no.vegvesen.ixn.MessagingClient {
 	}
 
 	@Override
-	public String receive(String queueName) throws JMSException, NamingException {
+	public TextMessage receive(String queueName) throws JMSException, NamingException {
 		Destination queue = (Destination) context.lookup(queueName);
 		Connection connection = createConnection();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -57,7 +57,12 @@ public class QpidMessagingClient implements no.vegvesen.ixn.MessagingClient {
 		TextMessage receivedMessage = (TextMessage) messageConsumer.receive(2000L);
 
 		connection.close();
-		return receivedMessage.getText();
+		return receivedMessage;
+	}
+
+	@Override
+	public void send(DispatchMessage dispatchMessage) throws NamingException, JMSException {
+		send(dispatchMessage.getQueue(), dispatchMessage.getBody());
 	}
 
 	private class MyExceptionListener implements ExceptionListener {

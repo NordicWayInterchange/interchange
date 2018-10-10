@@ -1,10 +1,12 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.model.DispatchMessage;
+
 import javax.jms.JMSException;
+import javax.jms.TextMessage;
 import javax.naming.NamingException;
 
 public interface MessagingClient {
-	void send(String queueName, String body) throws JMSException, NamingException;
-
-	String receive(String queueName) throws JMSException, NamingException;
+	TextMessage receive(String queueName) throws JMSException, NamingException;
+	void send(DispatchMessage dispatchMessage) throws NamingException, JMSException;
 }
