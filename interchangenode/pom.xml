@@ -3,6 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <properties>
+        <qpid-broker-version>7.0.6</qpid-broker-version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
 
     <parent>
         <groupId>net.nordicway.interchange</groupId>
@@ -13,6 +18,8 @@
     <artifactId>interchange-node</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+
+
     <dependencies>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -20,6 +27,61 @@
             <version>42.2.5</version>
             <type>jar</type>
         </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>qpid-jms-client</artifactId>
+            <version>0.37.0</version>
+        </dependency>
+
+        <!-- ==================== TEST SCOPE ==================== -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+
+<!--
+        &lt;!&ndash; Note that the below is qpid-broker-core and *not* qpid-broker. &ndash;&gt;
+        <dependency>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>qpid-broker-core</artifactId>
+            <version>${qpid-broker-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>qpid-broker-plugins-amqp-1-0-protocol</artifactId>
+            <version>${qpid-broker-version}</version>
+            <scope>test</scope>
+        </dependency>
+        &lt;!&ndash; If a different store type is required it needs to be included here &ndash;&gt;
+        <dependency>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>qpid-broker-plugins-memory-store</artifactId>
+            <version>${qpid-broker-version}</version>
+            <scope>test</scope>
+        </dependency>
+-->
+
+
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Provide a logging implementation to avoid
+             notice from SLF4J that none was found -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+
     </dependencies>
 
 
