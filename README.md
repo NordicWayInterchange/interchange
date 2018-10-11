@@ -107,7 +107,7 @@ Queues created:
 
 ## Logstash container
 
-The Dockerfile is in the "logstash" directory.
+The Dockerfile is in the "logstash" directory under docker-compose.
 To create an image:
 ```
 docker build -t logstash_image .
@@ -121,38 +121,24 @@ docker run --rm -it -p 9200:9200 -p 9300:9300 logstash_image
 
 
 ## Docker compose
-To set up all the containers simeltaneously, use docker-compose.
 
 The ```docker-compose.yml``` describes the setup of
-four different docker images, and the local network
-bridge 'elknet'. The images are:
+five different docker images.
  * Postgis
-    * Holds the PostGIS database. Performs lookups and logging.
+    * Holds the PostGIS database. Performs lookups and logs to a .
+    volume it shares with filebeat.
  * Filebeat
+    * Harvests logs from a volume it shares with postgis
+    and forwards them to logstash.
+ * Logstash 
+    * Receives logs from filebeat. Parses them and sends them to 
+    elasticsearch
  * Elasticsearch
+    * Stores the logfiles
  * Kibana
+    * Visualizes the files in elasticsearch
 
-To build all four containers, 
-navigate to the directory containing the Dockerfiles
-and the ```docker-compose.yml``` file: 
-
-````
-docker-compose $tree
-.
-├── docker-compose.yml
-├── filebeat
-│   ├── Dockerfile
-│   └── filebeat.yml
-├── logs
-└── postgis
-    ├── Dockerfile
-    ├── init.sql
-    └── postgresql.conf
-
-``````
-
-Build the images listed in the ```docker-compose.yml``` by running the following command:
-
+To build all five containers run : 
 
 ```
 docker-compose build
@@ -160,37 +146,33 @@ docker-compose build
 
 This builds the images for all the containers.
 
-To run the images:
+Run the images with:
 ````
 docker-compose up -d
 ````
 
-You now have four running containers and a network
-called 'elknet':
+You now have five running containers. 
 
-````
-CONTAINER ID        IMAGE                                    COMMAND                  CREATED             STATUS              PORTS                              NAMES
-2318f16c0ea4        docker.elastic.co/beats/filebeat:6.4.1   "/usr/local/bin/dock…"   25 seconds ago      Up 24 seconds                                          filebeat
-5999c0fd2305        kibana:6.4.1                             "/usr/local/bin/kiba…"   26 seconds ago      Up 25 seconds       0.0.0.0:5601->5601/tcp             kibana
-cf9773e8c583        elasticsearch:6.4.1                      "/usr/local/bin/dock…"   28 seconds ago      Up 26 seconds       0.0.0.0:9200->9200/tcp, 9300/tcp   elasticsearch
-9074535467ce        postgis-docker_postgis                   "docker-entrypoint.s…"   28 seconds ago      Up 26 seconds       0.0.0.0:5432->5432/tcp             postgis
-````
-
-````
-NETWORK ID          NAME                     DRIVER              SCOPE
-2b913cf8aa32        postgis-docker_elknet    bridge              local
-````
-
-### docker-compose TODO:
-* Setting up logstash container
-* Forwarding of logs from filebeat to logstash 
+####Viewing the logfiles in Kibana
+```
+http://localhost:5601
+```
 
 
-###
-TODO
+
+#### Seeing the number of files in Elasticsearch
+```
+http://localhost:9200/_count?pretty
+```
+
+#### TODO
+* Describe how to create an index in kibana/elasticsearch
+
+---------------
+
+### TODO
 
  * network setup
- * pointing to the elasticsearch container
  * pipeline configs.
 
 #Contact 
