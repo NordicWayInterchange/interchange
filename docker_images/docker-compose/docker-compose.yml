@@ -10,7 +10,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./logs:/var/log/postgresqlv
+      - ./logs:/var/log/postgresql
 
 
   filebeat:
@@ -31,6 +31,7 @@ services:
       - elknet
     ports:
       - 9200:9200
+      - 9300:9300
 
   kibana:
     image: kibana:${TAG}
@@ -46,7 +47,7 @@ services:
 
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:${TAG}
+    build: ./logstash
     container_name: logstash
     links:
     - elasticsearch
@@ -57,6 +58,10 @@ services:
     volumes:
     - ./logstash:/config-dir
     command: logstash -f /config-dir/logstash.conf
+    ports:
+      - 5044:5044
+    environment:
+      - LOG_LEVEL=debug
 
 
 networks:

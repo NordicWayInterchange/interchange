@@ -3,4 +3,5 @@ COPY filebeat.yml /usr/share/filebeat/filebeat.yml
 
 USER root
 RUN chown root:filebeat /user/share/filebeat/filebeat.yml
+RUN yum -y install nmap-ncat
 USER filebeat

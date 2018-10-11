@@ -2,4 +2,5 @@
 *.cer
 *.iml
 .DS_Store
-interchangenode/target/ 
+interchangenode/target/
+docker_images/docker-compose/logs/ 
