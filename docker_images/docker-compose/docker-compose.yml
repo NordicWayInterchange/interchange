@@ -45,12 +45,18 @@ services:
       - 5601:5601
 
 
-  # NOT IN USE yet
-  #logstash:
-    #build: docker.elastic.co/logstash/logstash:${TAG}
-    #container_name: logstash
-   # networks:
-   #   - elknet
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${TAG}
+    container_name: logstash
+    links:
+    - elasticsearch
+    depends_on:
+    - elasticsearch
+    networks:
+    - elknet
+    volumes:
+    - ./logstash:/config-dir
+    command: logstash -f /config-dir/logstash.conf
 
 
 networks:
