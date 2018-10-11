@@ -16,6 +16,7 @@ public class QpidMessagingClient implements no.vegvesen.ixn.MessagingClient {
 	private final Session session;
 	private MessageProducer messageProducer;
 	private MessageConsumer messageConsumer;
+	private Destination inQueue;
 
 	private static Logger logger = LoggerFactory.getLogger(QpidMessagingClient.class);
 
@@ -32,7 +33,7 @@ public class QpidMessagingClient implements no.vegvesen.ixn.MessagingClient {
 		logger.debug("started client");
 		Destination outQueue = (Destination) context.lookup(JNDI_NAME_OUT);
 		messageProducer = session.createProducer(outQueue);
-		Destination inQueue = (Destination) context.lookup(JNDI_NAME_IN);
+		inQueue = (Destination) context.lookup(JNDI_NAME_IN);
 		messageConsumer = session.createConsumer(inQueue);
 	}
 
@@ -45,7 +46,7 @@ public class QpidMessagingClient implements no.vegvesen.ixn.MessagingClient {
 
 	@Override
 	public TextMessage receive() throws JMSException{
-		logger.debug("receiving from " + messageConsumer);
+		logger.debug("receiving from " + inQueue);
 		return (TextMessage) messageConsumer.receive();
 	}
 
