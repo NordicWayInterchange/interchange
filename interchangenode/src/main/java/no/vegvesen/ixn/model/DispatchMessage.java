@@ -6,24 +6,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DispatchMessage {
-	private final String queue;
 	private final Map<String, String> properties;
 	private final String body;
 
-	public DispatchMessage(String queue, Map<String, String> properties, String body) {
-		this.queue = queue;
+	public DispatchMessage(Map<String, String> properties, String body) {
 		this.properties = properties;
 		this.body = body;
 	}
 
-	public DispatchMessage(String queue, TextMessage originalMessage) throws JMSException {
-		this.queue = queue;
+	public DispatchMessage(TextMessage originalMessage) throws JMSException {
 		this.body = originalMessage.getText();
 		this.properties = new HashMap<>();
-	}
-
-	public String getQueue() {
-		return queue;
 	}
 
 	public Map<String, String> getProperties() {

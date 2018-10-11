@@ -29,11 +29,10 @@ public class TestSendMessage {
 		Map<String,String> properties = new HashMap<>();
 		properties.put("lat", "10");
 		properties.put("lon", "60");
-		String queue = "onramp";
 		String body = "fisk";
-		DispatchMessage dispatchMessage = new DispatchMessage(queue, properties, body);
+		DispatchMessage dispatchMessage = new DispatchMessage(properties, body);
 		messagingClient.send(dispatchMessage);
-		TextMessage received = messagingClient.receive(queue);
+		TextMessage received = messagingClient.receive();
 		assertEquals("fisk", received.getText());
 	}
 

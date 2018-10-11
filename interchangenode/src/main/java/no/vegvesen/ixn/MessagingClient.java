@@ -7,6 +7,7 @@ import javax.jms.TextMessage;
 import javax.naming.NamingException;
 
 public interface MessagingClient {
-	TextMessage receive(String queueName) throws JMSException, NamingException;
+	TextMessage receive() throws JMSException, NamingException;
+	void close() throws JMSException;
 	void send(DispatchMessage dispatchMessage) throws NamingException, JMSException;
 }

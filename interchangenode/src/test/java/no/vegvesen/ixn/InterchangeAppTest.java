@@ -32,18 +32,18 @@ public class InterchangeAppTest {
 	public void handleOneMessage() throws JMSException, NamingException {
 		TextMessage textMessage = mock(TextMessage.class);
 		when(textMessage.getText()).thenReturn("fisk");
-		when(messagingClient.receive("onramp")).thenReturn(textMessage);
+		when(messagingClient.receive()).thenReturn(textMessage);
 		app.handleOneMessage();
-		verify(messagingClient, times(1)).send(argThat(messageToWithBody("test-out", "fisk")));
+		verify(messagingClient, times(1)).send(argThat(messageWithBody("fisk")));
 	}
 
-	private Matcher<DispatchMessage> messageToWithBody(final String outQueue, final String body) {
+	private Matcher<DispatchMessage> messageWithBody(final String body) {
 		return new TypeSafeMatcher<DispatchMessage>() {
 			public boolean matchesSafely(DispatchMessage item) {
-				return body.equals(item.getBody()) && outQueue.equals(item.getQueue());
+				return body.equals(item.getBody());
 			}
 			public void describeTo(Description description) {
-				description.appendText("a message to " + outQueue + " with body " + body);
+				description.appendText("a message with body " + body);
 			}
 		};
 	}
