@@ -9,6 +9,7 @@ COPY qpidconfig/ /var/qpid/
 
 # Add entrypoint
 COPY docker-entrypoint.sh /
+RUN chmod u+x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 EXPOSE 5672 8080

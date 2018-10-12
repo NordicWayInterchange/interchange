@@ -12,8 +12,15 @@ services:
     volumes:
       - ./logs:/var/log/postgresql
 
+  qpid:
+    build: ./qpid
+    container_name: qpid
+    ports:
+      - 8080:8080/tcp
+      - 5672:5672/tcp
 
-  filebeat:
+
+  filebeat_postgis:
     build: ./filebeat
     container_name: filebeat
     volumes:
