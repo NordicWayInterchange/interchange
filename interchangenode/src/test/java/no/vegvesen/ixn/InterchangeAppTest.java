@@ -37,6 +37,16 @@ public class InterchangeAppTest {
 		verify(messagingClient, times(1)).send(argThat(messageWithBody("fisk")));
 	}
 
+
+	@Test
+	public void  messageWithoutBodyIsDropped() throws JMSException, NamingException {
+		TextMessage textMessage = mock(TextMessage.class);
+		when(textMessage.getText()).thenReturn(null);
+		when(messagingClient.receive()).thenReturn(textMessage);
+		app.handleOneMessage();
+		verify(messagingClient, times(0)).send(any());
+	}
+
 	private Matcher<DispatchMessage> messageWithBody(final String body) {
 		return new TypeSafeMatcher<DispatchMessage>() {
 			public boolean matchesSafely(DispatchMessage item) {

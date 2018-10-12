@@ -36,8 +36,14 @@ public class InterchangeApp {
 		TextMessage message = messagingClient.receive();
 		MDCUtil.setLogVariables(message);
 		logger.debug("handling one message body " + message.getText());
-		messagingClient.send(new DispatchMessage(message));
+		if (valid(message)) {
+			messagingClient.send(new DispatchMessage(message));
+		}
 		MDCUtil.removeLogVariables();
+	}
+
+	private boolean valid(TextMessage message) throws JMSException {
+		return message.getText() != null;
 	}
 
 	public void stop() {
