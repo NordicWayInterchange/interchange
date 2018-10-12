@@ -3,4 +3,4 @@
 *.iml
 .DS_Store
 interchangenode/target/
-docker-compose/logs/
+docker-compose/*_logs/

@@ -10,21 +10,32 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./logs:/var/log/postgresql
+      - ./postgis_logs:/var/log/postgresql
+
+  filebeat_postgis:
+    build: ./filebeat
+    container_name: filebeat_postgis
+    volumes:
+      - ./postgis_logs:/var/log/logfiles
+    links:
+      - elasticsearch
+      - kibana
 
   qpid:
     build: ./qpid
     container_name: qpid
-    ports:
-      - 8080:8080/tcp
-      - 5672:5672/tcp
-
-
-  filebeat:
-    build: ./filebeat
-    container_name: filebeat
     volumes:
-      - ./logs:/var/log/logfiles
+    - ./qpid_logs:/var/qpid/log
+    ports:
+    - 8080:8080/tcp
+    - 5672:5672/tcp
+
+
+  filebeat_qpid:
+    build: ./filebeat
+    container_name: filebeat_qpid
+    volumes:
+      - ./qpid_logs:/var/log/logfiles
     links:
       - elasticsearch
       - kibana
