@@ -1,14 +1,11 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.model.DispatchMessage;
-import no.vegvesen.ixn.qpid.QpidMessagingClient;
 import no.vegvesen.ixn.util.MDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.naming.NamingException;
+import java.util.HashMap;
 
 public class InterchangeApp {
 	private MessagingClient messagingClient;
@@ -20,7 +17,7 @@ public class InterchangeApp {
 		running = true;
 	}
 
-	private void handleMessages() throws NamingException, JMSException {
+	private void handleMessages() {
 		try {
 			logger.info("Started handling messages");
 			while (running) {
@@ -32,33 +29,21 @@ public class InterchangeApp {
 		}
 	}
 
-	void handleOneMessage() throws JMSException, NamingException {
-		TextMessage message = messagingClient.receive();
+	void handleOneMessage()  {
+		DispatchMessage message = messagingClient.receive();
 		MDCUtil.setLogVariables(message);
-		logger.debug("handling one message body " + message.getText());
+		logger.debug("handling one message body " + message.getBody());
 		if (valid(message)) {
-			messagingClient.send(new DispatchMessage(message));
+			messagingClient.send(new DispatchMessage(new HashMap<>(), message.getBody()));
 		}
 		MDCUtil.removeLogVariables();
 	}
 
-	private boolean valid(TextMessage message) throws JMSException {
-		return message.getText() != null;
+	private boolean valid(DispatchMessage message){
+		return message.getBody() != null;
 	}
 
 	public void stop() {
 		running = false;
 	}
-
-	public static void main(String[] args) {
-		try {
-			InterchangeApp app = new InterchangeApp(new QpidMessagingClient());
-			app.handleMessages();
-		} catch (NamingException e) {
-			System.out.println("Could not start interchange app " + e);
-		} catch (JMSException e) {
-			System.out.println("Error while receiving or sending message " + e);
-		}
-	}
-
 }

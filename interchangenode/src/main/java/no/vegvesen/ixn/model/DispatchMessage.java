@@ -1,8 +1,5 @@
 package no.vegvesen.ixn.model;
 
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import java.util.HashMap;
 import java.util.Map;
 
 public class DispatchMessage {
@@ -14,16 +11,16 @@ public class DispatchMessage {
 		this.body = body;
 	}
 
-	public DispatchMessage(TextMessage originalMessage) throws JMSException {
-		this.body = originalMessage.getText();
-		this.properties = new HashMap<>();
-	}
-
+	@SuppressWarnings("WeakerAccess")
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 
 	public String getBody() {
 		return body;
+	}
+
+	public String getId() {
+		return getProperties().get("msgguid");
 	}
 }

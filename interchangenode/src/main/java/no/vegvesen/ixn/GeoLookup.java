@@ -34,7 +34,7 @@ public class GeoLookup {
 
 
         }catch(Exception e){
-            System.out.println("problem");
+            System.out.println("problem " + e.getMessage());
         }
 
     }
