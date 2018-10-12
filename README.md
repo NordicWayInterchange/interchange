@@ -153,20 +153,29 @@ docker-compose up -d
 
 You now have five running containers. 
 
-####Viewing the logfiles in Kibana
+#### Viewing the logfiles in Kibana
 ```
 http://localhost:5601
 ```
 
+#### Defining index patterns in Kibana
+An index pattern tells Kibana which Elasticsearch indices you
+want to explore. 
+
+To create an index pattern, open Kibana in your
+browser and navigate to ```Management```. If this is your first
+index pattern, the ```Create Index Pattern``` page opens automatically.
+Otherwise click `Index Pattern` under `Kibana`. 
+
+Enter your index pattern and click ```Next Step```. 
+Choose if you want to add a ``Time Filter``. 
+Click ``Create index pattern`` to create the index pattern.
 
 
 #### Seeing the number of files in Elasticsearch
 ```
 http://localhost:9200/_count?pretty
 ```
-
-#### TODO
-* Describe how to create an index in kibana/elasticsearch
 
 ---------------
 
