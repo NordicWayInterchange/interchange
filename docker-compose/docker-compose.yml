@@ -17,9 +17,10 @@ services:
     container_name: filebeat_postgis
     volumes:
       - ./postgis_logs:/var/log/logfiles
-    links:
+    networks:
+      - elknet
+    depends_on:
       - elasticsearch
-      - kibana
 
   qpid:
     build: ./qpid
@@ -36,9 +37,10 @@ services:
     container_name: filebeat_qpid
     volumes:
       - ./qpid_logs:/var/log/logfiles
-    links:
+    networks:
+      - elknet
+    depends_on:
       - elasticsearch
-      - kibana
 
   elasticsearch:
     image: elasticsearch:${TAG}
@@ -46,32 +48,38 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+    networks:
+      - elknet
 
   kibana:
     image: kibana:${TAG}
     container_name: kibana
     depends_on:
       - elasticsearch
-    links:
-      - elasticsearch
     ports:
       - 5601:5601
+    networks:
+      - elknet
 
 
   logstash:
     build: ./logstash
     container_name: logstash
-    links:
-    - elasticsearch
     depends_on:
-    - elasticsearch
+      - elasticsearch
+      - filebeat_postgis
+      - filebeat_qpid
     volumes:
     - ./logstash:/config-dir
     command: logstash -f /config-dir/logstash.conf
     ports:
       - 5044:5044
+    networks:
+      - elknet
 
-
+networks:
+  elknet:
+    driver: bridge
 
 
 

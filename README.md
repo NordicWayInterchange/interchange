@@ -153,7 +153,89 @@ docker-compose up -d
 
 You now have five running containers. 
 
+## Logging service
+
+We use the Elastic Stack to store and query logs from the
+different services. 
+
+
+Filebeat shares a volume with the application container where the
+application logs are stored, and forwards the logs to Logstash.
+
+Logstash ingests data from mulitple sources (filebeat instances), 
+with the possibility of structuring them, making them easier to 
+query. At this point we have not done any structuring of logs in 
+logstash, but this is a clear point of development for the next
+iteration. 
+
+Elasticsearch stores the logs, and makes them available to Kibana.
+
+The elastic containers
+have their own network defined in the docker-compose.yml. This is
+a separate network within the IXN that binds these containers
+together, and prevents the application containers from accessing
+them.
+
+In the docker-compose file we bind Kibana's port 5601 port to the 
+same port on localhost to access the visualization function
+ that Kibana offers.
+
+For debugging purposes, the Elasticsearch port 9200 is also bound
+to the same port on localhost. This binding should be removed once 
+we are confident everything is working, so that Kibana is the 
+only entrypoint to the logs.
+
+### Logfiles
+
+At the moment we are pushing logs only from postgis and qpid into the 
+elastic stack. When the Interchange App is up and running, 
+we will also add logs from the Interchange App to the elastic stack. 
+
+Both postgis and qpid have existing functions for logging. 
+Postgis creates both .log and .csv files. Qpid logs only in .log 
+for the moment.
+
+Filebeat is only
+forwarding .log files at the moment. It would perhaps be easier
+to use .csv for the future to set up filters or pipelines in 
+logstash. 
+
+The logs for postgis are located in the postgis container at 
+```
+/var/log/postgresql
+```
+
+and on the host at: 
+```
+./postgis_logs
+```
+
+The logs for qpid are located in the qpid container at
+```
+/var/qpid/log
+```
+
+and on the host at:
+```
+./qpid_logs
+```
+
+To view the logs, either inspect them individually from these 
+folders, or use Kibana for a more user friendly interface.
+
+### Elasticsearch
+Stores the logfiles, making them possible to visualize using Kibana.
+
+#### Seeing the number of files in Elasticsearch
+```
+http://localhost:9200/_count?pretty
+```
+
+
 ### Kibana
+Kibana can take some time at startup to connect with elasticsearch
+to display the logfiles.
+
 
 To open Kibana:
 ```
@@ -165,6 +247,9 @@ An index pattern tells Kibana which Elasticsearch indices you
 want to explore. An index pattern is created to select files
 from Elasticsearch, so the index pattern must match files 
 that already exist in Elasticsearch.
+
+*If you want to view logfiles using Kibana, you must first create
+an index pattern*
 
 #### Viewing index patterns
 To see existing index patterns use:
@@ -183,12 +268,7 @@ Choose if you want to add a ``Time Filter``.
 Click ``Create index pattern`` to create the index pattern.
 
 
-### Elasticsearch
 
-#### Seeing the number of files in Elasticsearch
-```
-http://localhost:9200/_count?pretty
-```
 
 ---------------
 
@@ -196,6 +276,8 @@ http://localhost:9200/_count?pretty
 
  * network setup
  * pipeline configs.
+ * Remove binding of Elasticsearch container port 9200 to localhost.
+ * Logs from Interchange app to elastic stack
 
 #Contact 
 christian.berg.skjetne@vegvesen.no
