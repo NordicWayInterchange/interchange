@@ -33,6 +33,8 @@ services:
     ports:
     - 8080:8080/tcp
     - 5672:5672/tcp
+    networks:
+      - geolookup
 
 
   filebeat_qpid:
