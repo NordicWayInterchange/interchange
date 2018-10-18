@@ -19,7 +19,7 @@ import java.time.temporal.ChronoUnit;
 public class DebugClient implements MessageListener
 {
 	private static final String USER = "nw_bouvet";
-    private static final String PASSWORD = "bouvet_dc81b52a0540b09cb0a62a66d8e7ed28";
+    private static final String PASSWORD = System.getProperty("PASSWORD");
 	private Connection connection;
 	private Session session;
 	private MessageProducer messageProducer;
@@ -163,7 +163,7 @@ public class DebugClient implements MessageListener
 			//message.writeBytes(msg.getBytes());
 			
 			//message.getFacade().setType("text/plain");
-			message.getFacade().setUserId("nor_traffic");
+			message.getFacade().setUserId(USER);
 			
 			/*String testmsg = "";
 			for(int i = 0; i<1000; i++)
