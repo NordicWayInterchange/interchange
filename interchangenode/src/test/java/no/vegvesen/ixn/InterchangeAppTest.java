@@ -1,18 +1,14 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.model.DispatchMessage;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
+import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import javax.naming.NamingException;
 
 import static org.mockito.Mockito.*;
 
@@ -20,31 +16,28 @@ import static org.mockito.Mockito.*;
 public class InterchangeAppTest {
 
 	@Mock
-	MessagingClient messagingClient;
+	IxnMessageProducer producer;
 	private InterchangeApp app;
 
 	@Before
 	public void setUp() {
-		app = new InterchangeApp(messagingClient);
+		app = new InterchangeApp(producer);
 	}
 
 	@Test
-	public void handleOneMessage() throws JMSException, NamingException {
+	public void handleOneMessage() throws JMSException {
 		TextMessage textMessage = mock(TextMessage.class);
 		when(textMessage.getText()).thenReturn("fisk");
-		when(messagingClient.receive()).thenReturn(textMessage);
-		app.handleOneMessage();
-		verify(messagingClient, times(1)).send(argThat(messageWithBody("fisk")));
+		app.receiveMessage(textMessage);
+		verify(producer, times(1)).sendMessage(any(), any());
 	}
 
-	private Matcher<DispatchMessage> messageWithBody(final String body) {
-		return new TypeSafeMatcher<DispatchMessage>() {
-			public boolean matchesSafely(DispatchMessage item) {
-				return body.equals(item.getBody());
-			}
-			public void describeTo(Description description) {
-				description.appendText("a message with body " + body);
-			}
-		};
+	@Test
+	public void  messageWithoutBodyIsDropped() throws JMSException {
+		TextMessage textMessage = mock(TextMessage.class);
+		when(textMessage.getText()).thenReturn(null);
+		app.receiveMessage(textMessage);
+		verify(producer, times(0)).sendMessage(any(), any());
 	}
+
 }

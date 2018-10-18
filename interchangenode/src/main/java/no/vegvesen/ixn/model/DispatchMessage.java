@@ -1,11 +1,12 @@
 package no.vegvesen.ixn.model;
 
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class DispatchMessage {
+	@SuppressWarnings("WeakerAccess")
+	public static final String MSGGUID = "msgguid";
 	private final Map<String, String> properties;
 	private final String body;
 
@@ -14,16 +15,22 @@ public class DispatchMessage {
 		this.body = body;
 	}
 
-	public DispatchMessage(TextMessage originalMessage) throws JMSException {
-		this.body = originalMessage.getText();
+	public DispatchMessage(String body) {
+		this.body = body;
 		this.properties = new HashMap<>();
+		this.properties.put(MSGGUID, this.getClass().getSimpleName() + "-" +  UUID.randomUUID().toString());
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	public Map<String, String> getProperties() {
 		return properties;
 	}
 
 	public String getBody() {
 		return body;
+	}
+
+	public String getId() {
+		return getProperties().get(MSGGUID);
 	}
 }
