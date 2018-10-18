@@ -7,16 +7,19 @@ services:
       - POSTGRES_PASSWORD=geolookup
       - POSTGRES_DB=geolookup
     container_name: postgis
-    ports:
-      - 5432:5432
+    expose:
+      - 5432
     volumes:
       - ./postgis_logs:/var/log/postgresql
+    networks:
+      - geolookup
+
 
   filebeat_postgis:
     build: ./filebeat
     container_name: filebeat_postgis
     volumes:
-      - ./postgis_logs:/var/log/logfiles
+      - ./postgis_logs:/var/log/logfiles:ro
     networks:
       - elknet
     depends_on:
@@ -36,11 +39,32 @@ services:
     build: ./filebeat
     container_name: filebeat_qpid
     volumes:
-      - ./qpid_logs:/var/log/logfiles
+      - ./qpid_logs:/var/log/logfiles:ro
     networks:
       - elknet
     depends_on:
       - elasticsearch
+
+  interchangeapp:
+    build: ./interchangeapp
+    container_name: interchangeapp
+    volumes:
+      - ./interchange_logs:/var/interchange/log
+    depends_on:
+      - postgis
+    networks:
+      - geolookup
+
+  filebeat_interchange:
+    build: ./filebeat
+    container_name: filebeat_interchangeapp
+    depends_on:
+      - elasticsearch
+    networks:
+      - elknet
+    volumes:
+      - ./interchangeapp_logs:/var/log/logfiles:ro
+
 
   elasticsearch:
     image: elasticsearch:${TAG}
@@ -72,13 +96,15 @@ services:
     volumes:
     - ./logstash:/config-dir
     command: logstash -f /config-dir/logstash.conf
-    ports:
-      - 5044:5044
+    expose:
+      - 5044
     networks:
       - elknet
 
 networks:
   elknet:
+    driver: bridge
+  geolookup:
     driver: bridge
 
 
