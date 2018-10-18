@@ -99,6 +99,16 @@ docker run --name qpid_container -p 8080:8080/tcp -p 5672:5672/tcp qpid_image
 
 Access the managment web console at http://localhost:8080/ with the username/password admin/admin
 
+### On Windows?
+
+You might experience some problems when using Windows. This is due to the ```docker-entrypoint.sh``` script having trailing 
+Windows newlines. The user will se an error along the lines of 
+```
+standard_init_linux.go:190: exec user process caused "no such file or directory"
+```
+To fix the problem, run the ```clean_qpid_script.bat``` script, which converts the script to Unix line endings.
+
+
 ### Queues
 Queues created: 
 * onramp

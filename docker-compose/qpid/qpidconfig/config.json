@@ -6,7 +6,7 @@
     "id" : "42ea43b9-28ef-445d-a76f-9f57f0e7bd58",
     "name" : "passwordFile",
     "type" : "PlainPasswordFile",
-    "path" : "${qpid.home_dir}${file.separator}etc${file.separator}passwd"
+    "path" : "${qpid.work_dir}${file.separator}etc${file.separator}passwd"
   } ],
   "brokerloggers" : [ {
     "id" : "97535c68-9472-49e4-8ec9-219a4a47975d",
