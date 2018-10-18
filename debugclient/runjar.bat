@@ -1,0 +1,1 @@
+java -Djavax.net.ssl.keyStore=C:\arbeid\git\interchange\nw_bouvet\d10\nw_bouvet.p12 -Djavax.net.ssl.keyStorePassword=<passordet> -Djavax.net.ssl.keyStoreType=pkcs12 -Djavax.net.ssl.trustStore=C:\arbeid\git\interchange\nw_bouvet\d10\truststore.jks -Djavax.net.ssl.trustStorePassword=<passordet> -jar target\debugclient-1.0-SNAPSHOT-jar-with-dependencies.jar
