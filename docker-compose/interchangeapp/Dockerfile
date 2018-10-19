@@ -1,4 +1,4 @@
 FROM java:8
-COPY spring_boot_test-1.0-SNAPSHOT.jar ./
+COPY interchange-node-1.0-SNAPSHOT.jar ./
 
-CMD java -jar spring_boot_test-1.0-SNAPSHOT.jar > /var/interchange/log/interchange.log
+CMD java -jar interchange-node-1.0-SNAPSHOT.jar > /var/interchange/log/interchange.log

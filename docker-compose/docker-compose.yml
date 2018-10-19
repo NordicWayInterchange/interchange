@@ -12,7 +12,7 @@ services:
     volumes:
       - ./postgis_logs:/var/log/postgresql
     networks:
-      - geolookup
+      - interchange
 
 
   filebeat_postgis:
@@ -34,7 +34,7 @@ services:
     - 8080:8080/tcp
     - 5672:5672/tcp
     networks:
-      - geolookup
+      - interchange
 
 
   filebeat_qpid:
@@ -54,8 +54,9 @@ services:
       - ./interchange_logs:/var/interchange/log
     depends_on:
       - postgis
+      - qpid
     networks:
-      - geolookup
+      - interchange
 
   filebeat_interchange:
     build: ./filebeat
@@ -106,7 +107,7 @@ services:
 networks:
   elknet:
     driver: bridge
-  geolookup:
+  interchange:
     driver: bridge
 
 
