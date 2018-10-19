@@ -33,7 +33,7 @@ public class InterchangeAppTest {
 		TextMessage textMessage = mock(TextMessage.class);
 		when(textMessage.getText()).thenReturn("fisk");
 		when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
-		app.receiveMessage(textMessage);
+		app.handleOneMessage(textMessage);
 		verify(producer, times(1)).sendMessage(any(), any());
 	}
 
@@ -41,7 +41,7 @@ public class InterchangeAppTest {
 	public void  messageWithoutBodyIsDropped() throws JMSException {
 		TextMessage textMessage = mock(TextMessage.class);
 		when(textMessage.getText()).thenReturn(null);
-		app.receiveMessage(textMessage);
+		app.handleOneMessage(textMessage);
 		verify(producer, times(0)).sendMessage(any(), any());
 	}
 

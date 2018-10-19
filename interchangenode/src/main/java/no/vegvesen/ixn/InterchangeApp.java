@@ -19,7 +19,7 @@ import java.util.List;
 
 @SpringBootApplication
 @EnableJms
-public class InterchangeApp implements CommandLineRunner {
+public class InterchangeApp{
 	private static Logger logger = LoggerFactory.getLogger(InterchangeApp.class);
 
 	private final IxnMessageProducer producer;
@@ -31,22 +31,29 @@ public class InterchangeApp implements CommandLineRunner {
 		this.geoLookup = geoLookup;
 	}
 
+
+	public boolean isValid(TextMessage message){
+		try {
+			float lat = message.getFloatProperty("lat");
+			float lon = message.getFloatProperty("lon");
+
+			return message.getText() != null && lat != 0 && lon != 0;
+
+		}catch(JMSException jmse){
+			jmse.printStackTrace();
+			return false;
+		}
+	}
+
 	@JmsListener(destination = "onramp")
-	public void receiveMessage(TextMessage message) throws JMSException {
+	void handleOneMessage(TextMessage message) throws JMSException {
 		logger.info("============= Received: " + message.getText());
-		DispatchMessage dispatchMessage = transform(message);
-		handleOneMessage(dispatchMessage);
-	}
 
-	private DispatchMessage transform(TextMessage message) throws JMSException {
-		return new DispatchMessage(message.getText(), message.getFloatProperty("lat"), message.getFloatProperty("lon"));
-	}
-
-	void handleOneMessage(DispatchMessage message)  {
 		MDCUtil.setLogVariables(message);
-		logger.debug("handling one message body " + message.getBody());
-		if (message.isValid()) {
-			List<String> countries = geoLookup.getCountries(message.getLat(), message.getLong());
+
+		logger.debug("handling one message body " + message.getText());
+		if (isValid(message)) {
+			List<String> countries = geoLookup.getCountries(message.getFloatProperty("lat"), message.getFloatProperty("lon"));
 			logger.debug("countries " + countries);
 			producer.sendMessage("test-out", message);
 		}
@@ -57,9 +64,4 @@ public class InterchangeApp implements CommandLineRunner {
 		SpringApplication.run(InterchangeApp.class, args);
 	}
 
-	@Override
-	public void run(String... args) {
-		DispatchMessage dispatchMessage = new DispatchMessage("fisk", 10.0f, 60.0f);
-		producer.sendMessage("onramp", dispatchMessage);
-	}
 }

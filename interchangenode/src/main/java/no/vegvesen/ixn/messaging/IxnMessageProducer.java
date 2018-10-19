@@ -16,7 +16,6 @@
  */
 package no.vegvesen.ixn.messaging;
 
-import no.vegvesen.ixn.model.DispatchMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +36,17 @@ public class IxnMessageProducer {
 		this.jmsTemplate = jmsTemplate;
 	}
 
-	public void sendMessage(final String destinationName, final DispatchMessage message) {
+	public void sendMessage(final String destinationName, final TextMessage message) {
 		this.jmsTemplate.send(destinationName, session -> {
 			logger.debug("Sending message {} to {}", message, destinationName);
-			TextMessage textMessage = session.createTextMessage(message.getBody());
-			textMessage.setFloatProperty("lat", message.getLat());
-			textMessage.setFloatProperty("lon", message.getLong());
-			return textMessage;
+			TextMessage textMessage = session.createTextMessage(message.getText());
+
+			while(message.getPropertyNames().hasMoreElements()){
+				String property = (String) message.getPropertyNames().nextElement();
+				textMessage.setStringProperty(property, message.getStringProperty(property));
+			}
+
+			return textMessage; // kan vi bare returnere 'message'?
 		});
     }
 }
