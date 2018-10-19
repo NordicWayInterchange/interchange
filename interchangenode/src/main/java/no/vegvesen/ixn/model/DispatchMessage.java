@@ -1,29 +1,24 @@
 package no.vegvesen.ixn.model;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class DispatchMessage {
-	@SuppressWarnings("WeakerAccess")
-	public static final String MSGGUID = "msgguid";
-	private final Map<String, String> properties;
+	private final String id;
 	private final String body;
+	private float lat;
+	private float lon;
 
-	public DispatchMessage(Map<String, String> properties, String body) {
-		this.properties = properties;
+	private DispatchMessage(String body) {
+		this.id = this.getClass().getSimpleName() + "-" +  UUID.randomUUID().toString();
 		this.body = body;
+		lat = 0;
+		lon = 0;
 	}
 
-	public DispatchMessage(String body) {
-		this.body = body;
-		this.properties = new HashMap<>();
-		this.properties.put(MSGGUID, this.getClass().getSimpleName() + "-" +  UUID.randomUUID().toString());
-	}
-
-	@SuppressWarnings("WeakerAccess")
-	public Map<String, String> getProperties() {
-		return properties;
+	public DispatchMessage(String body, float lat, float lon) {
+		this(body);
+		this.lat = lat;
+		this.lon = lon;
 	}
 
 	public String getBody() {
@@ -31,6 +26,22 @@ public class DispatchMessage {
 	}
 
 	public String getId() {
-		return getProperties().get(MSGGUID);
+		return id;
+	}
+
+	public float getLat() {
+		return lat;
+	}
+
+	public float getLong() {
+		return this.lon;
+	}
+
+	public boolean isValid() {
+		return body != null && hasLatLong();
+	}
+
+	private boolean hasLatLong() {
+		return this.lat != 0 && this.lon != 0;
 	}
 }

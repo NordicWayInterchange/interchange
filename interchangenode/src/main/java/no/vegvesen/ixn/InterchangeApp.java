@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.geo.GeoLookup;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import no.vegvesen.ixn.model.DispatchMessage;
 import no.vegvesen.ixn.util.MDCUtil;
@@ -14,17 +15,20 @@ import org.springframework.jms.annotation.JmsListener;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import java.util.List;
 
 @SpringBootApplication
 @EnableJms
 public class InterchangeApp implements CommandLineRunner {
 	private static Logger logger = LoggerFactory.getLogger(InterchangeApp.class);
 
-	private IxnMessageProducer producer;
+	private final IxnMessageProducer producer;
+	private final GeoLookup geoLookup;
 
 	@Autowired
-	InterchangeApp(IxnMessageProducer producer) {
+	InterchangeApp(IxnMessageProducer producer, GeoLookup geoLookup) {
 		this.producer = producer;
+		this.geoLookup = geoLookup;
 	}
 
 	@JmsListener(destination = "onramp")
@@ -35,20 +39,18 @@ public class InterchangeApp implements CommandLineRunner {
 	}
 
 	private DispatchMessage transform(TextMessage message) throws JMSException {
-		return new DispatchMessage(message.getText());
+		return new DispatchMessage(message.getText(), message.getFloatProperty("lat"), message.getFloatProperty("lon"));
 	}
 
 	void handleOneMessage(DispatchMessage message)  {
 		MDCUtil.setLogVariables(message);
 		logger.debug("handling one message body " + message.getBody());
-		if (valid(message)) {
-			producer.sendMessage("test-out", message.getBody());
+		if (message.isValid()) {
+			List<String> countries = geoLookup.getCountries(message.getLat(), message.getLong());
+			logger.debug("countries " + countries);
+			producer.sendMessage("test-out", message);
 		}
 		MDCUtil.removeLogVariables();
-	}
-
-	private boolean valid(DispatchMessage message){
-		return message.getBody() != null;
 	}
 
 	public static void main(String[] args) {
@@ -57,6 +59,7 @@ public class InterchangeApp implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		producer.sendMessage("onramp", "fisk");
+		DispatchMessage dispatchMessage = new DispatchMessage("fisk", 10.0f, 60.0f);
+		producer.sendMessage("onramp", dispatchMessage);
 	}
 }

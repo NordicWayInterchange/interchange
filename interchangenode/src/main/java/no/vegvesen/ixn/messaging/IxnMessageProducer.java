@@ -16,11 +16,14 @@
  */
 package no.vegvesen.ixn.messaging;
 
+import no.vegvesen.ixn.model.DispatchMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
+
+import javax.jms.TextMessage;
 
 @Component
 public class IxnMessageProducer {
@@ -34,10 +37,13 @@ public class IxnMessageProducer {
 		this.jmsTemplate = jmsTemplate;
 	}
 
-	public void sendMessage(String destinationName, final String message) {
+	public void sendMessage(final String destinationName, final DispatchMessage message) {
 		this.jmsTemplate.send(destinationName, session -> {
 			logger.debug("Sending message {} to {}", message, destinationName);
-			return session.createTextMessage(message);
+			TextMessage textMessage = session.createTextMessage(message.getBody());
+			textMessage.setFloatProperty("lat", message.getLat());
+			textMessage.setFloatProperty("lon", message.getLong());
+			return textMessage;
 		});
     }
 }
