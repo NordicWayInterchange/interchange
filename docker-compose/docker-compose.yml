@@ -23,6 +23,7 @@ services:
     networks:
       - elknet
     depends_on:
+      - postgis
       - elasticsearch
 
   qpid:
@@ -45,6 +46,7 @@ services:
     networks:
       - elknet
     depends_on:
+      - qpid
       - elasticsearch
 
   interchangeapp:
@@ -62,6 +64,7 @@ services:
     build: ./filebeat
     container_name: filebeat_interchangeapp
     depends_on:
+      - interchangeapp
       - elasticsearch
     networks:
       - elknet
