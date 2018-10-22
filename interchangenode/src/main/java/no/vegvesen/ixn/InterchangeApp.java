@@ -12,14 +12,18 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import java.util.List;
 
 @SpringBootApplication
 @EnableJms
-public class InterchangeApp{
+public class InterchangeApp implements CommandLineRunner{
 	private static Logger logger = LoggerFactory.getLogger(InterchangeApp.class);
 
 	private final IxnMessageProducer producer;
@@ -62,6 +66,14 @@ public class InterchangeApp{
 
 	public static void main(String[] args) {
 		SpringApplication.run(InterchangeApp.class, args);
+	}
+
+	@Override
+	public void run(String... args){
+
+		producer.sendMessage("onramp", 10.0f, 63.0f, "This is a message");
+
+
 	}
 
 }

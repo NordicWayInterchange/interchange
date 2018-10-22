@@ -36,17 +36,25 @@ public class IxnMessageProducer {
 		this.jmsTemplate = jmsTemplate;
 	}
 
-	public void sendMessage(final String destinationName, final TextMessage message) {
+	public void sendMessage(final String destinationName, final TextMessage textMessage) {
 		this.jmsTemplate.send(destinationName, session -> {
-			logger.debug("Sending message {} to {}", message, destinationName);
-			TextMessage textMessage = session.createTextMessage(message.getText());
+			logger.debug("Sending message {} to {}", textMessage, destinationName);
 
-			while(message.getPropertyNames().hasMoreElements()){
-				String property = (String) message.getPropertyNames().nextElement();
-				textMessage.setStringProperty(property, message.getStringProperty(property));
-			}
-
-			return textMessage; // kan vi bare returnere 'message'?
+			return textMessage;
 		});
     }
+
+    public void sendMessage(final String destinationName, final float lat, final float lon, final String message){
+		this.jmsTemplate.send(destinationName, session -> {
+			logger.debug("Sending message {} to {}", message, destinationName);
+			TextMessage textMessage = session.createTextMessage(message);
+
+			textMessage.setFloatProperty("lat", lat);
+			textMessage.setFloatProperty("lon", lon);
+
+			return textMessage;
+		});
+
+	}
 }
+
