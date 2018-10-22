@@ -168,18 +168,6 @@ You now have five running containers.
 We use the Elastic Stack to store and query logs from the
 different services. 
 
-
-Filebeat shares a volume with the application container where the
-application logs are stored, and forwards the logs to Logstash.
-
-Logstash ingests data from mulitple sources (filebeat instances), 
-with the possibility of structuring them, making them easier to 
-query. At this point we have not done any structuring of logs in 
-logstash, but this is a clear point of development for the next
-iteration. 
-
-Elasticsearch stores the logs, and makes them available to Kibana.
-
 The elastic containers
 have their own network defined in the docker-compose.yml. This is
 a separate network within the IXN that binds these containers
@@ -187,8 +175,8 @@ together, and prevents the application containers from accessing
 them.
 
 In the docker-compose file we bind Kibana's port 5601 port to the 
-same port on localhost to access the visualization function
- that Kibana offers.
+same port on localhost to access the visualization function 
+that Kibana offers.
 
 For debugging purposes, the Elasticsearch port 9200 is also bound
 to the same port on localhost. This binding should be removed once 
@@ -205,10 +193,7 @@ Both postgis and qpid have existing functions for logging.
 Postgis creates both .log and .csv files. Qpid logs only in .log 
 for the moment.
 
-Filebeat is only
-forwarding .log files at the moment. It would perhaps be easier
-to use .csv for the future to set up filters or pipelines in 
-logstash. 
+
 
 The logs for postgis are located in the postgis container at 
 ```
@@ -230,11 +215,42 @@ and on the host at:
 ./qpid_logs
 ```
 
+The logs for InterchangeApp are located in the container at
+```
+/var/interchange/log
+```
+
+and on the host at: 
+```
+./interchangeapp_logs
+```
+
+
 To view the logs, either inspect them individually from these 
 folders, or use Kibana for a more user friendly interface.
 
+### Filebeat
+Is a fileshipper that ships the logfiles from the application to Logstash. 
+
+Filebeat shares a volume with the application container where the
+application logs are stored, and forwards the logs to Logstash.
+This volume is read only from the Filebeat side.
+
+Filebeat is only
+forwarding .log files at the moment. It would perhaps be easier
+to use .csv for the future to set up filters or pipelines in 
+logstash. 
+
+### Logstash
+Logstash ingests data from mulitple sources (filebeat instances), 
+with the possibility of structuring them, making them easier to 
+query. At this point we have not done any structuring of logs in 
+logstash, but this is a clear point of development for the next
+iteration. 
+
 ### Elasticsearch
-Stores the logfiles, making them possible to visualize using Kibana.
+Elasticsearch stores the logfiles and makes them available to Kibana.
+
 
 #### Seeing the number of files in Elasticsearch
 ```
