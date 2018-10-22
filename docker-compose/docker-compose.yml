@@ -62,15 +62,13 @@ services:
 
   filebeat_interchange:
     build: ./filebeat
-    container_name: filebeat_interchangeapp
+    container_name: filebeat_interchange
     depends_on:
-      - interchangeapp
-      - elasticsearch
+      - logstash
     networks:
       - elknet
     volumes:
-      - ./interchangeapp_logs:/var/log/logfiles:ro
-
+      - ./interchange_logs:/var/log/logfiles:ro
 
   elasticsearch:
     image: elasticsearch:${TAG}
