@@ -23,8 +23,7 @@ services:
     networks:
       - elknet
     depends_on:
-      - postgis
-      - elasticsearch
+      - logstash
 
   qpid:
     build: ./qpid
@@ -37,7 +36,6 @@ services:
     networks:
       - interchange
 
-
   filebeat_qpid:
     build: ./filebeat
     container_name: filebeat_qpid
@@ -46,8 +44,7 @@ services:
     networks:
       - elknet
     depends_on:
-      - qpid
-      - elasticsearch
+      - logstash
 
   interchangeapp:
     build: ./interchangeapp
@@ -99,14 +96,11 @@ services:
     networks:
       - elknet
 
-
   logstash:
     build: ./logstash
     container_name: logstash
     depends_on:
       - elasticsearch
-      - filebeat_postgis
-      - filebeat_qpid
     volumes:
     - ./logstash:/config-dir
     command: logstash -f /config-dir/logstash.conf
@@ -120,6 +114,3 @@ networks:
     driver: bridge
   interchange:
     driver: bridge
-
-
-
