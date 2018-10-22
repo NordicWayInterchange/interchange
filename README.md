@@ -163,6 +163,11 @@ docker-compose up -d
 
 You now have five running containers. 
 
+## Networks
+The docker compose file defines two different networks. One network is defined
+for the containers dealing with the logging. This network is called elknet. 
+One network is defined for the application containers. This network is called interchange. 
+
 ## Logging service
 
 We use the Elastic Stack to store and query logs from the
@@ -173,15 +178,6 @@ have their own network defined in the docker-compose.yml. This is
 a separate network within the IXN that binds these containers
 together, and prevents the application containers from accessing
 them.
-
-In the docker-compose file we bind Kibana's port 5601 port to the 
-same port on localhost to access the visualization function 
-that Kibana offers.
-
-For debugging purposes, the Elasticsearch port 9200 is also bound
-to the same port on localhost. This binding should be removed once 
-we are confident everything is working, so that Kibana is the 
-only entrypoint to the logs.
 
 ### Logfiles
 
@@ -251,6 +247,14 @@ iteration.
 ### Elasticsearch
 Elasticsearch stores the logfiles and makes them available to Kibana.
 
+Elasticsearch needs quite a bit of memory to run. If the default memory limit 
+of Docker is not set to at least 4 GB, Elasticsearch can be quite unstable. 
+
+For debugging purposes, the Elasticsearch port 9200 is also bound
+to the same port on localhost. This binding should be removed once 
+we are confident everything is working, so that Kibana is the 
+only entrypoint to the logs.
+
 
 #### Seeing the number of files in Elasticsearch
 ```
@@ -259,6 +263,10 @@ http://localhost:9200/_count?pretty
 
 
 ### Kibana
+In the docker-compose file we bind Kibana's port 5601 port to the 
+same port on localhost to access the visualization function 
+that Kibana offers.
+
 Kibana can take some time at startup to connect with elasticsearch
 to display the logfiles.
 
