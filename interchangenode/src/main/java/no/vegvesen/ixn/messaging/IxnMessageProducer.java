@@ -16,7 +16,6 @@
  */
 package no.vegvesen.ixn.messaging;
 
-import no.vegvesen.ixn.model.DispatchMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,8 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.jms.TextMessage;
+
+import static no.vegvesen.ixn.MessageProperties.*;
 
 @Component
 public class IxnMessageProducer {
@@ -37,13 +38,26 @@ public class IxnMessageProducer {
 		this.jmsTemplate = jmsTemplate;
 	}
 
-	public void sendMessage(final String destinationName, final DispatchMessage message) {
+	public void sendMessage(final String destinationName, final TextMessage textMessage) {
 		this.jmsTemplate.send(destinationName, session -> {
-			logger.debug("Sending message {} to {}", message, destinationName);
-			TextMessage textMessage = session.createTextMessage(message.getBody());
-			textMessage.setFloatProperty("lat", message.getLat());
-			textMessage.setFloatProperty("lon", message.getLong());
+			logger.debug("Sending message {} to {}", textMessage, destinationName);
+
 			return textMessage;
 		});
     }
+
+    public void sendMessage(final String destinationName, final float lat, final float lon, final String what, final String message){
+		this.jmsTemplate.send(destinationName, session -> {
+			logger.debug("Sending message {} to {}", message, destinationName);
+			TextMessage textMessage = session.createTextMessage(message);
+
+			textMessage.setFloatProperty(LAT, lat);
+			textMessage.setFloatProperty(LON, lon);
+			textMessage.setStringProperty(WHAT, what);
+
+			return textMessage;
+		});
+
+	}
 }
+

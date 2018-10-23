@@ -9,26 +9,10 @@
         </layout>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/interchange/log/interchange.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover -->
-            <fileNamePattern>/var/interchange/log/interchange.%d{yyyy-MM-dd}.log</fileNamePattern>
 
-            <!-- keep 10 days' worth of history capped at 3GB total size -->
-            <maxHistory>10</maxHistory>
-            <totalSizeCap>3GB</totalSizeCap>
-        </rollingPolicy>
 
-        <encoder>
-            <Pattern>
-                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
-            </Pattern>
-        </encoder>
-    </appender>
-
-    <root level="debug">
-        <appender-ref ref="FILE" />
+    <root level="info">
+        <appender-ref ref="STDOUT" />
     </root>
 
 </configuration>

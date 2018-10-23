@@ -11,38 +11,45 @@ import org.mockito.junit.MockitoJUnitRunner;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import java.util.Arrays;
+import java.util.Collections;
+
+import static no.vegvesen.ixn.MessageProperties.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InterchangeAppTest {
 
-	@Mock
-	IxnMessageProducer producer;
-	@Mock
-	GeoLookup geoLookup;
+    @Mock
+    IxnMessageProducer producer;
+    @Mock
+    GeoLookup geoLookup;
 
-	private InterchangeApp app;
+    private InterchangeApp app;
 
-	@Before
-	public void setUp() {
-		app = new InterchangeApp(producer, geoLookup);
-	}
+    @Before
+    public void setUp() {
+        app = new InterchangeApp(producer, geoLookup);
+    }
 
-	@Test
-	public void handleOneMessage() throws JMSException {
-		TextMessage textMessage = mock(TextMessage.class);
-		when(textMessage.getText()).thenReturn("fisk");
-		when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
-		app.receiveMessage(textMessage);
-		verify(producer, times(1)).sendMessage(any(), any());
-	}
+    @Test
+    public void handleOneMessage() throws JMSException {
+        TextMessage textMessage = mock(TextMessage.class);
+        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
+        when(textMessage.getText()).thenReturn("fisk");
+        when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
+        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction");
+        app.handleOneMessage(textMessage);
+        verify(producer, times(1)).sendMessage(eq("test-out"), any());
+    }
 
-	@Test
-	public void  messageWithoutBodyIsDropped() throws JMSException {
-		TextMessage textMessage = mock(TextMessage.class);
-		when(textMessage.getText()).thenReturn(null);
-		app.receiveMessage(textMessage);
-		verify(producer, times(0)).sendMessage(any(), any());
-	}
+    @Test
+    public void  messageWithoutBodyIsDropped() throws JMSException {
+        TextMessage textMessage = mock(TextMessage.class);
+        when(textMessage.getText()).thenReturn(null);
+        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
+        app.handleOneMessage(textMessage);
+        verify(producer, times(0)).sendMessage(eq("test-out"), any());
+    }
 
 }

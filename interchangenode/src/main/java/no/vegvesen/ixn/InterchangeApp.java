@@ -10,16 +10,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.jms.JmsException;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 import javax.jms.TextMessage;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+
+import static no.vegvesen.ixn.MessageProperties.LAT;
+import static no.vegvesen.ixn.MessageProperties.LON;
+import static no.vegvesen.ixn.MessageProperties.WHAT;
 
 @SpringBootApplication
 @EnableJms
-public class InterchangeApp implements CommandLineRunner {
+public class InterchangeApp{
 	private static Logger logger = LoggerFactory.getLogger(InterchangeApp.class);
 
 	private final IxnMessageProducer producer;
@@ -31,25 +42,44 @@ public class InterchangeApp implements CommandLineRunner {
 		this.geoLookup = geoLookup;
 	}
 
+
+	public boolean isValid(TextMessage message) throws JMSException{
+		// TODO: check that the message 'who' matches the message 'userID' (check against user database).
+
+		try{
+            logger.info("Validating message");
+
+            // Getting all the header fields and converting them to a list of Strings
+            Enumeration propertyNames = message.getPropertyNames();
+            List<String> headerFields = Collections.list(propertyNames);
+
+			String what = message.getStringProperty(WHAT);
+			String body = message.getText();
+
+            return (headerFields.contains(LAT) && headerFields.contains(LON) && what != null && body != null);
+
+		} catch(JMSException jmse) {
+            logger.error("Could not get header attributes for message", jmse);
+            return false;
+        }
+	}
+
 	@JmsListener(destination = "onramp")
-	public void receiveMessage(TextMessage message) throws JMSException {
+	void handleOneMessage(TextMessage message) throws JMSException {
+	    // TODO: remove message.getText() and replace with message ID
 		logger.info("============= Received: " + message.getText());
-		DispatchMessage dispatchMessage = transform(message);
-		handleOneMessage(dispatchMessage);
-	}
 
-	private DispatchMessage transform(TextMessage message) throws JMSException {
-		return new DispatchMessage(message.getText(), message.getFloatProperty("lat"), message.getFloatProperty("lon"));
-	}
-
-	void handleOneMessage(DispatchMessage message)  {
 		MDCUtil.setLogVariables(message);
-		logger.debug("handling one message body " + message.getBody());
-		if (message.isValid()) {
-			List<String> countries = geoLookup.getCountries(message.getLat(), message.getLong());
+
+		logger.debug("handling one message body " + message.getText());
+		if (isValid(message)) {
+			List<String> countries = geoLookup.getCountries(message.getFloatProperty(LAT), message.getFloatProperty(LON));
 			logger.debug("countries " + countries);
 			producer.sendMessage("test-out", message);
-		}
+		} else {
+            logger.info("Sending bad message to dead letter queue");
+            producer.sendMessage("dlqueue", message);
+        }
 		MDCUtil.removeLogVariables();
 	}
 
@@ -57,9 +87,5 @@ public class InterchangeApp implements CommandLineRunner {
 		SpringApplication.run(InterchangeApp.class, args);
 	}
 
-	@Override
-	public void run(String... args) {
-		DispatchMessage dispatchMessage = new DispatchMessage("fisk", 10.0f, 60.0f);
-		producer.sendMessage("onramp", dispatchMessage);
-	}
+
 }
