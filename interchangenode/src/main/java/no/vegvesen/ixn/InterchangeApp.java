@@ -68,17 +68,21 @@ public class InterchangeApp{
 		logger.debug("handling one message body " + message.getText());
 		if (isValid(message)) {
 
-		    logger.info("lat: " + message.getFloatProperty("lat"));
-		    logger.info("lon: " + message.getFloatProperty("lon"));
-			List<String> countries = geoLookup.getCountries(message.getFloatProperty("lat"), message.getFloatProperty("lon"));
+
+			List<String> countries = geoLookup.getCountries(message.getFloatProperty(LAT), message.getFloatProperty(LON));
             logger.info("Countries : " + countries);
 
-            String what = message.getStringProperty("what");
-            List<String> situationRecordTypes = Arrays.asList(what.split("\\s*,\\s*"));
-            logger.info("What: " + situationRecordTypes);
-			producer.sendMessage("test-out", message, countries, situationRecordTypes);
+            if(countries.size() == 0){
+                producer.sendMessage("dlqueue", message);
+            }else {
+
+                String what = message.getStringProperty(WHAT);
+                List<String> situationRecordTypes = Arrays.asList(what.split("\\s*,\\s*"));
+
+                producer.sendMessage("test-out", message, countries, situationRecordTypes);
+            }
 		} else {
-            logger.info("Sending bad message to dead letter queue");
+            logger.warn("Sending bad message to dead letter queue");
             producer.sendMessage("dlqueue", message);
         }
 		MDCUtil.removeLogVariables();

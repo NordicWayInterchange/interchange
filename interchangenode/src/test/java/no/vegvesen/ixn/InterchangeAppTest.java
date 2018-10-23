@@ -39,8 +39,9 @@ public class InterchangeAppTest {
         when(textMessage.getText()).thenReturn("fisk");
         when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
         when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction");
+        when(geoLookup.getCountries(eq(1.0f), eq(1.0f))).thenReturn(Arrays.asList("NO"));
         app.handleOneMessage(textMessage);
-        verify(producer, times(1)).sendMessage(eq("test-out"), any());
+        verify(producer, times(1)).sendMessage(eq("test-out"), any(), any(), any());
     }
 
     @Test

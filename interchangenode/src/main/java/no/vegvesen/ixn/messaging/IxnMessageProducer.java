@@ -53,8 +53,8 @@ public class IxnMessageProducer {
 					logger.debug("Sending message {} to {}", outgoing, destinationName);
 
 					// Sets country and situation record type
-					outgoing.setStringProperty("where1", country);
-					outgoing.setStringProperty("what", situationRecordType);
+					outgoing.setStringProperty(WHERE, country);
+					outgoing.setStringProperty(WHAT, situationRecordType);
 					logger.info("Creating packet with country " + country + " and situation record " + situationRecordType);
 
 					return outgoing;
