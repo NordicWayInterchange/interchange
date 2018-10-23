@@ -2,24 +2,18 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.geo.GeoLookup;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
-import no.vegvesen.ixn.model.DispatchMessage;
 import no.vegvesen.ixn.util.MDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.jms.JmsException;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
 
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
 import javax.jms.TextMessage;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -73,9 +67,16 @@ public class InterchangeApp{
 
 		logger.debug("handling one message body " + message.getText());
 		if (isValid(message)) {
-			List<String> countries = geoLookup.getCountries(message.getFloatProperty(LAT), message.getFloatProperty(LON));
-			logger.debug("countries " + countries);
-			producer.sendMessage("test-out", message);
+
+		    logger.info("lat: " + message.getFloatProperty("lat"));
+		    logger.info("lon: " + message.getFloatProperty("lon"));
+			List<String> countries = geoLookup.getCountries(message.getFloatProperty("lat"), message.getFloatProperty("lon"));
+            logger.info("Countries : " + countries);
+
+            String what = message.getStringProperty("what");
+            List<String> situationRecordTypes = Arrays.asList(what.split("\\s*,\\s*"));
+            logger.info("What: " + situationRecordTypes);
+			producer.sendMessage("test-out", message, countries, situationRecordTypes);
 		} else {
             logger.info("Sending bad message to dead letter queue");
             producer.sendMessage("dlqueue", message);
