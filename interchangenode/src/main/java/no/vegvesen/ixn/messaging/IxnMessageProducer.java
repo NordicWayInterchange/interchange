@@ -58,13 +58,14 @@ public class IxnMessageProducer {
 
 	}
 
-	public void sendBadMessage(final String destinationName, final float lat, String message){
+	public void sendBadMessage(final String destinationName, final float lat, final float lon,  String message){
 		// Sends a bad message that will not pass validation.
 
 		this.jmsTemplate.send(destinationName, session -> {
 			logger.debug("Sending message {} to {}", message, destinationName);
 			TextMessage textMessage = session.createTextMessage();
 			textMessage.setFloatProperty("lat", lat);
+			textMessage.setFloatProperty("lon", lon);
 			return textMessage;
 		});
 	}

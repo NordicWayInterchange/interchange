@@ -87,7 +87,7 @@ public class InterchangeApp implements CommandLineRunner{
 	public void run(String... args){
 
 		//producer.sendMessage("onramp", 10.0f, 63.0f, "Obstruction", "This is a message");
-        producer.sendBadMessage("onramp", 10.0f, "This message has no 'lon' ");
+        producer.sendBadMessage("onramp", 10.0f, 63.0f, "This message has no 'lon' ");
 
 	}
 
