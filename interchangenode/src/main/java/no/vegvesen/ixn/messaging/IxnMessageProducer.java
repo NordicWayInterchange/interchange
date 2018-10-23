@@ -59,6 +59,8 @@ public class IxnMessageProducer {
 	}
 
 	public void sendBadMessage(final String destinationName, final float lat, String message){
+		// For testing purposes.
+		
 		this.jmsTemplate.send(destinationName, session -> {
 			logger.debug("Sending message {} to {}", message, destinationName);
 			TextMessage textMessage = session.createTextMessage();

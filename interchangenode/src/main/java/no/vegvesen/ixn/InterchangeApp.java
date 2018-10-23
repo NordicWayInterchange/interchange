@@ -64,6 +64,7 @@ public class InterchangeApp implements CommandLineRunner{
 
 	@JmsListener(destination = "onramp")
 	void handleOneMessage(TextMessage message) throws JMSException {
+	    // TODO: remove message.getText() and replace with message ID
 		logger.info("============= Received: " + message.getText());
 
 		MDCUtil.setLogVariables(message);
