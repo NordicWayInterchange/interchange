@@ -39,8 +39,6 @@ public class InterchangeApp implements CommandLineRunner{
 	}
 
 
-
-
 	public boolean isValid(TextMessage message) throws JMSException{
 		// TODO: check that the message 'who' matches the message 'userID' (check against user database).
 
@@ -75,7 +73,6 @@ public class InterchangeApp implements CommandLineRunner{
 			logger.debug("countries " + countries);
 			producer.sendMessage("test-out", message);
 		} else {
-		    // Message is not valid, send to dlqueue
             logger.info("Sending bad message to dead letter queue");
             producer.sendMessage("dlqueue", message);
         }
@@ -91,7 +88,6 @@ public class InterchangeApp implements CommandLineRunner{
 
 		//producer.sendMessage("onramp", 10.0f, 63.0f, "Obstruction", "This is a message");
         producer.sendBadMessage("onramp", 10.0f, "This message has no 'lon' ");
-
 
 	}
 
