@@ -1,4 +1,5 @@
 package no.vegvesen.ixn.geo;
+import org.postgis.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,11 @@ public class GeoLookup{
 
 
     public List<String> getCountries(float lat, float lon){
-        String sql = String.format("SELECT iso2 FROM worldshape_10kmbuffer WHERE ST_Within(ST_GeomFromText('POINT(%.1f %.1f)'), worldshape_10kmbuffer.geom)", lat, lon);
-        return jdbcTemplate.queryForList(sql, String.class);
+        String sql = "SELECT iso2 FROM worldshape_10kmbuffer WHERE ST_Within(ST_GeomFromText(?), worldshape_10kmbuffer.geom)";
+        return jdbcTemplate.queryForList(sql, new Point[] {new Point(lon, lat)}, new int[]{Point.POINT}, String.class);
     }
 
-
+    @SuppressWarnings("WeakerAccess")
     public List<String> getCountries(String latitude, String longitude){
         try {
             float lat = Float.parseFloat(latitude);

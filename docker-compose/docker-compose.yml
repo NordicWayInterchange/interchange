@@ -7,8 +7,8 @@ services:
       - POSTGRES_PASSWORD=geolookup
       - POSTGRES_DB=geolookup
     container_name: postgis
-    expose:
-      - 5432
+    ports:
+    - 5432:5432/tcp
     volumes:
       - ./postgis_logs:/var/log/postgresql
     networks:
