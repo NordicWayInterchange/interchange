@@ -24,9 +24,13 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
+import static no.vegvesen.ixn.MessageProperties.LAT;
+import static no.vegvesen.ixn.MessageProperties.LON;
+import static no.vegvesen.ixn.MessageProperties.WHAT;
+
 @SpringBootApplication
 @EnableJms
-public class InterchangeApp implements CommandLineRunner{
+public class InterchangeApp{
 	private static Logger logger = LoggerFactory.getLogger(InterchangeApp.class);
 
 	private final IxnMessageProducer producer;
@@ -49,10 +53,10 @@ public class InterchangeApp implements CommandLineRunner{
             Enumeration propertyNames = message.getPropertyNames();
             List<String> headerFields = Collections.list(propertyNames);
 
-			String what = message.getStringProperty("what");
+			String what = message.getStringProperty(WHAT);
 			String body = message.getText();
 
-            return (headerFields.contains("lat") && headerFields.contains("lon") && what != null && body != null);
+            return (headerFields.contains(LAT) && headerFields.contains(LON) && what != null && body != null);
 
 		} catch(JMSException jmse) {
             logger.error("Could not get header attributes for message", jmse);
@@ -69,7 +73,7 @@ public class InterchangeApp implements CommandLineRunner{
 
 		logger.debug("handling one message body " + message.getText());
 		if (isValid(message)) {
-			List<String> countries = geoLookup.getCountries(message.getFloatProperty("lat"), message.getFloatProperty("lon"));
+			List<String> countries = geoLookup.getCountries(message.getFloatProperty(LAT), message.getFloatProperty(LON));
 			logger.debug("countries " + countries);
 			producer.sendMessage("test-out", message);
 		} else {
@@ -83,12 +87,5 @@ public class InterchangeApp implements CommandLineRunner{
 		SpringApplication.run(InterchangeApp.class, args);
 	}
 
-	@Override
-	public void run(String... args){
-
-		//producer.sendMessage("onramp", 10.0f, 63.0f, "Obstruction", "This is a message");
-        producer.sendBadMessage("onramp", 10.0f, 63.0f, "This message has no 'lon' ");
-
-	}
 
 }

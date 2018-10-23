@@ -24,6 +24,8 @@ import org.springframework.stereotype.Component;
 
 import javax.jms.TextMessage;
 
+import static no.vegvesen.ixn.MessageProperties.*;
+
 @Component
 public class IxnMessageProducer {
 
@@ -49,25 +51,13 @@ public class IxnMessageProducer {
 			logger.debug("Sending message {} to {}", message, destinationName);
 			TextMessage textMessage = session.createTextMessage(message);
 
-			textMessage.setFloatProperty("lat", lat);
-			textMessage.setFloatProperty("lon", lon);
-			textMessage.setStringProperty("what", what);
+			textMessage.setFloatProperty(LAT, lat);
+			textMessage.setFloatProperty(LON, lon);
+			textMessage.setStringProperty(WHAT, what);
 
 			return textMessage;
 		});
 
-	}
-
-	public void sendBadMessage(final String destinationName, final float lat, final float lon,  String message){
-		// Sends a bad message that will not pass validation.
-
-		this.jmsTemplate.send(destinationName, session -> {
-			logger.debug("Sending message {} to {}", message, destinationName);
-			TextMessage textMessage = session.createTextMessage();
-			textMessage.setFloatProperty("lat", lat);
-			textMessage.setFloatProperty("lon", lon);
-			return textMessage;
-		});
 	}
 }
 
