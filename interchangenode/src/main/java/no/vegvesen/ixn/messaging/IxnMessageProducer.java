@@ -44,17 +44,27 @@ public class IxnMessageProducer {
 		});
     }
 
-    public void sendMessage(final String destinationName, final float lat, final float lon, final String message){
+    public void sendMessage(final String destinationName, final float lat, final float lon, final String what, final String message){
 		this.jmsTemplate.send(destinationName, session -> {
 			logger.debug("Sending message {} to {}", message, destinationName);
 			TextMessage textMessage = session.createTextMessage(message);
 
 			textMessage.setFloatProperty("lat", lat);
 			textMessage.setFloatProperty("lon", lon);
+			textMessage.setStringProperty("what", what);
 
 			return textMessage;
 		});
 
+	}
+
+	public void sendBadMessage(final String destinationName, final float lat, String message){
+		this.jmsTemplate.send(destinationName, session -> {
+			logger.debug("Sending message {} to {}", message, destinationName);
+			TextMessage textMessage = session.createTextMessage();
+			textMessage.setFloatProperty("lat", lat);
+			return textMessage;
+		});
 	}
 }
 

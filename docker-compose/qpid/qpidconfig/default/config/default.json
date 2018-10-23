@@ -43,6 +43,17 @@
     "createdBy" : "admin",
     "createdTime" : 1538547045800
   }, {
+    "id" : "76deccec-1506-4608-85d7-63501e8e628e",
+    "name" : "dlqueue",
+    "type" : "standard",
+    "durable" : true,
+    "holdOnPublishEnabled" : false,
+    "owner" : null,
+    "lastUpdatedBy" : "admin",
+    "lastUpdatedTime" : 1540279628006,
+    "createdBy" : "admin",
+    "createdTime" : 1540279628006
+    }, {
     "id" : "6dc5af84-c9e4-45e8-991b-fd71f86b72f7",
     "name" : "test-out",
     "type" : "standard",

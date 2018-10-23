@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.jms.JmsException;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -19,6 +20,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 
 @SpringBootApplication
@@ -36,17 +39,27 @@ public class InterchangeApp implements CommandLineRunner{
 	}
 
 
-	public boolean isValid(TextMessage message){
-		try {
-			float lat = message.getFloatProperty("lat");
-			float lon = message.getFloatProperty("lon");
 
-			return message.getText() != null && lat != 0 && lon != 0;
 
-		}catch(JMSException jmse){
-			jmse.printStackTrace();
-			return false;
-		}
+	public boolean isValid(TextMessage message) throws JMSException{
+		// TODO: check that the message 'who' matches the message 'userID' (check against user database).
+
+		try{
+            logger.info("Validating message");
+
+            // Getting all the header fields and converting them to a list of Strings
+            Enumeration propertyNames = message.getPropertyNames();
+            List<String> headerFields = Collections.list(propertyNames);
+
+			String what = message.getStringProperty("what");
+			String body = message.getText();
+
+            return (headerFields.contains("lat") && headerFields.contains("lon") && what != null && body != null);
+
+		} catch(JMSException jmse) {
+            logger.error("Could not get header attributes for message", jmse);
+            return false;
+        }
 	}
 
 	@JmsListener(destination = "onramp")
@@ -60,7 +73,11 @@ public class InterchangeApp implements CommandLineRunner{
 			List<String> countries = geoLookup.getCountries(message.getFloatProperty("lat"), message.getFloatProperty("lon"));
 			logger.debug("countries " + countries);
 			producer.sendMessage("test-out", message);
-		}
+		} else {
+		    // Message is not valid, send to dlqueue
+            logger.info("Sending bad message to dead letter queue");
+            producer.sendMessage("dlqueue", message);
+        }
 		MDCUtil.removeLogVariables();
 	}
 
@@ -71,7 +88,8 @@ public class InterchangeApp implements CommandLineRunner{
 	@Override
 	public void run(String... args){
 
-		producer.sendMessage("onramp", 10.0f, 63.0f, "This is a message");
+		//producer.sendMessage("onramp", 10.0f, 63.0f, "Obstruction", "This is a message");
+        producer.sendBadMessage("onramp", 10.0f, "This message has no 'lon' ");
 
 
 	}
