@@ -37,7 +37,7 @@ public class InterchangeApp{
 	}
 
 
-	public boolean isValid(TextMessage message) throws JMSException{
+	public boolean isValid(TextMessage message){
 		// TODO: check that the message 'who' matches the message 'userID' (check against user database).
 
 		try{
@@ -53,7 +53,7 @@ public class InterchangeApp{
             return (headerFields.contains(LAT) && headerFields.contains(LON) && what != null && body != null);
 
 		} catch(JMSException jmse) {
-            logger.error("Could not get header attributes for message", jmse);
+            logger.error("Could not get header attributes for message.", jmse);
             return false;
         }
 	}
@@ -72,18 +72,19 @@ public class InterchangeApp{
 			List<String> countries = geoLookup.getCountries(message.getFloatProperty(LAT), message.getFloatProperty(LON));
             logger.info("Countries : " + countries);
 
-            if(countries.size() == 0){
-                producer.sendMessage("dlqueue", message);
+            String what = message.getStringProperty(WHAT);
+            List<String> situationRecordTypes = Arrays.asList(what.split("\\s*,\\s*"));
+
+            if(countries.size() == 0 || situationRecordTypes.size() == 0){
+                logger.warn("Sending bad message to dead letter queue. Country or situation record type not set.");
+                producer.dropMessage(message);
             }else {
-
-                String what = message.getStringProperty(WHAT);
-                List<String> situationRecordTypes = Arrays.asList(what.split("\\s*,\\s*"));
-
+                logger.info("Message is valid. Sending to test-out.");
                 producer.sendMessage("test-out", message, countries, situationRecordTypes);
             }
 		} else {
-            logger.warn("Sending bad message to dead letter queue");
-            producer.sendMessage("dlqueue", message);
+            logger.warn("Sending bad message to dead letter queue. Missing header fields or empty message.");
+            producer.dropMessage(message);
         }
 		MDCUtil.removeLogVariables();
 	}

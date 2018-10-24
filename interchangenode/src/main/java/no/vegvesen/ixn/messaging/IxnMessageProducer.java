@@ -61,29 +61,22 @@ public class IxnMessageProducer {
 				});
 			}
 		}
+
+
+
     }
 
     // Is used for sending invalid messages straigt to 'dlqueue'
-	public void sendMessage(final String destinationName, final TextMessage textMessage) {
+	public void dropMessage(final TextMessage textMessage) {
+	    String destinationName = "dlqueue";
 		this.jmsTemplate.send(destinationName, session -> {
 			logger.debug("Sending message {} to {}", textMessage, destinationName);
 
 			return textMessage;
 		});
+
+
     }
 
-	// Is used to send the initial message to 'onramp'
-    public void sendMessage(final String destinationName, final float lat, final float lon, final String what, final String message){
-		this.jmsTemplate.send(destinationName, session -> {
-			logger.debug("Sending message {} to {}", message, destinationName);
-			TextMessage textMessage = session.createTextMessage(message);
-
-			textMessage.setFloatProperty(LAT, lat);
-			textMessage.setFloatProperty(LON, lon);
-			textMessage.setStringProperty(WHAT, what);
-
-			return textMessage;
-		});
-	}
 }
 
