@@ -20,12 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Component;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
 import javax.jms.TextMessage;
 import java.util.List;
 
@@ -42,7 +38,7 @@ public class IxnMessageProducer {
 		this.jmsTemplate = jmsTemplate;
 	}
 
-	// Sending messages with multiple countries and situation records to 'test-out'
+	// Duplicates message for each country and situation record type.
 	public void sendMessage(final TextMessage textMessage, List<String> countries, List<String> situationRecordTypes) {
 
 		String destinationName = "test-out";
@@ -51,13 +47,18 @@ public class IxnMessageProducer {
 
 				this.jmsTemplate.send(destinationName, session -> {
 
-					// Copies the body from the original message
+					// Copy the body from the original message
 					TextMessage outgoing = session.createTextMessage(textMessage.getText());
 					logger.debug("Sending message {} to {}", outgoing, destinationName);
 
-					// Sets country and situation record type
+					// Set country and situation record type
 					outgoing.setStringProperty(WHERE, country);
 					outgoing.setStringProperty(WHAT, situationRecordType);
+
+					// Copy the rest of the header fields
+					outgoing.setFloatProperty(LAT, textMessage.getFloatProperty(LAT));
+					outgoing.setFloatProperty(LON, textMessage.getFloatProperty(LON));
+
 					logger.info("Creating packet with country " + country + " and situation record " + situationRecordType);
 
 					return outgoing;

@@ -41,7 +41,7 @@ public class InterchangeApp{
 		// TODO: check that the message 'who' matches the message 'userID' (check against user database).
 
 		try{
-            logger.info("Validating message");
+            logger.debug("Validating message");
 
             // Getting all the header fields and converting them to a list of Strings
             Enumeration propertyNames = message.getPropertyNames();
@@ -68,12 +68,12 @@ public class InterchangeApp{
 		logger.debug("handling one message body " + message.getText());
 		if (isValid(message)) {
 
-
 			List<String> countries = geoLookup.getCountries(message.getFloatProperty(LAT), message.getFloatProperty(LON));
-            logger.info("Countries : " + countries);
+            logger.debug("Countries : " + countries);
 
             String what = message.getStringProperty(WHAT);
             List<String> situationRecordTypes = Arrays.asList(what.split("\\s*,\\s*"));
+            logger.debug("What: " + situationRecordTypes);
 
             if(countries.size() == 0 || situationRecordTypes.size() == 0){
                 logger.warn("Sending bad message to dead letter queue. Country or situation record type not set.");

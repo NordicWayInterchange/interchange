@@ -67,7 +67,7 @@ public class InterchangeAppTest {
     }
 
     @Test
-    public void messageWithMissingHeaderFieldsIsNotValidAndIsDropped() throws JMSException{
+    public void messageWithMissingHeaderFieldsIsDropped() throws JMSException{
         // Missing LON from header means message is dropped
         TextMessage textMessage = mock(TextMessage.class);
         when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, WHAT)));
@@ -80,7 +80,6 @@ public class InterchangeAppTest {
 
     @Test
     public void messageWithInvalidWhatIsDropped() throws JMSException{
-        // feks et komma
         TextMessage textMessage = mock(TextMessage.class);
         when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
         when(textMessage.getText()).thenReturn("fisk");
@@ -93,16 +92,11 @@ public class InterchangeAppTest {
     }
 
     @Test
-    public void failedGetOrSetMethodOnMessageShouldFailTestIsValid() throws JMSException{
+    public void failedGetOrSetMethodOnMessageFailsTestIsValid() throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
         when(textMessage.getPropertyNames()).thenThrow(JMSException.class);
         app.isValid(textMessage);
         Assert.assertFalse(app.isValid(textMessage));
     }
-
-
-    // Egen testklasse for IXN Message Producer
-
-
 
 }
