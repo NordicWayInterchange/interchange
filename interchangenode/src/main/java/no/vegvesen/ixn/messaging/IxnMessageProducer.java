@@ -23,6 +23,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.jms.TextMessage;
+import java.util.List;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 
@@ -30,7 +31,6 @@ import static no.vegvesen.ixn.MessageProperties.*;
 public class IxnMessageProducer {
 
     private static final Logger logger = LoggerFactory.getLogger(IxnMessageProducer.class);
-
 	private final JmsTemplate jmsTemplate;
 
 	@Autowired
@@ -38,7 +38,28 @@ public class IxnMessageProducer {
 		this.jmsTemplate = jmsTemplate;
 	}
 
-	public void sendMessage(final String destinationName, final TextMessage textMessage) {
+	// Duplicates message for each country and situation record type.
+	public void sendMessage(final TextMessage textMessage, List<String> countries, List<String> situationRecordTypes) {
+
+		String destinationName = "test-out";
+		for(String country : countries){
+			for(String situationRecordType : situationRecordTypes){
+
+				this.jmsTemplate.send(destinationName, session -> {
+
+					textMessage.setStringProperty(WHERE, country);
+					textMessage.setStringProperty(WHAT, situationRecordType);
+					return textMessage;
+				});
+
+			}
+		}
+    }
+
+    // Is used for sending invalid messages straigt to 'dlqueue'
+	public void dropMessage(final TextMessage textMessage) {
+
+		String destinationName = "dlqueue";
 		this.jmsTemplate.send(destinationName, session -> {
 			logger.debug("Sending message {} to {}", textMessage, destinationName);
 
@@ -46,18 +67,5 @@ public class IxnMessageProducer {
 		});
     }
 
-    public void sendMessage(final String destinationName, final float lat, final float lon, final String what, final String message){
-		this.jmsTemplate.send(destinationName, session -> {
-			logger.debug("Sending message {} to {}", message, destinationName);
-			TextMessage textMessage = session.createTextMessage(message);
-
-			textMessage.setFloatProperty(LAT, lat);
-			textMessage.setFloatProperty(LON, lon);
-			textMessage.setStringProperty(WHAT, what);
-
-			return textMessage;
-		});
-
-	}
 }
 
