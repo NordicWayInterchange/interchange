@@ -42,7 +42,7 @@ public class InterchangeAppTest {
         when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction");
         when(geoLookup.getCountries(eq(1.0f), eq(1.0f))).thenReturn(Arrays.asList("NO"));
         app.handleOneMessage(textMessage);
-        verify(producer, times(1)).sendMessage(eq("test-out"), any(), any(), any());
+        verify(producer, times(1)).sendMessage(any(), any(), any());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class InterchangeAppTest {
         when(textMessage.getText()).thenReturn(null);
         when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
         app.handleOneMessage(textMessage);
-        verify(producer, times(0)).sendMessage(eq("test-out"), any(), any(), any());
+        verify(producer, times(0)).sendMessage(any(), any(), any());
     }
 
     @Test

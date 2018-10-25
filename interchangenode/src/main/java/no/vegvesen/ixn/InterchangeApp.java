@@ -80,7 +80,7 @@ public class InterchangeApp{
                 producer.dropMessage(message);
             }else {
                 logger.info("Message is valid. Sending to test-out.");
-                producer.sendMessage("test-out", message, countries, situationRecordTypes);
+                producer.sendMessage(message, countries, situationRecordTypes);
             }
 		} else {
             logger.warn("Sending bad message to dead letter queue. Missing header fields or empty message.");

@@ -20,8 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Component;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import java.util.List;
 
@@ -31,7 +35,6 @@ import static no.vegvesen.ixn.MessageProperties.*;
 public class IxnMessageProducer {
 
     private static final Logger logger = LoggerFactory.getLogger(IxnMessageProducer.class);
-
 	private final JmsTemplate jmsTemplate;
 
 	@Autowired
@@ -39,10 +42,10 @@ public class IxnMessageProducer {
 		this.jmsTemplate = jmsTemplate;
 	}
 
+	// Sending messages with multiple countries and situation records to 'test-out'
+	public void sendMessage(final TextMessage textMessage, List<String> countries, List<String> situationRecordTypes) {
 
-	// Is used for sending messages with multiple countries and situation records to 'test-out'
-	public void sendMessage(final String destinationName, final TextMessage textMessage, List<String> countries, List<String> situationRecordTypes) {
-
+		String destinationName = "test-out";
 		for(String country : countries){
 			for(String situationRecordType : situationRecordTypes){
 
@@ -61,21 +64,17 @@ public class IxnMessageProducer {
 				});
 			}
 		}
-
-
-
     }
 
     // Is used for sending invalid messages straigt to 'dlqueue'
 	public void dropMessage(final TextMessage textMessage) {
-	    String destinationName = "dlqueue";
+
+		String destinationName = "dlqueue";
 		this.jmsTemplate.send(destinationName, session -> {
 			logger.debug("Sending message {} to {}", textMessage, destinationName);
 
 			return textMessage;
 		});
-
-
     }
 
 }

@@ -1,13 +1,12 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.geo.GeoLookup;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
@@ -15,22 +14,19 @@ import org.springframework.jms.core.MessageCreator;
 import javax.jms.*;
 import java.util.*;
 
-import static no.vegvesen.ixn.MessageProperties.LAT;
-import static no.vegvesen.ixn.MessageProperties.LON;
 import static no.vegvesen.ixn.MessageProperties.WHAT;
-import static org.mockito.ArgumentMatchers.any;
+import static no.vegvesen.ixn.MessageProperties.WHERE;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IxnMessageProducerTest {
 
-
-
     private IxnMessageProducer producer;
+    private TextMessage textMessage = mock(TextMessage.class);
 
-    @Mock
-    GeoLookup geoLookup;
+
 
     @Mock
     JmsTemplate jmsTemplate;
@@ -40,53 +36,57 @@ public class IxnMessageProducerTest {
         producer = new IxnMessageProducer(jmsTemplate);
     }
 
-    // TODO: Metode for gyldig melding
-
     @Test
-    public void messageWithOneCountryAndOneWhatCallsSendOnce() throws JMSException {
-
+    public void messageWithOneCountryAndOneWhatCallsSendOnce(){
         ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
-
-        TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
-        when(textMessage.getText()).thenReturn("fisk");
-        when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
-        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction");
-        when(geoLookup.getCountries(eq(1.0f), eq(1.0f))).thenReturn(Arrays.asList("NO"));
-
         List<String> countries = Arrays.asList("NO");
         List<String> situations = Arrays.asList("Obstruction");
 
-        producer.sendMessage("test-out", textMessage, countries, situations);
-
+        producer.sendMessage(textMessage, countries, situations);
         verify(jmsTemplate, times(1)).send(eq("test-out"), messageCreator.capture());
     }
 
     @Test
-    public void messageWithTwoCountriesAndOneWhatCallsSendTwice() throws JMSException{
+    public void messageWithTwoCountriesAndTwoWhatCallsSendFourTimes(){
         ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
-
-        TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
-        when(textMessage.getText()).thenReturn("fisk");
-        when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
-        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction");
-        when(geoLookup.getCountries(eq(1.0f), eq(1.0f))).thenReturn(Arrays.asList("NO"));
-
         List<String> countries = Arrays.asList("NO", "SE");
         List<String> situations = Arrays.asList("Obstruction", "Works");
 
-        producer.sendMessage("test-out", textMessage, countries, situations);
+        producer.sendMessage(textMessage, countries, situations);
+        verify(jmsTemplate, times(4)).send(eq("test-out"), messageCreator.capture());
+    }
+
+    @Test
+    public void droppingMessage(){
+        ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
+        producer.dropMessage(textMessage);
+        verify(jmsTemplate, times(1)).send(eq("dlqueue"), messageCreator.capture());
+    }
+
+    @Test
+    public void lambdaTest() throws JMSException{
+        ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
+
+
+        // testing that the packet split of one message into four messages creates 4 valid messages.
+
+        // One message - call send
+        List<String> countries = Arrays.asList("NO", "SE");
+        List<String> situations = Arrays.asList("Obstruction", "Works");
+        producer.sendMessage(textMessage, countries, situations);
 
         verify(jmsTemplate, times(4)).send(eq("test-out"), messageCreator.capture());
 
+        List<MessageCreator> lambdaValues = messageCreator.getAllValues();
+
+        MessageCreator firstMessage = lambdaValues.get(0);
+        MessageCreator secondMessage = lambdaValues.get(1);
+
+
+        
+
+
+
+
     }
-
-
-    // message with two countries and one what is duplicated; calls send two times
-    // message with one country and two whats is duplicated; calls send two times
-
-    // message passed to dropMessage is sent to dlqueue
-
-
 }
