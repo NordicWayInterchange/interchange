@@ -47,26 +47,8 @@ public class IxnMessageProducer {
 
 				this.jmsTemplate.send(destinationName, session -> {
 
-					/*
-					// Copy the body from the original message
-					TextMessage outgoing = session.createTextMessage(textMessage.getText());
-					logger.debug("Sending message {} to {}", outgoing, destinationName);
-
-					// Set country and situation record type
-					outgoing.setStringProperty(WHERE, country);
-					outgoing.setStringProperty(WHAT, situationRecordType);
-
-					// Copy the rest of the header fields
-					outgoing.setFloatProperty(LAT, textMessage.getFloatProperty(LAT));
-					outgoing.setFloatProperty(LON, textMessage.getFloatProperty(LON));
-
-					logger.info("Creating packet with country " + country + " and situation record " + situationRecordType);
-					*/
-
 					textMessage.setStringProperty(WHERE, country);
 					textMessage.setStringProperty(WHAT, situationRecordType);
-
-
 					return textMessage;
 				});
 
