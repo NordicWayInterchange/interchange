@@ -37,7 +37,6 @@ public class IxnMessageProducer {
 	}
 
 	// Duplicates message for each country and situation record type.
-	// TODO: check if userID and ttl are set using getStringProperty and getLongProperty
 	public void sendMessage(String destination, final IxnMessage message){
 		for(String country : message.getCountries()){
 			for(String situationRecordType : message.getWhat()){
@@ -47,15 +46,21 @@ public class IxnMessageProducer {
 					TextMessage outgoingMessage = session.createTextMessage();
 					outgoingMessage.setFloatProperty(LAT, message.getLat());
 					outgoingMessage.setFloatProperty(LON, message.getLon());
-					outgoingMessage.setStringProperty("who", message.getWho());
-					outgoingMessage.setStringProperty("userID", message.getUserID());
+					outgoingMessage.setStringProperty(WHO, message.getWho());
+					outgoingMessage.setStringProperty(USERID, message.getUserID());
 					outgoingMessage.setStringProperty(WHERE, country);
 					outgoingMessage.setStringProperty(WHAT, situationRecordType);
-					outgoingMessage.setLongProperty("ttl", message.getTtl());
+					outgoingMessage.setJMSExpiration(message.getTtl());
 					return outgoingMessage;
 				});
 			}
 		}
     }
+
+    public void sendMessage(String destination, final TextMessage textMessage){
+		this.jmsTemplate.send(destination, session -> {
+			return textMessage;
+		});
+	}
 }
 

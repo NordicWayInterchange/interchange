@@ -22,9 +22,14 @@ import static no.vegvesen.ixn.MessageProperties.*;
 @SpringBootApplication
 @EnableJms
 public class InterchangeApp{
+	public static final String DLQUEUE = "dlqueue";
+	public static final String TEST_OUT = "test-out";
 	private static Logger logger = LoggerFactory.getLogger(InterchangeApp.class);
 	private final IxnMessageProducer producer;
 	private final GeoLookup geoLookup;
+
+
+	// TODO: Lookup in user db on 'userID' - check if it matches 'who'. If not, log it.
 
 	@Autowired
 	InterchangeApp(IxnMessageProducer producer, GeoLookup geoLookup) {
@@ -33,9 +38,6 @@ public class InterchangeApp{
 	}
 
 	public boolean isValid(TextMessage textMessage){
-	    // TODO: Is userID from getstringProperty or somewhere else? ('JMSXUserID')
-		// TODO: check that the message 'who' matches the message 'userID' (check against user database).
-
 		logger.debug("Validating message.");
 
 		try {
@@ -44,9 +46,7 @@ public class InterchangeApp{
 			String who = textMessage.getStringProperty(WHO);
 			String userID = textMessage.getStringProperty(USERID);
 			String body = textMessage.getText();
-
-			String whatString = textMessage.getStringProperty(WHAT);
-			List<String> what = Arrays.asList(whatString.split("\\s*,\\s*"));
+			List<String> what = IxnMessage.parseWhat(textMessage.getStringProperty(WHAT));
 
 			return (lon != 0 && lat != 0 && who != null && userID != null && body != null && what.size() != 0);
 		}catch(JMSException jmse){
@@ -57,6 +57,7 @@ public class InterchangeApp{
 
 	@JmsListener(destination = "onramp")
 	public void receiveMessage(TextMessage textMessage) throws JMSException{
+		MDCUtil.setLogVariables(textMessage);
 		logger.info("============= Received: " + textMessage.getText());
 
 		if(isValid(textMessage)){
@@ -64,28 +65,33 @@ public class InterchangeApp{
 			handleOneMessage(message);
 		}
 		else{
-			throw new IllegalArgumentException();
+			logger.error("Sending bad message to dead letter queue. Invalid message.");
+			producer.sendMessage(DLQUEUE, textMessage);
 		}
+
+		MDCUtil.removeLogVariables();
 	}
 
 	void handleOneMessage(IxnMessage message){
-	    // TODO: remove message.getText() and replace with message ID
-		// TODO: MDCUtil.setLogVariables(message);
+	    // TODO: remove message.getText() and replace with message ID to avoid logging the whole body of the message.
 		logger.debug("handling one message body " + message.getBody());
 
 		List<String> countries = geoLookup.getCountries(message.getLat(), message.getLon());
 		message.setCountries(countries);
 		logger.debug("Message has countries : " + countries);
 
-		if (message.hasCountries()) {
+		if(!message.hasCountries()){
+			// Message does not have any countries
+			logger.warn("Sending bad message to dead letter queue. 'where1' not set.");
+			producer.sendMessage(DLQUEUE, message);
+		}else if(!message.hasWhat()){
+			// Message does not have any situation records
+			logger.warn("Sending bad message to dead letter queue. 'where1' not set.");
+			producer.sendMessage(DLQUEUE, message);
+		} else{
 			logger.debug("Sending valid message to test-out.");
-            producer.sendMessage("test-out", message);
-
-		} else {
-            logger.warn("Sending bad message to dead letter queue. Invalid message, or message without 'where1'.");
-            producer.sendMessage("dlqueue", message);
-        }
-		MDCUtil.removeLogVariables();
+			producer.sendMessage(TEST_OUT, message);
+		}
 	}
 
 	public static void main(String[] args) {

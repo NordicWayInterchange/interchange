@@ -19,23 +19,23 @@ public class IxnMessage {
     private List<String> countries = new ArrayList();
 
     public IxnMessage(TextMessage textMessage) throws JMSException {
+        this(textMessage.getStringProperty(WHO),
+                textMessage.getStringProperty(USERID),
+                textMessage.getJMSExpiration(),
+                textMessage.getFloatProperty(LAT),
+                textMessage.getFloatProperty(LON),
+                parseWhat(textMessage.getStringProperty(WHAT)),
+                textMessage.getText());
+    }
 
-        // TODO: check if you get text message ttl with getLongProperty or something else
-        // TODO: check the same with userID.
-
-
-        this.who = textMessage.getStringProperty(WHO);
-        this.userID = textMessage.getStringProperty(USERID);
-        this.lat = textMessage.getFloatProperty(LAT);
-        this.lon = textMessage.getFloatProperty(LON);
-        this.body = textMessage.getText();
-
-        String whatString = textMessage.getStringProperty(WHAT);
-        this.what = Arrays.asList(whatString.split("\\s*,\\s*"));
-
-        Long ttl = textMessage.getJMSExpiration();
+    public IxnMessage(String who, String userID, long ttl, float lat, float lon, List<String> what, String body){
+        this.who = who;
+        this.userID = userID;
+        this.lat = lat;
+        this.lon = lon;
+        this.body = body;
+        this.what = what;
         setTtl(ttl);
-
     }
 
     public String getWho() {
@@ -72,20 +72,32 @@ public class IxnMessage {
         return (countries.size() != 0);
     }
 
+    public boolean hasWhat(){
+        return (what.size() != 0);
+    }
+
     public void setCountries (List<String> countries){
         this.countries = countries;
     }
 
     public void setTtl(long ttl){
+        this.ttl = checkTtl(ttl);
+    }
+
+    public static List<String> parseWhat(String what){
+        return Arrays.asList(what.split("\\s*,\\s*"));
+    }
+
+    public static long checkTtl(long ttl){
         if(ttl <= 0){
             // ttl is absent or illegal - setting to default ttl (1 day)
-            this.ttl = 86_400_000l;
+            return 86_400_000l;
         }else if(ttl > 6_911_200_000l){
             // ttl is too high, setting to maximum ttl (8 days)
-            this.ttl = 6_911_200_000l;
+            return 6_911_200_000l;
         }else{
             // ttl is in the valid range (more than 0, less than 8 days)
-            this.ttl = ttl;
+            return ttl;
         }
     }
 

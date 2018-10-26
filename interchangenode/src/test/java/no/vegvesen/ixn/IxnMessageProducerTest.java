@@ -11,13 +11,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
-import javax.jms.*;
 import java.util.*;
 
-import static no.vegvesen.ixn.MessageProperties.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class IxnMessageProducerTest {

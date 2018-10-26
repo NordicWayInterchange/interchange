@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import javax.xml.soap.Text;
 
 import java.util.Arrays;
 
@@ -64,9 +65,10 @@ public class InterchangeAppTest {
         when(message.getLon()).thenReturn(63.0f);
         // geolookup on lat and lon gives a non-empty list of countries.
         when(message.hasCountries()).thenReturn(true);
+        when(message.hasWhat()).thenReturn(true);
 
         app.handleOneMessage(message);
-        verify(producer, times(1)).sendMessage(eq("test-out"), any());
+        verify(producer, times(1)).sendMessage(eq("test-out"), any(IxnMessage.class));
     }
 
     @Test
@@ -76,7 +78,7 @@ public class InterchangeAppTest {
         when(message.hasCountries()).thenReturn(false);
 
         app.handleOneMessage(message);
-        verify(producer, times(0)).sendMessage(eq("test-out"), any());
+        verify(producer, times(0)).sendMessage(eq("test-out"), any(IxnMessage.class));
     }
 
     @Test
@@ -98,17 +100,14 @@ public class InterchangeAppTest {
     }
 
     @Test
-    public void invalidTextMessageThrowsIllegalArgumentException() throws JMSException{
+    public void receivedInvalidTextMessageSentToDeadLetterQueue() throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
         when(textMessage.getText()).thenReturn("fisk");
         when(textMessage.getStringProperty(WHAT)).thenReturn(","); // Invalid what will split to empty string.
         when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
 
-        try {
-            app.receiveMessage(textMessage);
-        }catch(RuntimeException e){
-            Assert.assertTrue(e instanceof IllegalArgumentException);
-        }
+        app.receiveMessage(textMessage);
+        verify(producer, times(1)).sendMessage(eq("dlqueue"), any(TextMessage.class));
     }
 
 
