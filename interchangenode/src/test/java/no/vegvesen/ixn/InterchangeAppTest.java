@@ -2,6 +2,7 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.geo.GeoLookup;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
+import no.vegvesen.ixn.model.IxnMessage;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +14,6 @@ import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 import static org.mockito.Mockito.*;
@@ -27,6 +27,7 @@ public class InterchangeAppTest {
     GeoLookup geoLookup;
 
     private InterchangeApp app;
+    private IxnMessage message = mock(IxnMessage.class);
 
     @Before
     public void setUp() {
@@ -34,69 +35,81 @@ public class InterchangeAppTest {
     }
 
     @Test
-    public void validMessageIsSent() throws JMSException {
+    public void validMessagePassesIsValid()throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
         when(textMessage.getText()).thenReturn("fisk");
-        when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
-        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction");
-        when(geoLookup.getCountries(eq(1.0f), eq(1.0f))).thenReturn(Arrays.asList("NO"));
-        app.handleOneMessage(textMessage);
-        verify(producer, times(1)).sendMessage(any(), any(), any());
+        when(textMessage.getFloatProperty(any())).thenReturn(1.0f); // LAT and LON
+        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction"); // WHAT
+        when(textMessage.getStringProperty(USERID)).thenReturn("1234"); // userID
+        when(textMessage.getStringProperty(WHO)).thenReturn("VolvoCloud"); // WHO
+
+        Assert.assertTrue(app.isValid(textMessage));
     }
 
     @Test
-    public void  messageWithoutBodyIsDropped() throws JMSException {
+    public void invalidMessageFailsIsValid()throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getText()).thenReturn(null);
-        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
-        app.handleOneMessage(textMessage);
-        verify(producer, times(0)).sendMessage(any(), any(), any());
+
+        when(textMessage.getFloatProperty(any())).thenReturn(1.0f); // LAT and LON
+        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction"); // WHAT
+        when(textMessage.getStringProperty(USERID)).thenReturn(""); // Missing userID
+        when(textMessage.getStringProperty(WHO)).thenReturn("VolvoCloud"); // WHO
+
+        Assert.assertFalse(app.isValid(textMessage));
     }
 
     @Test
-    public void messageWithoutCountryIsDropped()throws JMSException{
-        TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
-        when(textMessage.getText()).thenReturn("fisk");
-        when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
-        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction");
-        app.handleOneMessage(textMessage);
-        verify(producer, times(1)).dropMessage(any());
+    public void validMessageIsSent(){
+        when(message.getLat()).thenReturn(10.0f);
+        when(message.getLon()).thenReturn(63.0f);
+        // geolookup on lat and lon gives a non-empty list of countries.
+        when(message.hasCountries()).thenReturn(true);
 
+        app.handleOneMessage(message);
+        verify(producer, times(1)).sendMessage(eq("test-out"), any());
     }
 
     @Test
-    public void messageWithMissingHeaderFieldsIsDropped() throws JMSException{
-        // Missing LON from header means message is dropped
-        TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, WHAT)));
-        when(textMessage.getText()).thenReturn("fisk");
-        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction");
-        app.handleOneMessage(textMessage);
-        verify(producer, times(1)).dropMessage(any());
-    }
+    public void  messageWithoutCountryIsDropped(){
+        when(message.getLat()).thenReturn(10.0f);
+        when(message.getLon()).thenReturn(63.0f);
+        when(message.hasCountries()).thenReturn(false);
 
+        app.handleOneMessage(message);
+        verify(producer, times(0)).sendMessage(eq("test-out"), any());
+    }
 
     @Test
     public void messageWithInvalidWhatIsDropped() throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(LAT, LON, WHAT)));
         when(textMessage.getText()).thenReturn("fisk");
-        when(textMessage.getStringProperty(WHAT)).thenReturn(",");
+        when(textMessage.getStringProperty(WHAT)).thenReturn(","); // Invalid what - will split to empty string.
         when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
-        when(geoLookup.getCountries(eq(1.0f), eq(1.0f))).thenReturn(Arrays.asList("NO"));
-        app.handleOneMessage(textMessage);
-        verify(producer, times(1)).dropMessage(any());
 
+        Assert.assertFalse(app.isValid(textMessage));
     }
 
     @Test
     public void failedGetOrSetMethodOnMessageFailsTestIsValid() throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getPropertyNames()).thenThrow(JMSException.class);
-        app.isValid(textMessage);
+        when(textMessage.getFloatProperty(LAT)).thenThrow(JMSException.class);
+
         Assert.assertFalse(app.isValid(textMessage));
     }
+
+    @Test
+    public void invalidTextMessageThrowsIllegalArgumentException() throws JMSException{
+        TextMessage textMessage = mock(TextMessage.class);
+        when(textMessage.getText()).thenReturn("fisk");
+        when(textMessage.getStringProperty(WHAT)).thenReturn(","); // Invalid what will split to empty string.
+        when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
+
+        try {
+            app.receiveMessage(textMessage);
+        }catch(RuntimeException e){
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+
 
 }
