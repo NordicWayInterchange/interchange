@@ -159,7 +159,7 @@
                             <goal>start</goal>
                         </goals>
                     </execution>
-
+                    <!-- rebase-mark -->
                     <execution>
                         <id>stop</id>
                         <phase>post-integration-test</phase>
