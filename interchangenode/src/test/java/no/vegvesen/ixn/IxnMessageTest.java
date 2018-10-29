@@ -16,16 +16,60 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 public class IxnMessageTest {
 
-    IxnMessage message = mock(IxnMessage.class);
+    private final long DEFAULT_TTL = 86_400_000L;
+    private final long MAX_TTL = 6_911_200_000L;
+    private IxnMessage message = mock(IxnMessage.class);
+
 
     @Test
-    public void negativeTtlIsSetToDefaultValue(){
-        Assert.assertEquals(86_400_000l, message.checkTtl(-1));
+    public void negativeExpirationTimeIsSetToDefaultExpiration(){
+        long currentTime = System.currentTimeMillis();
+
+        List<String> what = Arrays.asList("Obstruction", "Works");
+        IxnMessage testMessage = new IxnMessage("Volvo",
+                "1234",
+                -1,
+                currentTime,
+                10.0f,
+                63.0f,
+                what,
+                "This is a message");
+
+        Assert.assertEquals((currentTime + DEFAULT_TTL), testMessage.getExpiration());
     }
 
     @Test
-    public void tooBigTtlIsSetToDefaultBigValue(){
-        Assert.assertEquals(6_911_200_000l, message.checkTtl(6_911_200_100l));
+    public void tooBigExpiratioNTimeIsSetToMaxExpiration(){
+        long currentTime = System.currentTimeMillis();
+
+        List<String> what = Arrays.asList("Obstruction", "Works");
+        IxnMessage testMessage = new IxnMessage("Volvo",
+                "1234",
+                (6_911_200_100L + currentTime),
+                currentTime,
+                10.0f,
+                63.0f,
+                what,
+                "This is a message");
+
+        Assert.assertEquals((currentTime + MAX_TTL), testMessage.getExpiration());
+    }
+
+    @Test
+    public void validExpirationTimeIsKept(){
+        long currentTime = System.currentTimeMillis();
+
+        List<String> what = Arrays.asList("Obstruction", "Works");
+        IxnMessage testMessage = new IxnMessage("Volvo",
+                "1234",
+                (6_911_100_00L + currentTime),
+                currentTime,
+                10.0f,
+                63.0f,
+                what,
+                "This is a message");
+
+        Assert.assertEquals((6_911_100_00L + currentTime), testMessage.getExpiration());
     }
 
     @Test
