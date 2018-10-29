@@ -58,7 +58,8 @@ public class InterchangeApp{
 	@JmsListener(destination = "onramp")
 	public void receiveMessage(TextMessage textMessage) throws JMSException{
 		MDCUtil.setLogVariables(textMessage);
-		logger.info("============= Received: " + textMessage.getText());
+
+		logger.info("============= Received: {}", textMessage.getText());
 
 		if(isValid(textMessage)){
 			IxnMessage message = new IxnMessage(textMessage);
@@ -73,12 +74,11 @@ public class InterchangeApp{
 	}
 
 	void handleOneMessage(IxnMessage message){
-	    // TODO: remove message.getText() and replace with message ID to avoid logging the whole body of the message.
-		logger.debug("handling one message body " + message.getBody());
+		logger.debug("handling one message body: {}", message.getBody());
 
 		List<String> countries = geoLookup.getCountries(message.getLat(), message.getLon());
 		message.setCountries(countries);
-		logger.debug("Message has countries : " + countries);
+		logger.debug("Message has countries : {} ", countries);
 
 		if(!message.hasCountries()){
 			// Message does not have any countries
