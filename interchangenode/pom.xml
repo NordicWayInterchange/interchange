@@ -103,70 +103,60 @@
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.27.2</version>
+
+                <configuration>
+                    <images>
+                        <image>
+                            <!-- TODO: point to existing docker-compose catalogue -->
+                            <name>postgis</name>
+                            <build>
+                                <dockerFileDir>postgis</dockerFileDir>
+                            </build>
+                            <run>
+                                <ports>
+                                    <port>5432:5432</port>
+                                </ports>
+                                <env>
+                                    <POSTGRES_USER>geolookup</POSTGRES_USER>
+                                    <POSTGRES_PASSWORD>geolookup</POSTGRES_PASSWORD>
+                                    <POSTGRES_DB>geolookup</POSTGRES_DB>
+                                </env>
+                                <wait>
+                                    <time>12000</time> <!--erstatte av healthcheck i docker-images-->
+                                </wait>
+                            </run>
+                        </image>
+                        <image>
+                            <!-- TODO: point to existing docker-compose catalogue -->
+                            <name>qpid</name>
+                            <build>
+                                <dockerFileDir>qpid</dockerFileDir>
+                            </build>
+                            <run>
+                                <ports>
+                                    <port>5672:5672</port>
+                                </ports>
+                                <wait>
+                                    <time>4000</time> <!--erstatte av healthcheck i docker-images-->
+                                </wait>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+
+
                 <executions>
                     <execution>
-                        <id>start-postgis</id>
+                        <id>start</id>
                         <phase>pre-integration-test</phase>
                         <goals>
                             <goal>build</goal>
                             <goal>start</goal>
-                        </goals>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <!-- TODO: point to existing docker-compose catalogue -->
-                                    <name>postgis</name>
-                                    <build>
-                                        <dockerFileDir>postgis</dockerFileDir>
-                                    </build>
-                                    <run>
-                                        <ports>
-                                            <port>5432:5432</port>
-                                        </ports>
-                                        <env>
-                                            <POSTGRES_USER>geolookup</POSTGRES_USER>
-                                            <POSTGRES_PASSWORD>geolookup</POSTGRES_PASSWORD>
-                                            <POSTGRES_DB>geolookup</POSTGRES_DB>
-                                        </env>
-                                    </run>
-                                </image>
-                            </images>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>stop-postgis</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
                         </goals>
                     </execution>
 
                     <execution>
-                        <id>start-qpid</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>start</goal>
-                        </goals>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <!-- TODO: point to existing docker-compose catalogue -->
-                                    <name>qpid</name>
-                                    <build>
-                                        <dockerFileDir>qpid</dockerFileDir>
-                                    </build>
-                                    <run>
-                                        <ports>
-                                            <port>5672:5672</port>
-                                        </ports>
-                                    </run>
-                                </image>
-                            </images>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>stop-qpid</id>
+                        <id>stop</id>
                         <phase>post-integration-test</phase>
                         <goals>
                             <goal>stop</goal>
