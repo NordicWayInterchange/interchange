@@ -80,7 +80,7 @@ public class IxnMessage {
         this.countries = countries;
     }
 
-    public void setTtl(long ttl){
+    private void setTtl(long ttl){
         this.ttl = checkTtl(ttl);
     }
 

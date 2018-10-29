@@ -12,9 +12,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import javax.xml.soap.Text;
-
-import java.util.Arrays;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 import static org.mockito.Mockito.*;
