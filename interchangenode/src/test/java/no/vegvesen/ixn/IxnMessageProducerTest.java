@@ -1,6 +1,7 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
+import no.vegvesen.ixn.model.IxnMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,18 +11,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
-import javax.jms.*;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class IxnMessageProducerTest {
 
     private IxnMessageProducer producer;
-    private TextMessage textMessage = mock(TextMessage.class);
+    private IxnMessage message = mock(IxnMessage.class);
 
     @Mock
     JmsTemplate jmsTemplate;
@@ -34,28 +33,43 @@ public class IxnMessageProducerTest {
     @Test
     public void messageWithOneCountryAndOneWhatCallsSendOnce(){
         ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
-        List<String> countries = Arrays.asList("NO");
-        List<String> situations = Arrays.asList("Obstruction");
 
-        producer.sendMessage(textMessage, countries, situations);
+        when(message.getCountries()).thenReturn(Arrays.asList("NO"));
+        when(message.getWhat()).thenReturn(Arrays.asList("Obstruction"));
+
+        producer.sendMessage("test-out", message);
         verify(jmsTemplate, times(1)).send(eq("test-out"), messageCreator.capture());
     }
 
     @Test
     public void messageWithTwoCountriesAndTwoWhatCallsSendFourTimes(){
         ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
-        List<String> countries = Arrays.asList("NO", "SE");
-        List<String> situations = Arrays.asList("Obstruction", "Works");
 
-        producer.sendMessage(textMessage, countries, situations);
+        when(message.getCountries()).thenReturn(Arrays.asList("NO", "SE"));
+        when(message.getWhat()).thenReturn(Arrays.asList("Obstruction", "Works"));
+
+        producer.sendMessage("test-out", message);
         verify(jmsTemplate, times(4)).send(eq("test-out"), messageCreator.capture());
     }
 
     @Test
-    public void droppingMessage(){
+    public void messageWithNoCountryIsSentZeroTimes(){
         ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
-        producer.dropMessage(textMessage);
-        verify(jmsTemplate, times(1)).send(eq("dlqueue"), messageCreator.capture());
+
+        when(message.getCountries()).thenReturn(Arrays.asList());
+        producer.sendMessage("dlqueue", message);
+        verify(jmsTemplate, times(0)).send(eq("dlqueue"), messageCreator.capture());
     }
+
+    @Test
+    public void messageWithNoWhatIsSentZeroTimes(){
+        ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
+
+        when(message.getCountries()).thenReturn(Arrays.asList("NO", "SE"));
+        when(message.getWhat()).thenReturn(Arrays.asList());
+        producer.sendMessage("dlqueue", message);
+        verify(jmsTemplate, times(0)).send(eq("dlqueue"), messageCreator.capture());
+    }
+
 
 }

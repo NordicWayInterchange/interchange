@@ -2,6 +2,7 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.geo.GeoLookup;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
+import no.vegvesen.ixn.model.IxnMessage;
 import no.vegvesen.ixn.util.MDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,21 +15,21 @@ import org.springframework.jms.annotation.JmsListener;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 
-import static no.vegvesen.ixn.MessageProperties.LAT;
-import static no.vegvesen.ixn.MessageProperties.LON;
-import static no.vegvesen.ixn.MessageProperties.WHAT;
+import static no.vegvesen.ixn.MessageProperties.*;
 
 @SpringBootApplication
 @EnableJms
 public class InterchangeApp{
+	public static final String DLQUEUE = "dlqueue";
+	public static final String TEST_OUT = "test-out";
 	private static Logger logger = LoggerFactory.getLogger(InterchangeApp.class);
-
 	private final IxnMessageProducer producer;
 	private final GeoLookup geoLookup;
+
+
+	// TODO: Lookup in user db on 'userID' - check if it matches 'who'. If not, log it.
 
 	@Autowired
 	InterchangeApp(IxnMessageProducer producer, GeoLookup geoLookup) {
@@ -36,62 +37,64 @@ public class InterchangeApp{
 		this.geoLookup = geoLookup;
 	}
 
+	public boolean isValid(TextMessage textMessage){
+		logger.debug("Validating message.");
 
-	public boolean isValid(TextMessage message){
-		// TODO: check that the message 'who' matches the message 'userID' (check against user database).
+		try {
+			float lon = textMessage.getFloatProperty(LON);
+			float lat = textMessage.getFloatProperty(LAT);
+			String who = textMessage.getStringProperty(WHO);
+			String userID = textMessage.getStringProperty(USERID);
+			String body = textMessage.getText();
+			List<String> what = IxnMessage.parseWhat(textMessage.getStringProperty(WHAT));
 
-		try{
-            logger.debug("Validating message");
-
-            // Getting all the header fields and converting them to a list of Strings
-            Enumeration propertyNames = message.getPropertyNames();
-            List<String> headerFields = Collections.list(propertyNames);
-
-			String what = message.getStringProperty(WHAT);
-			String body = message.getText();
-
-            return (headerFields.contains(LAT) && headerFields.contains(LON) && what != null && body != null);
-
-		} catch(JMSException jmse) {
-            logger.error("Could not get header attributes for message.", jmse);
-            return false;
-        }
+			return (lon != 0 && lat != 0 && who != null && userID != null && body != null && what.size() != 0);
+		}catch(JMSException jmse){
+			logger.error("Failed to get message property from TextMessage.", jmse);
+			return false;
+		}
 	}
 
 	@JmsListener(destination = "onramp")
-	void handleOneMessage(TextMessage message) throws JMSException {
-	    // TODO: remove message.getText() and replace with message ID
-		logger.info("============= Received: " + message.getText());
+	public void receiveMessage(TextMessage textMessage) throws JMSException{
+		MDCUtil.setLogVariables(textMessage);
 
-		MDCUtil.setLogVariables(message);
+		logger.info("============= Received: {}", textMessage.getText());
 
-		logger.debug("handling one message body " + message.getText());
-		if (isValid(message)) {
+		if(isValid(textMessage)){
+			IxnMessage message = new IxnMessage(textMessage);
+			handleOneMessage(message);
+		}
+		else{
+			logger.error("Sending bad message to dead letter queue. Invalid message.");
+			producer.sendMessage(DLQUEUE, textMessage);
+		}
 
-			List<String> countries = geoLookup.getCountries(message.getFloatProperty(LAT), message.getFloatProperty(LON));
-            logger.debug("Countries : " + countries);
-
-            String what = message.getStringProperty(WHAT);
-            List<String> situationRecordTypes = Arrays.asList(what.split("\\s*,\\s*"));
-            logger.debug("What: " + situationRecordTypes);
-
-            if(countries.size() == 0 || situationRecordTypes.size() == 0){
-                logger.warn("Sending bad message to dead letter queue. Country or situation record type not set.");
-                producer.dropMessage(message);
-            }else {
-                logger.info("Message is valid. Sending to test-out.");
-                producer.sendMessage(message, countries, situationRecordTypes);
-            }
-		} else {
-            logger.warn("Sending bad message to dead letter queue. Missing header fields or empty message.");
-            producer.dropMessage(message);
-        }
 		MDCUtil.removeLogVariables();
+	}
+
+	void handleOneMessage(IxnMessage message){
+		logger.debug("handling one message body: {}", message.getBody());
+
+		List<String> countries = geoLookup.getCountries(message.getLat(), message.getLon());
+		message.setCountries(countries);
+		logger.debug("Message has countries : {} ", countries);
+
+		if(!message.hasCountries()){
+			// Message does not have any countries
+			logger.warn("Sending bad message to dead letter queue. 'where1' not set.");
+			producer.sendMessage(DLQUEUE, message);
+		}else if(!message.hasWhat()){
+			// Message does not have any situation records
+			logger.warn("Sending bad message to dead letter queue. 'what' not set.");
+			producer.sendMessage(DLQUEUE, message);
+		} else{
+			logger.debug("Sending valid message to test-out.");
+			producer.sendMessage(TEST_OUT, message);
+		}
 	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(InterchangeApp.class, args);
 	}
-
-
 }

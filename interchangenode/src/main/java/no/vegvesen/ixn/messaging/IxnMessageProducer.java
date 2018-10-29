@@ -16,22 +16,20 @@
  */
 package no.vegvesen.ixn.messaging;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import no.vegvesen.ixn.model.IxnMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.jms.TextMessage;
-import java.util.List;
+import javax.jms.*;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 
 @Component
 public class IxnMessageProducer {
 
-    private static final Logger logger = LoggerFactory.getLogger(IxnMessageProducer.class);
 	private final JmsTemplate jmsTemplate;
+
 
 	@Autowired
 	public IxnMessageProducer(JmsTemplate jmsTemplate) {
@@ -39,33 +37,31 @@ public class IxnMessageProducer {
 	}
 
 	// Duplicates message for each country and situation record type.
-	public void sendMessage(final TextMessage textMessage, List<String> countries, List<String> situationRecordTypes) {
+	public void sendMessage(String destination, final IxnMessage message){
+		for(String country : message.getCountries()){
+			for(String situationRecordType : message.getWhat()){
 
-		String destinationName = "test-out";
-		for(String country : countries){
-			for(String situationRecordType : situationRecordTypes){
+				this.jmsTemplate.send(destination, session -> {
 
-				this.jmsTemplate.send(destinationName, session -> {
-
-					textMessage.setStringProperty(WHERE, country);
-					textMessage.setStringProperty(WHAT, situationRecordType);
-					return textMessage;
+					TextMessage outgoingMessage = session.createTextMessage();
+					outgoingMessage.setFloatProperty(LAT, message.getLat());
+					outgoingMessage.setFloatProperty(LON, message.getLon());
+					outgoingMessage.setStringProperty(WHO, message.getWho());
+					outgoingMessage.setStringProperty(USERID, message.getUserID());
+					outgoingMessage.setStringProperty(WHERE, country);
+					outgoingMessage.setStringProperty(WHAT, situationRecordType);
+					outgoingMessage.setJMSExpiration(message.getExpiration());
+					return outgoingMessage;
 				});
-
 			}
 		}
     }
 
-    // Is used for sending invalid messages straigt to 'dlqueue'
-	public void dropMessage(final TextMessage textMessage) {
-
-		String destinationName = "dlqueue";
-		this.jmsTemplate.send(destinationName, session -> {
-			logger.debug("Sending message {} to {}", textMessage, destinationName);
-
+    public void sendMessage(String destination, final TextMessage textMessage){
+		this.jmsTemplate.send(destination, session -> {
 			return textMessage;
 		});
-    }
+	}
 
 }
 

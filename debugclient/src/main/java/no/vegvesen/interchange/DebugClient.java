@@ -18,7 +18,7 @@ import java.time.temporal.ChronoUnit;
 
 public class DebugClient implements MessageListener
 {
-	private static final String USER = "nw_bouvet";
+	private static final String USER = System.getProperty("USER");
     private static final String PASSWORD = System.getProperty("PASSWORD");
 	private Connection connection;
 	private Session session;
@@ -41,7 +41,8 @@ public class DebugClient implements MessageListener
             Destination queueS = (Destination) context.lookup("myQueueLookup");
             System.out.println((char)27+"[36m rece queue: "+queueR.toString());
             System.out.println((char)27+"[36m send queue: "+queueS.toString());
-            
+
+            System.out.println(USER + PASSWORD);
             connection = factory.createConnection(USER, PASSWORD);
             //connection.setExceptionListener(new MyExceptionListener());
             connection.start();
