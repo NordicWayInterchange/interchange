@@ -19,11 +19,12 @@ public class IxnMessageTest {
     private final long DEFAULT_TTL = 86_400_000L;
     private final long MAX_TTL = 6_911_200_000L;
     private IxnMessage message = mock(IxnMessage.class);
+    private long currentTime = System.currentTimeMillis();
 
 
     @Test
     public void negativeExpirationTimeIsSetToDefaultExpiration(){
-        long currentTime = System.currentTimeMillis();
+
 
         List<String> what = Arrays.asList("Obstruction", "Works");
         IxnMessage testMessage = new IxnMessage("Volvo",
@@ -40,8 +41,6 @@ public class IxnMessageTest {
 
     @Test
     public void tooBigExpiratioNTimeIsSetToMaxExpiration(){
-        long currentTime = System.currentTimeMillis();
-
         List<String> what = Arrays.asList("Obstruction", "Works");
         IxnMessage testMessage = new IxnMessage("Volvo",
                 "1234",
@@ -57,8 +56,6 @@ public class IxnMessageTest {
 
     @Test
     public void validExpirationTimeIsKept(){
-        long currentTime = System.currentTimeMillis();
-
         List<String> what = Arrays.asList("Obstruction", "Works");
         IxnMessage testMessage = new IxnMessage("Volvo",
                 "1234",
