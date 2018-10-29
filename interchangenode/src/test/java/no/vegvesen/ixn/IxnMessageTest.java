@@ -38,11 +38,11 @@ public class IxnMessageTest {
     }
 
     @Test
-    public void tooBigExpiratioNTimeIsSetToMaxExpiration(){
+    public void tooBigExpirationTimeIsSetToMaxExpiration(){
         List<String> what = Arrays.asList("Obstruction", "Works");
         IxnMessage testMessage = new IxnMessage("Volvo",
                 "1234",
-                (6_911_200_100L + currentTime),
+                ((MAX_TTL+100) + currentTime),
                 currentTime,
                 10.0f,
                 63.0f,
@@ -57,14 +57,14 @@ public class IxnMessageTest {
         List<String> what = Arrays.asList("Obstruction", "Works");
         IxnMessage testMessage = new IxnMessage("Volvo",
                 "1234",
-                (6_911_100_00L + currentTime),
+                ((MAX_TTL-100) + currentTime),
                 currentTime,
                 10.0f,
                 63.0f,
                 what,
                 "This is a message");
 
-        Assert.assertEquals((6_911_100_00L + currentTime), testMessage.getExpiration());
+        Assert.assertEquals(((MAX_TTL-100) + currentTime), testMessage.getExpiration());
     }
 
     @Test

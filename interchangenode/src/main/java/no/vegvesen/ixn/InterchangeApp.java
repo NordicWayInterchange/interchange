@@ -14,7 +14,6 @@ import org.springframework.jms.annotation.JmsListener;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import java.util.Arrays;
 import java.util.List;
 
 import static no.vegvesen.ixn.MessageProperties.*;
