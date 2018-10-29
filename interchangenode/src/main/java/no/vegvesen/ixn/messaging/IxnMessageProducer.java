@@ -50,7 +50,7 @@ public class IxnMessageProducer {
 					outgoingMessage.setStringProperty(USERID, message.getUserID());
 					outgoingMessage.setStringProperty(WHERE, country);
 					outgoingMessage.setStringProperty(WHAT, situationRecordType);
-					outgoingMessage.setJMSExpiration(message.getTtl());
+					outgoingMessage.setJMSExpiration(message.getExpiration());
 					return outgoingMessage;
 				});
 			}

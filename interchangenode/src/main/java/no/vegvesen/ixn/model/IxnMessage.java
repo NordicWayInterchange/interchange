@@ -9,9 +9,11 @@ import java.util.List;
 import static no.vegvesen.ixn.MessageProperties.*;
 
 public class IxnMessage {
+    private final long DEFAULT_TTL = 86_400_000l;
+    private final long MAX_TTL = 6_911_200_000l;
     private final String who;
     private final String userID;
-    private long ttl;
+    private long expiration;
     private final float lat;
     private final float lon;
     private final List<String> what;
@@ -28,14 +30,14 @@ public class IxnMessage {
                 textMessage.getText());
     }
 
-    public IxnMessage(String who, String userID, long ttl, float lat, float lon, List<String> what, String body){
+    public IxnMessage(String who, String userID, long expiration, float lat, float lon, List<String> what, String body){
         this.who = who;
         this.userID = userID;
         this.lat = lat;
         this.lon = lon;
         this.body = body;
         this.what = what;
-        setTtl(ttl);
+        setExpiration(expiration);
     }
 
     public String getWho() {
@@ -46,8 +48,8 @@ public class IxnMessage {
         return userID;
     }
 
-    public long getTtl(){
-        return ttl;
+    public long getExpiration(){
+        return expiration;
     }
 
     public float getLat() {
@@ -80,24 +82,26 @@ public class IxnMessage {
         this.countries = countries;
     }
 
-    private void setTtl(long ttl){
-        this.ttl = checkTtl(ttl);
+    private void setExpiration(long expiration){
+        this.expiration = checkExpiration(expiration);
     }
 
     public static List<String> parseWhat(String what){
         return Arrays.asList(what.split("\\s*,\\s*"));
     }
 
-    public static long checkTtl(long ttl){
-        if(ttl <= 0){
-            // ttl is absent or illegal - setting to default ttl (1 day)
-            return 86_400_000l;
-        }else if(ttl > 6_911_200_000l){
-            // ttl is too high, setting to maximum ttl (8 days)
-            return 6_911_200_000l;
+    private long checkExpiration(long expiration){
+        long currentTime = System.currentTimeMillis();
+
+        if(expiration <= 0){
+            // expiration is absent or illegal - setting to default ttl (1 day)
+            return (DEFAULT_TTL + currentTime);
+        }else if(expiration > (MAX_TTL + currentTime)){
+            // expiration is too high, setting to maximum ttl (8 days)
+            return (MAX_TTL + currentTime);
         }else{
-            // ttl is in the valid range (more than 0, less than 8 days)
-            return ttl;
+            // expiration is in the valid range (more than 0, less than 8 days)
+            return expiration;
         }
     }
 
