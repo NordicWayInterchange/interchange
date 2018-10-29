@@ -115,7 +115,10 @@
                             <images>
                                 <image>
                                     <!-- TODO: point to existing docker-compose catalogue -->
-                                    <name>postgis_fredag</name>
+                                    <name>postgis</name>
+                                    <build>
+                                        <dockerFileDir>postgis</dockerFileDir>
+                                    </build>
                                     <run>
                                         <ports>
                                             <port>5432:5432</port>
