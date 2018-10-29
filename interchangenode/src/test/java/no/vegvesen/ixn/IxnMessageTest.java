@@ -24,8 +24,6 @@ public class IxnMessageTest {
 
     @Test
     public void negativeExpirationTimeIsSetToDefaultExpiration(){
-
-
         List<String> what = Arrays.asList("Obstruction", "Works");
         IxnMessage testMessage = new IxnMessage("Volvo",
                 "1234",
