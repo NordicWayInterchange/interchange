@@ -86,7 +86,7 @@ public class InterchangeApp{
 			producer.sendMessage(DLQUEUE, message);
 		}else if(!message.hasWhat()){
 			// Message does not have any situation records
-			logger.warn("Sending bad message to dead letter queue. 'where1' not set.");
+			logger.warn("Sending bad message to dead letter queue. 'what' not set.");
 			producer.sendMessage(DLQUEUE, message);
 		} else{
 			logger.debug("Sending valid message to test-out.");
