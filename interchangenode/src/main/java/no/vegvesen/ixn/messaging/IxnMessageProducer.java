@@ -17,11 +17,13 @@
 package no.vegvesen.ixn.messaging;
 
 import no.vegvesen.ixn.model.IxnMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.jms.*;
+import javax.jms.TextMessage;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 
@@ -30,6 +32,7 @@ public class IxnMessageProducer {
 
 	private final JmsTemplate jmsTemplate;
 
+	private static Logger logger = LoggerFactory.getLogger(IxnMessageProducer.class);
 
 	@Autowired
 	public IxnMessageProducer(JmsTemplate jmsTemplate) {
@@ -37,9 +40,9 @@ public class IxnMessageProducer {
 	}
 
 	// Duplicates message for each country and situation record type.
-	public void sendMessage(String destination, final IxnMessage message){
-		for(String country : message.getCountries()){
-			for(String situationRecordType : message.getWhat()){
+	public void sendMessage(String destination, final IxnMessage message) {
+		for (String country : message.getCountries()) {
+			for (String situationRecordType : message.getWhat()) {
 
 				this.jmsTemplate.send(destination, session -> {
 
@@ -51,16 +54,22 @@ public class IxnMessageProducer {
 					outgoingMessage.setStringProperty(WHERE, country);
 					outgoingMessage.setStringProperty(WHAT, situationRecordType);
 					outgoingMessage.setJMSExpiration(message.getExpiration());
+					outgoingMessage.setText(message.getBody());
+					logger.debug("sending lon {} lat {} who {} userID {}  what {} body {}",
+							message.getLon(),
+							message.getLat(),
+							message.getWho(),
+							message.getUserID(),
+							message.getWhat(),
+							message.getBody());
 					return outgoingMessage;
 				});
 			}
 		}
-    }
+	}
 
-    public void sendMessage(String destination, final TextMessage textMessage){
-		this.jmsTemplate.send(destination, session -> {
-			return textMessage;
-		});
+	public void sendMessage(String destination, final TextMessage textMessage) {
+		this.jmsTemplate.send(destination, session -> textMessage);
 	}
 
 }
