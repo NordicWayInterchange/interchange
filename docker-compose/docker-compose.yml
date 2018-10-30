@@ -7,12 +7,18 @@ services:
       - POSTGRES_PASSWORD=geolookup
       - POSTGRES_DB=geolookup
     container_name: postgis
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "geolookup"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
     - 5432:5432/tcp
     volumes:
       - ./postgis_logs:/var/log/postgresql
     networks:
       - interchange
+
 
 
   filebeat_postgis:
@@ -28,6 +34,11 @@ services:
   qpid:
     build: ./qpid
     container_name: qpid
+    healthcheck:
+      test: ["CMD", "curl", "-I", "localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
     - ./qpid_logs:/var/qpid/log
     ports:
