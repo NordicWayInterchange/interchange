@@ -11,7 +11,7 @@ import javax.jms.TextMessage;
 @Component
 public class TestIxnMessageConsumer {
 
-	@JmsListener(destination = "test-out")
+	@JmsListener(destination = "${ixn.queue.out.name}")
 	public void receiveMessage(TextMessage textMessage) throws JMSException {
 		System.out.println("timestamp:    " + textMessage.getJMSTimestamp());
 		System.out.println("deliveryTime: " + textMessage.getJMSDeliveryTime());
