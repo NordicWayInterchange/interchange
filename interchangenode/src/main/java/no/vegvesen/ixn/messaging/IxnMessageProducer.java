@@ -41,8 +41,11 @@ public class IxnMessageProducer {
 
 	// Duplicates message for each country and situation record type.
 	public void sendMessage(String destination, final IxnMessage message) {
+
 		for (String country : message.getCountries()) {
 			for (String situationRecordType : message.getWhat()) {
+
+				logger.debug("*** Sending message ***");
 
 				this.jmsTemplate.send(destination, session -> {
 
@@ -55,12 +58,13 @@ public class IxnMessageProducer {
 					outgoingMessage.setStringProperty(WHAT, situationRecordType);
 					outgoingMessage.setJMSExpiration(message.getExpiration());
 					outgoingMessage.setText(message.getBody());
-					logger.debug("sending lon {} lat {} who {} userID {}  what {} body {}",
+					logger.debug("sending lon: {} lat: {} who: {} userID: {} country:  {} what: {} body: {}",
 							message.getLon(),
 							message.getLat(),
 							message.getWho(),
 							message.getUserID(),
-							message.getWhat(),
+							country,
+							situationRecordType,
 							message.getBody());
 					return outgoingMessage;
 				});

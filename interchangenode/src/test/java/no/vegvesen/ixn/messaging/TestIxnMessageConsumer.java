@@ -7,11 +7,12 @@ import org.springframework.stereotype.Component;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
-@EnableJms
+//@EnableJms
 @Component
 public class TestIxnMessageConsumer {
 
-	@JmsListener(destination = "${ixn.queue.out.name}")
+
+	//@JmsListener(destination = "${ixn.queue.out.name}")
 	public void receiveMessage(TextMessage textMessage) throws JMSException {
 		System.out.println("timestamp:    " + textMessage.getJMSTimestamp());
 		System.out.println("deliveryTime: " + textMessage.getJMSDeliveryTime());
@@ -19,4 +20,5 @@ public class TestIxnMessageConsumer {
 		System.out.println("now         : " + now);
 		System.out.println("latency : " + (now - textMessage.getJMSDeliveryTime()));
 	}
+
 }
