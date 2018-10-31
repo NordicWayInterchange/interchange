@@ -5,7 +5,15 @@ import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.DeliveryMode;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.io.BufferedReader;
@@ -69,10 +77,7 @@ public class DebugClient implements MessageListener
 		{	
 			
 			msg.acknowledge();
-			//System.out.println("type: "+msg.getClass().getName());
-			//JmsBytesMessage bm = (JmsBytesMessage)msg;
-			//JmsTextMessage bm = (JmsTextMessage)msg;
-			
+
 			
 			int delay = -1;
 			if(msg.getStringProperty("when") != null) 
@@ -120,12 +125,7 @@ public class DebugClient implements MessageListener
 			System.out.println((char)27+"[1;32m when: "+msg.getStringProperty("when")+"\n");
 	        
 	        System.out.print("\t"+(char)27+"[37m");
-			/*for (int i = 0; i < bm.getBodyLength(); i++)
-			{
-				char c = (char)bm.readByte();
-				if(c == '\n') System.out.print(c+"\t");
-				else System.out.print(c);
-			}*/
+
 	        try
 	        {
 	        	System.out.println(((JmsTextMessage)msg).getText());
@@ -146,7 +146,7 @@ public class DebugClient implements MessageListener
         catch (Exception e)
 		{
 			System.err.println(e.getMessage());
-			//System.exit(1);
+
 		}
 	}
 	
@@ -159,27 +159,18 @@ public class DebugClient implements MessageListener
 	{
 		try
 		{
-			JmsTextMessage message = (JmsTextMessage) session.createTextMessage(msg);//new String(msg.getBytes(), StandardCharsets.UTF_8)+"");
-			//JmsBytesMessage message = (JmsBytesMessage) session.createBytesMessage();
-			//message.writeBytes(msg.getBytes());
-			
-			//message.getFacade().setType("text/plain");
+			JmsTextMessage message = (JmsTextMessage) session.createTextMessage(msg);
+
 			message.getFacade().setUserId(USER);
 			
-			/*String testmsg = "";
-			for(int i = 0; i<1000; i++)
-			{
-				testmsg+=i+"";
-			}*/
-			
-	         message.setStringProperty("who", "Norwegian Public Roads Administration");//"Norwegian Public Roads Authority");
+
+	         message.setStringProperty("who", "Norwegian Public Roads Administration");
 	         message.setStringProperty("how", "Datex2");
 	         message.setStringProperty("what", "Conditions");
 	         message.setStringProperty("lat", "63.0");
 	         message.setStringProperty("lon", "10.0");
 	         message.setStringProperty("where1", where);
 	         message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-	         //message.setStringProperty("body", testmsg);
 	         
 	         
 	         System.out.println((char)27+"[1;33m sending message");
@@ -231,6 +222,7 @@ public class DebugClient implements MessageListener
 	            {
 	            	c.sendMessage(s.substring(s.indexOf(" ")));
 	            }
+	            //example: d onramp thisismymessage
 	            else if(s.startsWith("d"))
 	            {
 	            	int firstSpace = s.indexOf(" ");
@@ -244,28 +236,35 @@ public class DebugClient implements MessageListener
 	            }
 	            else if(s.startsWith("f "))
 	            {
-	            	FileInputStream is = new FileInputStream(s.substring(s.indexOf(" ")).trim());
-	            	InputStreamReader isr = new InputStreamReader(is, "UTF-8");
-	            	
-	            	try(BufferedReader br = new BufferedReader(isr)) {
-	            	    StringBuilder sb = new StringBuilder();
-	            	    String line = br.readLine();
-
-	            	    while (line != null) {
-	            	        sb.append(line);
-	            	        sb.append(System.lineSeparator());
-	            	        line = br.readLine();
-	            	    }
-	            	    String everything = sb.toString();
-	            	    
-	            	    c.sendMessage(everything);
-	            	}
+					String filename = s.substring(s.indexOf(" ")).trim();
+					String everything = readFile(filename);
+					c.sendMessage(everything);
 	            }
             } catch (IOException e)
 			{
 				e.printStackTrace();
 			}
         }
+	}
+
+	private static String readFile(String filename) throws IOException {
+		FileInputStream is = new FileInputStream(filename);
+		InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+
+		String everything;
+		try(BufferedReader br = new BufferedReader(isr)) {
+			StringBuilder sb = new StringBuilder();
+			String line = br.readLine();
+
+			while (line != null) {
+				sb.append(line);
+				sb.append(System.lineSeparator());
+				line = br.readLine();
+			}
+			everything = sb.toString();
+
+		}
+		return everything;
 	}
 
 

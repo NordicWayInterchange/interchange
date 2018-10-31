@@ -38,7 +38,7 @@ public class InterchangeApp{
 	}
 
 	public boolean isValid(TextMessage textMessage){
-		logger.debug("Validating message.");
+		logger.info("Validating message.");
 
 		try {
 			float lon = textMessage.getFloatProperty(LON);
@@ -47,7 +47,7 @@ public class InterchangeApp{
 			String userID = textMessage.getStringProperty(USERID);
 			String body = textMessage.getText();
 			List<String> what = IxnMessage.parseWhat(textMessage.getStringProperty(WHAT));
-			logger.debug("sending lon {} lat {} who {} userID {}  what {} body {}", lon, lat, who, userID, what, body);
+			logger.info("sending lon {} lat {} who {} userID {}  what {} body {}", lon, lat, who, userID, what, body);
 			return (lon != 0 && lat != 0 && who != null && userID != null && body != null && what.size() != 0);
 		}catch(JMSException jmse){
 			logger.error("Failed to get message property from TextMessage.", jmse);
@@ -74,11 +74,11 @@ public class InterchangeApp{
 	}
 
 	void handleOneMessage(IxnMessage message){
-		logger.debug("handling one message body: {}", message.getBody());
+		logger.info("handling one message body: {}", message.getBody());
 
 		List<String> countries = geoLookup.getCountries(message.getLat(), message.getLon());
 		message.setCountries(countries);
-		logger.debug("Message has countries : {} ", countries);
+		logger.info("Message has countries : {} ", countries);
 
 		if(!message.hasCountries()){
 			// Message does not have any countries
@@ -89,7 +89,7 @@ public class InterchangeApp{
 			logger.warn("Sending bad message to dead letter queue. 'what' not set.");
 			producer.sendMessage(DLQUEUE, message);
 		} else{
-			logger.debug("Sending valid message to test-out.");
+			logger.info("Sending valid message to test-out.");
 			producer.sendMessage(TEST_OUT, message);
 		}
 	}
