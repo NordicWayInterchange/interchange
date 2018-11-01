@@ -68,6 +68,20 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -79,6 +93,78 @@
                     <execution>
                         <goals>
                             <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.27.2</version>
+
+                <configuration>
+                    <images>
+                        <image>
+                            <!-- TODO: point to existing docker-compose catalogue -->
+                            <alias>postgis</alias>
+                            <name>postgis</name>
+                            <build>
+                                <dockerFileDir>postgis</dockerFileDir>
+                            </build>
+
+                            <run>
+                                <wait>
+                                    <healthy>true</healthy> <!-- waits for container to become healthy-->
+                                    <time>60000</time>      <!-- maximum wait time of 1 minute-->
+                                </wait>
+                                <ports>
+                                    <port>5432:5432</port>
+                                </ports>
+                                <env>
+                                    <POSTGRES_USER>geolookup</POSTGRES_USER>
+                                    <POSTGRES_PASSWORD>geolookup</POSTGRES_PASSWORD>
+                                    <POSTGRES_DB>geolookup</POSTGRES_DB>
+                                </env>
+
+                            </run>
+                        </image>
+                        <image>
+                            <!-- TODO: point to existing docker-compose catalogue -->
+                            <name>qpid</name>
+                            <build>
+                                <dockerFileDir>qpid</dockerFileDir>
+                            </build>
+                            <run>
+                                <ports>
+                                    <port>5672:5672</port>
+                                </ports>
+                                <wait>
+                                    <healthy>true</healthy>
+                                    <time>60000</time>
+                                </wait>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+
+
+                <executions>
+                    <execution>
+                        <id>start</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>stop</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
                         </goals>
                     </execution>
                 </executions>
