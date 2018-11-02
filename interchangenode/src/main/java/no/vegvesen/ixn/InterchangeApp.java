@@ -18,6 +18,7 @@ import java.util.List;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 
+@SuppressWarnings("WeakerAccess")
 @SpringBootApplication
 @EnableJms
 public class InterchangeApp{
@@ -46,7 +47,7 @@ public class InterchangeApp{
 			String userID = textMessage.getStringProperty(USERID);
 			String body = textMessage.getText();
 			List<String> what = IxnMessage.parseWhat(textMessage.getStringProperty(WHAT));
-
+			logger.debug("sending lon {} lat {} who {} userID {}  what {} body {}", lon, lat, who, userID, what, body);
 			return (lon != 0 && lat != 0 && who != null && userID != null && body != null && what.size() != 0);
 		}catch(JMSException jmse){
 			logger.error("Failed to get message property from TextMessage.", jmse);
