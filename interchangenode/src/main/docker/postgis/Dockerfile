@@ -9,3 +9,7 @@ RUN chmod go+r /etc/postgresql/postgresql.conf
 # setting Postgresql config file to our custom conf file.
 CMD ["-c", "config_file=/etc/postgresql/postgresql.conf"]
 
+# Check if database is ready
+HEALTHCHECK --interval=3s --timeout=3s --retries=7 \
+    CMD pg_isready -U geolookup
+

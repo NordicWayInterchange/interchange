@@ -53,17 +53,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-amqp</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.qpid</groupId>
-                    <artifactId>proton-j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 
     <build>
@@ -108,10 +97,12 @@
                     <images>
                         <image>
                             <!-- TODO: point to existing docker-compose catalogue -->
+                            <alias>postgis</alias>
                             <name>postgis</name>
                             <build>
                                 <dockerFileDir>postgis</dockerFileDir>
                             </build>
+
                             <run>
                                 <ports>
                                     <port>5432:5432</port>
@@ -122,7 +113,7 @@
                                     <POSTGRES_DB>geolookup</POSTGRES_DB>
                                 </env>
                                 <wait>
-                                    <time>12000</time> <!--erstatte av healthcheck i docker-images-->
+                                    <time>15000</time>
                                 </wait>
                             </run>
                         </image>
@@ -135,9 +126,11 @@
                             <run>
                                 <ports>
                                     <port>5672:5672</port>
+                                    <port>8080:8080</port>
                                 </ports>
                                 <wait>
-                                    <time>4000</time> <!--erstatte av healthcheck i docker-images-->
+                                    <healthy>true</healthy>
+                                    <time>60000</time>
                                 </wait>
                             </run>
                         </image>
@@ -154,7 +147,7 @@
                             <goal>start</goal>
                         </goals>
                     </execution>
-
+                    <!-- rebase-mark -->
                     <execution>
                         <id>stop</id>
                         <phase>post-integration-test</phase>
