@@ -53,17 +53,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-amqp</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.qpid</groupId>
-                    <artifactId>proton-j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 
     <build>
@@ -115,10 +104,6 @@
                             </build>
 
                             <run>
-                                <wait>
-                                    <healthy>true</healthy> <!-- waits for container to become healthy-->
-                                    <time>60000</time>      <!-- maximum wait time of 1 minute-->
-                                </wait>
                                 <ports>
                                     <port>5432:5432</port>
                                 </ports>
@@ -127,7 +112,9 @@
                                     <POSTGRES_PASSWORD>geolookup</POSTGRES_PASSWORD>
                                     <POSTGRES_DB>geolookup</POSTGRES_DB>
                                 </env>
-
+                                <wait>
+                                    <time>15000</time>
+                                </wait>
                             </run>
                         </image>
                         <image>
