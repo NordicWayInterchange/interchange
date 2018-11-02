@@ -100,7 +100,7 @@
                             <alias>postgis</alias>
                             <name>postgis</name>
                             <build>
-                                <dockerFileDir>postgis</dockerFileDir>
+                                <dockerFileDir>${project.basedir}/src/test/docker/postgis</dockerFileDir>
                             </build>
 
                             <run>
@@ -121,7 +121,7 @@
                             <!-- TODO: point to existing docker-compose catalogue -->
                             <name>qpid</name>
                             <build>
-                                <dockerFileDir>qpid</dockerFileDir>
+                                <dockerFileDir>${project.basedir}/src/test/docker/qpid</dockerFileDir>
                             </build>
                             <run>
                                 <ports>
