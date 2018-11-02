@@ -1,7 +1,6 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.messaging.IxnMessageProducer;
-import no.vegvesen.ixn.model.IxnMessage;
+import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,16 +13,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collections;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class QpidIT {
 
+
     @Autowired
-    IxnMessageProducer producer;
+    TestOnrampMessageProducer producer;
 
     // These test require HTTP basic authentication to be enabled in the qpid broker
     // and that the qpid port 8080 is bound to localhost 8080.
@@ -69,40 +67,47 @@ public class QpidIT {
     }
 
 
-    public void sendMessageOneCountry(String queueName){
-
+    public void sendMessageOneCountry(){
         long systemTime = System.currentTimeMillis();
         long timeToLive = 3_600_000; // 5 hrs
         long expiration = systemTime+timeToLive;
 
-        IxnMessage message = new IxnMessage(
-                "The great traffic testers",
-                "quest",
-                expiration,
-                63.0f,
+        producer.sendMessage(63.0f,
                 10.0f,
-                Collections.singletonList("Obstruction"),
-                "Testing the sending of one message");
-        message.setCountries(Collections.singletonList("NO"));
-        producer.sendMessage(queueName, message);
+                "Statens Vegvesen",
+                "1234",
+                "Obstruction",
+                "Message with one country",
+                expiration);
     }
 
-    public void sendMessageTwoCountries(String queueName){
+    public void sendMessageTwoCountries(){
         long systemTime = System.currentTimeMillis();
         long timeToLive = 3_600_000;
         long expiration = systemTime+timeToLive;
 
-        IxnMessage message = new IxnMessage(
-                "The great traffic testers",
-                "quest",
-                expiration,
-                59.09f,
+        producer.sendMessage(59.09f,
                 11.25f,
-                Collections.singletonList("Obstruction"),
-                "Testing splitting of messages");
-        message.setCountries(Arrays.asList("NO", "SE"));
-        producer.sendMessage(queueName, message);
+                "Statens Vegvesen",
+                "1234",
+                "Obstruction",
+                "Message with two countries",
+                expiration);
+    }
 
+    public void sendBadMessage(){
+        long systemTime = System.currentTimeMillis();
+        long timeToLive = 3_600_000;
+        long expiration = systemTime+timeToLive;
+
+        // Missing 'who' gives invalid message.
+        producer.sendMessage(58f,
+                11f,
+                null,
+                "1234",
+                "Obstruction",
+                "Message with two countries",
+                expiration);
     }
 
 
@@ -135,7 +140,6 @@ public class QpidIT {
         int queueDepth = statistics.getInt("queueDepthMessages");
 
         return queueDepth;
-
     }
 
     @Before
@@ -146,27 +150,28 @@ public class QpidIT {
     }
 
     @Test
-    public void checkIfMessageSentToDlqueueGivesCorrectQueueDepthInQueue() throws Exception{
-        // Send one message to the queue
-        sendMessageOneCountry("onramp");
+    public void sendingOneMessageGivesQueueDepthOfOne() throws Exception{
+        sendMessageOneCountry();
         Thread.sleep(2*1000);
-
         // Expecting 1 message on the queue if 1 message is sent.
         Assert.assertEquals(1, checkQueueDepth("test-out"));
     }
 
 
-    /*
-    Denne testen klarer av en eller annen rar grunn å spinne opp to instanser av IxnMessageProducer,
-    noe som resulterer i fire meldinger sendt til test-out i stedet for to. Disse testene burde endres
-    til å inkludere en refaktorert debug klient.
-     */
     @Test
-    public void checkDulicationOfMessageWithTwoCountries() throws Exception{
-        sendMessageTwoCountries("onramp");
+    public void messageWithTwoCountriesGivesQueueDepthOfTwo() throws Exception{
+        sendMessageTwoCountries();
         Thread.sleep(2*1000);
-
+        // Expecting two messages on test out because message is split.
         Assert.assertEquals(2, checkQueueDepth("test-out") );
+    }
+
+    @Test
+    public void badMessageGoesDoDeadLetterQueue() throws Exception{
+        sendBadMessage();
+        Thread.sleep(2*1000);
+        // Expecting one message on dlqueue because message is invalid.
+        Assert.assertEquals(1, checkQueueDepth("dlqueue"));
     }
 
 
