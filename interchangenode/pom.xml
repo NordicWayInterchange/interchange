@@ -126,6 +126,7 @@
                             <run>
                                 <ports>
                                     <port>5672:5672</port>
+                                    <port>8080:8080</port>
                                 </ports>
                                 <wait>
                                     <healthy>true</healthy>
