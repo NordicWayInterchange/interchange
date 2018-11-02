@@ -13,7 +13,3 @@ RUN chmod u+x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 EXPOSE 5672 8080
-
-# Check if qpid is reachable.
-HEALTHCHECK --interval=3s --timeout=3s --retries=7 \
-    CMD curl -I localhost:8080

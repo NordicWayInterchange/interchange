@@ -70,19 +70,8 @@
   } ],
   "plugins" : [ {
     "id" : "b9cbc36a-2b88-4fd7-abcc-d1f91b275e87",
-    "name" : "httpManagement",
     "type" : "MANAGEMENT-HTTP",
-    "compressResponses" : false,
-    "corsAllowCredentials" : true,
-    "corsAllowMethods" : [ ],
-    "httpBasicAuthenticationEnabled" : true,
-    "httpSaslAuthenticationEnabled" : true,
-    "httpsBasicAuthenticationEnabled" : true,
-    "httpsSaslAuthenticationEnabled" : true,
-    "lastUpdatedBy" : "admin",
-    "lastUpdatedTime" : 1541156225797,
-    "createdBy" : null,
-    "createdTime" : 1541156196709
+    "name" : "httpManagement"
   } ],
   "ports" : [ {
     "id" : "0af80db2-3083-45d1-b26c-7c03fc962122",
