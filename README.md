@@ -307,10 +307,7 @@ Click ``Create index pattern`` to create the index pattern.
 ---------------
 
 ### TODO
-
- * network setup
  * pipeline configs.
- * Remove binding of Elasticsearch container port 9200 to localhost.
  * Logs from Interchange app to elastic stack
 
 # Using Windows?
