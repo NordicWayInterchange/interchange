@@ -23,8 +23,8 @@ import static no.vegvesen.ixn.MessageProperties.*;
 @EnableJms
 public class InterchangeApp{
 	public static final String DLQUEUE = "dlqueue";
-	public static final String TEST_OUT = "test-out";
-	private static Logger logger = LoggerFactory.getLogger(InterchangeApp.class);
+	public static final String NWEXCHANGE = "nwEx";
+	private static Logger logger =LoggerFactory.getLogger(InterchangeApp.class);
 	private final IxnMessageProducer producer;
 	private final GeoLookup geoLookup;
 
@@ -90,7 +90,7 @@ public class InterchangeApp{
 			producer.sendMessage(DLQUEUE, message);
 		} else{
 			logger.info("Sending valid message to test-out.");
-			producer.sendMessage(TEST_OUT, message);
+			producer.sendMessage(NWEXCHANGE, message);
 		}
 	}
 

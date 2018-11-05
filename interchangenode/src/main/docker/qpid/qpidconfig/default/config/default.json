@@ -29,7 +29,36 @@
     "type" : "topic",
     "lastUpdatedTime" : 1539081427434,
     "createdTime" : 1539081427434
-  } ]
+  }, {
+    "id" : "69c6e44d-284a-4ea1-9eb4-616edb5b5d7c",
+    "name" : "nwEx",
+    "type" : "headers",
+    "durable" : true,
+    "durableBindings" : [ {
+      "arguments" : {
+        "x-filter-jms-selector" : "where1='NO'"
+      },
+      "bindingKey" : "where1",
+      "destination" : "NO-out"
+    }, {
+      "arguments" : {
+        "x-filter-jms-selector" : "where1 LIKE '%'"
+      },
+      "bindingKey" : "where1",
+      "destination" : "test-out"
+    }, {
+      "arguments" : {
+        "x-filter-jms-selector" : "where1='NO' AND what='Obstruction'"
+      },
+      "bindingKey" : "where1, what",
+      "destination" : "NO-Obstruction"
+    }, {
+      "arguments" : {
+        "x-filter-jms-selector" : "where1='SE'"
+      },
+      "bindingKey" : "where1",
+      "destination" : "SE-out"
+      } ] } ]
   ,
   "queues" : [ {
     "id" : "2783f28f-09af-4a7a-9efb-27682fe3224e",
@@ -43,6 +72,17 @@
     "createdBy" : "admin",
     "createdTime" : 1538547045800
   }, {
+    "id" : "84da1fe8-d509-4932-939e-9627e6942ee3",
+    "name" : "test-out",
+    "type" : "standard",
+    "durable" : true,
+    "holdOnPublishEnabled" : false,
+    "owner" : null,
+    "lastUpdatedBy" : "admin",
+    "lastUpdatedTime" : 1541418586205,
+    "createdBy" : "admin",
+    "createdTime" : 1541418586205
+  }, {
     "id" : "76deccec-1506-4608-85d7-63501e8e628e",
     "name" : "dlqueue",
     "type" : "standard",
@@ -53,16 +93,38 @@
     "lastUpdatedTime" : 1540279628006,
     "createdBy" : "admin",
     "createdTime" : 1540279628006
+  }, {
+      "id" : "35a53062-1251-4d62-b1ce-e9dbb9952f13",
+      "name" : "NO-Obstruction",
+      "type" : "standard",
+      "durable" : true,
+      "holdOnPublishEnabled" : false,
+      "owner" : null,
+      "lastUpdatedBy" : "admin",
+      "lastUpdatedTime" : 1541410444811,
+      "createdBy" : "admin",
+      "createdTime" : 1541410444811
     }, {
-    "id" : "6dc5af84-c9e4-45e8-991b-fd71f86b72f7",
-    "name" : "test-out",
-    "type" : "standard",
-    "durable" : true,
-    "holdOnPublishEnabled" : false,
-    "owner" : null,
-    "lastUpdatedBy" : "admin",
-    "lastUpdatedTime" : 1538547055862,
-    "createdBy" : "admin",
-    "createdTime" : 1538547055862
-  } ]
+      "id" : "992c318a-2b9e-4dad-bd2f-4fbbfb716018",
+      "name" : "NO-out",
+      "type" : "standard",
+      "durable" : true,
+      "holdOnPublishEnabled" : false,
+      "owner" : null,
+      "lastUpdatedBy" : "admin",
+      "lastUpdatedTime" : 1541406227072,
+      "createdBy" : "admin",
+      "createdTime" : 1541406227072
+    }, {
+      "id" : "421117e0-e5cf-4f9d-937f-32830dbcafa7",
+      "name" : "SE-out",
+      "type" : "standard",
+      "durable" : true,
+      "holdOnPublishEnabled" : false,
+      "owner" : null,
+      "lastUpdatedBy" : "admin",
+      "lastUpdatedTime" : 1541407238320,
+      "createdBy" : "admin",
+      "createdTime" : 1541407238320
+    } ]
 }

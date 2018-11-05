@@ -13,8 +13,8 @@ import java.util.Collections;
 @SpringBootTest
 public class InterchangeAppIT {
 
-	//@Autowired
-	//TestIxnMessageConsumer consumer;
+	@Autowired
+	TestIxnMessageConsumer consumer;
 
 	@Autowired
 	IxnMessageProducer producer;

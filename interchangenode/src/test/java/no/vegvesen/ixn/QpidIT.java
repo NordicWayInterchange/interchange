@@ -66,7 +66,6 @@ public class QpidIT {
         }
     }
 
-
     public void sendMessageOneCountry(){
         long systemTime = System.currentTimeMillis();
         long timeToLive = 3_600_000; // 5 hrs
@@ -144,26 +143,36 @@ public class QpidIT {
 
     @Before
     public void before()throws Exception{
-        clearQueue("test-out");
+        clearQueue("NO-out");
+        clearQueue("NO-Obstruction");
+        clearQueue("SE-out");
         clearQueue("dlqueue");
         Thread.sleep(2*1000);
     }
 
     @Test
-    public void sendingOneMessageGivesQueueDepthOfOne() throws Exception{
-        sendMessageOneCountry();
+    public void messageToNorwayGoesToNorwayQueue() throws Exception{
+        sendMessageOneCountry(); // NO
         Thread.sleep(2*1000);
-        // Expecting 1 message on the queue if 1 message is sent.
-        Assert.assertEquals(1, checkQueueDepth("test-out"));
+        // The queue should have one message
+        Assert.assertEquals(1, checkQueueDepth("NO-out"));
     }
 
 
     @Test
-    public void messageWithTwoCountriesGivesQueueDepthOfTwo() throws Exception{
-        sendMessageTwoCountries();
+    public void messageWithTwoCountriesGoesToTwoQueues() throws Exception{
+        sendMessageTwoCountries(); // NO and SE
         Thread.sleep(2*1000);
-        // Expecting two messages on test out because message is split.
-        Assert.assertEquals(2, checkQueueDepth("test-out") );
+        // Each queue should have one message
+        Assert.assertEquals(1, checkQueueDepth("NO-out"));
+        Assert.assertEquals(1, checkQueueDepth("SE-out"));
+    }
+
+    @Test
+    public void messageWithCountryAndSituationGoesToRightQueue() throws Exception{
+        sendMessageOneCountry(); // NO and Obstruction
+        Thread.sleep(2*1000);
+        Assert.assertEquals(1, checkQueueDepth("NO-Obstruction"));
     }
 
     @Test
@@ -173,7 +182,4 @@ public class QpidIT {
         // Expecting one message on dlqueue because message is invalid.
         Assert.assertEquals(1, checkQueueDepth("dlqueue"));
     }
-
-
-
 }
