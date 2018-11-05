@@ -15,46 +15,6 @@ Run the container:
 docker run --rm -it -p 9200:9200 -p 9300:9300 logstash_image
 ```
 
-
-
-## Docker compose
-
-The ```docker-compose.yml``` describes the setup of
-five different docker images.
- * Postgis
-    * Holds the PostGIS database. Performs lookups and logs to a .
-    volume it shares with filebeat.
- * Filebeat
-    * Harvests logs from a volume it shares with postgis
-    and forwards them to logstash.
- * Logstash 
-    * Receives logs from filebeat. Parses them and sends them to 
-    elasticsearch
- * Elasticsearch
-    * Stores the logfiles
- * Kibana
-    * Visualizes the files in elasticsearch
-
-To build all five containers run : 
-
-```
-docker-compose build
-```
-
-This builds the images for all the containers.
-
-Run the images with:
-````
-docker-compose up -d
-````
-
-You now have five running containers. 
-
-## Networks
-The docker compose file defines two different networks. One network is defined
-for the containers dealing with the logging. This network is called elknet. 
-One network is defined for the application containers. This network is called interchange. 
-
 ## Logging service
 
 We use the Elastic Stack to store and query logs from the
