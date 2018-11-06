@@ -7,8 +7,8 @@ COPY postgresql.conf /etc/postgresql/postgresql.conf
 RUN chmod go+r /etc/postgresql/postgresql.conf
 
 # Installing VIM for debug purposes.
-RUN apt-get update -q\
-&& apt-get install -y -q vim
+#RUN apt-get update -q\
+#&& apt-get install -y -q vim
 
 # setting Postgresql config file to our custom conf file.
 CMD ["-c", "config_file=/etc/postgresql/postgresql.conf"]
