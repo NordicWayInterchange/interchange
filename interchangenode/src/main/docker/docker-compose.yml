@@ -19,8 +19,6 @@ services:
     networks:
       - interchange
 
-
-
   filebeat_postgis:
     build: ./filebeat
     container_name: filebeat_postgis
@@ -95,7 +93,6 @@ services:
       - 9300:9300
     networks:
       - elknet
-
 
   kibana:
     image: kibana:${TAG}
