@@ -118,10 +118,9 @@
                             </run>
                         </image>
                         <image>
-                            <!-- TODO: point to existing docker-compose catalogue -->
                             <name>qpid</name>
                             <build>
-                                <dockerFileDir>${project.basedir}/src/test/docker/qpid</dockerFileDir>
+                                <dockerFileDir>${project.basedir}/src/main/docker/qpid</dockerFileDir>
                             </build>
                             <run>
                                 <ports>
