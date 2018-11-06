@@ -65,7 +65,7 @@ public class InterchangeAppTest {
         when(message.hasWhat()).thenReturn(true);
 
         app.handleOneMessage(message);
-        verify(producer, times(1)).sendMessage(eq("test-out"), any(IxnMessage.class));
+        verify(producer, times(1)).sendMessage(eq("nwEx"), any(IxnMessage.class));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class InterchangeAppTest {
         when(message.hasCountries()).thenReturn(false);
 
         app.handleOneMessage(message);
-        verify(producer, times(0)).sendMessage(eq("test-out"), any(IxnMessage.class));
+        verify(producer, times(0)).sendMessage(eq("nwEx"), any(IxnMessage.class));
     }
 
     @Test
