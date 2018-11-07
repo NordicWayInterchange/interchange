@@ -18,6 +18,7 @@ import java.util.Base64;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class QpidIT {
+    String HTTP_PORT = "63080";
 
 
     @Autowired
@@ -28,7 +29,7 @@ public class QpidIT {
 
     public void clearQueue(String queueName) throws Exception{
         // Emptying the queue
-        String url = "http://localhost:8080/api/latest/queue/default/default/" + queueName + "/clearQueue";
+        String url = "http://localhost:" + HTTP_PORT + "/api/latest/queue/default/default/" + queueName + "/clearQueue";
         URL sourceURL = new URL(url);
         HttpURLConnection source = (HttpURLConnection) sourceURL.openConnection();
 
@@ -114,7 +115,7 @@ public class QpidIT {
 
         // HOWTO: Using a variable in a string
         // Query the qpid REST api for queue depth
-        String url = ("http://localhost:8080/api/latest/queue/default/default/" + queueName);
+        String url = ("http://localhost:" + HTTP_PORT + "/api/latest/queue/default/default/" + queueName);
         URL sourceUrl = new URL(url);
         HttpURLConnection source = (HttpURLConnection) sourceUrl.openConnection();
 

@@ -105,7 +105,7 @@
 
                             <run>
                                 <ports>
-                                    <port>5432:5432</port>
+                                    <port>63432:5432</port>
                                 </ports>
                                 <env>
                                     <POSTGRES_USER>geolookup</POSTGRES_USER>
@@ -124,8 +124,8 @@
                             </build>
                             <run>
                                 <ports>
-                                    <port>5672:5672</port>
-                                    <port>8080:8080</port>
+                                    <port>63672:5672</port>
+                                    <port>63080:8080</port>
                                 </ports>
                                 <wait>
                                     <healthy>true</healthy>
