@@ -4,6 +4,7 @@ import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +19,17 @@ import java.util.Base64;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class QpidIT {
-    String HTTP_PORT = "63080";
-
+    private String HTTP_PORT = "63080";
 
     @Autowired
     TestOnrampMessageProducer producer;
 
-    // These test require HTTP basic authentication to be enabled in the qpid broker
+	@BeforeClass
+	public static void setUp() {
+		TestKeystoreHelper.useTestKeystore();
+	}
+
+	// These test require HTTP basic authentication to be enabled in the qpid broker
     // and that the qpid port 8080 is bound to localhost 8080.
 
     public void clearQueue(String queueName) throws Exception{
