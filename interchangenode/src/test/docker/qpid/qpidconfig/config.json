@@ -1,0 +1,178 @@
+{
+  "id" : "dac42e79-107b-454f-bb11-7b8a009148de",
+  "name" : "${broker.name}",
+  "modelVersion" : "7.0",
+  "authenticationproviders" : [ {
+    "id" : "5d0049aa-d96b-4246-9693-e033790c3a2b",
+    "name" : "clientCerts",
+    "type" : "External"
+    }, {
+    "id" : "42ea43b9-28ef-445d-a76f-9f57f0e7bd58",
+    "name" : "passwordFile",
+    "type" : "PlainPasswordFile",
+    "path" : "${qpid.work_dir}${file.separator}etc${file.separator}passwd"
+  } ],
+  "brokerloggers" : [ {
+    "id" : "97535c68-9472-49e4-8ec9-219a4a47975d",
+    "name" : "logfile",
+    "type" : "File",
+    "fileName" : "${qpid.work_dir}${file.separator}log${file.separator}qpid.log",
+    "brokerloginclusionrules" : [ {
+      "id" : "37edc3ab-7800-42ab-8cde-65f566dc1b5e",
+      "name" : "Operational",
+      "type" : "NameAndLevel",
+      "level" : "INFO",
+      "loggerName" : "qpid.message.*"
+    }, {
+      "id" : "e7db389c-e393-4aef-bf35-1010988c5f1b",
+      "name" : "Qpid",
+      "type" : "NameAndLevel",
+      "level" : "INFO",
+      "loggerName" : "org.apache.qpid.*"
+    }, {
+      "id" : "632e240e-4e13-4725-9aa5-333819c6a2a4",
+      "name" : "Root",
+      "type" : "NameAndLevel",
+      "level" : "WARN",
+      "loggerName" : "ROOT"
+    }, {
+      "id" : "cdff4e6b-8d26-484e-8e36-25ba76405c16",
+      "name" : "Statistics",
+      "type" : "NameAndLevel",
+      "level" : "INFO",
+      "loggerName" : "qpid.statistics.*"
+    } ]
+  }, {
+    "id" : "7e73074d-23da-462e-837e-9460dc6d3f6b",
+    "name" : "memory",
+    "type" : "Memory",
+    "brokerloginclusionrules" : [ {
+      "id" : "d2837a21-2226-4820-93d4-374f9d69cc30",
+      "name" : "Operational",
+      "type" : "NameAndLevel",
+      "level" : "INFO",
+      "loggerName" : "qpid.message.*"
+    }, {
+      "id" : "c6ea2d60-e440-4eb0-9a05-8f9708f885b3",
+      "name" : "Qpid",
+      "type" : "NameAndLevel",
+      "level" : "INFO",
+      "loggerName" : "org.apache.qpid.*"
+    }, {
+      "id" : "9110c559-f070-4c0e-a13f-780a5a68aa5f",
+      "name" : "Root",
+      "type" : "NameAndLevel",
+      "level" : "WARN",
+      "loggerName" : "ROOT"
+    }, {
+      "id" : "8403d2f7-49be-4f73-95bc-5027c0e49ef8",
+      "name" : "Statistics",
+      "type" : "NameAndLevel",
+      "level" : "INFO",
+      "loggerName" : "qpid.statistics.*"
+    } ]
+  } ],
+  "keystores" : [ {
+    "id" : "260f3787-88bc-4baf-baaf-e2644df21723",
+    "name" : "localhost",
+    "type" : "FileKeyStore",
+    "certificateAlias" : "1",
+    "keyStoreType" : "pkcs12",
+    "password" : "password",
+    "storeUrl" : "data:application/x-pkcs12;base64,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"
+  } ],
+  "truststores" : [ {
+    "id" : "59d7b8c0-b9b5-4392-bc4e-036ea2e2b592",
+    "name" : "truststore",
+    "type" : "FileTrustStore",
+    "exposedAsMessageSource" : false,
+    "password" : "password",
+    "peersOnly" : false,
+    "storeUrl" : "data:application/octet-stream;base64,/u3+7QAAAAIAAAABAAAAAgAJbG9jYWxob3N0AAABZuhideUABVguNTA5AAADijCCA4YwggJuAgkAotroY4s2t+EwDQYJKoZIhvcNAQEFBQAwgYQxCzAJBgNVBAYTAk5PMQ0wCwYDVQQIDARPc2xvMQ0wCwYDVQQHDARPc2xvMQ8wDQYDVQQKDAZCb3V2ZXQxDjAMBgNVBAsMBVRlY2gxMRIwEAYDVQQDDAlsb2NhbGhvc3QxIjAgBgkqhkiG9w0BCQEWE2lkYS5iZXJnZUBib3V2ZXQubm8wHhcNMTgxMTA2MDkyNDM0WhcNMTkxMTA2MDkyNDM0WjCBhDELMAkGA1UEBhMCTk8xDTALBgNVBAgMBE9zbG8xDTALBgNVBAcMBE9zbG8xDzANBgNVBAoMBkJvdXZldDEOMAwGA1UECwwFVGVjaDExEjAQBgNVBAMMCWxvY2FsaG9zdDEiMCAGCSqGSIb3DQEJARYTaWRhLmJlcmdlQGJvdXZldC5ubzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJmcWsDzjUWBVtR+QlvTrhePsHlVgyYnNC+IG1mprhzwmBin8B9llURoFsAsKSgQ6TJapq4PxEGaUFY8kYRS4U7mz0BEQQqKj2iQctsv2f2uubxWi3N0MNsqABnHohi7BDMpB5T/DqYnD22D1KpYD2HOn4ns1ItPIvVLF/aekQ65sov7SRINQxnUbI3p6vm/LRmTlemr1dj2mqx7kDiDUlbOsgkWa1HWovGhX7ESajqcXUHN1KKu6+v26dhXJ2glbMz0NqL4W0bly7IDNqfOU9HOjUtZ2z5SMv10tu7uBeJjHFEBfSfAgXOVFl8r7Xzz2VsUqBr8yBIrHHCFvhcjprsCAwEAATANBgkqhkiG9w0BAQUFAAOCAQEANMUHj4b/GoXqNWmY4f9oSp34I/oMnyAD6RlbuZ5Tf2amfanAjWZn/KxUGVI1/R07Beo1KRcD6rOebWht7gaoFDsU7XpPZfnwBUiw789yH+YGfDDQDnTW7aieNABL8936mA3dhXZgSB6tVCCMKt4ZBWYsaBTT9J63zWgSSZQtxUGUhCrEP8FEso4bscKhzTY0kGoA/UKMo7UPaSgMoaaLjw531GbQreNoF1iqTaavyDx7v3QhtFJIhfwFV2weBGcATW/MbQ9ZHMfd575HzST5/BpwFv2b65LouWzSlJvrDBTSUaerOo9j9jN6aQztu0POzjptHEaNDugBiNP8vqGgD5MyctIjCpWkrD4BW5iIC8mUaKZ+",
+    "trustAnchorValidityEnforced" : false,
+    "trustStoreType" : "jks"
+  } ],
+  "plugins" : [ {
+    "id" : "b9cbc36a-2b88-4fd7-abcc-d1f91b275e87",
+    "name" : "httpManagement",
+    "type" : "MANAGEMENT-HTTP",
+    "compressResponses" : false,
+    "corsAllowCredentials" : true,
+    "corsAllowMethods" : [ ],
+    "httpBasicAuthenticationEnabled" : true,
+    "httpSaslAuthenticationEnabled" : true,
+    "httpsBasicAuthenticationEnabled" : true,
+    "httpsSaslAuthenticationEnabled" : true,
+    "lastUpdatedBy" : "admin",
+    "lastUpdatedTime" : 1541156225797,
+    "createdBy" : null,
+    "createdTime" : 1541156196709
+  } ],
+  "ports" : [ {
+    "id" : "0af80db2-3083-45d1-b26c-7c03fc962122",
+    "name" : "AMQP",
+    "port" : "${qpid.amqp_port}",
+    "authenticationProvider" : "passwordFile",
+    "virtualhostaliases" : [ {
+      "id" : "d8d34f1a-1d3f-470b-b569-0390d8f033f6",
+      "name" : "defaultAlias",
+      "type" : "defaultAlias"
+    }, {
+      "id" : "94af6464-1b38-4af0-bf07-4e55fef475a3",
+      "name" : "hostnameAlias",
+      "type" : "hostnameAlias"
+    }, {
+      "id" : "1ab23cf8-9fd5-4521-90fa-1d722a8b8c18",
+      "name" : "nameAlias",
+      "type" : "nameAlias"
+    } ]
+  },
+  {
+      "id" : "0ed4c80a-0b85-4127-a18b-27cd36de3209",
+      "name" : "AMQPS",
+      "type" : "AMQP",
+      "authenticationProvider" : "clientCerts",
+      "bindingAddress" : "*",
+      "keyStore" : "localhost",
+      "needClientAuth" : true,
+      "port" : "5671",
+      "protocols" : [ "AMQP_0_10", "AMQP_0_8", "AMQP_0_9", "AMQP_0_9_1", "AMQP_1_0" ],
+      "transports" : [ "SSL", "TCP" ],
+      "trustStores" : [ "truststore" ],
+      "wantClientAuth" : false,
+      "virtualhostaliases" : [ {
+        "id" : "808ce951-048c-408e-9c52-7abeb1bccbb2",
+        "name" : "defaultAlias",
+        "type" : "defaultAlias",
+        "durable" : true
+      }, {
+        "id" : "f057b5cb-afdb-4e33-8c18-154c2bbe3569",
+        "name" : "hostnameAlias",
+        "type" : "hostnameAlias",
+        "durable" : true
+      }, {
+        "id" : "baa1e275-d98e-4e8e-9c64-208f3db70932",
+        "name" : "nameAlias",
+        "type" : "nameAlias",
+        "durable" : true
+      } ]
+    },
+    {
+    "id" : "27490ea5-0ffc-484a-8d5a-50ea7b6eca1b",
+    "name" : "HTTP",
+    "port" : "${qpid.http_port}",
+    "authenticationProvider" : "passwordFile",
+    "protocols" : [ "HTTP" ]
+  } ],
+  "virtualhostnodes" : [ {
+    "id" : "347482e4-d6cc-4520-a609-9a843e04f254",
+    "name" : "default",
+    "type" : "JSON",
+    "defaultVirtualHostNode" : "true",
+    "virtualHostInitialConfiguration" : "{}",
+    "lastUpdatedBy" : null,
+    "lastUpdatedTime" : 1539082324473,
+    "createdBy" : null,
+    "createdTime" : 1539082324070
+  } ]
+}

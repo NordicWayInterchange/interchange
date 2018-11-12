@@ -53,6 +53,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+            <version>4.1.28.Final</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -120,10 +125,11 @@
                         <image>
                             <name>qpid</name>
                             <build>
-                                <dockerFileDir>${project.basedir}/src/main/docker/qpid</dockerFileDir>
+                                <dockerFileDir>${project.basedir}/src/test/docker/qpid</dockerFileDir>
                             </build>
                             <run>
                                 <ports>
+                                    <port>63671:5671</port>
                                     <port>63672:5672</port>
                                     <port>63080:8080</port>
                                 </ports>

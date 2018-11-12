@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.messaging;
 
+import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.model.IxnMessage;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,12 @@ public class InterchangeAppIT {
 
 	@Autowired
 	IxnMessageProducer producer;
+
+
+	@BeforeClass
+	public static void setUp() {
+		TestKeystoreHelper.useTestKeystore();
+	}
 
 	@Test
 	public void sendValidMessage() {
