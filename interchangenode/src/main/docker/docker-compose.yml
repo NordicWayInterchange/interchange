@@ -14,112 +14,35 @@ services:
       retries: 5
     expose:
     - "5432"
-    volumes:
-      - ./postgis_logs:/var/log/postgresql
-    networks:
-      - interchange
 
-  filebeat_postgis:
-    build: ./filebeat
-    container_name: filebeat_postgis
-    volumes:
-      - ./postgis_logs:/var/log/logfiles:ro
-    networks:
-      - elknet
-    depends_on:
-      - logstash
-
-  qpid:
-    build: ./qpid
-    container_name: qpid
-    healthcheck:
-      test: ["CMD", "curl", "-I", "localhost:8080"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-    - ./qpid_logs:/var/qpid/log
-    ports:
-    - 8080:8080/tcp
+  qpid-cpp:
+    image: scholzj/qpid-cpp
+    container_name: qpid-cpp
+    hostname: qpid-cpp
+    environment:
+      - QPIDD_ADMIN_USERNAME=admin
+      - QPIDD_ADMIN_PASSWORD=admin
     expose:
     - "5672"
-    networks:
-      - interchange
 
-  filebeat_qpid:
-    build: ./filebeat
-    container_name: filebeat_qpid
-    volumes:
-      - ./qpid_logs:/var/log/logfiles:ro
-    networks:
-      - elknet
-    depends_on:
-      - logstash
+  qpid-gui:
+    image: scholzj/qpid-cpp-gui
+    container_name: qpid-gui
+    environment:
+      - QMF_GUI_ADMIN_USERNAME=admin
+      - QMF_GUI_ADMIN_PASSWORD=admin
+    ports:
+      - 8080:8080
+
+  proxy:
+    image: nginx:latest
+    expose: ["5672"]
+    volumes: ["./nginx.conf:/etc/nginx/nginx.conf"]
+    hostname: proxy
+    container_name: proxy
+    ports:
+      - 5672:5672
 
   interchangeapp:
     build: ./interchangeapp
     container_name: interchangeapp
-    volumes:
-      - ./interchange_logs:/var/interchange/log
-    depends_on:
-      - postgis
-      - qpid
-    networks:
-      - interchange
-
-  filebeat_interchange:
-    build: ./filebeat
-    container_name: filebeat_interchange
-    depends_on:
-      - logstash
-    networks:
-      - elknet
-    volumes:
-      - ./interchange_logs:/var/log/logfiles:ro
-
-  elasticsearch:
-    image: elasticsearch:${TAG}
-    container_name: elasticsearch
-    environment:
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - ./esdata:/usr/share/elasticsearch/data
-    expose:
-      - "9200"
-      - "9300"
-    networks:
-      - elknet
-
-  kibana:
-    image: kibana:${TAG}
-    container_name: kibana
-    depends_on:
-      - elasticsearch
-    ports:
-      - 5601:5601
-    networks:
-      - elknet
-
-  logstash:
-    build: ./logstash
-    container_name: logstash
-    depends_on:
-      - elasticsearch
-    volumes:
-    - ./logstash:/config-dir
-    command: logstash -f /config-dir/logstash.conf
-    expose:
-      - 5044
-    networks:
-      - elknet
-
-networks:
-  elknet:
-    driver: bridge
-  interchange:
-    driver: bridge
