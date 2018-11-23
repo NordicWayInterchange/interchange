@@ -24,8 +24,6 @@ public class DebugClient implements MessageListener {
 	private MessageProducer messageProducer;
 
 	void init(String url, String sendQueue, String receiveQueue) {
-		System.setProperty("javax.net.debug", "ssl:handshake");
-
 		try {
 			Hashtable<Object, Object> env = new Hashtable<>();
 			env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
@@ -44,9 +42,12 @@ public class DebugClient implements MessageListener {
 			System.out.println((char) 27 + "[36m rece queue: " + queueR.toString());
 			System.out.println((char) 27 + "[36m send queue: " + queueS.toString());
 
-			System.out.println(USER + PASSWORD);
-			connection = factory.createConnection(USER, PASSWORD);
-			//connection.setExceptionListener(new MyExceptionListener());
+			if (USER != null && USER.length() > 0) {
+				System.out.println(String.format("Basic auth %s/%s ", USER, PASSWORD));
+				connection = factory.createConnection(USER, PASSWORD);
+			} else {
+				connection = factory.createConnection();
+			}
 			connection.start();
 
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
