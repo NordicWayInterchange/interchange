@@ -17,8 +17,16 @@ import java.time.temporal.ChronoUnit;
 import java.util.Hashtable;
 
 public class DebugClient implements MessageListener {
+	private static final String GREEN = "[1;32m";
+	private static final String BROWN = "[1;33m";
+	private static final String BLACK = "[0m";
+	private static final String YELLOW = "[33m";
+	private static final String TURQUOISE = "[36m";
+	private static final String GREY = "[37m";
+
 	private static final String USER = System.getProperty("USER");
 	private static final String PASSWORD = System.getProperty("PASSWORD");
+
 	private Connection connection;
 	private Session session;
 	private MessageProducer messageProducer;
@@ -35,15 +43,15 @@ public class DebugClient implements MessageListener {
 			JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
 			factory.setPopulateJMSXUserID(true);
 
-			System.out.println("Connecting to: " + factory.getRemoteURI());
+			printWithColor(TURQUOISE, "Connecting to: " + factory.getRemoteURI());
 
 			Destination queueR = (Destination) context.lookup("receiveQueue");
 			Destination queueS = (Destination) context.lookup("sendQueue");
-			System.out.println((char) 27 + "[36m rece queue: " + queueR.toString());
-			System.out.println((char) 27 + "[36m send queue: " + queueS.toString());
+			printWithColor(TURQUOISE, " rece queue: " + queueR.toString());
+			printWithColor(TURQUOISE, " send queue: " + queueS.toString());
 
 			if (USER != null && USER.length() > 0) {
-				System.out.println(String.format("Basic auth %s/%s ", USER, PASSWORD));
+				printWithColor(TURQUOISE, String.format("Basic auth %s/%s ", USER, PASSWORD));
 				connection = factory.createConnection(USER, PASSWORD);
 			} else {
 				connection = factory.createConnection();
@@ -54,8 +62,7 @@ public class DebugClient implements MessageListener {
 
 			MessageConsumer messageConsumer = session.createConsumer(queueR);
 			messageProducer = session.createProducer(queueS);
-			System.out.println((char) 27 + "[33m Waiting for messages..");
-			//System.out.println((char)27+"[0m ");
+			printWithColor(YELLOW, " Waiting for messages..");
 			messageConsumer.setMessageListener(this);
 
 		} catch (Exception e) {
@@ -80,38 +87,36 @@ public class DebugClient implements MessageListener {
 
 			}
 
-			System.out.println((char) 27 + "[1;32m Got message from " + msg.getStringProperty("who") + " @ delay=" + delay + "ms:");
-			System.out.println((char) 27 + "[1;32m (Msg type: " + msg.getStringProperty("what") + ")\n");
-			System.out.println((char) 27 + "[1;32m Msg props:");
-			System.out.println((char) 27 + "[1;32m UserID:" + ((JmsMessage) msg).getFacade().getUserId());
-			System.out.println((char) 27 + "[1;32m Type:" + ((JmsMessage) msg).getFacade().getType());
-			System.out.println((char) 27 + "[1;32m Expiration:" + ((JmsMessage) msg).getFacade().getExpiration());
-			System.out.println((char) 27 + "[1;32m App props:");
-			System.out.println((char) 27 + "[1;32m who: " + msg.getStringProperty("who"));
-			System.out.println((char) 27 + "[1;32m how: " + msg.getStringProperty("how"));
-			System.out.println((char) 27 + "[1;32m what: " + msg.getStringProperty("what"));
+			printWithColor(GREEN, " Got message from " + msg.getStringProperty("who") + " @ delay=" + delay + "ms:");
+			printWithColor(GREEN, " (Msg type: " + msg.getStringProperty("what") + ")\n");
+			printWithColor(GREEN, " Msg props:");
+			printWithColor(GREEN, " UserID:" + ((JmsMessage) msg).getFacade().getUserId());
+			printWithColor(GREEN, " Type:" + ((JmsMessage) msg).getFacade().getType());
+			printWithColor(GREEN, " Expiration:" + ((JmsMessage) msg).getFacade().getExpiration());
+			printWithColor(GREEN, " App props:");
+			printWithColor(GREEN, " who: " + msg.getStringProperty("who"));
+			printWithColor(GREEN, " how: " + msg.getStringProperty("how"));
+			printWithColor(GREEN, " what: " + msg.getStringProperty("what"));
 			try {
-				System.out.println((char) 27 + "[1;32m lat: " + msg.getStringProperty("lat"));
-				System.out.println((char) 27 + "[1;32m lon: " + msg.getStringProperty("lon"));
+				printWithColor(GREEN, " lat: " +  msg.getStringProperty("lat"));
+				printWithColor(GREEN, " lon: " + msg.getStringProperty("lon"));
 			} catch (Exception e) {
 			}
 			try {
-				System.out.println((char) 27 + "[1;32m lat: " + msg.getDoubleProperty("lat"));
-				System.out.println((char) 27 + "[1;32m lon: " + msg.getDoubleProperty("lon"));
+				printWithColor(GREEN, " lat: " + msg.getDoubleProperty("lat"));
+				printWithColor(GREEN, " lon: " + msg.getDoubleProperty("lon"));
 			} catch (Exception e) {
 			}
 			try {
-				System.out.println((char) 27 + "[1;32m lat: " + msg.getFloatProperty("lat"));
-				System.out.println((char) 27 + "[1;32m lon: " + msg.getFloatProperty("lon"));
+				printWithColor(GREEN, " lat: " + msg.getFloatProperty("lat"));
+				printWithColor(GREEN, " lon: " + msg.getFloatProperty("lon"));
 			} catch (Exception e) {
 			}
-			System.out.println((char) 27 + "[1;32m where1: " + msg.getStringProperty("where1"));
-			System.out.println((char) 27 + "[1;32m when: " + msg.getStringProperty("when") + "\n");
-
-			System.out.print("\t" + (char) 27 + "[37m");
+			printWithColor(GREEN, " where1: " + msg.getStringProperty("where1"));
+			printWithColor(GREEN, " when: " + msg.getStringProperty("when") + "\n");
 
 			try {
-				System.out.println(((JmsTextMessage) msg).getText());
+				printWithColor(GREY, "\t" + ((JmsTextMessage) msg).getText());
 			} catch (ClassCastException e) {
 				for (int i = 0; i < ((JmsBytesMessage) msg).getBodyLength(); i++) {
 					char c = (char) ((JmsBytesMessage) msg).readByte();
@@ -119,13 +124,16 @@ public class DebugClient implements MessageListener {
 					else System.out.print(c);
 				}
 			}
-			System.out.println((char) 27 + "[1;32m\n End of message from " + msg.getStringProperty("who") + "\n");
-			System.out.println((char) 27 + "[0m ");
+			printWithColor(GREEN, "\n End of message from " + msg.getStringProperty("who") + "\n");
+			printWithColor(BLACK, " ");
 
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
-
 		}
+	}
+
+	private static void printWithColor(String color, String s) {
+		System.out.println((char) 27 + color + s);
 	}
 
 	private void sendMessage(String msg) {
@@ -148,8 +156,8 @@ public class DebugClient implements MessageListener {
 			message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
 
-			System.out.println((char) 27 + "[1;33m sending message");
-			System.out.println((char) 27 + "[0m ");
+			printWithColor(BROWN, " sending message");
+			printWithColor(BLACK, " ");
 			messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 
 
@@ -161,7 +169,7 @@ public class DebugClient implements MessageListener {
 	void close() {
 		try {
 			System.out.println("closing");
-			System.out.println((char) 27 + "[0m ");
+			printWithColor(BLACK, " ");
 			connection.close();
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -177,10 +185,10 @@ public class DebugClient implements MessageListener {
 			url = args[0];
 			sendQueue = args[1];
 			receiveQueue = args[2];
-		} else if (args.length == 1){
+		} else if (args.length == 1) {
 			url = args[0];
 		}
-		System.out.println((char) 27 + String.format( "[36mUsing url [%s] sendQueue [%s] outQueue [%s]", url, sendQueue, receiveQueue));
+		printWithColor(TURQUOISE, String.format("Using url [%s] sendQueue [%s] outQueue [%s]", url, sendQueue, receiveQueue));
 
 		DebugClient c = new DebugClient();
 		c.init(url, sendQueue, receiveQueue);
