@@ -1,0 +1,87 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-qpid
+data:
+  default.json: |
+    {
+      "type": "BDB",
+      "name": "{{ .Values.qpid.vhost_name }}",
+      "modelVersion": "7.0",
+      "exchanges": [
+        {
+          "name": "nwEx",
+          "type": "headers",
+          "durable": true,
+          "durableBindings": [
+            {
+              "arguments": {
+                "x-filter-jms-selector": "where1='NO'"
+              },
+              "bindingKey": "where1",
+              "destination": "NO-out"
+            },
+            {
+              "arguments": {
+                "x-filter-jms-selector": "where1 LIKE '%'"
+              },
+              "bindingKey": "where1",
+              "destination": "test-out"
+            },
+            {
+              "arguments": {
+                "x-filter-jms-selector": "where1='NO' AND what='Obstruction'"
+              },
+              "bindingKey": "where1, what",
+              "destination": "NO-Obstruction"
+            },
+            {
+              "arguments": {
+                "x-filter-jms-selector": "where1='SE'"
+              },
+              "bindingKey": "where1",
+              "destination": "SE-out"
+            }
+          ]
+        }
+      ],
+      "queues": [
+        {
+          "name": "onramp",
+          "type": "standard",
+          "durable": true,
+          "holdOnPublishEnabled": false
+        },
+        {
+          "name": "test-out",
+          "type": "standard",
+          "durable": true,
+          "holdOnPublishEnabled": false
+        },
+        {
+          "name": "dlqueue",
+          "type": "standard",
+          "durable": true,
+          "holdOnPublishEnabled": false
+        },
+        {
+          "name": "NO-Obstruction",
+          "type": "standard",
+          "durable": true,
+          "holdOnPublishEnabled": false
+        },
+        {
+          "name": "NO-out",
+          "type": "standard",
+          "durable": true,
+          "holdOnPublishEnabled": false
+        },
+        {
+          "name": "SE-out",
+          "type": "standard",
+          "durable": true,
+          "holdOnPublishEnabled": false
+        }
+      ]
+    }
+

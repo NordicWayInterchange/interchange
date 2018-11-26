@@ -1,0 +1,66 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-qpid
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: qpid
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: qpid
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: qpid
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: qpid
+        image: "{{ .Values.qpid.image.repository }}:{{ .Values.qpid.image.tag }}"
+        ports:
+        - name: amqp
+          containerPort: 5672
+        - name: amqps
+          containerPort: 5671
+        - name: http
+          containerPort: 8080
+        env:
+        - name: KEYSTORE_FILE
+          value: /secure/{{ .Values.qpid.keystore.file }}
+        - name: KEYSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.qpid.tls_secret_name }}
+              key: {{ .Values.qpid.keystore.password_key }}
+        - name: TRUSTSTORE_FILE
+          value: /secure/{{ .Values.qpid.truststore.file }}
+        - name: TRUSTSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.qpid.tls_secret_name }}
+              key: {{ .Values.qpid.truststore.password_key }}
+        - name: VHOST_FILE
+          value: /config/default.json
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: secure
+          mountPath: /secure
+        readinessProbe:
+          initialDelaySeconds: 5
+          tcpSocket:
+            port: amqps
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-qpid
+      - name: secure
+        secret:
+          secretName: {{ .Values.qpid.tls_secret_name }}

@@ -1,0 +1,36 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: postgis
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: postgis
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: postgis
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: postgis
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: postgis
+        image: "{{ .Values.postgis.image.repository }}:{{ .Values.postgis.image.tag }}"
+        env:
+        - name: POSTGRES_USER
+          value: geolookup
+        - name: POSTGRES_PASSWORD
+          value: geolookup
+        - name: POSTGRES_DB
+          value: geolookup
+        ports:
+        - name: db
+          containerPort: 5432
