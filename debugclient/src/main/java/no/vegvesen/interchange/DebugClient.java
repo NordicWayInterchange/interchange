@@ -74,9 +74,7 @@ public class DebugClient implements MessageListener {
 	@Override
 	public void onMessage(Message msg) {
 		try {
-
 			msg.acknowledge();
-
 
 			int delay = -1;
 			if (msg.getStringProperty("when") != null) {
@@ -85,7 +83,6 @@ public class DebugClient implements MessageListener {
 				} catch (Exception e) {
 					System.err.println("Could not parse \"when\"-field to calculate delay; " + msg.getStringProperty("when"));
 				}
-
 			}
 
 			printWithColor(GREEN, " Got message from " + msg.getStringProperty("who") + " @ delay=" + delay + "ms:");
@@ -148,10 +145,7 @@ public class DebugClient implements MessageListener {
 	private void sendMessage(String where, String msg) {
 		try {
 			JmsTextMessage message = (JmsTextMessage) session.createTextMessage(msg);
-
 			message.getFacade().setUserId(USER);
-
-
 			message.setStringProperty("who", "Norwegian Public Roads Administration");
 			message.setStringProperty("how", "Datex2");
 			message.setStringProperty("what", "Conditions");
@@ -159,13 +153,9 @@ public class DebugClient implements MessageListener {
 			message.setStringProperty("lon", "10.0");
 			message.setStringProperty("where1", where);
 			message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-
-
 			printWithColor(BROWN, " sending message");
 			printWithColor(BLACK, " ");
 			messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-
-
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
@@ -247,7 +237,6 @@ public class DebugClient implements MessageListener {
 				line = br.readLine();
 			}
 			everything = sb.toString();
-
 		}
 		return everything;
 	}
