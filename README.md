@@ -22,7 +22,19 @@ Make sure to build the project with Maven before running docker compose.
 Maven starts temporary instances of the containers for integration
 testing, and so the container ports will already be in use.
 
+Maven will also build the images and push them to the Google Container Registry.
+Since pulling images from Docker Hub and pushing images to GCR requires 
+authentication, `mvn install` must be run with environmental variables for 
+authentication. From a terminal with gcloud installed, where you have already 
+authenticated against google cloud, run the following to build the project and push
+the images to GCR:
 
+```
+mvn clean install -Denv.DOCKERUSER=username -Denv.DOCKERPASSWD=password -Denv.GAUTHUSER=oauth2accesstoken -Denv.GAUTHTOKEN=$(gcloud auth print-access-token)
+```
+
+Replace `username` and `password` with your docker username and password.
+ 
 
 ### Docker compose
 The Interchange Node is started using Docker compose. The compose file 

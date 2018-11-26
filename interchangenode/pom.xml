@@ -98,12 +98,16 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.27.2</version>
 
+
                 <configuration>
+
+                    <!-- Registry to push images to -->
+
                     <images>
                         <image>
-                            <!-- TODO: point to existing docker-compose catalogue -->
+                            <!-- TODO: point to existing docker-compose catalogue or to images in a container registry-->
                             <alias>postgis</alias>
-                            <name>postgis</name>
+                            <name>eu.gcr.io/nordic-way-aad182cc/postgis</name>
                             <build>
                                 <dockerFileDir>${project.basedir}/src/test/docker/postgis</dockerFileDir>
                             </build>
@@ -123,7 +127,7 @@
                             </run>
                         </image>
                         <image>
-                            <name>qpid</name>
+                            <name>eu.gcr.io/nordic-way-aad182cc/qpid</name>
                             <build>
                                 <dockerFileDir>${project.basedir}/src/test/docker/qpid</dockerFileDir>
                             </build>
@@ -139,7 +143,27 @@
                                 </wait>
                             </run>
                         </image>
+
+                        <image>
+                            <name>eu.gcr.io/nordic-way-aad182cc/ixnapp</name>
+                            <build>
+                                <dockerFileDir>${project.basedir}</dockerFileDir>
+                            </build>
+                        </image>
                     </images>
+
+                    <authConfig>
+                        <push>
+                            <username>${env.GAUTHUSER}</username>
+                            <password>${env.GAUTHTOKEN}</password>
+                        </push>
+
+                        <pull>
+                            <username>${env.DOCKERUSER}}</username>
+                            <password>${env.DOCKERPASSWD}</password>
+                        </pull>
+                    </authConfig>
+
                 </configuration>
 
 
@@ -150,6 +174,14 @@
                         <goals>
                             <goal>build</goal>
                             <goal>start</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>push</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>push</goal>
                         </goals>
                     </execution>
                     <!-- rebase-mark -->
