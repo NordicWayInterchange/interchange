@@ -32,7 +32,7 @@ public class DebugClient implements MessageListener {
 	private Session session;
 	private MessageProducer messageProducer;
 
-	private void init(String url, String sendQueue, String receiveQueue) {
+	private DebugClient(String url, String sendQueue, String receiveQueue) {
 		try {
 			Hashtable<Object, Object> env = new Hashtable<>();
 			env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
@@ -185,8 +185,7 @@ public class DebugClient implements MessageListener {
 		}
 		printWithColor(TURQUOISE, String.format("Using url [%s] sendQueue [%s] outQueue [%s]", url, sendQueue, receiveQueue));
 
-		DebugClient c = new DebugClient();
-		c.init(url, sendQueue, receiveQueue);
+		DebugClient c = new DebugClient(url, sendQueue, receiveQueue);
 
 		BufferedReader commandLine = new BufferedReader(new InputStreamReader(System.in));
 
