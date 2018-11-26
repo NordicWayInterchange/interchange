@@ -1,0 +1,56 @@
+version: '3'
+services:
+
+  interchangenode:
+    build: ./interchangenode
+    container_name: interchangenode
+    hostname: interchangenode
+    volumes:
+      - ./interchange_logs:/var/interchange/log
+    depends_on:
+      - postgis
+      - qpid
+
+  qpid:
+    build: ./qpid
+    container_name: qpid
+    hostname: qpid
+    healthcheck:
+      test: ["CMD", "curl", "-I", "localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+    - ./qpid_logs:/var/qpid/log
+    ports:
+    - 8080:8080
+    - 5671:5671
+    - 5672:5672
+    volumes:
+    - "./qpid/dev/vhost.json:/config/default.json"
+    - "./qpid/dev/tls/server.p12:/secure/keystore.p12"
+    - "./qpid/dev/tls/common.jks:/secure/truststore.jks"
+    environment:
+      KEYSTORE_FILE: "/secure/keystore.p12"
+      KEYSTORE_PASSWORD: "supersecret"
+      TRUSTSTORE_FILE: "/secure/truststore.jks"
+      TRUSTSTORE_PASSWORD: "supersecret"
+      VHOST_FILE: "/config/default.json"
+
+  postgis:
+    build: ./postgis
+    environment:
+      - POSTGRES_USER=geolookup
+      - POSTGRES_PASSWORD=geolookup
+      - POSTGRES_DB=geolookup
+    container_name: postgis
+    hostname: postgis
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "geolookup"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    expose:
+    - "5432"
+    volumes:
+      - ./tmp/postgis-logs:/var/log/postgresql
