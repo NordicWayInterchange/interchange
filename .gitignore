@@ -4,6 +4,5 @@
 .DS_Store
 interchangenode/target/
 debugclient/target/
-docker-compose/*_logs/
 esdata/
 tmp/

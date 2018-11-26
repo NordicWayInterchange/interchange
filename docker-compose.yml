@@ -6,7 +6,7 @@ services:
     container_name: interchangenode
     hostname: interchangenode
     volumes:
-      - ./interchange_logs:/var/interchange/log
+      - ./tmp/interchange_logs:/var/interchange/log
     depends_on:
       - postgis
       - qpid
@@ -21,7 +21,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-    - ./qpid_logs:/var/qpid/log
+    - ./tmp/qpid_logs:/var/qpid/log
     ports:
     - 8080:8080
     - 5671:5671
