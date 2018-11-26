@@ -1,0 +1,172 @@
+{
+  "name": "${broker.name}",
+  "modelVersion": "7.0",
+  "authenticationproviders": [
+    {
+      "name": "clientCerts",
+      "type": "External"
+    },
+    {
+      "name": "passwordFile",
+      "type": "PlainPasswordFile",
+      "path": "${qpid.home_dir}/etc/passwd"
+    }
+  ],
+  "brokerloggers": [
+    {
+      "name": "logfile",
+      "type": "File",
+      "fileName": "${qpid.work_dir}/log/qpid.log",
+      "brokerloginclusionrules": [
+        {
+          "name": "Operational",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "qpid.message.*"
+        },
+        {
+          "name": "Qpid",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "org.apache.qpid.*"
+        },
+        {
+          "name": "Root",
+          "type": "NameAndLevel",
+          "level": "WARN",
+          "loggerName": "ROOT"
+        },
+        {
+          "name": "Statistics",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "qpid.statistics.*"
+        }
+      ]
+    },
+    {
+      "name": "memory",
+      "type": "Memory",
+      "brokerloginclusionrules": [
+        {
+          "name": "Operational",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "qpid.message.*"
+        },
+        {
+          "name": "Qpid",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "org.apache.qpid.*"
+        },
+        {
+          "name": "Root",
+          "type": "NameAndLevel",
+          "level": "WARN",
+          "loggerName": "ROOT"
+        },
+        {
+          "name": "Statistics",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "qpid.statistics.*"
+        }
+      ]
+    }
+  ],
+  "keystores": [
+    {
+      "name": "default",
+      "type": "FileKeyStore",
+      "keyStoreType": "pkcs12",
+      "password": "${KEYSTORE_PASSWORD}",
+      "storeUrl": "${KEYSTORE_FILE}"
+    }
+  ],
+  "plugins": [
+    {
+      "type": "MANAGEMENT-HTTP",
+      "name": "httpManagement"
+    }
+  ],
+  "ports": [
+    {
+      "name": "AMQP",
+      "type": "AMQP",
+      "authenticationProvider": "passwordFile",
+      "port": "5672",
+      "protocols": ["AMQP_1_0"],
+      "virtualhostaliases": [
+        {
+          "name": "defaultAlias",
+          "type": "defaultAlias"
+        },
+        {
+          "name": "hostnameAlias",
+          "type": "hostnameAlias"
+        },
+        {
+          "name": "nameAlias",
+          "type": "nameAlias"
+        }
+      ]
+    },
+    {
+      "name": "AMQPS",
+      "type": "AMQP",
+      "authenticationProvider": "clientCerts",
+      "bindingAddress": "*",
+      "keyStore": "default",
+      "needClientAuth": true,
+      "port": "5671",
+      "protocols": ["AMQP_1_0"],
+      "transports": [
+        "SSL",
+        "TCP"
+      ],
+      "trustStores": ["truststore"],
+      "wantClientAuth": false,
+      "virtualhostaliases": [
+        {
+          "name": "defaultAlias",
+          "type": "defaultAlias"
+        },
+        {
+          "name": "hostnameAlias",
+          "type": "hostnameAlias"
+        },
+        {
+          "name": "nameAlias",
+          "type": "nameAlias"
+        }
+      ]
+    },
+    {
+      "name": "HTTP",
+      "port": "8080",
+      "authenticationProvider": "passwordFile",
+      "protocols": ["HTTP"]
+    }
+  ],
+  "truststores": [
+    {
+      "name": "truststore",
+      "type": "FileTrustStore",
+      "exposedAsMessageSource": false,
+      "password": "${TRUSTSTORE_PASSWORD}",
+      "peersOnly": false,
+      "storeUrl": "${TRUSTSTORE_FILE}",
+      "trustAnchorValidityEnforced": false,
+      "trustStoreType": "jks"
+    }
+  ],
+  "virtualhostnodes": [
+    {
+      "name": "default",
+      "type": "JSON",
+      "defaultVirtualHostNode": "true",
+      "virtualHostInitialConfiguration": "{}"
+    }
+  ]
+}
