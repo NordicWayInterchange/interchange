@@ -1,0 +1,16 @@
+version: '3'
+services:
+  server:
+    build: ../
+    ports: ["5672:5672", "5671:5671", "8080:8080"]
+    hostname: qpid
+    container_name: qpid
+    volumes:
+    - "./vhost.json:/work/default/config/default.json"
+    - "./tls/server.p12:/secure/keystore.p12"
+    - "./tls/common.jks:/secure/truststore.jks"
+    environment:
+      KEYSTORE_FILE: "/secure/keystore.p12"
+      KEYSTORE_PASSWORD: "supersecret"
+      TRUSTSTORE_FILE: "/secure/truststore.jks"
+      TRUSTSTORE_PASSWORD: "supersecret"
