@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -31,7 +32,7 @@ public class DebugClient implements MessageListener {
 	private Session session;
 	private MessageProducer messageProducer;
 
-	void init(String url, String sendQueue, String receiveQueue) {
+	private void init(String url, String sendQueue, String receiveQueue) {
 		try {
 			Hashtable<Object, Object> env = new Hashtable<>();
 			env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
@@ -98,19 +99,19 @@ public class DebugClient implements MessageListener {
 			printWithColor(GREEN, " how: " + msg.getStringProperty("how"));
 			printWithColor(GREEN, " what: " + msg.getStringProperty("what"));
 			try {
-				printWithColor(GREEN, " lat: " +  msg.getStringProperty("lat"));
+				printWithColor(GREEN, " lat: " + msg.getStringProperty("lat"));
 				printWithColor(GREEN, " lon: " + msg.getStringProperty("lon"));
-			} catch (Exception e) {
+			} catch (Exception ignored) {
 			}
 			try {
 				printWithColor(GREEN, " lat: " + msg.getDoubleProperty("lat"));
 				printWithColor(GREEN, " lon: " + msg.getDoubleProperty("lon"));
-			} catch (Exception e) {
+			} catch (Exception ignored) {
 			}
 			try {
 				printWithColor(GREEN, " lat: " + msg.getFloatProperty("lat"));
 				printWithColor(GREEN, " lon: " + msg.getFloatProperty("lon"));
-			} catch (Exception e) {
+			} catch (Exception ignored) {
 			}
 			printWithColor(GREEN, " where1: " + msg.getStringProperty("where1"));
 			printWithColor(GREEN, " when: " + msg.getStringProperty("when") + "\n");
@@ -118,17 +119,21 @@ public class DebugClient implements MessageListener {
 			try {
 				printWithColor(GREY, "\t" + ((JmsTextMessage) msg).getText());
 			} catch (ClassCastException e) {
-				for (int i = 0; i < ((JmsBytesMessage) msg).getBodyLength(); i++) {
-					char c = (char) ((JmsBytesMessage) msg).readByte();
-					if (c == '\n') System.out.print(c + "\t");
-					else System.out.print(c);
+				@SuppressWarnings("ConstantConditions") JmsBytesMessage jmsBytesMessage = (JmsBytesMessage) msg;
+				for (int i = 0; i < jmsBytesMessage.getBodyLength(); i++) {
+					char c = (char) jmsBytesMessage.readByte();
+					if (c == '\n') {
+						System.out.print(c + "\t");
+					} else {
+						System.out.print(c);
+					}
 				}
 			}
 			printWithColor(GREEN, "\n End of message from " + msg.getStringProperty("who") + "\n");
 			printWithColor(BLACK, " ");
 
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -166,7 +171,7 @@ public class DebugClient implements MessageListener {
 		}
 	}
 
-	void close() {
+	private void close() {
 		try {
 			System.out.println("closing");
 			printWithColor(BLACK, " ");
@@ -229,7 +234,7 @@ public class DebugClient implements MessageListener {
 
 	private static String readFile(String filename) throws IOException {
 		FileInputStream is = new FileInputStream(filename);
-		InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+		InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
 
 		String everything;
 		try (BufferedReader br = new BufferedReader(isr)) {
@@ -246,6 +251,5 @@ public class DebugClient implements MessageListener {
 		}
 		return everything;
 	}
-
 
 }
