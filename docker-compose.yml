@@ -29,7 +29,7 @@ services:
     volumes:
     - "./qpid/dev/vhost.json:/config/default.json"
     - "./qpid/dev/tls/server.p12:/secure/keystore.p12"
-    - "./qpid/dev/tls/common.jks:/secure/truststore.jks"
+    - "./qpid/dev/tls/truststore.jks:/secure/truststore.jks"
     environment:
       KEYSTORE_FILE: "/secure/keystore.p12"
       KEYSTORE_PASSWORD: "supersecret"
