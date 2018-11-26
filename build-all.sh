@@ -5,6 +5,9 @@ TAG="$(git rev-parse --short HEAD)"
 PUSH=${PUSH:-false}
 IMAGES="interchangenode qpid postgis"
 
+echo "make sure you've run 'mvn clean install' in interchangenodeapp. Build depends on artefacts outputed from that command."
+echo ""
+
 for image in ${IMAGES}; do
     pushd ${image}
     docker build -t ${image}:${TAG} .
@@ -18,6 +21,7 @@ for image in ${IMAGES}; do
     popd
 done
 
+echo ""
 for image in ${IMAGES}; do
     echo "${REGISTRY}/${image}:${TAG}"
 done
