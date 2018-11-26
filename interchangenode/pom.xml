@@ -100,14 +100,11 @@
 
 
                 <configuration>
-
-                    <!-- Registry to push images to -->
-
                     <images>
                         <image>
                             <!-- TODO: point to existing docker-compose catalogue or to images in a container registry-->
                             <alias>postgis</alias>
-                            <name>eu.gcr.io/nordic-way-aad182cc/postgis</name>
+                            <name>postgis</name>
                             <build>
                                 <dockerFileDir>${project.basedir}/src/test/docker/postgis</dockerFileDir>
                             </build>
@@ -127,7 +124,8 @@
                             </run>
                         </image>
                         <image>
-                            <name>eu.gcr.io/nordic-way-aad182cc/qpid</name>
+                            <alias>qpid</alias>
+                            <name>qpid</name>
                             <build>
                                 <dockerFileDir>${project.basedir}/src/test/docker/qpid</dockerFileDir>
                             </build>
@@ -144,25 +142,7 @@
                             </run>
                         </image>
 
-                        <image>
-                            <name>eu.gcr.io/nordic-way-aad182cc/ixnapp</name>
-                            <build>
-                                <dockerFileDir>${project.basedir}</dockerFileDir>
-                            </build>
-                        </image>
                     </images>
-
-                    <authConfig>
-                        <push>
-                            <username>${env.GAUTHUSER}</username>
-                            <password>${env.GAUTHTOKEN}</password>
-                        </push>
-
-                        <pull>
-                            <username>${env.DOCKERUSER}}</username>
-                            <password>${env.DOCKERPASSWD}</password>
-                        </pull>
-                    </authConfig>
 
                 </configuration>
 
@@ -177,14 +157,6 @@
                         </goals>
                     </execution>
 
-                    <execution>
-                        <id>push</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>push</goal>
-                        </goals>
-                    </execution>
-                    <!-- rebase-mark -->
                     <execution>
                         <id>stop</id>
                         <phase>post-integration-test</phase>
