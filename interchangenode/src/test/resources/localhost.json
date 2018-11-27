@@ -1,0 +1,86 @@
+{
+  "type": "BDB",
+  "name": "localhost",
+  "modelVersion": "7.0",
+  "exchanges": [
+    {
+      "name": "nwEx",
+      "type": "headers",
+      "durable": true,
+      "durableBindings": [
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where1='NO'"
+          },
+          "bindingKey": "where1",
+          "destination": "NO-out"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where1 LIKE '%'"
+          },
+          "bindingKey": "where1",
+          "destination": "test-out"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where1='NO' AND what='Obstruction'"
+          },
+          "bindingKey": "where1, what",
+          "destination": "NO-Obstruction"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where1='SE'"
+          },
+          "bindingKey": "where1",
+          "destination": "SE-out"
+        }
+      ]
+    }
+  ],
+  "queues": [
+    {
+      "name": "onramp",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "test-out",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "dlqueue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "NO-Obstruction",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "NO-out",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "SE-out",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    }
+  ]
+}
