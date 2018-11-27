@@ -1,0 +1,14 @@
+# ACL file for integration tests.
+# Virtual host name must be changed for production.
+
+
+# Admin has all rights
+ACL ALLOW-LOG admin ALL ALL
+
+# User guest can access the virtualhost, send to onramp and consume from test-out.
+ACL ALLOW-LOG guest ACCESS VIRTUALHOST name="localhost"
+ACL ALLOW-LOG guest CONSUME QUEUE name="test-out"
+ACL ALLOW-LOG guest PUBLISH EXCHANGE
+
+# Default is to deny everyone.
+ACL DENY-LOG ALL ALL
