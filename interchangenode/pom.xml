@@ -127,7 +127,7 @@
                             <alias>qpid</alias>
                             <name>qpid</name>
                             <build>
-                                <dockerFileDir>${project.basedir}/src/test/docker/qpid</dockerFileDir>
+                                <dockerFileDir>${project.basedir}/../qpid/</dockerFileDir>
                             </build>
                             <run>
                                 <ports>
@@ -135,10 +135,24 @@
                                     <port>63672:5672</port>
                                     <port>63080:8080</port>
                                 </ports>
-                                <wait>
-                                    <healthy>true</healthy>
-                                    <time>60000</time>
-                                </wait>
+                                <volumes>
+                                    <bind>
+                                        <volume>
+                                            ${project.basedir}\src\test\resources\localhost.json:/config/default.json
+                                        </volume>
+                                        <volume>
+                                            ${project.basedir}\src\test\resources\jks\localhost.crt:/secure/server.crt
+                                        </volume>
+                                        <volume>
+                                            ${project.basedir}\src\test\resources\jks\localhost.key:/secure/server.key
+                                        </volume>
+                                    </bind>
+                                </volumes>
+                                <env>
+                                    <PRIVATE_KEY_FILE>/secure/server.key</PRIVATE_KEY_FILE>
+                                    <CERTIFICATE_FILE>/secure/server.crt</CERTIFICATE_FILE>
+                                    <VHOST_FILE>/config/default.json</VHOST_FILE>
+                                </env>
                             </run>
                         </image>
 
