@@ -16,3 +16,5 @@ ADD config.json /work/
 ADD entrypoint.sh /
 
 ENTRYPOINT ["/entrypoint.sh"]
+
+HEALTHCHECK --interval=5s --timeout=3s CMD nc -zv localhost 5671
