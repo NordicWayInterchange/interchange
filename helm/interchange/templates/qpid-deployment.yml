@@ -32,20 +32,10 @@ spec:
         - name: http
           containerPort: 8080
         env:
-        - name: KEYSTORE_FILE
-          value: /secure/{{ .Values.qpid.keystore.file }}
-        - name: KEYSTORE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.qpid.tls_secret_name }}
-              key: {{ .Values.qpid.keystore.password_key }}
-        - name: TRUSTSTORE_FILE
-          value: /secure/{{ .Values.qpid.truststore.file }}
-        - name: TRUSTSTORE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.qpid.tls_secret_name }}
-              key: {{ .Values.qpid.truststore.password_key }}
+        - name: CERTIFICATE_FILE
+          value: /secure/{{ .Values.qpid.certificate_file }}
+        - name: PRIVATE_KEY_FILE
+          value: /secure/{{ .Values.qpid.private_key_file }}
         - name: VHOST_FILE
           value: /config/default.json
         volumeMounts:

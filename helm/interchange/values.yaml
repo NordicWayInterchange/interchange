@@ -1,3 +1,5 @@
+## the name which will be used to address the QPID server externally
+# external_name: test.nordic-way.io
 interchange:
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
@@ -8,9 +10,6 @@ qpid:
     repository: eu.gcr.io/nordic-way-aad182cc/qpid
     tag: latest
 
-  ## the name which will be used to address the QPID server externally
-  vhost_name: test.nordic-way.io
-
   ## whether or not to expose amqps (5671) on public internet
   ## creates a public loadbalancer for the qpid-secure service
   expose_amqps: false
@@ -18,12 +17,8 @@ qpid:
   ## must provide the name of a k8s secret (in the same namespace)
   ## which includes a .p12 keystore, .jks truststore and passwords to both of these
   # tls_secret_name: qpid-certs
-  keystore:
-    file: server.p12
-    password_key: keystore-password
-  truststore:
-    file: truststore.jks
-    password_key: truststore-password
+  private_key_file: server.key
+  certificate_file: server.crt
 
 postgis:
   image:

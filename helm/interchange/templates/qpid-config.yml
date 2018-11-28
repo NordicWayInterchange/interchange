@@ -6,7 +6,7 @@ data:
   default.json: |
     {
       "type": "BDB",
-      "name": "{{ .Values.qpid.vhost_name }}",
+      "name": "{{ .Values.external_name }}",
       "modelVersion": "7.0",
       "exchanges": [
         {
