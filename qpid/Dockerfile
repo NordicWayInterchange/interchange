@@ -12,10 +12,6 @@ RUN cd /usr/local && \
 
 ENV QPID_WORK=/work
 
-EXPOSE 8080
-EXPOSE 5671
-EXPOSE 5672
-
 ADD config.json /work/
 ADD entrypoint.sh /
 

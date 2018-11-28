@@ -77,11 +77,10 @@
   ],
   "keystores": [
     {
-      "name": "default",
-      "type": "FileKeyStore",
-      "keyStoreType": "pkcs12",
-      "password": "${KEYSTORE_PASSWORD}",
-      "storeUrl": "${KEYSTORE_FILE}"
+    "name" : "default",
+    "type" : "NonJavaKeyStore",
+    "certificateUrl" : "${CERTIFICATE_FILE}",
+    "privateKeyUrl" : "${PRIVATE_KEY_FILE}"
     }
   ],
   "plugins": [
@@ -125,7 +124,7 @@
         "SSL",
         "TCP"
       ],
-      "trustStores": ["truststore"],
+      "trustStores": ["default"],
       "wantClientAuth": false,
       "virtualhostaliases": [
         {
@@ -151,14 +150,11 @@
   ],
   "truststores": [
     {
-      "name": "truststore",
-      "type": "FileTrustStore",
+      "name": "default",
+      "type": "NonJavaTrustStore",
       "exposedAsMessageSource": false,
-      "password": "${TRUSTSTORE_PASSWORD}",
-      "peersOnly": false,
-      "storeUrl": "${TRUSTSTORE_FILE}",
       "trustAnchorValidityEnforced": false,
-      "trustStoreType": "jks"
+      "certificatesUrl": "${CERTIFICATE_FILE}"
     }
   ],
   "virtualhostnodes": [

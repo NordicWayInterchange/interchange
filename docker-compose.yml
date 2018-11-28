@@ -27,13 +27,11 @@ services:
     - 5671:5671
     - 5672:5672
     volumes:
-    - "./qpid/dev/vhost.json:/config/default.json"
+    - "./qpid/example-vhost.json:/config/default.json"
     - "./tmp/keys:/secure"
     environment:
-      KEYSTORE_FILE: "/secure/server.p12"
-      KEYSTORE_PASSWORD: "password"
-      TRUSTSTORE_FILE: "/secure/truststore.jks"
-      TRUSTSTORE_PASSWORD: "password"
+      CERTIFICATE_FILE: "/secure/server.crt"
+      PRIVATE_KEY_FILE: "/secure/server.key"
       VHOST_FILE: "/config/default.json"
 
   postgis:
