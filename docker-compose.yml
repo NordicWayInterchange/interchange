@@ -28,13 +28,12 @@ services:
     - 5672:5672
     volumes:
     - "./qpid/dev/vhost.json:/config/default.json"
-    - "./qpid/dev/tls/server.p12:/secure/keystore.p12"
-    - "./qpid/dev/tls/truststore.jks:/secure/truststore.jks"
+    - "./tmp/keys:/secure"
     environment:
-      KEYSTORE_FILE: "/secure/keystore.p12"
-      KEYSTORE_PASSWORD: "supersecret"
+      KEYSTORE_FILE: "/secure/server.p12"
+      KEYSTORE_PASSWORD: "password"
       TRUSTSTORE_FILE: "/secure/truststore.jks"
-      TRUSTSTORE_PASSWORD: "supersecret"
+      TRUSTSTORE_PASSWORD: "password"
       VHOST_FILE: "/config/default.json"
 
   postgis:
