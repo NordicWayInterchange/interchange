@@ -7,9 +7,6 @@ services:
     hostname: interchangenode
     volumes:
       - ./tmp/interchange_logs:/var/interchange/log
-    depends_on:
-      - postgis
-      - qpid
 
   qpid:
     build: ./qpid
