@@ -5,6 +5,10 @@ services:
     build: ./interchangenode
     container_name: interchangenode
     hostname: interchangenode
+    environment:
+      AMQP_URI: amqp://qpid
+      AMQP_USER: admin
+      AMQP_PASSWORD: admin
     volumes:
       - ./tmp/interchange_logs:/var/interchange/log
     depends_on:
