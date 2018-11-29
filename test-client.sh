@@ -7,14 +7,14 @@ fi
 
 SERVER=${1:-localhost}
 
-KEYSTORE_FILE="./tmp/keys/king_harald.p12"
+USER=king_harald
+KEYSTORE_FILE="./tmp/keys/${USER}.p12"
 TRUSTSTORE_FILE="./tmp/keys/truststore.jks"
 PASSWORD=password
 CLIENT_JAR=debugclient/target/debugclient-1.0-SNAPSHOT-jar-with-dependencies.jar
 SERVER_URI="amqps://${SERVER}:5671"
 SEND_QUEUE=onramp
-RECEIVE_QUEUE=king_harald
-USER=king_harald
+RECEIVE_QUEUE=${USER}
 
 java \
     -Djavax.net.ssl.keyStore=${KEYSTORE_FILE} \

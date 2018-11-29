@@ -16,23 +16,18 @@ services:
     build: ./qpid
     container_name: qpid
     hostname: qpid
-    healthcheck:
-      test: ["CMD", "curl", "-I", "localhost:8080"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-    - ./tmp/qpid_logs:/var/qpid/log
+    command: dev
     ports:
     - 8080:8080
     - 5671:5671
     - 5672:5672
     volumes:
+    - "./tmp/qpid_logs:/var/qpid/log"
     - "./qpid/dev:/config"
-    - "./tmp/keys:/secure"
+    - "./tmp:/tmp"
     environment:
-      CERTIFICATE_FILE: "/secure/server.crt"
-      PRIVATE_KEY_FILE: "/secure/server.key"
+      CERTIFICATE_FILE: "/tmp/keys/server.crt"
+      PRIVATE_KEY_FILE: "/tmp/keys/server.key"
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
