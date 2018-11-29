@@ -9,7 +9,7 @@
     {
       "name": "passwordFile",
       "type": "PlainPasswordFile",
-      "path": "${qpid.home_dir}/etc/passwd"
+      "path": "${PASSWD_FILE}"
     }
   ],
   "brokerloggers": [
@@ -164,5 +164,10 @@
       "defaultVirtualHostNode": "true",
       "virtualHostInitialConfiguration": "{}"
     }
-  ]
+  ],
+  "groupproviders" : [ {
+    "name" : "default",
+    "type" : "GroupFile",
+    "path" : "${GROUPS_FILE}"
+  } ]
 }

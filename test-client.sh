@@ -7,22 +7,21 @@ fi
 
 SERVER=${1:-localhost}
 
-SECURE_DIR="./tmp/keys"
-
-KEYSTORE_FILE="${SECURE_DIR}/guest.p12"
-KEYSTORE_PASSWORD=password
-TRUSTSTORE_FILE="${SECURE_DIR}/truststore.jks"
-TRUSTSTORE_PASSWORD=password
+KEYSTORE_FILE="./tmp/keys/king_harald.p12"
+TRUSTSTORE_FILE="./tmp/keys/truststore.jks"
+PASSWORD=password
 CLIENT_JAR=debugclient/target/debugclient-1.0-SNAPSHOT-jar-with-dependencies.jar
 SERVER_URI="amqps://${SERVER}:5671"
-SEND_QUEUE=nwEx
-RECEIVE_QUEUE=test-out
+SEND_QUEUE=onramp
+RECEIVE_QUEUE=king_harald
+USER=king_harald
 
 java \
     -Djavax.net.ssl.keyStore=${KEYSTORE_FILE} \
-    -Djavax.net.ssl.keyStorePassword=${KEYSTORE_PASSWORD} \
+    -Djavax.net.ssl.keyStorePassword=${PASSWORD} \
     -Djavax.net.ssl.keyStoreType=pkcs12 \
     -Djavax.net.ssl.trustStore=${TRUSTSTORE_FILE} \
-    -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} \
+    -Djavax.net.ssl.trustStorePassword=${PASSWORD} \
+    -DUSER=${USER} \
     -jar ${CLIENT_JAR} \
     ${SERVER_URI} ${SEND_QUEUE} ${RECEIVE_QUEUE}

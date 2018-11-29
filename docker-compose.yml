@@ -7,8 +7,8 @@ services:
     hostname: interchangenode
     environment:
       AMQP_URI: amqp://qpid
-      AMQP_USER: admin
-      AMQP_PASSWORD: admin
+      AMQP_USER: interchange
+      AMQP_PASSWORD: "12345678"
     volumes:
       - ./tmp/interchange_logs:/var/interchange/log
 
@@ -28,12 +28,14 @@ services:
     - 5671:5671
     - 5672:5672
     volumes:
-    - "./qpid/example-vhost.json:/config/default.json"
+    - "./qpid/dev:/config"
     - "./tmp/keys:/secure"
     environment:
       CERTIFICATE_FILE: "/secure/server.crt"
       PRIVATE_KEY_FILE: "/secure/server.key"
-      VHOST_FILE: "/config/default.json"
+      VHOST_FILE: "/config/vhost.json"
+      GROUPS_FILE: "/config/groups"
+      PASSWD_FILE: "/config/passwd"
 
   postgis:
     build: ./postgis
