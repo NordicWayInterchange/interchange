@@ -25,19 +25,12 @@ data:
           "type": "headers",
           "durable": true,
           "durableBindings": [
-            {
-              "arguments": {
-                "x-filter-jms-selector": "where1='NO'"
-              },
-              "bindingKey": "where1",
-              "destination": "NO-out"
-            },
             {{- range .Values.qpid.users }}
             {
               "arguments": {
-                "x-filter-jms-selector": "where1='{{ .binding }}'"
+                "x-filter-jms-selector": "{{ .binding }}"
               },
-              "bindingKey": "where1",
+              "bindingKey": "binding_key",
               "destination": "{{ .name }}"
             },
             {{- end }}
@@ -45,7 +38,7 @@ data:
               "arguments": {
                 "x-filter-jms-selector": "where1 LIKE '%'"
               },
-              "bindingKey": "where1",
+              "bindingKey": "binding_key",
               "destination": "test-out"
             }
           ]
