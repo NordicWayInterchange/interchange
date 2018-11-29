@@ -1,5 +1,6 @@
 ## the name which will be used to address the QPID server externally
 # external_name: test.nordic-way.io
+
 interchange:
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
@@ -15,10 +16,25 @@ qpid:
   expose_amqps: false
 
   ## must provide the name of a k8s secret (in the same namespace)
-  ## which includes a .p12 keystore, .jks truststore and passwords to both of these
+  ## which includes a private key and a signed certificate.
+  ## the cert must have the same CN as .Values.external_name
   # tls_secret_name: qpid-certs
   private_key_file: server.key
   certificate_file: server.crt
+
+  ## credentials used by the interchange server(s)
+  interchange_user: interchange
+  interchange_password: c81b984cd23adb8bada75135ee6bb3e9
+
+  ## admin credentials
+  admin_user: qpid-admin
+  admin_password: d5779aa9d01f422db0b3d1b12b916e09
+
+  users:
+  - name: king_harald
+    binding: NO
+  - name: king_gustaf
+    binding: SE
 
 postgis:
   image:

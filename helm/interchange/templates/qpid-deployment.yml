@@ -38,6 +38,12 @@ spec:
           value: /secure/{{ .Values.qpid.private_key_file }}
         - name: VHOST_FILE
           value: /config/default.json
+        - name: GROUPS_FILE
+          value: /config/groups
+        - name: PASSWD_FILE
+          value: /config/passwd
+        - name: EXTERNAL_USERS
+          value: "{{ range .Values.qpid.users }}{{ .name }} {{ end }}"
         volumeMounts:
         - name: config
           mountPath: /config

@@ -28,8 +28,8 @@ spec:
         - name: AMQP_URI
           value: amqp://{{ .Release.Name }}-qpid?amqp.vhost={{ .Values.external_name }}
         - name: AMQP_USER
-          value: admin
+          value: {{ .Values.qpid.interchange_user }}
         - name: AMQP_PASSWORD
-          value: admin
+          value: {{ .Values.qpid.interchange_password }}
         - name: POSTGIS_URI
           value: jdbc:postgresql://{{ .Release.Name }}-postgis:5432/geolookup
