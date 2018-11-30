@@ -35,11 +35,11 @@ public class QpidIT {
 
     @Before
     public void before()throws Exception{
+        Thread.sleep(RECEIVE_TIMEOUT);
         consumer.emptyQueue(NO_OUT);
         consumer.emptyQueue(NO_OBSTRUCTION);
         consumer.emptyQueue(SE_OUT);
         consumer.emptyQueue(DLQUEUE);
-        Thread.sleep(RECEIVE_TIMEOUT);
     }
 
     public void sendMessageOneCountry(String messageId){
@@ -112,7 +112,6 @@ public class QpidIT {
 
     @Test
     public void badMessageGoesDoDeadLetterQueue() throws Exception{
-        consumer.emptyQueue(DLQUEUE);
         sendBadMessage("4");
         Thread.sleep(RECEIVE_TIMEOUT);
         // Expecting one message on dlqueue because message is invalid.
