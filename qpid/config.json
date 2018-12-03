@@ -12,67 +12,17 @@
       "path": "${PASSWD_FILE}"
     }
   ],
-  "brokerloggers": [
+  "brokerloggers" : [
     {
-      "name": "logfile",
-      "type": "File",
-      "fileName": "${qpid.work_dir}/log/qpid.log",
-      "brokerloginclusionrules": [
-        {
-          "name": "Operational",
-          "type": "NameAndLevel",
-          "level": "INFO",
-          "loggerName": "qpid.message.*"
-        },
-        {
-          "name": "Qpid",
-          "type": "NameAndLevel",
-          "level": "INFO",
-          "loggerName": "org.apache.qpid.*"
-        },
-        {
-          "name": "Root",
-          "type": "NameAndLevel",
-          "level": "WARN",
-          "loggerName": "ROOT"
-        },
-        {
-          "name": "Statistics",
-          "type": "NameAndLevel",
-          "level": "INFO",
-          "loggerName": "qpid.statistics.*"
-        }
-      ]
-    },
-    {
-      "name": "memory",
-      "type": "Memory",
-      "brokerloginclusionrules": [
-        {
-          "name": "Operational",
-          "type": "NameAndLevel",
-          "level": "INFO",
-          "loggerName": "qpid.message.*"
-        },
-        {
-          "name": "Qpid",
-          "type": "NameAndLevel",
-          "level": "INFO",
-          "loggerName": "org.apache.qpid.*"
-        },
-        {
-          "name": "Root",
-          "type": "NameAndLevel",
-          "level": "WARN",
-          "loggerName": "ROOT"
-        },
-        {
-          "name": "Statistics",
-          "type": "NameAndLevel",
-          "level": "INFO",
-          "loggerName": "qpid.statistics.*"
-        }
-      ]
+      "name" : "console",
+      "type" : "Console",
+      "lastUpdatedBy" : "admin",
+      "brokerloginclusionrules" : [ {
+        "name" : "rootInclude",
+        "type" : "NameAndLevel",
+        "durable" : true,
+        "level" : "INFO"
+      } ]
     }
   ],
   "keystores": [

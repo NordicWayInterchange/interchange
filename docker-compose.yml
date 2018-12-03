@@ -22,7 +22,6 @@ services:
     - 5671:5671
     - 5672:5672
     volumes:
-    - "./tmp/qpid_logs:/var/qpid/log"
     - "./qpid/dev:/config"
     - "./tmp:/tmp"
     environment:
