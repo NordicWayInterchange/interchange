@@ -1,6 +1,6 @@
 FROM java:8-alpine
 
-RUN apk update && apk add bash openssl
+RUN apk update && apk add bash openssl jq
 
 ENV QPID_VERSION=7.0.6
 
