@@ -19,6 +19,8 @@ public class IxnMessage {
     private final List<String> what;
     private final String body;
     private List<String> countries = new ArrayList<>();
+    private String how;
+    private String when;
 
     public IxnMessage(TextMessage textMessage) throws JMSException {
         this(textMessage.getStringProperty(WHO),
@@ -28,6 +30,14 @@ public class IxnMessage {
                 textMessage.getFloatProperty(LON),
                 parseWhat(textMessage.getStringProperty(WHAT)),
                 textMessage.getText());
+        String how = textMessage.getStringProperty(HOW);
+        if (how != null) {
+            this.how = how;
+        }
+        String when = textMessage.getStringProperty(WHEN);
+        if (when != null) {
+            this.when = when;
+        }
     }
 
     public IxnMessage(String who, String userID, long expiration, float lat, float lon, List<String> what, String body){
@@ -99,4 +109,11 @@ public class IxnMessage {
         }
     }
 
+    public String getHow() {
+        return how;
+    }
+
+    public String getWhen() {
+        return when;
+    }
 }
