@@ -57,20 +57,25 @@ public class InterchangeApp{
 
 	@JmsListener(destination = "onramp")
 	public void receiveMessage(TextMessage textMessage) throws JMSException{
-		MDCUtil.setLogVariables(textMessage);
+		try {
+			MDCUtil.setLogVariables(textMessage);
 
-		logger.info("============= Received: {}", textMessage.getText());
+			logger.info("============= Received: {}", textMessage.getText());
 
-		if(isValid(textMessage)){
-			IxnMessage message = new IxnMessage(textMessage);
-			handleOneMessage(message);
-		}
-		else{
-			logger.error("Sending bad message to dead letter queue. Invalid message.");
+			if (isValid(textMessage)) {
+				IxnMessage message = new IxnMessage(textMessage);
+				handleOneMessage(message);
+			} else {
+				logger.error("Sending bad message to dead letter queue. Invalid message.");
+				producer.sendMessage(DLQUEUE, textMessage);
+			}
+		}  catch (JMSException jmse){
+			throw jmse;
+		} catch (Exception e) {
 			producer.sendMessage(DLQUEUE, textMessage);
+		} finally {
+			MDCUtil.removeLogVariables();
 		}
-
-		MDCUtil.removeLogVariables();
 	}
 
 	void handleOneMessage(IxnMessage message){

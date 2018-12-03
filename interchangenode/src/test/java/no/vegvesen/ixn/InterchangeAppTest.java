@@ -107,5 +107,21 @@ public class InterchangeAppTest {
         verify(producer, times(1)).sendMessage(eq("dlqueue"), any(TextMessage.class));
     }
 
+    @Test
+    public void receivedMessageToThrowExceptionSendsToDlQueue() throws JMSException{
+        TextMessage textMessage = mock(TextMessage.class);
+        when(textMessage.getFloatProperty(any())).thenThrow(new NumberFormatException());
 
+        app.receiveMessage(textMessage);
+        verify(producer, times(1)).sendMessage(eq("dlqueue"), any(TextMessage.class));
+    }
+
+    @Test(expected = JMSException.class)
+    public void receivedMessageToThrowJMSExceptionIsNotSendtToDlQueue() throws JMSException{
+        TextMessage textMessage = mock(TextMessage.class);
+        when(textMessage.getText()).thenThrow(new JMSException("test-exception"));
+
+        app.receiveMessage(textMessage);
+        verify(producer, times(0)).sendMessage(eq("dlqueue"), any(TextMessage.class));
+    }
 }
