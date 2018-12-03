@@ -36,17 +36,14 @@ qpid:
   admin_password: d5779aa9d01f422db0b3d1b12b916e09
 
   ## each user specified here will receive access to the onramp queue as well as their own queue/binding
-  users: {}
+  users: []
   # - name: king_harald
   #   binding: "where1='NO'"
-  #   additional_queues:
-  #   - name: svalbard
-  #     binding: "where1='SV'"
   # - name: king_gustaf
   #   binding: "where1='SE'"
 
   ## if a user requires additional queues, they can be specified here
-  additional_queues: {}
+  additional_queues: []
   # - name: odin
   #   binding: "where1='valhalla'"
   #   user: king_harald

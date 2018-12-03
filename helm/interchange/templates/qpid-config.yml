@@ -149,11 +149,11 @@ data:
             {{- range .Values.qpid.additional_queues }}
             {
               "objectType": "QUEUE",
-              "identity": "{{ .name }}",
+              "identity": "{{ .user }}",
               "operation": "CONSUME",
               "outcome": "ALLOW_LOG",
               "attributes": {
-                "NAME": "{{ .user }}"
+                "NAME": "{{ .name }}"
               }
             },
             {{- end }}
