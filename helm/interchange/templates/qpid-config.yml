@@ -34,6 +34,15 @@ data:
               "destination": "{{ .name }}"
             },
             {{- end }}
+            {{- range .Values.qpid.additional_queues }}
+            {
+              "arguments": {
+                "x-filter-jms-selector": "{{ .binding }}"
+              },
+              "bindingKey": "binding_key",
+              "destination": "{{ .name }}"
+            },
+            {{- end }}
             {
               "arguments": {
                 "x-filter-jms-selector": "where1 LIKE '%'"
@@ -60,6 +69,15 @@ data:
           "owner": null
         },
         {{- range .Values.qpid.users }}
+        {
+          "name": "{{ .name }}",
+          "type": "standard",
+          "durable": true,
+          "holdOnPublishEnabled": false,
+          "owner": null
+        },
+        {{- end }}
+        {{- range .Values.qpid.additional_queues }}
         {
           "name": "{{ .name }}",
           "type": "standard",
@@ -125,6 +143,17 @@ data:
               "outcome": "ALLOW_LOG",
               "attributes": {
                 "NAME": "{{ .name }}"
+              }
+            },
+            {{- end }}
+            {{- range .Values.qpid.additional_queues }}
+            {
+              "objectType": "QUEUE",
+              "identity": "{{ .name }}",
+              "operation": "CONSUME",
+              "outcome": "ALLOW_LOG",
+              "attributes": {
+                "NAME": "{{ .user }}"
               }
             },
             {{- end }}
