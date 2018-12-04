@@ -56,6 +56,12 @@ public class IxnMessageProducer {
 					outgoingMessage.setStringProperty(USERID, message.getUserID());
 					outgoingMessage.setStringProperty(WHERE, country);
 					outgoingMessage.setStringProperty(WHAT, situationRecordType);
+					if (message.getHow() != null) {
+						outgoingMessage.setStringProperty(HOW, message.getHow());
+					}
+					if (message.getWhen() != null) {
+						outgoingMessage.setStringProperty(WHEN, message.getWhen());
+					}
 					outgoingMessage.setJMSExpiration(message.getExpiration());
 					outgoingMessage.setText(message.getBody());
 					logger.debug("sending lon: {} lat: {} who: {} userID: {} country:  {} what: {} body: {}",
