@@ -61,10 +61,6 @@ public class AccessControlIT {
 
 		Assert.assertEquals(true, exceptionThrown);
 
-
-
-
-
 	}
 
 	@Test

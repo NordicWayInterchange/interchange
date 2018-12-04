@@ -22,7 +22,12 @@ public class QpidIT {
     private static final String SE_OUT = "SE-out";
     private static final String DLQUEUE = "dlqueue";
     private static final String NO_OBSTRUCTION = "NO-Obstruction";
-    @Autowiredls
+
+    private static final String USER_KEYSTORE = "jks/guest.p12";
+    private static final String TRUSTSTORE = "jks/truststore.jks";
+
+
+    @Autowired
     TestOnrampMessageProducer producer;
 
     @Autowired
@@ -30,7 +35,7 @@ public class QpidIT {
 
 	@BeforeClass
 	public static void setUp() {
-		TestKeystoreHelper.useTestKeystore();
+		TestKeystoreHelper.useTestKeystore(USER_KEYSTORE, TRUSTSTORE);
 	}
 
     @Before

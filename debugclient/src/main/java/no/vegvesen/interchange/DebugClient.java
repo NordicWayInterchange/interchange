@@ -142,6 +142,7 @@ public class DebugClient implements MessageListener {
 		sendMessage("no", msg);
 	}
 
+
 	private void sendMessage(String where, String msg) {
 		try {
 			JmsTextMessage message = (JmsTextMessage) session.createTextMessage(msg);
@@ -151,7 +152,7 @@ public class DebugClient implements MessageListener {
 			message.setStringProperty("what", "Conditions");
 			message.setStringProperty("lat", "63.0");
 			message.setStringProperty("lon", "10.0");
-			message.setStringProperty("where1", where);
+			message.setStringProperty("where1", "SE");
 			message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 			printWithColor(BROWN, " sending message");
 			printWithColor(BLACK, " ");
