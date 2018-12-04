@@ -22,6 +22,11 @@ public class QpidIT {
     private static final String SE_OUT = "SE-out";
     private static final String DLQUEUE = "dlqueue";
     private static final String NO_OBSTRUCTION = "NO-Obstruction";
+
+    private static final String USER_KEYSTORE = "jks/guest.p12";
+    private static final String TRUSTSTORE = "jks/truststore.jks";
+
+
     @Autowired
     TestOnrampMessageProducer producer;
 
@@ -30,7 +35,7 @@ public class QpidIT {
 
 	@BeforeClass
 	public static void setUp() {
-		TestKeystoreHelper.useTestKeystore();
+		TestKeystoreHelper.useTestKeystore(USER_KEYSTORE, TRUSTSTORE);
 	}
 
     @Before
@@ -116,5 +121,11 @@ public class QpidIT {
         Thread.sleep(RECEIVE_TIMEOUT);
         // Expecting one message on dlqueue because message is invalid.
         assertThat(consumer.numberOfMessages(DLQUEUE)).isEqualTo(1);
+    }
+
+    @Test
+    public void goodMessageToOnrap() throws Exception{
+        sendMessageOneCountry("5");
+        Thread.sleep(RECEIVE_TIMEOUT);
     }
 }

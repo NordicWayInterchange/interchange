@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.messaging;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.messaging.IxnMessageProducer;
+import no.vegvesen.ixn.messaging.TestIxnMessageConsumer;
 import no.vegvesen.ixn.model.IxnMessage;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,10 +23,13 @@ public class InterchangeAppIT {
 	@Autowired
 	IxnMessageProducer producer;
 
+	private static final String USER_KEYSTORE = "jks/king_harald.p12";
+	private static final String TRUSTSTORE = "jks/truststore.jks";
+
 
 	@BeforeClass
 	public static void setUp() {
-		TestKeystoreHelper.useTestKeystore();
+		TestKeystoreHelper.useTestKeystore(USER_KEYSTORE, TRUSTSTORE);
 	}
 
 	@Test
