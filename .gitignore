@@ -6,3 +6,4 @@ interchangenode/target/
 debugclient/target/
 esdata/
 tmp/
+qpid/messages/

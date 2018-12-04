@@ -41,39 +41,59 @@
   ],
   "queues": [
     {
-      "name": "test-out",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
-    {
+      "id": "bb885764-c684-4138-8e9d-b1342c7582ae",
       "name": "dlqueue",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
-      "owner": null
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
     },
     {
-      "name": "king_harald",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
-    {
+      "id": "62db8a58-26c6-4121-8a79-2d6db32e13f9",
       "name": "king_gustaf",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
-      "owner": null
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
     },
     {
+      "id": "ada38ba3-a880-4abd-8ecb-d5fb517523db",
+      "name": "king_harald",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
+    },
+    {
+      "id": "502bde7b-a4e9-47cb-912d-d960647746b9",
       "name": "onramp",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
-      "owner": null
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
+    },
+    {
+      "id": "0c78cf35-f87b-4720-906f-6548d0786ec6",
+      "name": "test-out",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
     }
   ],
   "virtualhostaccesscontrolproviders": [

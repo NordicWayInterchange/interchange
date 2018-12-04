@@ -22,6 +22,7 @@ services:
     volumes:
     - "./qpid/dev:/config"
     - "./tmp:/tmp"
+    - "./qpid/messages:/work/qpid.test.io/messages"
     environment:
       CERTIFICATE_FILE: "/tmp/keys/server.crt"
       PRIVATE_KEY_FILE: "/tmp/keys/server.key"
