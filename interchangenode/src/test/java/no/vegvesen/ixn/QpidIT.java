@@ -122,10 +122,4 @@ public class QpidIT {
         // Expecting one message on dlqueue because message is invalid.
         assertThat(consumer.numberOfMessages(DLQUEUE)).isEqualTo(1);
     }
-
-    @Test
-    public void goodMessageToOnrap() throws Exception{
-        sendMessageOneCountry("5");
-        Thread.sleep(RECEIVE_TIMEOUT);
-    }
 }
