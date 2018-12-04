@@ -2,7 +2,6 @@ package no.vegvesen.ixn;
 
 import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsTextMessage;
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.jms.Connection;
@@ -11,15 +10,12 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
 import java.util.Hashtable;
 
 public class AccessControlIT {
-
-	// TODO: Finne ut av hvordan vi skal gi path som er lik for alle miljøer.
 
 	// Keystore and trust store files for integration testing.
 	private static final String JKS_KING_HARALD_P_12 = "jks/king_harald.p12";
@@ -33,13 +29,10 @@ public class AccessControlIT {
 	private static final String URI = "amqps://localhost:63671";
 
 
-
-	@Test
+	@Test(expected = JMSSecurityException.class)
 	public void testKingHaraldCanNotConsumeSE_OUT() throws Exception {
-
-		// Set which keystore to use
 		TestKeystoreHelper.useTestKeystore(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Context context = setContext(URI, SE_OUT, "onramp");
+		Context context = setContext(SE_OUT, "onramp");
 
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
 		factory.setPopulateJMSXUserID(true);
@@ -49,25 +42,13 @@ public class AccessControlIT {
 		connection.start();
 
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-		boolean exceptionThrown = false;
-
-		MessageConsumer messageConsumer = null;
-		try {
-			messageConsumer = session.createConsumer(queueR);
-		} catch (JMSSecurityException e) {
-			exceptionThrown = true;
-		}
-
-		Assert.assertEquals(true, exceptionThrown);
-
+		session.createConsumer(queueR);
 	}
 
-	@Test
+	@Test(expected = JMSSecurityException.class)
 	public void testKingGustafCanNotConsumeNO_OUT() throws Exception {
-
 		TestKeystoreHelper.useTestKeystore(JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS);
-		Context context = setContext(URI, NO_OUT, "onramp");
+		Context context = setContext(NO_OUT, "onramp");
 
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
 		factory.setPopulateJMSXUserID(true);
@@ -78,23 +59,13 @@ public class AccessControlIT {
 
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-		boolean exceptionThrown = false;
-
-		MessageConsumer messageConsumer = null;
-		try {
-			messageConsumer = session.createConsumer(queueR);
-		} catch (JMSSecurityException e) {
-			exceptionThrown = true;
-		}
-
-		Assert.assertEquals(true, exceptionThrown);
-
+		session.createConsumer(queueR);
 	}
 
-	@Test
+	@Test(expected = JMSSecurityException.class)
 	public void KingHaraldCanNotConsumeFromOnramp() throws Exception {
 		TestKeystoreHelper.useTestKeystore(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Context context = setContext(URI, "onramp", "onramp");
+		Context context = setContext("onramp", "onramp");
 
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
 		factory.setPopulateJMSXUserID(true);
@@ -104,25 +75,14 @@ public class AccessControlIT {
 		connection.start();
 
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-		boolean exceptionThrown = false;
-
-		MessageConsumer messageConsumer = null;
-		try {
-			messageConsumer = session.createConsumer(queueR);
-		} catch (JMSSecurityException e) {
-			exceptionThrown = true;
-		}
-
-		Assert.assertEquals(true, exceptionThrown);
+		session.createConsumer(queueR);
 	}
 
 
-	@Test
+	@Test(expected = JMSException.class)
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
-
 		TestKeystoreHelper.useTestKeystore(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Context context = setContext(URI, NO_OUT, "nwEx");
+		Context context = setContext(NO_OUT, "nwEx");
 
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
 		factory.setPopulateJMSXUserID(true);
@@ -134,7 +94,7 @@ public class AccessControlIT {
 
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-		MessageConsumer messageConsumer = session.createConsumer(queueR);
+		session.createConsumer(queueR);
 		MessageProducer messageProducer = session.createProducer(queueS);
 
 		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello world");
@@ -146,87 +106,43 @@ public class AccessControlIT {
 		message.setStringProperty("lon", "10.0");
 		message.setStringProperty("where1", "NO");
 
-		boolean exceptionThrown = false;
-
-		try {
-			messageProducer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-		} catch (JMSException e) {
-			exceptionThrown = true;
-		}
-
-		Assert.assertEquals(true, exceptionThrown);
-
+		messageProducer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 	}
 
-	@Test
+	@Test(expected = JMSException.class)
 	public void userWithInvalidCertificateCannotConnect() throws Exception {
 		TestKeystoreHelper.useTestKeystore(UNCERTIFIED_P_12, TRUSTSTORE_JKS);
-		Context context = setContext(URI, "test-out", "onramp");
+		Context context = setContext("test-out", "onramp");
 
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
 		factory.setPopulateJMSXUserID(true);
 
-		Connection connection = null;
-
-		boolean throwsException = false;
-
-		try {
-			connection = factory.createConnection();
-			Destination queueR = (Destination) context.lookup("receiveQueue");
-			Destination queueS = (Destination) context.lookup("sendQueue");
-			connection.start();
-
-
-		} catch (Exception e) {
-			System.out.println(e.getClass().getName());
-			throwsException = true;
-		}
-
-
-		Assert.assertEquals(true, throwsException);
-
+		Connection connection = factory.createConnection();
+		connection.start();
 	}
 
 	@Test
-	public void userWithValidCertificateCanConnect() throws Exception{
+	public void userWithValidCertificateCanConnect() throws Exception {
 		TestKeystoreHelper.useTestKeystore(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Context context = setContext(URI, NO_OUT, "onramp");
+		Context context = setContext(NO_OUT, "onramp");
 
 		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
 		factory.setPopulateJMSXUserID(true);
 
-		Connection connection = null;
-
-		boolean throwsException = false;
-
-		try {
-			connection = factory.createConnection();
-			Destination queueR = (Destination) context.lookup("receiveQueue");
-			Destination queueS = (Destination) context.lookup("sendQueue");
-			connection.start();
-
-
-		} catch (Exception e) {
-			System.out.println(e.getClass().getName());
-
-			throwsException = true;
-		}
-
-		Assert.assertEquals(false, throwsException);
-
+		Connection connection = factory.createConnection();
+		connection.start();
 	}
 
-	private static Context setContext(String uri, String receiveQueue, String sendQueue) throws Exception {
+	private static Context setContext(String receiveQueue, String sendQueue) throws Exception {
 		Hashtable<Object, Object> env = new Hashtable<>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
-		env.put("connectionfactory.myFactoryLookupTLS", uri);
+		env.put("connectionfactory.myFactoryLookupTLS", URI);
 		env.put("queue.receiveQueue", receiveQueue);
 		env.put("queue.sendQueue", sendQueue);
 		javax.naming.Context context = new javax.naming.InitialContext(env);
 
 		return context;
 	}
-
 
 
 }

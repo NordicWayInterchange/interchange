@@ -142,7 +142,6 @@ public class DebugClient implements MessageListener {
 		sendMessage("no", msg);
 	}
 
-
 	private void sendMessage(String where, String msg) {
 		try {
 			JmsTextMessage message = (JmsTextMessage) session.createTextMessage(msg);
