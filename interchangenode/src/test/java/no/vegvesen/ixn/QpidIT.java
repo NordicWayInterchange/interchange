@@ -22,7 +22,7 @@ public class QpidIT {
     private static final String SE_OUT = "SE-out";
     private static final String DLQUEUE = "dlqueue";
     private static final String NO_OBSTRUCTION = "NO-Obstruction";
-    @Autowired
+    @Autowiredls
     TestOnrampMessageProducer producer;
 
     @Autowired
