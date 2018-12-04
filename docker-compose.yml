@@ -9,8 +9,6 @@ services:
       AMQP_URI: amqp://qpid
       AMQP_USER: interchange
       AMQP_PASSWORD: "12345678"
-    volumes:
-      - ./tmp/interchange_logs:/var/interchange/log
 
   qpid:
     build: ./qpid
