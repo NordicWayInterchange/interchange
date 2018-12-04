@@ -138,20 +138,19 @@
                                 <volumes>
                                     <bind>
                                         <volume>
-                                            ${project.basedir}\src\test\resources\localhost.json:/config/default.json
+                                            ${project.basedir}/src/test/resources/qpid:/config
                                         </volume>
                                         <volume>
-                                            ${project.basedir}\src\test\resources\jks\localhost.crt:/secure/server.crt
-                                        </volume>
-                                        <volume>
-                                            ${project.basedir}\src\test\resources\jks\localhost.key:/secure/server.key
+                                            ${project.basedir}/src/test/resources/jks:/tmp
                                         </volume>
                                     </bind>
                                 </volumes>
                                 <env>
-                                    <PRIVATE_KEY_FILE>/secure/server.key</PRIVATE_KEY_FILE>
-                                    <CERTIFICATE_FILE>/secure/server.crt</CERTIFICATE_FILE>
-                                    <VHOST_FILE>/config/default.json</VHOST_FILE>
+                                    <CERTIFICATE_FILE>/tmp/localhost.crt</CERTIFICATE_FILE>
+                                    <PRIVATE_KEY_FILE>/tmp/localhost.key</PRIVATE_KEY_FILE>
+                                    <VHOST_FILE>/config/localhost.json</VHOST_FILE>
+                                    <GROUPS_FILE>/config/groups</GROUPS_FILE>
+                                    <PASSWD_FILE>/config/passwd</PASSWD_FILE>
                                 </env>
                             </run>
                         </image>
