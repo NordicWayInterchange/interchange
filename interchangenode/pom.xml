@@ -58,14 +58,6 @@
             <artifactId>netty-handler</artifactId>
             <version>4.1.28.Final</version>
         </dependency>
-<!--
-        <dependency>
-            <groupId>com.github.stephenc.jcip</groupId>
-            <artifactId>jcip-annotations</artifactId>
-            <version>1.0-1</version>
-            <scope>test</scope>
-        </dependency>
--->
     </dependencies>
 
     <build>
@@ -133,7 +125,7 @@
                         </image>
                         <image>
                             <alias>qpid</alias>
-                            <name>qpid62</name>
+                            <name>qpid</name>
                             <build>
                                 <dockerFileDir>${project.basedir}/../qpid/</dockerFileDir>
                             </build>
@@ -164,10 +156,12 @@
                         </image>
                         <image>
                             <alias>qpid</alias>
-                            <name>qpid63</name>
+                            <name>qpid</name>
+<!-- two identical containers on different ports to separate queue-environment. Only one container needs to be built.
                             <build>
                                 <dockerFileDir>${project.basedir}/../qpid/</dockerFileDir>
                             </build>
+-->
                             <run>
                                 <ports>
                                     <port>63671:5671</port>
