@@ -58,6 +58,14 @@
             <artifactId>netty-handler</artifactId>
             <version>4.1.28.Final</version>
         </dependency>
+<!--
+        <dependency>
+            <groupId>com.github.stephenc.jcip</groupId>
+            <artifactId>jcip-annotations</artifactId>
+            <version>1.0-1</version>
+            <scope>test</scope>
+        </dependency>
+-->
     </dependencies>
 
     <build>
@@ -80,7 +88,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <fork>true</fork>
+                    <fork>false</fork>
                     <skip>false</skip>
                 </configuration>
                 <executions>
@@ -125,7 +133,38 @@
                         </image>
                         <image>
                             <alias>qpid</alias>
-                            <name>qpid</name>
+                            <name>qpid62</name>
+                            <build>
+                                <dockerFileDir>${project.basedir}/../qpid/</dockerFileDir>
+                            </build>
+                            <run>
+                                <ports>
+                                    <port>62671:5671</port>
+                                    <port>62672:5672</port>
+                                    <port>62080:8080</port>
+                                </ports>
+                                <volumes>
+                                    <bind>
+                                        <volume>
+                                            ${project.basedir}/src/test/resources/qpid:/config
+                                        </volume>
+                                        <volume>
+                                            ${project.basedir}/src/test/resources/jks:/tmp
+                                        </volume>
+                                    </bind>
+                                </volumes>
+                                <env>
+                                    <CERTIFICATE_FILE>/tmp/localhost.crt</CERTIFICATE_FILE>
+                                    <PRIVATE_KEY_FILE>/tmp/localhost.key</PRIVATE_KEY_FILE>
+                                    <VHOST_FILE>/config/localhost.json</VHOST_FILE>
+                                    <GROUPS_FILE>/config/groups</GROUPS_FILE>
+                                    <PASSWD_FILE>/config/passwd</PASSWD_FILE>
+                                </env>
+                            </run>
+                        </image>
+                        <image>
+                            <alias>qpid</alias>
+                            <name>qpid63</name>
                             <build>
                                 <dockerFileDir>${project.basedir}/../qpid/</dockerFileDir>
                             </build>

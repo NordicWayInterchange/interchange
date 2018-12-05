@@ -1,20 +1,20 @@
 package no.vegvesen.ixn.messaging;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
-import no.vegvesen.ixn.messaging.IxnMessageProducer;
-import no.vegvesen.ixn.messaging.TestIxnMessageConsumer;
 import no.vegvesen.ixn.model.IxnMessage;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@ActiveProfiles("62")
 public class InterchangeAppIT {
 
 	@Autowired
