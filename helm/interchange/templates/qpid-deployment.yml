@@ -44,13 +44,13 @@ spec:
           value: /config/groups
         - name: PASSWD_FILE
           value: /config/passwd
-        - name: EXTERNAL_USERS
-          value: "{{ range .Values.qpid.users }}{{ .name }} {{ end }}"
         volumeMounts:
         - name: config
           mountPath: /config
         - name: secure
           mountPath: /secure
+        - name: storage
+          mountPath: /work/{{ required "must provide external_name" .Values.external_name }}
         readinessProbe:
           initialDelaySeconds: 5
           tcpSocket:
@@ -61,4 +61,11 @@ spec:
           name: {{ .Release.Name }}-qpid
       - name: secure
         secret:
-          secretName: {{ .Values.qpid.tls_secret_name }}
+          secretName: {{ required "must provide secret" .Values.qpid.tls_secret_name }}
+      - name: storage
+      {{- if .Values.qpid.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-qpid
+      {{- else }}
+        emptyDir: {}
+      {{- end -}}

@@ -1,0 +1,18 @@
+{{- if .Values.qpid.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-qpid
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: qpid
+    release: {{ .Release.Name }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.qpid.persistence.size | quote }}
+  storageClassName: {{ .Values.qpid.persistence.storageClassName }}
+{{- end -}}

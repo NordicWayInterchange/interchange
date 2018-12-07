@@ -70,8 +70,10 @@ public class InterchangeApp{
 				producer.sendMessage(DLQUEUE, textMessage);
 			}
 		}  catch (JMSException jmse){
+			logger.error("Error while receiving message, rethrowing exception to keep the message on the queue.", jmse);
 			throw jmse;
 		} catch (Exception e) {
+			logger.error("Exception when processing message, sending bad message to dead letter queue. Invalid message.", e);
 			producer.sendMessage(DLQUEUE, textMessage);
 		} finally {
 			MDCUtil.removeLogVariables();
@@ -94,7 +96,7 @@ public class InterchangeApp{
 			logger.warn("Sending bad message to dead letter queue. 'what' not set.");
 			producer.sendMessage(DLQUEUE, message);
 		} else{
-			logger.info("Sending valid message to test-out.");
+			logger.info("Sending valid message to {}.", NWEXCHANGE);
 			producer.sendMessage(NWEXCHANGE, message);
 		}
 	}
