@@ -62,7 +62,6 @@ public class InterchangeAppTest {
         when(message.getLon()).thenReturn(63.0d);
         // geolookup on lat and lon gives a non-empty list of countries.
         when(message.hasCountries()).thenReturn(true);
-        when(message.hasWhat()).thenReturn(true);
 
         app.handleOneMessage(message);
         verify(producer, times(1)).sendMessage(eq("nwEx"), any(IxnMessage.class));
