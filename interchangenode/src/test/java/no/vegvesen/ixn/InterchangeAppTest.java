@@ -36,7 +36,7 @@ public class InterchangeAppTest {
     public void validMessagePassesIsValid()throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
         when(textMessage.getText()).thenReturn("fisk");
-        when(textMessage.getFloatProperty(any())).thenReturn(1.0f); // LAT and LON
+        when(textMessage.getDoubleProperty(any())).thenReturn(1.0d); // LAT and LON
         when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction"); // WHAT
         when(textMessage.getStringProperty(USERID)).thenReturn("1234"); // userID
         when(textMessage.getStringProperty(WHO)).thenReturn("VolvoCloud"); // WHO
@@ -48,7 +48,7 @@ public class InterchangeAppTest {
     public void invalidMessageFailsIsValid()throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
 
-        when(textMessage.getFloatProperty(any())).thenReturn(1.0f); // LAT and LON
+        when(textMessage.getDoubleProperty(any())).thenReturn(1.0d); // LAT and LON
         when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction"); // WHAT
         when(textMessage.getStringProperty(USERID)).thenReturn(""); // Missing userID
         when(textMessage.getStringProperty(WHO)).thenReturn("VolvoCloud"); // WHO
@@ -58,8 +58,8 @@ public class InterchangeAppTest {
 
     @Test
     public void validMessageIsSent(){
-        when(message.getLat()).thenReturn(10.0f);
-        when(message.getLon()).thenReturn(63.0f);
+        when(message.getLat()).thenReturn(10.0d);
+        when(message.getLon()).thenReturn(63.0d);
         // geolookup on lat and lon gives a non-empty list of countries.
         when(message.hasCountries()).thenReturn(true);
         when(message.hasWhat()).thenReturn(true);
@@ -70,8 +70,8 @@ public class InterchangeAppTest {
 
     @Test
     public void  messageWithoutCountryIsDropped(){
-        when(message.getLat()).thenReturn(10.0f);
-        when(message.getLon()).thenReturn(63.0f);
+        when(message.getLat()).thenReturn(10.0d);
+        when(message.getLon()).thenReturn(63.0d);
         when(message.hasCountries()).thenReturn(false);
 
         app.handleOneMessage(message);
@@ -83,7 +83,7 @@ public class InterchangeAppTest {
         TextMessage textMessage = mock(TextMessage.class);
         when(textMessage.getText()).thenReturn("fisk");
         when(textMessage.getStringProperty(WHAT)).thenReturn(","); // Invalid what - will split to empty string.
-        when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
+        when(textMessage.getDoubleProperty(any())).thenReturn(1.0d);
 
         Assert.assertFalse(app.isValid(textMessage));
     }
@@ -91,7 +91,7 @@ public class InterchangeAppTest {
     @Test
     public void failedGetOrSetMethodOnMessageFailsTestIsValid() throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getFloatProperty(LAT)).thenThrow(JMSException.class);
+        when(textMessage.getDoubleProperty(LAT)).thenThrow(JMSException.class);
 
         Assert.assertFalse(app.isValid(textMessage));
     }
@@ -101,7 +101,7 @@ public class InterchangeAppTest {
         TextMessage textMessage = mock(TextMessage.class);
         when(textMessage.getText()).thenReturn("fisk");
         when(textMessage.getStringProperty(WHAT)).thenReturn(","); // Invalid what will split to empty string.
-        when(textMessage.getFloatProperty(any())).thenReturn(1.0f);
+        when(textMessage.getDoubleProperty(any())).thenReturn(1.0d);
 
         app.receiveMessage(textMessage);
         verify(producer, times(1)).sendMessage(eq("dlqueue"), any(TextMessage.class));
@@ -110,7 +110,7 @@ public class InterchangeAppTest {
     @Test
     public void receivedMessageToThrowExceptionSendsToDlQueue() throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
-        when(textMessage.getFloatProperty(any())).thenThrow(new NumberFormatException());
+        when(textMessage.getDoubleProperty(any())).thenThrow(new NumberFormatException());
 
         app.receiveMessage(textMessage);
         verify(producer, times(1)).sendMessage(eq("dlqueue"), any(TextMessage.class));

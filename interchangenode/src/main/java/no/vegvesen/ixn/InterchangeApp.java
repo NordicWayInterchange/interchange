@@ -41,8 +41,8 @@ public class InterchangeApp{
 		logger.info("Validating message.");
 
 		try {
-			float lon = textMessage.getFloatProperty(LON);
-			float lat = textMessage.getFloatProperty(LAT);
+			double lon = textMessage.getDoubleProperty(LON);
+			double lat = textMessage.getDoubleProperty(LAT);
 			String who = textMessage.getStringProperty(WHO);
 			String userID = textMessage.getStringProperty(USERID);
 			String body = textMessage.getText();

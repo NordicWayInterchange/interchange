@@ -50,8 +50,8 @@ public class IxnMessageProducer {
 				this.jmsTemplate.send(destination, session -> {
 
 					TextMessage outgoingMessage = session.createTextMessage();
-					outgoingMessage.setFloatProperty(LAT, message.getLat());
-					outgoingMessage.setFloatProperty(LON, message.getLon());
+					outgoingMessage.setDoubleProperty(LAT, message.getLat());
+					outgoingMessage.setDoubleProperty(LON, message.getLon());
 					outgoingMessage.setStringProperty(WHO, message.getWho());
 					outgoingMessage.setStringProperty(USERID, message.getUserID());
 					outgoingMessage.setStringProperty(WHERE, country);
