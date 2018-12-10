@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import java.util.Collections;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 import static org.mockito.Mockito.*;
@@ -38,19 +39,16 @@ public class InterchangeAppTest {
         when(textMessage.getText()).thenReturn("fisk");
         when(textMessage.getDoubleProperty(any())).thenReturn(1.0d); // LAT and LON
         when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction"); // WHAT
-        when(textMessage.getStringProperty(USERID)).thenReturn("1234"); // userID
         when(textMessage.getStringProperty(WHO)).thenReturn("VolvoCloud"); // WHO
-
         Assert.assertTrue(app.isValid(textMessage));
     }
 
     @Test
-    public void invalidMessageFailsIsValid()throws JMSException{
+    public void validMessageWithoutUserIdinvalidMessageFailsIsValid()throws JMSException{
         TextMessage textMessage = mock(TextMessage.class);
 
         when(textMessage.getDoubleProperty(any())).thenReturn(1.0d); // LAT and LON
-        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstruction"); // WHAT
-        when(textMessage.getStringProperty(USERID)).thenReturn(""); // Missing userID
+        when(textMessage.getStringProperty(WHAT)).thenReturn(""); // WHAT
         when(textMessage.getStringProperty(WHO)).thenReturn("VolvoCloud"); // WHO
 
         Assert.assertFalse(app.isValid(textMessage));
@@ -103,7 +101,7 @@ public class InterchangeAppTest {
         when(textMessage.getDoubleProperty(any())).thenReturn(1.0d);
 
         app.receiveMessage(textMessage);
-        verify(producer, times(1)).sendMessage(eq("dlqueue"), any(TextMessage.class));
+        verify(producer, times(1)).sendMessage(eq(InterchangeApp.DLQUEUE), any(TextMessage.class));
     }
 
     @Test
@@ -112,7 +110,7 @@ public class InterchangeAppTest {
         when(textMessage.getDoubleProperty(any())).thenThrow(new NumberFormatException());
 
         app.receiveMessage(textMessage);
-        verify(producer, times(1)).sendMessage(eq("dlqueue"), any(TextMessage.class));
+        verify(producer, times(1)).sendMessage(eq(InterchangeApp.DLQUEUE), any(TextMessage.class));
     }
 
     @Test(expected = JMSException.class)
@@ -121,6 +119,19 @@ public class InterchangeAppTest {
         when(textMessage.getText()).thenThrow(new JMSException("test-exception"));
 
         app.receiveMessage(textMessage);
-        verify(producer, times(0)).sendMessage(eq("dlqueue"), any(TextMessage.class));
+        verify(producer, times(0)).sendMessage(eq(InterchangeApp.DLQUEUE), any(TextMessage.class));
+    }
+
+    @Test
+    public void receivedValidTextMessageSentToExchange() throws JMSException{
+        TextMessage textMessage = mock(TextMessage.class);
+        when(textMessage.getText()).thenReturn("fisk");
+        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstructions");
+        when(textMessage.getStringProperty(WHO)).thenReturn("Bouvet Island Traffic Agency");
+        when(textMessage.getDoubleProperty(any())).thenReturn(1.0d);
+        when(geoLookup.getCountries(anyDouble(), anyDouble())).thenReturn(Collections.singletonList("NO"));
+
+        app.receiveMessage(textMessage);
+        verify(producer, times(1)).sendMessage(eq(InterchangeApp.NWEXCHANGE), any(IxnMessage.class));
     }
 }
