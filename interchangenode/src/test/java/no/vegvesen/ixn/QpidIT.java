@@ -23,7 +23,6 @@ public class QpidIT {
     private static final String DLQUEUE = "dlqueue";
     private static final String NO_OBSTRUCTION = "NO-Obstruction";
 
-    private static final String USER_KEYSTORE = "jks/guest.p12";
     private static final String TRUSTSTORE = "jks/truststore.jks";
 
 
@@ -35,7 +34,8 @@ public class QpidIT {
 
 	@BeforeClass
 	public static void setUp() {
-		TestKeystoreHelper.useTestKeystore(USER_KEYSTORE, TRUSTSTORE);
+	    //TODO: Initiate truststore in jms connection factory
+		TestKeystoreHelper.useTestKeystore(null, TRUSTSTORE);
 	}
 
     @Before

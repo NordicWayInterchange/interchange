@@ -20,6 +20,7 @@ import no.vegvesen.ixn.model.IxnMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +36,7 @@ public class IxnMessageProducer {
 	private static Logger logger = LoggerFactory.getLogger(IxnMessageProducer.class);
 
 	@Autowired
-	public IxnMessageProducer(JmsTemplate jmsTemplate) {
+	public IxnMessageProducer(@Qualifier("interchangeTemplate") JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
 	}
 

@@ -8,12 +8,15 @@ public class TestKeystoreHelper {
 	public static final String JAVAX_NET_SSL_TRUST_STORE = "javax.net.ssl.trustStore";
 
 	public static void useTestKeystore(String userKeystore, String truststore) {
-		System.setProperty(JAVAX_NET_SSL_KEY_STORE, getFilePath(userKeystore));
-		System.setProperty("javax.net.ssl.keyStorePassword", "password");
-		System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-
-		System.setProperty(JAVAX_NET_SSL_TRUST_STORE, getFilePath(truststore));
-		System.setProperty("javax.net.ssl.trustStorePassword", "password");
+		if (userKeystore != null) {
+			System.setProperty(JAVAX_NET_SSL_KEY_STORE, getFilePath(userKeystore));
+			System.setProperty("javax.net.ssl.keyStorePassword", "password");
+			System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
+		}
+		if (truststore != null) {
+			System.setProperty(JAVAX_NET_SSL_TRUST_STORE, getFilePath(truststore));
+			System.setProperty("javax.net.ssl.trustStorePassword", "password");
+		}
 	}
 
 	private static String getFilePath(String jksTestResource) {
