@@ -55,43 +55,63 @@ data:
       ],
       "queues": [
         {
+          "id": "7C1F3C61-AA9F-4339-A8DF-C0FDB6930D45",
           "name": "test-out",
           "type": "standard",
           "durable": true,
           "holdOnPublishEnabled": false,
-          "owner": null
+          "messageDurability": "ALWAYS",
+          "owner": null,
+          "lastUpdatedBy": "interchange",
+          "createdBy": "interchange"
         },
         {
+          "id": "0EF5AA55-E3A8-4DD6-A394-46E1F6AED77A",
           "name": "dlqueue",
           "type": "standard",
           "durable": true,
           "holdOnPublishEnabled": false,
-          "owner": null
+          "messageDurability": "ALWAYS",
+          "owner": null,
+          "lastUpdatedBy": "interchange",
+          "createdBy": "interchange"
         },
         {{- range .Values.qpid.users }}
         {
+          "id": "{{ .uuid}}",
           "name": "{{ .name }}",
           "type": "standard",
           "durable": true,
           "holdOnPublishEnabled": false,
-          "owner": null
+          "messageDurability": "ALWAYS",
+          "owner": null,
+          "lastUpdatedBy": "interchange",
+          "createdBy": "interchange"
         },
         {{- end }}
         {{- range .Values.qpid.additional_queues }}
         {
+          "id": "{{ .uuid}}",
           "name": "{{ .name }}",
           "type": "standard",
           "durable": true,
           "holdOnPublishEnabled": false,
-          "owner": null
+          "messageDurability": "ALWAYS",
+          "owner": null,
+          "lastUpdatedBy": "interchange",
+          "createdBy": "interchange"
         },
         {{- end }}
         {
+          "id": "01A46DBE-B8A3-408D-BF32-AD8DCEF5F569",
           "name": "onramp",
           "type": "standard",
           "durable": true,
           "holdOnPublishEnabled": false,
-          "owner": null
+          "messageDurability": "ALWAYS",
+          "owner": null,
+          "lastUpdatedBy": "interchange",
+          "createdBy": "interchange"
         }
       ],
       "virtualhostaccesscontrolproviders": [
