@@ -1,8 +1,11 @@
 #!/bin/bash -eu
 
+set -x
+
 pushd ${QPID_WORK}
 
 ENV=${1:-default}
+VHOST_NAME="$(jq -r '.name' < ${VHOST_FILE})"
 
 verifyExternalName() {
     echo "verifying that vhost name and certificate CN match..."
@@ -24,5 +27,11 @@ if [[ ${ENV} == "dev" ]]; then
 else
     verifyExternalName
 fi
+
+for file in $(find ${QPID_WORK} -name *.lck); do
+    rm -f "$file"
+done
+
+
 
 /usr/local/qpid/bin/qpid-server
