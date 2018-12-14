@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.messaging;
 
-import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.model.IxnMessage;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +10,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
 
+/**
+ * Verifies that it is possible to send messages to the amqp-server.
+ * It reuses the spring wiring of jms resources from the interchange app to send and receive messages in the tests.
+ * This test is run with profile "62" and uses ports in the 62...-series.
+ * The amqp-url, username and password is specified in the application-62.properties.
+ *
+ * @See AccessControlIT uses separate user client connections.
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("62")
@@ -22,15 +28,6 @@ public class InterchangeAppIT {
 
 	@Autowired
 	IxnMessageProducer producer;
-
-	private static final String USER_KEYSTORE = "jks/king_harald.p12";
-	private static final String TRUSTSTORE = "jks/truststore.jks";
-
-
-	@BeforeClass
-	public static void setUp() {
-		TestKeystoreHelper.useTestKeystore(USER_KEYSTORE, TRUSTSTORE);
-	}
 
 	@Test
 	public void sendValidMessage() {
