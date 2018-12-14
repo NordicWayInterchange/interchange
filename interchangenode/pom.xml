@@ -152,6 +152,10 @@
                                     <GROUPS_FILE>/config/groups</GROUPS_FILE>
                                     <PASSWD_FILE>/config/passwd</PASSWD_FILE>
                                 </env>
+                                <wait>
+                                    <healthy>true</healthy>
+                                    <time>60000</time>
+                                </wait>
                             </run>
                         </image>
                         <image>
@@ -185,6 +189,11 @@
                                     <GROUPS_FILE>/config/groups</GROUPS_FILE>
                                     <PASSWD_FILE>/config/passwd</PASSWD_FILE>
                                 </env>
+                                <wait>
+                                    <healthy>true</healthy>
+                                    <time>60000</time>
+                                </wait>
+
                             </run>
                         </image>
 

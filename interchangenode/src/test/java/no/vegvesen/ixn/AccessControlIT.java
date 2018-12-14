@@ -19,7 +19,7 @@ public class AccessControlIT {
 	private static final String SE_OUT = "SE-out";
 	private static final String NO_OUT = "NO-out";
 
-	private static final String URI = "amqps://localhost:63671";
+	private static final String URI = "amqps://localhost:62671";
 
 
 	@Test(expected = JMSSecurityException.class)
