@@ -74,6 +74,7 @@ public class IxnMessageProducer {
 							message.getBody());
 					return outgoingMessage;
 				});
+				logger.info("Message sent to country {} ", country);
 			}
 		}
 	}
