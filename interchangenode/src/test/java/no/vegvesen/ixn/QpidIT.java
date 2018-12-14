@@ -2,19 +2,27 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.messaging.CountIxnMessageConsumer;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Verifies that the InterchangeApp routes messages from the onramp via the exchange and further to the out-queues.
+ * This test is run in a separate qpid-server in order to count received messages from one set of tests.
+ * It reuses the spring wiring of jms resources from the interchange app to send and receive messages in the tests.
+ * The amqp-url, username and password is specified in the application-63.properties.
+ *
+ * @See AccessControlIT uses separate user client connections.
+ */
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@ActiveProfiles("63")
 public class QpidIT {
 
     private static final long RECEIVE_TIMEOUT = 2000;
@@ -23,20 +31,11 @@ public class QpidIT {
     private static final String DLQUEUE = "dlqueue";
     private static final String NO_OBSTRUCTION = "NO-Obstruction";
 
-    private static final String USER_KEYSTORE = "jks/guest.p12";
-    private static final String TRUSTSTORE = "jks/truststore.jks";
-
-
     @Autowired
     TestOnrampMessageProducer producer;
 
     @Autowired
     CountIxnMessageConsumer consumer;
-
-	@BeforeClass
-	public static void setUp() {
-		TestKeystoreHelper.useTestKeystore(USER_KEYSTORE, TRUSTSTORE);
-	}
 
     @Before
     public void before()throws Exception{
