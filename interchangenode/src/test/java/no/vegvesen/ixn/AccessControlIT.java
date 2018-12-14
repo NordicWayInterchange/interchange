@@ -8,6 +8,9 @@ import javax.jms.*;
 import javax.naming.Context;
 import java.util.Hashtable;
 
+/**
+ * Verifies access control lists where username comes from the common name (CN) of the user certificate.
+ */
 public class AccessControlIT {
 
 	// Keystore and trust store files for integration testing.
