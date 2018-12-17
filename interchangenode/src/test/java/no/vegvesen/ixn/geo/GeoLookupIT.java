@@ -30,18 +30,13 @@ public class GeoLookupIT {
 
 	@Test
 	public void getPointAtBorderNorwaySwedenReturnsTwoCountries() {
-		List<String> countries = geoLookup.getCountries(60f, 12.5f);
+		List<String> countries = geoLookup.getCountries(60d, 12.5d);
 		assertThat(countries).hasSize(2).contains("SE").contains("NO");
 	}
 
 	@Test
 	public void getPointInTheNorthSeaReturnsNoCountries() {
-		List<String> countries = geoLookup.getCountries(60f, 4.0f);
+		List<String> countries = geoLookup.getCountries(60d, 4.0d);
 		assertThat(countries).hasSize(0);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void getPointInvalidStringThrowsException() {
-		geoLookup.getCountries(";drop", "table");
 	}
 }

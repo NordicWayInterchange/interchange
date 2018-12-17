@@ -16,20 +16,8 @@ public class GeoLookup{
     }
 
 
-    public List<String> getCountries(float lat, float lon){
+    public List<String> getCountries(double lat, double lon){
         String sql = "SELECT iso2 FROM worldshape_10kmbuffer WHERE ST_Within(ST_GeomFromText(?), worldshape_10kmbuffer.geom)";
         return jdbcTemplate.queryForList(sql, new Point[] {new Point(lon, lat)}, new int[]{Point.POINT}, String.class);
     }
-
-    @SuppressWarnings("WeakerAccess")
-    public List<String> getCountries(String latitude, String longitude){
-        try {
-            float lat = Float.parseFloat(latitude);
-            float lon = Float.parseFloat(longitude);
-            return getCountries(lat, lon);
-        } catch (Exception e){
-            throw new IllegalArgumentException(e);
-        }
-    }
-
 }

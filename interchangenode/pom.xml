@@ -80,7 +80,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <fork>true</fork>
+                    <fork>false</fork>
                     <skip>false</skip>
                 </configuration>
                 <executions>
@@ -131,6 +131,43 @@
                             </build>
                             <run>
                                 <ports>
+                                    <port>62671:5671</port>
+                                    <port>62672:5672</port>
+                                    <port>62080:8080</port>
+                                </ports>
+                                <volumes>
+                                    <bind>
+                                        <volume>
+                                            ${project.basedir}/src/test/resources/qpid:/config
+                                        </volume>
+                                        <volume>
+                                            ${project.basedir}/src/test/resources/jks:/tmp
+                                        </volume>
+                                    </bind>
+                                </volumes>
+                                <env>
+                                    <CERTIFICATE_FILE>/tmp/localhost.crt</CERTIFICATE_FILE>
+                                    <PRIVATE_KEY_FILE>/tmp/localhost.key</PRIVATE_KEY_FILE>
+                                    <VHOST_FILE>/config/localhost.json</VHOST_FILE>
+                                    <GROUPS_FILE>/config/groups</GROUPS_FILE>
+                                    <PASSWD_FILE>/config/passwd</PASSWD_FILE>
+                                </env>
+                                <wait>
+                                    <healthy>true</healthy>
+                                    <time>60000</time>
+                                </wait>
+                            </run>
+                        </image>
+                        <image>
+                            <alias>qpid</alias>
+                            <name>qpid</name>
+<!-- two identical containers on different ports to separate queue-environment. Only one container needs to be built.
+                            <build>
+                                <dockerFileDir>${project.basedir}/../qpid/</dockerFileDir>
+                            </build>
+-->
+                            <run>
+                                <ports>
                                     <port>63671:5671</port>
                                     <port>63672:5672</port>
                                     <port>63080:8080</port>
@@ -152,6 +189,11 @@
                                     <GROUPS_FILE>/config/groups</GROUPS_FILE>
                                     <PASSWD_FILE>/config/passwd</PASSWD_FILE>
                                 </env>
+                                <wait>
+                                    <healthy>true</healthy>
+                                    <time>60000</time>
+                                </wait>
+
                             </run>
                         </image>
 

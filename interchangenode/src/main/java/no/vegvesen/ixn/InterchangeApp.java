@@ -41,14 +41,12 @@ public class InterchangeApp{
 		logger.info("Validating message.");
 
 		try {
-			float lon = textMessage.getFloatProperty(LON);
-			float lat = textMessage.getFloatProperty(LAT);
+			double lon = textMessage.getDoubleProperty(LON);
+			double lat = textMessage.getDoubleProperty(LAT);
 			String who = textMessage.getStringProperty(WHO);
-			String userID = textMessage.getStringProperty(USERID);
 			String body = textMessage.getText();
 			List<String> what = IxnMessage.parseWhat(textMessage.getStringProperty(WHAT));
-			logger.info("sending lon {} lat {} who {} userID {}  what {} body {}", lon, lat, who, userID, what, body);
-			return (lon != 0 && lat != 0 && who != null && userID != null && body != null && what.size() != 0);
+			return (lon != 0 && lat != 0 && who != null && body != null && what.size() != 0);
 		}catch(JMSException jmse){
 			logger.error("Failed to get message property from TextMessage.", jmse);
 			return false;
@@ -81,7 +79,13 @@ public class InterchangeApp{
 	}
 
 	void handleOneMessage(IxnMessage message){
-		logger.info("handling one message body: {}", message.getBody());
+		logger.info("handling message lon {} lat {} who {} userID {}  what {}",
+				message.getLon(),
+				message.getLat(),
+				message.getWho(),
+				message.getUserID(),
+				message.getWhat());
+		logger.debug("handling one message body: {}", message.getBody());
 
 		List<String> countries = geoLookup.getCountries(message.getLat(), message.getLon());
 		message.setCountries(countries);
@@ -90,10 +94,6 @@ public class InterchangeApp{
 		if(!message.hasCountries()){
 			// Message does not have any countries
 			logger.warn("Sending bad message to dead letter queue. 'where1' not set.");
-			producer.sendMessage(DLQUEUE, message);
-		}else if(!message.hasWhat()){
-			// Message does not have any situation records
-			logger.warn("Sending bad message to dead letter queue. 'what' not set.");
 			producer.sendMessage(DLQUEUE, message);
 		} else{
 			logger.info("Sending valid message to {}.", NWEXCHANGE);

@@ -14,8 +14,8 @@ public class IxnMessage {
     private final String who;
     private final String userID;
     private long expiration;
-    private final float lat;
-    private final float lon;
+    private final double lat;
+    private final double lon;
     private final List<String> what;
     private final String body;
     private List<String> countries = new ArrayList<>();
@@ -26,8 +26,8 @@ public class IxnMessage {
         this(textMessage.getStringProperty(WHO),
                 textMessage.getStringProperty(USERID),
                 textMessage.getJMSExpiration(),
-                textMessage.getFloatProperty(LAT),
-                textMessage.getFloatProperty(LON),
+                textMessage.getDoubleProperty(LAT),
+                textMessage.getDoubleProperty(LON),
                 parseWhat(textMessage.getStringProperty(WHAT)),
                 textMessage.getText());
         String how = textMessage.getStringProperty(HOW);
@@ -40,7 +40,7 @@ public class IxnMessage {
         }
     }
 
-    public IxnMessage(String who, String userID, long expiration, float lat, float lon, List<String> what, String body){
+    public IxnMessage(String who, String userID, long expiration, double lat, double lon, List<String> what, String body){
         this.who = who;
         this.userID = userID;
         this.lat = lat;
@@ -62,11 +62,11 @@ public class IxnMessage {
         return expiration;
     }
 
-    public float getLat() {
+    public double getLat() {
         return lat;
     }
 
-    public float getLon() {
+    public double getLon() {
         return lon;
     }
 
