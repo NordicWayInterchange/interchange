@@ -1,17 +1,15 @@
 package no.vegvesen.ixn;
 
-import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.Test;
 
 import javax.jms.*;
 import javax.naming.Context;
-import java.util.Hashtable;
 
 /**
  * Verifies access control lists where username comes from the common name (CN) of the user certificate.
  */
-public class AccessControlIT {
+public class AccessControlIT extends IxnBaseIT {
 
 	// Keystore and trust store files for integration testing.
 	private static final String JKS_KING_HARALD_P_12 = "jks/king_harald.p12";
@@ -27,13 +25,9 @@ public class AccessControlIT {
 
 	@Test(expected = JMSSecurityException.class)
 	public void testKingHaraldCanNotConsumeSE_OUT() throws Exception {
-		Context context = setContext(SE_OUT, "onramp");
+		Context context = setContext(URI, SE_OUT, "onramp");
 
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
-		factory.setPopulateJMSXUserID(true);
-		factory.setSslContext(TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-
-		Connection connection = factory.createConnection();
+		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
 		Destination queueR = (Destination) context.lookup("receiveQueue");
 		connection.start();
 
@@ -43,12 +37,8 @@ public class AccessControlIT {
 
 	@Test(expected = JMSSecurityException.class)
 	public void testKingGustafCanNotConsumeNO_OUT() throws Exception {
-		Context context = setContext(NO_OUT, "onramp");
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
-		factory.setPopulateJMSXUserID(true);
-		factory.setSslContext(TestKeystoreHelper.sslContext(JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS));
-
-		Connection connection = factory.createConnection();
+		Context context = setContext(URI, NO_OUT, "onramp");
+		Connection connection = createConnection(context, JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS);
 		Destination queueR = (Destination) context.lookup("receiveQueue");
 		connection.start();
 
@@ -59,13 +49,9 @@ public class AccessControlIT {
 
 	@Test(expected = JMSSecurityException.class)
 	public void KingHaraldCanNotConsumeFromOnramp() throws Exception {
-		Context context = setContext("onramp", "onramp");
+		Context context = setContext(URI, "onramp", "onramp");
 
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
-		factory.setPopulateJMSXUserID(true);
-		factory.setSslContext(TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-
-		Connection connection = factory.createConnection();
+		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
 		Destination queueR = (Destination) context.lookup("receiveQueue");
 		connection.start();
 
@@ -76,13 +62,9 @@ public class AccessControlIT {
 
 	@Test(expected = JMSException.class)
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
-		Context context = setContext(NO_OUT, "nwEx");
+		Context context = setContext(URI, NO_OUT, "nwEx");
 
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
-		factory.setPopulateJMSXUserID(true);
-		factory.setSslContext(TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-
-		Connection connection = factory.createConnection();
+		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
 		Destination queueR = (Destination) context.lookup("receiveQueue");
 		Destination queueS = (Destination) context.lookup("sendQueue");
 		connection.start();
@@ -106,35 +88,18 @@ public class AccessControlIT {
 
 	@Test(expected = JMSException.class)
 	public void userWithInvalidCertificateCannotConnect() throws Exception {
-		Context context = setContext("test-out", "onramp");
+		Context context = setContext(URI, "test-out", "onramp");
 
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
-		factory.setPopulateJMSXUserID(true);
-		factory.setSslContext(TestKeystoreHelper.sslContext(JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS));
-
-		Connection connection = factory.createConnection();
+		Connection connection = createConnection(context, JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS);
 		connection.start();
 	}
 
 	@Test
 	public void userWithValidCertificateCanConnect() throws Exception {
-		Context context = setContext(NO_OUT, "onramp");
+		Context context = setContext(URI, NO_OUT, "onramp");
 
-		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
-		factory.setPopulateJMSXUserID(true);
-		factory.setSslContext(TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-
-		Connection connection = factory.createConnection();
+		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
 		connection.start();
-	}
-
-	private static Context setContext(String receiveQueue, String sendQueue) throws Exception {
-		Hashtable<Object, Object> env = new Hashtable<>();
-		env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
-		env.put("connectionfactory.myFactoryLookupTLS", URI);
-		env.put("queue.receiveQueue", receiveQueue);
-		env.put("queue.sendQueue", sendQueue);
-		return new javax.naming.InitialContext(env);
 	}
 
 
