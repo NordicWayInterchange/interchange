@@ -52,7 +52,7 @@ public  class PerformanceTestIT extends IxnBaseIT{
 	@Test
 	public void testSendReceive2000() throws Exception {
 		Context context = setContext(URI, NO_OUT, "onramp");
-		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
+		Connection connection = createConnection(context);
 		Destination receive = (Destination) context.lookup("receiveQueue");
 		Destination send = (Destination) context.lookup("sendQueue");
 		connection.start();

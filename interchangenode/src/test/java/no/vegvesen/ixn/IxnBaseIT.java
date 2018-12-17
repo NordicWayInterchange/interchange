@@ -24,4 +24,12 @@ public class IxnBaseIT {
 		factory.setSslContext(TestKeystoreHelper.sslContext(keystore, truststore));
 		return factory.createConnection();
 	}
+
+	protected Connection createConnection(Context context) throws NamingException, JMSException {
+		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
+		factory.setPopulateJMSXUserID(true);
+		return factory.createConnection();
+	}
+
+
 }
