@@ -14,6 +14,7 @@ import org.springframework.jms.annotation.JmsListener;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import java.util.Arrays;
 import java.util.List;
 
 import static no.vegvesen.ixn.MessageProperties.*;
@@ -87,9 +88,11 @@ public class InterchangeApp{
 				message.getWhat());
 		logger.debug("handling one message body: {}", message.getBody());
 
-		List<String> countries = geoLookup.getCountries(message.getLat(), message.getLon());
+		//List<String> countries = geoLookup.getCountries(message.getLat(), message.getLon());
+		List<String> countries = Arrays.asList("NO");
 		message.setCountries(countries);
-		logger.info("Message has countries : {} ", countries);
+		//logger.info("Message has countries : {} ", countries);
+		logger.info("Fixed country 'NO' ");
 
 		if(!message.hasCountries()){
 			// Message does not have any countries
