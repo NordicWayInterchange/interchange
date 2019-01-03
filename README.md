@@ -46,3 +46,4 @@ testing, and so the container ports will already be in use.
 If sharing doesn't work (for example postrges saying it can't write log files),
 try unsharing and then sharing your local disk (usually c:) in the docker settings under "Shared Drives"
 
+Also, the docker command may sometimes fail to set up the containers properly. A restart of the docker daemon should fix it.
