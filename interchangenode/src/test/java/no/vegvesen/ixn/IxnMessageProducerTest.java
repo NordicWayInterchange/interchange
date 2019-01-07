@@ -31,10 +31,9 @@ public class IxnMessageProducerTest {
     }
 
     @Test
-    public void messageWithOneCountryAndOneWhatCallsSendOnce(){
+    public void messageWithOneWhatCallsSendOnce(){
         ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
 
-        when(message.getCountries()).thenReturn(Arrays.asList("NO"));
         when(message.getWhat()).thenReturn(Arrays.asList("Obstruction"));
 
         producer.sendMessage("test-out", message);
@@ -42,30 +41,19 @@ public class IxnMessageProducerTest {
     }
 
     @Test
-    public void messageWithTwoCountriesAndTwoWhatCallsSendFourTimes(){
+    public void messageWithTwoWhatCallsSendFourTimes(){
         ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
 
-        when(message.getCountries()).thenReturn(Arrays.asList("NO", "SE"));
         when(message.getWhat()).thenReturn(Arrays.asList("Obstruction", "Works"));
 
         producer.sendMessage("test-out", message);
-        verify(jmsTemplate, times(4)).send(eq("test-out"), messageCreator.capture());
-    }
-
-    @Test
-    public void messageWithNoCountryIsSentZeroTimes(){
-        ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
-
-        when(message.getCountries()).thenReturn(Arrays.asList());
-        producer.sendMessage("dlqueue", message);
-        verify(jmsTemplate, times(0)).send(eq("dlqueue"), messageCreator.capture());
+        verify(jmsTemplate, times(2)).send(eq("test-out"), messageCreator.capture());
     }
 
     @Test
     public void messageWithNoWhatIsSentZeroTimes(){
         ArgumentCaptor<MessageCreator> messageCreator = ArgumentCaptor.forClass(MessageCreator.class);
 
-        when(message.getCountries()).thenReturn(Arrays.asList("NO", "SE"));
         when(message.getWhat()).thenReturn(Arrays.asList());
         producer.sendMessage("dlqueue", message);
         verify(jmsTemplate, times(0)).send(eq("dlqueue"), messageCreator.capture());

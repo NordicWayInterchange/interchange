@@ -30,7 +30,7 @@ public class InterchangeAppTest {
 
     @Before
     public void setUp() {
-        app = new InterchangeApp(producer, geoLookup);
+        app = new InterchangeApp(producer);
     }
 
     @Test
@@ -58,18 +58,17 @@ public class InterchangeAppTest {
     public void validMessageIsSent(){
         when(message.getLat()).thenReturn(10.0d);
         when(message.getLon()).thenReturn(63.0d);
-        // geolookup on lat and lon gives a non-empty list of countries.
-        when(message.hasCountries()).thenReturn(true);
+        when(message.getGeohash()).thenReturn("s7");
 
-        app.handleOneMessage(message);
+        app.handleOneMessage(this.message);
         verify(producer, times(1)).sendMessage(eq("nwEx"), any(IxnMessage.class));
     }
 
     @Test
-    public void  messageWithoutCountryIsDropped(){
+    public void  messageWithNullGeohashIsDropped(){
         when(message.getLat()).thenReturn(10.0d);
         when(message.getLon()).thenReturn(63.0d);
-        when(message.hasCountries()).thenReturn(false);
+        when(message.getGeohash()).thenReturn(null);
 
         app.handleOneMessage(message);
         verify(producer, times(0)).sendMessage(eq("nwEx"), any(IxnMessage.class));
@@ -129,7 +128,7 @@ public class InterchangeAppTest {
         when(textMessage.getStringProperty(WHAT)).thenReturn("Obstructions");
         when(textMessage.getStringProperty(WHO)).thenReturn("Bouvet Island Traffic Agency");
         when(textMessage.getDoubleProperty(any())).thenReturn(1.0d);
-        when(geoLookup.getCountries(anyDouble(), anyDouble())).thenReturn(Collections.singletonList("NO"));
+        //when(geoLookup.getCountries(anyDouble(), anyDouble())).thenReturn(Collections.singletonList("NO"));
 
         app.receiveMessage(textMessage);
         verify(producer, times(1)).sendMessage(eq(InterchangeApp.NWEXCHANGE), any(IxnMessage.class));
