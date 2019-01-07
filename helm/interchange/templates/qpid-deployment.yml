@@ -44,6 +44,10 @@ spec:
           value: /config/groups
         - name: PASSWD_FILE
           value: /config/passwd
+        #- name: QPID_JAVA_MEM
+          #value: -Xmx12g -XX:MaxDirectMemorySize=24g
+        #- name: QPID_JAVA_GC
+          #value: -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC
         volumeMounts:
         - name: config
           mountPath: /config

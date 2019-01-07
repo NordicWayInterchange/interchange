@@ -14,6 +14,7 @@ parser.add_argument('--sorted', help='The data file has entries in the (latency,
 parser.add_argument('--file', help='The datafile that will be plotted', action='append')
 parser.add_argument('--label', help='The plot label of the corresponding data file', action='append')
 parser.add_argument('--expected_num_messages', help='The number of expected messages in the datafile', type=int)
+parser.add_argument('--plot_label', help='The title of the plot')
 
 args = parser.parse_args()
 
@@ -47,7 +48,10 @@ for file in args.file:
 		#latencies.sort()
 		sorted_latencies = list(latencies)
 		plt.plot(latencies, label=args.label[x])
-		plt.title('Latency on received messages')
+		if not args.plot_label:
+			plt.title('Latency on received messages')
+		else:
+			plt.title(args.plot_label)
 
 
 
