@@ -42,41 +42,40 @@ public class IxnMessageProducer {
 	// Duplicates message for each country and situation record type.
 	public void sendMessage(String destination, final IxnMessage message) {
 
-		for (String country : message.getCountries()) {
-			for (String situationRecordType : message.getWhat()) {
+		for (String situationRecordType : message.getWhat()) {
 
-				logger.debug("*** Sending message ***");
+			logger.debug("*** Sending message ***");
 
-				this.jmsTemplate.send(destination, session -> {
+			this.jmsTemplate.send(destination, session -> {
 
-					TextMessage outgoingMessage = session.createTextMessage();
-					outgoingMessage.setDoubleProperty(LAT, message.getLat());
-					outgoingMessage.setDoubleProperty(LON, message.getLon());
-					outgoingMessage.setStringProperty(WHO, message.getWho());
-					outgoingMessage.setStringProperty(USERID, message.getUserID());
-					outgoingMessage.setStringProperty(WHERE, country);
-					outgoingMessage.setStringProperty(WHAT, situationRecordType);
-					if (message.getHow() != null) {
-						outgoingMessage.setStringProperty(HOW, message.getHow());
-					}
-					if (message.getWhen() != null) {
-						outgoingMessage.setStringProperty(WHEN, message.getWhen());
-					}
-					outgoingMessage.setJMSExpiration(message.getExpiration());
-					outgoingMessage.setText(message.getBody());
-					logger.debug("sending lon: {} lat: {} who: {} userID: {} country:  {} what: {} body: {}",
-							message.getLon(),
-							message.getLat(),
-							message.getWho(),
-							message.getUserID(),
-							country,
-							situationRecordType,
-							message.getBody());
-					return outgoingMessage;
-				});
-				logger.info("Message sent to country {} ", country);
-			}
+				TextMessage outgoingMessage = session.createTextMessage();
+				outgoingMessage.setDoubleProperty(LAT, message.getLat());
+				outgoingMessage.setDoubleProperty(LON, message.getLon());
+				outgoingMessage.setStringProperty(WHO, message.getWho());
+				outgoingMessage.setStringProperty(USERID, message.getUserID());
+				outgoingMessage.setStringProperty(WHAT, situationRecordType);
+				outgoingMessage.setStringProperty(GEOHASH, message.getGeohash());
+				if (message.getHow() != null) {
+					outgoingMessage.setStringProperty(HOW, message.getHow());
+				}
+				if (message.getWhen() != null) {
+					outgoingMessage.setStringProperty(WHEN, message.getWhen());
+				}
+				outgoingMessage.setJMSExpiration(message.getExpiration());
+				outgoingMessage.setText(message.getBody());
+				logger.debug("sending lon: {} lat: {} who: {} userID: {} geohash:  {} what: {} body: {}",
+						message.getLon(),
+						message.getLat(),
+						message.getWho(),
+						message.getUserID(),
+						message.getGeohash(),
+						situationRecordType,
+						message.getBody());
+				return outgoingMessage;
+			});
+			logger.info("Message sent with geohash {} ", message.getGeohash());
 		}
+
 	}
 
 	public void sendMessage(String destination, final TextMessage textMessage) {

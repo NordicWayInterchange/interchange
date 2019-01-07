@@ -14,8 +14,8 @@ import org.springframework.jms.annotation.JmsListener;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import java.util.Arrays;
 import java.util.List;
+import ch.hsr.geohash.GeoHash;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 
@@ -27,15 +27,13 @@ public class InterchangeApp{
 	public static final String NWEXCHANGE = "nwEx";
 	private static Logger logger =LoggerFactory.getLogger(InterchangeApp.class);
 	private final IxnMessageProducer producer;
-	private final GeoLookup geoLookup;
 
 
 	// TODO: Lookup in user db on 'userID' - check if it matches 'who'. If not, log it.
 
 	@Autowired
-	InterchangeApp(IxnMessageProducer producer, GeoLookup geoLookup) {
+	InterchangeApp(IxnMessageProducer producer) {
 		this.producer = producer;
-		this.geoLookup = geoLookup;
 	}
 
 	public boolean isValid(TextMessage textMessage){
@@ -80,23 +78,23 @@ public class InterchangeApp{
 	}
 
 	void handleOneMessage(IxnMessage message){
+		double lat = message.getLat();
+		double lon = message.getLon();
+
 		logger.info("handling message lon {} lat {} who {} userID {}  what {}",
-				message.getLon(),
-				message.getLat(),
+				lat,
+				lon,
 				message.getWho(),
 				message.getUserID(),
 				message.getWhat());
 		logger.debug("handling one message body: {}", message.getBody());
 
-		//List<String> countries = geoLookup.getCountries(message.getLat(), message.getLon());
-		List<String> countries = Arrays.asList("NO");
-		message.setCountries(countries);
-		//logger.info("Message has countries : {} ", countries);
-		logger.info("Fixed country 'NO' ");
+		// Convert lat lon to geohash and set geohash on message.
+		String geohashString = GeoHash.withCharacterPrecision(lat, lon, 12).toBase32();
+		message.setGeohash(geohashString);
 
-		if(!message.hasCountries()){
-			// Message does not have any countries
-			logger.warn("Sending bad message to dead letter queue. 'where1' not set.");
+		if(message.getGeohash() == null){
+			logger.warn("Sending bad message to dead letter queue. Geohash was null.");
 			producer.sendMessage(DLQUEUE, message);
 		} else{
 			logger.info("Sending valid message to {}.", NWEXCHANGE);

@@ -21,6 +21,7 @@ public class IxnMessage {
     private List<String> countries = new ArrayList<>();
     private String how;
     private String when;
+    private String geohash;
 
     public IxnMessage(TextMessage textMessage) throws JMSException {
         this(textMessage.getStringProperty(WHO),
@@ -73,15 +74,13 @@ public class IxnMessage {
     public List<String> getWhat() {
         return what;
     }
+
     public String getBody(){
         return body;
     }
+
     public List<String> getCountries(){
         return countries;
-    }
-
-    public boolean hasCountries(){
-        return (countries.size() != 0);
     }
 
     public boolean hasWhat(){
@@ -116,4 +115,13 @@ public class IxnMessage {
     public String getWhen() {
         return when;
     }
+
+    public void setGeohash(String geohash){
+        this.geohash = geohash;
+    }
+
+    public String getGeohash(){
+        return this.geohash;
+    }
+
 }
