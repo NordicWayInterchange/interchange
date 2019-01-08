@@ -8,20 +8,20 @@
       "type": "headers",
       "durable": true,
       "durableBindings": [
-        {
-          "arguments": {
-            "x-filter-jms-selector": "(geohash LIKE 'u5pn7%') OR (geohash LIKE 'u6800%')"
+          {
+            "arguments": {
+              "x-filter-jms-selector": "(geohash LIKE 'u5pn7%') OR (geohash LIKE 'u6800%')"
+            },
+            "bindingKey": "geohash",
+            "destination": "NO-out"
           },
-          "bindingKey": "geohash",
-          "destination": "NO-out"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "geohash LIKE '%'"
+          {
+            "arguments": {
+              "x-filter-jms-selector": "geohash LIKE '%'"
+            },
+            "bindingKey": "geohash",
+            "destination": "test-out"
           },
-          "bindingKey": "geohash",
-          "destination": "test-out"
-        },
         {
           "arguments": {
             "x-filter-jms-selector": "((geohash LIKE 'u5pn7%') OR (geohash LIKE 'u6800%')) AND what='Obstruction'"
