@@ -10,30 +10,30 @@
       "durableBindings": [
         {
           "arguments": {
-            "x-filter-jms-selector": "where1='NO'"
+            "x-filter-jms-selector": "(geohash LIKE 'u5pn7%') OR (geohash LIKE 'u6800%')"
           },
-          "bindingKey": "where1",
+          "bindingKey": "geohash",
           "destination": "NO-out"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where1 LIKE '%'"
+            "x-filter-jms-selector": "geohash LIKE '%'"
           },
-          "bindingKey": "where1",
+          "bindingKey": "geohash",
           "destination": "test-out"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where1='NO' AND what='Obstruction'"
+            "x-filter-jms-selector": "((geohash LIKE 'u5pn7%') OR (geohash LIKE 'u6800%')) AND what='Obstruction'"
           },
-          "bindingKey": "where1, what",
+          "bindingKey": "geohash, what",
           "destination": "NO-Obstruction"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where1='SE'"
+            "x-filter-jms-selector": "(geohash LIKE 'u6800%') OR (geohash LIKE 'u6dvq%')"
           },
-          "bindingKey": "where1",
+          "bindingKey": "geohash",
           "destination": "SE-out"
         }
       ]

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import ch.hsr.geohash.GeoHash;
 import no.vegvesen.ixn.messaging.CountIxnMessageConsumer;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
 import org.junit.*;
@@ -51,13 +52,19 @@ public class QpidIT {
         long timeToLive = 3_600_000; // 5 hrs
         long expiration = systemTime+timeToLive;
 
-        producer.sendMessage(63.0f,
-                10.0f,
+        double lat = 63.0;
+        double lon = 10.0;
+        // u5pn7scc8ghq - In Norway, south of Trondheim
+        String geohash = GeoHash.withCharacterPrecision(lat, lon, 12).toBase32();
+
+        producer.sendMessage(lat,
+                lon,
                 "Statens Vegvesen",
                 "1234",
                 "Obstruction",
                 "Message with one country - " + messageId ,
-                expiration);
+                expiration,
+                geohash);
     }
 
     public void sendMessageTwoCountries(String s){
@@ -65,28 +72,40 @@ public class QpidIT {
         long timeToLive = 3_600_000;
         long expiration = systemTime+timeToLive;
 
-        producer.sendMessage(59.09f,
-                11.25f,
+        double lat = 59.09;
+        double lon = 11.25;
+        // u6800j000n25 - In Sweden, on the Svinesund bridge
+        String geohash = GeoHash.withCharacterPrecision(lat, lon, 12).toBase32();
+
+        producer.sendMessage(lat,
+                lon,
                 "Statens Vegvesen",
                 "1234",
                 "Obstruction",
                 "Message with two countries - " + s,
-                expiration);
+                expiration,
+                geohash);
     }
 
     public void sendBadMessage(String s){
+        // Missing 'who' gives invalid message.
         long systemTime = System.currentTimeMillis();
         long timeToLive = 3_600_000;
         long expiration = systemTime+timeToLive;
 
-        // Missing 'who' gives invalid message.
-        producer.sendMessage(58f,
-                11f,
+        double lat = 60.0;
+        double lon = 15.4;
+        // u6dvq6tvq48m - In Sweden
+        String geohash = GeoHash.withCharacterPrecision(lat, lon, 12).toBase32();
+
+        producer.sendMessage(lat,
+                lon,
                 null,
                 "1234",
                 "Obstruction",
                 "Message with two countries - " + s,
-                expiration);
+                expiration,
+                geohash);
     }
 
     @Test
@@ -120,5 +139,6 @@ public class QpidIT {
         Thread.sleep(RECEIVE_TIMEOUT);
         // Expecting one message on dlqueue because message is invalid.
         assertThat(consumer.numberOfMessages(DLQUEUE)).isEqualTo(1);
+        assertThat(consumer.numberOfMessages(SE_OUT)).isEqualTo(0);
     }
 }

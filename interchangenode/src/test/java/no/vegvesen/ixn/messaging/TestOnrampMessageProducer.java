@@ -14,15 +14,16 @@ public class TestOnrampMessageProducer {
     @Autowired
     JmsTemplate jmsTemplate;
 
-    public void sendMessage(float lat, float lon, String who, String userID, String what, String body, long expiration){
+    public void sendMessage(double lat, double lon, String who, String userID, String what, String body, long expiration, String geohash){
         this.jmsTemplate.send("onramp", session -> {
 
             TextMessage outgoingMessage = session.createTextMessage();
-            outgoingMessage.setFloatProperty(LAT, lat);
-            outgoingMessage.setFloatProperty(LON, lon);
+            outgoingMessage.setDoubleProperty(LAT, lat);
+            outgoingMessage.setDoubleProperty(LON, lon);
             outgoingMessage.setStringProperty(WHO, who);
             outgoingMessage.setStringProperty(USERID, userID);
             outgoingMessage.setStringProperty(WHAT, what);
+            outgoingMessage.setStringProperty(GEOHASH, geohash);
             outgoingMessage.setText(body);
             outgoingMessage.setJMSExpiration(expiration);
             return outgoingMessage;
