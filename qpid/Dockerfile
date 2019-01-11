@@ -5,7 +5,7 @@ RUN apk update && apk add bash openssl jq
 ENV QPID_VERSION=7.0.6
 
 RUN cd /usr/local && \
-    wget http://apache.uib.no/qpid/broker-j/${QPID_VERSION}/binaries/apache-qpid-broker-j-${QPID_VERSION}-bin.tar.gz && \
+    wget http://archive.apache.org/dist/qpid/broker-j/${QPID_VERSION}/binaries/apache-qpid-broker-j-${QPID_VERSION}-bin.tar.gz && \
     tar -xvf apache-qpid-broker-j-${QPID_VERSION}-bin.tar.gz && \
     ln -s qpid-broker/${QPID_VERSION} qpid && \
     rm -f apache-qpid-broker-j-${QPID_VERSION}-bin.tar.gz

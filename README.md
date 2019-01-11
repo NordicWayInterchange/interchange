@@ -23,7 +23,7 @@ Maven starts temporary instances of the containers for integration
 testing, and so the container ports will already be in use.
 
 ### Development environment
-- Run `generate-keys.sh` to get keys and certs necessary for simulating a
+- Run `qpid/generate-keys.sh` to get keys and certs necessary for simulating a
   client/server relationship. These will be generated in `tmp/keys/`.
 - make sure you've run `mvn clean install` in both `interchangenode` and
   `debugclient` so the jars are available for your builds/tests
