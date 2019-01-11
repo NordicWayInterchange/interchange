@@ -37,7 +37,9 @@ testing, and so the container ports will already be in use.
 
 ### Resources
 [Trello](https://trello.com/b/MXlcCmye/interchange)
+
 [Github Wiki](https://github.com/NordicWayInterchange/interchange/wiki)
+
 [Nordic Way](http://vejdirektoratet.dk/EN/roadsector/Nordicway/Pages/Default.aspx)
 
 
