@@ -33,9 +33,9 @@ services:
   postgis:
     build: ./postgis
     environment:
-      - POSTGRES_USER=geolookup
-      - POSTGRES_PASSWORD=geolookup
-      - POSTGRES_DB=geolookup
+    - POSTGRES_USER=geolookup
+    - POSTGRES_PASSWORD=geolookup
+    - POSTGRES_DB=geolookup
     container_name: postgis
     hostname: postgis
     healthcheck:
@@ -43,7 +43,5 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    ports:
-      - 5432:5432
     expose:
     - "5432"
