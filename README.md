@@ -25,9 +25,8 @@ testing, and so the container ports will already be in use.
 ### Development environment
 - Run `qpid/generate-keys.sh` to get keys and certs necessary for simulating a
   client/server relationship. These will be generated in `tmp/keys/`.
-- make sure you've run `mvn clean install` in both `interchangenode` and
-  `debugclient` so the jars are available for your builds/tests
 - run `docker-compose up --build` to start the environment.
+- make sure you've run `mvn clean install` in `debugclient` so the jar is available for your test-client below.
 - use `test-client.sh` to run the debugclient with all your generated keys.
   Adding a command line argument will modify the server name being used (default
   is localhost).

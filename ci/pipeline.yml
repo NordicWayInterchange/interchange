@@ -1,0 +1,139 @@
+resource_types:
+- name: concourse-pipeline
+  type: docker-image
+  source:
+    repository: concourse/concourse-pipeline-resource
+
+resources:
+- name: concourse
+  type: concourse-pipeline
+  source:
+    target: https://concourse.t16r.duckdns.org
+    teams:
+    - name: main
+      username: ((common-secrets.concourse-username))
+      password: ((common-secrets.concourse-password))
+
+- name: ci-config
+  type: git
+  source:
+    uri: git@github.com:NordicWayInterchange/interchange.git
+    private_key: ((common-secrets.git-key))
+    paths: [ci]
+
+- name: interchangenode
+  type: git
+  source:
+    uri: git@github.com:NordicWayInterchange/interchange.git
+    private_key: ((common-secrets.git-key))
+    paths: [interchangenode]
+
+- name: qpid
+  type: git
+  source:
+    uri: git@github.com:NordicWayInterchange/interchange.git
+    private_key: ((common-secrets.git-key))
+    paths: [qpid]
+
+- name: postgis
+  type: git
+  source:
+    uri: git@github.com:NordicWayInterchange/interchange.git
+    private_key: ((common-secrets.git-key))
+    paths: [postgis]
+
+- name: interchangenode-image
+  type: docker-image
+  source:
+    repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
+    username: ((common-secrets.gcr-username))
+    password: ((common-secrets.gcr-password))
+
+- name: qpid-image
+  type: docker-image
+  source:
+    repository: eu.gcr.io/nordic-way-aad182cc/qpid
+    username: ((common-secrets.gcr-username))
+    password: ((common-secrets.gcr-password))
+
+- name: postgis-image
+  type: docker-image
+  source:
+    repository: eu.gcr.io/nordic-way-aad182cc/postgis
+    username: ((common-secrets.gcr-username))
+    password: ((common-secrets.gcr-password))
+
+jobs:
+- name: update-pipeline
+  plan:
+  - get: ci-config
+    trigger: true
+  - put: concourse
+    params:
+      pipelines:
+      - name: nordic-way
+        team: main
+        config_file: ci-config/ci/pipeline.yml
+
+- name: build-interchangenode
+  plan:
+  - get: concourse
+    trigger: true
+    passed: [update-pipeline]
+  - get: interchangenode
+    trigger: true
+  - task: generate-tag
+    config:
+      platform: linux
+      image_resource: {type: docker-image, source: {repository: alpine/git}}
+      inputs: [name: interchangenode]
+      outputs: [name: tags]
+      run:
+        path: interchangenode/ci/generate-tags.sh
+  - put: interchangenode-image
+    params:
+      build: interchangenode/interchangenode
+      tag_file: tags/hash-tag
+      additional_tags: tags/latest-tag
+
+- name: build-qpid
+  plan:
+  - get: concourse
+    trigger: true
+    passed: [update-pipeline]
+  - get: qpid
+    trigger: true
+  - task: generate-tag
+    config:
+      platform: linux
+      image_resource: {type: docker-image, source: {repository: alpine/git}}
+      inputs: [name: qpid]
+      outputs: [name: tags]
+      run:
+        path: qpid/ci/generate-tags.sh
+  - put: qpid-image
+    params:
+      build: qpid/qpid
+      tag_file: tags/hash-tag
+      additional_tags: tags/latest-tag
+
+- name: build-postgis
+  plan:
+  - get: concourse
+    trigger: true
+    passed: [update-pipeline]
+  - get: postgis
+    trigger: true
+  - task: generate-tag
+    config:
+      platform: linux
+      image_resource: {type: docker-image, source: {repository: alpine/git}}
+      inputs: [name: postgis]
+      outputs: [name: tags]
+      run:
+        path: postgis/ci/generate-tags.sh
+  - put: postgis-image
+    params:
+      build: postgis/postgis
+      tag_file: tags/hash-tag
+      additional_tags: tags/latest-tag
