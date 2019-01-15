@@ -20,8 +20,11 @@ public class ShapeView {
         if (args.length == 0) {
             //TODO not on my computer!
             map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_shape.shp")));
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_inner_hashes.shp")));
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_outer_hashes.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_outer_hashes_4.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_inner_hashes_3.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\worldshape_10kmbuffer_oresund3.shp")));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\kyrre_tester.shp")));
+
         } else {
             for (String filename : args) {
                 map.addLayer(createLayer(new File(filename)));
