@@ -32,3 +32,4 @@ for file in $(find ${QPID_WORK} -name *.lck); do
 done
 
 /usr/local/qpid/bin/qpid-server
+
