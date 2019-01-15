@@ -7,7 +7,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     component: postgis
     release: {{ .Release.Name }}
-{{- with .Values.qpid.annotations }}
+{{- with .Values.postgis.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
