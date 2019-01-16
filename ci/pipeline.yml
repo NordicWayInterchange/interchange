@@ -146,5 +146,5 @@ jobs:
     params:
       build: source/postgis
       tag_file: tags/hash-tag
-#      additional_tags: tags/latest-tag
+      additional_tags: tags/latest-tag
 
