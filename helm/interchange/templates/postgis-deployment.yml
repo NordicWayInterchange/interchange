@@ -7,10 +7,6 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     component: postgis
     release: {{ .Release.Name }}
-{{- with .Values.postgis.annotations }}
-  annotations:
-{{ toYaml . | indent 4 }}
-{{- end }}
 spec:
   replicas: 1
   selector:
@@ -27,7 +23,7 @@ spec:
     spec:
       containers:
       - name: postgis
-        image: "{{ .Values.postgis.image.repository }}:{{ .Values.postgis.image.tag }}"
+        image: {{ .Values.postgis.image | quote }}
         env:
         - name: POSTGRES_USER
           value: geolookup

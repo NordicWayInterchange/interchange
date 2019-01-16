@@ -7,10 +7,6 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     component: qpid
     release: {{ .Release.Name }}
-{{- with .Values.qpid.annotations }}
-  annotations:
-{{ toYaml . | indent 4 }}
-{{- end }}
 spec:
   replicas: 1
   selector:
@@ -29,7 +25,7 @@ spec:
     spec:
       containers:
       - name: qpid
-        image: "{{ .Values.qpid.image.repository }}:{{ .Values.qpid.image.tag }}"
+        image: {{ .Values.qpid.image | quote }}
         ports:
         - name: amqp
           containerPort: 5672
@@ -54,7 +50,7 @@ spec:
         - name: secure
           mountPath: /secure
         - name: storage
-          mountPath: /work/{{ required "must provide external_name" .Values.external_name }}
+          mountPath: /work/{{ required "must provide .Values.external_name" .Values.external_name }}
         readinessProbe:
           initialDelaySeconds: 5
           tcpSocket:
@@ -65,7 +61,7 @@ spec:
           name: {{ .Release.Name }}-qpid
       - name: secure
         secret:
-          secretName: {{ required "must provide secret" .Values.qpid.tls_secret_name }}
+          secretName: {{ required "must provide .Values.qpid.tls_secret_name" .Values.qpid.tls_secret_name }}
       - name: storage
       {{- if .Values.qpid.persistence.enabled }}
         persistentVolumeClaim:

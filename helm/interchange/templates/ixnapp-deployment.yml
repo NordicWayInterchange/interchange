@@ -7,10 +7,6 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     component: interchange
     release: {{ .Release.Name }}
-{{- with .Values.interchange.annotations }}
-  annotations:
-{{ toYaml . | indent 4 }}
-{{- end }}
 spec:
   replicas: 1
   selector:
@@ -27,7 +23,7 @@ spec:
     spec:
       containers:
       - name: interchange
-        image: "{{ .Values.interchange.image.repository }}:{{ .Values.interchange.image.tag }}"
+        image: {{ .Values.interchange.image | quote }}
         env:
         - name: AMQP_URI
           value: amqp://{{ .Release.Name }}-qpid?amqp.vhost={{ .Values.external_name }}
