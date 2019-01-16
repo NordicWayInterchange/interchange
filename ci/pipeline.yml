@@ -14,6 +14,12 @@ resources:
       username: ((common-secrets.concourse-username))
       password: ((common-secrets.concourse-password))
 
+- name: source
+  type: git
+  source:
+    uri: git@github.com:NordicWayInterchange/interchange.git
+    private_key: ((common-secrets.git-key))
+
 - name: ci-config
   type: git
   source:
@@ -66,6 +72,7 @@ resources:
 jobs:
 - name: update-pipeline
   plan:
+  - get: source
   - get: ci-config
     trigger: true
   - put: concourse
@@ -73,10 +80,11 @@ jobs:
       pipelines:
       - name: nordic-way
         team: main
-        config_file: ci-config/ci/pipeline.yml
+        config_file: source/ci/pipeline.yml
 
 - name: build-interchangenode
   plan:
+  - get: source
   - get: concourse
     trigger: true
     passed: [update-pipeline]
@@ -86,18 +94,19 @@ jobs:
     config:
       platform: linux
       image_resource: {type: docker-image, source: {repository: alpine/git}}
-      inputs: [name: interchangenode]
+      inputs: [name: source]
       outputs: [name: tags]
       run:
-        path: interchangenode/ci/generate-tags.sh
+        path: source/ci/generate-tags.sh
   - put: interchangenode-image
     params:
-      build: interchangenode/interchangenode
+      build: source/interchangenode
       tag_file: tags/hash-tag
-      additional_tags: tags/latest-tag
+      additional_tags: [latest-tag]
 
 - name: build-qpid
   plan:
+  - get: source
   - get: concourse
     trigger: true
     passed: [update-pipeline]
@@ -107,18 +116,19 @@ jobs:
     config:
       platform: linux
       image_resource: {type: docker-image, source: {repository: alpine/git}}
-      inputs: [name: qpid]
+      inputs: [name: source]
       outputs: [name: tags]
       run:
-        path: qpid/ci/generate-tags.sh
+        path: source/ci/generate-tags.sh
   - put: qpid-image
     params:
-      build: qpid/qpid
+      build: source/qpid
       tag_file: tags/hash-tag
-      additional_tags: tags/latest-tag
+      additional_tags: [latest-tag]
 
 - name: build-postgis
   plan:
+  - get: source
   - get: concourse
     trigger: true
     passed: [update-pipeline]
@@ -128,12 +138,13 @@ jobs:
     config:
       platform: linux
       image_resource: {type: docker-image, source: {repository: alpine/git}}
-      inputs: [name: postgis]
+      inputs: [name: source]
       outputs: [name: tags]
       run:
-        path: postgis/ci/generate-tags.sh
+        path: source/ci/generate-tags.sh
   - put: postgis-image
     params:
-      build: postgis/postgis
+      build: source/postgis
       tag_file: tags/hash-tag
-      additional_tags: tags/latest-tag
+      additional_tags: [latest-tag]
+
