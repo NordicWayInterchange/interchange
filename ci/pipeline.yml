@@ -10,64 +10,64 @@ resources:
   source:
     target: https://concourse.t16r.duckdns.org
     teams:
-    - name: main
-      username: ((common-secrets.concourse-username))
-      password: ((common-secrets.concourse-password))
+    - name: nordic-way
+      username: ((common.concourse-user))
+      password: ((common.concourse-pass))
 
 - name: source
   type: git
   source:
     uri: git@github.com:NordicWayInterchange/interchange.git
-    private_key: ((common-secrets.git-key))
+    private_key: ((common.git-key))
 
 - name: ci-config
   type: git
   source:
     uri: git@github.com:NordicWayInterchange/interchange.git
-    private_key: ((common-secrets.git-key))
+    private_key: ((common.git-key))
     paths: [ci]
 
 - name: interchangenode
   type: git
   source:
     uri: git@github.com:NordicWayInterchange/interchange.git
-    private_key: ((common-secrets.git-key))
+    private_key: ((common.git-key))
     paths: [interchangenode]
 
 - name: qpid
   type: git
   source:
     uri: git@github.com:NordicWayInterchange/interchange.git
-    private_key: ((common-secrets.git-key))
+    private_key: ((common.git-key))
     paths: [qpid]
 
 - name: postgis
   type: git
   source:
     uri: git@github.com:NordicWayInterchange/interchange.git
-    private_key: ((common-secrets.git-key))
+    private_key: ((common.git-key))
     paths: [postgis]
 
 - name: interchangenode-image
   type: docker-image
   source:
     repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
-    username: ((common-secrets.gcr-username))
-    password: ((common-secrets.gcr-password))
+    username: ((common.gcr-user))
+    password: ((common.gcr-pass))
 
 - name: qpid-image
   type: docker-image
   source:
     repository: eu.gcr.io/nordic-way-aad182cc/qpid
-    username: ((common-secrets.gcr-username))
-    password: ((common-secrets.gcr-password))
+    username: ((common.gcr-user))
+    password: ((common.gcr-pass))
 
 - name: postgis-image
   type: docker-image
   source:
     repository: eu.gcr.io/nordic-way-aad182cc/postgis
-    username: ((common-secrets.gcr-username))
-    password: ((common-secrets.gcr-password))
+    username: ((common.gcr-user))
+    password: ((common.gcr-pass))
 
 jobs:
 - name: update-pipeline
@@ -78,8 +78,8 @@ jobs:
   - put: concourse
     params:
       pipelines:
-      - name: nordic-way
-        team: main
+      - name: interchange
+        team: nordic-way
         config_file: source/ci/pipeline.yml
 
 - name: build-interchangenode
