@@ -78,7 +78,9 @@ data:
         },
         {{- range .Values.qpid.users }}
         {
+          {{- if .uuid }}
           "id": "{{ .uuid}}",
+          {{- end }}
           "name": "{{ .name }}",
           "type": "standard",
           "durable": true,
