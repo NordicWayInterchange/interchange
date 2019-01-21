@@ -102,7 +102,7 @@ jobs:
     params:
       build: source/interchangenode
       tag_file: tags/hash-tag
-      additional_tags: tags/latest-tag
+      additional_tags: tags/additional-tags
 
 - name: build-qpid
   plan:
@@ -124,7 +124,7 @@ jobs:
     params:
       build: source/qpid
       tag_file: tags/hash-tag
-      additional_tags: tags/latest-tag
+      additional_tags: tags/additional-tags
 
 - name: build-postgis
   plan:
@@ -146,5 +146,5 @@ jobs:
     params:
       build: source/postgis
       tag_file: tags/hash-tag
-      additional_tags: tags/latest-tag
+      additional_tags: tags/additional-tags
 
