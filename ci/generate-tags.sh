@@ -6,7 +6,7 @@ mkdir -p ../tags
 git rev-parse --short HEAD > ../tags/hash-tag
 echo -n latest > ../tags/additional-tags
 
-for tag in $(git --no-pager tags); do
+for tag in $(git --no-pager tag); do
     echo -n " ${tag}" >> ../tags/additional-tags
 done
 
