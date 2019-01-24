@@ -26,10 +26,9 @@ public class ShapeHasher {
 
 
     public static void main(String[] args) throws IOException, CQLException {
-        FileDataStore dataStore = FileDataStoreFinder.getDataStore(new File("C:\\interchange\\shapefiler\\oresund3\\worldshape_10kmbuffer_oresund3.shp"));
-        SimpleFeatureSource featureSource = dataStore.getFeatureSource();
-        Filter filter = CQL.toFilter("ISO2 = 'NO'");
-        SimpleFeatureCollection features = featureSource.getFeatures(filter);
+        String pathname = "C:\\interchange\\shapefiler\\oresund3\\worldshape_10kmbuffer_oresund3.shp";
+        String cqlPredicate = "ISO2 = 'NO'";
+        SimpleFeatureCollection features = getFeaturesFromShape(pathname, cqlPredicate);
 
 
         //SimpleFeatureType schema = featureSource.getSchema();
@@ -91,19 +90,17 @@ public class ShapeHasher {
         } finally {
             t.close();
         }
+    }
 
-/*
-        Style style = SLD.createSimpleStyle(featureSource.getSchema());
-        FeatureLayer layer = new FeatureLayer(features,style);
-        MapContent map = new MapContent();
-        map.setTitle("GetTools filter");
-        map.addLayer(layer);
-        JMapFrame.showMap(map);
-        */
+    public static SimpleFeatureCollection getFeaturesFromShape(String pathname, String cqlPredicate) throws IOException, CQLException {
+        FileDataStore dataStore = FileDataStoreFinder.getDataStore(new File(pathname));
+        SimpleFeatureSource featureSource = dataStore.getFeatureSource();
+        Filter filter = CQL.toFilter(cqlPredicate);
+        return featureSource.getFeatures(filter);
     }
 
 
-    private static Polygon createPolygonFromHash(String hash) {
+    public static Polygon createPolygonFromHash(String hash) {
         GeometryFactory factory = JTSFactoryFinder.getGeometryFactory();
         GeoHash geoHash = GeoHash.fromGeohashString(hash);
 
@@ -115,5 +112,13 @@ public class ShapeHasher {
                 new Coordinate(boundingBox.getMinLon(),boundingBox.getMaxLat()),
                 new Coordinate(boundingBox.getMinLon(),boundingBox.getMinLat())};
         return factory.createPolygon(coordinates);
+    }
+
+    public static SimpleFeatureType createGeohashScema() {
+        SimpleFeatureTypeBuilder schemabuilder = new SimpleFeatureTypeBuilder();
+        schemabuilder.setName("Test");
+        schemabuilder.add("the_geom", Polygon.class);
+        schemabuilder.length(7).add("geohash",String.class);
+        return schemabuilder.buildFeatureType();
     }
 }

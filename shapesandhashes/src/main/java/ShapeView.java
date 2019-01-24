@@ -23,8 +23,11 @@ public class ShapeView {
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_outer_hashes_4.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_inner_hashes_3.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\worldshape_10kmbuffer_oresund3.shp")));
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\kyrre_tester.shp")));
-
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\polygonlist_compressed.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\polygonlist_random_length_7.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\hashed_depth_5_rounds_400000.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\generated_shape_size_5.shp")));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\hashes_5_compressed.shp")));
         } else {
             for (String filename : args) {
                 map.addLayer(createLayer(new File(filename)));
