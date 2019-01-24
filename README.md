@@ -32,7 +32,16 @@ testing, and so the container ports will already be in use.
   is localhost).
 
 ### Running the Tests
+Unit tests are run by default, for instance when running `mvn clean install`.
 
+To run the integration tests, activate the integration test profile (IT): 
+`mvn clean install -PIT`
+
+To start the docker containers for integration tests from maven so you can run the integration tests from your IDE:
+`mvn docker:start -PIT`    
+
+To stop the docker containers for integration tests from maven: 
+`mvn docker:stop -PIT`
 
 ### Resources
 [Trello](https://trello.com/b/MXlcCmye/interchange)
