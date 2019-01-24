@@ -20,8 +20,6 @@ import java.util.Random;
  *************/
 
 public class DebugClient implements MessageListener{
-
-	private static final String BLACK = "[0m";
 	private static final String YELLOW = "[33m";
 	private static final String TURQUOISE = "[36m";
 	private static final String USER = System.getProperty("USER");
@@ -108,10 +106,10 @@ public class DebugClient implements MessageListener{
 		for(int i=0; i<2000; i++) {
 			try {
 
-				double latDelta = r.nextDouble();
-				double lonDelta = r.nextDouble();
+				double latDelta = r.nextDouble()*0.1;
+				double lonDelta = r.nextDouble() *0.1;
 
-				double lat = 63.0 + latDelta;
+				double lat = 61.0 + latDelta;
 				double lon = 10.0 + lonDelta;
 
 				JmsTextMessage message = (JmsTextMessage) session.createTextMessage(Integer.toString(i));
@@ -121,7 +119,6 @@ public class DebugClient implements MessageListener{
 				message.setStringProperty("what", "Conditions");
 				message.setStringProperty("lat", Double.toString(lat));
 				message.setStringProperty("lon", Double.toString(lon));
-				message.setStringProperty("where1", where);
 				message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 				messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 			} catch (Exception e) {

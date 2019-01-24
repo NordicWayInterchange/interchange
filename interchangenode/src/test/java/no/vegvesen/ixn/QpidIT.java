@@ -114,6 +114,7 @@ public class QpidIT {
         Thread.sleep(RECEIVE_TIMEOUT);
         // The queue should have one message
         assertThat(consumer.numberOfMessages(NO_OUT)).isEqualTo(1);
+        assertThat(consumer.numberOfMessages(SE_OUT)).isEqualTo(0);
     }
 
 
@@ -131,6 +132,7 @@ public class QpidIT {
         sendMessageOneCountry("2"); // NO and Obstruction
         Thread.sleep(RECEIVE_TIMEOUT);
         assertThat(consumer.numberOfMessages(NO_OUT)).isEqualTo(1);
+        assertThat(consumer.numberOfMessages(SE_OUT)).isEqualTo(0);
     }
 
     @Test

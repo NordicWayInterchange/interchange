@@ -8,7 +8,7 @@ metadata:
     component: postgis
     release: {{ .Release.Name }}
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
