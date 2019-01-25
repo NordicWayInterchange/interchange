@@ -14,6 +14,7 @@ import org.springframework.jms.annotation.JmsListener;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import java.util.Enumeration;
 import java.util.List;
 
 import static no.vegvesen.ixn.MessageProperties.*;
@@ -57,6 +58,11 @@ public class InterchangeApp{
 	public void receiveMessage(TextMessage textMessage) throws JMSException{
 		try {
 			MDCUtil.setLogVariables(textMessage);
+			Enumeration propertyNames = textMessage.getPropertyNames();
+			while (propertyNames.hasMoreElements()) {
+				Object propName = propertyNames.nextElement();
+				logger.debug("property {}", propName);
+			}
 
 			logger.info("============= Received: {}", textMessage.getText());
 
