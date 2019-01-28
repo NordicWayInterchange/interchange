@@ -10,6 +10,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -68,5 +71,6 @@ public class MonteCarloShapeHasher {
         }
         System.out.println(String.format("Made %d points within the shape", numPoints));
         HashToShape.createShapeFromPolygons(geohashScema, hashedFeatures, "hashed_depth_" + depth + "_rounds_" + rounds);
+        Files.write(Paths.get("C:\\interchange\\shapefiler\\oresund3\\hashed_depth" + depth + "_rounds_" + rounds + ".csv"),hashes, Charset.forName("UTF-8"));
     }
 }

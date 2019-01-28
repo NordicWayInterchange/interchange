@@ -16,10 +16,14 @@ public class ShapeView {
     public static void main(String[] args) throws IOException {
 
         MapContent map = new MapContent();
-        map.setTitle("Geohashing tiles for Norway w/10km buffer");
+        map.setTitle("Nordic countries w/10km buffer");
         if (args.length == 0) {
             //TODO not on my computer!
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_shape.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_shape.shp")));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Norway_10km_buffer.shp")));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Sweden_10km_buffer.shp")));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Finland_10km_buffer.shp")));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Denmark_10km_buffer.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_outer_hashes_4.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_inner_hashes_3.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\worldshape_10kmbuffer_oresund3.shp")));
