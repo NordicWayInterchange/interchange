@@ -2,10 +2,7 @@ import ch.hsr.geohash.GeoHash;
 import net.sf.geographiclib.Geodesic;
 import net.sf.geographiclib.GeodesicData;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class GeoHashArea {
 
@@ -15,29 +12,38 @@ public class GeoHashArea {
 		this.area = area;
 	}
 
-	public Set<GeoHash> getNeigbours(){
-		Set <GeoHash> neigbours = new HashSet<GeoHash>();
+	public Set<GeoHash> getNeigbours() {
+		Set<GeoHash> neighbours = new HashSet<>();
+		Map<Integer, Set<GeoHash>> precisionGeoHashMap = new HashMap<>();
 		for (GeoHash areaHash : area) {
 			for (GeoHash neighbour : areaHash.getAdjacent()) {
 				if (!area.contains(neighbour)) {
-					neigbours.add(neighbour);
+					int precision = neighbour.getCharacterPrecision();
+					Set<GeoHash> geoHashes = precisionGeoHashMap.get(precision);
+					if (geoHashes == null) {
+						geoHashes = new HashSet<>();
+						precisionGeoHashMap.put(precision, geoHashes);
+					}
+					geoHashes.add(neighbour);
+					neighbours.add(neighbour);
 				}
 			}
 		}
-		return neigbours;
-	}
 
-
-	public void getNeighbourHashesIs8Hashes() {
-		double lat = 60.3, lon = 10.2;
-		GeoHash hash = GeoHash.withCharacterPrecision(lat, lon, 10);
-		System.out.println(hash.toBase32());
-		for (GeoHash adjacent : hash.getAdjacent()) {
-			System.out.println(adjacent.toBase32());
+		//Neighbour must not be part of the lowest precision area
+		Integer highestPrecision = precisionGeoHashMap.keySet().iterator().next();
+		if (highestPrecision != null) {
+			for (GeoHash geoHash : precisionGeoHashMap.get(highestPrecision)) {
+				neighbours.removeIf(covered -> covered != geoHash && covered.within(geoHash));
+			}
 		}
-		
+		// Neighbour must not be part of the original area
+		for (GeoHash geoHash : area) {
+			neighbours.removeIf(covered -> covered != geoHash && covered.within(geoHash));
+		}
+		return neighbours;
 	}
-	
+
 	static class LonLat {
 		final public double lon, lat;
 
@@ -49,7 +55,7 @@ public class GeoHashArea {
 
 	public static void main(String[] args) {
 		List<LonLat> eventArea = getEventArea();
-		System.out.println("Distance " + getDistance(eventArea.get(0), eventArea.get(eventArea.size()-1)));
+		System.out.println("Distance " + getDistance(eventArea.get(0), eventArea.get(eventArea.size() - 1)));
 		Set<GeoHash> eventHashes = new HashSet<GeoHash>();
 		for (LonLat lonLat : eventArea) {
 			GeoHash eventHash = GeoHash.withCharacterPrecision(lonLat.lat, lonLat.lon, 6);
