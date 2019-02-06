@@ -43,6 +43,17 @@ public class GeoHashArea {
 		return neighbours;
 	}
 
+	public boolean intersects(GeoHashArea other) {
+		for (GeoHash thisHash : area) {
+			for (GeoHash otherHash : other.area) {
+				if (thisHash.within(otherHash) || otherHash.within(thisHash)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	static class LonLat {
 		final public double lon, lat;
 
