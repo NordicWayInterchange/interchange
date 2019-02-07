@@ -13,6 +13,11 @@ public class GeoHashArea {
 		this.area.addAll(area);
 	}
 
+	/**
+	 * For now a neighbour could overlap the original area.
+	 * Should that be allowed? Can a bigger GeoHash overlap a smaller one that makes up the area?
+	 * @return All GeoHashes that is neigbours to this area
+	 */
 	public Set<GeoHash> getNeigbours() {
 		Set<GeoHash> neighbours = new HashSet<>();
 		Map<Integer, Set<GeoHash>> precisionGeoHashMap = new HashMap<>();
