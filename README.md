@@ -45,7 +45,7 @@ testing, and so the container ports will already be in use.
 
 Make sure you have Git, Java and Maven installed.
 Download and install docker as documented here: https://docs.docker.com/v17.09/docker-for-windows/install/#download-docker-for-windows
-Note that the physical box you are running needs to have virtualisation and Hyper-V enabled (see the section 'What to know before you install') 
+Note that the physical box you are running needs to have virtualisation and Hyper-V enabled (see the section [What to know before you install](https://docs.docker.com/v17.09/docker-for-windows/install/#what-to-know-before-you-install) 
 
 The actual start-up instructions are the same as for *nix systems:
 - make sure docker is up and running
