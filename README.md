@@ -55,12 +55,12 @@ To stop the docker containers for integration tests from maven:
 
 Make sure you have Git, Java and Maven installed.
 Download and install docker as documented here: https://docs.docker.com/v17.09/docker-for-windows/install/#download-docker-for-windows
-Note that the physical box you are running needs to have virtualisation and Hyper-V enabled (see the section [What to know before you install](https://docs.docker.com/v17.09/docker-for-windows/install/#what-to-know-before-you-install) 
+Note that the physical box you are running needs to have virtualisation and Hyper-V enabled (see the section [What to know before you install](https://docs.docker.com/v17.09/docker-for-windows/install/#what-to-know-before-you-install) )
 
 The actual start-up instructions are the same as for *nix systems:
 - make sure docker is up and running
 - run `mvn install` in the top code directory to compile all the needed code.
-  - this might fail with an error message saying `unable to start container`. If it does, restart docker using the whale icon in the lower-left systems menu.   
+  - this might fail with an error message saying `unable to start container`. If it does, restart docker using the whale icon in the lower-left systems menu. Repeat the build when docker is strted (might take some time, so be patient)   
 - run `docker-compose up --build` to start the environment. This will use the keys generated during the build procedure.
 - to run the debug client, run the `test-client.bat`. This will start the debug client keys matching the ones mentioned in the previous step. 
 
