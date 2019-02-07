@@ -53,7 +53,17 @@ To stop the docker containers for integration tests from maven:
 
 # Using Windows?
 
-If sharing doesn't work (for example postrges saying it can't write log files),
-try unsharing and then sharing your local disk (usually c:) in the docker settings under "Shared Drives"
+Make sure you have Git, Java and Maven installed.
+Download and install docker as documented here: https://docs.docker.com/v17.09/docker-for-windows/install/#download-docker-for-windows
+Note that the physical box you are running needs to have virtualisation and Hyper-V enabled (see the section [What to know before you install](https://docs.docker.com/v17.09/docker-for-windows/install/#what-to-know-before-you-install) 
 
-Also, the docker command may sometimes fail to set up the containers properly. A restart of the docker daemon should fix it.
+The actual start-up instructions are the same as for *nix systems:
+- make sure docker is up and running
+- run `mvn install` in the top code directory to compile all the needed code.
+  - this might fail with an error message saying `unable to start container`. If it does, restart docker using the whale icon in the lower-left systems menu.   
+- run `docker-compose up --build` to start the environment. This will use the keys generated during the build procedure.
+- to run the debug client, run the `test-client.bat`. This will start the debug client keys matching the ones mentioned in the previous step. 
+
+In general, the docker daemon sometimes have problems mounting directories or starting the docker containers. Try restarting the container and try again after it is restarted, 
+or remount the directories in the docker settings.
+
