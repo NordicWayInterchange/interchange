@@ -38,7 +38,7 @@ public class IxnMessageProducerTest {
         when(message.getWhat()).thenReturn(Arrays.asList("Obstruction"));
 
         producer.sendMessage("test-out", message);
-        verify(jmsTemplate, times(1)).send(eq("test-out"), messageCreator.capture());
+        verify(jmsTemplate, times(1)).send(eq("test-out"), messageCreator.capture(), eq(0L));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class IxnMessageProducerTest {
         when(message.getWhat()).thenReturn(Arrays.asList("Obstruction", "Works"));
 
         producer.sendMessage("test-out", message);
-        verify(jmsTemplate, times(4)).send(eq("test-out"), messageCreator.capture());
+        verify(jmsTemplate, times(4)).send(eq("test-out"), messageCreator.capture(), eq(0L));
     }
 
     @Test
