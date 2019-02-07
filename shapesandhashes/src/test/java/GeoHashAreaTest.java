@@ -35,6 +35,27 @@ public class GeoHashAreaTest {
 	}
 
 	@Test
+	public void getNeighboursOfThreeLevelsHorizontallyAdjacentHashesIsCompact() {
+		List<GeoHash> threeLevelsOfAdjacentHashes = Arrays.asList(
+				GeoHash.fromGeohashString("u6b"),
+				GeoHash.fromGeohashString("u4zp"),
+				GeoHash.fromGeohashString("u4zr"),
+				GeoHash.fromGeohashString("u4zx"),
+				GeoHash.fromGeohashString("u4zz"),
+				GeoHash.fromGeohashString("u4yp"),
+				GeoHash.fromGeohashString("u4yr"),
+				GeoHash.fromGeohashString("u4yx"),
+				GeoHash.fromGeohashString("u4yz"),
+				GeoHash.fromGeohashString("u4vzz"));
+		GeoHashArea area = new GeoHashArea(threeLevelsOfAdjacentHashes);
+		Set<GeoHash> neigbours = area.getNeigbours();
+		assertThat(neigbours).contains(GeoHash.fromGeohashString("u4vz"));
+		assertThat(neigbours).contains(GeoHash.fromGeohashString("u5n0"));
+		assertThat(neigbours).contains(GeoHash.fromGeohashString("u5p"));
+		assertThat(neigbours).hasSize(19);
+	}
+
+	@Test
 	public void sameAreaIntersects() {
 		GeoHashArea first = new GeoHashArea(Arrays.asList(GeoHash.fromGeohashString("u705"), GeoHash.fromGeohashString("u70h")));
 		assertThat(first.intersects(first)).isTrue();
