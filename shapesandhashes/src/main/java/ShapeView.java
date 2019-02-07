@@ -8,6 +8,7 @@ import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
 import org.geotools.swing.JMapFrame;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -21,9 +22,9 @@ public class ShapeView {
             //TODO not on my computer!
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_shape.shp")));
             map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Norway_10km_buffer.shp")));
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Sweden_10km_buffer.shp")));
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Finland_10km_buffer.shp")));
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Denmark_10km_buffer.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Sweden_10km_buffer.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Finland_10km_buffer.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Denmark_10km_buffer.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_outer_hashes_4.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_inner_hashes_3.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\worldshape_10kmbuffer_oresund3.shp")));
@@ -31,7 +32,8 @@ public class ShapeView {
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\polygonlist_random_length_7.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\hashed_depth_5_rounds_400000.shp")));
             //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\generated_shape_size_5.shp")));
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\hashes_5_compressed.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\hashes_5_compressed.shp")));
+            map.addLayer(createLayer(new File("C:\\interchange\\datex_eksempler\\linestrings_getSituation.shp"),Color.BLUE));
         } else {
             for (String filename : args) {
                 map.addLayer(createLayer(new File(filename)));
@@ -47,4 +49,13 @@ public class ShapeView {
         return new FeatureLayer(featureSource,style);
 
     }
+
+    public static Layer createLayer(File file, Color lineColor) throws IOException {
+        FileDataStore dataStore = FileDataStoreFinder.getDataStore(file);
+        SimpleFeatureSource featureSource = dataStore.getFeatureSource();
+        Style style = SLD.createPolygonStyle(lineColor,null,0.0f);
+        return new FeatureLayer(featureSource,style);
+
+    }
+
 }
