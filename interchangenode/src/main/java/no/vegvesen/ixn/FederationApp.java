@@ -1,17 +1,10 @@
-package no.vegvesen.interchange;
+package no.vegvesen.ixn;
 
 import org.apache.qpid.jms.JmsConnectionFactory;
-import org.apache.qpid.jms.message.JmsBytesMessage;
-import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 
 import javax.jms.*;
 import javax.naming.Context;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -19,49 +12,44 @@ import java.util.Hashtable;
 import java.util.Random;
 
 public class FederationApp implements MessageListener {
-	private static final String BLACK = "[0m";
-	private static final String YELLOW = "[33m";
-	private static final String TURQUOISE = "[36m";
-	private static final String USER = System.getProperty("USER");
-	private static final String PASSWORD = System.getProperty("PASSWORD");
+
+	private static final String USER = "interchange";
+	private static final String PASSWORD = "12345678";
+
+	private static final String WRITE_URL = "amqp://localhost:62672";
+	private final String SEND_QUEUE = "fedEx";
 
 	private Connection connection;
 	private Session session;
 	private MessageProducer messageProducer;
 
-	private FederationApp(String url, String sendQueue, String receiveQueue) {
+	private FederationApp(String read_url, String receiveQueue) {
 		try {
+
+			// Create the read context
 			Hashtable<Object, Object> env = new Hashtable<>();
 			env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
-			env.put("connectionfactory.myFactoryLookupTLS", url);
+			env.put("connectionfactory.myFactoryLookupTLS", read_url);
 			env.put("queue.receiveQueue", receiveQueue);
-			env.put("queue.sendQueue", sendQueue);
-			javax.naming.Context context = new javax.naming.InitialContext(env);
 
+			Context context = new javax.naming.InitialContext(env);
+
+			// Create a connection factory based on this context.
 			JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
 			factory.setPopulateJMSXUserID(true);
 
-			printWithColor(TURQUOISE, "Connecting to: " + factory.getRemoteURI());
-
+			// define receive and send queues
 			Destination queueR = (Destination) context.lookup("receiveQueue");
-			Destination queueS = (Destination) context.lookup("sendQueue");
-			printWithColor(TURQUOISE, " rece queue: " + queueR.toString());
-			printWithColor(TURQUOISE, " send queue: " + queueS.toString());
 
-			if (USER != null && USER.length() > 0) {
-				printWithColor(TURQUOISE, String.format("Basic auth %s/%s ", USER, PASSWORD));
-				connection = factory.createConnection(USER, PASSWORD);
-			} else {
-				connection = factory.createConnection();
-			}
+			// create and start connection, create a session
+			connection = factory.createConnection(USER, PASSWORD);
 			connection.start();
-
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
+			// Create a message consumer for the session, and listen for messages.
 			MessageConsumer messageConsumer = session.createConsumer(queueR);
-			messageProducer = session.createProducer(queueS);
-			printWithColor(YELLOW, " Waiting for messages..");
 			messageConsumer.setMessageListener(this);
+
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -70,6 +58,8 @@ public class FederationApp implements MessageListener {
 
 	@Override
 	public void onMessage(Message msg) {
+
+		// we have received a message, write it to the other interchange.
 		try {
 			msg.acknowledge();
 
@@ -84,54 +74,45 @@ public class FederationApp implements MessageListener {
 				System.out.println("When not set");
 			}
 
-			// Prints message delay and message number
-			System.out.println(delay + " " + msg.getBody(String.class));
 
 			// TODO: Send message to defined interchange.
+
+
+			// Create the read context
+			Hashtable<Object, Object> env = new Hashtable<>();
+			env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
+			env.put("connectionfactory.myFactoryLookupTLS", WRITE_URL);
+			env.put("queue.sendQueue", SEND_QUEUE);
+
+			Context context = new javax.naming.InitialContext(env);
+
+			// Create a connection factory based on this context.
+			JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
+			factory.setPopulateJMSXUserID(true);
+
+			// define send queue(fedEx)
+			Destination queueS = (Destination) context.lookup("sendQueue");
+
+			// create and start connection, create a session
+			connection = factory.createConnection(USER, PASSWORD);
+			connection.start();
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+			// Create a message producer for the session, and send the message.
+			messageProducer = session.createProducer(queueS);
+			messageProducer.send(msg, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+			close();
+
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static void printWithColor(String color, String s) {
-		System.out.println((char) 27 + color + s);
-	}
-
-
-	private void sendMessage(String where, String msg) {
-		Random r = new Random();
-
-
-		try {
-
-			double latDelta = r.nextDouble();
-			double lonDelta = r.nextDouble();
-
-			double lat = 63.0 + latDelta;
-			double lon = 10.0 + lonDelta;
-
-			JmsTextMessage message = (JmsTextMessage) session.createTextMessage(msg);
-			message.getFacade().setUserId(USER);
-			message.setStringProperty("who", "Norwegian Public Roads Administration");
-			message.setStringProperty("how", "Datex2");
-			message.setStringProperty("what", "Conditions");
-			message.setStringProperty("lat", "63.0");
-			message.setStringProperty("lon", "10.0");
-			message.setStringProperty("where1", where);
-			message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-			printWithColor(BLACK, " ");
-			messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-		} catch (JMSException e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	private void close() {
 		try {
 			System.out.println("closing");
-			printWithColor(BLACK, " ");
 			connection.close();
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -139,13 +120,19 @@ public class FederationApp implements MessageListener {
 	}
 
 	public static void main(String[] args) {
-		String url = "amqp://localhost:5672";
-		String sendQueue = "onramp";
-		String receiveQueue = "test-out";
 
-		printWithColor(TURQUOISE, String.format("Using url [%s] sendQueue [%s] outQueue [%s]", url, sendQueue, receiveQueue));
+		// TODO: Not hardcoded URIs
 
-		FederationApp fed = new FederationApp(url, sendQueue, receiveQueue);
+		// Read messages (receive) from queue ixn-b on node ixn-a
+		String read_url = "amqp://localhost:61672";
+		String receiveQueue = "ixn-b";
+
+		// Send messages to exchange fedEx on ixn-b
+		String write_url = "amqp://localhost:62672";
+
+		System.out.println(String.format("Using read_url [%s] write_url [%s] outQueue [%s]", read_url, WRITE_URL, receiveQueue));
+
+		FederationApp fed = new FederationApp(read_url, receiveQueue);
 
 	}
 
