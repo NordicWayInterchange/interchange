@@ -27,6 +27,7 @@ public class DebugClient implements MessageListener {
 
 	private static final String USER = System.getProperty("USER");
 	private static final String PASSWORD = System.getProperty("PASSWORD");
+	private static final int TIME_TO_LIVE_THIRTY_SECONDS = 30000;
 
 	private Connection connection;
 	private Session session;
@@ -139,7 +140,7 @@ public class DebugClient implements MessageListener {
 	}
 
 	private void sendMessage(String msg) {
-		sendMessage("no", msg);
+		sendMessage("NO", msg);
 	}
 
 	private void sendMessage(String where, String msg) {
@@ -155,7 +156,7 @@ public class DebugClient implements MessageListener {
 			message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 			printWithColor(BROWN, " sending message");
 			printWithColor(BLACK, " ");
-			messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+			messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, TIME_TO_LIVE_THIRTY_SECONDS);
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
