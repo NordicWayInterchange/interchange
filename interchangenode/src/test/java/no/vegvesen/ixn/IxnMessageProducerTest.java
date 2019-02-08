@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.messaging.IxnJmsTemplate;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import no.vegvesen.ixn.model.IxnMessage;
 import org.junit.Before;
@@ -8,10 +9,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
-import java.util.*;
+import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -23,7 +23,7 @@ public class IxnMessageProducerTest {
     private IxnMessage message = mock(IxnMessage.class);
 
     @Mock
-    JmsTemplate jmsTemplate;
+    IxnJmsTemplate jmsTemplate;
 
     @Before
     public void setUp() {
@@ -38,7 +38,7 @@ public class IxnMessageProducerTest {
         when(message.getWhat()).thenReturn(Arrays.asList("Obstruction"));
 
         producer.sendMessage("test-out", message);
-        verify(jmsTemplate, times(1)).send(eq("test-out"), messageCreator.capture());
+        verify(jmsTemplate, times(1)).send(eq("test-out"), messageCreator.capture(), eq(0L));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class IxnMessageProducerTest {
         when(message.getWhat()).thenReturn(Arrays.asList("Obstruction", "Works"));
 
         producer.sendMessage("test-out", message);
-        verify(jmsTemplate, times(4)).send(eq("test-out"), messageCreator.capture());
+        verify(jmsTemplate, times(4)).send(eq("test-out"), messageCreator.capture(), eq(0L));
     }
 
     @Test

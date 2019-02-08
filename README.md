@@ -3,6 +3,11 @@ Interchange node under the Nordic Way project
 
 Hello world
 
+=======
+### License
+See full MIT license text [here](license.md).
+  
+### Introduction
 The Nordic Way Interchange Node (NWIXN) is a message broker that
 enables crowdsourcing of traffic data. Nordic Way partners send traffic information
 to the broker in the form of AMQP messages. These messages are distributed to subscribing partners.
