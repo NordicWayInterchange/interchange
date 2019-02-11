@@ -205,6 +205,39 @@
 
                                     </run>
                                 </image>
+                                <image>
+                                    <alias>qpid</alias>
+                                    <name>qpid</name>
+                                    <run>
+                                        <ports>
+                                            <!-- Only used without TLS <port>64671:5671</port>-->
+                                            <port>64672:5672</port>
+                                            <port>64080:8080</port>
+                                        </ports>
+                                        <volumes>
+                                            <bind>
+                                                <volume>
+                                                    ${project.basedir}/src/test/resources/qpid:/config
+                                                </volume>
+                                                <volume>
+                                                    ${project.basedir}/src/test/resources/jks:/tmp
+                                                </volume>
+                                            </bind>
+                                        </volumes>
+                                        <env>
+                                            <CERTIFICATE_FILE>/tmp/localhost.crt</CERTIFICATE_FILE>
+                                            <PRIVATE_KEY_FILE>/tmp/localhost.key</PRIVATE_KEY_FILE>
+                                            <VHOST_FILE>/config/localhost.json</VHOST_FILE>
+                                            <GROUPS_FILE>/config/groups</GROUPS_FILE>
+                                            <PASSWD_FILE>/config/passwd</PASSWD_FILE>
+                                        </env>
+                                        <wait>
+                                            <healthy>true</healthy>
+                                            <time>60000</time>
+                                        </wait>
+
+                                    </run>
+                                </image>
 
                             </images>
 
