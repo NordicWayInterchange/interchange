@@ -1,6 +1,5 @@
-package no.vegvesen.ixn.messaging;
+package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.IxnBaseIT;
 import org.apache.qpid.jms.JmsQueue;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.assertj.core.data.Offset;
