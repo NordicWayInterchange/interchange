@@ -1,9 +1,9 @@
-package idaberge.springbootrestapi;
+package no.vegvesen.ixn.federation;
 
-import idaberge.springbootrestapi.Model.Capability;
-import idaberge.springbootrestapi.Model.Interchange;
-import idaberge.springbootrestapi.Model.Subscription;
-import idaberge.springbootrestapi.Model.DataType;
+import no.vegvesen.ixn.federation.Model.Capability;
+import no.vegvesen.ixn.federation.Model.Interchange;
+import no.vegvesen.ixn.federation.Model.Subscription;
+import no.vegvesen.ixn.federation.Model.DataType;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +15,11 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
+
+/**
+ * A Spring Boot REST api controller that uses Qpid's REST api to
+ * change/create queues/bindings based on incoming requests.
+ */
 
 @RestController
 public class Controller{
@@ -28,6 +33,7 @@ public class Controller{
 	String exchangeURL = "http://localhost:8081/api/latest/exchange/default/qpid.test.io/nwEx";
 	String queueURL = "http://localhost:8081/api/latest/queue/default/qpid.test.io";
 
+	// A method that posts a json object to the Qpid REST api, using a given URI and a given command.
 	public void callQpid(String urlString, String message, String command) throws Exception{
 		String url = urlString + command;
 
@@ -35,7 +41,7 @@ public class Controller{
 		URL sourceURL = new URL(url);
 		HttpURLConnection source = (HttpURLConnection) sourceURL.openConnection();
 
-		// HTTP Basic Authentication.
+		// HTTP Basic Authentication. This must be enabled in the qpid for this to work.
 		String userpass = "interchange:12345678";
 		String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
 		source.setRequestProperty ("Authorization", basicAuth);
@@ -67,6 +73,7 @@ public class Controller{
 		wr.close();
 	}
 
+	// Updates the binding of a queue to a new binding.
 	public void updateBinding(String binding, String queueName) throws Exception{
 
 		JSONObject json = new JSONObject();
@@ -84,6 +91,7 @@ public class Controller{
 		callQpid(exchangeURL, jsonString, "/bind");
 	}
 
+	// Creates a new queue for a neighbouring Interchange.
 	public void createQueue(Interchange interchange) throws Exception{
 		JSONObject json = new JSONObject();
 		json.put("name", interchange.getId());
@@ -99,11 +107,10 @@ public class Controller{
 		updateBinding(binding, interchange.getId());
 	}
 
+	// Creates a binding based on the subscriptions of a neighbouring Interchange.
 	public String createBinding(Interchange interchange){
 
 		String binding = "";
-
-		logger.info("Number of subscriptions: " + interchange.getSubscriptions().size());
 
 		for(Subscription subscription : interchange.getSubscriptions()) {
 
@@ -132,19 +139,13 @@ public class Controller{
 			binding += ")"; // closing parenthesis for how/version/what
 
 			if(interchange.getSubscriptions().indexOf(subscription) != interchange.getSubscriptions().size()-1 ){
-				// Subscrption is not the last element, add OR
-
-				int index = interchange.getSubscriptions().indexOf(subscription);
-				logger.info("Country: " + interchange.getSubscriptions().get(index).getCountry()
-						+ ", index: " + index );
-				binding += ") OR";
+				// subscription is not the last element in the list of subscriptions, add OR.
+				binding += ") OR ";
 			}else{
 				binding += ")";
 			}
-
 		}
 		logger.info("Queue binding:" + binding);
-
 		return binding;
 	}
 
@@ -152,12 +153,11 @@ public class Controller{
 	@PostMapping("/updateSubscription")
 	public Interchange updateSubscription(@RequestBody Interchange interchange)throws Exception{
 
-		// Check if we already have information about this interchange; if it is already in the list.
-
 		if(!neighbours.contains(interchange)) {
-			// We have not seen this interchange before. Add it to the list of neighbours.
+			// We have not seen this interchange before.
 			createInterchange(interchange);
 		}else {
+			// We have seen the interchange before. Update the bindings.
 			String binding = createBinding(interchange);
 			updateBinding(binding, interchange.getId());
 		}
@@ -166,14 +166,16 @@ public class Controller{
 	}
 
 	@GetMapping("/neighbours")
-	public List<Interchange> getAllSubscriptions()throws Exception{
+	public List<Interchange> getAllSubscriptions(){
+		// Returns a list of all neighbouring interchanges.
 		return neighbours;
 	}
 
 	@PostMapping("/interchange")
 	public Interchange createInterchange(@RequestBody Interchange interchange)throws Exception{
+		// Check if Interchange already exists as a neighbour.
+		// If not - add it to the list of neighbours and create a new queue.
 		if(!neighbours.contains(interchange)){
-			// we have a new interchange node, add it to list of neighbours and create a queue for it.
 			neighbours.add(interchange);
 			createQueue(interchange);
 		}
@@ -183,11 +185,15 @@ public class Controller{
 
 	@PostMapping("/neighbourCapabilities")
 	public Capability createNewCapability(@RequestBody Capability capability){
+		// TODO
 		neighbourCapabilities.add(capability);
 		return capability;
 	}
 
 	@GetMapping("/capabilities")
-	public List<Capability> getNeighbourCapabilities(){ return neighbourCapabilities; }
+	public List<Capability> getNeighbourCapabilities(){
+		// TODO
+		return neighbourCapabilities;
+	}
 
 }
