@@ -44,7 +44,8 @@ public class TimeToLiveIT extends IxnBaseIT {
 		consumer = session.createConsumer(new JmsQueue(READ_QUEUE));
 	}
 
-	private void sendMessage(long timeToLive) throws Exception {
+
+	private JmsTextMessage createTestMessage() throws JMSException {
 		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello " + getClass().getSimpleName());
 		message.getFacade().setUserId("king_harald");
 		message.setStringProperty("who", "Bouvet Expiry Testing Department");
@@ -54,8 +55,7 @@ public class TimeToLiveIT extends IxnBaseIT {
 		message.setStringProperty("lon", "10.0");
 		message.setStringProperty("where1", "NO");
 		message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-
-		messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
+		return message;
 	}
 
 	private Message readMessage(long readTimeout) throws JMSException {
@@ -65,6 +65,25 @@ public class TimeToLiveIT extends IxnBaseIT {
 	@Test
 	public void messageSentThroughInterchangeAppKeepsTimeToLiveSetting() throws Exception {
 		// drain
+		drainMessages();
+
+		JmsTextMessage expiryMessage = createTestMessage();
+		long expectedExpiry = sendMessageExpectedExpiry(expiryMessage);
+		Message receivedMessage = readMessage(3000L); // wait long enough for the Interchange routing to complete
+
+		assertThat(receivedMessage).isNotNull();
+		assertThat(receivedMessage.getJMSExpiration()).isCloseTo(expectedExpiry, Offset.offset(500L));
+		session.close();
+	}
+
+	private long sendMessageExpectedExpiry(JmsTextMessage expiryMessage) throws JMSException {
+		long systemTime = System.currentTimeMillis();
+		long timeToLive = 10000L;
+		messageProducer.send(expiryMessage, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
+		return systemTime + timeToLive;
+	}
+
+	private void drainMessages() throws JMSException {
 		Message message;
 		do {
 			message = readMessage(400);
@@ -72,15 +91,6 @@ public class TimeToLiveIT extends IxnBaseIT {
 				System.out.println("drained message " + message.getBody(String.class));
 			}
 		} while (message != null);
-
-		long systemTime = System.currentTimeMillis();
-		long timeToLive = 10000L;
-		long readTimeout = timeToLive + 10000L;
-		sendMessage(timeToLive);
-		Message receivedMessage = readMessage(readTimeout);
-		assertThat(receivedMessage).isNotNull();
-		assertThat(receivedMessage.getJMSExpiration()).isCloseTo(systemTime + timeToLive, Offset.offset(2000L));
-		session.close();
 	}
 
 }
