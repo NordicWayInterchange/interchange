@@ -1,12 +1,12 @@
-package idaberge.springbootrestapi.Model;
+package no.vegvesen.ixn.federation.Model;
 
 import java.util.List;
 
 public class Interchange {
 
-	List<Capability> capabilities;
-	List<Subscription> subscriptions;
-	String id;
+	private List<Capability> capabilities;
+	private List<Subscription> subscriptions;
+	private String id;
 
 	public Interchange(){}
 

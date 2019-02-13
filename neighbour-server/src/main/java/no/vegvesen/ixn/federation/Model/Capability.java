@@ -1,4 +1,4 @@
-package idaberge.springbootrestapi.Model;
+package no.vegvesen.ixn.federation.Model;
 
 import java.util.List;
 

@@ -1,12 +1,12 @@
-package idaberge.springbootrestapi.Model;
+package no.vegvesen.ixn.federation.Model;
 
 import java.util.List;
 
 public class DataType {
 
-	String how;
-	String version;
-	List<String> what;
+	private String how;
+	private String version;
+	private List<String> what;
 
 
 	public DataType(){}
