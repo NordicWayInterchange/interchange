@@ -26,9 +26,9 @@ public class Controller{
 
 	Logger logger = LoggerFactory.getLogger(Controller.class);
 
-	List<Interchange> neighbours = new ArrayList<>();
-	List<Subscription> subscriptions = new ArrayList<>();
-	List<Capability> neighbourCapabilities = new ArrayList<>();
+	private List<Interchange> neighbours = new ArrayList<>();
+	private List<Subscription> subscriptions = new ArrayList<>();
+	private List<Capability> neighbourCapabilities = new ArrayList<>();
 
 	String exchangeURL = "http://localhost:8081/api/latest/exchange/default/qpid.test.io/nwEx";
 	String queueURL = "http://localhost:8081/api/latest/queue/default/qpid.test.io";
@@ -41,7 +41,7 @@ public class Controller{
 		URL sourceURL = new URL(url);
 		HttpURLConnection source = (HttpURLConnection) sourceURL.openConnection();
 
-		// HTTP Basic Authentication. This must be enabled in the qpid for this to work.
+		// HTTP Basic Authentication. This must be enabled in the qpid broker for this to work.
 		String userpass = "interchange:12345678";
 		String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
 		source.setRequestProperty ("Authorization", basicAuth);
