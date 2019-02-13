@@ -1,4 +1,4 @@
-package idaberge.springbootrestapi;
+package no.vegvesen.ixn.federation;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
