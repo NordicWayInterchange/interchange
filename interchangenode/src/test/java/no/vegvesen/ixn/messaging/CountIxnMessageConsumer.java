@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.messaging;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 @EnableJms
 @Component
+@Profile("63")
 public class CountIxnMessageConsumer {
 	private Map<String, List<TextMessage>> receivedMessages = new HashMap<>();
 
