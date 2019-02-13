@@ -1,10 +1,10 @@
 package no.vegvesen.ixn;
 
+import org.apache.qpid.jms.JmsQueue;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.Test;
 
 import javax.jms.*;
-import javax.naming.Context;
 
 /**
  * Verifies access control lists where username comes from the common name (CN) of the user certificate.
@@ -22,57 +22,30 @@ public class AccessControlIT extends IxnBaseIT {
 
 	private static final String URI = "amqps://localhost:62671";
 
-
 	@Test(expected = JMSSecurityException.class)
 	public void testKingHaraldCanNotConsumeSE_OUT() throws Exception {
-		Context context = setContext(URI, SE_OUT, "onramp");
-
-		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Destination queueR = (Destination) context.lookup("receiveQueue");
-		connection.start();
-
-		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		session.createConsumer(queueR);
+		Session session = getTlsSession(URI, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
+		session.createConsumer(new JmsQueue(SE_OUT));
 	}
 
 	@Test(expected = JMSSecurityException.class)
 	public void testKingGustafCanNotConsumeNO_OUT() throws Exception {
-		Context context = setContext(URI, NO_OUT, "onramp");
-		Connection connection = createConnection(context, JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS);
-		Destination queueR = (Destination) context.lookup("receiveQueue");
-		connection.start();
-
-		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-		session.createConsumer(queueR);
+		Session session = getTlsSession(URI, JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS);
+		session.createConsumer(new JmsQueue(NO_OUT));
 	}
 
 	@Test(expected = JMSSecurityException.class)
 	public void KingHaraldCanNotConsumeFromOnramp() throws Exception {
-		Context context = setContext(URI, "onramp", "onramp");
-
-		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Destination queueR = (Destination) context.lookup("receiveQueue");
-		connection.start();
-
-		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		session.createConsumer(queueR);
+		Session session = getTlsSession(URI, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
+		session.createConsumer(new JmsQueue("onramp"));
 	}
 
 
 	@Test(expected = JMSException.class)
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
-		Context context = setContext(URI, NO_OUT, "nwEx");
-
-		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Destination queueR = (Destination) context.lookup("receiveQueue");
-		Destination queueS = (Destination) context.lookup("sendQueue");
-		connection.start();
-
-		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-		session.createConsumer(queueR);
-		MessageProducer messageProducer = session.createProducer(queueS);
+		Session session = getTlsSession(URI, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
+		MessageProducer messageProducer = session.createProducer(new JmsQueue("nwEx"));
+		MessageConsumer noOut = session.createConsumer(new JmsQueue(NO_OUT));
 
 		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello world");
 		message.getFacade().setUserId("king_harald");
@@ -88,18 +61,12 @@ public class AccessControlIT extends IxnBaseIT {
 
 	@Test(expected = JMSException.class)
 	public void userWithInvalidCertificateCannotConnect() throws Exception {
-		Context context = setContext(URI, "test-out", "onramp");
-
-		Connection connection = createConnection(context, JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		connection.start();
+		getTlsSession(URI, JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS);
 	}
 
 	@Test
 	public void userWithValidCertificateCanConnect() throws Exception {
-		Context context = setContext(URI, NO_OUT, "onramp");
-
-		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		connection.start();
+		getTlsSession(URI, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
 	}
 
 
