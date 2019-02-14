@@ -1,10 +1,20 @@
 package no.vegvesen.ixn.federation.Model;
 
+import javax.persistence.*;
 import java.util.List;
 
+@Entity
 public class Capability {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="cap_id")
+	private int id;
+
+	@Column(name = "country")
 	private String country;
+
+	@OneToMany(cascade= CascadeType.ALL)
 	private List<DataType> dataSets;
 
 	public Capability(){}
@@ -13,6 +23,7 @@ public class Capability {
 		this.country = country;
 		this.dataSets = dataSets;
 	}
+
 
 	public String getCountry() {
 		return country;

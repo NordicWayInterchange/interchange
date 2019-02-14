@@ -1,13 +1,25 @@
 package no.vegvesen.ixn.federation.Model;
 
+import javax.persistence.*;
 import java.util.List;
 
+@Entity
 public class DataType {
 
-	private String how;
-	private String version;
-	private List<String> what;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="data_id")
+	private int id;
 
+	@Column(name = "how")
+	private String how;
+
+	@Column(name= "version")
+	private String version;
+
+	@ElementCollection
+	@Column(name = "what")
+	private List<String> what;
 
 	public DataType(){}
 
@@ -41,3 +53,4 @@ public class DataType {
 		this.what = what;
 	}
 }
+

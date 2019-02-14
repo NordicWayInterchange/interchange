@@ -1,18 +1,33 @@
 package no.vegvesen.ixn.federation.Model;
 
+import javax.persistence.*;
 import java.util.List;
 
+@Entity
+@Table(name = "Interchanges")
 public class Interchange {
 
-	private List<Capability> capabilities;
-	private List<Subscription> subscriptions;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="id")
+	private int nr;
+
+	@Column(name = "ixn_id")
 	private String id;
+
+	@OneToMany(cascade= CascadeType.ALL)
+	@JoinColumn(name = "id")
+	private List<Capability> capabilities;
+
+	@OneToMany(cascade= CascadeType.ALL)
+	@JoinColumn(name = "id")
+	private List<Subscription> subscriptions;
 
 	public Interchange(){}
 
-	public Interchange(List<Capability> capabilities, String id, List<Subscription> subscriptions) {
-		this.capabilities = capabilities;
+	public Interchange(String id, List<Capability> capabilities, List<Subscription> subscriptions) {
 		this.id = id;
+		this.capabilities = capabilities;
 		this.subscriptions = subscriptions;
 	}
 
