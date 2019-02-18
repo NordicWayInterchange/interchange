@@ -58,6 +58,25 @@
             <artifactId>netty-handler</artifactId>
             <version>4.1.28.Final</version>
         </dependency>
+
+            <!-- Note that the below is qpid-broker-core and *not* qpid-broker. -->
+            <dependency>
+                <groupId>org.apache.qpid</groupId>
+                <artifactId>qpid-broker-core</artifactId>
+                <version>7.0.6</version>
+            </dependency>
+            <!-- AMQP protocol support is modular. Here we show support for 0-8/0-9 and 1.0. Support for 0-10 is excluded. -->
+            <dependency>
+                <groupId>org.apache.qpid</groupId>
+                <artifactId>qpid-broker-plugins-amqp-1-0-protocol</artifactId>
+                <version>7.0.6</version>
+            </dependency>
+            <!-- If a different store type is required it needs to be included here -->
+            <dependency>
+                <groupId>org.apache.qpid</groupId>
+                <artifactId>qpid-broker-plugins-memory-store</artifactId>
+                <version>7.0.6</version>
+            </dependency>
     </dependencies>
 
     <build>
