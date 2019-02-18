@@ -21,22 +21,25 @@ public class WorldToCountryShape {
     public static void main(String[] args) throws IOException, CQLException {
         String pathname = "C:\\interchange\\shapefiler\\oresund3\\worldshape_10kmbuffer_oresund3.shp";
         String cqlPredicate = "ISO2 = 'DK'";
-        FileDataStore dataStore = FileDataStoreFinder.getDataStore(new File(pathname));
+        String fileBase = "Denmark_10km_buffer";
+        String outPath = "C:\\interchange\\shapefiler\\oresund3\\"; //+ fileBase + ".shp";
+        filterFileToOutShape(pathname, cqlPredicate, fileBase, outPath);
+
+
+    }
+
+    public static void filterFileToOutShape(String inputFileName, String cqlPredicate, String outFileName, String outPath) throws IOException, CQLException {
+        FileDataStore dataStore = FileDataStoreFinder.getDataStore(new File(inputFileName));
         SimpleFeatureSource featureSource = dataStore.getFeatureSource();
         Filter filter = CQL.toFilter(cqlPredicate);
         SimpleFeatureType schema = featureSource.getSchema();
         SimpleFeatureCollection features = featureSource.getFeatures(filter);
-        String fileBase = "Denmark_10km_buffer";
-        String outPath = "C:\\interchange\\shapefiler\\oresund3\\" + fileBase + ".shp";
         Map<String, Serializable> creationParams = new HashMap<>();
-        creationParams.put("url", URLs.fileToUrl(new File(outPath)));
+        creationParams.put("url", URLs.fileToUrl(new File(outPath + outFileName + ".shp")));
         FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory(".shp");
         DataStore outStore = factory.createDataStore(creationParams);
         outStore.createSchema(schema);
-
-        SimpleFeatureStore featureStore = (SimpleFeatureStore)outStore.getFeatureSource(fileBase);
-
-
+        SimpleFeatureStore featureStore = (SimpleFeatureStore)outStore.getFeatureSource(outFileName);
         Transaction t = new DefaultTransaction();
         try {
             featureStore.addFeatures(features);
@@ -50,10 +53,5 @@ public class WorldToCountryShape {
         } finally {
             t.close();
         }
-
-
-
-
-
     }
 }

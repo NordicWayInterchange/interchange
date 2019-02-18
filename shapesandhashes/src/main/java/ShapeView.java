@@ -20,20 +20,8 @@ public class ShapeView {
         map.setTitle("Nordic countries w/10km buffer");
         if (args.length == 0) {
             //TODO not on my computer!
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_shape.shp")));
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Norway_10km_buffer.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Sweden_10km_buffer.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Finland_10km_buffer.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\Denmark_10km_buffer.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_outer_hashes_4.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_inner_hashes_3.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\worldshape_10kmbuffer_oresund3.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\polygonlist_compressed.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\polygonlist_random_length_7.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\hashed_depth_5_rounds_400000.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\generated_shape_size_5.shp")));
-            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\hashes_5_compressed.shp")));
-            map.addLayer(createLayer(new File("C:\\interchange\\datex_eksempler\\linestrings_getSituation.shp"),Color.BLUE));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_shape.shp"),Color.RED));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\oslo_4_length.shp")));
         } else {
             for (String filename : args) {
                 map.addLayer(createLayer(new File(filename)));
@@ -53,7 +41,7 @@ public class ShapeView {
     public static Layer createLayer(File file, Color lineColor) throws IOException {
         FileDataStore dataStore = FileDataStoreFinder.getDataStore(file);
         SimpleFeatureSource featureSource = dataStore.getFeatureSource();
-        Style style = SLD.createPolygonStyle(lineColor,null,0.0f);
+        Style style = SLD.createPolygonStyle(lineColor,lineColor,0.2f);
         return new FeatureLayer(featureSource,style);
 
     }

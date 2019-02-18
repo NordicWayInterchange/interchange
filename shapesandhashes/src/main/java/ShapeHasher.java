@@ -121,4 +121,13 @@ public class ShapeHasher {
         schemabuilder.length(7).add("geohash",String.class);
         return schemabuilder.buildFeatureType();
     }
+
+
+    public static List<String> createOuterHashesFromPolygon(MultiPolygon polygon,int level) {
+        Set<String> hashesToTest = new HashSet<>();
+        Point centroid = polygon.getCentroid();
+        String s = GeoHash.geoHashStringWithCharacterPrecision(centroid.getX(), centroid.getY(), level);
+        hashesToTest.add(s);
+        return Arrays.asList(s);
+    }
 }

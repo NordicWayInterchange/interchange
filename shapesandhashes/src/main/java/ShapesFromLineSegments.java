@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class ShapesFromLineSegments {
 
     public static void main(String[] args) throws IOException {
-        List<LineString> lineStrings = Files.lines(Paths.get("C:\\interchange\\datex_eksempler", "linesegments_unique.txt"))
+        List<LineString> lineStrings = Files.lines(Paths.get("C:\\interchange\\datex_eksempler", "linesegments_1549975028_unique.txt"))
                 .map(ShapesFromLineSegments::createLineString)
                 .collect(Collectors.toList());
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
@@ -34,7 +34,7 @@ public class ShapesFromLineSegments {
         builder.add("the_geom",LineString.class);
         SimpleFeatureType schema = builder.buildFeatureType();
 
-        String outFileName = "linestrings_getSituation";
+        String outFileName = "linestrings_getSituation_" + System.currentTimeMillis();
         File outFile = new File("C:\\interchange\\datex_eksempler\\" + outFileName + ".shp");
         Map<String, Serializable> creationParams = new HashMap<>();
         creationParams.put("url", URLs.fileToUrl(outFile));
