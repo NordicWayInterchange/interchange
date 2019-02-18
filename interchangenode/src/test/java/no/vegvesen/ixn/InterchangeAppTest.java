@@ -1,6 +1,5 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.geo.GeoLookup;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import no.vegvesen.ixn.model.IxnMessage;
 import org.junit.Assert;
@@ -12,7 +11,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import java.util.Collections;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 import static org.mockito.Mockito.*;
@@ -22,8 +20,8 @@ public class InterchangeAppTest {
 
     @Mock
     IxnMessageProducer producer;
-    @Mock
-    GeoLookup geoLookup;
+
+    MockGeoLookup geoLookup = new MockGeoLookup();
 
     private InterchangeApp app;
     private IxnMessage message = mock(IxnMessage.class);
@@ -129,7 +127,6 @@ public class InterchangeAppTest {
         when(textMessage.getStringProperty(WHAT)).thenReturn("Obstructions");
         when(textMessage.getStringProperty(WHO)).thenReturn("Bouvet Island Traffic Agency");
         when(textMessage.getDoubleProperty(any())).thenReturn(1.0d);
-        when(geoLookup.getCountries(anyDouble(), anyDouble())).thenReturn(Collections.singletonList("NO"));
 
         app.receiveMessage(textMessage);
         verify(producer, times(1)).sendMessage(eq(InterchangeApp.NWEXCHANGE), any(IxnMessage.class));

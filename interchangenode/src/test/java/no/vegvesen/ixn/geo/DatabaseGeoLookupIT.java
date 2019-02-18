@@ -16,16 +16,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class GeoLookupIT {
+public class DatabaseGeoLookupIT {
 
 	@Autowired
 	DataSource dataSource;
 
-	private GeoLookup geoLookup;
+	private DatabaseGeoLookup geoLookup;
 
 	@Before
 	public void setup() {
-		geoLookup = new GeoLookup(new JdbcTemplate(dataSource));
+		geoLookup = new DatabaseGeoLookup(new JdbcTemplate(dataSource));
 	}
 
 	@Test
