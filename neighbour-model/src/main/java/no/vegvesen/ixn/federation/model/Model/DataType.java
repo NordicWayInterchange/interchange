@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model.Model;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class DataType {
@@ -17,13 +18,13 @@ public class DataType {
 	@Column(name= "version")
 	String version;
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@Column(name = "what")
-	List<String> what;
+	Set<String> what;
 
 	public DataType(){}
 
-	public DataType(String how, String version, List<String> what) {
+	public DataType(String how, String version, Set<String> what) {
 		this.how = how;
 		this.version = version;
 		this.what = what;
@@ -45,11 +46,11 @@ public class DataType {
 		this.version = version;
 	}
 
-	public List<String> getWhat() {
+	public Set<String> getWhat() {
 		return what;
 	}
 
-	public void setWhat(List<String> what) {
+	public void setWhat(Set<String> what) {
 		this.what = what;
 	}
 }

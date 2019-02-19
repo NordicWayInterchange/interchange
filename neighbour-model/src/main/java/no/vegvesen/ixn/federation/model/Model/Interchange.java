@@ -1,10 +1,12 @@
 package no.vegvesen.ixn.federation.model.Model;
 
+import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "Interchanges")
@@ -16,34 +18,33 @@ public class Interchange {
 	@Column(name="id")
 	Integer id;
 
-
 	@Column(name = "name", unique = true)
 	String name;
 
-	@OneToMany(cascade= CascadeType.ALL)
+	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "id")
-	List<Capability> capabilities;
+	Set<Capability> capabilities;
 
-	@OneToMany(cascade= CascadeType.ALL)
+	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "id")
-	List<Subscription> subscriptions;
+	Set<Subscription> subscriptions;
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
 
 	public Interchange(){}
 
-	public Interchange(String name, List<Capability> capabilities, List<Subscription> subscriptions) {
+	public Interchange(String name, Set<Capability> capabilities, Set<Subscription> subscriptions) {
 		this.name = name;
 		this.capabilities = capabilities;
 		this.subscriptions = subscriptions;
 	}
 
-	public List<Capability> getCapabilities() {
+	public Set<Capability> getCapabilities() {
 		return capabilities;
 	}
 
-	public void setCapabilities(List<Capability> capabilities) {
+	public void setCapabilities(Set<Capability> capabilities) {
 		this.capabilities = capabilities;
 	}
 
@@ -55,11 +56,11 @@ public class Interchange {
 		this.name = name;
 	}
 
-	public List<Subscription> getSubscriptions() {
+	public Set<Subscription> getSubscriptions() {
 		return subscriptions;
 	}
 
-	public void setSubscriptions(List<Subscription> subscriptions) {
+	public void setSubscriptions(Set<Subscription> subscriptions) {
 		this.subscriptions = subscriptions;
 	}
 }

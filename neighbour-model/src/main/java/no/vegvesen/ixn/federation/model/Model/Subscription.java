@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model.Model;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Subscription {
@@ -14,12 +15,12 @@ public class Subscription {
 	@Column(name = "country")
 	private String country;
 
-	@OneToMany(cascade= CascadeType.ALL)
-	private List<DataType> dataSets;
+	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
+	private Set<DataType> dataSets;
 
 	public Subscription(){}
 
-	public Subscription(Interchange interchange, String country, List<DataType> dataSets) {
+	public Subscription(Interchange interchange, String country, Set<DataType> dataSets) {
 
 		this.country = country;
 		this.dataSets = dataSets;
@@ -34,11 +35,11 @@ public class Subscription {
 		this.country = country;
 	}
 
-	public List<DataType> getDataSets() {
+	public Set<DataType> getDataSets() {
 		return dataSets;
 	}
 
-	public void setDataSets(List<DataType> dataSets) {
+	public void setDataSets(Set<DataType> dataSets) {
 		this.dataSets = dataSets;
 	}
 }

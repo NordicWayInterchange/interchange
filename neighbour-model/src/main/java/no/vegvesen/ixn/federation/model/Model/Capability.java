@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model.Model;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Capability {
@@ -15,11 +16,11 @@ public class Capability {
 	private String country;
 
 	@OneToMany(cascade= CascadeType.ALL)
-	private List<DataType> dataSets;
+	private Set<DataType> dataSets;
 
 	public Capability(){}
 
-	public Capability(String country, List<DataType> dataSets) {
+	public Capability(String country, Set<DataType> dataSets) {
 		this.country = country;
 		this.dataSets = dataSets;
 	}
@@ -33,11 +34,11 @@ public class Capability {
 		this.country = country;
 	}
 
-	public List<DataType> getDataSets() {
+	public Set<DataType> getDataSets() {
 		return dataSets;
 	}
 
-	public void setDataSets(List<DataType> dataSets) {
+	public void setDataSets(Set<DataType> dataSets) {
 		this.dataSets = dataSets;
 	}
 }
