@@ -18,6 +18,7 @@
     <modules>
         <module>interchangenode</module>
         <module>debugclient</module>
+        <module>neighbour-model</module>
         <module>neighbour-server</module>
     </modules>
 </project>
