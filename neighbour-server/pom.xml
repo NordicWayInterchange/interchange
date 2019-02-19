@@ -20,8 +20,20 @@
     <dependencies>
 
         <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>neighbour-model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.4-1206-jdbc42</version>
         </dependency>
 
         <dependency>
