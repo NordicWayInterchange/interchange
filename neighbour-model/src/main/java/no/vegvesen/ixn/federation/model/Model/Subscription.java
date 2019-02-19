@@ -1,15 +1,15 @@
-package no.vegvesen.ixn.federation.Model;
+package no.vegvesen.ixn.federation.model.Model;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
-public class Capability {
+public class Subscription {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="cap_id")
-	private int id;
+	@Column(name="sub_id")
+	int id;
 
 	@Column(name = "country")
 	private String country;
@@ -17,9 +17,10 @@ public class Capability {
 	@OneToMany(cascade= CascadeType.ALL)
 	private List<DataType> dataSets;
 
-	public Capability(){}
+	public Subscription(){}
 
-	public Capability(String country, List<DataType> dataSets) {
+	public Subscription(Interchange interchange, String country, List<DataType> dataSets) {
+
 		this.country = country;
 		this.dataSets = dataSets;
 	}
