@@ -15,7 +15,7 @@ public class Capability {
 	@Column(name = "country")
 	private String country;
 
-	@OneToMany(cascade= CascadeType.ALL)
+	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<DataType> dataSets;
 
 	public Capability(){}
