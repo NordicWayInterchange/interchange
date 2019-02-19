@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @RestController
 public class Controller {
@@ -27,6 +25,9 @@ public class Controller {
 	public Interchange updateSubscription(@RequestBody Interchange interchange){
 
 		Interchange mod = interchangeRepository.findByInterchangeId(interchange.getName());
+
+		logger.info("interchange name: " + interchange.getName());
+		logger.info("Interchange subscriptions: " + interchange.getSubscriptions().toString());
 
 		if(mod == null){
 			interchangeRepository.save(interchange);
@@ -59,7 +60,7 @@ public class Controller {
 
 
 	@RequestMapping(path="/{ixnId}/subscriptions")
-	public List<Subscription> getSubscription(@PathVariable String ixnId){
+	public Set<Subscription> getSubscription(@PathVariable String ixnId){
 		// TODO: return all the subscriptions
 
 		Interchange mod = interchangeRepository.findByInterchangeId(ixnId);
@@ -68,11 +69,11 @@ public class Controller {
 			return mod.getSubscriptions();
 		}
 
-		return Arrays.asList();
+		return Collections.emptySet();
 	}
 
 	@RequestMapping(path="/{ixnId}/capabilities")
-	public List<Capability> getCapabilities(@PathVariable String ixnId){
+	public Set<Capability> getCapabilities(@PathVariable String ixnId){
 		// TODO: return this node's capabilities
 
 		Interchange mod = interchangeRepository.findByInterchangeId(ixnId);
@@ -81,7 +82,7 @@ public class Controller {
 			return mod.getCapabilities();
 		}
 
-		return Arrays.asList();
+		return Collections.emptySet();
 	}
 
 	@RequestMapping(path="/{ixnId}")
