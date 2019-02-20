@@ -73,7 +73,7 @@ public class GeoHashArea {
 		System.out.println("Distance " + getDistance(eventArea.get(0), eventArea.get(eventArea.size() - 1)));
 		Set<GeoHash> eventHashes = new HashSet<>();
 		for (LonLat lonLat : eventArea) {
-			GeoHash eventHash = GeoHash.withCharacterPrecision(lonLat.lat, lonLat.lon, 6);
+			GeoHash eventHash = GeoHash.withCharacterPrecision(lonLat.lat, lonLat.lon, 8);
 			eventHashes.add(eventHash);
 		}
 		System.out.println("hashes: " + eventHashes.size());
@@ -88,6 +88,17 @@ public class GeoHashArea {
 		return g.s12;
 	}
 
+
+	public static GeoHashArea getSampleGeohashArea(int numberOfCharacters) {
+		List<LonLat> eventArea = getEventArea();
+		Set<GeoHash> eventHashes = new HashSet<>();
+		for (LonLat lonLat : eventArea) {
+			GeoHash eventHash = GeoHash.withCharacterPrecision(lonLat.lat, lonLat.lon, numberOfCharacters);
+			eventHashes.add(eventHash);
+		}
+		return new GeoHashArea(eventHashes);
+
+	}
 
 	private static List<LonLat> getEventArea() {
 		List<LonLat> area = new LinkedList<>();
@@ -258,5 +269,9 @@ public class GeoHashArea {
 		area.add(new LonLat(7.361873628710283, 59.31595693791465));
 		area.add(new LonLat(7.361787205452198, 59.31601589981677));
 		return area;
+	}
+
+	public Collection<GeoHash> getHashes() {
+		return Collections.unmodifiableCollection(area);
 	}
 }

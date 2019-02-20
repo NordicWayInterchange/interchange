@@ -70,7 +70,7 @@ public class MonteCarloShapeHasher {
 
         }
         System.out.println(String.format("Made %d points within the shape", numPoints));
-        HashToShape.createShapeFromPolygons(geohashScema, hashedFeatures, "hashed_depth_" + depth + "_rounds_" + rounds);
+        HashToShape.createShapeFromPolygons(geohashScema, hashedFeatures, "hashed_depth_" + depth + "_rounds_" + rounds, "C:\\interchange\\shapefiler\\oresund3\\");
         Files.write(Paths.get("C:\\interchange\\shapefiler\\oresund3\\hashed_depth" + depth + "_rounds_" + rounds + ".csv"),hashes, Charset.forName("UTF-8"));
     }
 }

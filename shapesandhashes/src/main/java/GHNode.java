@@ -11,10 +11,6 @@ public class GHNode {
         this.currentChar = currentChar;
     }
 
-    private void addChild(GHNode child) {
-        this.children.add(child);
-    }
-
     public Set<GHNode> children() {
         return children;
     }
@@ -26,11 +22,23 @@ public class GHNode {
         for (int i = 1; i < hashValue.length(); i++) {
             char currentChar = hashValue.charAt(i);
             GHNode n = new GHNode(currentChar);
-            current.addChild(n);
+            current.children.add(n);
             current = n;
         }
         return res;
 
+    }
+
+    public static GHNode fromHashes(Collection<GeoHash> hashes) {
+        GHNode top = null;
+        for (GeoHash hash : hashes) {
+            if (top == null) {
+                top = fromHash(hash);
+            } else {
+                top.add(hash);
+            }
+        }
+        return top;
     }
 
     private void addChildren(String remainingHash) {

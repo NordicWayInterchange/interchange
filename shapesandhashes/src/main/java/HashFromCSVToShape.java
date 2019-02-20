@@ -27,7 +27,7 @@ public class HashFromCSVToShape {
         System.out.println(geoHashSchema.toString());
 
         List<SimpleFeature> polygonList = new ArrayList<>();
-        String input_file = "hashes_5_compressed.csv";
+        String input_file = "hashes_5_compressed_and_moved.csv";
         for (String hash : Files.readAllLines(Paths.get("C:\\interchange\\shapefiler\\oresund3", input_file))) {
             Polygon polygonFromHash = ShapeHasher.createPolygonFromHash(hash);
             SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(geoHashSchema);
@@ -38,7 +38,7 @@ public class HashFromCSVToShape {
 
 
 
-        String filename = "hashes_5_compressed";
+        String filename = "hashes_5_compressed_and_moved";
         File outFile = new File("C:\\interchange\\shapefiler\\oresund3\\" + filename + ".shp");
         Map<String, Serializable> creationParams = new HashMap<>();
         creationParams.put("url", URLs.fileToUrl(outFile));
