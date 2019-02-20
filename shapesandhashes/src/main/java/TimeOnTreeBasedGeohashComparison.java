@@ -13,8 +13,8 @@ public class TimeOnTreeBasedGeohashComparison {
         List<GeoHash> norwayHashes = Files.lines(Paths.get(folderName, "hashes_5_compressed.csv"))
                 .map(GeoHash::fromGeohashString)
                 .collect(Collectors.toList());
-        //List<GeoHash> denmarkHashes = Files.lines(Paths.get(folderName,"shape_dk_compressed.csv"))
-        List<GeoHash> denmarkHashes = Files.lines(Paths.get(folderName,"hashes_5_compressed_and_moved.csv"))
+        List<GeoHash> denmarkHashes = Files.lines(Paths.get(folderName,"shape_se_compressed.csv"))
+        //List<GeoHash> denmarkHashes = Files.lines(Paths.get(folderName,"hashes_5_compressed_and_moved.csv"))
                 .map(GeoHash::fromGeohashString)
                 .collect(Collectors.toList());
 

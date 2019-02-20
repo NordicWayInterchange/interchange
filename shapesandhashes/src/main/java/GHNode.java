@@ -4,29 +4,22 @@ import java.util.*;
 
 public class GHNode {
     private char currentChar;
-    private Set<GHNode> children;
+    private Map<Character,GHNode> childMap;
 
     public GHNode(char currentChar) {
-        this.children = new HashSet<>();
         this.currentChar = currentChar;
+        this.childMap = new HashMap<>();
     }
 
-    public Set<GHNode> children() {
-        return children;
+    public Collection<GHNode> children() {
+        return childMap.values();
     }
 
     public static GHNode fromHash(GeoHash hash) {
         String hashValue = hash.toBase32();
         GHNode res = new GHNode(hashValue.charAt(0));
-        GHNode current = res;
-        for (int i = 1; i < hashValue.length(); i++) {
-            char currentChar = hashValue.charAt(i);
-            GHNode n = new GHNode(currentChar);
-            current.children.add(n);
-            current = n;
-        }
+        res.addChildren(hashValue.substring(1));
         return res;
-
     }
 
     public static GHNode fromHashes(Collection<GeoHash> hashes) {
@@ -46,34 +39,15 @@ public class GHNode {
             return;
         }
         char c = remainingHash.charAt(0);
-        boolean found = false;
-        for (GHNode child : children) {
-           if (child.currentChar == c ) {
-               found = true;
-               child.addChildren(remainingHash.substring(1));
-           }
-        }
-        if (! found) {
+        if (childMap.containsKey(c)) {
+            GHNode child = childMap.get(c);
+            child.addChildren(remainingHash.substring(1));
+        } else {
             GHNode newChild = new GHNode(c);
             newChild.addChildren(remainingHash.substring(1));
-            children.add(newChild);
+            childMap.put(c,newChild);
         }
 
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GHNode ghNode = (GHNode) o;
-        return currentChar == ghNode.currentChar &&
-                Objects.equals(children, ghNode.children);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(currentChar, children);
     }
 
 
@@ -82,7 +56,7 @@ public class GHNode {
     }
 
     public boolean isLeaf() {
-        return children.size() == 0;
+        return childMap.isEmpty();
     }
 
     public void add(GeoHash hash) {
@@ -98,13 +72,9 @@ public class GHNode {
             if (this.isLeaf() || other.isLeaf()) {
                 return true;
             }
-            for (GHNode otherChild : other.children) {
-                //Find the child with matching character. TODO should I repurpose the Set to a Hash?
-                final char otherChar = otherChild.currentChar;
-                Optional<GHNode> first = children.stream().filter(node -> node.currentChar == otherChar).findFirst();
-                if (first.isPresent()) {
-                    //visit the child with the other child
-                    if (first.get().overlaps(otherChild)) {
+            for (Character otherChildChar : other.childMap.keySet()) {
+                if (childMap.containsKey(otherChildChar)) {
+                    if (childMap.get(otherChildChar).overlaps(other.childMap.get(otherChildChar))) {
                         return true;
                     }
                 }
@@ -113,5 +83,19 @@ public class GHNode {
             return false;
         }
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GHNode ghNode = (GHNode) o;
+        return currentChar == ghNode.currentChar &&
+                Objects.equals(childMap, ghNode.childMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(currentChar, childMap);
     }
 }
