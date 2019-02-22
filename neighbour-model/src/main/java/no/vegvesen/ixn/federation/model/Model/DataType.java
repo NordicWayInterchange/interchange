@@ -1,26 +1,27 @@
 package no.vegvesen.ixn.federation.model.Model;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Set;
 
 @Entity
+@Table(name = "DataTypes")
 public class DataType {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "datatype_generator")
+	@SequenceGenerator(name="datatype_generator", sequenceName = "datatype_seq", allocationSize=50)
 	@Column(name="data_id")
 	int id;
 
 	@Column(name = "how")
-	String how;
+	private String how;
 
 	@Column(name= "version")
-	String version;
+	private String version;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@Column(name = "what")
-	Set<String> what;
+	private Set<String> what;
 
 	public DataType(){}
 
