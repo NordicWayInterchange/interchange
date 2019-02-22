@@ -9,22 +9,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.*;
 
 @RestController
 public class Controller {
 
-	@Autowired
-	InterchangeRepository interchangeRepository;
+	private InterchangeRepository interchangeRepository;
+	private Logger logger = LoggerFactory.getLogger(Controller.class);
 
-	Logger logger = LoggerFactory.getLogger(Controller.class);
+	@Autowired
+	public Controller(InterchangeRepository interchangeRepository){
+		this.interchangeRepository = interchangeRepository;
+	}
 
 	@PostMapping("/updateSubscription")
 	public Interchange updateSubscription(@RequestBody Interchange interchange){
 
-		Interchange mod = interchangeRepository.findByInterchangeId(interchange.getName());
+		Interchange mod = interchangeRepository.findByName(interchange.getName());
 
 		logger.info("interchange name: " + interchange.getName());
 		logger.info("Interchange subscriptions: " + interchange.getSubscriptions().toString());
@@ -44,7 +47,9 @@ public class Controller {
 	@PostMapping("/updateCapabilities")
 	public Interchange updateCapabilities(@RequestBody Interchange interchange){
 
-		Interchange mod = interchangeRepository.findByInterchangeId(interchange.getName());
+		Interchange mod = interchangeRepository.findByName(interchange.getName());
+		logger.info("interchange name: " + interchange.getName());
+		logger.info("Interchange capabilities: " + interchange.getCapabilities().toString());
 
 		if(mod == null){
 			interchangeRepository.save(interchange);
@@ -59,11 +64,10 @@ public class Controller {
 	}
 
 
-	@RequestMapping(path="/{ixnId}/subscriptions")
-	public Set<Subscription> getSubscription(@PathVariable String ixnId){
-		// TODO: return all the subscriptions
-
-		Interchange mod = interchangeRepository.findByInterchangeId(ixnId);
+	@RequestMapping(path="/{ixnName}/subscriptions")
+	public Set<Subscription> getSubscription(@PathVariable String ixnName){
+		// Get the subscriptions for a given node.
+		Interchange mod = interchangeRepository.findByName(ixnName);
 
 		if(mod != null){
 			return mod.getSubscriptions();
@@ -74,9 +78,8 @@ public class Controller {
 
 	@RequestMapping(path="/{ixnId}/capabilities")
 	public Set<Capability> getCapabilities(@PathVariable String ixnId){
-		// TODO: return this node's capabilities
-
-		Interchange mod = interchangeRepository.findByInterchangeId(ixnId);
+		// Get the capabilities for a given node.
+		Interchange mod = interchangeRepository.findByName(ixnId);
 
 		if(mod != null){
 			return mod.getCapabilities();
@@ -87,9 +90,8 @@ public class Controller {
 
 	@RequestMapping(path="/{ixnId}")
 	public Interchange getInterchange(@PathVariable String ixnId){
-		// TODO: return this node's capabilities
-
-		Interchange mod = interchangeRepository.findByInterchangeId(ixnId);
+		// Return the given interchange object.
+		Interchange mod = interchangeRepository.findByName(ixnId);
 
 		if(mod != null){
 			return mod;
@@ -98,32 +100,27 @@ public class Controller {
 		return null;
 	}
 
+	@RequestMapping(path = "/checkForChangesSince/{timestamp}")
+	public List<Interchange> checkForChanges(@PathVariable Timestamp timestamp){
+		Instant now = Instant.now();
+		Timestamp nowTimestamp = Timestamp.from(now);
 
-	@RequestMapping(path = "/checkForChanges/{timestamp}")
-	public List<Interchange> checkForChanges(@PathVariable String timestamp){
-
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss");
-		LocalDateTime formattedTime = LocalDateTime.parse(timestamp, formatter);
-
-		String queryAllOlderThan = formattedTime.format(formatter);
-
-		logger.info("Querying for Interchanges last updated before: " + queryAllOlderThan);
-
+		logger.info("Created timestamp from now: " + nowTimestamp.toString());
+		logger.info("Create timestamp from incoming json string: " + timestamp.toString());
 		try {
 
-			return interchangeRepository.findOlderThan(timestamp);
+			return interchangeRepository.findOlderThan(timestamp, nowTimestamp);
 		}catch(Exception e){
 			logger.info(e.getClass().getName());
 			logger.info("Timestamp: " + timestamp + ", found no objects older than this time. ");
 		}
 
-		return Arrays.asList();
+		return Collections.emptyList();
 	}
-
 
 	@GetMapping("/printNeighbours")
 	public List<Interchange> getAllSubscriptions(){
-		// Return a list of all the neighbours for debugging purposes.
+		// Return a list of all the registered interchanges(neighbours) for debugging purposes.
 
 		Iterable<Interchange> list = interchangeRepository.findAll();
 
@@ -134,11 +131,10 @@ public class Controller {
 		}
 
 		if(ret.size() == 0){
-			return Arrays.asList();
+			return Collections.emptyList();
 		}else{
 			return ret;
 		}
-
 	}
 
 
