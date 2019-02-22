@@ -1,30 +1,31 @@
 package no.vegvesen.ixn.federation.model.Model;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.Set;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "Capabilities")
+@DiscriminatorColumn(discriminatorType = DiscriminatorType.STRING, name = "type")
 public class Capability {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_generator")
+	@SequenceGenerator(name="cap_generator", sequenceName = "cap_seq", allocationSize=50)
 	@Column(name="cap_id")
 	int id;
 
 	@Column(name = "country")
 	private String country;
 
-	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
-	private Set<DataType> dataSets;
+	@OneToOne(cascade = CascadeType.ALL)
+	private DataType dataSet;
 
 	public Capability(){}
 
-	public Capability(String country, Set<DataType> dataSets) {
+	public Capability(String country, DataType dataSet) {
 		this.country = country;
-		this.dataSets = dataSets;
+		this.dataSet = dataSet;
 	}
-
 
 	public String getCountry() {
 		return country;
@@ -34,11 +35,11 @@ public class Capability {
 		this.country = country;
 	}
 
-	public Set<DataType> getDataSets() {
-		return dataSets;
+	public DataType getDataSet() {
+		return dataSet;
 	}
 
-	public void setDataSets(Set<DataType> dataSets) {
-		this.dataSets = dataSets;
+	public void setDataSets(DataType dataSet) {
+		this.dataSet = dataSet;
 	}
 }
