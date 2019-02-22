@@ -1,45 +1,45 @@
 package no.vegvesen.ixn.federation.model.Model;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.Set;
 
 @Entity
-public class Subscription {
+@Table(name = "Subscriptions")
+@DiscriminatorValue("Subscription")
+public class Subscription extends Capability {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
+	@SequenceGenerator(name="sub_generator", sequenceName = "sub_seq", allocationSize=50)
 	@Column(name="sub_id")
 	int id;
 
-	@Column(name = "country")
-	private String country;
+	@Column(name = "path")
+	private String path;
 
-	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
-	private Set<DataType> dataSets;
+	@Column(name = "status")
+	private String status;
 
 	public Subscription(){}
 
-	public Subscription(Interchange interchange, String country, Set<DataType> dataSets) {
-
-		this.country = country;
-		this.dataSets = dataSets;
+	public Subscription(String country, DataType dataSet, String path, String status) {
+		super(country, dataSet);
+		this.path = path;
+		this.status = status;
 	}
 
-
-	public String getCountry() {
-		return country;
+	public String getStatus() {
+		return status;
 	}
 
-	public void setCountry(String country) {
-		this.country = country;
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
-	public Set<DataType> getDataSets() {
-		return dataSets;
+	public String getPath() {
+		return path;
 	}
 
-	public void setDataSets(Set<DataType> dataSets) {
-		this.dataSets = dataSets;
+	public void setPath(String path) {
+		this.path = path;
 	}
 }
