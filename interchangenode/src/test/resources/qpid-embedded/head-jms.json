@@ -1,0 +1,37 @@
+{
+  "type": "Memory",
+  "name": "localhost",
+  "modelVersion": "7.0",
+  "exchanges": [
+    {
+      "name": "nwEx",
+      "type": "headers",
+      "durable": true,
+      "durableBindings": [
+        {
+          "arguments": {
+            "x-filter-jms-selector": "geohash like '.aaaa%'"
+          },
+          "bindingKey": "geohash-aaaa",
+          "destination": "NO-out"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "geohash like '.aaab%'"
+          },
+          "bindingKey": "geohash-aaab",
+          "destination": "NO-out"
+        }
+      ]
+    }
+  ],
+  "queues": [
+    {
+      "name": "NO-out",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    }
+  ]
+}
