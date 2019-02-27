@@ -5,12 +5,15 @@ import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.util.URLs;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.FactoryException;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,11 +28,12 @@ import java.util.stream.Collectors;
 
 public class ShapesFromLineSegments {
 
-    public static void main(String[] args) throws IOException {
-        List<LineString> lineStrings = Files.lines(Paths.get("C:\\interchange\\datex_eksempler", "linesegments_1549975028_unique.txt"))
+    public static void main(String[] args) throws IOException, FactoryException {
+        List<LineString> lineStrings = Files.lines(Paths.get("C:\\interchange\\datex_eksempler", "linesegments_1550841372_unique.txt"))
                 .map(ShapesFromLineSegments::createLineString)
                 .collect(Collectors.toList());
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
+        builder.setCRS(CRS.decode("EPSG:4326"));
         builder.setName("linestrings");
         builder.add("the_geom",LineString.class);
         SimpleFeatureType schema = builder.buildFeatureType();

@@ -20,8 +20,9 @@ public class ShapeView {
         map.setTitle("Nordic countries w/10km buffer");
         if (args.length == 0) {
             //TODO not on my computer!
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\norway_shape.shp"),Color.RED));
-            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\oslo_4_length.shp")));
+            //map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\E18_linjestykker_wgs84.shp")));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\oslo_shape_wgs84.shp")));
+            map.addLayer(createLayer(new File("C:\\interchange\\shapefiler\\oresund3\\getSituation.shp")));
         } else {
             for (String filename : args) {
                 map.addLayer(createLayer(new File(filename)));

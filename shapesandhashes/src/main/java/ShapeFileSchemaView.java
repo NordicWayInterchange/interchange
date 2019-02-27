@@ -1,5 +1,6 @@
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
+import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -15,7 +16,8 @@ public class ShapeFileSchemaView {
 
         File file;
         if (args.length == 0) {
-            file = new File("C:\\interchange\\shapefiler\\oresund3\\Norway_10km_buffer.shp");
+            //file = new File("C:\\interchange\\shapefiler\\oresund3\\kyrre_tester_linjestykke.shp");
+            file = new File("C:\\interchange\\datex_eksempler\\linestrings_getSituation_1550841672078.shp");
         } else {
             file = new File(args[0]);
         }
@@ -32,6 +34,8 @@ public class ShapeFileSchemaView {
             System.out.println("type: " + type + " :-> " + descriptor);
 
         }
+        SimpleFeatureCollection features = featureSource.getFeatures();
+        System.out.println(String.format("Contains %d features",features.size()));
 
     }
 }
