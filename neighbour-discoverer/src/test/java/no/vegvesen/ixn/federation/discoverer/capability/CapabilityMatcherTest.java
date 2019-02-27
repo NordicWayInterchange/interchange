@@ -29,7 +29,7 @@ public class CapabilityMatcherTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void unknownHeaderAttributeAccepted() throws ParseException {
+	public void unknownHeaderAttributeNotAccepted() throws ParseException {
 		DataType dataType = new DataType("spat", null, Collections.emptySet());
 		CapabilityMatcher.matches(dataType, "region like 'some region%'");
 	}
