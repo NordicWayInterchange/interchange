@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.federation.model.Model.Capability;
+import no.vegvesen.ixn.federation.model.Model.DataType;
 import no.vegvesen.ixn.federation.model.Model.Interchange;
 import no.vegvesen.ixn.federation.model.Model.Subscription;
 import no.vegvesen.ixn.federation.model.Repository.InterchangeRepository;
@@ -77,7 +77,7 @@ public class Controller {
 	}
 
 	@RequestMapping(path="/{ixnId}/capabilities")
-	public Set<Capability> getCapabilities(@PathVariable String ixnId){
+	public Set<DataType> getCapabilities(@PathVariable String ixnId){
 		// Get the capabilities for a given node.
 		Interchange mod = interchangeRepository.findByName(ixnId);
 
