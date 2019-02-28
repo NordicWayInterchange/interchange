@@ -96,6 +96,21 @@
       "port": "8080",
       "authenticationProvider": "passwordFile",
       "protocols": ["HTTP"]
+    },
+    {
+      "name": "HTTPS",
+      "type" : "HTTP",
+      "authenticationProvider" : "clientCerts",
+      "bindingAddress" : "*",
+      "port" : "443",
+      "trustStores": ["default"],
+      "keyStore": "default",
+      "needClientAuth": true,
+      "wantClientAuth": false,
+      "transports": [
+        "SSL",
+        "TCP"
+      ]
     }
   ],
   "truststores": [
