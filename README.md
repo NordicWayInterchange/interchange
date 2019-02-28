@@ -52,7 +52,7 @@ To stop the docker containers for integration tests from maven:
 
 [Github Wiki](https://github.com/NordicWayInterchange/interchange/wiki)
 
-[Nordic Way](http://vejdirektoratet.dk/EN/roadsector/Nordicway/Pages/Default.aspx)
+[Nordic Way](https://www.nordicway.net/)
 
 
 # Using Windows?
