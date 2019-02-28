@@ -20,8 +20,8 @@ public class CapabilityMatcher {
 
 		public DataTypeFilter(DataType dataType) {
 			headers.put("how", dataType.getHow());
-			headers.put("version", dataType.getVersion());
 			headers.put("what", dataType.getWhat());
+			headers.put("where1", dataType.getWhere1());
 		}
 
 		@Override
