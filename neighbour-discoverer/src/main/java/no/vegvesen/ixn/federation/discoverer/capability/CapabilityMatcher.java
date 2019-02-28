@@ -102,8 +102,16 @@ public class CapabilityMatcher {
 
 	@SuppressWarnings("WeakerAccess")
 	public static boolean matches(DataType capability, String selector) throws ParseException {
-		DataTypeFilter capabilityFilter = new DataTypeFilter(capability);
 		JMSSelectorFilter filter = new JMSSelectorFilter(selector);
+		notAlwaysTrue(filter);
+		DataTypeFilter capabilityFilter = new DataTypeFilter(capability);
 		return filter.matches(capabilityFilter);
+	}
+
+	private static void notAlwaysTrue(JMSSelectorFilter filter) {
+		DataTypeFilter neverTrue = new DataTypeFilter(new DataType("-1", "-1", "-1"));
+		if (filter.matches(neverTrue)){
+			throw new IllegalArgumentException("Cannot subscribe to a filter that is always true");
+		}
 	}
 }
