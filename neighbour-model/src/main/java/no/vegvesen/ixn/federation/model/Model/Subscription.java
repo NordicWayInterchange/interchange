@@ -5,7 +5,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "Subscriptions")
 @DiscriminatorValue("Subscription")
-public class Subscription extends Capability {
+public class Subscription {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
@@ -13,16 +13,15 @@ public class Subscription extends Capability {
 	@Column(name="sub_id")
 	int id;
 
-	@Column(name = "path")
 	private String path;
-
-	@Column(name = "status")
 	private String status;
+	@OneToOne
+	private DataType dataSet;
 
 	public Subscription(){}
 
 	public Subscription(String country, DataType dataSet, String path, String status) {
-		super(country, dataSet);
+		this.dataSet = dataSet;
 		this.path = path;
 		this.status = status;
 	}
