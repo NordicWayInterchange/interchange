@@ -13,22 +13,24 @@ public class DataType {
 	@Column(name="data_id")
 	int id;
 
-	@Column(name = "how")
+	private String where1;
 	private String how;
-
-	@Column(name= "version")
-	private String version;
-
-	@ElementCollection(fetch = FetchType.EAGER)
-	@Column(name = "what")
-	private Set<String> what;
+	private String what;
 
 	public DataType(){}
 
-	public DataType(String how, String version, Set<String> what) {
+	public DataType(String how, String where1, String what) {
 		this.how = how;
-		this.version = version;
 		this.what = what;
+		this.where1 = where1;
+	}
+
+	public String getWhere1() {
+		return where1;
+	}
+
+	public void setWhere1(String where1) {
+		this.where1 = where1;
 	}
 
 	public String getHow() {
@@ -39,19 +41,11 @@ public class DataType {
 		this.how = how;
 	}
 
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	public Set<String> getWhat() {
+	public String getWhat() {
 		return what;
 	}
 
-	public void setWhat(Set<String> what) {
+	public void setWhat(String what) {
 		this.what = what;
 	}
 }
