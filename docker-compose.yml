@@ -45,3 +45,10 @@ services:
       retries: 5
     expose:
     - "5432"
+
+  neighbours:
+    build: ./neighbour-db
+    container_name: neighbours
+    hostname: neighbours
+    ports:
+    - 7070:5432
