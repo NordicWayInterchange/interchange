@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import no.vegvesen.ixn.federation.model.Model.Capability;
 import no.vegvesen.ixn.federation.model.Model.DataType;
 import no.vegvesen.ixn.federation.model.Model.Interchange;
 import no.vegvesen.ixn.federation.model.Model.Subscription;
@@ -135,7 +134,8 @@ public class NeighbourDiscoverer{
 		// check if there are any neighbours we have not yet discovered.
 		// If we find a new neighbour, post our information to the neighbour.
 
-		List<Interchange> neighbours = dnsFacade.getNeighbours();
+		// TODO: REMOVE MOCK
+		List<Interchange> neighbours = dnsFacade.mockGetNeighbours();
 
 		for(Interchange i : neighbours){
 			if(interchangeRepository.findByName(i.getName()) == null){
@@ -152,11 +152,10 @@ public class NeighbourDiscoverer{
 					ixnA.setPortNr("8080");
 					ixnA.setName("ixn-a");
 
-					DataType dataTypeCapability = new DataType("datex2", "1.0", Collections.singleton("obstruction"));
-					Capability capability = new Capability("NO", dataTypeCapability);
-					ixnA.setCapabilities(Collections.singleton(capability));
+					DataType dataTypeCapability = new DataType("datex2", "1.0","obstruction");
+					ixnA.setCapabilities(Collections.singleton(dataTypeCapability));
 
-					DataType dataTypeSubscription = new DataType("datex2", "1.0", Collections.singleton("obstruction"));
+					DataType dataTypeSubscription = new DataType("datex2", "1.0", "obstruction");
 					Subscription subscription = new Subscription("SE", dataTypeSubscription, "", "");
 					ixnA.setSubscriptions(Collections.singleton(subscription));
 
