@@ -32,8 +32,7 @@ public class DNSFacade {
 		DataType capability = new DataType("datex2", "1.0", "works");
 		ixnC.setCapabilities(Collections.singleton(capability));
 
-		DataType dataTypeSubscription = new DataType("datex2", "1.0", "conditions");
-		Subscription subscription = new Subscription("SE", dataTypeSubscription, "", "");
+		Subscription subscription = new Subscription("SE", "where1 LIKE 'NO'", "", "");
 		ixnC.setSubscriptions(Collections.singleton(subscription));
 
 		ixnC.setName("ixn-c");
