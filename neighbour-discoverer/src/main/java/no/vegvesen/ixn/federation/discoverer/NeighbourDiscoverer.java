@@ -155,8 +155,7 @@ public class NeighbourDiscoverer{
 					DataType dataTypeCapability = new DataType("datex2", "1.0","obstruction");
 					ixnA.setCapabilities(Collections.singleton(dataTypeCapability));
 
-					DataType dataTypeSubscription = new DataType("datex2", "1.0", "obstruction");
-					Subscription subscription = new Subscription("SE", dataTypeSubscription, "", "");
+					Subscription subscription = new Subscription("SE", "where1 LIKE 'NO'", "", "");
 					ixnA.setSubscriptions(Collections.singleton(subscription));
 
 					// convert object to JSON
