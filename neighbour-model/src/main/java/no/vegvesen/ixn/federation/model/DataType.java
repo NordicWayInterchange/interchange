@@ -1,7 +1,6 @@
-package no.vegvesen.ixn.federation.model.Model;
+package no.vegvesen.ixn.federation.model;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "DataTypes")

@@ -1,7 +1,7 @@
-package no.vegvesen.ixn.federation.model.Repository;
+package no.vegvesen.ixn.federation.repository;
 
 
-import no.vegvesen.ixn.federation.model.Model.Interchange;
+import no.vegvesen.ixn.federation.model.Interchange;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
