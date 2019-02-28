@@ -15,13 +15,12 @@ public class Subscription {
 
 	private String path;
 	private String status;
-	@OneToOne
-	private DataType dataSet;
+	private String selector;
 
 	public Subscription(){}
 
-	public Subscription(String country, DataType dataSet, String path, String status) {
-		this.dataSet = dataSet;
+	public Subscription(String country, String selector, String path, String status) {
+		this.selector = selector;
 		this.path = path;
 		this.status = status;
 	}
@@ -40,5 +39,13 @@ public class Subscription {
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public String getSelector() {
+		return selector;
+	}
+
+	public void setSelector(String selector) {
+		this.selector = selector;
 	}
 }
