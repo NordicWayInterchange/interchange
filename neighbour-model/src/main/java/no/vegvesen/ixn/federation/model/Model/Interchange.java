@@ -17,36 +17,30 @@ public class Interchange {
 	@Column(name="ixn_id")
 	Integer id;
 
-	@Column(name = "name", unique = true)
-	String name;
-
-	@JsonIgnore
-	@Column(name = "hostname")
-	String hostname;
-
-	@JsonIgnore
-	@Column(name = "port_nr")
-	String portNr;
+	@Column(unique = true)
+	private String name;
+	private String hostname;
+	private String portNr;
 
 	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "ixn_id")
-	Set<Capability> capabilities;
+	private Set<DataType> capabilities;
 
 	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "ixn_id")
-	Set<Subscription> subscriptions;
+	private Set<Subscription> subscriptions;
 
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "ixn_id")
-	Set<Subscription> fedIn;
+	private Set<Subscription> fedIn;
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
 
 	public Interchange(){}
 
-	public Interchange(String name, Set<Capability> capabilities, Set<Subscription> subscriptions, Set<Subscription> fedIn, String hostname, String portNr) {
+	public Interchange(String name, Set<DataType> capabilities, Set<Subscription> subscriptions, Set<Subscription> fedIn, String hostname, String portNr) {
 		this.name = name;
 		this.hostname = hostname;
 		this.portNr = portNr;
@@ -55,11 +49,11 @@ public class Interchange {
 		this.fedIn = fedIn;
 	}
 
-	public Set<Capability> getCapabilities() {
+	public Set<DataType> getCapabilities() {
 		return capabilities;
 	}
 
-	public void setCapabilities(Set<Capability> capabilities) {
+	public void setCapabilities(Set<DataType> capabilities) {
 		this.capabilities = capabilities;
 	}
 
