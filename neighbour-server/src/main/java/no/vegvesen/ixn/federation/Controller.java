@@ -24,7 +24,7 @@ public class Controller {
 		this.interchangeRepository = interchangeRepository;
 	}
 
-	@PostMapping("/updateSubscription")
+	@RequestMapping(method = RequestMethod.POST, value = "/updateSubscription")
 	public Interchange updateSubscription(@RequestBody Interchange interchange){
 
 		Interchange mod = interchangeRepository.findByName(interchange.getName());
@@ -44,7 +44,7 @@ public class Controller {
 		return interchange;
 	}
 
-	@PostMapping("/updateCapabilities")
+	@RequestMapping(method = RequestMethod.POST, value = "/updateCapabilities")
 	public Interchange updateCapabilities(@RequestBody Interchange interchange){
 
 		Interchange mod = interchangeRepository.findByName(interchange.getName());
@@ -64,7 +64,7 @@ public class Controller {
 	}
 
 
-	@RequestMapping(path="/{ixnName}/subscriptions")
+	@RequestMapping(method = RequestMethod.GET, value="/{ixnName}/subscriptions")
 	public Set<Subscription> getSubscription(@PathVariable String ixnName){
 		// Get the subscriptions for a given node.
 		Interchange mod = interchangeRepository.findByName(ixnName);
@@ -76,7 +76,7 @@ public class Controller {
 		return Collections.emptySet();
 	}
 
-	@RequestMapping(path="/{ixnId}/capabilities")
+	@RequestMapping(method = RequestMethod.GET, value="/{ixnId}/capabilities")
 	public Set<DataType> getCapabilities(@PathVariable String ixnId){
 		// Get the capabilities for a given node.
 		Interchange mod = interchangeRepository.findByName(ixnId);
@@ -88,7 +88,7 @@ public class Controller {
 		return Collections.emptySet();
 	}
 
-	@RequestMapping(path="/{ixnId}")
+	@RequestMapping(method = RequestMethod.POST, value="/{ixnId}")
 	public Interchange getInterchange(@PathVariable String ixnId){
 		// Return the given interchange object.
 		Interchange mod = interchangeRepository.findByName(ixnId);
@@ -100,7 +100,7 @@ public class Controller {
 		return null;
 	}
 
-	@RequestMapping(path = "/checkForChangesSince/{timestamp}")
+	@RequestMapping(method = RequestMethod.POST, value = "/checkForChangesSince/{timestamp}")
 	public List<Interchange> checkForChanges(@PathVariable Timestamp timestamp){
 		Instant now = Instant.now();
 		Timestamp nowTimestamp = Timestamp.from(now);
@@ -118,7 +118,7 @@ public class Controller {
 		return Collections.emptyList();
 	}
 
-	@GetMapping("/printNeighbours")
+	@RequestMapping(method = RequestMethod.GET, value = "/printNeighbours")
 	public List<Interchange> getAllSubscriptions(){
 		// Return a list of all the registered interchanges(neighbours) for debugging purposes.
 
