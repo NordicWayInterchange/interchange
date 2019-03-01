@@ -10,16 +10,23 @@
       "durableBindings": [
         {
           "arguments": {
-            "x-filter-jms-selector": "geohash like '.aaaa%'"
+            "x-filter-jms-selector": "geohash like '%.aaaa%'"
           },
           "bindingKey": "geohash-aaaa",
           "destination": "NO-out"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "geohash like '.aaab%'"
+            "x-filter-jms-selector": "geohash like '%.aaab%'"
           },
           "bindingKey": "geohash-aaab",
+          "destination": "NO-out"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "geohash like '%.ccca%' OR geohash like '%.cccb%' OR geohash like '%.cccc%'"
+          },
+          "bindingKey": "geohash-ccc-or",
           "destination": "NO-out"
         }
       ]

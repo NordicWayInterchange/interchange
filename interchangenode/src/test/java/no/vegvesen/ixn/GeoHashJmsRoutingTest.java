@@ -82,4 +82,23 @@ public class GeoHashJmsRoutingTest extends IxnBaseIT {
 		session.close();
 	}
 
+	@Test
+	public void messageForAreaMatchingGeohashAreaIsRouted() throws Exception {
+		JmsTextMessage messageRouted = createTestMessage(".cccf123213213.cccb123213213.cccg123213213.ccch123213213");
+		messageProducer.send(messageRouted, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+		Message receivedMessage = readMessage(1000L); // wait long enough for the Interchange routing to complete
+		assertThat(receivedMessage).isNotNull();
+		session.close();
+	}
+
+	@Test
+	public void messageForAreaNotMatchingGeohashAreaIsNotRouted() throws Exception {
+		JmsTextMessage messageNotRouted = createTestMessage(".cccf123213213.ccci123213213.cccg123213213.ccch123213213");
+		messageProducer.send(messageNotRouted, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+		Message receivedMessage = readMessage(1000L); // wait long enough for the Interchange routing to complete
+		assertThat(receivedMessage).isNull();
+		session.close();
+	}
+
+
 }
