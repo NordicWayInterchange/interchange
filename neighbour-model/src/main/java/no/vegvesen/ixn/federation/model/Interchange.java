@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.model.Model;
+package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.UpdateTimestamp;

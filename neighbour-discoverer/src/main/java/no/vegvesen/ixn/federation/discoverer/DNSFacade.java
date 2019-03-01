@@ -2,9 +2,9 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import no.vegvesen.ixn.federation.model.Model.DataType;
-import no.vegvesen.ixn.federation.model.Model.Interchange;
-import no.vegvesen.ixn.federation.model.Model.Subscription;
+import no.vegvesen.ixn.federation.model.DataType;
+import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

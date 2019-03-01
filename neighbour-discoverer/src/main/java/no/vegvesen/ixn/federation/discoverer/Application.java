@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableJpaRepositories(basePackages={"no.vegvesen.ixn.federation.model.*"})
-@EntityScan(basePackages={"no.vegvesen.ixn.federation.model.*"})
+@EnableJpaRepositories(basePackages={"no.vegvesen.ixn.federation.repository"})
+@EntityScan(basePackages={"no.vegvesen.ixn.federation.model"})
 public class Application {
 
 	public static void main(String[] args){

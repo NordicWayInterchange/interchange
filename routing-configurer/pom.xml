@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.3.RELEASE</version>
+        <version>2.1.2.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+
     <groupId>net.nordicway.interchange</groupId>
-    <artifactId>neighbour-server</artifactId>
+    <artifactId>routing-configurer</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
         <java.version>1.8</java.version>
+        <start-class>no.vegvesen.ixn.federation.qpid.QpidClient</start-class>
     </properties>
 
     <dependencies>
@@ -26,15 +30,14 @@
         </dependency>
 
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.1.4</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
         </dependency>
 
         <dependency>
@@ -43,26 +46,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.vaadin.external.google</groupId>
-            <artifactId>android-json</artifactId>
-            <version>RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
-
-
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>2.8.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>2.8.0</version>
-            <scope>compile</scope>
-        </dependency>
 
     </dependencies>
 
@@ -97,25 +80,49 @@
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
                         <version>0.27.2</version>
+
+
                         <configuration>
                             <images>
                                 <image>
-                                    <alias>postgres</alias>
-                                    <name>neighbours</name>
+                                    <alias>qpid</alias>
+                                    <name>qpid</name>
                                     <build>
-                                        <dockerFileDir>${project.basedir}/../neighbour-db/</dockerFileDir>
+                                        <dockerFileDir>${project.basedir}/../qpid/</dockerFileDir>
                                     </build>
                                     <run>
                                         <ports>
-                                            <port>7070:5432</port>
+                                            <port>62671:5671</port>
+                                            <port>62672:5672</port>
+                                            <port>62080:8080</port>
+                                            <port>62443:443</port>
                                         </ports>
+                                        <volumes>
+                                            <bind>
+                                                <volume>
+                                                    ${project.basedir}/src/test/resources/qpid:/config
+                                                </volume>
+                                                <volume>
+                                                    ${project.basedir}/src/test/resources/jks:/tmp
+                                                </volume>
+                                            </bind>
+                                        </volumes>
+                                        <env>
+                                            <CERTIFICATE_FILE>/tmp/localhost.crt</CERTIFICATE_FILE>
+                                            <PRIVATE_KEY_FILE>/tmp/localhost.key</PRIVATE_KEY_FILE>
+                                            <VHOST_FILE>/config/localhost.json</VHOST_FILE>
+                                            <GROUPS_FILE>/config/groups</GROUPS_FILE>
+                                            <PASSWD_FILE>/config/passwd</PASSWD_FILE>
+                                        </env>
                                         <wait>
-                                            <time>1000</time>
+                                            <healthy>true</healthy>
+                                            <time>60000</time>
                                         </wait>
                                     </run>
                                 </image>
                             </images>
                         </configuration>
+
 
                         <executions>
                             <execution>
