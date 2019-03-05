@@ -1,44 +1,41 @@
 package no.vegvesen.ixn.federation.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "Subscriptions")
-@DiscriminatorValue("Subscription")
 public class Subscription {
 
+
+	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
 	@SequenceGenerator(name="sub_generator", sequenceName = "sub_seq", allocationSize=50)
 	@Column(name="sub_id")
-	int id;
+	private Integer sub_id;
 
-	private String path;
-	private String status;
+	public enum Status{REQUESTED, CREATED, REJECTED}
+
+	@Enumerated(EnumType.STRING)
+	private Status status;
+
 	private String selector;
 
 	public Subscription(){}
 
-	public Subscription(String country, String selector, String path, String status) {
+	public Subscription(String selector, Status status) {
 		this.selector = selector;
-		this.path = path;
 		this.status = status;
 	}
 
-	public String getStatus() {
+	public Status getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Status status) {
 		this.status = status;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
 	}
 
 	public String getSelector() {
@@ -48,4 +45,11 @@ public class Subscription {
 	public void setSelector(String selector) {
 		this.selector = selector;
 	}
+
+	@JsonIgnore
+	public Integer getId() {
+		return sub_id;
+	}
+
+
 }
