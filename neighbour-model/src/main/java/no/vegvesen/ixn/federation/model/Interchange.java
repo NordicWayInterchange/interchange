@@ -15,24 +15,24 @@ public class Interchange {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ixn_generator")
 	@SequenceGenerator(name="ixn_generator", sequenceName = "ixn_seq", allocationSize=50)
 	@Column(name="ixn_id")
-	Integer id;
+	private Integer ixn_id;
 
 	@Column(unique = true)
 	private String name;
 	private String hostname;
 	private String portNr;
 
-	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "ixn_id")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "fk_ixn_id")
 	private Set<DataType> capabilities;
 
-	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "ixn_id")
+	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "fk_ixn_id")
 	private Set<Subscription> subscriptions;
 
 	@JsonIgnore
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "ixn_id")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "fk_ixn_id")
 	private Set<Subscription> fedIn;
 
 	@UpdateTimestamp
@@ -88,4 +88,17 @@ public class Interchange {
 	public void setSubscriptions(Set<Subscription> subscriptions) {
 		this.subscriptions = subscriptions;
 	}
+
+	public Subscription getSubscriptionById(Integer id) throws Exception{
+
+		for (Subscription subscription : subscriptions){
+			if (subscription.getId().equals(id)){
+				return subscription;
+			}
+		}
+
+		throw new Exception("Could not find subscription");
+	}
+
+
 }
