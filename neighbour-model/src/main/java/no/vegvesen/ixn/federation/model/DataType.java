@@ -1,16 +1,20 @@
 package no.vegvesen.ixn.federation.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "DataTypes")
 public class DataType {
 
+
+	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "datatype_generator")
 	@SequenceGenerator(name="datatype_generator", sequenceName = "datatype_seq", allocationSize=50)
 	@Column(name="data_id")
-	int id;
+	private Integer data_id;
 
 	private String where1;
 	private String how;
