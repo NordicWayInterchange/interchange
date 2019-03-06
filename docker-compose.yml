@@ -52,3 +52,14 @@ services:
     hostname: neighbours
     ports:
     - 7070:5432
+
+  local_db:
+    image: postgres:9.6
+    container_name: local
+    hostname: local
+    ports:
+      - 7888:5432
+    environment:
+      - POSTGRES_USER=local
+      - POSTGRES_PASSWORD=local
+      - POSTGRES_DB=local_db
