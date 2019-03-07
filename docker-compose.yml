@@ -46,12 +46,16 @@ services:
     expose:
     - "5432"
 
-  neighbours:
-    build: ./neighbour-db
+  neighbour_db:
+    image: postgres:9.6
     container_name: neighbours
     hostname: neighbours
     ports:
     - 7070:5432
+    environment:
+      - POSTGRES_USER=neighbours
+      - POSTGRES_PASSWORD=neighbours
+      - POSTGRES_DB=neighbour_db
 
   local_db:
     image: postgres:9.6
