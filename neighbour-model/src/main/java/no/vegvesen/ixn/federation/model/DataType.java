@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "DataTypes")
@@ -18,6 +20,10 @@ public class DataType {
 	private String where1;
 	private String how;
 	private String what;
+
+	@Column
+	@UpdateTimestamp
+	private LocalDateTime lastUpdated;
 
 	public DataType(){}
 
