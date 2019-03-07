@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Subscriptions")
@@ -19,6 +21,10 @@ public class Subscription {
 
 	@Enumerated(EnumType.STRING)
 	private Status status;
+
+	@Column
+	@UpdateTimestamp
+	private LocalDateTime lastUpdated;
 
 	private String selector;
 
