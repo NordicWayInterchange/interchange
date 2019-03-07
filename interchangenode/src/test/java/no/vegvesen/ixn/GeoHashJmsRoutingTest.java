@@ -7,7 +7,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.util.SocketUtils;
 
 import javax.jms.*;
 
@@ -22,7 +21,6 @@ public class GeoHashJmsRoutingTest extends IxnBaseIT {
 
 	private static final String EXCHANGE_NAME = "my-queue";
 
-	private static int randomPort;
 	private static String URI;
 	private static final String USER = "admin";
 	private static final String PASSWORD = "admin";
@@ -33,11 +31,8 @@ public class GeoHashJmsRoutingTest extends IxnBaseIT {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		randomPort = SocketUtils.findAvailableTcpPort();
-		URI = "amqp://localhost:" + randomPort;
-		System.setProperty("qpid.amqp_port", "" + randomPort);
 		broker = new EmbeddedBroker("qpid-embedded/config-GeoHashJmsRoutingTest.json");
-		broker.start();
+		URI = broker.getURI();
 	}
 
 	@Before
