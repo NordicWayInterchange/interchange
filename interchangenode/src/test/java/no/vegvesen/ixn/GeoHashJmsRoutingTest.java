@@ -36,7 +36,7 @@ public class GeoHashJmsRoutingTest extends IxnBaseIT {
 		randomPort = SocketUtils.findAvailableTcpPort();
 		URI = "amqp://localhost:" + randomPort;
 		System.setProperty("qpid.amqp_port", "" + randomPort);
-		broker = new EmbeddedBroker();
+		broker = new EmbeddedBroker("qpid-embedded/config-GeoHashJmsRoutingTest.json");
 		broker.start();
 	}
 

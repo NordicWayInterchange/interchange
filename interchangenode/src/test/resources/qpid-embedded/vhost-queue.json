@@ -1,0 +1,15 @@
+{
+  "type": "Memory",
+  "name": "localhost",
+  "modelVersion": "7.0",
+  "exchanges": [],
+  "queues": [
+    {
+      "name": "my-queue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    }
+  ]
+}

@@ -8,19 +8,11 @@ import java.util.Map;
 
 public class EmbeddedBroker
 {
-	private static final String INITIAL_CONFIGURATION = "qpid-embedded/embed-initial-config-no.json";
+	private final String initialConfigurationFile;
 	private SystemLauncher systemLauncher;
 
-	public static void main(String args[]) {
-		EmbeddedBroker broker = new EmbeddedBroker();
-		try {
-			broker.start();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			System.exit(1);
-		}
+	public EmbeddedBroker(String initialConfigurationFile) {
+		this.initialConfigurationFile = initialConfigurationFile;
 	}
 
 	public void start() throws Exception {
@@ -34,7 +26,7 @@ public class EmbeddedBroker
 
 	private Map<String, Object> createSystemConfig() {
 		Map<String, Object> attributes = new HashMap<>();
-		URL initialConfig = EmbeddedBroker.class.getClassLoader().getResource(INITIAL_CONFIGURATION);
+		URL initialConfig = EmbeddedBroker.class.getClassLoader().getResource(initialConfigurationFile);
 		attributes.put("type", "Memory");
 		attributes.put("initialConfigurationLocation", initialConfig.toExternalForm());
 		attributes.put("startupLoggedToSystemOut", true);
