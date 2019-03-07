@@ -25,13 +25,13 @@ public class QpidClientIT {
 
 	@Test
 	public void createQueue() throws Exception {
-		Interchange findus = new Interchange("findus", Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), "localhost", "8080");
+		Interchange findus = new Interchange("findus", Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		client.createQueue(findus);
 	}
 
 	@Test(expected = Exception.class)
 	public void createQueueWithIllegalCharactersInIdFails() throws Exception {
-		Interchange torsk = new Interchange("torsk", Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), "localhost", "8080");
+		Interchange torsk = new Interchange("torsk", Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		client.createQueue(torsk);
 		client.createQueue(torsk); //create some queue that already exists
 	}
