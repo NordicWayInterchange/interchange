@@ -79,5 +79,11 @@ public class Interchange {
 		throw new Exception("Could not find subscription");
 	}
 
+	public Set<Subscription> getFedIn() {
+		return fedIn;
+	}
 
+	public void setFedIn(Set<Subscription> fedIn) {
+		this.fedIn = fedIn;
+	}
 }
