@@ -7,9 +7,11 @@ import org.apache.qpid.server.filter.selector.ParseException;
 import org.apache.qpid.server.message.AMQMessageHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 
+@Component
 public class CapabilityMatcher {
 
 	private static Logger logger = LoggerFactory.getLogger(CapabilityMatcher.class);
