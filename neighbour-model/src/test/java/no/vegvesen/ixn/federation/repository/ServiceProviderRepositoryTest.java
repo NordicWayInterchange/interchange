@@ -1,6 +1,6 @@
-package no.vegvesen.ixn.serviceprovider.repository;
+package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.serviceprovider.model.IxnServiceProvider;
+import no.vegvesen.ixn.federation.model.IxnServiceProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

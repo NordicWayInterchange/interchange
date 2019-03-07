@@ -1,6 +1,6 @@
-package no.vegvesen.ixn.serviceprovider.repository;
+package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.serviceprovider.model.IxnServiceProvider;
+import no.vegvesen.ixn.federation.model.IxnServiceProvider;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

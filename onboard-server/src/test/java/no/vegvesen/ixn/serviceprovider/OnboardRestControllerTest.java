@@ -2,8 +2,8 @@ package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.serviceprovider.model.IxnServiceProvider;
-import no.vegvesen.ixn.serviceprovider.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.model.IxnServiceProvider;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

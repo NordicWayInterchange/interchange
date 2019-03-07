@@ -1,8 +1,7 @@
-package no.vegvesen.ixn.serviceprovider.model;
+package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.vegvesen.ixn.federation.model.DataType;
 
 import javax.persistence.*;
 import java.util.Set;
