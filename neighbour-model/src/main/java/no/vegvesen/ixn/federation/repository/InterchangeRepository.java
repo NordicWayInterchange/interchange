@@ -20,6 +20,9 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	String FIND_OLDER_THAN = "select * from INTERCHANGES where last_updated between ?1 and ?2";
 
 	@Query(value = "SELECT * FROM INTERCHANGES WHERE last_updated BETWEEN ?1 AND ?2",  nativeQuery = true)
-	List<Interchange> findOlderThan(Timestamp then, Timestamp now);
+	List<Interchange> findInterchangeOlderThan(Timestamp then, Timestamp now);
+
+	@Query(value = "select * from interchanges where ixn_id in (select fk_ixn_id from data_types where last_updated between ?1 and ?2)", nativeQuery=true)
+	List<Interchange> findInterchangesWithRecentCapabilityChanges(Timestamp then, Timestamp now);
 
 }
