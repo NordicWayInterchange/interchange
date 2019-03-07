@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -18,9 +17,7 @@ public class Interchange {
 	private Integer ixn_id;
 
 	@Column(unique = true)
-	private String name;
-	private String hostname;
-	private String portNr;
+	private String name; // common name from the certificate
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "fk_ixn_id")
@@ -40,10 +37,8 @@ public class Interchange {
 
 	public Interchange(){}
 
-	public Interchange(String name, Set<DataType> capabilities, Set<Subscription> subscriptions, Set<Subscription> fedIn, String hostname, String portNr) {
+	public Interchange(String name, Set<DataType> capabilities, Set<Subscription> subscriptions, Set<Subscription> fedIn) {
 		this.name = name;
-		this.hostname = hostname;
-		this.portNr = portNr;
 		this.capabilities = capabilities;
 		this.subscriptions = subscriptions;
 		this.fedIn = fedIn;
@@ -63,22 +58,6 @@ public class Interchange {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getHostname() {
-		return hostname;
-	}
-
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
-	}
-
-	public String getPortNr() {
-		return portNr;
-	}
-
-	public void setPortNr(String portNr) {
-		this.portNr = portNr;
 	}
 
 	public Set<Subscription> getSubscriptions() {
