@@ -34,6 +34,7 @@
         <module>neighbour-model</module>
         <module>neighbour-server</module>
         <module>neighbour-discoverer</module>
+        <module>onboard-server</module>
         <module>routing-configurer</module>
     </modules>
 </project>

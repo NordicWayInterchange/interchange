@@ -1,0 +1,41 @@
+stages:
+
+- name: build-postgis
+  type: docker-build
+  dockerfile: postgis/Dockerfile
+  build_dir: postgis
+
+- name: build-qpid
+  type: docker-build
+  dockerfile: qpid/Dockerfile
+  build_dir: qpid
+
+- name: build-node
+  type: docker-build
+  dockerfile: interchangenode/Dockerfile
+  build_dir: interchangenode
+
+- name: push-postgis
+  type: docker-push
+  from_stage: build-postgis
+  repo: eu.gcr.io/nordic-way-aad182cc/postgis
+  tags:
+  - latest
+  - $KUBELINE_GIT_COMMIT_SHORT
+
+- name: push-qpid
+  type: docker-push
+  from_stage: build-qpid
+  repo: eu.gcr.io/nordic-way-aad182cc/qpid
+  tags:
+  - latest
+  - $KUBELINE_GIT_COMMIT_SHORT
+
+- name: push-node
+  type: docker-push
+  from_stage: build-node
+  repo: eu.gcr.io/nordic-way-aad182cc/interchangenode
+  tags:
+  - latest
+  - $KUBELINE_GIT_COMMIT_SHORT
+
