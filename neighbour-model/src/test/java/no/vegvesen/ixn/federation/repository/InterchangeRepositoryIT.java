@@ -1,19 +1,23 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Subscription;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
-public class InterchangeRepositoryTest {
+@SpringBootTest
+public class InterchangeRepositoryIT {
 
 	@Autowired
 	InterchangeRepository repository;
@@ -26,9 +30,9 @@ public class InterchangeRepositoryTest {
 
 	@Test
 	public void storedInterchangeIsPossibleToFindByName() {
-		Interchange firstInterchange = new Interchange("first-interchange", emptySet(), emptySet(), emptySet());
+		Interchange firstInterchange = new Interchange("another-interchange", emptySet(), emptySet(), emptySet());
 		repository.save(firstInterchange);
-		Interchange foundInterchange = repository.findByName("first-interchange");
+		Interchange foundInterchange = repository.findByName("another-interchange");
 		assertThat(foundInterchange).isNotNull();
 		assertThat(foundInterchange.getName()).isNotNull();
 	}
