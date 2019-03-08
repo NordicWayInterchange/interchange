@@ -24,24 +24,61 @@ public class Controller {
 		this.interchangeRepository = interchangeRepository;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/updateSubscription")
-	public Interchange updateSubscription(@RequestBody Interchange interchange){
+	@RequestMapping(method = RequestMethod.POST, value = "/createSubscription")
+	public List<String> createSubscriptions(@RequestBody Interchange interchange){
 
+		// Return a list of paths to poll
+		// Get the interchange we are creating subscriptions for.
 		Interchange mod = interchangeRepository.findByName(interchange.getName());
 
 		logger.info("interchange name: " + interchange.getName());
 		logger.info("Interchange subscriptions: " + interchange.getSubscriptions().toString());
 
+		List<String> paths = new ArrayList<>();
+
 		if(mod == null){
-			interchangeRepository.save(interchange);
+			// Interchange does not exist. Create it.
 			logger.info("*** NEW INTERCHANGE **");
+			interchangeRepository.save(interchange);
 		}else{
+			// Interchange exists: update it.
 			logger.info("---- UPDATING INTERCHANGE ----");
 			mod.setSubscriptions(interchange.getSubscriptions());
 			interchangeRepository.save(mod);
 		}
 
-		return interchange;
+		try {
+			// Get the subscriptions of the current interchange.
+			Interchange interchangeCreatePath = interchangeRepository.findByName(interchange.getName());
+
+			for (Subscription subscription : interchangeCreatePath.getSubscriptions()) {
+				// Path is interchange name and subscription id.
+				String path = interchange.getName() + "/subscription/" + subscription.getId();
+				paths.add(path);
+			}
+		}catch(Exception e){
+			logger.info(e.getClass().getName());
+		}
+
+		return paths;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "{ixnName}/subscription/{subscriptionId}")
+	public Subscription pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId){
+
+		Interchange interchange = interchangeRepository.findByName(ixnName);
+
+		if(interchange != null){
+			// found the interchange, get the subscription
+			try {
+				Subscription subscription = interchange.getSubscriptionById(subscriptionId);
+				return subscription;
+			}catch(Exception e){
+				logger.info(e.getMessage());
+			}
+		}
+
+		return null;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/updateCapabilities")
@@ -63,9 +100,8 @@ public class Controller {
 		return interchange;
 	}
 
-
 	@RequestMapping(method = RequestMethod.GET, value="/{ixnName}/subscriptions")
-	public Set<Subscription> getSubscription(@PathVariable String ixnName){
+	public Set<Subscription> getSubscriptions(@PathVariable String ixnName){
 		// Get the subscriptions for a given node.
 		Interchange mod = interchangeRepository.findByName(ixnName);
 
@@ -88,18 +124,6 @@ public class Controller {
 		return Collections.emptySet();
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value="/{ixnId}")
-	public Interchange getInterchange(@PathVariable String ixnId){
-		// Return the given interchange object.
-		Interchange mod = interchangeRepository.findByName(ixnId);
-
-		if(mod != null){
-			return mod;
-		}
-
-		return null;
-	}
-
 	@RequestMapping(method = RequestMethod.POST, value = "/checkForChangesSince/{timestamp}")
 	public List<Interchange> checkForChanges(@PathVariable Timestamp timestamp){
 		Instant now = Instant.now();
@@ -109,7 +133,7 @@ public class Controller {
 		logger.info("Create timestamp from incoming json string: " + timestamp.toString());
 		try {
 
-			return interchangeRepository.findOlderThan(timestamp, nowTimestamp);
+			return interchangeRepository.findInterchangeOlderThan(timestamp, nowTimestamp);
 		}catch(Exception e){
 			logger.info(e.getClass().getName());
 			logger.info("Timestamp: " + timestamp + ", found no objects older than this time. ");
@@ -122,19 +146,14 @@ public class Controller {
 	public List<Interchange> getAllSubscriptions(){
 		// Return a list of all the registered interchanges(neighbours) for debugging purposes.
 
-		Iterable<Interchange> list = interchangeRepository.findAll();
+		Iterable<Interchange> interchanges = interchangeRepository.findAll();
+		List<Interchange> returnList = new ArrayList<>();
 
-		List<Interchange> ret = new ArrayList<>();
-
-		for (Interchange i : list){
-			ret.add(i);
+		for (Interchange i : interchanges){
+			returnList.add(i);
 		}
 
-		if(ret.size() == 0){
-			return Collections.emptyList();
-		}else{
-			return ret;
-		}
+		return returnList;
 	}
 
 
