@@ -169,7 +169,6 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRate = 10000, initialDelay = 3000)
 	// every 10 seconds, check DNS for new interchanges. 3 second delay.
 	public void checkForNewInterchanges() {
-
 		// Get all neighbours found in the DNS lookup.
 		List<Interchange> neighbours = dnsFacade.getNeighbours();
 		Interchange currentNode = getRepresentationOfCurrentNode();
@@ -181,6 +180,7 @@ public class NeighbourDiscoverer {
 
 				// Found a new interchange, save it.
 				interchangeRepository.save(interchange);
+				logger.info("New neighbour saved in database");
 
 				try {
 					// Post capabilities of current node to the discovered node.
@@ -192,6 +192,7 @@ public class NeighbourDiscoverer {
 					String json = ow.writeValueAsString(currentNode);
 
 					// Post capabilities to the new neighbour.
+					logger.info("Posting capabilities to new neighbour");
 					POSTtoInterchange(json, interchange);
 
 				} catch (Exception e) {
