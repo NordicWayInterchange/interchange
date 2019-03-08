@@ -29,35 +29,28 @@ public class Controller {
 
 		// Return a list of paths to poll
 		// Get the interchange we are creating subscriptions for.
-		Interchange mod = interchangeRepository.findByName(interchange.getName());
+		Interchange updateInterchange = interchangeRepository.findByName(interchange.getName());
 
 		logger.info("interchange name: " + interchange.getName());
 		logger.info("Interchange subscriptions: " + interchange.getSubscriptions().toString());
 
 		List<String> paths = new ArrayList<>();
 
-		if(mod == null){
+		if(updateInterchange == null){
 			// Interchange does not exist. Create it.
 			logger.info("*** NEW INTERCHANGE **");
-			interchangeRepository.save(interchange);
+			updateInterchange = interchangeRepository.save(interchange);
 		}else{
 			// Interchange exists: update it.
 			logger.info("---- UPDATING INTERCHANGE ----");
-			mod.setSubscriptions(interchange.getSubscriptions());
-			interchangeRepository.save(mod);
+			updateInterchange.setSubscriptions(interchange.getSubscriptions());
+			updateInterchange = interchangeRepository.save(updateInterchange);
 		}
-
-		try {
-			// Get the subscriptions of the current interchange.
-			Interchange interchangeCreatePath = interchangeRepository.findByName(interchange.getName());
-
-			for (Subscription subscription : interchangeCreatePath.getSubscriptions()) {
-				// Path is interchange name and subscription id.
-				String path = interchange.getName() + "/subscription/" + subscription.getId();
-				paths.add(path);
-			}
-		}catch(Exception e){
-			logger.info(e.getClass().getName());
+		// Create paths to return.
+		for (Subscription subscription : updateInterchange.getSubscriptions()) {
+			// Path is interchange name and subscription id.
+			String path = interchange.getName() + "/subscription/" + subscription.getId();
+			paths.add(path);
 		}
 
 		return paths;
