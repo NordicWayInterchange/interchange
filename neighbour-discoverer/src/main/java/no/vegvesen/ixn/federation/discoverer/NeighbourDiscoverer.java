@@ -20,6 +20,17 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 
+/***
+ * Functionality:
+ *  - Check database for recent changes in neighbour capabilities.
+ *    Compute custom subscription to each neighbour when the neighbour capability is updated.
+ *    Post calculated subscription to neighbour.
+ *    Receive Post response with paths to each subscription.
+ *    Poll each paths until subscription status = CREATED
+ *
+ * - Check DNS for neighbours that we have not seen and that is not ourselves (new neighbours).
+ */
+
 @Component
 public class NeighbourDiscoverer {
 
@@ -28,11 +39,12 @@ public class NeighbourDiscoverer {
 	private RestTemplate restTemplate;
 	private String portNr;
 	private CapabilityMatcher capabilityMatcher;
+
 	private Logger logger = LoggerFactory.getLogger(NeighbourDiscoverer.class);
 	private Timestamp from;
 
 	@Autowired
-	NeighbourDiscoverer(@Value("${interchange.port.nr}") int portNr, DNSFacade dnsFacade, InterchangeRepository interchangeRepository, RestTemplate restTemplate, CapabilityMatcher capabilityMatcher) {
+	NeighbourDiscoverer(@Value("${interchange.port.number}") int portNr, DNSFacade dnsFacade, InterchangeRepository interchangeRepository, RestTemplate restTemplate, CapabilityMatcher capabilityMatcher) {
 		this.dnsFacade = dnsFacade;
 		this.interchangeRepository = interchangeRepository;
 		this.restTemplate = restTemplate;
@@ -42,24 +54,18 @@ public class NeighbourDiscoverer {
 	}
 
 	@Scheduled(fixedRate = 15000, initialDelay = 5000)  // check every 15 seconds. 5 second delay from start.
-	public void checkForChanges() {
-
-		// Every 15 seconds; print element from database that have changed since last time we checked.
-		// If something has changed, it is either the node's Cabilities or subscriptions
-		// If change in capabilities - recalculate our subscription, post our subscription
-		// if change in subscription - Not our job, that's the job of RoutingConfigurer.
+	public void checkForChangesInCapabilities() {
 
 		Instant now = Instant.now();
 		Timestamp nowTimestamp = Timestamp.from(now);
 		Interchange currentNode = getRepresentationOfCurrentNode();
 
-		logger.info("Querying for all interchanges edited between " + from.toString() + " and " + nowTimestamp.toString());
+		logger.info("Querying for all interchanges with capabilities edited between " + from.toString() + " and " + nowTimestamp.toString());
 
-		try {
-			List<Interchange> interchanges = interchangeRepository.findOlderThan(from, nowTimestamp);
+		try { // try-catch because of ObjectWriter
+			List<Interchange> interchanges = interchangeRepository.findInterchangesWithRecentCapabilityChanges(from, nowTimestamp);
 
-			if (interchanges != null) {
-				// We found some updated interchanges. For each interchange, calculate our new subscription.
+			if (interchanges != null) { // For each new interchange, calculate our new subscription.
 
 				for (Interchange interchange : interchanges) {
 
@@ -70,8 +76,10 @@ public class NeighbourDiscoverer {
 
 					Set<Subscription> newFedInSubscriptions = new HashSet<>();
 
-					// Calculate new FedIn subscription. Will be stored in newFedInSubscriptions.
+					// Calculate new FedIn subscription.
 					for (DataType dataType : interchange.getCapabilities()) {
+
+						logger.info("Capabilities of node " + interchange.getName()+ " : " + dataType.getWhere1() +", "+ dataType.getWhat()+ ", " + dataType.getHow());
 
 						for (Subscription subscription : currentNode.getSubscriptions()) {
 							// If the subscription selector string matches the data type,
@@ -116,8 +124,7 @@ public class NeighbourDiscoverer {
 				logger.info("Found no interchanges last between " + from.toString() + " and " + now.toString());
 			}
 		} catch (Exception e) {
-			logger.info("Error: " + e.getClass().getName());
-
+			logger.info("Error creating json object: ", e);
 		}
 
 		// update 'from' for next iteration.
@@ -130,7 +137,6 @@ public class NeighbourDiscoverer {
 		logger.info("URL: " + url);
 
 		try {
-
 			ResponseEntity<String> response = restTemplate.postForEntity(url, json, String.class);
 
 			if (response.getStatusCode().isError()) {
@@ -144,6 +150,7 @@ public class NeighbourDiscoverer {
 		}
 	}
 
+	// TODO: Remove.
 	public Interchange getRepresentationOfCurrentNode() {
 		Interchange interchange = new Interchange();
 		interchange.setName("bouvet");
@@ -151,13 +158,15 @@ public class NeighbourDiscoverer {
 		DataType dataTypeCapability = new DataType("datex2;1.0", "NO", "obstruction");
 		interchange.setCapabilities(Collections.singleton(dataTypeCapability));
 
-		Subscription subscription = new Subscription("where1 LIKE 'NO'", Subscription.Status.REQUESTED);
-		interchange.setSubscriptions(Collections.singleton(subscription));
+		Set<Subscription> subscriptions = new HashSet<>();
+		subscriptions.add(new Subscription("where1 LIKE 'NO'", Subscription.Status.REQUESTED));
+		subscriptions.add(new Subscription("where1 LIKE 'SE' ", Subscription.Status.REQUESTED));
+		interchange.setSubscriptions(subscriptions);
 
 		return interchange;
 	}
 
-	//@Scheduled(fixedRate = 10000, initialDelay = 3000)
+	@Scheduled(fixedRate = 10000, initialDelay = 3000)
 	// every 10 seconds, check DNS for new interchanges. 3 second delay.
 	public void checkForNewInterchanges() {
 
