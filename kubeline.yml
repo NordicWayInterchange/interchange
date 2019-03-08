@@ -1,5 +1,10 @@
 stages:
 
+- name: verify-modules
+  type: docker-build
+  dockerfile: Dockerfile
+  build_dir: .
+
 - name: build-postgis
   type: docker-build
   dockerfile: postgis/Dockerfile
