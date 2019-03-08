@@ -48,8 +48,8 @@ services:
 
   neighbour_db:
     image: postgres:9.6
-    container_name: neighbours
-    hostname: neighbours
+    container_name: neighbour_db
+    hostname: neighbour_db
     ports:
     - 7070:5432
     environment:
