@@ -36,4 +36,24 @@ public class InterchangeRepositoryIT {
 		assertThat(foundInterchange).isNotNull();
 		assertThat(foundInterchange.getName()).isNotNull();
 	}
+
+	@Test
+	public void storedSubscriptionsInAndOutAreSeparated() {
+		Set<Subscription> outbound = new HashSet<>();
+		outbound.add(new Subscription("outbound is true", Subscription.Status.CREATED));
+		Set<Subscription> inbound = new HashSet<>();
+		inbound.add(new Subscription("inbound is true", Subscription.Status.CREATED));
+		Interchange inOutIxn = new Interchange("in-out-interchange", emptySet(), outbound, inbound);
+		Interchange savedInOut = repository.save(inOutIxn);
+
+		Interchange foundInOut = repository.findByName(savedInOut.getName());
+		assertThat(foundInOut).isNotNull();
+		assertThat(foundInOut.getFedIn()).hasSize(1);
+
+		Subscription inSub = foundInOut.getFedIn().iterator().next();
+		assertThat(inSub.getSelector()).isEqualTo("inbound is true");
+		assertThat(foundInOut.getSubscriptions()).hasSize(1);
+		Subscription outSub = foundInOut.getSubscriptions().iterator().next();
+		assertThat(outSub.getSelector()).isEqualTo("outbound is true");
+	}
 }

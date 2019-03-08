@@ -24,12 +24,12 @@ public class Interchange {
 	private Set<DataType> capabilities;
 
 	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "fk_ixn_id")
+	@JoinColumn(name = "fk_ixn_id_sub")
 	private Set<Subscription> subscriptions;
 
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "fk_ixn_id")
+	@JoinColumn(name = "fk_ixn_id_fed_in")
 	private Set<Subscription> fedIn;
 
 	@UpdateTimestamp
