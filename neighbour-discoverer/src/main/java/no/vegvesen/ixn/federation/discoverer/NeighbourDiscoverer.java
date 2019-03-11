@@ -38,18 +38,15 @@ public class NeighbourDiscoverer {
 	private DNSFacade dnsFacade;
 	private RestTemplate restTemplate;
 	private String portNr;
-	private CapabilityMatcher capabilityMatcher;
-
 	private Logger logger = LoggerFactory.getLogger(NeighbourDiscoverer.class);
 	private Timestamp from;
 
 	@Autowired
-	NeighbourDiscoverer(@Value("${interchange.port.number}") int portNr, DNSFacade dnsFacade, InterchangeRepository interchangeRepository, RestTemplate restTemplate, CapabilityMatcher capabilityMatcher) {
+	NeighbourDiscoverer(@Value("${interchange.port.number}") int portNr, DNSFacade dnsFacade, InterchangeRepository interchangeRepository, RestTemplate restTemplate) {
 		this.dnsFacade = dnsFacade;
 		this.interchangeRepository = interchangeRepository;
 		this.restTemplate = restTemplate;
 		this.portNr = String.valueOf(portNr);
-		this.capabilityMatcher = capabilityMatcher;
 		from = Timestamp.from(Instant.now());
 	}
 
@@ -84,7 +81,7 @@ public class NeighbourDiscoverer {
 						for (Subscription subscription : currentNode.getSubscriptions()) {
 							// If the subscription selector string matches the data type,
 							// add the subscription to the new set of Subscriptions.
-							if (capabilityMatcher.matches(dataType, subscription.getSelector())) {
+							if (CapabilityMatcher.matches(dataType, subscription.getSelector())) {
 
 								logger.debug("Node " + interchange.getName() + " has capability (" + dataType.getHow() + ", "
 										+ dataType.getWhat() + ", " + dataType.getWhere1()
@@ -131,7 +128,7 @@ public class NeighbourDiscoverer {
 		from = nowTimestamp;
 	}
 
-	public void POSTtoInterchange(String json, Interchange interchange) {
+	private void POSTtoInterchange(String json, Interchange interchange) {
 
 		String url = "http://" + interchange.getName() + dnsFacade.getDomain() + ":" + portNr;
 		logger.info("URL: " + url);
@@ -198,7 +195,6 @@ public class NeighbourDiscoverer {
 				} catch (Exception e) {
 					logger.info("Error creating capability json object. " + e.getClass().getName());
 				}
-
 
 			} else {
 				logger.info("Interchange " + interchange.getName() + " was either in the database or has the same name as us.");
