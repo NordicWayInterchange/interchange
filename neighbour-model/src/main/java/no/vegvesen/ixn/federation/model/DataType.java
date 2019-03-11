@@ -6,15 +6,14 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "DataTypes")
+@Table(name = "data_types")
 public class DataType {
-
 
 	@JsonIgnore
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "datatype_generator")
-	@SequenceGenerator(name="datatype_generator", sequenceName = "datatype_seq", allocationSize=50)
-	@Column(name="data_id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_generator")
+	@SequenceGenerator(name="dat_generator", sequenceName = "dat_seq", allocationSize=50)
+	@Column(name="dat_id")
 	private Integer data_id;
 
 	private String where1;

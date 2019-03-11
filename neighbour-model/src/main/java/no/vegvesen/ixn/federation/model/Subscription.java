@@ -6,9 +6,8 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Subscriptions")
+@Table(name = "subscriptions")
 public class Subscription {
-
 
 	@JsonIgnore
 	@Id

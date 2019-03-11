@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
-@Table(name = "Interchanges")
+@Table(	name = "interchanges",
+		uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_ixn_name"))
 public class Interchange {
 
 	@Id
@@ -16,20 +17,19 @@ public class Interchange {
 	@Column(name="ixn_id")
 	private Integer ixn_id;
 
-	@Column(unique = true)
 	private String name; // common name from the certificate
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "fk_ixn_id")
+	@JoinColumn(name = "ixn_id_cap", foreignKey = @ForeignKey(name="fk_dat_ixn"))
 	private Set<DataType> capabilities;
 
 	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "fk_ixn_id")
+	@JoinColumn(name = "ixn_id_sub_out", foreignKey = @ForeignKey(name = "fk_sub_ixn_sub_out"))
 	private Set<Subscription> subscriptions;
 
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "fk_ixn_id")
+	@JoinColumn(name = "ixn_id_fed_in", foreignKey = @ForeignKey(name="fk_sub_ixn_fed_in"))
 	private Set<Subscription> fedIn;
 
 	@UpdateTimestamp

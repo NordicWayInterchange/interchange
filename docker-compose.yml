@@ -46,24 +46,13 @@ services:
     expose:
     - "5432"
 
-  neighbour_db:
+  federation_db:
     image: postgres:9.6
-    container_name: neighbour_db
-    hostname: neighbour_db
+    container_name: federation_db
+    hostname: federation_db
     ports:
     - 7070:5432
     environment:
-      - POSTGRES_USER=neighbours
-      - POSTGRES_PASSWORD=neighbours
-      - POSTGRES_DB=neighbour_db
-
-  local_db:
-    image: postgres:9.6
-    container_name: local
-    hostname: local
-    ports:
-      - 7888:5432
-    environment:
-      - POSTGRES_USER=local
-      - POSTGRES_PASSWORD=local
-      - POSTGRES_DB=local_db
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation

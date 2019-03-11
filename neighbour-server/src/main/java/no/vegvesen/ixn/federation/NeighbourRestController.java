@@ -14,13 +14,13 @@ import java.time.Instant;
 import java.util.*;
 
 @RestController
-public class Controller {
+public class NeighbourRestController {
 
 	private InterchangeRepository interchangeRepository;
-	private Logger logger = LoggerFactory.getLogger(Controller.class);
+	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
 	@Autowired
-	public Controller(InterchangeRepository interchangeRepository){
+	public NeighbourRestController(InterchangeRepository interchangeRepository){
 		this.interchangeRepository = interchangeRepository;
 	}
 

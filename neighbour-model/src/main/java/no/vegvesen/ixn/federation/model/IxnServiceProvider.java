@@ -1,27 +1,26 @@
-package no.vegvesen.ixn.serviceprovider.model;
+package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.vegvesen.ixn.federation.model.DataType;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "service_providers")
+@Table(name = "service_providers",
+		uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_spr_name"))
 public class IxnServiceProvider {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sp_generator")
-	@SequenceGenerator(name="sp_generator", sequenceName = "sp_seq", allocationSize=50)
-	@Column(name="sp_id")
+	@SequenceGenerator(name="spr_generator", sequenceName = "spr_seq", allocationSize=50)
+	@Column(name="spr_id")
 	private Integer id;
 
-	@Column(unique = true)
 	private String name;
 
 	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "fk_sp_id")
+	@JoinColumn(name = "spr_id_cap", foreignKey = @ForeignKey(name = "fk_dat_spr"))
 	private Set<DataType> capabilities;
 
 	public IxnServiceProvider() {

@@ -1,17 +1,17 @@
-package no.vegvesen.ixn.serviceprovider.repository;
+package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.serviceprovider.model.IxnServiceProvider;
+import no.vegvesen.ixn.federation.model.IxnServiceProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
-public class ServiceProviderRepositoryTest {
+@SpringBootTest
+public class ServiceProviderRepositoryIT {
 	@Autowired
 	ServiceProviderRepository repository;
 

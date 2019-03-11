@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.serviceprovider.model.IxnServiceProvider;
-import no.vegvesen.ixn.serviceprovider.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.model.IxnServiceProvider;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
