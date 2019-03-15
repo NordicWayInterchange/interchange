@@ -43,7 +43,7 @@
       "name": "default",
       "type": "Memory",
       "defaultVirtualHostNode": "true",
-      "virtualHostInitialConfiguration": "{\n  \"type\": \"Memory\",\n  \"name\": \"localhost\",\n  \"modelVersion\": \"7.0\",\n  \"exchanges\": [\n    {\n      \"name\": \"topicEx\",\n      \"type\": \"topic\",\n      \"durable\": true,\n      \"durableBindings\": []\n    }\n  ],\n  \"queues\": []\n}"
+      "virtualHostInitialConfiguration": "{\n  \"type\": \"Memory\",\n  \"name\": \"localhost\",\n  \"modelVersion\": \"7.0\",\n  \"exchanges\": [\n    {\n      \"name\": \"headerEx\",\n      \"type\": \"headers\",\n      \"durable\": true,\n      \"durableBindings\": [\n        {\n          \"arguments\": {\n            \"x-filter-jms-selector\": \"how = 'fisk' and what = 'torsk'\"\n          },\n          \"bindingKey\": \"headerFiskTorsk\",\n          \"destination\": \"headerFiskTorsk\"\n        }\n      ]\n    },\n    {\n      \"name\": \"topicEx\",\n      \"type\": \"topic\",\n      \"durable\": true,\n      \"durableBindings\": [],\n      \"alternateBinding\" : {\n        \"destination\" : \"headerEx\"\n      }\n    }\n  ],\n  \"queues\": [\n    {\n      \"name\": \"headerFiskTorsk\",\n      \"type\": \"standard\",\n      \"durable\": true,\n      \"holdOnPublishEnabled\": false,\n      \"owner\": null\n    }\n  ]\n}"
     }
   ]
 }

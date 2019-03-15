@@ -4,11 +4,36 @@
   "modelVersion": "7.0",
   "exchanges": [
     {
+      "name": "headerEx",
+      "type": "headers",
+      "durable": true,
+      "durableBindings": [
+        {
+          "arguments": {
+            "x-filter-jms-selector": "how = 'fisk' and what = 'torsk'"
+          },
+          "bindingKey": "headerFiskTorsk",
+          "destination": "headerFiskTorsk"
+        }
+      ]
+    },
+    {
       "name": "topicEx",
       "type": "topic",
       "durable": true,
-      "durableBindings": []
+      "durableBindings": [],
+      "alternateBinding" : {
+        "destination" : "headerEx"
+      }
     }
   ],
-  "queues": []
+  "queues": [
+    {
+      "name": "headerFiskTorsk",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    }
+  ]
 }
