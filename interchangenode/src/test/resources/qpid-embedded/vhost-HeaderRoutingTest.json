@@ -1,0 +1,29 @@
+{
+  "type": "Memory",
+  "name": "localhost",
+  "modelVersion": "7.0",
+  "exchanges": [
+    {
+      "name": "exchangeOne",
+      "type": "headers",
+      "durable": true,
+      "durableBindings": [
+        {
+          "arguments": {
+            "x-filter-jms-selector": "how = 'one'"
+          },
+          "bindingKey": "headerOne",
+          "destination": "queueOne"
+        }
+      ]
+    }
+  ],
+  "queues": [
+    {
+      "name": "queueOne",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false
+    }
+  ]
+}

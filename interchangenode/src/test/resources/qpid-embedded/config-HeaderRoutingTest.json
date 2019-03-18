@@ -1,0 +1,49 @@
+{
+  "name": "Embedded Broker",
+  "modelVersion": "7.0",
+  "authenticationproviders": [
+    {
+      "name": "Scram",
+      "type": "SCRAM-SHA-256",
+      "users": [
+        {
+          "name": "admin",
+          "type": "managed",
+          "password": "RlZheCx8NY5fmWpshDA2P1gULzLPA8GtoCe5uJgr4ms=,,mnHeeEsCki4ql4slKwooAncju7cL+5QLSxhUMzmvMJw=,z95S+Lmz5v5mESAmov1mJZN17310oMuAPyJIWtg4gBo=,4096"
+        }
+      ]
+    }
+  ],
+  "ports": [
+    {
+      "name": "AMQP",
+      "port": "${qpid.amqp_port}",
+      "protocols": [
+        "AMQP_1_0"
+      ],
+      "authenticationProvider": "Scram",
+      "virtualhostaliases": [
+        {
+          "name": "nameAlias",
+          "type": "nameAlias"
+        },
+        {
+          "name": "defaultAlias",
+          "type": "defaultAlias"
+        },
+        {
+          "name": "hostnameAlias",
+          "type": "hostnameAlias"
+        }
+      ]
+    }
+  ],
+  "virtualhostnodes": [
+    {
+      "name": "default",
+      "type": "Memory",
+      "defaultVirtualHostNode": "true",
+      "virtualHostInitialConfiguration": "{\n  \"type\": \"Memory\",\n  \"name\": \"localhost\",\n  \"modelVersion\": \"7.0\",\n  \"exchanges\": [\n    {\n      \"name\": \"exchangeOne\",\n      \"type\": \"headers\",\n      \"durable\": true,\n      \"durableBindings\": [\n        {\n          \"arguments\": {\n            \"x-filter-jms-selector\": \"how = 'one'\"\n          },\n          \"bindingKey\": \"headerOne\",\n          \"destination\": \"queueOne\"\n        }        \n      ]\n    }\n  ],\n  \"queues\": [\n    {\n      \"name\": \"queueOne\",\n      \"type\": \"standard\",\n      \"durable\": true,\n      \"holdOnPublishEnabled\": false\n    }\n  ]\n}"
+    }
+  ]
+}
