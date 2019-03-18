@@ -4,10 +4,7 @@ import no.vegvesen.ixn.broker.EmbeddedBroker;
 import org.apache.qpid.jms.JmsQueue;
 import org.apache.qpid.jms.JmsTopic;
 import org.apache.qpid.jms.message.JmsTextMessage;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.jms.*;
 
@@ -37,6 +34,11 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 	@Before
 	public void setUp() throws Exception {
 		session = getSession(URI, USER, PASSWORD);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		session.close();
 	}
 
 	@AfterClass
