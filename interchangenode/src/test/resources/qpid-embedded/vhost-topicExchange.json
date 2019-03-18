@@ -45,8 +45,8 @@
           "destination": "qFiskFlyndre"
         },
         {
-          "bindingKey": "fisk",
-          "destination": "qFiskFlyndre"
+          "bindingKey": "fisk.#",
+          "destination": "qFisk"
         }
       ],
       "alternateBinding" : {

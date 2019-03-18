@@ -131,4 +131,25 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 		assertThat(receivedMessage).isNotNull();
 	}
 
+	@Test
+	public void headerAllTypesOfFisk() throws JMSException {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFisk"));
+		sendWithHeader("fisk", null);
+		assertThat(consumer.receive(1000L)).isNotNull();
+		sendWithHeader("fisk", "torsk");
+		assertThat(consumer.receive(1000L)).isNotNull();
+		sendWithHeader("fisk", "flyndre");
+		assertThat(consumer.receive(1000L)).isNotNull();
+	}
+
+	@Test
+	public void topicAllTypesOfFisk() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFisk"));
+		sendToTopic("topicEx/fisk");
+		assertThat(consumer.receive(1000L)).isNotNull();
+		sendToTopic("topicEx/fisk/torsk");
+		assertThat(consumer.receive(1000L)).isNotNull();
+		sendToTopic("topicEx/fisk/flyndre");
+		assertThat(consumer.receive(1000L)).isNotNull();
+	}
 }
