@@ -14,6 +14,20 @@
           },
           "bindingKey": "headerFiskTorsk",
           "destination": "qFiskTorsk"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "how = 'fisk' and what = 'flyndre'"
+          },
+          "bindingKey": "headerFiskFlyndre",
+          "destination": "qFiskFlyndre"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "how = 'fisk'"
+          },
+          "bindingKey": "headerFisk",
+          "destination": "qFisk"
         }
       ]
     },
@@ -25,6 +39,14 @@
         {
           "bindingKey": "fisk.torsk",
           "destination": "qFiskTorsk"
+        },
+        {
+          "bindingKey": "fisk.flyndre",
+          "destination": "qFiskFlyndre"
+        },
+        {
+          "bindingKey": "fisk",
+          "destination": "qFiskFlyndre"
         }
       ],
       "alternateBinding" : {
@@ -35,6 +57,18 @@
   "queues": [
     {
       "name": "qFiskTorsk",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false
+    },
+    {
+      "name": "qFiskFlyndre",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false
+    },
+    {
+      "name": "qFisk",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false

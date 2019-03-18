@@ -23,7 +23,6 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 	private static EmbeddedBroker broker;
 	private Session session;
 	private MessageProducer messageProducer;
-	private MessageConsumer consumer;
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
@@ -53,15 +52,9 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 		messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 	}
 
-	@Test
-	public void headerFiskTorsk() throws JMSException {
-		consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
-		sendWithHeader("fisk", "torsk");
-		assertThat(consumer.receive(1000L)).isNotNull();
-	}
-
 	private void sendWithHeader(String how, String what) throws JMSException {
-		messageProducer = session.createProducer(new JmsTopic("topicEx"));
+		//The topic exchange forwards to header exchange where header binding is evaluated
+		messageProducer = session.createProducer(new JmsQueue("topicEx"));
 		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello " + messageProducer.getDestination().toString());
 		message.getFacade().setUserId("admin");
 		message.setStringProperty("how", how);
@@ -71,29 +64,71 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void messageWithSameTopicIsRouted() throws Exception {
-		consumer = session.createConsumer(new JmsTopic("topicEx/fisk"));
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk"));
 		sendToTopic("topicEx/fisk");
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
-		session.close();
+	}
+
+	@Test
+	public void messageOutsideBoundTopicIsNotReceived() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
+		sendToTopic("topicEx/fisk.flyndre");
+		Message receivedMessage = consumer.receive(1000L);
+		assertThat(receivedMessage).isNull();
 	}
 
 	@Test
 	public void messageWithBroaderTopicIsReceived() throws Exception {
-		consumer = session.createConsumer(new JmsTopic("topicEx/fisk.#"));
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.#"));
 		sendToTopic("topicEx/fisk.torsk");
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
-		session.close();
 	}
 
 	@Test
-	public void messageWithTopicBoundToQueueIsReceived() throws Exception {
-		consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
+	public void headerFiskTorsk() throws JMSException {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
+		sendWithHeader("fisk", "torsk");
+		assertThat(consumer.receive(1000L)).isNotNull();
+	}
+
+	@Test
+	public void topicFiskTorsk() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
 		sendToTopic("topicEx/fisk.torsk");
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
-		session.close();
+	}
+
+	@Test
+	public void headerFiskFlyndre() throws JMSException {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskFlyndre"));
+		sendWithHeader("fisk", "flyndre");
+		assertThat(consumer.receive(1000L)).isNotNull();
+	}
+
+	@Test
+	public void topicFiskFlyndre() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskFlyndre"));
+		sendToTopic("topicEx/fisk.flyndre");
+		Message receivedMessage = consumer.receive(1000L);
+		assertThat(receivedMessage).isNotNull();
+	}
+
+	@Test
+	public void headerFisk() throws JMSException {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFisk"));
+		sendWithHeader("fisk", null);
+		assertThat(consumer.receive(1000L)).isNotNull();
+	}
+
+	@Test
+	public void topicFisk() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFisk"));
+		sendToTopic("topicEx/fisk");
+		Message receivedMessage = consumer.receive(1000L);
+		assertThat(receivedMessage).isNotNull();
 	}
 
 }
