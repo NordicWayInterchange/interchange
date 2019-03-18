@@ -152,4 +152,16 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 		sendToTopic("topicEx/fisk/flyndre");
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
+
+	@Test
+	public void wrongTopicWithCorrectHeaderWillBeRoutedBecauseOfAlternateBindingToHeaderExchange() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
+		messageProducer = session.createProducer(new JmsTopic("topicEx/fisk"));
+		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello " + messageProducer.getDestination().toString());
+		message.getFacade().setUserId("admin");
+		message.setStringProperty("how", "fisk");
+		message.setStringProperty("what", "torsk");
+		messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+		assertThat(consumer.receive(1000L)).isNotNull();
+	}
 }
