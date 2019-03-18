@@ -40,7 +40,7 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 	}
 
 	@AfterClass
-	public static void tearDownClass() throws Exception {
+	public static void tearDownClass(){
 		broker.stop();
 	}
 
@@ -78,8 +78,8 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void messageWithBroaderTopicIsReceived() throws Exception {
-		consumer = session.createConsumer(new JmsTopic("topicEx/fisk/#"));
-		sendToTopic("topicEx/fisk/torsk");
+		consumer = session.createConsumer(new JmsTopic("topicEx/fisk.#"));
+		sendToTopic("topicEx/fisk.torsk");
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
 		session.close();
