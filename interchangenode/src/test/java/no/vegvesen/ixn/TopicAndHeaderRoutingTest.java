@@ -53,7 +53,7 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void headerFiskTorsk() throws JMSException {
-		consumer = session.createConsumer(new JmsQueue("headerFiskTorsk"));
+		consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
 		sendWithHeader("fisk", "torsk");
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
@@ -79,6 +79,15 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 	@Test
 	public void messageWithBroaderTopicIsReceived() throws Exception {
 		consumer = session.createConsumer(new JmsTopic("topicEx/fisk.#"));
+		sendToTopic("topicEx/fisk.torsk");
+		Message receivedMessage = consumer.receive(1000L);
+		assertThat(receivedMessage).isNotNull();
+		session.close();
+	}
+
+	@Test
+	public void messageWithTopicBoundToQueueIsReceived() throws Exception {
+		consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
 		sendToTopic("topicEx/fisk.torsk");
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
