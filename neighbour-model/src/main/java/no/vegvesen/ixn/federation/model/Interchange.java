@@ -27,13 +27,27 @@ public class Interchange {
 	@JoinColumn(name = "ixn_id_sub_out", foreignKey = @ForeignKey(name = "fk_sub_ixn_sub_out"))
 	private Set<Subscription> subscriptions;
 
-	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "ixn_id_fed_in", foreignKey = @ForeignKey(name="fk_sub_ixn_fed_in"))
 	private Set<Subscription> fedIn;
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
+
+	@JsonIgnore
+	private LocalDateTime lastSeen;
+
+	public enum InterchangeStatus {NEW, KNOWN, FEDERATED}
+
+	@Enumerated(EnumType.STRING)
+	private InterchangeStatus interchangeStatus;
+
+	@JsonIgnore
+	private String domainName;
+	@JsonIgnore
+	private String messageChannelPort;
+	@JsonIgnore
+	private String controlChannelPort;
 
 	public Interchange(){}
 
@@ -42,6 +56,7 @@ public class Interchange {
 		this.capabilities = capabilities;
 		this.subscriptions = subscriptions;
 		this.fedIn = fedIn;
+		this.interchangeStatus = InterchangeStatus.NEW;
 	}
 
 	public Set<DataType> getCapabilities() {
@@ -79,11 +94,51 @@ public class Interchange {
 		throw new Exception("Could not find subscription");
 	}
 
+	public InterchangeStatus getInterchangeStatus() {
+		return interchangeStatus;
+	}
+
+	public void setInterchangeStatus(InterchangeStatus interchangeStatus) {
+		this.interchangeStatus = interchangeStatus;
+	}
+
 	public Set<Subscription> getFedIn() {
 		return fedIn;
 	}
 
 	public void setFedIn(Set<Subscription> fedIn) {
 		this.fedIn = fedIn;
+	}
+
+	public LocalDateTime getLastSeen() {
+		return lastSeen;
+	}
+
+	public void setLastSeen(LocalDateTime lastSeen) {
+		this.lastSeen = lastSeen;
+	}
+
+	public String getDomainName() {
+		return domainName;
+	}
+
+	public void setDomainName(String domainName) {
+		this.domainName = domainName;
+	}
+
+	public String getMessageChannelPort() {
+		return messageChannelPort;
+	}
+
+	public void setMessageChannelPort(String messageChannelPort) {
+		this.messageChannelPort = messageChannelPort;
+	}
+
+	public String getControlChannelPort() {
+		return controlChannelPort;
+	}
+
+	public void setControlChannelPort(String controlChannelPort) {
+		this.controlChannelPort = controlChannelPort;
 	}
 }

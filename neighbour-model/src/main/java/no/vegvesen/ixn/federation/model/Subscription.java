@@ -16,10 +16,10 @@ public class Subscription {
 	@Column(name="sub_id")
 	private Integer sub_id;
 
-	public enum Status{REQUESTED, CREATED, REJECTED}
+	public enum SubscriptionStatus {REQUESTED, CREATED, REJECTED}
 
 	@Enumerated(EnumType.STRING)
-	private Status status;
+	private SubscriptionStatus subscriptionStatus;
 
 	@Column
 	@UpdateTimestamp
@@ -29,17 +29,17 @@ public class Subscription {
 
 	public Subscription(){}
 
-	public Subscription(String selector, Status status) {
+	public Subscription(String selector, SubscriptionStatus subscriptionStatus) {
 		this.selector = selector;
-		this.status = status;
+		this.subscriptionStatus = subscriptionStatus;
 	}
 
-	public Status getStatus() {
-		return status;
+	public SubscriptionStatus getSubscriptionStatus() {
+		return subscriptionStatus;
 	}
 
-	public void setStatus(Status status) {
-		this.status = status;
+	public void setSubscriptionStatus(SubscriptionStatus subscriptionStatus) {
+		this.subscriptionStatus = subscriptionStatus;
 	}
 
 	public String getSelector() {
