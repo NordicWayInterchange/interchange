@@ -13,6 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+        <spring-boot-dependencies.version>2.1.3.RELEASE</spring-boot-dependencies.version>
     </properties>
 
     <build>
@@ -26,6 +27,15 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <configuration>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -35,13 +45,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <type>pom</type>
-                <version>2.1.3.RELEASE</version>
+                <version>${spring-boot-dependencies.version}</version>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.amqphub.spring</groupId>
-                <artifactId>amqp-10-jms-spring-boot-starter</artifactId>
-                <version>2.1.2</version>
             </dependency>
             <dependency>
                 <groupId>net.postgis</groupId>
@@ -95,12 +100,13 @@
                 <artifactId>qpid-broker-core</artifactId>
                 <version>7.0.6</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
 
+
     <modules>
+        <module>interchangenode</module>
         <module>ssl-utils</module>
         <module>neighbour-model</module>
         <module>neighbour-server</module>
