@@ -1,49 +1,58 @@
 package no.vegvesen.ixn.federation;
 
+import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRejectedException;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Interchange.InterchangeStatus;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
 public class NeighbourRestController {
 
 	private InterchangeRepository interchangeRepository;
+	private ServiceProviderRepository serviceProviderRepository;
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
+	@Value("${interchange.node-provider.name}")
+	private String myName;
+
 	@Autowired
-	public NeighbourRestController(InterchangeRepository interchangeRepository){
+	public NeighbourRestController(InterchangeRepository interchangeRepository, ServiceProviderRepository serviceProviderRepository){
 		this.interchangeRepository = interchangeRepository;
+		this.serviceProviderRepository = serviceProviderRepository;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/createSubscription")
-	public List<String> createSubscriptions(@RequestBody Interchange interchange){
+	@RequestMapping(method = RequestMethod.POST, value = "/requestSubscription")
+	public List<String> requestSubscriptions(@RequestBody Interchange interchange){
 
-		// Return a list of paths to poll
-		// Get the interchange we are creating subscriptions for.
+		// Returns a list of paths to poll for subscription status.
 		Interchange updateInterchange = interchangeRepository.findByName(interchange.getName());
-
 		logger.info("interchange name: " + interchange.getName());
 		logger.info("Interchange subscriptions: " + interchange.getSubscriptions().toString());
 
 		List<String> paths = new ArrayList<>();
 
 		if(updateInterchange == null){
-			// Interchange does not exist. Create it.
-			logger.info("*** NEW INTERCHANGE **");
-			updateInterchange = interchangeRepository.save(interchange);
+			logger.info("*** Unknown interchange requesting subscriptions. Rejecting... ***");
+			throw new SubscriptionRejectedException("Capabilities must be exchanged before it is possible to post a subscription request.");
 		}else{
 			// Interchange exists: update it.
-			logger.info("---- UPDATING INTERCHANGE ----");
+			logger.info("*** Known interchange updated their subscription ***");
+			LocalDateTime now = LocalDateTime.now();
 			updateInterchange.setSubscriptions(interchange.getSubscriptions());
+			updateInterchange.setLastSeen(now);
 			updateInterchange = interchangeRepository.save(updateInterchange);
 		}
 		// Create paths to return.
@@ -62,92 +71,97 @@ public class NeighbourRestController {
 		Interchange interchange = interchangeRepository.findByName(ixnName);
 
 		if(interchange != null){
-			// found the interchange, get the subscription
 			try {
-				Subscription subscription = interchange.getSubscriptionById(subscriptionId);
-				return subscription;
+				return interchange.getSubscriptionById(subscriptionId);
 			}catch(Exception e){
 				logger.info(e.getMessage());
+				throw new InterchangeNotFoundException("The interchange has no subscription with this id. " + e.getMessage());
+			}
+		} else{
+			throw new InterchangeNotFoundException("The requested interchange does not exist. ");
+		}
+	}
+
+	// Method used to check for duplicate capabilities
+	private boolean setContainsObject(DataType dataType, Set<DataType> capabilities){
+
+		for(DataType d : capabilities){
+			if(dataType.getHow().equals(d.getHow()) && dataType.getWhat().equals(d.getWhat()) && dataType.getWhere1().equals(d.getWhere1())){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private Interchange getCapabilitiesOfCurrentNode(){
+		// Create POST response: My capabilities.
+		Interchange myRepresentation = new Interchange();
+		myRepresentation.setName(myName);
+		Set<DataType> interchangeCapabilities = new HashSet<>();
+
+		// Create Interchange capabilities from Service Provider capabilities.
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+
+		for(ServiceProvider serviceProvider : serviceProviders){
+			Set<DataType> serviceProviderCapabilities = serviceProvider.getCapabilities();
+			for(DataType dataType : serviceProviderCapabilities){
+				// Remove duplicate capabilities.
+				if(!setContainsObject(dataType, interchangeCapabilities)){
+					interchangeCapabilities.add(dataType);
+				}
 			}
 		}
 
-		return null;
+		myRepresentation.setCapabilities(interchangeCapabilities);
+		return myRepresentation;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/updateCapabilities")
 	public Interchange updateCapabilities(@RequestBody Interchange interchange){
 
-		Interchange mod = interchangeRepository.findByName(interchange.getName());
+		Interchange interchangeToUpdate = interchangeRepository.findByName(interchange.getName());
 		logger.info("interchange name: " + interchange.getName());
 		logger.info("Interchange capabilities: " + interchange.getCapabilities().toString());
 
-		if(mod == null){
-			interchangeRepository.save(interchange);
+		LocalDateTime now = LocalDateTime.now();
+
+		if(interchangeToUpdate == null){
 			logger.info("*** NEW INTERCHANGE **");
+			interchange.setLastSeen(now);
+			// The interchange contacted us directly. Give status 'KNOWN'
+			interchange.setInterchangeStatus(InterchangeStatus.KNOWN);
+			interchangeRepository.save(interchange);
 		}else{
 			logger.info("---- UPDATING INTERCHANGE ----");
-			mod.setCapabilities(interchange.getCapabilities());
-			interchangeRepository.save(mod);
+			interchangeToUpdate.setLastSeen(now);
+			interchangeToUpdate.setCapabilities(interchange.getCapabilities());
+			interchangeRepository.save(interchangeToUpdate);
 		}
 
-		return interchange;
+		// Post response
+		return getCapabilitiesOfCurrentNode();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value="/{ixnName}/subscriptions")
-	public Set<Subscription> getSubscriptions(@PathVariable String ixnName){
-		// Get the subscriptions for a given node.
-		Interchange mod = interchangeRepository.findByName(ixnName);
+	// TODO: Remove
+	@RequestMapping(method = RequestMethod.POST, value = "/createMyRepresentation")
+	public ServiceProvider createMyRepresentation(@RequestBody ServiceProvider serviceProvider){
 
-		if(mod != null){
-			return mod.getSubscriptions();
+		serviceProviderRepository.save(serviceProvider);
+		return serviceProvider;
+	}
+
+	// TODO: Remove
+	@RequestMapping(method = RequestMethod.GET, value = "/getStoredInterchanges")
+	public List<Interchange> getStoredInterchanges(){
+		Iterable<Interchange> storedInterchanges = interchangeRepository.findAll();
+
+		List<Interchange> interchanges = new ArrayList<>();
+
+		for(Interchange i : storedInterchanges){
+			interchanges.add(i);
 		}
 
-		return Collections.emptySet();
+		return interchanges;
 	}
-
-	@RequestMapping(method = RequestMethod.GET, value="/{ixnId}/capabilities")
-	public Set<DataType> getCapabilities(@PathVariable String ixnId){
-		// Get the capabilities for a given node.
-		Interchange mod = interchangeRepository.findByName(ixnId);
-
-		if(mod != null){
-			return mod.getCapabilities();
-		}
-
-		return Collections.emptySet();
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/checkForChangesSince/{timestamp}")
-	public List<Interchange> checkForChanges(@PathVariable Timestamp timestamp){
-		Instant now = Instant.now();
-		Timestamp nowTimestamp = Timestamp.from(now);
-
-		logger.info("Created timestamp from now: " + nowTimestamp.toString());
-		logger.info("Create timestamp from incoming json string: " + timestamp.toString());
-		try {
-
-			return interchangeRepository.findInterchangeOlderThan(timestamp, nowTimestamp);
-		}catch(Exception e){
-			logger.info(e.getClass().getName());
-			logger.info("Timestamp: " + timestamp + ", found no objects older than this time. ");
-		}
-
-		return Collections.emptyList();
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = "/printNeighbours")
-	public List<Interchange> getAllSubscriptions(){
-		// Return a list of all the registered interchanges(neighbours) for debugging purposes.
-
-		Iterable<Interchange> interchanges = interchangeRepository.findAll();
-		List<Interchange> returnList = new ArrayList<>();
-
-		for (Interchange i : interchanges){
-			returnList.add(i);
-		}
-
-		return returnList;
-	}
-
 
 }

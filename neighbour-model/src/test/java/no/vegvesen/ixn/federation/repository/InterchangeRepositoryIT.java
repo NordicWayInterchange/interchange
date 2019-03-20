@@ -40,9 +40,9 @@ public class InterchangeRepositoryIT {
 	@Test
 	public void storedSubscriptionsInAndOutAreSeparated() {
 		Set<Subscription> outbound = new HashSet<>();
-		outbound.add(new Subscription("outbound is true", Subscription.Status.CREATED));
+		outbound.add(new Subscription("outbound is true", Subscription.SubscriptionStatus.CREATED));
 		Set<Subscription> inbound = new HashSet<>();
-		inbound.add(new Subscription("inbound is true", Subscription.Status.CREATED));
+		inbound.add(new Subscription("inbound is true", Subscription.SubscriptionStatus.CREATED));
 		Interchange inOutIxn = new Interchange("in-out-interchange", emptySet(), outbound, inbound);
 		Interchange savedInOut = repository.save(inOutIxn);
 

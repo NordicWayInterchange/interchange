@@ -17,10 +17,10 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = FIND_INTERCHANGE, nativeQuery = true)
 	Interchange findByName(String name);
 
-	@Query(value = "SELECT * FROM INTERCHANGES WHERE last_updated BETWEEN ?1 AND ?2",  nativeQuery = true)
+	@Query(value = "select * from interchanges where last_updated between ?1 and ?2",  nativeQuery = true)
 	List<Interchange> findInterchangeOlderThan(Timestamp then, Timestamp now);
 
-	@Query(value = "select * from interchanges where ixn_id in (select fk_ixn_id from data_types where last_updated between ?1 and ?2)", nativeQuery=true)
+	@Query(value = "select * from interchanges where ixn_id in (select ixn_id_cap from data_types where last_updated between ?1 and ?2)", nativeQuery=true)
 	List<Interchange> findInterchangesWithRecentCapabilityChanges(Timestamp then, Timestamp now);
 
 }

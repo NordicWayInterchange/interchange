@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.model.IxnServiceProvider;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +17,15 @@ public class ServiceProviderRepositoryIT {
 
 	@Test
 	public void storedServiceProviderGetsId() {
-		IxnServiceProvider aaa = new IxnServiceProvider("aaa");
-		IxnServiceProvider saved = repository.save(aaa);
+		ServiceProvider aaa = new ServiceProvider("aaa");
+		ServiceProvider saved = repository.save(aaa);
 		assertThat(saved.getId()).isNotNull();
 	}
 
 	@Test
 	public void newServiceProviderCanBeFound() {
-		IxnServiceProvider bbb = new IxnServiceProvider("bbb");
-		IxnServiceProvider saved = repository.save(bbb);
+		ServiceProvider bbb = new ServiceProvider("bbb");
+		ServiceProvider saved = repository.save(bbb);
 		assertThat(saved.getId()).isNotNull();
 		assertThat(repository.findByName("bbb")).isNotNull();
 		assertThat(repository.findById(saved.getId())).isNotNull();
@@ -33,13 +33,13 @@ public class ServiceProviderRepositoryIT {
 
 	@Test
 	public void secondServiceProviderCreatedCanBeFound() {
-		IxnServiceProvider ccc = new IxnServiceProvider("ccc");
-		IxnServiceProvider saveCcc = repository.save(ccc);
-		IxnServiceProvider ddd = new IxnServiceProvider("ddd");
-		IxnServiceProvider saveDdd = repository.save(ddd);
+		ServiceProvider ccc = new ServiceProvider("ccc");
+		ServiceProvider saveCcc = repository.save(ccc);
+		ServiceProvider ddd = new ServiceProvider("ddd");
+		ServiceProvider saveDdd = repository.save(ddd);
 		assertThat(saveCcc.getId()).isNotNull();
 		assertThat(saveDdd.getId()).isNotNull();
-		IxnServiceProvider foundDdd = repository.findByName("ddd");
+		ServiceProvider foundDdd = repository.findByName("ddd");
 		assertThat(foundDdd).isNotNull();
 		assertThat(foundDdd.getName()).isEqualTo("ddd");
 	}
