@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.model.Subscription;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
