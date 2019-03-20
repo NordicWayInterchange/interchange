@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.broker;
 
 import org.apache.qpid.server.SystemLauncher;
+import org.springframework.util.SocketUtils;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -8,22 +9,18 @@ import java.util.Map;
 
 public class EmbeddedBroker
 {
-	private static final String INITIAL_CONFIGURATION = "qpid-embedded/embed-initial-config-no.json";
+	private final String initialConfigurationFile;
+	private final int port;
 	private SystemLauncher systemLauncher;
 
-	public static void main(String args[]) {
-		EmbeddedBroker broker = new EmbeddedBroker();
-		try {
-			broker.start();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			System.exit(1);
-		}
+	public EmbeddedBroker(String initialConfigurationFile) throws Exception {
+		this.initialConfigurationFile = initialConfigurationFile;
+		port = SocketUtils.findAvailableTcpPort();
+		this.start();
 	}
 
-	public void start() throws Exception {
+	private void start() throws Exception {
+		System.setProperty("qpid.amqp_port", "" + port);
 		systemLauncher = new SystemLauncher();
 		systemLauncher.startup(createSystemConfig());
 	}
@@ -34,10 +31,14 @@ public class EmbeddedBroker
 
 	private Map<String, Object> createSystemConfig() {
 		Map<String, Object> attributes = new HashMap<>();
-		URL initialConfig = EmbeddedBroker.class.getClassLoader().getResource(INITIAL_CONFIGURATION);
+		URL initialConfig = EmbeddedBroker.class.getClassLoader().getResource(initialConfigurationFile);
 		attributes.put("type", "Memory");
 		attributes.put("initialConfigurationLocation", initialConfig.toExternalForm());
 		attributes.put("startupLoggedToSystemOut", true);
 		return attributes;
+	}
+
+	public String getURI() {
+		return "amqp://localhost:" + port;
 	}
 }
