@@ -169,23 +169,16 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 	public void writeToCorrectTopicWithCorrectHeaderWillBeRoutedBecauseOfJmsBinding() throws Exception {
 		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfisk'");
 		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx/fisk.flyndre"));
-		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello fisk");
-		message.getFacade().setUserId("admin");
-		message.setStringProperty("how", "jmsfisk");
-		messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+		sendWithHeaders("jmsfisk", null, messageProducer);
 		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
 		assertThat(receive).isNotNull();
-		assertThat(receive.getText()).isEqualTo("hello fisk");
 	}
 
 	@Test
 	public void writeToCorrectTopicWithNotMatchingHeaderWillNotBeRouted() throws Exception {
 		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfisk'");
 		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx/fisk"));
-		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello fisk");
-		message.getFacade().setUserId("admin");
-		message.setStringProperty("how", "foofisk");
-		messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+		sendWithHeaders("foofisk", null, messageProducer);
 		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
 		assertThat(receive).isNull();
 	}
