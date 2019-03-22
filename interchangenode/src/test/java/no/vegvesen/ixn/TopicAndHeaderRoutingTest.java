@@ -182,4 +182,29 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
 		assertThat(receive).isNull();
 	}
+
+	@Test
+	public void messageSentOverTopicExchangeCanReadRoutingKey() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"));
+		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/my.routing.key"));
+		sendToTopic(messageProducer);
+		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
+		assertThat(receive).isNotNull();
+		Destination jmsDestination = receive.getJMSDestination();
+		assertThat(jmsDestination).isInstanceOf(JmsTopic.class);
+		JmsTopic topic = (JmsTopic) jmsDestination;
+		assertThat(topic.getTopicName()).isEqualTo("topicEx/my.routing.key");
+	}
+
+	@Test
+	public void messageWithHeadersSentOverTopicExchangeCanReadHeaderValue() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'my' and what = 'headers'");
+		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx"));
+		sendWithHeaders("my", "headers", messageProducer);
+		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
+		assertThat(receive).isNotNull();
+		assertThat(receive.getStringProperty("how")).isEqualTo("my");
+		assertThat(receive.getStringProperty("what")).isEqualTo("headers");
+	}
+
 }
