@@ -72,7 +72,7 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void messageOutsideBoundTopicIsNotReceived() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.torsk"));
 		sendToTopic("topicEx/fisk.flyndre");
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNull();
@@ -88,14 +88,14 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void headerFiskTorsk() throws JMSException {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx"), "how = 'fisk' and what = 'torsk'");
 		sendWithHeader("fisk", "torsk");
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
 
 	@Test
 	public void topicFiskTorsk() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.torsk"));
 		sendToTopic("topicEx/fisk.torsk");
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
@@ -103,14 +103,14 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void headerFiskFlyndre() throws JMSException {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskFlyndre"));
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fisk' and what = 'flyndre'");
 		sendWithHeader("fisk", "flyndre");
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
 
 	@Test
 	public void topicFiskFlyndre() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskFlyndre"));
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.flyndre"));
 		sendToTopic("topicEx/fisk.flyndre");
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
@@ -118,14 +118,14 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void headerFisk() throws JMSException {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFisk"));
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fisk'");
 		sendWithHeader("fisk", null);
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
 
 	@Test
 	public void topicFisk() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFisk"));
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk"));
 		sendToTopic("topicEx/fisk");
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
@@ -133,7 +133,7 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void headerAllTypesOfFisk() throws JMSException {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFisk"));
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fisk'");
 		sendWithHeader("fisk", null);
 		assertThat(consumer.receive(1000L)).isNotNull();
 		sendWithHeader("fisk", "torsk");
@@ -144,24 +144,37 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void topicAllTypesOfFisk() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFisk"));
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.#"));
 		sendToTopic("topicEx/fisk");
 		assertThat(consumer.receive(1000L)).isNotNull();
-		sendToTopic("topicEx/fisk/torsk");
+		sendToTopic("topicEx/fisk.torsk");
 		assertThat(consumer.receive(1000L)).isNotNull();
-		sendToTopic("topicEx/fisk/flyndre");
+		sendToTopic("topicEx/fisk.flyndre");
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
 
 	@Test
-	public void wrongTopicWithCorrectHeaderWillBeRoutedBecauseOfAlternateBindingToHeaderExchange() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("qFiskTorsk"));
-		messageProducer = session.createProducer(new JmsTopic("topicEx/fisk"));
-		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello " + messageProducer.getDestination().toString());
+	public void writeToCorrectTopicWithCorrectHeaderWillBeRoutedBecauseOfJmsBinding() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfisk'");
+		messageProducer = session.createProducer(new JmsQueue("topicEx/fisk.flyndre"));
+		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello fisk");
 		message.getFacade().setUserId("admin");
-		message.setStringProperty("how", "fisk");
-		message.setStringProperty("what", "torsk");
+		message.setStringProperty("how", "jmsfisk");
 		messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-		assertThat(consumer.receive(1000L)).isNotNull();
+		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
+		assertThat(receive).isNotNull();
+		assertThat(receive.getText()).isEqualTo("hello fisk");
+	}
+
+	@Test
+	public void writeToCorrectTopicWithNotMatchingHeaderWillNotBeRouted() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfisk'");
+		messageProducer = session.createProducer(new JmsQueue("topicEx/fisk"));
+		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello fisk");
+		message.getFacade().setUserId("admin");
+		message.setStringProperty("how", "foofisk");
+		messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
+		assertThat(receive).isNull();
 	}
 }
