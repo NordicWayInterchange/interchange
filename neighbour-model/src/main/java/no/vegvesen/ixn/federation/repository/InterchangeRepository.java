@@ -12,9 +12,7 @@ import java.util.List;
 @Repository
 public interface InterchangeRepository extends CrudRepository<Interchange, Integer> {
 
-	String FIND_INTERCHANGE = "select * from INTERCHANGES where name=?1";
-
-	@Query(value = FIND_INTERCHANGE, nativeQuery = true)
+	@Query(value = "select * from INTERCHANGES where name=?1", nativeQuery = true)
 	Interchange findByName(String name);
 
 	@Query(value = "select * from interchanges where last_updated between ?1 and ?2",  nativeQuery = true)
@@ -22,5 +20,8 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 
 	@Query(value = "select * from interchanges where ixn_id in (select ixn_id_cap from data_types where last_updated between ?1 and ?2)", nativeQuery=true)
 	List<Interchange> findInterchangesWithRecentCapabilityChanges(Timestamp then, Timestamp now);
+
+	@Query(value = "select * from interchanges where interchange_status='NEW'", nativeQuery = true)
+	List<Interchange> findInterchangesWithStatusNEW();
 
 }

@@ -1,9 +1,13 @@
 package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import net.bytebuddy.asm.Advice;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -11,43 +15,45 @@ import java.util.Set;
 		uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_ixn_name"))
 public class Interchange {
 
+	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ixn_generator")
 	@SequenceGenerator(name="ixn_generator", sequenceName = "ixn_seq", allocationSize=50)
 	@Column(name="ixn_id")
 	private Integer ixn_id;
 
-	private String name; // common name from the certificate
+	private String name = ""; // common name from the certificate
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "ixn_id_cap", foreignKey = @ForeignKey(name="fk_dat_ixn"))
-	private Set<DataType> capabilities;
+	private Set<DataType> capabilities = Collections.emptySet();
 
 	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "ixn_id_sub_out", foreignKey = @ForeignKey(name = "fk_sub_ixn_sub_out"))
-	private Set<Subscription> subscriptions;
-
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "ixn_id_fed_in", foreignKey = @ForeignKey(name="fk_sub_ixn_fed_in"))
-	private Set<Subscription> fedIn;
-
-	@UpdateTimestamp
-	private LocalDateTime lastUpdated;
+	private Set<Subscription> subscriptions = Collections.emptySet();
 
 	@JsonIgnore
-	private LocalDateTime lastSeen;
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "ixn_id_fed_in", foreignKey = @ForeignKey(name="fk_sub_ixn_fed_in"))
+	private Set<Subscription> fedIn = Collections.emptySet();
+
+	@UpdateTimestamp
+	private LocalDateTime lastUpdated = LocalDateTime.now();
+
+	@JsonIgnore
+	private LocalDateTime lastSeen = LocalDateTime.now();
 
 	public enum InterchangeStatus {NEW, KNOWN, FEDERATED}
 
 	@Enumerated(EnumType.STRING)
-	private InterchangeStatus interchangeStatus;
+	private InterchangeStatus interchangeStatus = InterchangeStatus.NEW;
 
 	@JsonIgnore
-	private String domainName;
+	private String domainName = "";
 	@JsonIgnore
-	private String messageChannelPort;
+	private String messageChannelPort = "";
 	@JsonIgnore
-	private String controlChannelPort;
+	private String controlChannelPort = "";
 
 	public Interchange(){}
 
@@ -83,7 +89,7 @@ public class Interchange {
 		this.subscriptions = subscriptions;
 	}
 
-	public Subscription getSubscriptionById(Integer id) throws Exception{
+	public Subscription getSubscriptionById(Integer id) throws SubscriptionNotFoundException{
 
 		for (Subscription subscription : subscriptions){
 			if (subscription.getId().equals(id)){
@@ -91,7 +97,7 @@ public class Interchange {
 			}
 		}
 
-		throw new Exception("Could not find subscription");
+		throw new SubscriptionNotFoundException("Could not find subscription with id " + id + " on interchange " + name);
 	}
 
 	public InterchangeStatus getInterchangeStatus() {
@@ -140,5 +146,26 @@ public class Interchange {
 
 	public void setControlChannelPort(String controlChannelPort) {
 		this.controlChannelPort = controlChannelPort;
+	}
+
+	@Override
+	public String toString() {
+		try {
+			return "Interchange{" +
+					"id='" + ixn_id + "'" +
+					", name='" + name + "'" +
+					", capabilities='" + capabilities.toString() + "'" +
+					", subscriptions='" + subscriptions.toString() + "'" +
+					", fedIn='" + fedIn.toString() + "'" +
+					", lastUpdated='" + lastUpdated.toString() + "'" +
+					", lastSeen='" + lastSeen.toString() + "'" +
+					", status='" + interchangeStatus.toString() + "'" +
+					", domainName='" + domainName + "'" +
+					", messageChannelPort='" + messageChannelPort + "'" +
+					", controlChannelPort='" + controlChannelPort + "'}";
+		}catch(NullPointerException e){
+			System.out.println("Not all interchange properties have been initialized. Cannot print as string.");
+			return "";
+		}
 	}
 }

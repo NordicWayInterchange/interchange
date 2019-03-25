@@ -1,7 +1,8 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRejectedException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotAcceptedException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.model.Interchange.InterchangeStatus;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -34,6 +36,14 @@ public class NeighbourRestController {
 		this.serviceProviderRepository = serviceProviderRepository;
 	}
 
+	private Set<Subscription> setStatusRequestedForAllSubscriptions(Set<Subscription> neighbourSubscriptionRequest){
+		for (Subscription s : neighbourSubscriptionRequest){
+			s.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+		}
+		return neighbourSubscriptionRequest;
+	}
+
+	@ResponseStatus(HttpStatus.ACCEPTED)
 	@RequestMapping(method = RequestMethod.POST, value = "/requestSubscription")
 	public List<String> requestSubscriptions(@RequestBody Interchange interchange){
 
@@ -45,25 +55,29 @@ public class NeighbourRestController {
 		List<String> paths = new ArrayList<>();
 
 		if(updateInterchange == null){
-			logger.info("*** Unknown interchange requesting subscriptions. Rejecting... ***");
-			throw new SubscriptionRejectedException("Capabilities must be exchanged before it is possible to post a subscription request.");
-		}else{
-			// Interchange exists: update it.
-			logger.info("*** Known interchange updated their subscription ***");
+			logger.error("Unknown interchange requesting subscriptions. REJECTED.");
+			throw new InterchangeNotFoundException("Capabilities must be exchanged before it is possible to post a subscription request.");
+		}else if(updateInterchange.getInterchangeStatus() != InterchangeStatus.KNOWN || updateInterchange.getInterchangeStatus() != InterchangeStatus.FEDERATED){
+			logger.error("Interchange with status other than KNOWN or FEDERATED tried to post a subscription request. REJECTED.");
+			throw new SubscriptionNotAcceptedException("Only KNOWN or FEDERATED interchanges may post subscription requests.");
+		}
+		else{
+			logger.info("*** {} interchange {} updated their subscription ***", interchange.getInterchangeStatus().toString(), interchange.getName());
 			LocalDateTime now = LocalDateTime.now();
-			updateInterchange.setSubscriptions(interchange.getSubscriptions());
+			Set<Subscription> requestedSubscriptions = setStatusRequestedForAllSubscriptions(interchange.getSubscriptions());
+			updateInterchange.setSubscriptions(requestedSubscriptions);
 			updateInterchange.setLastSeen(now);
 			updateInterchange = interchangeRepository.save(updateInterchange);
 		}
+
 		// Create paths to return.
 		for (Subscription subscription : updateInterchange.getSubscriptions()) {
-			// Path is interchange name and subscription id.
 			String path = interchange.getName() + "/subscription/" + subscription.getId();
 			paths.add(path);
 		}
-
 		return paths;
 	}
+
 
 	@RequestMapping(method = RequestMethod.GET, value = "{ixnName}/subscription/{subscriptionId}")
 	public Subscription pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId){
@@ -73,9 +87,9 @@ public class NeighbourRestController {
 		if(interchange != null){
 			try {
 				return interchange.getSubscriptionById(subscriptionId);
-			}catch(Exception e){
-				logger.info(e.getMessage());
-				throw new InterchangeNotFoundException("The interchange has no subscription with this id. " + e.getMessage());
+			}catch(SubscriptionNotFoundException subscriptionNotFound){
+				logger.error(subscriptionNotFound.getMessage());
+				throw subscriptionNotFound;
 			}
 		} else{
 			throw new InterchangeNotFoundException("The requested interchange does not exist. ");
@@ -83,8 +97,7 @@ public class NeighbourRestController {
 	}
 
 	// Method used to check for duplicate capabilities
-	private boolean setContainsObject(DataType dataType, Set<DataType> capabilities){
-
+	private boolean setContainsDataType(DataType dataType, Set<DataType> capabilities){
 		for(DataType d : capabilities){
 			if(dataType.getHow().equals(d.getHow()) && dataType.getWhat().equals(d.getWhat()) && dataType.getWhere1().equals(d.getWhere1())){
 				return true;
@@ -93,10 +106,10 @@ public class NeighbourRestController {
 		return false;
 	}
 
-	private Interchange getCapabilitiesOfCurrentNode(){
-		// Create POST response: My capabilities.
-		Interchange myRepresentation = new Interchange();
-		myRepresentation.setName(myName);
+	private Interchange getCapabilitiesOfDiscoveringNode(){
+
+		Interchange discoveringInterchange = new Interchange();
+		discoveringInterchange.setName(myName);
 		Set<DataType> interchangeCapabilities = new HashSet<>();
 
 		// Create Interchange capabilities from Service Provider capabilities.
@@ -106,16 +119,16 @@ public class NeighbourRestController {
 			Set<DataType> serviceProviderCapabilities = serviceProvider.getCapabilities();
 			for(DataType dataType : serviceProviderCapabilities){
 				// Remove duplicate capabilities.
-				if(!setContainsObject(dataType, interchangeCapabilities)){
+				if(!setContainsDataType(dataType, interchangeCapabilities)){
 					interchangeCapabilities.add(dataType);
 				}
 			}
 		}
-
-		myRepresentation.setCapabilities(interchangeCapabilities);
-		return myRepresentation;
+		discoveringInterchange.setCapabilities(interchangeCapabilities);
+		return discoveringInterchange;
 	}
 
+	@ResponseStatus(HttpStatus.CREATED)
 	@RequestMapping(method = RequestMethod.POST, value = "/updateCapabilities")
 	public Interchange updateCapabilities(@RequestBody Interchange interchange){
 
@@ -139,29 +152,7 @@ public class NeighbourRestController {
 		}
 
 		// Post response
-		return getCapabilitiesOfCurrentNode();
-	}
-
-	// TODO: Remove
-	@RequestMapping(method = RequestMethod.POST, value = "/createMyRepresentation")
-	public ServiceProvider createMyRepresentation(@RequestBody ServiceProvider serviceProvider){
-
-		serviceProviderRepository.save(serviceProvider);
-		return serviceProvider;
-	}
-
-	// TODO: Remove
-	@RequestMapping(method = RequestMethod.GET, value = "/getStoredInterchanges")
-	public List<Interchange> getStoredInterchanges(){
-		Iterable<Interchange> storedInterchanges = interchangeRepository.findAll();
-
-		List<Interchange> interchanges = new ArrayList<>();
-
-		for(Interchange i : storedInterchanges){
-			interchanges.add(i);
-		}
-
-		return interchanges;
+		return getCapabilitiesOfDiscoveringNode();
 	}
 
 }

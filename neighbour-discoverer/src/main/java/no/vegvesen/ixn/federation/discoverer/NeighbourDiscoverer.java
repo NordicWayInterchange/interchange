@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 /***
  * Functionality:
@@ -46,6 +47,12 @@ public class NeighbourDiscoverer {
 	private Timestamp from;
 	private String myName;
 
+	@Value("${path.capabilities-exchange}")
+	private String capabilityExchangePath;
+
+	@Value("${path.subscription-request}")
+	private String subscriptionRequestPath;
+
 	@Autowired
 	NeighbourDiscoverer(DNSFacadeInterface dnsFacade, InterchangeRepository interchangeRepository, ServiceProviderRepository serviceProviderRepository, RestTemplate restTemplate, @Value("${interchange.node-provider.name}") String myName) {
 		this.dnsFacade = dnsFacade;
@@ -58,7 +65,7 @@ public class NeighbourDiscoverer {
 
 	// Methods used to check if DataType or Subscription is already
 	// in a set of capabilities or subscriptions (preventing duplicates).
-	private boolean setContainsDataType(DataType dataType, Set<DataType> capabilities) {
+	boolean setContainsDataType(DataType dataType, Set<DataType> capabilities) {
 		for (DataType d : capabilities) {
 			if (dataType.getHow().equals(d.getHow()) && dataType.getWhat().equals(d.getWhat()) && dataType.getWhere1().equals(d.getWhere1())) {
 				return true;
@@ -67,7 +74,7 @@ public class NeighbourDiscoverer {
 		return false;
 	}
 
-	private boolean setContainsSubscription(Subscription subscription, Set<Subscription> subscriptions) {
+	boolean setContainsSubscription(Subscription subscription, Set<Subscription> subscriptions) {
 		for (Subscription s : subscriptions) {
 			if (subscription.getSelector().equals(s.getSelector())) {
 				return true;
@@ -76,50 +83,61 @@ public class NeighbourDiscoverer {
 		return false;
 	}
 
-	Interchange getRepresentationOfCurrentNode() {
-		Interchange myRepresentation = new Interchange();
-
-		myRepresentation.setName(myName);
-		Set<DataType> interchangeCapabilities = new HashSet<>();
-		Set<Subscription> interchangeSubscriptions = new HashSet<>();
-
+	Set<DataType> getLocalServiceProviderCapabilities() {
+		Set<DataType> capabilities = new HashSet<>();
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-		for (ServiceProvider serviceProvider : serviceProviders) {
 
-			// Get capabilities
+		for (ServiceProvider serviceProvider : serviceProviders) {
 			Set<DataType> serviceProviderCapabilities = serviceProvider.getCapabilities();
+
 			for (DataType dataType : serviceProviderCapabilities) {
 				// Remove duplicate capabilities.
-				if (!setContainsDataType(dataType, interchangeCapabilities)) {
-					interchangeCapabilities.add(dataType);
+				if (!setContainsDataType(dataType, capabilities)) { // check if dataType already in capabilities list
+					capabilities.add(dataType);
 				}
 			}
-			myRepresentation.setCapabilities(interchangeCapabilities);
+		}
+		return capabilities;
+	}
 
-			// Get subscriptions
+	Set<Subscription> getLocalServiceProviderSubscriptions() {
+		Set<Subscription> subscriptions = new HashSet<>();
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+
+		for (ServiceProvider serviceProvider : serviceProviders) {
 			Set<Subscription> serviceProviderSubscriptions = serviceProvider.getSubscriptions();
 			for (Subscription subscription : serviceProviderSubscriptions) {
 				// Remove duplicate subscriptions
-				if (!setContainsSubscription(subscription, interchangeSubscriptions)) {
-					interchangeSubscriptions.add(subscription);
+				if (!setContainsSubscription(subscription, subscriptions)) {
+					subscriptions.add(subscription);
 				}
 			}
-			myRepresentation.setSubscriptions(interchangeSubscriptions);
 		}
+		return subscriptions;
+	}
+
+
+	// TODO: split into two methods: one for getting subscriptions and one for getting capabilities.
+	Interchange getRepresentationOfDiscoveringInterchange() {
+		Interchange myRepresentation = new Interchange();
+		myRepresentation.setName(myName);
+		myRepresentation.setSubscriptions(getLocalServiceProviderSubscriptions());
+		myRepresentation.setCapabilities(getLocalServiceProviderCapabilities());
 		return myRepresentation;
 	}
 
-	private Set<Subscription> calculateSubscription(Interchange neighbourInterchange) {
+	Set<Subscription> calculateCustomSubscriptionForNeighbour(Interchange neighbourInterchange) {
 		logger.info("Calculating custom subscription for node: " + neighbourInterchange.getName());
-		Set<Subscription> newFedInSubscriptions = new HashSet<>();
-		Interchange currentNode = getRepresentationOfCurrentNode();
 
-		try {
-			// Calculate new FedIn subscription for a given neighbour
+		Set<Subscription> calculatedFedInSubscriptions = new HashSet<>();
+		Interchange discoveringInterchange = getRepresentationOfDiscoveringInterchange();
+
+		try { // capability matcher trows Parse Exception or Illegal Argument Exception if selector is always true
+
 			for (DataType dataType : neighbourInterchange.getCapabilities()) {
 				logger.info("Capability of node " + neighbourInterchange.getName() + " : " + dataType.getWhere1() + ", " + dataType.getWhat() + ", " + dataType.getHow());
 
-				for (Subscription subscription : currentNode.getSubscriptions()) {
+				for (Subscription subscription : discoveringInterchange.getSubscriptions()) {
 					// If the subscription selector string matches the data type,
 					// add the subscription to the new set of Subscriptions.
 					if (CapabilityMatcher.matches(dataType, subscription.getSelector())) {
@@ -128,20 +146,20 @@ public class NeighbourDiscoverer {
 								+ dataType.getWhat() + ", " + dataType.getWhere1()
 								+ ") that matches subscription (" + subscription.getSelector() + ")");
 
-						// Set status REQUESTED for all the new subscriptions.
 						subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
-						newFedInSubscriptions.add(subscription);
+						calculatedFedInSubscriptions.add(subscription);
 					}
 				}
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			logger.error("Could not calculate custom subscription for neighbouring node \n " + neighbourInterchange.getName(), e);
+			return Collections.emptySet();
 		}
-		return newFedInSubscriptions;
+		return calculatedFedInSubscriptions;
 	}
 
 	public String getUrl(Interchange neighbour) {
-		return "http://" + neighbour.getName() + neighbour.getDomainName()+":" + neighbour.getControlChannelPort();
+		return "http://" + neighbour.getName() + neighbour.getDomainName() + ":" + neighbour.getControlChannelPort();
 	}
 
 	// FIXME: This method does nothing at the moment.
@@ -149,165 +167,178 @@ public class NeighbourDiscoverer {
 		// threaded polling of each subscription separately,
 		// at least a separate thread from the neighbour discoverer client?
 		logger.info("Polling subscriptions....");
-
 	}
-
 
 	// FIXME: Polling is doing nothing at the moment.
-	public void postSubscription(Interchange postingInterchange, Interchange neighbourDestination) {
-		String url = getUrl(neighbourDestination) + "/requestSubscription";
+	public void postSubscriptionRequestToNeighbour(Interchange postingInterchange, Interchange neighbourDestination) {
+		String url = getUrl(neighbourDestination) + subscriptionRequestPath;
 		logger.info("Posting subscription request to URL: " + url);
+		logger.info("Posting subscription request to " + neighbourDestination.getName());
+		logger.info("Representation of discovering interchange: \n" + postingInterchange.toString());
 
-		try {
-			// convert posting Interchange to JSON
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String postingJson = ow.writeValueAsString(postingInterchange);
-			logger.info("Posting subscription request to " + neighbourDestination.getName());
-			logger.info("Posting jsonString: " + postingJson);
 
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<String> entity = new HttpEntity<>(postingJson, headers);
+		// Post JSON to neighbour and receive list of paths
+		// WORKING:
+		//HttpHeaders headers = new HttpHeaders();
+		//headers.setContentType(MediaType.APPLICATION_JSON);
+		//HttpEntity<String> entity = new HttpEntity<>(postingJson, headers);
+		//ResponseEntity<List<String>> response = restTemplate.exchange(url, HttpMethod.POST, entity, new ParameterizedTypeReference<List<String>>() {});
+		//List<String> paths = response.getBody();
+		//HttpStatus statusCode = response.getStatusCode();
 
-			ResponseEntity<List<String>> response = restTemplate.exchange(url, HttpMethod.POST, entity, new ParameterizedTypeReference<List<String>>() {});
-			List<String> paths = response.getBody();
+		// Possible substitute that does not require ObjectWriter
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<Interchange> entity = new HttpEntity<>(postingInterchange, headers);
+		ResponseEntity<List<String>> response = restTemplate.exchange(url, HttpMethod.POST, entity, new ParameterizedTypeReference<List<String>>() {
+		});
+		List<String> paths = response.getBody();
+		HttpStatus statusCode = response.getStatusCode();
 
-			// Response body is list of strings.
-			HttpStatus statusCode = response.getStatusCode();
 
-			if (statusCode == HttpStatus.OK && paths.size() != 0) {
-				// We have paths to poll.
-				logger.info("Response code for POST to {} is {}", url, response.getStatusCodeValue());
+		if (statusCode == HttpStatus.ACCEPTED && paths.size() != 0) {
+			logger.info("Response code for POST to {} is {}", url, response.getStatusCodeValue());
 
-				logger.info("Paths: ");
-				for(String s : paths){
-					logger.info(s);
-				}
 
-				// TODO: Poll paths
+			// TODO: Poll paths
 
-			} else {
-				// Status code is not 200 OK OR
-				// we don't have any paths to poll
-				// How do we decide the status of our neighbour if we cannot post our subscriptions?
-				logger.info("Response code for POST to {} with payload {} is {}", url, postingInterchange, response.getStatusCodeValue());
-			}
-		} catch (Exception e) {
-			logger.error("Error in sending JSON. ", e);
+		} else if (statusCode == HttpStatus.FORBIDDEN || statusCode == HttpStatus.NOT_ACCEPTABLE) {
+			// Something went wrong in the syncronization of server and client
+			// Set status of neighbour to NEW to trigger a new post to this neighbour.
+			neighbourDestination.setInterchangeStatus(Interchange.InterchangeStatus.NEW);
+		} else {
+			// TODO: Unexpected post response code from server. Something wrong on server side.
+			// TODO: implement graceful backoff.
+			logger.info("Response code for POST to {} with payload {} is {}", url, postingInterchange, response.getStatusCodeValue());
 		}
+
 	}
 
+	// TODO: Både sjekke om lik null eller om size = 0. Hvordan skal jeg gjøre dette på best mulig måte?
 	@Scheduled(fixedRateString = "${dns.lookup.interval}", initialDelayString = "${dns.lookup.initial-delay}")
-	public void checkForChangesInCapabilities() {
+	public void checkForRecentChangesInCapabilitiesOfNeighbours() {
 
 		Timestamp nowTimestamp = Timestamp.from(Instant.now());
-		Interchange currentNode = getRepresentationOfCurrentNode();
-
+		Interchange myRepresentation = getRepresentationOfDiscoveringInterchange();
 		logger.info("Querying for all interchanges with capabilities edited between " + from.toString() + " and " + nowTimestamp.toString());
 
-		try { // try-catch because of ObjectWriter
-			List<Interchange> neighbourInterchanges = interchangeRepository.findInterchangesWithRecentCapabilityChanges(from, nowTimestamp);
+		List<Interchange> updatedNeighbours = interchangeRepository.findInterchangesWithRecentCapabilityChanges(from, nowTimestamp);
 
-			if (neighbourInterchanges != null) { // For each new interchange, calculate our new subscription.
-				for (Interchange neighbour : neighbourInterchanges) {
-
-					logger.debug("Neighbour interchange from database. ** BEFORE**");
-					ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-					String beforeJson = ow.writeValueAsString(neighbour);
-					logger.debug(beforeJson);
-
-					// Calculate custom subscription for this neighbour
-					Set<Subscription> neighbourFedInSubscriptions = calculateSubscription(neighbour);
-					neighbour.setFedIn(neighbourFedInSubscriptions);
-					interchangeRepository.save(neighbour);
-
-					// post to our neighbour if the set of subscriptions is not empty
-					if (neighbourFedInSubscriptions.size() != 0) {
-						currentNode.setSubscriptions(neighbourFedInSubscriptions);
-						postSubscription(currentNode, neighbour);
-					}
-
-					String afterJson = ow.writeValueAsString(neighbour);
-					logger.debug(afterJson);
-				}
-			} else {
-				logger.info("Found no interchanges last between " + from.toString() + " and " + nowTimestamp.toString());
-			}
-		} catch (Exception e) {
-			logger.info("Error creating json object: ", e);
+		if (updatedNeighbours == null || updatedNeighbours.size() == 0) {
+			logger.info("Found no interchanges with changes in capabilities between " + from.toString() + " and " + nowTimestamp.toString());
+			return;
 		}
+		// For each updated interchange, calculate the updated subscription request.
+		for (Interchange neighbour : updatedNeighbours) {
+
+			logger.debug("Neighbour {} has updated capabilities. Calculating new subscription request...", neighbour.getName());
+			logger.info("Previous subscription to neighbour: \n" + neighbour.getFedIn().toString());
+
+			Set<Subscription> calculatedSubscriptionRequest = calculateCustomSubscriptionForNeighbour(neighbour);
+
+			// If subscription is not empty, post to neighbour.
+			// If subscription is empty:
+			// If we have a previous subscription to our neighbour, post empty subscription.
+			// If we don't have a previous subscription to our neighbour, and subscription is empty, post nothing.
+			if (calculatedSubscriptionRequest.size() != 0 || (neighbour.getFedIn() != null || neighbour.getFedIn().size() != 0)) {
+				postSubscriptionRequestToNeighbour(myRepresentation, neighbour);
+			}
+
+			// Update representation of neighbour
+			neighbour.setFedIn(calculatedSubscriptionRequest);
+			interchangeRepository.save(neighbour);
+			logger.debug("Updated subscription to neighbour: \n", neighbour.getFedIn().toString());
+		}
+
 		// update 'from' for next iteration.
 		from = nowTimestamp;
 	}
 
-	private Interchange postCapabilities(Interchange postingInterchange, Interchange destinationInterchange) {
+	private Interchange postCapabilities(Interchange discoveringInterchange, Interchange neighbour) {
 
-		String url = getUrl(destinationInterchange) + "/updateCapabilities";
+		String url = getUrl(neighbour) + capabilityExchangePath;
 		logger.info("Posting capabilities to URL: " + url);
+		logger.info("Discovering node representation: \n" + discoveringInterchange.toString());
 
+		ResponseEntity<Interchange> response = restTemplate.postForEntity(url, discoveringInterchange, Interchange.class);
+		Interchange neighbourResponse = response.getBody();
+		HttpStatus responseStatusCode = response.getStatusCode();
+
+		logger.info("Response status code: " + response.getStatusCodeValue());
+
+		Interchange updateNeighbour;
 		try {
-			// convert posting Interchange to JSON
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String postingJson = ow.writeValueAsString(postingInterchange);
-			logger.info("Posting jsonString: " + postingJson);
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<String> entity = new HttpEntity<>(postingJson, headers);
-			ResponseEntity<Interchange> response = restTemplate.postForEntity(url, entity, Interchange.class);
-			Interchange neighbour = response.getBody();
-			HttpStatus statusCode = response.getStatusCode();
-
-			logger.info("Status code: " + response.getStatusCodeValue());
-
-			if (statusCode == HttpStatus.OK && neighbour != null) {
-				// Receive capability object from neighbour.
-
-				try {
-					logger.info("Received capability response");
-					logger.info(ow.writeValueAsString(neighbour));
-
-					// Get the neighbour from the database. Change status from new to known.
-					logger.info("neighbour name: " + neighbour.getName());
-
-					Interchange updateNeighbour = interchangeRepository.findByName(neighbour.getName());
-					LocalDateTime now = LocalDateTime.now();
-					if (updateNeighbour != null) {
-						updateNeighbour.setInterchangeStatus(Interchange.InterchangeStatus.KNOWN);
-						updateNeighbour.setLastSeen(now);
-						updateNeighbour.setCapabilities(neighbour.getCapabilities());
-						logger.info("Saving neighbour in database...");
-						interchangeRepository.save(updateNeighbour);
-
-						return interchangeRepository.findByName(updateNeighbour.getName());
-
-					}else{
-						logger.info("Could not find neighbour in database! ");
-						return null;
-					}
-				} catch (Exception e) {
-					logger.error("Could not write post response as JSON string: ", e);
-					return null;
-				}
-
-
-			} else {
-				// Status code is not 200 OK.
-				// TODO: How to handle this? What do we do about the last seen when we get server error or something else?
-				// TODO: What if the Post response is a null interchange?
-				logger.info("Response code for POST to {} with payload {} is {}", url, postingJson, response.getStatusCodeValue());
-				return null;
-			}
-
-		} catch (Exception e) {
-			logger.error("Error in sending JSON. ", e);
+			updateNeighbour = interchangeRepository.findByName(neighbourResponse.getName());
+		} catch (NullPointerException e) {
+			logger.info("Could not find neighbour in database. ");
 			return null;
+		}
+
+		// TODO: Only one response code.
+		if (responseStatusCode == HttpStatus.CREATED || responseStatusCode == HttpStatus.OK) {
+			logger.info("Response from neighbour: \n" + neighbourResponse.toString());
+
+			LocalDateTime now = LocalDateTime.now();
+
+			updateNeighbour.setInterchangeStatus(Interchange.InterchangeStatus.KNOWN);
+			updateNeighbour.setLastSeen(now);
+			updateNeighbour.setCapabilities(neighbourResponse.getCapabilities());
+			logger.info("Saving updated neighbour...");
+			interchangeRepository.save(updateNeighbour);
+			// return updated interchange object.
+			return interchangeRepository.findByName(updateNeighbour.getName());
+		} else {
+			// Capabilitites post only has 201 as possible response code.
+			// any other code means something went wrong on the server side.
+			// TODO: Implement graceful backoff
+			return null;
+		}
+	}
+
+	@Scheduled(fixedRateString = "${neighbour.capabilities.update.interval}", initialDelayString = "${neighbour.capabilities.initial-delay}")
+	public void postCapabilitiesToNewInterchanges() {
+
+		List<Interchange> newInterchanges = interchangeRepository.findInterchangesWithStatusNEW();
+
+		for (Interchange neighbour : newInterchanges) {
+			logger.info("Found interchange with status NEW: " + neighbour.getName());
+
+			Interchange discoveringInterchange = new Interchange();
+			discoveringInterchange.setName(myName);
+			discoveringInterchange.setCapabilities(getLocalServiceProviderCapabilities());
+
+			// Post capabilities to the new neighbour. Receive capabilities from neighbour.
+			Interchange postResponseInterchange = postCapabilities(discoveringInterchange, neighbour);
+
+			if (postResponseInterchange != null) {
+				// calculate and post subscription request.
+
+				logger.info("Successfully posted capabilities. Calculating and posting subscription request...");
+				Set<Subscription> neighbourFedInSubscriptions = calculateCustomSubscriptionForNeighbour(postResponseInterchange);
+				logger.info("Calculated subscription: \n" + neighbourFedInSubscriptions.toString());
+
+				postResponseInterchange.setFedIn(neighbourFedInSubscriptions);
+				interchangeRepository.save(postResponseInterchange);
+
+				// post to our neighbour if the set of subscriptions is not empty
+				if (neighbourFedInSubscriptions.size() != 0) {
+					// Create custom representation for neighbouring node
+
+					discoveringInterchange.setSubscriptions(neighbourFedInSubscriptions);
+
+					logger.info("Posting subscription request to neighbour. ");
+					postSubscriptionRequestToNeighbour(discoveringInterchange, postResponseInterchange);
+				} else {
+					logger.info("The calculated subscriptions was empty.");
+				}
+			} else {
+				logger.info("Unsuccessful post of capabilities");
+			}
 		}
 	}
 
 
 	@Scheduled(fixedRateString = "${neighbour.capabilities.update.interval}", initialDelayString = "${neighbour.capabilities.initial-delay}")
-	// every 10 seconds, check DNS for new interchanges. 3 second delay.
 	public void checkForNewInterchanges() {
 		// Get all neighbours found in the DNS lookup.
 		List<Interchange> neighbours = dnsFacade.getNeighbours();
@@ -321,48 +352,6 @@ public class NeighbourDiscoverer {
 				neighbourInterchange.setInterchangeStatus(Interchange.InterchangeStatus.NEW);
 				interchangeRepository.save(neighbourInterchange);
 				logger.info("New neighbour saved in database");
-
-				try {
-					// Get representation of current node. Has empty subscription
-					Interchange myRepresentation = getRepresentationOfCurrentNode();
-					// Setting the subscriptions as empty set for capability exchange
-					myRepresentation.setSubscriptions(Collections.emptySet());
-					// Post capabilities to the new neighbour.
-					Interchange postResponseInterchange = postCapabilities(myRepresentation, neighbourInterchange);
-
-					if(postResponseInterchange != null){
-						// calculate and post subscription request.
-
-						logger.info("Successfully posted capabilities. Calculating and posting subscription request...");
-						Set<Subscription> neighbourFedInSubscriptions = calculateSubscription(postResponseInterchange);
-
-						ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-						String subscriptionJson = ow.writeValueAsString(neighbourFedInSubscriptions);
-						logger.info("Calculated subscription: " + subscriptionJson);
-
-						postResponseInterchange.setFedIn(neighbourFedInSubscriptions);
-						interchangeRepository.save(postResponseInterchange);
-
-						// post to our neighbour if the set of subscriptions is not empty
-						if (neighbourFedInSubscriptions.size() != 0) {
-							// Create custom representation for neighbouring node
-
-							myRepresentation.setSubscriptions(neighbourFedInSubscriptions);
-
-							logger.info("Posting subscription request to neighbour. ");
-							postSubscription(myRepresentation, postResponseInterchange);
-						}
-
-					} else{
-						logger.info("Unsuccessful post of capabilities");
-					}
-
-				} catch (Exception e) {
-					logger.info("Error creating capability json object. " + e.getClass().getName());
-				}
-
-			} else {
-				logger.info("Interchange " + neighbourInterchange.getName() + " was either in the database or has the same name as us.");
 			}
 		}
 	}

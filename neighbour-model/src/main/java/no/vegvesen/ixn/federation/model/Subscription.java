@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -12,8 +13,8 @@ public class Subscription {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
-	@SequenceGenerator(name="sub_generator", sequenceName = "sub_seq", allocationSize=50)
-	@Column(name="sub_id")
+	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq", allocationSize = 50)
+	@Column(name = "sub_id")
 	private Integer sub_id;
 
 	public enum SubscriptionStatus {REQUESTED, CREATED, REJECTED}
@@ -27,7 +28,8 @@ public class Subscription {
 
 	private String selector;
 
-	public Subscription(){}
+	public Subscription() {
+	}
 
 	public Subscription(String selector, SubscriptionStatus subscriptionStatus) {
 		this.selector = selector;
@@ -55,5 +57,12 @@ public class Subscription {
 		return sub_id;
 	}
 
+	@Override
+	public String toString() {
 
+		return "Subscription{" +
+				"selector='" + selector + "'" +
+				", subscriptionStatus='" + subscriptionStatus.toString() + "'}";
+
+	}
 }

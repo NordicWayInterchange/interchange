@@ -2,26 +2,40 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.model.Interchange;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import java.util.ArrayList;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
+import static org.mockito.Mockito.*;
+import java.util.Arrays;
 import java.util.List;
 
 
-/**
- * Depends on DNS Java Record
- */
-
+@RunWith(MockitoJUnitRunner.class)
 public class DNSFacadeTest {
 
-	private DNSFacade dnsFacade = new DNSFacade(".itsinterchange.eu", "8080", "5672");
-	private List<Interchange> neighbours = new ArrayList<>();
+	private DNSFacade dnsFacade = mock(DNSFacade.class);
+
+	@Before
+	public void before(){
+		Interchange bouvet = new Interchange();
+		bouvet.setName("bouvet");
+
+		Interchange ericsson = new Interchange();
+		ericsson.setName("ericsson");
+
+		List<Interchange> mockInterchanges = Arrays.asList(bouvet, ericsson);
+
+		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(bouvet, ericsson));
+	}
+
 
 	@Test
 	public void testNumberOfNeighbours(){
 
-		int expectedNumberOfRecords = 2;
+		int expectedNumberOfNeighbours = 2;
 		List<Interchange> interchanges = dnsFacade.getNeighbours();
-		Assert.assertEquals(expectedNumberOfRecords, interchanges.size());
+		Assert.assertEquals(expectedNumberOfNeighbours, interchanges.size());
 	}
 
 	@Test
@@ -33,10 +47,4 @@ public class DNSFacadeTest {
 		}
 	}
 
-	@Test
-	public void checkDomainIsRight(){
-		String expectedDomain = ".itsinterchange.eu";
-
-		Assert.assertEquals(expectedDomain, dnsFacade.getDomain());
-	}
 }

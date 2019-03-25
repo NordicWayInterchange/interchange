@@ -55,4 +55,12 @@ public class DataType {
 	public void setWhat(String what) {
 		this.what = what;
 	}
+
+	@Override
+	public String toString(){
+		return "DataType{" +
+				"how='" + how + "'" +
+				", what='" + what + "'" +
+				", where1='" + where1 + "'}";
+	}
 }

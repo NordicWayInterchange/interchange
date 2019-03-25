@@ -77,8 +77,4 @@ public class DNSFacade implements DNSFacadeInterface {
 		return interchanges;
 	}
 
-	public String getDomain(){
-		return domain;
-	}
-
 }

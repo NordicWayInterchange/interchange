@@ -17,7 +17,10 @@ public class NeighbourDiscovererIT {
 
 	@Test
 	public void verifyCorrectRepresentationInRemoteDatabase(){
+
 		neighbourDiscoverer.checkForNewInterchanges();
+
+		neighbourDiscoverer.postCapabilitiesToNewInterchanges();
 	}
 
 }

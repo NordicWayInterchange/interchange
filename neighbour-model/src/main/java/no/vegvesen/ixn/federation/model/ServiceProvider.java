@@ -47,6 +47,10 @@ public class ServiceProvider {
 		return id;
 	}
 
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
 	public Set<DataType> getCapabilities() {
 		return capabilities;
 	}
