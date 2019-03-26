@@ -18,8 +18,13 @@ public class NeighbourFetcher {
         this.repository = repository;
     }
 
+    //TODO this is not yet enabled
+    //@Scheduled(fixedRate = 15000, initialDelay = 3000)  // check every 15 seconds. 5 second delay from start.
     public List<Interchange> listNeighbourCandidates() {
         List<Interchange> interchanges = repository.findFederatedInterchanges();
+        //for (Interchange interchange : interchanges) {
+        //    System.out.println(String.format("%s:%s",interchange.getName(),interchange.getControlChannelPort()));
+        //}
         return interchanges;
 
     }
