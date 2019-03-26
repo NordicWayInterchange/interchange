@@ -23,4 +23,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges where ixn_id in (select ixn_id_cap from data_types where last_updated between ?1 and ?2)", nativeQuery=true)
 	List<Interchange> findInterchangesWithRecentCapabilityChanges(Timestamp then, Timestamp now);
 
+	@Query(value = "select * from interchanges where interchange_status = 'FEDERATED'", nativeQuery = true)
+	List<Interchange> findFederatedInterchanges();
+
 }
