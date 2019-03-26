@@ -1,0 +1,8 @@
+How I've built and run the databaase during development
+
+docker build -t interchanges_test .
+docker run -it -e POSTGRES_USER=federation -e POSTGRES_PASSWORD=federation -e POSTGRES_DB=federation -p 7070:5432 --name interchange_container interchanges_test
+
+docker exec -it interchange_container bash
+psql -U federation -d federation
+insert into interchanges (ixn_id, interchange_status, name, domain_name, control_channel_port) values (0,'FEDERATED','myIxn','kyrre.priv.no','4443');

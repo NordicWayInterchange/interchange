@@ -35,6 +35,7 @@
         <module>onboard-server</module>
         <module>routing-configurer</module>
         <module>federation-it</module>
+        <module>message-forwarder</module>
         <module>interchangenode</module>
         <module>debugclient</module>
     </modules>
