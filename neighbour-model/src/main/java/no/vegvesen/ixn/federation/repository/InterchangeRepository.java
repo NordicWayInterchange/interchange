@@ -30,5 +30,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges where interchange_status='FAILED_SUBSCRIPTION_REQUEST'", nativeQuery = true)
 	List<Interchange> findInterchangesWithStatusFAILED_SUBSCRIPTION_REQUEST();
 
+	@Query(value = "select * from interchanges where interchange_status = 'FEDERATED'", nativeQuery = true)
+	List<Interchange> findFederatedInterchanges();
 
 }
