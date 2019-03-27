@@ -9,6 +9,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class MessageForwarderTest {
 
+    //TODO do this with mocks? Try to minimize the code here as much as possible
 
     @Test
     public void foo() {

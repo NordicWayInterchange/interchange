@@ -1,4 +1,14 @@
-How I've built and run the databaase during development
+This branch is made on top of the neighbour_client_server branch
+Rebase your work on top of this before pushing.
+this can be done using
+
+git fetch --all
+If you have uncommitted work: git stash
+git rebase neighbour_client_server
+And, if you used stash: git stash pop
+now push your changes.
+
+How I've built and run the database during development
 
 docker build -t interchanges_test .
 docker run -it -e POSTGRES_USER=federation -e POSTGRES_PASSWORD=federation -e POSTGRES_DB=federation -p 7070:5432 --name interchange_container interchanges_test

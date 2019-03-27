@@ -37,7 +37,7 @@ public class Interchange {
 	@JsonIgnore
 	private LocalDateTime lastSeen;
 
-	public enum InterchangeStatus {NEW, KNOWN, FEDERATED}
+	public enum InterchangeStatus {NEW, KNOWN, READY_TO_FEDERATE, FEDERATED}
 
 	@Enumerated(EnumType.STRING)
 	private InterchangeStatus interchangeStatus;
