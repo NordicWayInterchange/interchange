@@ -52,7 +52,6 @@ public class Interchange {
 	public enum InterchangeStatus {NEW, KNOWN, FEDERATED, UNREACHABLE,
 		FAILED_CAPABILITY_EXCHANGE, FAILED_SUBSCRIPTION_REQUEST}
 
-
 	@Enumerated(EnumType.STRING)
 	private InterchangeStatus interchangeStatus;
 
