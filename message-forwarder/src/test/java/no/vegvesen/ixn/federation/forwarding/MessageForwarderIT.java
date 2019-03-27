@@ -15,14 +15,10 @@ import java.util.List;
 public class MessageForwarderIT {
 
     @Autowired
-    NeighbourFetcher fetcher;
-
+    MessageForwarder forwarder;
     @Test
     public void testFoo() {
-        List<Interchange> interchanges = fetcher.listNeighbourCandidates();
-        for (Interchange i : interchanges) {
-            System.out.println(i.getName() + " " + i.getControlChannelPort() + " " + i.getDomainName() + " " + i.getSubscriptions());
-        }
+        forwarder.setupConnectionsToNewNeighbours();
     }
 
 }

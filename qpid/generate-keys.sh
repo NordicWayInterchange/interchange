@@ -5,7 +5,7 @@
 pushd $(dirname $0)
 SERVER_CN=${SERVER_CN:-localhost}
 USER_CNS=${USER_CNS:-king_gustaf king_harald}
-KEYS_DIR=../tmp/keys
+KEYS_DIR=tmp/keys
 
 serverCert() {
     echo "generating server side certificate with common name '${SERVER_CN}'"
@@ -15,6 +15,8 @@ serverCert() {
     rm -f server.csr server.srl
     keytool -import -trustcacerts -file server.crt -keystore truststore.jks \
         -storepass password -noprompt
+	openssl pkcs12 -export -out server.p12 -inkey server.key -in server.crt \
+	    -chain -CAfile server.crt -password pass:password -name server
 }
 
 userCert() {
