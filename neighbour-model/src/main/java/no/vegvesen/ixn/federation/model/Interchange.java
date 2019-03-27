@@ -49,7 +49,7 @@ public class Interchange {
 	@JsonIgnore
 	private int backoffAttempts = 0;
 
-	public enum InterchangeStatus {NEW, KNOWN, FEDERATED, UNREACHABLE,
+	public enum InterchangeStatus {NEW, KNOWN, READY_TO_FEDERATE, FEDERATED, UNREACHABLE,
 		FAILED_CAPABILITY_EXCHANGE, FAILED_SUBSCRIPTION_REQUEST}
 
 	@Enumerated(EnumType.STRING)
