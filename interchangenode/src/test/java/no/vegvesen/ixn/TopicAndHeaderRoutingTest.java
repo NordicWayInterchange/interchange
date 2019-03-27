@@ -138,8 +138,10 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void headerAllTypesOfFisk() throws JMSException {
+		//create producer and consumer with selector filter
 		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fisk'");
 		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx"));
+		//send and receive messages
 		sendWithHeaders("fisk", null, messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
 		messageProducer = session.createProducer(new JmsQueue("topicEx"));
@@ -152,8 +154,10 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void topicAllTypesOfFisk() throws Exception {
+		//create consumer with wildcard binding
 		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.#"));
 		MessageProducer messageProducer;
+		//create producers and sed/receive messages
 		messageProducer = session.createProducer(new JmsTopic("topicEx/fisk"));
 		sendToTopic(messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
@@ -167,27 +171,36 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 
 	@Test
 	public void writeToCorrectTopicWithCorrectHeaderWillBeRoutedBecauseOfJmsBinding() throws Exception {
+		//create producer and consumer with selector filter
 		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfisk'");
 		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx/fisk.flyndre"));
+		//send message with header
 		sendWithHeaders("jmsfisk", null, messageProducer);
+		//receive message
 		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
 		assertThat(receive).isNotNull();
 	}
 
 	@Test
 	public void writeToCorrectTopicWithNotMatchingHeaderWillNotBeRouted() throws Exception {
+		//create producer and consumer with selector filter
 		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfisk'");
 		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx/fisk"));
+		//send message with header
 		sendWithHeaders("foofisk", null, messageProducer);
+		//try to receive message
 		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
 		assertThat(receive).isNull();
 	}
 
 	@Test
 	public void messageSentOverTopicExchangeCanReadRoutingKey() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"));
+		//create producer and consumer with binding key
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx/my.*.key"));
 		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/my.routing.key"));
+		//send message
 		sendToTopic(messageProducer);
+		//receive message
 		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
 		assertThat(receive).isNotNull();
 		Destination jmsDestination = receive.getJMSDestination();
@@ -197,10 +210,34 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 	}
 
 	@Test
+	public void messageSentOverTopicExchangeWithDynamicRoutingKey() throws Exception {
+		//Create message producer and consumer with binding key
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/it.a22.*.*.u0j2.#"));
+		MessageProducer messageProducer = session.createProducer(null);
+
+		//create message and set routing key
+		JmsTextMessage message = (JmsTextMessage) session.createTextMessage("hello dynamic");
+		JmsTopic top = new JmsTopic("topicEx/it.a22.asn1.denm.u0j2.ws2.gee");
+		message.getFacade().setUserId("admin");
+		messageProducer.send(top, message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+		
+		//Receive message
+		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
+		assertThat(receive).isNotNull();
+		Destination jmsDestination = receive.getJMSDestination();
+		assertThat(jmsDestination).isInstanceOf(JmsTopic.class);
+		JmsTopic topic = (JmsTopic) jmsDestination;
+		assertThat(topic.getTopicName()).isEqualTo("topicEx/it.a22.asn1.denm.u0j2.ws2.gee");
+	}
+
+	@Test
 	public void messageWithHeadersSentOverTopicExchangeCanReadHeaderValue() throws Exception {
+		//create producer and consumer with selector filter
 		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'my' and what = 'headers'");
 		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx"));
+		//send message with heaaders
 		sendWithHeaders("my", "headers", messageProducer);
+		//receive message
 		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
 		assertThat(receive).isNotNull();
 		assertThat(receive.getStringProperty("how")).isEqualTo("my");
