@@ -44,3 +44,20 @@ stages:
   - latest
   - $KUBELINE_GIT_COMMIT_SHORT
 
+- name: federation_build
+  type: docker-build
+  dockerfile: federation-docker-files/Federation_build
+  build_dir: .
+
+- name: neigbour_server
+  type: docker-build
+  dockerfile: neighbour-server/Dockerfile
+  build_dir: .
+
+- name: push-node
+  type: docker-push
+  from_stage: neigbour_server
+  repo: eu.gcr.io/nordic-way-aad182cc/interchangenode
+  tags:
+    - canary
+    - $KUBELINE_GIT_COMMIT_SHORT
