@@ -58,136 +58,147 @@ public class TopicAndHeaderRoutingTest extends IxnBaseIT {
 		messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 	}
 
-	@Test
-	public void messageWithSameTopicIsRouted() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk"));
-		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fisk"));
-		sendToTopic(messageProducer);
-		Message receivedMessage = consumer.receive(1000L);
-		assertThat(receivedMessage).isNotNull();
-	}
 
 	@Test
-	public void messageOutsideBoundTopicIsNotReceived() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.torsk"));
-		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fisk.flyndre"));
+	public void messageSentToANeighbourTopicIsNotRouted() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fish.cod"));
+		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fish.flounder"));
 		sendToTopic(messageProducer);
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNull();
 	}
 
 	@Test
-	public void messageWithBroaderTopicIsReceived() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.#"));
-		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fisk.torsk"));
+	public void messageSentToAMoreNarrowTopicIsConsumedByABroaderTopic() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fish.#"));
+		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fish.cod"));
 		sendToTopic(messageProducer);
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
 	}
 
 	@Test
-	public void headerFiskTorsk() throws JMSException {
-		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx"), "how = 'fisk' and what = 'torsk'");
+	public void messageSentWithHeaderFishCodIsConsumedByASelectorForHeaderValuesFishAndCod() throws JMSException {
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx"), "how = 'fish' and what = 'cod'");
 		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx"));
-		sendWithHeaders("fisk", "torsk", messageProducer);
+		sendWithHeaders("fish", "cod", messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
 
 	@Test
-	public void topicFiskTorsk() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.torsk"));
-		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fisk.torsk"));
+	public void messageSentWithHeaderFishFlounderIsNotConsumedByASelectorForHeaderValuesFishAndCod() throws JMSException {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fish' and what = 'cod'");
+		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx"));
+		sendWithHeaders("fish", "flounder", messageProducer);
+		assertThat(consumer.receive(1000L)).isNull();
+	}
+
+	@Test
+	public void topicWithIdenticalTopLevelTopicOnProducerAndConsumerIsRouted() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fish"));
+		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fish"));
+		sendToTopic(messageProducer);
+		Message receivedMessage = consumer.receive(1000L);
+		assertThat(receivedMessage).isNotNull();
+	}
+
+
+	@Test
+	public void topicNotMatchingWillNotBeRouted() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/bird"));
+		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fish"));
+		sendToTopic(messageProducer);
+		Message receivedMessage = consumer.receive(1000L);
+		assertThat(receivedMessage).isNull();
+	}
+
+
+	@Test
+	public void topicWithIdenticalSecondLevelTopicOnProducerAndConsumerIsRouted() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fish.cod"));
+		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fish.cod"));
 		sendToTopic(messageProducer);
 		Message receivedMessage = consumer.receive(1000L);
 		assertThat(receivedMessage).isNotNull();
 	}
 
 	@Test
-	public void headerFiskFlyndre() throws JMSException {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fisk' and what = 'flyndre'");
+	public void topicFishFlounder() throws Exception {
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fish.flounder"));
+		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fish.flounder"));
+		sendToTopic(messageProducer);
+		Message receivedMessage = consumer.receive(1000L);
+		assertThat(receivedMessage).isNotNull();
+	}
+
+	@Test
+	public void oneHeaderValueMatchingWillBeRouted() throws JMSException {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fish'");
 		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx"));
-		sendWithHeaders("fisk", "flyndre", messageProducer);
+		sendWithHeaders("fish", null, messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
 
 	@Test
-	public void topicFiskFlyndre() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.flyndre"));
-		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fisk.flyndre"));
-		sendToTopic(messageProducer);
-		Message receivedMessage = consumer.receive(1000L);
-		assertThat(receivedMessage).isNotNull();
-	}
-
-	@Test
-	public void headerFisk() throws JMSException {
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fisk'");
+	public void oneHeaderValueNotMatchingWillNotBeRouted() throws JMSException {
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fish'");
 		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx"));
-		sendWithHeaders("fisk", null, messageProducer);
-		assertThat(consumer.receive(1000L)).isNotNull();
+		sendWithHeaders("bird", null, messageProducer);
+		assertThat(consumer.receive(1000L)).isNull();
 	}
 
 	@Test
-	public void topicFisk() throws Exception {
-		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk"));
-		MessageProducer messageProducer = session.createProducer(new JmsTopic("topicEx/fisk"));
-		sendToTopic(messageProducer);
-		Message receivedMessage = consumer.receive(1000L);
-		assertThat(receivedMessage).isNotNull();
-	}
-
-	@Test
-	public void headerAllTypesOfFisk() throws JMSException {
+	public void jmsSelectorForAllTypesOfFishRoutesMessagesSentWithHeaderFish() throws JMSException {
 		//create producer and consumer with selector filter
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fisk'");
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'fish'");
 		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx"));
 		//send and receive messages
-		sendWithHeaders("fisk", null, messageProducer);
+		sendWithHeaders("fish", null, messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
 		messageProducer = session.createProducer(new JmsQueue("topicEx"));
-		sendWithHeaders("fisk", "torsk", messageProducer);
+		sendWithHeaders("fish", "cod", messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
 		messageProducer = session.createProducer(new JmsQueue("topicEx"));
-		sendWithHeaders("fisk", "flyndre", messageProducer);
+		sendWithHeaders("fish", "flounder", messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
 
 	@Test
-	public void topicAllTypesOfFisk() throws Exception {
+	public void topicConsumerForAllTypesOfFishRoutesMessagesSentToTopicFishAndBelow() throws Exception {
 		//create consumer with wildcard binding
-		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fisk.#"));
+		MessageConsumer consumer = session.createConsumer(new JmsTopic("topicEx/fish.#"));
 		MessageProducer messageProducer;
 		//create producers and sed/receive messages
-		messageProducer = session.createProducer(new JmsTopic("topicEx/fisk"));
+		messageProducer = session.createProducer(new JmsTopic("topicEx/fish"));
 		sendToTopic(messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
-		messageProducer = session.createProducer(new JmsTopic("topicEx/fisk.torsk"));
+		messageProducer = session.createProducer(new JmsTopic("topicEx/fish.cod"));
 		sendToTopic(messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
-		messageProducer = session.createProducer(new JmsTopic("topicEx/fisk.flyndre"));
+		messageProducer = session.createProducer(new JmsTopic("topicEx/fish.flounder"));
 		sendToTopic(messageProducer);
 		assertThat(consumer.receive(1000L)).isNotNull();
 	}
 
 	@Test
-	public void writeToCorrectTopicWithCorrectHeaderWillBeRoutedBecauseOfJmsBinding() throws Exception {
+	public void messageSentToToARandomTopicWithCorrectHeaderWillBeRoutedBecauseOfJmsBinding() throws Exception {
 		//create producer and consumer with selector filter
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfisk'");
-		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx/fisk.flyndre"));
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfish'");
+		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx/fish.flounder"));
 		//send message with header
-		sendWithHeaders("jmsfisk", null, messageProducer);
+		sendWithHeaders("jmsfish", null, messageProducer);
 		//receive message
 		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
 		assertThat(receive).isNotNull();
 	}
 
 	@Test
-	public void writeToCorrectTopicWithNotMatchingHeaderWillNotBeRouted() throws Exception {
+	public void messageSentToToARandomTopicWithNotMatchingHeaderWillNotBeRouted() throws Exception {
 		//create producer and consumer with selector filter
-		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfisk'");
-		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx/fisk"));
+		MessageConsumer consumer = session.createConsumer(new JmsQueue("topicEx"), "how = 'jmsfish'");
+		MessageProducer messageProducer = session.createProducer(new JmsQueue("topicEx/fish"));
 		//send message with header
-		sendWithHeaders("foofisk", null, messageProducer);
+		sendWithHeaders("foofish", null, messageProducer);
 		//try to receive message
 		JmsTextMessage receive = (JmsTextMessage) consumer.receive(1000L);
 		assertThat(receive).isNull();
