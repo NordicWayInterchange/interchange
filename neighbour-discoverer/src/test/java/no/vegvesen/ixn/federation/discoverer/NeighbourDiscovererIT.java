@@ -20,7 +20,7 @@ public class NeighbourDiscovererIT {
 
 		neighbourDiscoverer.checkForNewInterchanges();
 
-		neighbourDiscoverer.postCapabilitiesToNewInterchanges();
+		neighbourDiscoverer.capabilityExchangeWithNewNeighbour();
 	}
 
 }
