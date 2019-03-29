@@ -52,31 +52,45 @@ public class NeighbourRestController {
 
 		// Returns a list of paths to poll for subscription status.
 		Interchange updateInterchange = interchangeRepository.findByName(interchange.getName());
-		logger.info("interchange name: " + interchange.getName());
-		logger.info("Interchange subscriptions: " + interchange.getSubscriptions().toString());
+		logger.info("Incoming interchange name: " + interchange.getName());
+		logger.info("Saved interchange name: " + updateInterchange.getName());
+		logger.info("Incoming interchange status: " + interchange.getInterchangeStatus());
+		logger.info("Saved interchange status: " + updateInterchange.getInterchangeStatus().toString());
+		logger.info("Incoming interchange subscriptions: " + interchange.getSubscriptions().toString());
 
 		if(updateInterchange == null){
 			logger.error("Unknown interchange requesting subscriptions. REJECTED.");
 			throw new InterchangeNotFoundException("Capabilities must be exchanged before it is possible to post a subscription request.");
-		}else if(updateInterchange.getInterchangeStatus() != InterchangeStatus.KNOWN || updateInterchange.getInterchangeStatus() != InterchangeStatus.FEDERATED){
+		}//else if(updateInterchange.getInterchangeStatus() != InterchangeStatus.KNOWN || updateInterchange.getInterchangeStatus() != InterchangeStatus.FEDERATED){
+		else if(updateInterchange.getInterchangeStatus() == InterchangeStatus.NEW){
+			logger.error("Interchange has status: " + updateInterchange.getInterchangeStatus().toString());
 			logger.error("Interchange with status other than KNOWN or FEDERATED tried to post a subscription request. REJECTED.");
 			throw new SubscriptionNotAcceptedException("Only KNOWN or FEDERATED interchanges may post subscription requests.");
 		}
 		else{
-			logger.info("*** {} interchange {} updated their subscription ***", interchange.getInterchangeStatus().toString(), interchange.getName());
+			logger.info("*** {} interchange {} updated their subscription ***", updateInterchange.getInterchangeStatus().toString(), updateInterchange.getName());
 			LocalDateTime now = LocalDateTime.now();
 			Set<Subscription> requestedSubscriptions = setStatusRequestedForAllSubscriptions(interchange.getSubscriptions());
 
-			for (Subscription subscription : requestedSubscriptions) {
-				String path = interchange.getName() + "/subscription/" + subscription.getId();
+			// Subscription ID is set when a subscription is saved in the database.
+			// Save the subscription on the interchange, get the interchange from the database,
+			// calculate path and set on subscription, save subscription on interchange.
+
+			updateInterchange.setSubscriptions(requestedSubscriptions);
+			interchangeRepository.save(updateInterchange);
+			updateInterchange = interchangeRepository.findByName(updateInterchange.getName());
+
+			for (Subscription subscription : updateInterchange.getSubscriptions()) {
+				String path = updateInterchange.getName() + "/subscription/" + subscription.getId();
 				subscription.setPath(path);
 			}
 
-			updateInterchange.setSubscriptions(requestedSubscriptions);
 			updateInterchange.setLastSeen(now);
 			interchangeRepository.save(updateInterchange);
 
-			return requestedSubscriptions;
+			logger.info("Interchange updated with subscription: \n" + updateInterchange.toString());
+
+			return updateInterchange.getSubscriptions();
 		}
 	}
 
@@ -110,6 +124,8 @@ public class NeighbourRestController {
 
 	private Interchange getCapabilitiesOfDiscoveringNode(){
 
+		logger.info("Getting capabilities of service providers for capabilities response.");
+
 		Interchange discoveringInterchange = new Interchange();
 		discoveringInterchange.setName(myName);
 		Set<DataType> interchangeCapabilities = new HashSet<>();
@@ -127,6 +143,7 @@ public class NeighbourRestController {
 			}
 		}
 		discoveringInterchange.setCapabilities(interchangeCapabilities);
+		logger.info("posting to neighbour: \n" + discoveringInterchange.toString());
 		return discoveringInterchange;
 	}
 
@@ -145,6 +162,7 @@ public class NeighbourRestController {
 			interchange.setLastSeen(now);
 			// The interchange contacted us directly. Give status 'KNOWN'
 			interchange.setInterchangeStatus(InterchangeStatus.KNOWN);
+			logger.info("Saving interchange in database as: \n" + interchange.toString());
 			interchangeRepository.save(interchange);
 		}else{
 			logger.info("---- UPDATING INTERCHANGE ----");
