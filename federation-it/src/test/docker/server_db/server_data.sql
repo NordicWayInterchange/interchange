@@ -70,9 +70,14 @@ ALTER TABLE public.data_types OWNER TO federation;
 
 CREATE TABLE public.interchanges (
   ixn_id integer NOT NULL,
+  backoff_attempts integer NOT NULL,
+  backoff_start timestamp without time zone,
+  control_channel_port character varying(255),
+  domain_name character varying(255),
   interchange_status character varying(255),
   last_seen timestamp without time zone,
   last_updated timestamp without time zone,
+  message_channel_port character varying(255),
   name character varying(255)
 );
 
@@ -140,8 +145,9 @@ ALTER TABLE public.sub_seq OWNER TO federation;
 CREATE TABLE public.subscriptions (
   sub_id integer NOT NULL,
   last_updated timestamp without time zone,
+  path character varying(255),
   selector character varying(255),
-  status character varying(255),
+  subscription_status character varying(255),
   spr_id_sub integer,
   ixn_id_sub_out integer,
   ixn_id_fed_in integer
@@ -162,10 +168,10 @@ SELECT pg_catalog.setval('public.dat_seq', 51, true);
 --
 
 COPY public.data_types (dat_id, how, last_updated, what, where1, spr_id_cap, ixn_id_cap) FROM stdin;
-1	datex2;1.0	2019-03-14 10:33:32.897	Works	NO	1	\N
-2	datex2;1.0	2019-03-14 10:33:32.9	Works	SE	1	\N
-3	datex2;1.0	2019-03-14 10:34:06.443	Works	NO	2	\N
-4	datex2;1.0	2019-03-14 10:34:06.445	Conditions	NO	2	\N
+1	datex2;1.0	2019-03-29 13:48:38.007	Conditions	NO	1	\N
+2	datex2;1.0	2019-03-29 13:48:38.01	Works	NO	1	\N
+3	datex2;1.0	2019-03-29 13:49:10.011	Works	NO	2	\N
+4	datex2;1.0	2019-03-29 13:49:10.012	Works	SE	2	\N
 \.
 
 
@@ -173,7 +179,7 @@ COPY public.data_types (dat_id, how, last_updated, what, where1, spr_id_cap, ixn
 -- Data for Name: interchanges; Type: TABLE DATA; Schema: public; Owner: federation
 --
 
-COPY public.interchanges (ixn_id, interchange_status, last_seen, last_updated, name) FROM stdin;
+COPY public.interchanges (ixn_id, backoff_attempts, backoff_start, control_channel_port, domain_name, interchange_status, last_seen, last_updated, message_channel_port, name) FROM stdin;
 \.
 
 
@@ -189,8 +195,8 @@ SELECT pg_catalog.setval('public.ixn_seq', 1, false);
 --
 
 COPY public.service_providers (spr_id, name) FROM stdin;
-1	Scania Cloud
-2	Volvo Cloud
+1	Volvo Cloud
+2	Scania Cloud
 \.
 
 
@@ -212,9 +218,9 @@ SELECT pg_catalog.setval('public.sub_seq', 51, true);
 -- Data for Name: subscriptions; Type: TABLE DATA; Schema: public; Owner: federation
 --
 
-COPY public.subscriptions (sub_id, last_updated, selector, status, spr_id_sub, ixn_id_sub_out, ixn_id_fed_in) FROM stdin;
-1	2019-03-14 10:33:32.902	where1 LIKE 'DK'	REQUESTED	1	\N	\N
-2	2019-03-14 10:34:06.446	where1 LIKE 'FI'	REQUESTED	2	\N	\N
+COPY public.subscriptions (sub_id, last_updated, path, selector, subscription_status, spr_id_sub, ixn_id_sub_out, ixn_id_fed_in) FROM stdin;
+1	2019-03-29 13:48:38.012	\N	where1 LIKE 'FI'	REQUESTED	1	\N	\N
+2	2019-03-29 13:49:10.014	\N	where1 LIKE 'DK'	REQUESTED	2	\N	\N
 \.
 
 
