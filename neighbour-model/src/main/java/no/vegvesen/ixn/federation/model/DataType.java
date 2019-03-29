@@ -57,10 +57,13 @@ public class DataType {
 	}
 
 	@Override
-	public String toString(){
+	public String toString() {
 		return "DataType{" +
-				"how='" + how + "'" +
-				", what='" + what + "'" +
-				", where1='" + where1 + "'}";
+				"data_id=" + data_id +
+				", where1='" + where1 + '\'' +
+				", how='" + how + '\'' +
+				", what='" + what + '\'' +
+				", lastUpdated=" + lastUpdated +
+				'}';
 	}
 }

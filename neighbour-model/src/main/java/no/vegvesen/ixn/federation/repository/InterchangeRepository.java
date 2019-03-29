@@ -24,4 +24,11 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges where interchange_status='NEW'", nativeQuery = true)
 	List<Interchange> findInterchangesWithStatusNEW();
 
+	@Query(value = "select * from interchanges where interchange_status='FAILED_CAPABILITY_EXCHANGE'", nativeQuery = true)
+	List<Interchange> findInterchangesWithStatusFAILED_CAPABILITY_EXCHANGE();
+
+	@Query(value = "select * from interchanges where interchange_status='FAILED_SUBSCRIPTION_REQUEST'", nativeQuery = true)
+	List<Interchange> findInterchangesWithStatusFAILED_SUBSCRIPTION_REQUEST();
+
+
 }

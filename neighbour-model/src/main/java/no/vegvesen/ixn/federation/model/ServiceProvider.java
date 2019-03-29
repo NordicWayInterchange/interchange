@@ -27,8 +27,7 @@ public class ServiceProvider {
 	@JoinColumn(name = "spr_id_sub", foreignKey = @ForeignKey(name = "fk_sub_spr"))
 	private Set<Subscription> subscriptions;
 
-	public ServiceProvider() {
-	}
+	public ServiceProvider() { }
 
 	@JsonCreator
 	public ServiceProvider(@JsonProperty("name") String name) {
@@ -65,5 +64,15 @@ public class ServiceProvider {
 
 	public void setSubscriptions(Set<Subscription> subscriptions) {
 		this.subscriptions = subscriptions;
+	}
+
+	@Override
+	public String toString() {
+		return "ServiceProvider{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", capabilities=" + capabilities +
+				", subscriptions=" + subscriptions +
+				'}';
 	}
 }

@@ -28,6 +28,8 @@ public class Subscription {
 
 	private String selector;
 
+	private String path;
+
 	public Subscription() {
 	}
 
@@ -57,12 +59,22 @@ public class Subscription {
 		return sub_id;
 	}
 
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
 	@Override
 	public String toString() {
-
 		return "Subscription{" +
-				"selector='" + selector + "'" +
-				", subscriptionStatus='" + subscriptionStatus.toString() + "'}";
-
+				"sub_id=" + sub_id +
+				", subscriptionStatus=" + subscriptionStatus +
+				", lastUpdated=" + lastUpdated +
+				", selector='" + selector + '\'' +
+				", path='" + path + '\'' +
+				'}';
 	}
 }

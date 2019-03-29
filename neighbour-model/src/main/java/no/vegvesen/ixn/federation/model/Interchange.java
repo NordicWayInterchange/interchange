@@ -38,22 +38,32 @@ public class Interchange {
 	private Set<Subscription> fedIn = Collections.emptySet();
 
 	@UpdateTimestamp
-	private LocalDateTime lastUpdated = LocalDateTime.now();
+	private LocalDateTime lastUpdated;
 
 	@JsonIgnore
-	private LocalDateTime lastSeen = LocalDateTime.now();
+	private LocalDateTime lastSeen;
 
-	public enum InterchangeStatus {NEW, KNOWN, FEDERATED}
+	@JsonIgnore
+	private LocalDateTime backoffStart;
+
+	@JsonIgnore
+	private int backoffAttempts = 0;
+
+	public enum InterchangeStatus {NEW, KNOWN, FEDERATED, UNREACHABLE,
+		FAILED_CAPABILITY_EXCHANGE, FAILED_SUBSCRIPTION_REQUEST}
+
 
 	@Enumerated(EnumType.STRING)
 	private InterchangeStatus interchangeStatus = InterchangeStatus.NEW;
 
 	@JsonIgnore
-	private String domainName = "";
+	private String domainName;
 	@JsonIgnore
-	private String messageChannelPort = "";
+	private String messageChannelPort;
 	@JsonIgnore
-	private String controlChannelPort = "";
+	private String controlChannelPort;
+
+
 
 	public Interchange(){}
 
@@ -148,24 +158,38 @@ public class Interchange {
 		this.controlChannelPort = controlChannelPort;
 	}
 
+	public LocalDateTime getBackoffStartTime() {
+		return backoffStart;
+	}
+
+	public void setBackoffStart(LocalDateTime backoffStart) {
+		this.backoffStart = backoffStart;
+	}
+
+	public int getBackoffAttempts() {
+		return backoffAttempts;
+	}
+
+	public void setBackoffAttempts(int backoffAttempts) {
+		this.backoffAttempts = backoffAttempts;
+	}
+
 	@Override
 	public String toString() {
-		try {
-			return "Interchange{" +
-					"id='" + ixn_id + "'" +
-					", name='" + name + "'" +
-					", capabilities='" + capabilities.toString() + "'" +
-					", subscriptions='" + subscriptions.toString() + "'" +
-					", fedIn='" + fedIn.toString() + "'" +
-					", lastUpdated='" + lastUpdated.toString() + "'" +
-					", lastSeen='" + lastSeen.toString() + "'" +
-					", status='" + interchangeStatus.toString() + "'" +
-					", domainName='" + domainName + "'" +
-					", messageChannelPort='" + messageChannelPort + "'" +
-					", controlChannelPort='" + controlChannelPort + "'}";
-		}catch(NullPointerException e){
-			System.out.println("Not all interchange properties have been initialized. Cannot print as string.");
-			return "";
-		}
+		return "Interchange{" +
+				"ixn_id=" + ixn_id +
+				", name='" + name + '\'' +
+				", capabilities=" + capabilities +
+				", subscriptions=" + subscriptions +
+				", fedIn=" + fedIn +
+				", lastUpdated=" + lastUpdated +
+				", lastSeen=" + lastSeen +
+				", backoffStart=" + backoffStart +
+				", backoffAttempts=" + backoffAttempts +
+				", interchangeStatus=" + interchangeStatus +
+				", domainName='" + domainName + '\'' +
+				", messageChannelPort='" + messageChannelPort + '\'' +
+				", controlChannelPort='" + controlChannelPort + '\'' +
+				'}';
 	}
 }
