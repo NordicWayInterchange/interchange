@@ -22,7 +22,7 @@ public class Interchange {
 	@Column(name="ixn_id")
 	private Integer ixn_id;
 
-	private String name = ""; // common name from the certificate
+	private String name; // common name from the certificate
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "ixn_id_cap", foreignKey = @ForeignKey(name="fk_dat_ixn"))
@@ -54,7 +54,7 @@ public class Interchange {
 
 
 	@Enumerated(EnumType.STRING)
-	private InterchangeStatus interchangeStatus = InterchangeStatus.NEW;
+	private InterchangeStatus interchangeStatus;
 
 	@JsonIgnore
 	private String domainName;

@@ -138,6 +138,8 @@ public class NeighbourDiscoverer {
 		myRepresentation.setSubscriptions(getLocalServiceProviderSubscriptions());
 		myRepresentation.setCapabilities(Collections.emptySet());
 
+		logger.info("Representation of discovering interchange: \n" + myRepresentation.toString());
+
 		return myRepresentation;
 	}
 
@@ -148,14 +150,20 @@ public class NeighbourDiscoverer {
 		Set<Subscription> calculatedFedInSubscriptions = new HashSet<>();
 		Interchange discoveringInterchange = getDiscoveringInterchangeWithSubscriptions();
 
+		logger.info("Neighbour capabilities: " + neighbourInterchange.getCapabilities());
+
 		try { // capability matcher trows Parse Exception or Illegal Argument Exception if selector is always true
 
 			for (DataType dataType : neighbourInterchange.getCapabilities()) {
 				logger.info("Capability of node " + neighbourInterchange.getName() + " : " + dataType.getWhere1() + ", " + dataType.getWhat() + ", " + dataType.getHow());
 
+				logger.info("subscriptions of discovering interchange: " + discoveringInterchange.getSubscriptions());
+
 				for (Subscription subscription : discoveringInterchange.getSubscriptions()) {
 					// If the subscription selector string matches the data type,
 					// add the subscription to the new set of Subscriptions.
+
+					logger.info("Matching single subscription " + subscription.toString() + " with neighbour  ");
 					if (CapabilityMatcher.matches(dataType, subscription.getSelector())) {
 
 						logger.debug("Node " + neighbourInterchange.getName() + " has capability (" + dataType.getHow() + ", "
@@ -346,7 +354,12 @@ public class NeighbourDiscoverer {
 		HttpEntity<Interchange> entity = new HttpEntity<>(discoveringInterchange, headers);
 		ResponseEntity<Set<Subscription>> response = restTemplate.exchange(url, HttpMethod.POST, entity, new ParameterizedTypeReference<Set<Subscription>>() {
 		});
+
+		logger.info("Response code: " + response.getStatusCodeValue());
+
 		Set<Subscription> returnedSubscriptionsWithStatus = response.getBody();
+		logger.info("Response.getBody(): " + returnedSubscriptionsWithStatus.toString());
+
 		HttpStatus statusCode = response.getStatusCode();
 
 		// TODO: What if we post an empty subscription - should the server return something else than an empty list?
@@ -371,7 +384,10 @@ public class NeighbourDiscoverer {
 		logger.info("Discovering node representation: \n" + discoveringInterchange.toString());
 
 		ResponseEntity<Interchange> response = restTemplate.postForEntity(url, discoveringInterchange, Interchange.class);
+		logger.info("Response: " + response.toString());
 		Interchange neighbourResponse = response.getBody();
+		logger.info("Response.getBody(): " + neighbourResponse.toString());
+
 		HttpStatus responseStatusCode = response.getStatusCode();
 
 		logger.info("Response status code: " + response.getStatusCodeValue());
@@ -387,8 +403,8 @@ public class NeighbourDiscoverer {
 		}
 
 		if (responseStatusCode == HttpStatus.CREATED) {
-			logger.info("Response from neighbour: \n" + neighbourResponse.toString());
-			return neighbour;
+			//logger.info("Response from neighbour: \n" + response.toString());
+			return neighbourResponse;
 		} else {
 			throw new CapabilityPostException("Unable to post capabilities to neighbour " + neighbour.getName());
 		}
@@ -409,12 +425,15 @@ public class NeighbourDiscoverer {
 			try {
 				// Capabilities exchange.
 				neighbourResponse = postCapabilities(discoveringInterchange, neighbour); // throws exception if this fails.
+				logger.info("Received post response from neighbour: \n" + neighbourResponse.toString() );
 				neighbour.setCapabilities(neighbourResponse.getCapabilities());
+				neighbour.setInterchangeStatus(Interchange.InterchangeStatus.KNOWN);
 				interchangeRepository.save(neighbour); // save capabilities on neighbour in case something fails later on.
-				logger.info("Successfully posted capabilities. Calculating and posting subscription request...");
+				logger.info("Successfully posted and received capabilities. Calculating and posting subscription request...");
 
 				// Calculate subscription to neighbour
-				Set<Subscription> neighbourFedInSubscriptions = calculateCustomSubscriptionForNeighbour(neighbourResponse);
+				neighbour = interchangeRepository.findByName(neighbour.getName());
+				Set<Subscription> neighbourFedInSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour);
 				logger.info("Calculated subscription: \n" + neighbourFedInSubscriptions.toString());
 				neighbour.setFedIn(neighbourFedInSubscriptions);
 				interchangeRepository.save(neighbour); // save calculated subscription on neighbour in case something fails later on.
