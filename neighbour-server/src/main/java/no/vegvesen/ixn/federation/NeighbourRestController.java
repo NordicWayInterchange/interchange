@@ -43,6 +43,9 @@ public class NeighbourRestController {
 		return neighbourSubscriptionRequest;
 	}
 
+
+	// TODO: Endre denne returtypen til en liste/set av subscriptions,
+	// TODO: hvor hver subscription har en path og en status.
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@RequestMapping(method = RequestMethod.POST, value = "/requestSubscription")
 	public List<String> requestSubscriptions(@RequestBody Interchange interchange){
