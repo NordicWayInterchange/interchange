@@ -44,6 +44,14 @@ stages:
   dockerfile: federation-docker-files/Federation_build
   build_dir: .
 
+- name: push-federation-build
+  type: docker-push
+  from_stage: federation-build
+  repo: eu.gcr.io/nordic-way-aad182cc/interchangenode
+  tags:
+    - latest
+    - $KUBELINE_GIT_COMMIT_SHORT
+
 - name: neighbour-server
   type: docker-build
   dockerfile: neighbour-server/Dockerfile
