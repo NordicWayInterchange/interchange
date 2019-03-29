@@ -48,14 +48,12 @@ public class NeighbourRestController {
 	// TODO: hvor hver subscription har en path og en status.
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@RequestMapping(method = RequestMethod.POST, value = "/requestSubscription")
-	public List<String> requestSubscriptions(@RequestBody Interchange interchange){
+	public Set<Subscription> requestSubscriptions(@RequestBody Interchange interchange){
 
 		// Returns a list of paths to poll for subscription status.
 		Interchange updateInterchange = interchangeRepository.findByName(interchange.getName());
 		logger.info("interchange name: " + interchange.getName());
 		logger.info("Interchange subscriptions: " + interchange.getSubscriptions().toString());
-
-		List<String> paths = new ArrayList<>();
 
 		if(updateInterchange == null){
 			logger.error("Unknown interchange requesting subscriptions. REJECTED.");
@@ -68,17 +66,18 @@ public class NeighbourRestController {
 			logger.info("*** {} interchange {} updated their subscription ***", interchange.getInterchangeStatus().toString(), interchange.getName());
 			LocalDateTime now = LocalDateTime.now();
 			Set<Subscription> requestedSubscriptions = setStatusRequestedForAllSubscriptions(interchange.getSubscriptions());
+
+			for (Subscription subscription : requestedSubscriptions) {
+				String path = interchange.getName() + "/subscription/" + subscription.getId();
+				subscription.setPath(path);
+			}
+
 			updateInterchange.setSubscriptions(requestedSubscriptions);
 			updateInterchange.setLastSeen(now);
-			updateInterchange = interchangeRepository.save(updateInterchange);
-		}
+			interchangeRepository.save(updateInterchange);
 
-		// Create paths to return.
-		for (Subscription subscription : updateInterchange.getSubscriptions()) {
-			String path = interchange.getName() + "/subscription/" + subscription.getId();
-			paths.add(path);
+			return requestedSubscriptions;
 		}
-		return paths;
 	}
 
 
