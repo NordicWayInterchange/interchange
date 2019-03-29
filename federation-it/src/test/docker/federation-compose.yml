@@ -1,10 +1,11 @@
 version: '3'
 services:
 
-  federation_build:
+  federation-build:
     build:
       dockerfile: federation-docker-files/Federation_build
       context: ../../../../
+    image: federation-build
 
   node1_db:
     build:
@@ -24,7 +25,7 @@ services:
       context: ../../../../
     depends_on:
       - node1_db
-      - federation_build
+      - federation-build
     ports:
       - 8090:8090
     environment:
@@ -49,7 +50,7 @@ services:
       context: ../../../../
     depends_on:
       - node2_db
-      - federation_build
+      - federation-build
     ports:
       - 8070:8090
     environment:
