@@ -72,12 +72,6 @@ public class NeighbourDiscoverer {
 		from = Timestamp.from(Instant.now());
 	}
 
-	/**
-	 * Checks if a datatype is a member of a set of data types(Capabilities).
-	 * @param dataType the datatype we want to test for
-	 * @param capabilities the set of capabilities we want to check if contains the data type.
-	 * @return true if data type is in the set of capabilities, false otherwise.
-	 */
 	boolean setContainsDataType(DataType dataType, Set<DataType> capabilities) {
 		for (DataType d : capabilities) {
 			if (dataType.getHow().equals(d.getHow()) && dataType.getWhat().equals(d.getWhat()) && dataType.getWhere1().equals(d.getWhere1())) {
@@ -87,12 +81,6 @@ public class NeighbourDiscoverer {
 		return false;
 	}
 
-	/**
-	 * Cheks if a subscription is a member of a set of subscriptions.
-	 * @param subscription the subscription we are testing for
-	 * @param subscriptions the set of subscriptions we are testing
-	 * @return true if subscription is in the set of subscriptions, false otherwise.
-	 */
 	boolean setContainsSubscription(Subscription subscription, Set<Subscription> subscriptions) {
 		for (Subscription s : subscriptions) {
 			if (subscription.getSelector().equals(s.getSelector())) {
@@ -153,11 +141,7 @@ public class NeighbourDiscoverer {
 		return myRepresentation;
 	}
 
-	/**
-	 *
-	 * @param neighbourInterchange
-	 * @return
-	 */
+
 	Set<Subscription> calculateCustomSubscriptionForNeighbour(Interchange neighbourInterchange) {
 		logger.info("Calculating custom subscription for node: " + neighbourInterchange.getName());
 
@@ -190,25 +174,15 @@ public class NeighbourDiscoverer {
 		return calculatedFedInSubscriptions;
 	}
 
-	/**
-	 *
-	 * @param neighbour
-	 * @return
-	 */
 	public String getUrl(Interchange neighbour) {
 		return "http://" + neighbour.getName() + neighbour.getDomainName() + ":" + neighbour.getControlChannelPort();
 	}
-
 
 	// TODO: sceduled. Get all REQUESTED subscriptions from database and poll them.
 	public void pollSubscriptions() {
 
 	}
 
-
-	/**
-	 *
-	 */
 	@Scheduled(fixedRateString = "${dns.lookup.interval}",
 			initialDelayString = "${dns.lookup.initial-delay}")
 	public void capabilityExchangeWithUpdatedNeighbours() {
@@ -257,12 +231,6 @@ public class NeighbourDiscoverer {
 		from = nowTimestamp;
 	}
 
-
-	/**
-	 * Calculates the next possible for attempt for a neighbour that is in a graceful backoff loop.
-	 * @param neighbour The neighbour we are calculating the post attempt for.
-	 * @return LocalDateTime of next possible post attempt.
-	 */
 	LocalDateTime getNextPostAttemptTime(Interchange neighbour) {
 		logger.info("Backoff interval length in seconds: {}", backoffIntervalLength);
 		int randomShift = new Random().nextInt(60);
@@ -273,8 +241,6 @@ public class NeighbourDiscoverer {
 		logger.info("Calculated next possible post time: {}", nextPostAttempt.toString());
 		return nextPostAttempt;
 	}
-
-
 
 	@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}",
 			initialDelayString = "${neighbour.graceful-backoff.check-offset}")
@@ -345,7 +311,6 @@ public class NeighbourDiscoverer {
 
 					interchangeRepository.save(neighbour);
 				}
-
 			}
 		}
 	}
@@ -357,15 +322,6 @@ public class NeighbourDiscoverer {
 		logger.info(postResponseSubscriptions.toString());
 	}
 
-	/**
-	 * Posts a custom subscription request to a neighbour.
-	 *
-	 * @param discoveringInterchange The representation we are posting to our neighbour (the calculated subscriptions).
-	 * @param neighbourDestination   The neighbour we are posting the subscription request to.
-	 * @return The set of subscriptions from the post response of the neighbour
-	 * @throws SubscriptionRequestException if post response from neighbour is null or empty, or if the response
-	 *                                      code is anything other than 202 Accepted.
-	 */
 	public Set<Subscription> postSubscriptionRequest(Interchange discoveringInterchange, Interchange neighbourDestination) {
 		String url = getUrl(neighbourDestination) + subscriptionRequestPath;
 		logger.info("Posting subscription request to URL: " + url);
@@ -408,15 +364,6 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-
-	/**
-	 * Posts the discovering node's capabilities to a neighbouring node, and receives the capabilities of the neighbour.
-	 *
-	 * @param discoveringInterchange the representation of the discovering interchange.
-	 * @param neighbour              the neighbour we are trying to perform capability exchange with.
-	 * @return The representation of the neighbour, with capabilities.
-	 * @throws CapabilityPostException if the neighbour response has bad response code, the neighbour response is null, or the neighbour replies with a bad name.
-	 */
 	Interchange postCapabilities(Interchange discoveringInterchange, Interchange neighbour) {
 
 		String url = getUrl(neighbour) + capabilityExchangePath;
@@ -447,9 +394,6 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	/**
-	 * Performs capability exchange with new neighbours. If successful, it creates a subscription request.
-	 */
 	@Scheduled(fixedRateString = "${neighbour.capabilities.update.interval}",
 			initialDelayString = "${neighbour.capabilities.initial-delay}")
 	public void capabilityExchangeWithNewNeighbour() {
@@ -506,7 +450,6 @@ public class NeighbourDiscoverer {
 			}
 		}
 	}
-
 
 	@Scheduled(fixedRateString = "${neighbour.capabilities.update.interval}",
 			initialDelayString = "${neighbour.capabilities.initial-delay}")
