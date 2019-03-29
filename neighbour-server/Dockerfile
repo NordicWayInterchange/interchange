@@ -1,7 +1,7 @@
-FROM federation-build as build
+FROM federation-build:latest
 
 COPY neighbour-server/entrypoint.sh /entrypoint.sh
-COPY --from=build neighbour-server/target/neighbour-server-1.0-SNAPSHOT.jar neighbour-server.jar
+COPY --from=federation-build:latest neighbour-server/target/neighbour-server-1.0-SNAPSHOT.jar neighbour-server.jar
 
 ENTRYPOINT ["/entrypoint.sh"]
 
