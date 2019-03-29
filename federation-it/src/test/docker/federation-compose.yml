@@ -10,8 +10,9 @@ services:
   node1_db:
     build:
       dockerfile: Dockerfile
-      context: ./client_db
+      context: ./server_db
     image: node1_db
+    container_name: server_db
     ports:
       - 5432
     environment:
@@ -23,6 +24,7 @@ services:
     build:
       dockerfile: neighbour-server/Dockerfile
       context: ../../../../
+    container_name: server_node1
     depends_on:
       - node1_db
       - federation-build
@@ -35,8 +37,9 @@ services:
   node2_db:
     build:
       dockerfile: Dockerfile
-      context: ./server_db
+      context:  ./client_db
     image: node2_db
+    container_name: client_db
     ports:
       - 7070:5432
     environment:
@@ -48,6 +51,7 @@ services:
     build:
       dockerfile: neighbour-server/Dockerfile
       context: ../../../../
+    container_name: server_node2
     depends_on:
       - node2_db
       - federation-build

@@ -1,5 +1,5 @@
 FROM postgres:9.6
 
-ADD data.sql /docker-entrypoint-initdb.d/
+ADD client_data.sql /docker-entrypoint-initdb.d/
 
 
