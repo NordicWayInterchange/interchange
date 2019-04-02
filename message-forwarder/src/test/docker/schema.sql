@@ -75,7 +75,12 @@ CREATE TABLE public.interchanges (
   last_updated timestamp without time zone,
   name character varying(255),
   domain_name character varying(255),
-  control_channel_port character varying(255)
+  control_channel_port character varying(255),
+  message_channel_port character varying(255),
+  path character varying (255),
+  backoff_attempts integer not null default 0,
+  backoff_start timestamp without time zone,
+  subscription_status character varying(255)
 );
 
 
