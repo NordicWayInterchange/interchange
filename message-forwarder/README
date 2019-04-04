@@ -4,15 +4,18 @@ this can be done using
 
 git fetch --all
 If you have uncommitted work: git stash
-git rebase neighbour_client_server
+git rebase origin/neighbour_client_server
 And, if you used stash: git stash pop
 now push your changes.
 
 How I've built and run the database during development
-
+in message-forwarder/src/test/docker/db
 docker build -t interchanges_test .
 docker run -it -e POSTGRES_USER=federation -e POSTGRES_PASSWORD=federation -e POSTGRES_DB=federation -p 7070:5432 --name interchange_container interchanges_test
 
-docker exec -it interchange_container bash
-psql -U federation -d federation
-insert into interchanges (ixn_id, interchange_status, name, domain_name, control_channel_port) values (0,'FEDERATED','myIxn','kyrre.priv.no','4443');
+If you want more rows in the database, add the sql insert statements in the data.sql file.
+
+Next, we need two Interchanges to forward messages between. 
+
+To build the "local" IXN, do:
+
