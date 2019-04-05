@@ -18,4 +18,11 @@ If you want more rows in the database, add the sql insert statements in the data
 Next, we need two Interchanges to forward messages between. 
 
 To build the "local" IXN, do:
+in message-forwarder/src/test/docker/localIxn
+docker build -t local_ixn .
+
+and to run:
+docker run --rm -it -p 8080:8080 -p 5671:5671 -p 5672:5672 --name local_ixn local_ixn
+
+
 
