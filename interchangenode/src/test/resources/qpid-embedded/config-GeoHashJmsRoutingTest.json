@@ -43,7 +43,7 @@
       "name": "default",
       "type": "Memory",
       "defaultVirtualHostNode": "true",
-      "virtualHostInitialConfiguration": "{\n  \"type\": \"Memory\",\n  \"name\": \"localhost\",\n  \"modelVersion\": \"7.0\",\n  \"exchanges\": [],\n  \"queues\": [\n    {\n      \"name\": \"my-queue\",\n      \"type\": \"standard\",\n      \"durable\": true,\n      \"holdOnPublishEnabled\": false,\n      \"owner\": null\n    }\n  ]\n}"
+      "virtualHostInitialConfiguration": "{\n  \"type\": \"Memory\",\n  \"name\": \"localhost\",\n  \"modelVersion\": \"7.0\",\n  \"exchanges\": [\n    {\n      \"name\": \"topicEx\",\n      \"type\": \"topic\",\n      \"durable\": true,\n      \"durableBindings\": []\n    }    \n  ],\n  \"queues\": [\n    {\n      \"name\": \"my-queue\",\n      \"type\": \"standard\",\n      \"durable\": true,\n      \"holdOnPublishEnabled\": false,\n      \"owner\": null\n    }\n  ]\n}"
     }
   ]
 }

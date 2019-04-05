@@ -1,0 +1,22 @@
+{
+  "type": "Memory",
+  "name": "localhost",
+  "modelVersion": "7.0",
+  "exchanges": [
+    {
+      "name": "topicEx",
+      "type": "topic",
+      "durable": true,
+      "durableBindings": []
+    }
+  ],
+  "queues": [
+    {
+      "name": "my-queue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    }
+  ]
+}
