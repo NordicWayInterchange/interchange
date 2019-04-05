@@ -10,6 +10,15 @@ import org.springframework.stereotype.Service;
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.NamingException;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -38,6 +47,29 @@ public class MessageForwarder {
         }
     }
 
+    private static class StoreDetails {
+        private String path;
+        private String password;
+        private String storeType;
+
+        public StoreDetails(String path, String password, String storeType) {
+            this.path = path;
+            this.password = password;
+            this.storeType = storeType;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public String getStoreType() {
+            return storeType;
+        }
+    }
 
     private NeighbourFetcher neighbourFetcher;
 
@@ -47,12 +79,15 @@ public class MessageForwarder {
     //Need some private list of connections.. TODO this will probably not work in a threaded environment...
     private List<Interchange> connectedInterchanges;
     private Logger logger = LoggerFactory.getLogger(MessageForwarder.class);
+    private StoreDetails keyStoreDetails;
+    private StoreDetails trustStoreDetails;
 
 
     @Autowired
     public MessageForwarder(NeighbourFetcher fetcher) {
         this.neighbourFetcher = fetcher;
         this.connectedInterchanges = new ArrayList<>();
+        //this.keyStoreDetails = new StoreDetails()
     }
 
     //Call the rest api and get the list of queues
@@ -70,7 +105,7 @@ public class MessageForwarder {
 
                 //remote queue:
                 //amqp://<ixn.getDomainName()>:<ixn.getControlChannelPort>, queue name "fedEx"
-                String writeUrl = String.format("amqp://%s:%s",ixn.getDomainName(),ixn.getControlChannelPort());
+                String writeUrl = String.format("amqps://%s:%s",ixn.getDomainName(),ixn.getControlChannelPort());
                 String writeQueue = "fedEx";
                 Hashtable<Object, Object> writeEnv = createWriteContext(writeUrl, writeQueue);
 
@@ -78,6 +113,7 @@ public class MessageForwarder {
                 Context writeContext = new javax.naming.InitialContext(writeEnv);
                 JmsConnectionFactory writeFactory = (JmsConnectionFactory) writeContext.lookup("myFactoryLookupTLS");
                 writeFactory.setPopulateJMSXUserID(true);
+                //TODO writeFactory.setSslContext(createSSLContext(keyStoreDetails,trustStoreDetails));
                 Destination queueS = (Destination) writeContext.lookup("sendQueue");
                 Connection writeConnection = writeFactory.createConnection("king_harald", "password");
                 writeConnection.start();
@@ -130,6 +166,30 @@ public class MessageForwarder {
         Hashtable<Object, Object> env = new Hashtable<>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
         return  env;
+    }
+
+
+    private SSLContext createSSLContext(StoreDetails keyStoreDetails, StoreDetails trustStoreDetails) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableKeyException, KeyManagementException {
+        KeyStore keyStore = readStore(keyStoreDetails);
+        KeyStore trustStore = readStore(trustStoreDetails);
+
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(keyStore,keyStoreDetails.getPassword().toCharArray()); //TODO this assumes the same password for the key store as the actual keys...
+
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(trustStore);
+
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(kmf.getKeyManagers(),tmf.getTrustManagers(),null);
+        return context;
+    }
+
+    private KeyStore readStore(StoreDetails storeDetails) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        try (InputStream keyStoreStream = Files.newInputStream(Paths.get(storeDetails.getPath())) ) {
+           KeyStore keyStore = KeyStore.getInstance(storeDetails.getStoreType());
+           keyStore.load(keyStoreStream,storeDetails.getPassword().toCharArray());
+           return keyStore;
+        }
     }
 
 }

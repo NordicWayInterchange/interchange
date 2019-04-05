@@ -24,5 +24,12 @@ docker build -t local_ixn .
 and to run:
 docker run --rm -it -p 8080:8080 -p 5671:5671 -p 5672:5672 --name local_ixn local_ixn
 
+To build the "remote" IXN, do:
+in message-forwarder/src/test/docker/remoteIxn
+docker build -t remote_ixn .
+
+and to run:
+docker run --rm -it -p 8081:8080 -p 6671:5671 -p 6672:5672 --name remote_ixn remote_ixn
+	
 
 

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.jms.JMSException;
+import javax.naming.NamingException;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -17,7 +19,7 @@ public class MessageForwarderIT {
     @Autowired
     MessageForwarder forwarder;
     @Test
-    public void testFoo() {
+    public void testFoo() throws JMSException, NamingException {
         forwarder.setupConnectionsToNewNeighbours();
     }
 
