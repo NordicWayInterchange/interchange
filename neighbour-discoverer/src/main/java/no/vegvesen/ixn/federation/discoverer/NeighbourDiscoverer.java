@@ -143,7 +143,6 @@ public class NeighbourDiscoverer {
 		return myRepresentation;
 	}
 
-
 	Set<Subscription> calculateCustomSubscriptionForNeighbour(Interchange neighbourInterchange) {
 		logger.info("Calculating custom subscription for node: " + neighbourInterchange.getName());
 
@@ -182,13 +181,42 @@ public class NeighbourDiscoverer {
 		return calculatedFedInSubscriptions;
 	}
 
-	public String getUrl(Interchange neighbour) {
+	String getUrl(Interchange neighbour) {
 		return "http://" + neighbour.getName() + neighbour.getDomainName() + ":" + neighbour.getControlChannelPort();
 	}
 
-	// TODO: sceduled. Get all REQUESTED subscriptions from database and poll them.
-	public void pollSubscriptions() {
 
+	void pollSubscriptions() {
+
+		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesWithFedInStatusRequested();
+
+		for(Interchange neighbour: interchangesToPoll){
+
+			logger.info("Found subscriptions to neighbour {} with status REQUESTED ", neighbour.getName());
+
+			for(Subscription subscription : neighbour.getFedIn()){
+
+				if(subscription.getSubscriptionStatus() == Subscription.SubscriptionStatus.REQUESTED ){
+					// ask for update on status of subscription
+					logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
+
+					String url = getUrl(neighbour)+"/"+subscription.getPath();
+
+					logger.info("URL: " + url);
+
+					ResponseEntity<Subscription> response = restTemplate.getForEntity(url, Subscription.class);
+					Subscription responseSubscription = response.getBody();
+
+					if(responseSubscription == null){
+						// TODO:  implement backoff algorithm?
+					}else{
+						logger.info("Received response: " + response.getBody().toString());
+						subscription.setSubscriptionStatus(responseSubscription.getSubscriptionStatus());
+						interchangeRepository.save(neighbour);
+					}
+				}
+			}
+		}
 	}
 
 	@Scheduled(fixedRateString = "${dns.lookup.interval}",
@@ -224,7 +252,7 @@ public class NeighbourDiscoverer {
 					Set<Subscription> postResponseSubscriptions = postSubscriptionRequest(discoveringInterchange, neighbour);
 					logger.info("Successfully updated subscription to neighbour {} ", neighbour.getName());
 
-					updateSubscriptionsOfNeighbour(neighbour, postResponseSubscriptions);
+					neighbour.setFedIn(postResponseSubscriptions);
 				}
 
 			} catch (SubscriptionRequestException e){
@@ -232,6 +260,8 @@ public class NeighbourDiscoverer {
 				neighbour.setInterchangeStatus(Interchange.InterchangeStatus.FAILED_SUBSCRIPTION_REQUEST);
 				neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
 				neighbour.setBackoffStart(LocalDateTime.now());
+
+			}finally{
 				interchangeRepository.save(neighbour);
 			}
 		}
@@ -272,8 +302,6 @@ public class NeighbourDiscoverer {
 					// capabilities exchange is successful, post subscription request
 					postSubscriptionRequest(discoveringInterchange, neighbour);
 
-					interchangeRepository.save(neighbour);
-
 				} catch (CapabilityPostException e) {
 					// Increase number of attempts by 1.
 					neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
@@ -282,6 +310,8 @@ public class NeighbourDiscoverer {
 					if (neighbour.getBackoffAttempts() > allowedNumberOfBackoffAttempts) {
 						neighbour.setInterchangeStatus(Interchange.InterchangeStatus.UNREACHABLE);
 					}
+
+				} finally{
 					interchangeRepository.save(neighbour);
 				}
 			}
@@ -307,7 +337,8 @@ public class NeighbourDiscoverer {
 					logger.info("Successfully posted subscription request to neighbour in graceful backoff.");
 					neighbour.setInterchangeStatus(Interchange.InterchangeStatus.KNOWN);
 					neighbour.setBackoffAttempts(0);
-					updateSubscriptionsOfNeighbour(neighbour, postResponseSubscriptions); // will save interchange object in the database.
+					neighbour.setFedIn(postResponseSubscriptions);
+					interchangeRepository.save(neighbour); // each subscription in fedIn has a status and a path.
 
 				}catch(SubscriptionRequestException e){
 					neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
@@ -323,30 +354,11 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	// TODO: update a neighbours fedIn subscriptions with the incoming post response Subscriptions.
-	public void updateSubscriptionsOfNeighbour(Interchange neighbour, Set<Subscription> postResponseSubscriptions) {
-		// must save neighbour in database before finishing.
-		logger.info("TODO: Updating fedIn subscription status of neighbour {}", neighbour.getName());
-		logger.info(postResponseSubscriptions.toString());
-	}
-
-	public Set<Subscription> postSubscriptionRequest(Interchange discoveringInterchange, Interchange neighbourDestination) {
+	Set<Subscription> postSubscriptionRequest(Interchange discoveringInterchange, Interchange neighbourDestination) {
 		String url = getUrl(neighbourDestination) + subscriptionRequestPath;
 		logger.info("Posting subscription request to URL: " + url);
 		logger.info("Posting subscription request to " + neighbourDestination.getName());
 		logger.info("Representation of discovering interchange: \n" + discoveringInterchange.toString());
-
-
-		// Post JSON to neighbour and receive list of paths
-		// Requires Object Writer to make JSON string
-		// WORKING:
-		//HttpHeaders headers = new HttpHeaders();
-		//headers.setContentType(MediaType.APPLICATION_JSON);
-		//HttpEntity<String> entity = new HttpEntity<>(postingJson, headers);
-		//ResponseEntity<List<String>> response = restTemplate.exchange(url, HttpMethod.POST, entity, new ParameterizedTypeReference<List<String>>() {});
-		//List<String> paths = response.getBody();
-		//HttpStatus statusCode = response.getStatusCode();
-
 
 		// Post representation to neighbour
 		HttpHeaders headers = new HttpHeaders();
@@ -354,6 +366,10 @@ public class NeighbourDiscoverer {
 		HttpEntity<Interchange> entity = new HttpEntity<>(discoveringInterchange, headers);
 		ResponseEntity<Set<Subscription>> response = restTemplate.exchange(url, HttpMethod.POST, entity, new ParameterizedTypeReference<Set<Subscription>>() {
 		});
+
+		if(response.getBody() == null){
+			throw new SubscriptionRequestException("Subscription request failed. Post response from neighbour gave null object.");
+		}
 
 		logger.info("Response code: " + response.getStatusCodeValue());
 
@@ -365,9 +381,7 @@ public class NeighbourDiscoverer {
 		// TODO: What if we post an empty subscription - should the server return something else than an empty list?
 		// TODO: is empty list a legal or an illegal response?
 
-		if (returnedSubscriptionsWithStatus == null) {
-			throw new SubscriptionRequestException("Subscription request failed. Post response from neighbour gave null object.");
-		} else if (returnedSubscriptionsWithStatus.isEmpty()) {
+		if (returnedSubscriptionsWithStatus.isEmpty()) {
 			throw new SubscriptionRequestException("Subscription request failed. Post response from neighbour gave empty list of subscriptions.");
 		} else if (statusCode != HttpStatus.ACCEPTED) {
 			throw new SubscriptionRequestException("Subscription request failed. Neighbour returned bad status code:  " + response.getStatusCodeValue());
@@ -385,16 +399,15 @@ public class NeighbourDiscoverer {
 
 		ResponseEntity<Interchange> response = restTemplate.postForEntity(url, discoveringInterchange, Interchange.class);
 		logger.info("Response: " + response.toString());
-		Interchange neighbourResponse = response.getBody();
-		logger.info("Response.getBody(): " + neighbourResponse.toString());
 
-		HttpStatus responseStatusCode = response.getStatusCode();
-
-		logger.info("Response status code: " + response.getStatusCodeValue());
-
-		if (neighbourResponse == null) {
+		if (response.getBody() == null) {
 			throw new CapabilityPostException("Post response from interchange gave null object. Unsuccessful capabilities exchange. ");
 		}
+
+		Interchange neighbourResponse = response.getBody();
+		logger.info("Response.getBody(): " + neighbourResponse.toString());
+		HttpStatus responseStatusCode = response.getStatusCode();
+		logger.info("Response status code: " + response.getStatusCodeValue());
 
 		Interchange updateNeighbour = interchangeRepository.findByName(neighbourResponse.getName());
 
@@ -403,7 +416,6 @@ public class NeighbourDiscoverer {
 		}
 
 		if (responseStatusCode == HttpStatus.CREATED) {
-			//logger.info("Response from neighbour: \n" + response.toString());
 			return neighbourResponse;
 		} else {
 			throw new CapabilityPostException("Unable to post capabilities to neighbour " + neighbour.getName());
@@ -428,15 +440,11 @@ public class NeighbourDiscoverer {
 				logger.info("Received post response from neighbour: \n" + neighbourResponse.toString() );
 				neighbour.setCapabilities(neighbourResponse.getCapabilities());
 				neighbour.setInterchangeStatus(Interchange.InterchangeStatus.KNOWN);
-				interchangeRepository.save(neighbour); // save capabilities on neighbour in case something fails later on.
+				neighbour = interchangeRepository.save(neighbour); // save capabilities on neighbour in case something fails later on.
 				logger.info("Successfully posted and received capabilities. Calculating and posting subscription request...");
 
-				// Calculate subscription to neighbour
-				neighbour = interchangeRepository.findByName(neighbour.getName());
 				Set<Subscription> neighbourFedInSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour);
 				logger.info("Calculated subscription: \n" + neighbourFedInSubscriptions.toString());
-				neighbour.setFedIn(neighbourFedInSubscriptions);
-				interchangeRepository.save(neighbour); // save calculated subscription on neighbour in case something fails later on.
 
 				if (neighbourFedInSubscriptions.size() != 0) {
 
@@ -446,7 +454,8 @@ public class NeighbourDiscoverer {
 
 					Set<Subscription> postResponseSubscriptions = postSubscriptionRequest(discoveringInterchange, neighbour); // throws exception if it fails.
 					logger.info("Successful subscription request to neighbour " + neighbour.getName());
-					updateSubscriptionsOfNeighbour(neighbour, postResponseSubscriptions);
+					neighbour.setFedIn(postResponseSubscriptions);
+					interchangeRepository.save(neighbour);
 
 				} else {
 					logger.info("The calculated subscriptions was empty. Skipping post of empty subscription to NEW neighbour.");
