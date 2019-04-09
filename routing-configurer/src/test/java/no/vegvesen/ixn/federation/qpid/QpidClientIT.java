@@ -27,17 +27,30 @@ public class QpidClientIT {
 	}
 
 	@Test
-	public void createQueue() throws Exception {
+	public void createQueue(){
 		Interchange findus = new Interchange("findus", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 
 		client.createQueue(findus);
 	}
 
 	@Test(expected = Exception.class)
-	public void createQueueWithIllegalCharactersInIdFails() throws Exception {
+	public void createQueueWithIllegalCharactersInIdFails() {
 		Interchange torsk = new Interchange("torsk", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 
 		client.createQueue(torsk);
 		client.createQueue(torsk); //create some queue that already exists
 	}
+
+	@Test
+	public void createdQueueCanBeQueriedFromQpid() {
+		Interchange leroy = new Interchange("leroy", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
+		client.createQueue(leroy);
+		assertThat(client.queueExists(leroy.getName())).isTrue();
+	}
+
+	@Test
+	public void queueNotCreatedQueueDoesNotExist() {
+		assertThat(client.queueExists("mackrel")).isFalse();
+	}
+
 }

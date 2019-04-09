@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -37,14 +40,14 @@ public class QpidClient {
 		this.restTemplate = restTemplate;
 	}
 
-	int ping(){
+	int ping() {
 		ResponseEntity<String> response = restTemplate.getForEntity(pingURL, String.class);
 		logger.debug(response.getBody());
 		return response.getStatusCodeValue();
 	}
 
 	// A method that posts a json object to the Qpid REST api, using a given URI and a given command.
-	private void callQpid(String urlString, String message, String command) {
+	private void postQpid(String urlString, String message, String command) {
 
 		String url = urlString + command;
 		logger.info("URL: " + url);
@@ -57,43 +60,54 @@ public class QpidClient {
 	}
 
 	// Updates the binding of a queue to a new binding.
-	public void updateBinding(String binding, String queueName) throws Exception {
-		JSONObject json = new JSONObject();
-		json.put("destination", queueName);
-		json.put("bindingKey", "where1");
-		json.put("replaceExistingArguments", true);
+	private void updateBinding(String binding, String queueName) {
+		try {
+			JSONObject json = new JSONObject();
+			json.put("destination", queueName);
+			json.put("bindingKey", "where1");
+			json.put("replaceExistingArguments", true);
 
-		JSONObject innerjson = new JSONObject();
-		innerjson.put("x-filter-jms-selector", binding);
+			JSONObject innerjson = new JSONObject();
+			innerjson.put("x-filter-jms-selector", binding);
 
-		json.put("arguments", innerjson);
-		String jsonString = json.toString();
+			json.put("arguments", innerjson);
+			String jsonString = json.toString();
 
-		logger.info("Json string: " + jsonString);
-		callQpid(exchangeURL, jsonString, "/bind");
+			logger.info("Json string: " + jsonString);
+			postQpid(exchangeURL, jsonString, "/bind");
+		} catch (JSONException e) {
+			throw new RoutingConfigurerException(e);
+		}
 	}// Creates a new queue for a neighbouring Interchange.
 
-	public void createQueue(Interchange interchange) throws Exception {
-		JSONObject json = new JSONObject();
-		json.put("name", interchange.getName());
-		json.put("durable", true);
+	public void createQueue(Interchange interchange) {
+		try {
+			JSONObject json = new JSONObject();
+			json.put("name", interchange.getName());
+			json.put("durable", true);
 
-		String jsonString = json.toString();
-		logger.info("Creating queue:" + jsonString);
+			String jsonString = json.toString();
+			logger.info("Creating queue:" + jsonString);
 
-		callQpid(queueURL, jsonString, "/");
+			postQpid(queueURL, jsonString, "/");
 
-		logger.info("Creating binding for queue..");
-		String binding = createBinding(interchange.getSubscriptionRequest().getSubscriptions());
-		updateBinding(binding, interchange.getName());
-	}// Creates a binding based on the subscriptions of a neighbouring Interchange.
+			logger.info("Creating binding for queue..");
+			String binding = createBinding(interchange.getSubscriptions());
+			updateBinding(binding, interchange.getName());
+		} catch (JSONException e) {
+			throw new RoutingConfigurerException(e);
+		}
+	}
 
+	/**
+	 * Creates a binding based on the subscriptions of a neighbouring Interchange.
+	 */
 	String createBinding(Set<Subscription> subscriptions) {
 		StringBuilder binding = new StringBuilder();
 
 		Iterator<Subscription> subscriptionIterator = subscriptions.iterator();
 		while (subscriptionIterator.hasNext()) {
-			Subscription subscription =  subscriptionIterator.next();
+			Subscription subscription = subscriptionIterator.next();
 			binding.append("(");
 			binding.append(subscription.getSelector());
 			binding.append(")");
@@ -105,4 +119,17 @@ public class QpidClient {
 		return binding.toString();
 	}
 
+	public boolean queueExists(String queueName) {
+		String queueQueryUrl = queueURL + "/" + queueName;
+		logger.info("quering for queue {} with url {}", queueName, queueQueryUrl);
+		ResponseEntity<Object> response;
+		try {
+			response = restTemplate.getForEntity(new URI(queueQueryUrl), Object.class);
+		} catch (HttpClientErrorException.NotFound notFound) {
+			return false;
+		} catch (URISyntaxException e) {
+			throw new RoutingConfigurerException(e);
+		}
+		return response.getStatusCode().is2xxSuccessful();
+	}
 }
