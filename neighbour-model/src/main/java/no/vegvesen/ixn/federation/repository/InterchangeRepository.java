@@ -12,15 +12,23 @@ import java.util.List;
 @Repository
 public interface InterchangeRepository extends CrudRepository<Interchange, Integer> {
 
-	String FIND_INTERCHANGE = "select * from INTERCHANGES where name=?1";
-
-	@Query(value = FIND_INTERCHANGE, nativeQuery = true)
+	@Query(value = "select * from INTERCHANGES where name=?1", nativeQuery = true)
 	Interchange findByName(String name);
 
-	@Query(value = "SELECT * FROM INTERCHANGES WHERE last_updated BETWEEN ?1 AND ?2",  nativeQuery = true)
+	@Query(value = "select * from interchanges where last_updated between ?1 and ?2",  nativeQuery = true)
 	List<Interchange> findInterchangeOlderThan(Timestamp then, Timestamp now);
 
-	@Query(value = "select * from interchanges where ixn_id in (select fk_ixn_id from data_types where last_updated between ?1 and ?2)", nativeQuery=true)
+	@Query(value = "select * from interchanges where ixn_id in (select ixn_id_cap from data_types where last_updated between ?1 and ?2)", nativeQuery=true)
 	List<Interchange> findInterchangesWithRecentCapabilityChanges(Timestamp then, Timestamp now);
+
+	@Query(value = "select * from interchanges where interchange_status='NEW'", nativeQuery = true)
+	List<Interchange> findInterchangesWithStatusNEW();
+
+	@Query(value = "select * from interchanges where interchange_status='FAILED_CAPABILITY_EXCHANGE'", nativeQuery = true)
+	List<Interchange> findInterchangesWithStatusFAILED_CAPABILITY_EXCHANGE();
+
+	@Query(value = "select * from interchanges where interchange_status='FAILED_SUBSCRIPTION_REQUEST'", nativeQuery = true)
+	List<Interchange> findInterchangesWithStatusFAILED_SUBSCRIPTION_REQUEST();
+
 
 }

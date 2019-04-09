@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -12,14 +13,14 @@ public class Subscription {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
-	@SequenceGenerator(name="sub_generator", sequenceName = "sub_seq", allocationSize=50)
-	@Column(name="sub_id")
+	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq", allocationSize = 50)
+	@Column(name = "sub_id")
 	private Integer sub_id;
 
-	public enum Status{REQUESTED, CREATED, REJECTED}
+	public enum SubscriptionStatus {REQUESTED, CREATED, REJECTED}
 
 	@Enumerated(EnumType.STRING)
-	private Status status;
+	private SubscriptionStatus subscriptionStatus;
 
 	@Column
 	@UpdateTimestamp
@@ -27,19 +28,22 @@ public class Subscription {
 
 	private String selector;
 
-	public Subscription(){}
+	private String path;
 
-	public Subscription(String selector, Status status) {
+	public Subscription() {
+	}
+
+	public Subscription(String selector, SubscriptionStatus subscriptionStatus) {
 		this.selector = selector;
-		this.status = status;
+		this.subscriptionStatus = subscriptionStatus;
 	}
 
-	public Status getStatus() {
-		return status;
+	public SubscriptionStatus getSubscriptionStatus() {
+		return subscriptionStatus;
 	}
 
-	public void setStatus(Status status) {
-		this.status = status;
+	public void setSubscriptionStatus(SubscriptionStatus subscriptionStatus) {
+		this.subscriptionStatus = subscriptionStatus;
 	}
 
 	public String getSelector() {
@@ -55,5 +59,22 @@ public class Subscription {
 		return sub_id;
 	}
 
+	public String getPath() {
+		return path;
+	}
 
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	@Override
+	public String toString() {
+		return "Subscription{" +
+				"sub_id=" + sub_id +
+				", subscriptionStatus=" + subscriptionStatus +
+				", lastUpdated=" + lastUpdated +
+				", selector='" + selector + '\'' +
+				", path='" + path + '\'' +
+				'}';
+	}
 }

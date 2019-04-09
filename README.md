@@ -31,6 +31,18 @@ testing, and so the container ports will already be in use.
   Adding a command line argument will modify the server name being used (default
   is localhost).
 
+### Federation docker images
+The docker images for federation shares the module "neighbour-model", so we choose to build all of the jars with 
+maven before creating the docker images for them.
+
+To build all federation docker images run these commands from the top folder of the project:
+* `docker build -t federation_build -f federation-docker-files/Federation_build .`
+* `docker build -t neigbour_server -f neighbour-server/Dockerfile .`
+* `docker build -t neigbour_discoverer -f neighbour-discoverer/Dockerfile .`
+* `docker build -t onboard_server -f onboard-server/Dockerfile .`
+
+The module "federation-it" is created to demonstrate how to start a set of containers for test using docker-compose.  
+
 ### Running the Tests
 Unit tests are run by default, for instance when running `mvn clean install`.
 

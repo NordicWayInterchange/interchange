@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @EnableScheduling
 @EnableJpaRepositories(basePackages={"no.vegvesen.ixn.federation.repository"})
 @EntityScan(basePackages={"no.vegvesen.ixn.federation.model"})
-public class Application {
+public class NeighbourDiscovererApplication {
 
 	@Bean
 	public RestTemplate restTemplate() {
@@ -20,7 +20,9 @@ public class Application {
 	}
 
 
+
+
 	public static void main(String[] args){
-		SpringApplication.run(Application.class);
+		SpringApplication.run(NeighbourDiscovererApplication.class);
 	}
 }

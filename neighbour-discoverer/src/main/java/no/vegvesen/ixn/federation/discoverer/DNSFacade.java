@@ -6,30 +6,43 @@ import no.vegvesen.ixn.federation.model.Interchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SRVRecord;
 import org.xbill.DNS.Type;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class DNSFacade {
+@ConditionalOnProperty(name ="dns.type", havingValue = "prod", matchIfMissing = true)
+public class DNSFacade implements DNSFacadeInterface {
 
 	private String domain;
+	private String controlChannelPortnr;
+	private String messageChannelPortnr;
 	private Logger logger = LoggerFactory.getLogger(DNSFacade.class);
 
-	public DNSFacade(@Value("${dns.lookup.domain.name}") String domain){
+	public DNSFacade(@Value("${dns.lookup.domain.name}") String domain,
+					 @Value("${control.channel.portnr}") String controlChannelPortnr,
+					 @Value("${message.channel.portnr}") String messageChannelPortnr){
 
 		if(!domain.startsWith(".")){
 			this.domain = "."+domain;
 		}else {
 			this.domain = domain;
 		}
+
+		this.controlChannelPortnr = controlChannelPortnr;
+		this.messageChannelPortnr = messageChannelPortnr;
 	}
 
 	// Returns a list of interchanges discovered through DNS lookup.
+	@Override
 	public List<Interchange> getNeighbours() {
 
 		List<Interchange> interchanges = new ArrayList<>();
@@ -47,6 +60,9 @@ public class DNSFacade {
 
 				int lengthDomain = target.indexOf(domain);
 				interchange.setName(target.substring(0, lengthDomain));
+				interchange.setControlChannelPort(controlChannelPortnr);
+				interchange.setMessageChannelPort(messageChannelPortnr);
+				interchange.setDomainName(domain);
 
 				interchanges.add(interchange);
 				ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -59,10 +75,6 @@ public class DNSFacade {
 		}
 
 		return interchanges;
-	}
-
-	public String getDomain(){
-		return domain;
 	}
 
 }

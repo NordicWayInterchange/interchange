@@ -34,6 +34,7 @@
         <module>neighbour-discoverer</module>
         <module>onboard-server</module>
         <module>routing-configurer</module>
+        <module>federation-it</module>
         <module>interchangenode</module>
         <module>debugclient</module>
     </modules>

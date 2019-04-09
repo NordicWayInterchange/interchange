@@ -1,0 +1,62 @@
+version: '3'
+services:
+
+  federation-build:
+    build:
+      dockerfile: federation-docker-files/Federation_build
+      context: ../../../../
+    image: federation-build
+
+  node1_db:
+    build:
+      dockerfile: Dockerfile
+      context: ./server_db
+    image: node1_db
+    container_name: server_db
+    ports:
+      - 5432
+    environment:
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation
+
+  server_node1:
+    build:
+      dockerfile: neighbour-server/Dockerfile
+      context: ../../../../
+    container_name: server_node1
+    depends_on:
+      - node1_db
+      - federation-build
+    ports:
+      - 8090:8090
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://node1_db:5432/federation
+      - SERVER_NAME=localhost
+
+  node2_db:
+    build:
+      dockerfile: Dockerfile
+      context:  ./client_db
+    image: node2_db
+    container_name: client_db
+    ports:
+      - 7070:5432
+    environment:
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation
+
+  server_node2:
+    build:
+      dockerfile: neighbour-server/Dockerfile
+      context: ../../../../
+    container_name: server_node2
+    depends_on:
+      - node2_db
+      - federation-build
+    ports:
+      - 8070:8090
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://node2_db:5432/federation
+      - SERVER_NAME=bouvet

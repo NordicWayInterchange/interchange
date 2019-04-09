@@ -9,7 +9,7 @@ import java.util.Set;
 @Entity
 @Table(name = "service_providers",
 		uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_spr_name"))
-public class IxnServiceProvider {
+public class ServiceProvider {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sp_generator")
@@ -23,11 +23,14 @@ public class IxnServiceProvider {
 	@JoinColumn(name = "spr_id_cap", foreignKey = @ForeignKey(name = "fk_dat_spr"))
 	private Set<DataType> capabilities;
 
-	public IxnServiceProvider() {
-	}
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "spr_id_sub", foreignKey = @ForeignKey(name = "fk_sub_spr"))
+	private Set<Subscription> subscriptions;
+
+	public ServiceProvider() { }
 
 	@JsonCreator
-	public IxnServiceProvider(@JsonProperty("name") String name) {
+	public ServiceProvider(@JsonProperty("name") String name) {
 		this.name = name;
 	}
 
@@ -53,5 +56,23 @@ public class IxnServiceProvider {
 
 	public void setCapabilities(Set<DataType> capabilities) {
 		this.capabilities = capabilities;
+	}
+
+	public Set<Subscription> getSubscriptions() {
+		return subscriptions;
+	}
+
+	public void setSubscriptions(Set<Subscription> subscriptions) {
+		this.subscriptions = subscriptions;
+	}
+
+	@Override
+	public String toString() {
+		return "ServiceProvider{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", capabilities=" + capabilities +
+				", subscriptions=" + subscriptions +
+				'}';
 	}
 }

@@ -15,8 +15,8 @@ public class QpidClientTest {
 	public void createBindingWithTwoSubscriptionsWillBeJoinedWithLogicalOperatorOR() {
 		QpidClient c = new QpidClient("aaa", "aaa", mock(RestTemplate.class));
 		HashSet<Subscription> selectors = new HashSet<>();
-		selectors.add(new Subscription("a", Subscription.Status.CREATED));
-		selectors.add(new Subscription("b", Subscription.Status.CREATED));
+		selectors.add(new Subscription("a", Subscription.SubscriptionStatus.CREATED));
+		selectors.add(new Subscription("b", Subscription.SubscriptionStatus.CREATED));
 		assertThat(c.createBinding(selectors)).contains("(a)").contains(" OR ").contains("(b)");
 	}
 
@@ -24,7 +24,7 @@ public class QpidClientTest {
 	public void createBindingWithOneSubscriptionWillBeGuardedWithParentheses() {
 		QpidClient c = new QpidClient("aaa", "aaa", mock(RestTemplate.class));
 		HashSet<Subscription> selectors = new HashSet<>();
-		selectors.add(new Subscription("a", Subscription.Status.CREATED));
+		selectors.add(new Subscription("a", Subscription.SubscriptionStatus.CREATED));
 		assertThat(c.createBinding(selectors)).isEqualTo("(a)");
 	}
 }

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.model.IxnServiceProvider;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +20,9 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/createServiceProvider")
 	@ResponseBody
-	public IxnServiceProvider updateSubscription(@RequestBody IxnServiceProvider serviceProvider){
+	public ServiceProvider updateSubscription(@RequestBody ServiceProvider serviceProvider){
 		logger.debug("service provider name: " + serviceProvider.getName());
-		IxnServiceProvider existing = repository.findByName(serviceProvider.getName());
+		ServiceProvider existing = repository.findByName(serviceProvider.getName());
 		if (existing != null) {
 			serviceProvider.setId(existing.getId());
 		}

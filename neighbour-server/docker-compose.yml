@@ -1,0 +1,10 @@
+version: '3'
+services:
+
+  server_node1:
+    build: .
+    environment:
+    - POSTGRES_URI=jdbc:postgresql://node1_db:5432/federation
+    container_name: server_node1
+    hostname: server_node1
+
