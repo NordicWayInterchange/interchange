@@ -29,6 +29,7 @@
     </build>
 
     <modules>
+        <module>ssl-utils</module>
         <module>neighbour-model</module>
         <module>neighbour-server</module>
         <module>neighbour-discoverer</module>
