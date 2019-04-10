@@ -98,7 +98,7 @@
         },
         {
           "objectType": "ALL",
-          "identity": "localhost",
+          "identity": "administrators",
           "operation": "ALL",
           "outcome": "ALLOW_LOG",
           "attributes": {}
