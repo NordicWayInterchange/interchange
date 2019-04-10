@@ -48,15 +48,14 @@ public class QpidClient {
 
 	// A method that posts a json object to the Qpid REST api, using a given URI and a given command.
 	private void postQpid(String urlString, String message, String command) {
-
 		String url = urlString + command;
 		logger.info("URL: " + url);
+
 		ResponseEntity<String> response = restTemplate.postForEntity(url, message, String.class);
-		if (response.getStatusCode().isError()) {
-			//TODO: introduce our own runtime exception
-			throw new RuntimeException(String.format("could not post to %s with payload %s", url, message));
-		}
 		logger.debug("Resonse code for POST to {} with payload {} is {}", url, message, response.getStatusCodeValue());
+		if (response.getStatusCode().isError()) {
+			throw new RoutingConfigurerException(String.format("could not post to %s with payload %s", url, message));
+		}
 	}
 
 	// Updates the binding of a queue to a new binding.
@@ -91,9 +90,6 @@ public class QpidClient {
 
 			postQpid(queueURL, jsonString, "/");
 
-			logger.info("Creating binding for queue..");
-			String binding = createBinding(interchange.getSubscriptions());
-			updateBinding(binding, interchange.getName());
 		} catch (JSONException e) {
 			throw new RoutingConfigurerException(e);
 		}
