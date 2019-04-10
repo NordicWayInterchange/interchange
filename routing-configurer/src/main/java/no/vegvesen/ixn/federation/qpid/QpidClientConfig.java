@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,13 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.FileInputStream;
 import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 
 @Configuration
 public class QpidClientConfig {
@@ -35,63 +31,31 @@ public class QpidClientConfig {
 	@Value("${qpid.rest.api.keystore.key.password}")
 	String keyPassword;
 
-	private HttpClient httpsClient() throws InvalidSSLConfig {
+	private HttpClient httpsClient() {
 		return HttpClients.custom()
 				.setSSLContext(sslContextFromKeystoreAndTruststore())
 				.build();
 	}
 
-	private SSLContext sslContextFromKeystoreAndTruststore() throws InvalidSSLConfig {
-		KeyStore keystore = loadKeystore(keystoreName, keystorePassword, keystoreType);
-		KeyStore truststore = loadKeystore(truststoreName, truststorePassword, truststoreType);
-		return newSSLContext(keystore, keyPassword, truststore);
+	private SSLContext sslContextFromKeystoreAndTruststore() {
+		String keystoreFileName = getFilePathFromClasspathResource(keystoreName);
+		String truststoreFileName = getFilePathFromClasspathResource(truststoreName);
+		return SSLContextFactory.sslContextFromKeyAndTrustStores(
+				keystoreFileName, keystorePassword, keystoreType,
+				truststoreFileName, truststorePassword, truststoreType,
+				keyPassword);
 	}
 
-	private static KeyStore loadKeystore(String keystoreName, String password, String keystoreType) throws InvalidSSLConfig {
-		KeyStore keystore;
-		try {
-			keystore = KeyStore.getInstance(keystoreType);
-			keystore.load(new FileInputStream(getFilePath(keystoreName)), password.toCharArray());
-		} catch (Exception e) {
-			throw new InvalidSSLConfig(e);
-		}
-		return keystore;
-	}
-
-	private static String getFilePath(String jksTestResource) {
-		URL resource = Thread.currentThread().getContextClassLoader().getResource(jksTestResource);
+	private static String getFilePathFromClasspathResource(String classpathResource) {
+		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
 		if (resource != null) {
 			return resource.getFile();
 		}
-		throw new RuntimeException("Could not load test jks resource " + jksTestResource);
-	}
-
-	private static SSLContext newSSLContext(final KeyStore ks, final String keyPassword, final KeyStore ts) throws InvalidSSLConfig {
-		try {
-			// Get a KeyManager and initialize it
-			final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-			kmf.init(ks, keyPassword.toCharArray());
-
-			final TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-			tmf.init(ts);
-
-			// Get the SSLContext to help create SSLSocketFactory
-			final SSLContext sslContext = SSLContext.getInstance("TLS");
-			sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-			return sslContext;
-		} catch (final GeneralSecurityException e) {
-			throw new InvalidSSLConfig(e);
-		}
-	}
-
-	static class InvalidSSLConfig extends Exception {
-		InvalidSSLConfig(Exception e) {
-			super(e);
-		}
+		throw new RuntimeException("Could not load classpath resource " + classpathResource);
 	}
 
 	@Bean
-	public RestTemplate restTemplate() throws InvalidSSLConfig {
+	public RestTemplate restTemplate() throws SSLContextFactory.InvalidSSLConfig {
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpsClient()));
 	}
 }
