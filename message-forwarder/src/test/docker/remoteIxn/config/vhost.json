@@ -135,8 +135,17 @@
           }
         },
         {
+          "objectType": "EXCHANGE",
+          "identity": "ALL",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "fedEx"
+          }
+        },
+        {
           "objectType": "VIRTUALHOST",
-          "identity": "messaging-users",
+          "identity": "ALL",
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {

@@ -14,11 +14,15 @@ ENV QPID_WORK=/work
 
 ADD config.json /work/
 ADD entrypoint.sh /
-ADD generate-keys.sh /scripts/
+#ADD generate-keys.sh /scripts/
 ADD config /config
+ADD local.crt /keys/
+ADD local.key /keys/
+ADD ca.crt /keys/
 
-ENV CERTIFICATE_FILE "/scripts/tmp/keys/server.crt"
-ENV PRIVATE_KEY_FILE "/scripts/tmp/keys/server.key"
+ENV CERTIFICATE_FILE "/keys/local.crt"
+ENV CA_CERT_FILE "/keys/ca.crt"
+ENV PRIVATE_KEY_FILE "/keys/local.key"
 ENV VHOST_FILE "/config/vhost.json"
 ENV GROUPS_FILE "/config/groups"
 ENV PASSWD_FILE "/config/passwd"

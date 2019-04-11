@@ -119,7 +119,7 @@
       "type": "NonJavaTrustStore",
       "exposedAsMessageSource": false,
       "trustAnchorValidityEnforced": false,
-      "certificatesUrl": "${CERTIFICATE_FILE}"
+      "certificatesUrl": "${CA_CERT_FILE}"
     }
   ],
   "virtualhostnodes": [
