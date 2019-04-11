@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-//@EnableScheduling
+@EnableScheduling
 @EnableJpaRepositories(basePackages={"no.vegvesen.ixn.federation.repository"})
 @EntityScan(basePackages={"no.vegvesen.ixn.federation.model"})
 @SpringBootApplication

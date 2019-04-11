@@ -131,7 +131,7 @@
         },
         {
           "objectType": "VIRTUALHOST",
-          "identity": "messaging-users",
+          "identity": "ALL",
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
@@ -145,6 +145,15 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "test-out"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "ALL",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "fedTest"
           }
         },
         {

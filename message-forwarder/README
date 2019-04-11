@@ -11,7 +11,7 @@ now push your changes.
 How I've built and run the database during development
 in message-forwarder/src/test/docker/db
 docker build -t interchanges_test .
-docker run -it -e POSTGRES_USER=federation -e POSTGRES_PASSWORD=federation -e POSTGRES_DB=federation -p 7070:5432 --name interchange_container interchanges_test
+docker run --rm -it -e POSTGRES_USER=federation -e POSTGRES_PASSWORD=federation -e POSTGRES_DB=federation -p 7070:5432 --name interchange_container interchanges_test
 
 If you want more rows in the database, add the sql insert statements in the data.sql file.
 
@@ -32,4 +32,8 @@ and to run:
 docker run --rm -it -p 8081:8080 -p 6671:5671 -p 6672:5672 --name remote_ixn remote_ixn
 	
 
+CA: (DENNE BRUKES IKKE NÅ. Kan kanskje løse dette i en enkel docker-fil.)
 
+docker build -t certificate_auth .
+
+docker run --rm -it --name certificate_auth_container certificate_auth sh

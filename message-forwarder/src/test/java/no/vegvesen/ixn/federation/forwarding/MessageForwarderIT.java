@@ -10,16 +10,23 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
-import java.util.List;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class MessageForwarderIT {
 
+
     @Autowired
     MessageForwarder forwarder;
+
     @Test
-    public void testFoo() throws JMSException, NamingException {
+    public void testFoo() throws JMSException, NamingException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
         forwarder.setupConnectionsToNewNeighbours();
     }
 
