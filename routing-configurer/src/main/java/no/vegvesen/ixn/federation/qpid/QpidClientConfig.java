@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import no.vegvesen.ixn.ssl.KeystoreDetails;
+import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -41,9 +43,8 @@ public class QpidClientConfig {
 		String keystoreFileName = getFilePathFromClasspathResource(keystoreName);
 		String truststoreFileName = getFilePathFromClasspathResource(truststoreName);
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				keystoreFileName, keystorePassword, keystoreType,
-				truststoreFileName, truststorePassword, truststoreType,
-				keyPassword);
+				new KeystoreDetails(keystoreFileName, keystorePassword, KeystoreType.valueOf(keystoreType), keyPassword),
+				new KeystoreDetails(truststoreFileName, truststorePassword, KeystoreType.valueOf(truststoreType)));
 	}
 
 	private static String getFilePathFromClasspathResource(String classpathResource) {
