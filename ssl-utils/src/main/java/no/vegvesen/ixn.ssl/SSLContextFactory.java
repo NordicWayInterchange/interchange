@@ -7,27 +7,27 @@ import java.io.FileInputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
+@SuppressWarnings("WeakerAccess")
 public class SSLContextFactory {
-	public static SSLContext sslContextFromKeyAndTrustStores(String keystoreFileName, String keystorePassword, String keystoreType,
-													  String truststoreFileName, String truststorePassword, String truststoreType,
-													  String keyPassword) throws InvalidSSLConfig {
-		KeyStore keystore = loadKeystoreFromFile(keystoreFileName, keystorePassword, keystoreType);
-		KeyStore truststore = loadKeystoreFromFile(truststoreFileName, truststorePassword, truststoreType);
-		return newSSLContext(keystore, keyPassword, truststore);
+	public static SSLContext sslContextFromKeyAndTrustStores(KeystoreDetails keystoreDetails,
+															 KeystoreDetails truststoreDetails){
+		KeyStore keystore = loadKeystoreFromFile(keystoreDetails);
+		KeyStore truststore = loadKeystoreFromFile(truststoreDetails);
+		return newSSLContext(keystore, keystoreDetails.getKeyPassword(), truststore);
 	}
 
-	private static KeyStore loadKeystoreFromFile(String keystoreFileName, String keystorePassword, String keystoreType) {
+	private static KeyStore loadKeystoreFromFile(KeystoreDetails details) {
 		KeyStore keyStore;
 		try {
-			keyStore = KeyStore.getInstance(keystoreType);
-			keyStore.load(new FileInputStream(keystoreFileName), keystorePassword.toCharArray());
+			keyStore = KeyStore.getInstance(details.getType().toString());
+			keyStore.load(new FileInputStream(details.getFileName()), details.getPassword().toCharArray());
 		} catch (Exception e1) {
 			throw new InvalidSSLConfig(e1);
 		}
 		return keyStore;
 	}
 
-	private static SSLContext newSSLContext(final KeyStore ks, final String keyPassword, final KeyStore ts)  {
+	private static SSLContext newSSLContext(final KeyStore ks, final String keyPassword, final KeyStore ts) {
 		try {
 			// Get a KeyManager and initialize it
 			final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
