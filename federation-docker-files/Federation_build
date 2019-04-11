@@ -1,6 +1,10 @@
 FROM maven:3.5.4-jdk-8-alpine
 
 COPY pom.xml pom.xml
+
+COPY ssl-utils/pom.xml ssl-utils/pom.xml
+COPY ssl-utils/src ssl-utils/src
+
 COPY debugclient/pom.xml debugclient/pom.xml
 COPY debugclient/src debugclient/src
 
