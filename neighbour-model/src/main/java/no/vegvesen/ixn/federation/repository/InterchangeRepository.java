@@ -35,6 +35,5 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	List<Interchange> findInterchangesWithFailedCapabilityExchange();
 
 
-	//TODO: add query when statuses are available
-	List<Interchange> findInterchangesWithSubscriptionStatusRequestedAndAtLeastOneSubscriptionAccepted();
+
 }
