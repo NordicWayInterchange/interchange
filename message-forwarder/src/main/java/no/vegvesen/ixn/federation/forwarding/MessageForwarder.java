@@ -17,57 +17,13 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @Service
 public class MessageForwarder {
 
-
-    public static class MessageForwarderException extends RuntimeException {
-        public MessageForwarderException(Exception e) {
-            super(e);
-        }
-
-        public MessageForwarderException(String cause) {
-            super(cause);
-        }
-    }
-
-    public static class MessageForwardListener implements MessageListener {
-        private AtomicBoolean running;
-        private final MessageConsumer messageConsumer;
-        private final MessageProducer producer;
-
-        public MessageForwardListener(MessageConsumer messageConsumer, MessageProducer producer) {
-            this.messageConsumer = messageConsumer;
-            this.producer = producer;
-            this.running = new AtomicBoolean(true);
-        }
-
-        @Override
-        public void onMessage(Message message) {
-            if (running.get()) {
-                try {
-                    producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-                } catch (JMSException e) {
-                    //TODO what to do? Probably need to mark as unusable, and tear down???
-                    try {
-                        producer.close();
-                        running.set(false);
-                    } catch (JMSException e1) {
-                        e1.printStackTrace();
-                    }
-                    throw new MessageForwarderException(e);
-                }
-            } else {
-                throw new MessageForwarderException("Not running!");
-            }
-        }
-
-
-
-    }
+    //TODO This is the interface to use in order to set the listener running flag to false
+    ExceptionListener exceptionListener = (e) -> e.printStackTrace();
 
     @Value("${forwarder.localIxnDomainName}")
     private String localIxnDomainName;
@@ -78,16 +34,13 @@ public class MessageForwarder {
     private NeighbourFetcher neighbourFetcher;
     private final SSLContext sslContext;
     //TODO this will probably not work in a threaded environment...
-    //private List<Interchange> connectedInterchanges;
     private Map<String,MessageForwardListener> listeners;
-    //private List<String> listeners;
     private Logger logger = LoggerFactory.getLogger(MessageForwarder.class);
 
 
     @Autowired
     public MessageForwarder(NeighbourFetcher fetcher, SSLContext sslContext) {
         this.neighbourFetcher = fetcher;
-        //this.connectedInterchanges = new ArrayList<>();
         this.listeners = new HashMap<>();
         this.sslContext = sslContext;
     }
@@ -103,7 +56,7 @@ public class MessageForwarder {
         Set<String> remoteNames = listeners.keySet();
         for (String remoteName : remoteNames) {
             MessageForwardListener listener = listeners.get(remoteName);
-            if (! listener.running.get()) {
+            if (! listener.isRunning()) {
                 listeners.remove(remoteName);
             }
         }
@@ -114,7 +67,6 @@ public class MessageForwarder {
         List<Interchange> interchanges = neighbourFetcher.listNeighbourCandidates();
         for (Interchange ixn : interchanges) {
             String name = ixn.getName();
-            //if (! connectedInterchanges.contains(ixn)) {
             if (! listeners.containsKey(name)) {
                 System.out.println(String.format("name: %s, address %s:%s, fedIn: %s status: %s",ixn.getName(),ixn.getDomainName(),ixn.getControlChannelPort(),ixn.getFedIn(),ixn.getInterchangeStatus()));
                 logger.debug("Found nex Ixn %s, setting up connections");
@@ -124,7 +76,6 @@ public class MessageForwarder {
                 messageConsumer.setMessageListener(messageListener);
                 
                 //TODO Should we have a single object that is a message consumer? Or one per destination? messageConsumer.setMessageListener(this);
-                //connectedInterchanges.add(ixn);
                 listeners.put(name,messageListener);
             } else {
                 logger.debug("No new Ixn found");
@@ -168,9 +119,10 @@ public class MessageForwarder {
         writeFactory.setPopulateJMSXUserID(true);
         writeFactory.setSslContext(sslContext);
 
+        //TODO take username and password from other places
         Destination queueS = (Destination) writeContext.lookup("sendQueue");
         Connection writeConnection = writeFactory.createConnection("remote", "password");
-        //writeConnection.
+        writeConnection.setExceptionListener(exceptionListener);
         writeConnection.start();
         Session writeSession = writeConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         return writeSession.createProducer(queueS);
