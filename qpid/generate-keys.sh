@@ -15,6 +15,8 @@ serverCert() {
     rm -f server.csr server.srl
     keytool -import -trustcacerts -file server.crt -keystore truststore.jks \
         -storepass password -noprompt
+    openssl pkcs12 -export -name server -out server.p12 -inkey server.key \
+        -in server.crt -CAfile server.crt -password pass:password
 }
 
 userCert() {

@@ -32,7 +32,7 @@
                                 <configuration>
                                     <workingDirectory>${project.basedir}/..</workingDirectory>
                                     <executable>docker-compose</executable>
-                                    <commandlineArgs>-f federation-it/src/test/docker/federation-compose.yml up --detach</commandlineArgs>
+                                    <commandlineArgs>-f federation-compose.yml up --detach</commandlineArgs>
                                 </configuration>
                             </execution>
 
@@ -45,7 +45,7 @@
                                 <configuration>
                                     <workingDirectory>${project.basedir}/..</workingDirectory>
                                     <executable>docker-compose</executable>
-                                    <commandlineArgs>-f federation-it/src/test/docker/federation-compose.yml stop</commandlineArgs>
+                                    <commandlineArgs>-f federation-compose.yml stop</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
