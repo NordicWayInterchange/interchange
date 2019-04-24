@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,16 +22,16 @@ public class RoutingConfigurer {
 	}
 
 
+	@Scheduled(fixedRateString = "${routing.configurer.interval}")
 	public void checkForInterchangesToSetupRoutingFor() {
-		List<Interchange> readyToSetupRouting = repository.findInterchangesWithSubscriptionStatusRequestedAndAtLeastOneSubscriptionAccepted();
+		List<Interchange> readyToSetupRouting = repository.findInterchangesWithStatusNEW(); //TODO Use correct criteria
 		for (Interchange interchange : readyToSetupRouting) {
 			setupRouting(interchange);
 		}
 	}
 
 	private void setupRouting(Interchange interchange) {
-		String queueName = "fed-out-" + interchange.getName();
-		if (!qpidClient.queueExists(queueName)) {
+		if (!qpidClient.queueExists(interchange.getName())) {
 			qpidClient.createQueue(interchange);
 		}
 	}

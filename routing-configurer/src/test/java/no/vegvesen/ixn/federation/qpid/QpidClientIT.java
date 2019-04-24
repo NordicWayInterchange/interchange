@@ -11,7 +11,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class})
+@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
 @RunWith(SpringRunner.class)
 public class QpidClientIT {
 
