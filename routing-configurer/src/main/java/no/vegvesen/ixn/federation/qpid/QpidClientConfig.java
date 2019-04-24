@@ -14,9 +14,13 @@ import javax.net.ssl.SSLContext;
 @Configuration
 public class QpidClientConfig {
 
+	private final SSLContext sslContext;
+
 	@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 	@Autowired
-	SSLContext sslContext;
+	public QpidClientConfig(SSLContext sslContext) {
+		this.sslContext = sslContext;
+	}
 
 	private HttpClient httpsClient() {
 		return HttpClients.custom()
