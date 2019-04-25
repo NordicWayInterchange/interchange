@@ -25,4 +25,7 @@ COPY routing-configurer/pom.xml routing-configurer/pom.xml
 COPY federation-it/src federation-it/src
 COPY federation-it/pom.xml federation-it/pom.xml
 
+COPY test-data-helpers/src test-data-helpers/src
+COPY test-data-helpers/pom.xml test-data-helpers/pom.xml
+
 RUN mvn clean install -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B
