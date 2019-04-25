@@ -1,18 +1,15 @@
 package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import net.bytebuddy.asm.Advice;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+
 
 @Entity
-@Table(	name = "interchanges",
-		uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_ixn_name"))
+@Table(	name = "interchanges", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_ixn_name"))
 public class Interchange {
 
 	@JsonIgnore
@@ -24,18 +21,18 @@ public class Interchange {
 
 	private String name; // common name from the certificate
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "ixn_id_cap", foreignKey = @ForeignKey(name="fk_dat_ixn"))
-	private Set<DataType> capabilities = Collections.emptySet();
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "ixn_id_cap", referencedColumnName = "cap_id")
+	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 
-	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "ixn_id_sub_out", foreignKey = @ForeignKey(name = "fk_sub_ixn_sub_out"))
-	private Set<Subscription> subscriptions = Collections.emptySet();
+	@OneToOne(cascade= CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name="ixn_id_sub_out", referencedColumnName = "subreq_id")
+	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 
 	@JsonIgnore
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "ixn_id_fed_in", foreignKey = @ForeignKey(name="fk_sub_ixn_fed_in"))
-	private Set<Subscription> fedIn = Collections.emptySet();
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name= "ixn_id_fed_in", referencedColumnName = "subreq_id")
+	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
@@ -49,13 +46,6 @@ public class Interchange {
 	@JsonIgnore
 	private int backoffAttempts = 0;
 
-	public enum InterchangeStatus {NEW, KNOWN, FEDERATED, UNREACHABLE,
-		FAILED_CAPABILITY_EXCHANGE, FAILED_SUBSCRIPTION_REQUEST}
-
-
-	@Enumerated(EnumType.STRING)
-	private InterchangeStatus interchangeStatus;
-
 	@JsonIgnore
 	private String domainName;
 	@JsonIgnore
@@ -63,23 +53,20 @@ public class Interchange {
 	@JsonIgnore
 	private String controlChannelPort;
 
-
-
 	public Interchange(){}
 
-	public Interchange(String name, Set<DataType> capabilities, Set<Subscription> subscriptions, Set<Subscription> fedIn) {
+	public Interchange(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn) {
 		this.name = name;
 		this.capabilities = capabilities;
-		this.subscriptions = subscriptions;
+		this.subscriptionRequest = subscriptions;
 		this.fedIn = fedIn;
-		this.interchangeStatus = InterchangeStatus.NEW;
 	}
 
-	public Set<DataType> getCapabilities() {
+	public Capabilities getCapabilities() {
 		return capabilities;
 	}
 
-	public void setCapabilities(Set<DataType> capabilities) {
+	public void setCapabilities(Capabilities capabilities) {
 		this.capabilities = capabilities;
 	}
 
@@ -91,17 +78,21 @@ public class Interchange {
 		this.name = name;
 	}
 
-	public Set<Subscription> getSubscriptions() {
-		return subscriptions;
+	public SubscriptionRequest getSubscriptionRequest() {
+		return subscriptionRequest;
 	}
 
-	public void setSubscriptions(Set<Subscription> subscriptions) {
-		this.subscriptions = subscriptions;
+	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
+		this.subscriptionRequest = subscriptionRequest;
 	}
 
-	public Subscription getSubscriptionById(Integer id) throws SubscriptionNotFoundException{
+	public SubscriptionRequest getFedIn() {
+		return fedIn;
+	}
 
-		for (Subscription subscription : subscriptions){
+	public Subscription getSubscriptionById(Integer id) throws SubscriptionNotFoundException {
+
+		for (Subscription subscription : subscriptionRequest.getSubscriptions()){
 			if (subscription.getId().equals(id)){
 				return subscription;
 			}
@@ -109,20 +100,7 @@ public class Interchange {
 
 		throw new SubscriptionNotFoundException("Could not find subscription with id " + id + " on interchange " + name);
 	}
-
-	public InterchangeStatus getInterchangeStatus() {
-		return interchangeStatus;
-	}
-
-	public void setInterchangeStatus(InterchangeStatus interchangeStatus) {
-		this.interchangeStatus = interchangeStatus;
-	}
-
-	public Set<Subscription> getFedIn() {
-		return fedIn;
-	}
-
-	public void setFedIn(Set<Subscription> fedIn) {
+	public void setFedIn(SubscriptionRequest fedIn) {
 		this.fedIn = fedIn;
 	}
 
@@ -130,8 +108,10 @@ public class Interchange {
 		return lastSeen;
 	}
 
-	public void setLastSeen(LocalDateTime lastSeen) {
-		this.lastSeen = lastSeen;
+	@PreUpdate
+	@PrePersist
+	public void setLastSeen() {
+		this.lastSeen = LocalDateTime.now();
 	}
 
 	public String getDomainName() {
@@ -180,13 +160,12 @@ public class Interchange {
 				"ixn_id=" + ixn_id +
 				", name='" + name + '\'' +
 				", capabilities=" + capabilities +
-				", subscriptions=" + subscriptions +
+				", subscriptionRequest=" + subscriptionRequest +
 				", fedIn=" + fedIn +
 				", lastUpdated=" + lastUpdated +
 				", lastSeen=" + lastSeen +
 				", backoffStart=" + backoffStart +
 				", backoffAttempts=" + backoffAttempts +
-				", interchangeStatus=" + interchangeStatus +
 				", domainName='" + domainName + '\'' +
 				", messageChannelPort='" + messageChannelPort + '\'' +
 				", controlChannelPort='" + controlChannelPort + '\'' +

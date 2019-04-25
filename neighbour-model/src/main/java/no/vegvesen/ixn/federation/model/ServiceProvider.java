@@ -7,8 +7,7 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "service_providers",
-		uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_spr_name"))
+@Table(name = "service_providers", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_spr_name"))
 public class ServiceProvider {
 
 	@Id
