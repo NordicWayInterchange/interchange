@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -14,18 +16,17 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class QpidClient {
 	private Logger logger = LoggerFactory.getLogger(QpidClient.class);
 	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s/nwEx";
-	private static final String QUEUE_URL_PATTERN = "%s/api/latest/queue/default/%s";
+	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
 
 	private final String exchangeURL;
-	private final String queueURL;
+	private final String queuesURL;
 	private final String pingURL;
 
 	private final RestTemplate restTemplate;
@@ -35,7 +36,7 @@ public class QpidClient {
 					  @Value("${qpid.rest.api.vhost}") String vhostName,
 					  RestTemplate restTemplate) {
 		this.exchangeURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
-		this.queueURL = String.format(QUEUE_URL_PATTERN, baseUrl, vhostName);
+		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
 		this.restTemplate = restTemplate;
 	}
@@ -86,34 +87,14 @@ public class QpidClient {
 			json.put("durable", true);
 			String jsonString = json.toString();
 			logger.info("Creating queue:" + jsonString);
-			postQpid(queueURL, jsonString, "/");
+			postQpid(queuesURL, jsonString, "/");
 		} catch (JSONException e) {
 			throw new RoutingConfigurerException(e);
 		}
 	}
 
-	/**
-	 * Creates a binding based on the subscriptions of a neighbouring Interchange.
-	 */
-	String createBinding(Set<Subscription> subscriptions) {
-		StringBuilder binding = new StringBuilder();
-
-		Iterator<Subscription> subscriptionIterator = subscriptions.iterator();
-		while (subscriptionIterator.hasNext()) {
-			Subscription subscription = subscriptionIterator.next();
-			binding.append("(");
-			binding.append(subscription.getSelector());
-			binding.append(")");
-			if (subscriptionIterator.hasNext()) {
-				binding.append(" OR ");
-			}
-		}
-		logger.info("Queue binding:" + binding);
-		return binding.toString();
-	}
-
 	boolean queueExists(String queueName) {
-		String queueQueryUrl = queueURL + "/" + queueName;
+		String queueQueryUrl = queuesURL + "/" + queueName;
 		logger.info("quering for queue {} with url {}", queueName, queueQueryUrl);
 		ResponseEntity<Object> response;
 		try {
@@ -127,9 +108,77 @@ public class QpidClient {
 	}
 
 	public void setupRouting(Interchange interchange) {
-		if (!queueExists(interchange.getName())) {
+		if (queueExists(interchange.getName())) {
+			unbindOldUnwantedBindings(interchange);
+		}
+		else {
 			createQueue(interchange);
 		}
-		updateBinding(createBinding(interchange.getSubscriptions()), interchange.getName(), interchange.getName());
+		for (Subscription subscription : interchange.getSubscriptions()) {
+			updateBinding(subscription.getSelector(), interchange.getName(), bindKey(interchange, subscription));
+		}
 	}
+
+	private void unbindOldUnwantedBindings(Interchange interchange) {
+		Set<String> unwantedBindKeys = getUnwantedBindKeys(interchange);
+		for (String unwantedBindKey : unwantedBindKeys) {
+			unbindBindKey(interchange, unwantedBindKey);
+		}
+	}
+
+	private void unbindBindKey(Interchange interchange, String unwantedBindKey) {
+		try {
+			JSONObject json = new JSONObject();
+			json.put("destination", interchange.getName());
+			json.put("bindingKey", unwantedBindKey);
+			String jsonString = json.toString();
+
+			logger.info("Json string: " + jsonString);
+			postQpid(exchangeURL, jsonString, "/unbind");
+		} catch (JSONException e) {
+			throw new RoutingConfigurerException(e);
+		}
+	}
+
+	private Set<String> getUnwantedBindKeys(Interchange interchange) {
+		Set<String> existingBindKeys = getQueueBindKeys(interchange.getName());
+		Set<String> wantedBindKeys = wantedBindings(interchange);
+		Set<String> unwantedBindKeys = new HashSet<>(existingBindKeys);
+		unwantedBindKeys.removeAll(wantedBindKeys);
+		return unwantedBindKeys;
+	}
+
+	private Set<String> wantedBindings(Interchange interchange) {
+		Set<String> wantedBindings = new HashSet<>();
+		for (Subscription subscription : interchange.getSubscriptions()) {
+			wantedBindings.add(bindKey(interchange, subscription));
+		}
+		return wantedBindings;
+	}
+
+	private String bindKey(Interchange interchange, Subscription subscription) {
+		return interchange.getName() + "-" + subscription.getSelector().hashCode();
+	}
+
+	Set<String> getQueueBindKeys(String queueName) {
+		HashSet<String> existingBindKeys = new HashSet<>();
+		String url = queuesURL + "/" + queueName + "/getPublishingLinks";
+
+		ResponseEntity<List<Map<String,Object>>> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<List<Map<String,Object>>>(){});
+		List<Map<String,Object>> queueBindings = response.getBody();
+		if (queueBindings != null) {
+			for (Map<String, Object> binding : queueBindings) {
+				Object bindingKey = binding.get("bindingKey");
+				if (bindingKey instanceof String) {
+					existingBindKeys.add((String)bindingKey);
+				}
+			}
+		}
+		return existingBindKeys;
+	}
+
 }

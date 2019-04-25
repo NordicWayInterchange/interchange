@@ -83,4 +83,20 @@ public class QpidClientIT {
 		client.setupRouting(seabass);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
 	}
+
+	@Test
+	public void interchangeCanUnbindSubscription() {
+		Subscription s1 = new Subscription("a = b", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription s2 = new Subscription("b = c", Subscription.SubscriptionStatus.REQUESTED);
+		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
+		Interchange trout = new Interchange("trout", Collections.emptySet(), subscriptions, Collections.emptySet());
+		client.setupRouting(trout);
+		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
+
+		subscriptions = new HashSet<>(Collections.singletonList(s1));
+		trout = new Interchange("trout", Collections.emptySet(), subscriptions, Collections.emptySet());
+
+		client.setupRouting(trout);
+		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
+	}
 }
