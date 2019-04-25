@@ -59,11 +59,11 @@ public class QpidClient {
 	}
 
 	// Updates the binding of a queue to a new binding.
-	private void updateBinding(String binding, String queueName) {
+	private void updateBinding(String binding, String queueName, String bindingKey) {
 		try {
 			JSONObject json = new JSONObject();
 			json.put("destination", queueName);
-			json.put("bindingKey", "where1");
+			json.put("bindingKey", bindingKey);
 			json.put("replaceExistingArguments", true);
 
 			JSONObject innerjson = new JSONObject();
@@ -79,17 +79,14 @@ public class QpidClient {
 		}
 	}// Creates a new queue for a neighbouring Interchange.
 
-	public void createQueue(Interchange interchange) {
+	void createQueue(Interchange interchange) {
 		try {
 			JSONObject json = new JSONObject();
 			json.put("name", interchange.getName());
 			json.put("durable", true);
-
 			String jsonString = json.toString();
 			logger.info("Creating queue:" + jsonString);
-
 			postQpid(queueURL, jsonString, "/");
-
 		} catch (JSONException e) {
 			throw new RoutingConfigurerException(e);
 		}
@@ -115,7 +112,7 @@ public class QpidClient {
 		return binding.toString();
 	}
 
-	public boolean queueExists(String queueName) {
+	boolean queueExists(String queueName) {
 		String queueQueryUrl = queueURL + "/" + queueName;
 		logger.info("quering for queue {} with url {}", queueName, queueQueryUrl);
 		ResponseEntity<Object> response;
@@ -127,5 +124,12 @@ public class QpidClient {
 			throw new RoutingConfigurerException(e);
 		}
 		return response.getStatusCode().is2xxSuccessful();
+	}
+
+	public void setupRouting(Interchange interchange) {
+		if (!queueExists(interchange.getName())) {
+			createQueue(interchange);
+		}
+		updateBinding(createBinding(interchange.getSubscriptions()), interchange.getName(), interchange.getName());
 	}
 }

@@ -26,13 +26,7 @@ public class RoutingConfigurer {
 	public void checkForInterchangesToSetupRoutingFor() {
 		List<Interchange> readyToSetupRouting = repository.findInterchangesWithStatusNEW(); //TODO Use correct criteria
 		for (Interchange interchange : readyToSetupRouting) {
-			setupRouting(interchange);
-		}
-	}
-
-	private void setupRouting(Interchange interchange) {
-		if (!qpidClient.queueExists(interchange.getName())) {
-			qpidClient.createQueue(interchange);
+			qpidClient.setupRouting(interchange);
 		}
 	}
 }
