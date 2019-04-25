@@ -38,4 +38,9 @@ public class CapabilityMatcherTest {
 		CapabilityMatcher.matches(dataType, "how like 'spat%' or 1=1");
 	}
 
+	@Test(expected = ParseException.class)
+	public void invalidSyntaxIsNotAccepted() throws ParseException {
+		DataType dataType = new DataType("spat",null, null);
+		CapabilityMatcher.matches(dataType, "how flike 'spat%' or 1=1");
+	}
 }
