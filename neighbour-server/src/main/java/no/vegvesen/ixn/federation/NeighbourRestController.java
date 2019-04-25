@@ -1,26 +1,24 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionNotAcceptedException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Interchange;
-import no.vegvesen.ixn.federation.model.Interchange.InterchangeStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
-@RestController
+//
+// TODO: avoid hard coded paths for the API endpoints. Move them to application.properties
+//
+@RestController("/")
 public class NeighbourRestController {
 
 	private InterchangeRepository interchangeRepository;
@@ -30,13 +28,15 @@ public class NeighbourRestController {
 	@Value("${interchange.node-provider.name}")
 	private String myName;
 
+
+
 	@Autowired
-	public NeighbourRestController(InterchangeRepository interchangeRepository, ServiceProviderRepository serviceProviderRepository){
+	public NeighbourRestController(InterchangeRepository interchangeRepository, ServiceProviderRepository serviceProviderRepository) {
 		this.interchangeRepository = interchangeRepository;
 		this.serviceProviderRepository = serviceProviderRepository;
 	}
 
-	private Set<Subscription> setStatusRequestedForAllSubscriptions(Set<Subscription> neighbourSubscriptionRequest){
+	Set<Subscription> setStatusRequestedForAllSubscriptions(Set<Subscription> neighbourSubscriptionRequest){
 		for (Subscription s : neighbourSubscriptionRequest){
 			s.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		}
@@ -44,58 +44,65 @@ public class NeighbourRestController {
 	}
 
 
-	// TODO: Endre denne returtypen til en liste/set av subscriptions,
-	// TODO: hvor hver subscription har en path og en status.
+
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@RequestMapping(method = RequestMethod.POST, value = "/requestSubscription")
-	public Set<Subscription> requestSubscriptions(@RequestBody Interchange interchange){
+	@RequestMapping(method = RequestMethod.POST, path = "/requestSubscription", produces = MediaType.APPLICATION_JSON_VALUE)
+	public SubscriptionRequest requestSubscriptions(@RequestBody Interchange interchange){
+
+		logger.info("Incoming interchange name: " + interchange.getName());
 
 		// Returns a list of paths to poll for subscription status.
 		Interchange updateInterchange = interchangeRepository.findByName(interchange.getName());
-		logger.info("Incoming interchange name: " + interchange.getName());
-		logger.info("Saved interchange name: " + updateInterchange.getName());
-		logger.info("Incoming interchange status: " + interchange.getInterchangeStatus());
-		logger.info("Saved interchange status: " + updateInterchange.getInterchangeStatus().toString());
-		logger.info("Incoming interchange subscriptions: " + interchange.getSubscriptions().toString());
+		logger.info("update interchange:" + updateInterchange);
 
 		if(updateInterchange == null){
-			logger.error("Unknown interchange requesting subscriptions. REJECTED.");
-			throw new InterchangeNotFoundException("Capabilities must be exchanged before it is possible to post a subscription request.");
-		}//else if(updateInterchange.getInterchangeStatus() != InterchangeStatus.KNOWN || updateInterchange.getInterchangeStatus() != InterchangeStatus.FEDERATED){
-		else if(updateInterchange.getInterchangeStatus() == InterchangeStatus.NEW){
-			logger.error("Interchange has status: " + updateInterchange.getInterchangeStatus().toString());
-			logger.error("Interchange with status other than KNOWN or FEDERATED tried to post a subscription request. REJECTED.");
-			throw new SubscriptionNotAcceptedException("Only KNOWN or FEDERATED interchanges may post subscription requests.");
+			// new neighbour - set capabilities status UNKNOWN to trigger capabilities exchange later
+			logger.info("Unknown interchange requesting subscriptions. Updating capabilities status to UNKNOWN");
+			updateInterchange = interchange;
+			updateInterchange.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
+
+			logger.info("update interchange: " + updateInterchange.toString());
+
+		} else{
+			logger.info("*** interchange {} updated their subscription ***", updateInterchange.getName());
+			logger.info("Saved interchange name: " + updateInterchange.getName());
+			logger.info("Incoming interchange subscriptions: " + interchange.getSubscriptionRequest().toString());
 		}
-		else{
-			logger.info("*** {} interchange {} updated their subscription ***", updateInterchange.getInterchangeStatus().toString(), updateInterchange.getName());
-			LocalDateTime now = LocalDateTime.now();
-			Set<Subscription> requestedSubscriptions = setStatusRequestedForAllSubscriptions(interchange.getSubscriptions());
 
-			// Subscription ID is set when a subscription is saved in the database.
-			// Save the subscription on the interchange, get the interchange from the database,
-			// calculate path and set on subscription, save subscription on interchange.
+		logger.info("Subscription request: " + updateInterchange.getSubscriptionRequest().toString());
 
-			updateInterchange.setSubscriptions(requestedSubscriptions);
-			interchangeRepository.save(updateInterchange);
-			updateInterchange = interchangeRepository.findByName(updateInterchange.getName());
+		Set<Subscription> requestedSubscriptions = setStatusRequestedForAllSubscriptions(interchange.getSubscriptionRequest().getSubscriptions());
+		updateInterchange.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, requestedSubscriptions));
 
-			for (Subscription subscription : updateInterchange.getSubscriptions()) {
-				String path = updateInterchange.getName() + "/subscription/" + subscription.getId();
-				subscription.setPath(path);
-			}
+		logger.info("Updated interchange: " + updateInterchange.toString());
 
-			updateInterchange.setLastSeen(now);
-			interchangeRepository.save(updateInterchange);
+		// Save the interchange in the database to generate subscription ids.
 
-			logger.info("Interchange updated with subscription: \n" + updateInterchange.toString());
+		updateInterchange = interchangeRepository.save(updateInterchange);
 
-			return updateInterchange.getSubscriptions();
+		logger.info("*** After save");
+
+		logger.info(updateInterchange.toString());
+		logger.info("Saved neighbour in database");
+
+		// Create a path for each subscription
+		for (Subscription subscription : updateInterchange.getSubscriptionRequest().getSubscriptions()) {
+			String path = updateInterchange.getName() + "/subscription/" + subscription.getId();
+			logger.info("Path for subscription {}: {}", subscription.toString(), path);
+			subscription.setPath(path);
 		}
+
+		interchangeRepository.save(updateInterchange);
+
+		logger.info("Interchange updated with subscription: \n" + updateInterchange.toString());
+
+		return updateInterchange.getSubscriptionRequest();
 	}
 
 
-	@RequestMapping(method = RequestMethod.GET, value = "{ixnName}/subscription/{subscriptionId}")
+	// TODO: update when protocol has been decided if we poll subscriptions or subscription requests.
+
+	@RequestMapping(method = RequestMethod.GET, value = "{ixnName}/subscription/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Subscription pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId){
 
 		Interchange interchange = interchangeRepository.findByName(ixnName);
@@ -112,8 +119,21 @@ public class NeighbourRestController {
 		}
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "{ixnName}/subscriptionRequestStatus", produces = MediaType.APPLICATION_JSON_VALUE)
+	public SubscriptionRequest pollSubscriptionRequest(@PathVariable String ixnName){
+
+		Interchange interchange = interchangeRepository.findByName(ixnName);
+
+		if(interchange != null){
+			return interchange.getSubscriptionRequest();
+		}else{
+			throw new InterchangeNotFoundException("The requested interchange does not exist.");
+		}
+
+	}
+
 	// Method used to check for duplicate capabilities
-	private boolean setContainsDataType(DataType dataType, Set<DataType> capabilities){
+	boolean setContainsDataType(DataType dataType, Set<DataType> capabilities){
 		for(DataType d : capabilities){
 			if(dataType.getHow().equals(d.getHow()) && dataType.getWhat().equals(d.getWhat()) && dataType.getWhere1().equals(d.getWhere1())){
 				return true;
@@ -122,54 +142,66 @@ public class NeighbourRestController {
 		return false;
 	}
 
-	private Interchange getCapabilitiesOfDiscoveringNode(){
+	Interchange getCapabilitiesOfDiscoveringNode(){
 
 		logger.info("Getting capabilities of service providers for capabilities response.");
 
 		Interchange discoveringInterchange = new Interchange();
 		discoveringInterchange.setName(myName);
-		Set<DataType> interchangeCapabilities = new HashSet<>();
+		Set<DataType> dataTypes = new HashSet<>();
 
 		// Create Interchange capabilities from Service Provider capabilities.
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 
+		logger.info("Found local service providers: \n");
+
 		for(ServiceProvider serviceProvider : serviceProviders){
+			logger.info(serviceProvider.toString());
+
+
 			Set<DataType> serviceProviderCapabilities = serviceProvider.getCapabilities();
 			for(DataType dataType : serviceProviderCapabilities){
 				// Remove duplicate capabilities.
-				if(!setContainsDataType(dataType, interchangeCapabilities)){
-					interchangeCapabilities.add(dataType);
+				if(!setContainsDataType(dataType, dataTypes)){
+					dataTypes.add(dataType);
 				}
 			}
 		}
-		discoveringInterchange.setCapabilities(interchangeCapabilities);
+
+		logger.info("Finished list of data types (capabilities: \n");
+
+		for(DataType d : dataTypes){
+			logger.info(d.toString());
+		}
+
+		Capabilities serviceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, dataTypes);
+		discoveringInterchange.setCapabilities(serviceProviderCapabilities);
 		logger.info("posting to neighbour: \n" + discoveringInterchange.toString());
 		return discoveringInterchange;
 	}
 
 	@ResponseStatus(HttpStatus.CREATED)
-	@RequestMapping(method = RequestMethod.POST, value = "/updateCapabilities")
+	@RequestMapping(method = RequestMethod.POST, value = "/updateCapabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Interchange updateCapabilities(@RequestBody Interchange interchange){
 
-		Interchange interchangeToUpdate = interchangeRepository.findByName(interchange.getName());
 		logger.info("interchange name: " + interchange.getName());
 		logger.info("Interchange capabilities: " + interchange.getCapabilities().toString());
 
-		LocalDateTime now = LocalDateTime.now();
+
+		Interchange interchangeToUpdate = interchangeRepository.findByName(interchange.getName());
 
 		if(interchangeToUpdate == null){
 			logger.info("*** NEW INTERCHANGE **");
-			interchange.setLastSeen(now);
-			// The interchange contacted us directly. Give status 'KNOWN'
-			interchange.setInterchangeStatus(InterchangeStatus.KNOWN);
-			logger.info("Saving interchange in database as: \n" + interchange.toString());
-			interchangeRepository.save(interchange);
+			interchangeToUpdate = interchange;
 		}else{
 			logger.info("---- UPDATING INTERCHANGE ----");
-			interchangeToUpdate.setLastSeen(now);
 			interchangeToUpdate.setCapabilities(interchange.getCapabilities());
-			interchangeRepository.save(interchangeToUpdate);
 		}
+
+
+		interchangeToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+		interchangeToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		interchangeRepository.save(interchangeToUpdate);
 
 		// Post response
 		return getCapabilitiesOfDiscoveringNode();
