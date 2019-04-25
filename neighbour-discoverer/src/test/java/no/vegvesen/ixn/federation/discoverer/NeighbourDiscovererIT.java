@@ -20,9 +20,11 @@ public class NeighbourDiscovererIT {
 
 		neighbourDiscoverer.checkForNewInterchanges();
 
-		neighbourDiscoverer.capabilityExchangeWithNewNeighbour();
+		neighbourDiscoverer.capabilityExchange();
 
-		neighbourDiscoverer.pollSubscriptions();
+		neighbourDiscoverer.subscriptionRequest();
+
+		//neighbourDiscoverer.pollSubscriptions();
 
 		try {
 			Thread.sleep(20000);

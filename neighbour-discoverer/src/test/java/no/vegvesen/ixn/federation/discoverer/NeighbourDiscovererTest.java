@@ -1,29 +1,20 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Interchange;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.web.client.RestTemplate;
-
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,31 +24,30 @@ public class NeighbourDiscovererTest {
 	private InterchangeRepository interchangeRepository = mock(InterchangeRepository.class);
 	private ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
 	private DNSFacade dnsFacade = mock(DNSFacade.class);
-	private RestTemplate restTemplate = mock(RestTemplate.class);
+	private NeighbourRESTFacade neighbourRESTFacade = mock(NeighbourRESTFacade.class);
 
 	private String myName = "bouvet";
 	private int backoffIntervalLength = 120;
 	private int allowedNumberOfBackoffAttempts = 4;
-	private String subscriptionRequestPath = "/requestSubscription";
-	private String capabilityExchangePath = "/updateCapabilities";
+
+
 
 	@Spy
 	private NeighbourDiscoverer neighbourDiscoverer = new NeighbourDiscoverer(dnsFacade,
 			interchangeRepository,
 			serviceProviderRepository,
-			restTemplate,
+			neighbourRESTFacade,
 			myName,
 			backoffIntervalLength,
-			allowedNumberOfBackoffAttempts,
-			subscriptionRequestPath,
-			capabilityExchangePath);
+			allowedNumberOfBackoffAttempts);
+
+
 	private List<Interchange> neighbours = new ArrayList<>();
 
 	// Objects used in testing
 	private Interchange ericsson;
 	private DataType firstDataType;
 	private DataType secondDataType;
-	private DataType thirdDataType;
 	private ServiceProvider firstServiceProvider;
 	private ServiceProvider secondServiceProvider;
 	private ServiceProvider illegalServiceProvider;
@@ -65,8 +55,8 @@ public class NeighbourDiscovererTest {
 	private Iterable<ServiceProvider> illegalServiceProviders;
 	private Subscription firstSubscription;
 	private Subscription secondSubscription;
-	private Subscription thirdSubscrption;
 	private Subscription illegalSubscription;
+
 
 
 	@Before
@@ -81,11 +71,9 @@ public class NeighbourDiscovererTest {
 
 		firstDataType = new DataType("datex2;1.0", "NO", "Obstruction");
 		secondDataType = new DataType("datex2;1.0", "SE", "Works");
-		thirdDataType = new DataType("datex2;1.0", "FI", "Conditions");
 
 		firstSubscription = new Subscription("where1 LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		secondSubscription = new Subscription("where1 LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
-		thirdSubscrption = new Subscription("where1 LIKE 'DK'", Subscription.SubscriptionStatus.REQUESTED);
 		illegalSubscription = new Subscription("(where1 LIKE 'DK') OR (1=1)", Subscription.SubscriptionStatus.REQUESTED);
 
 		// Service provider set up: two identical service providers with different names.
@@ -159,20 +147,25 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void subscriptionNotInSubscriptionSetReturnsFalse(){
 		Set<Subscription> testSubscriptionSet = Collections.singleton(secondSubscription);
+
 		Assert.assertFalse(neighbourDiscoverer.setContainsSubscription(firstSubscription, testSubscriptionSet));
 	}
 
 	@Test
 	public void checkThatCapabilitiesDoesNotContainDuplicates(){
 		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
+
 		Set<DataType> interchangeCapabilities = neighbourDiscoverer.getLocalServiceProviderCapabilities();
+
 		Assert.assertEquals(1, interchangeCapabilities.size());
 	}
 
 	@Test
 	public void checkThatSubscriptionsDoesNotContainDuplicates(){
 		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
+
 		Set<Subscription> interchangeSubscriptions = neighbourDiscoverer.getLocalServiceProviderSubscriptions();
+
 		Assert.assertEquals(1, interchangeSubscriptions.size());
 	}
 
@@ -181,7 +174,7 @@ public class NeighbourDiscovererTest {
 		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
 		Interchange neighbourInterchange = new Interchange();
 		neighbourInterchange.setName("BMW");
-		neighbourInterchange.setCapabilities(Collections.singleton(firstDataType));
+		neighbourInterchange.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,Collections.singleton(firstDataType)));
 
 		Set<Subscription> calculatedCustomSubscription = neighbourDiscoverer.calculateCustomSubscriptionForNeighbour(neighbourInterchange);
 
@@ -193,7 +186,7 @@ public class NeighbourDiscovererTest {
 		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
 		Interchange neighbourInterchange = new Interchange();
 		neighbourInterchange.setName("BMW");
-		neighbourInterchange.setCapabilities(Collections.singleton(secondDataType));
+		neighbourInterchange.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(secondDataType)));
 
 		Set<Subscription> calculatedCustomSubscription = neighbourDiscoverer.calculateCustomSubscriptionForNeighbour(neighbourInterchange);
 
@@ -205,58 +198,53 @@ public class NeighbourDiscovererTest {
 		when(serviceProviderRepository.findAll()).thenReturn(illegalServiceProviders);
 		Interchange neighbourInterchange = new Interchange();
 		neighbourInterchange.setName("BMW");
-		neighbourInterchange.setCapabilities(Collections.singleton(secondDataType));
+		neighbourInterchange.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(secondDataType)));
 
 		Set<Subscription> calculatedCustomSubscription = neighbourDiscoverer.calculateCustomSubscriptionForNeighbour(neighbourInterchange);
 
 		Assert.assertTrue(calculatedCustomSubscription.isEmpty());
 	}
 
-	@Test
-	public void expectedUrlIsCreated(){
-		String expectedURL = "http://ericsson.itsinterchange.eu:8080";
-		String actualURL = neighbourDiscoverer.getUrl(ericsson);
-
-		Assert.assertEquals(expectedURL, actualURL);
-	}
 
 	/**
-	 * Tests for method capabilityExchangeWithUpdatedNeighbour()
+	 * Capabilities exchange and subscription request
 	 */
 
 	@Test
-	public void checkSuccessfulPostToUpdatedNeighbour(){
-		when(interchangeRepository.findInterchangesWithRecentCapabilityChanges(any(Timestamp.class), any(Timestamp.class))).thenReturn(Arrays.asList(ericsson));
-		doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).calculateCustomSubscriptionForNeighbour(ericsson);
-		doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
+	public void successfulCapabilitiesPostCallsSaveOnRepository(){
 
-		neighbourDiscoverer.capabilityExchangeWithUpdatedNeighbours();
+		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesForCapabilityExchange();
+		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
 
-		verify(neighbourDiscoverer, times(1)).updateSubscriptionsOfNeighbour(any(Interchange.class), anySet());
-	}
+		neighbourDiscoverer.capabilityExchange();
 
-	@Test
-	public void checkUnsuccessfulPostToUpdatedNeighbourSetsStatusOfNeighbour(){
-
-		when(interchangeRepository.findInterchangesWithRecentCapabilityChanges(any(Timestamp.class), any(Timestamp.class))).thenReturn(Arrays.asList(ericsson));
-		doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).calculateCustomSubscriptionForNeighbour(ericsson);
-		doThrow(new SubscriptionRequestException("Exception from mock")).when(neighbourDiscoverer).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
-
-		neighbourDiscoverer.capabilityExchangeWithUpdatedNeighbours();
-
-		verify(neighbourDiscoverer, times(0)).updateSubscriptionsOfNeighbour(any(Interchange.class), anySet());
 		verify(interchangeRepository, times(1)).save(any(Interchange.class));
 
 	}
 
+
 	@Test
-	public void noUpdatedNeighboursDoesNotCausePost(){
-		when(interchangeRepository.findInterchangesWithRecentCapabilityChanges(any(Timestamp.class), any(Timestamp.class))).thenReturn(Collections.emptyList());
+	public void successfulSubscriptionRequestCallsSaveOnRepository(){
 
-		neighbourDiscoverer.capabilityExchangeWithUpdatedNeighbours();
+		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesForSubscriptionRequest();
+		doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).calculateCustomSubscriptionForNeighbour(ericsson);
+		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
+		doReturn(subscriptionRequestResponse).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
 
-		verify(neighbourDiscoverer, times(0)).updateSubscriptionsOfNeighbour(any(Interchange.class), anySet());
-		verify(interchangeRepository, times(0)).save(any(Interchange.class));
+		neighbourDiscoverer.subscriptionRequest();
+
+		verify(interchangeRepository, times(1)).save(any(Interchange.class));
+
+	}
+
+
+	@Test
+	public void noNeighboursFoundForCapabilityExchangeCausesNoPost(){
+		when(interchangeRepository.findInterchangesForCapabilityExchange()).thenReturn(Collections.emptyList());
+
+		neighbourDiscoverer.capabilityExchange();
+
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
 	}
 
 
@@ -288,36 +276,71 @@ public class NeighbourDiscovererTest {
 
 	@Test
 	public void gracefulBackoffPostOfCapabilityDoesNotHappenBeforeAllowedPostTime(){
-		when(interchangeRepository.findInterchangesWithStatusFAILED_CAPABILITY_EXCHANGE()).thenReturn(Arrays.asList(ericsson));
+		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Arrays.asList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourDiscoverer, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+	}
+
+	@Test
+	public void gracefulBackoffPostOfSubscriptionRequestDoesNotHappenBeforeAllowedTime(){
+
+		when(interchangeRepository.findInterchangesWithFailedFedIn()).thenReturn(Arrays.asList(ericsson));
+		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
+		doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
+
+		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
+
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+
 	}
 
 	@Test
 	public void gracefulBackoffPostOfCapabilitiesHappensIfAllowedPostTimeHasPassed(){
-		when(interchangeRepository.findInterchangesWithStatusFAILED_CAPABILITY_EXCHANGE()).thenReturn(Arrays.asList(ericsson));
+
+		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Collections.singletonList(ericsson));
+
+		Interchange ericssonResponse = new Interchange();
+		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
+		SubscriptionRequest ericssonSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
+		ericssonResponse.setCapabilities(ericssonCapabilities);
+		ericssonResponse.setSubscriptionRequest(ericssonSubscriptionRequest);
+
+		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
+
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
-		Interchange neighbourResponse = mock(Interchange.class);
-		doReturn(neighbourResponse).when(neighbourDiscoverer).postCapabilities(any(Interchange.class), any(Interchange.class));
-		doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourDiscoverer, times(1)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(1)).postCapabilities(any(Interchange.class), any(Interchange.class));
+	}
+
+	@Test
+	public void gracefulBackoffPostOfSubscriptionRequestHappensIfAllowedPostTimeHasPassed(){
+
+		when(interchangeRepository.findInterchangesWithFailedFedIn()).thenReturn(Collections.singletonList(ericsson));
+		SubscriptionRequest ericssonSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
+		doReturn(ericssonSubscriptionRequest).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
+		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
+		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
+
+		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
+
+		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
 	}
 
 	@Test
 	public void failedPostOfCapabilitiesInBackoffIncreasesNumberOfBackoffAttempts(){
 		ericsson.setBackoffAttempts(0);
-		when(interchangeRepository.findInterchangesWithStatusFAILED_CAPABILITY_EXCHANGE()).thenReturn(Arrays.asList(ericsson));
+		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
+
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourDiscoverer).postCapabilities(any(Interchange.class), any(Interchange.class));
+		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
@@ -325,78 +348,36 @@ public class NeighbourDiscovererTest {
 	}
 
 	@Test
-	public void unsuccessfulPostOfCapabilitiesToNodeTooManyPreviousBackoffAttemptsMarksNodeUnreachable(){
+	public void unsuccessfulPostOfCapabilitiesToNodeTooManyPreviousBackoffAttemptsMarksCapabilitiesUnreachable(){
 		ericsson.setBackoffAttempts(4);
-		when(interchangeRepository.findInterchangesWithStatusFAILED_CAPABILITY_EXCHANGE()).thenReturn(Arrays.asList(ericsson));
+
+		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(firstDataType));
+		ericsson.setCapabilities(ericssonCapabilities);
+
+		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourDiscoverer).postCapabilities(any(Interchange.class), any(Interchange.class));
+		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		Assert.assertEquals(ericsson.getInterchangeStatus(), Interchange.InterchangeStatus.UNREACHABLE);
-	}
-
-	@Test
-	public void postingCapabilitiesToRespondingNeighbourIsSuccessful(){
-
-		// Testing post Capabilities to new interchange
-
-		// Test that an interchange marked as new as discovered in this method.
-		// findInterchangesWithCapabilitiesNEW()
-		// verify that the list of new neighbours is as log as we expected
-
-		// mock not null Interchange object return value from method postCapabilities() - indicating successful post of capabilities.
-
-		// mock a Set<Subscription> return value from method calculateCustomSubscription() that is not empty
-
-		// verify that the subscription is saved on the neighbour (setFedIn )
-
-		// mocking post response wth Interchange object as body.
-		// verify that post subscription request to neighbour is sent
-
-
-
-		// second test: Mock that Interchange object return value from postCapabilities is null
-
+		Assert.assertEquals(ericsson.getCapabilities().getStatus(), Capabilities.CapabilitiesStatus.UNREACHABLE);
 	}
 
 
 	@Test
-	public void postCapabilitiesSuccessfulPosts(){
-		// Call method postCapabilities and mock a positive post response (method returns true)
+	public void successfulPollOfSubscriptionCallsSaveOnRepository(){
 
-		// Call method postCapabilities and mock a negative post response (method returns false)
+		Subscription subscription = new Subscription("where1 LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		ericsson.setFedIn(ericssonSubscription);
+		when(interchangeRepository.findInterchangesToPollForSubscriptionStatus()).thenReturn(Collections.singletonList(ericsson));
+		doReturn(subscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+
+		neighbourDiscoverer.pollSubscriptions();
+
+		verify(interchangeRepository, times(1)).save(any(Interchange.class));
 	}
-
-	@Test
-	public void postCapabilitiesThrowsExceptionResponseIsNull(){
-
-		// mock null post response
-
-		// verify exception is thrown
-
-	}
-
-	@Test
-	public void postCapabilitiesThrowsExceptionWhenResponseHasWrongName(){
-		// mock database lookup with a certain name
-		// mock post response with different name
-
-		// verify exception is thrown
-
-	}
-
-	@Test
-	public void postCapabilitiesResponseCodeOtherThanCreatedThrowsException(){
-
-		// mock response with different response code
-		// verify that exception is thrown
-
-	}
-
-
-
 
 
 }
