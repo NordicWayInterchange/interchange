@@ -28,8 +28,7 @@ public class NeighbourDiscovererIT {
 
 		try {
 			Thread.sleep(20000);
-		}catch (InterruptedException e){
-
+		}catch (InterruptedException ignore){
 		}
 	}
 
