@@ -58,7 +58,7 @@ public class NeighbourRESTFacadeTest {
 		Interchange returnInterchange = new Interchange();
 		returnInterchange.setName("ReturnInterchange");
 		returnInterchange = null;
-		ResponseEntity<Interchange> response = new ResponseEntity<Interchange>(returnInterchange, HttpStatus.CREATED);
+		ResponseEntity<Interchange> response = new ResponseEntity<>(returnInterchange, HttpStatus.CREATED);
 		when(restTemplate.postForEntity(any(String.class), any(Interchange.class), eq(Interchange.class))).thenReturn(response);
 
 		neighbourRESTFacade.postCapabilities(ericsson, ericsson);
@@ -70,7 +70,7 @@ public class NeighbourRESTFacadeTest {
 		Interchange returnInterchange = new Interchange();
 		returnInterchange.setName("ReturnInterchange");
 
-		ResponseEntity<Interchange> response = new ResponseEntity<Interchange>(returnInterchange, HttpStatus.INTERNAL_SERVER_ERROR);
+		ResponseEntity<Interchange> response = new ResponseEntity<>(returnInterchange, HttpStatus.INTERNAL_SERVER_ERROR);
 		when(restTemplate.postForEntity(any(String.class), any(Interchange.class), eq(Interchange.class))).thenReturn(response);
 
 		neighbourRESTFacade.postCapabilities(ericsson, ericsson);
@@ -88,7 +88,7 @@ public class NeighbourRESTFacadeTest {
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest=null;
 
-		ResponseEntity<SubscriptionRequest> response = new ResponseEntity<SubscriptionRequest>(subscriptionRequest, HttpStatus.ACCEPTED);
+		ResponseEntity<SubscriptionRequest> response = new ResponseEntity<>(subscriptionRequest, HttpStatus.ACCEPTED);
 		when(restTemplate.exchange(any(String.class),eq(HttpMethod.POST),any(HttpEntity.class), eq(SubscriptionRequest.class))).thenReturn(response);
 
 		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
@@ -118,7 +118,7 @@ public class NeighbourRESTFacadeTest {
 
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 
-		ResponseEntity<SubscriptionRequest> response = new ResponseEntity<SubscriptionRequest>(subscriptionRequest, HttpStatus.INTERNAL_SERVER_ERROR);
+		ResponseEntity<SubscriptionRequest> response = new ResponseEntity<>(subscriptionRequest, HttpStatus.INTERNAL_SERVER_ERROR);
 		when(restTemplate.exchange(any(String.class),eq(HttpMethod.POST),any(HttpEntity.class), eq(SubscriptionRequest.class))).thenReturn(response);
 
 		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);

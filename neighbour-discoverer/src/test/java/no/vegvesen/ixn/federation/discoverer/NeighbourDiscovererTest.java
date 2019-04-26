@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("FieldCanBeLocal")
 @RunWith(MockitoJUnitRunner.class)
 public class NeighbourDiscovererTest {
 
@@ -276,7 +277,7 @@ public class NeighbourDiscovererTest {
 
 	@Test
 	public void gracefulBackoffPostOfCapabilityDoesNotHappenBeforeAllowedPostTime(){
-		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Arrays.asList(ericsson));
+		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 
@@ -288,7 +289,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPostOfSubscriptionRequestDoesNotHappenBeforeAllowedTime(){
 
-		when(interchangeRepository.findInterchangesWithFailedFedIn()).thenReturn(Arrays.asList(ericsson));
+		when(interchangeRepository.findInterchangesWithFailedFedIn()).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 
