@@ -20,7 +20,7 @@ public class CapabilityMatcher {
 
 		private final HashMap<String, Object> headers = new HashMap<>();
 
-		public DataTypeFilter(DataType dataType) {
+		DataTypeFilter(DataType dataType) {
 			headers.put("how", dataType.getHow());
 			headers.put("what", dataType.getWhat());
 			headers.put("where1", dataType.getWhere1());
@@ -102,7 +102,6 @@ public class CapabilityMatcher {
 		}
 	}
 
-	@SuppressWarnings("WeakerAccess")
 	public static boolean matches(DataType capability, String selector) throws ParseException {
 		JMSSelectorFilter filter = new JMSSelectorFilter(selector);
 		notAlwaysTrue(filter);
