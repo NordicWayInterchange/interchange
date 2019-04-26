@@ -99,4 +99,17 @@ public class QpidClientIT {
 		client.setupRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
 	}
+
+	@Test
+	public void tearDownQueue() {
+		Interchange crab = new Interchange("crab", Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+
+		//Set up a new queue
+		client.createQueue(crab);
+		assertThat(client.queueExists(crab.getName())).isTrue();
+
+		//Delete the queue
+		client.removeQueue(crab.getName());
+		assertThat(client.queueExists(crab.getName())).isFalse();
+	}
 }

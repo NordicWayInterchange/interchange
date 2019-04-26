@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -25,8 +26,13 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing.configurer.interval}")
 	public void checkForInterchangesToSetupRoutingFor() {
 		List<Interchange> readyToSetupRouting = repository.findInterchangesWithStatusNEW(); //TODO Use correct criteria
-		for (Interchange interchange : readyToSetupRouting) {
-			qpidClient.setupRouting(interchange);
+		for (Interchange setUp : readyToSetupRouting) {
+			qpidClient.setupRouting(setUp);
+		}
+
+		List<Interchange> readyToTearDownRouting = Collections.emptyList();//repository.findInterchangesWithStatusNEW(); //TODO Use correct criteria
+		for (Interchange tearDown : readyToTearDownRouting) {
+			qpidClient.removeQueue(tearDown.getName());
 		}
 	}
 }

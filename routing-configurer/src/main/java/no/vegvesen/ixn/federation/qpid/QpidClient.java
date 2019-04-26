@@ -94,17 +94,26 @@ public class QpidClient {
 	}
 
 	boolean queueExists(String queueName) {
+		return queueId(queueName) != null;
+	}
+
+	private String queueId(String queueName) {
 		String queueQueryUrl = queuesURL + "/" + queueName;
 		logger.info("quering for queue {} with url {}", queueName, queueQueryUrl);
-		ResponseEntity<Object> response;
+		ResponseEntity<HashMap> response;
 		try {
-			response = restTemplate.getForEntity(new URI(queueQueryUrl), Object.class);
+			response = restTemplate.getForEntity(new URI(queueQueryUrl), HashMap.class);
 		} catch (HttpClientErrorException.NotFound notFound) {
-			return false;
+			return null;
 		} catch (URISyntaxException e) {
 			throw new RoutingConfigurerException(e);
 		}
-		return response.getStatusCode().is2xxSuccessful();
+		if (response.getStatusCode().is2xxSuccessful()) {
+			if (response.getBody() != null) {
+				return (String) response.getBody().get("id");
+			}
+		}
+		return null;
 	}
 
 	public void setupRouting(Interchange interchange) {
@@ -181,4 +190,8 @@ public class QpidClient {
 		return existingBindKeys;
 	}
 
+	public void removeQueue(String queueName) {
+		String queueId = queueId(queueName);
+		restTemplate.delete(queuesURL + "?id=" + queueId);
+	}
 }
