@@ -57,15 +57,6 @@ public class NeighbourDiscoverer {
 		this.neighbourRESTFacade = neighbourRESTFacade;
 	}
 
-	boolean setContainsDataType(DataType dataType, Set<DataType> capabilities) {
-		for (DataType d : capabilities) {
-			if (dataType.getHow().equals(d.getHow()) && dataType.getWhat().equals(d.getWhat()) && dataType.getWhere1().equals(d.getWhere1())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	boolean setContainsSubscription(Subscription subscription, Set<Subscription> subscriptions) {
 		for (Subscription s : subscriptions) {
 			if (subscription.getSelector().equals(s.getSelector())) {
@@ -84,7 +75,7 @@ public class NeighbourDiscoverer {
 
 			for (DataType dataType : serviceProviderCapabilities) {
 				// Remove duplicate capabilities.
-				if (!setContainsDataType(dataType, capabilities)) { // check if dataType already in capabilities list
+				if (!dataType.isContainedInSet(capabilities)) { // check if dataType already in capabilities list
 					capabilities.add(dataType);
 				}
 			}

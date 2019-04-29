@@ -47,16 +47,16 @@ public class NeighbourDiscovererTest {
 
 	// Objects used in testing
 	private Interchange ericsson;
-	private DataType firstDataType;
-	private DataType secondDataType;
+	private DataType firstDataType = new DataType("datex2;1.0", "NO", "Obstruction");
+	private DataType secondDataType = new DataType("datex2;1.0", "SE", "Works");
 	private ServiceProvider firstServiceProvider;
 	private ServiceProvider secondServiceProvider;
 	private ServiceProvider illegalServiceProvider;
 	private Iterable<ServiceProvider> serviceProviders;
 	private Iterable<ServiceProvider> illegalServiceProviders;
-	private Subscription firstSubscription;
-	private Subscription secondSubscription;
-	private Subscription illegalSubscription;
+	private Subscription firstSubscription = new Subscription("where1 LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+	private Subscription secondSubscription = new Subscription("where1 LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
+	private Subscription illegalSubscription = new Subscription("(where1 LIKE 'DK') OR (1=1)", Subscription.SubscriptionStatus.REQUESTED);
 
 
 
@@ -69,13 +69,6 @@ public class NeighbourDiscovererTest {
 		ericsson.setDomainName(".itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
 		neighbours.add(ericsson);
-
-		firstDataType = new DataType("datex2;1.0", "NO", "Obstruction");
-		secondDataType = new DataType("datex2;1.0", "SE", "Works");
-
-		firstSubscription = new Subscription("where1 LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
-		secondSubscription = new Subscription("where1 LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
-		illegalSubscription = new Subscription("(where1 LIKE 'DK') OR (1=1)", Subscription.SubscriptionStatus.REQUESTED);
 
 		// Service provider set up: two identical service providers with different names.
 		firstServiceProvider = new ServiceProvider("Scania");
@@ -130,13 +123,13 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void dataTypeInCapabilitiesReturnsTrue(){
 		Set<DataType> testCapabilities = Collections.singleton(firstDataType);
-		Assert.assertTrue(neighbourDiscoverer.setContainsDataType(firstDataType, testCapabilities));
+		Assert.assertTrue(firstDataType.isContainedInSet(testCapabilities));
 	}
 
 	@Test
 	public void dataTypeNotInCapabilitiesReturnsFalse(){
 		Set<DataType> testCapabilities = Collections.singleton(secondDataType);
-		Assert.assertFalse(neighbourDiscoverer.setContainsDataType(firstDataType, testCapabilities));
+		Assert.assertFalse(firstDataType.isContainedInSet(testCapabilities));
 	}
 
 	@Test

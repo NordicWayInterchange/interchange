@@ -1,5 +1,6 @@
-package no.vegvesen.ixn.federation.dbhelper;
+package no.vegvesen.ixn.federation.discoverer;
 
+import no.vegvesen.ixn.federation.dbhelper.DatabaseHelperInterface;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
@@ -7,15 +8,14 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
 @Component
-@ConditionalOnProperty(name = "db.side", havingValue = "client")
 public class ClientDatabaseHelperImpl implements DatabaseHelperInterface {
 
 
