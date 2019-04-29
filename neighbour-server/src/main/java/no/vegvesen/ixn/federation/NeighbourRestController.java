@@ -142,7 +142,7 @@ public class NeighbourRestController {
 		return false;
 	}
 
-	Interchange getCapabilitiesOfDiscoveringNode(){
+	protected Interchange getCapabilitiesOfDiscoveringNode(){
 
 		logger.info("Getting capabilities of service providers for capabilities response.");
 
@@ -162,7 +162,7 @@ public class NeighbourRestController {
 			Set<DataType> serviceProviderCapabilities = serviceProvider.getCapabilities();
 			for(DataType dataType : serviceProviderCapabilities){
 				// Remove duplicate capabilities.
-				if(!setContainsDataType(dataType, dataTypes)){
+				if(!dataType.isContainedInSet(dataTypes)){
 					dataTypes.add(dataType);
 				}
 			}

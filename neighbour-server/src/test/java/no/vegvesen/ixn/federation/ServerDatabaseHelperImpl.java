@@ -1,5 +1,6 @@
-package no.vegvesen.ixn.federation.dbhelper;
+package no.vegvesen.ixn.federation;
 
+import no.vegvesen.ixn.federation.dbhelper.DatabaseHelperInterface;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
@@ -15,7 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-@ConditionalOnProperty(name = "db.side", havingValue = "server")
 public class ServerDatabaseHelperImpl implements DatabaseHelperInterface {
 
 	private Logger logger = LoggerFactory.getLogger(ServerDatabaseHelperImpl.class);

@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 @SpringBootTest
 public class NeighbourRestControllerTest {
 
@@ -42,11 +43,8 @@ public class NeighbourRestControllerTest {
 	@InjectMocks
 	private NeighbourRestController neighbourRestController;
 
-	@Value("${interchange.subscription-request}")
-	private String subscriptionRequestPath;
-
-	@Value("${interchange.capabilities-exchange}")
-	private String capabilityExchangePath;
+	private String subscriptionRequestPath = "/requestSubscription";
+	private String capabilityExchangePath = "/updateCapabilities";
 
 	@Before
 	public void setUp(){
@@ -141,27 +139,4 @@ public class NeighbourRestControllerTest {
 				.andExpect(status().isAccepted());
 
 	}
-
-
-	@Test
-	public void checkThatMethodSetContainsDataTypeWorks(){
-		DataType oneDataType = new DataType("datex2;1.0", "FI", "where1 LIKE 'DK'");
-
-		Set<DataType> setOfDataType = Stream.of(oneDataType).collect(Collectors.toSet());
-
-		Assert.assertTrue(neighbourRestController.setContainsDataType(oneDataType, setOfDataType));
-	}
-
-
-	@Test
-	public void checkThatMethodSetContainsDataTypeIsNotAlwaysTrue(){
-		DataType oneDataType = new DataType("datex2;1.0", "FI", "where1 LIKE 'DK'");
-		DataType anotherDataType = new DataType("datex2;1.1", "DK", "where1 LIKE 'SE'");
-
-		Set<DataType> setOfDataType = Stream.of(oneDataType).collect(Collectors.toSet());
-
-		Assert.assertFalse(neighbourRestController.setContainsDataType(anotherDataType, setOfDataType));
-	}
-
-
 }
