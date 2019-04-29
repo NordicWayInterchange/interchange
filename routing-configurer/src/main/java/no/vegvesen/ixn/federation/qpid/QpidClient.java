@@ -84,7 +84,7 @@ public class QpidClient {
 		callQpid(queueURL, jsonString, "/");
 
 		logger.info("Creating binding for queue..");
-		String binding = createBinding(interchange.getSubscriptions());
+		String binding = createBinding(interchange.getSubscriptionRequest().getSubscriptions());
 		updateBinding(binding, interchange.getName());
 	}// Creates a binding based on the subscriptions of a neighbouring Interchange.
 
