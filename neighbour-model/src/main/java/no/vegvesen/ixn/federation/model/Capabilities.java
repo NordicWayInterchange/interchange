@@ -15,7 +15,7 @@ public class Capabilities {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_generator")
-	@SequenceGenerator(name="cap_generator", sequenceName = "cap_seq", allocationSize=50)
+	@SequenceGenerator(name="cap_generator", sequenceName = "cap_seq")
 	@Column(name="cap_id")
 	private Integer cap_id;
 

@@ -14,7 +14,7 @@ public class SubscriptionRequest {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subreq_generator")
-	@SequenceGenerator(name="subreq_generator", sequenceName = "subreq_seq", allocationSize=50)
+	@SequenceGenerator(name="subreq_generator", sequenceName = "subreq_seq")
 	@Column(name="subreq_id")
 	private Integer subreq_id;
 

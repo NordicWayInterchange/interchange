@@ -12,7 +12,7 @@ public class ServiceProvider {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sp_generator")
-	@SequenceGenerator(name="spr_generator", sequenceName = "spr_seq", allocationSize=50)
+	@SequenceGenerator(name="spr_generator", sequenceName = "spr_seq")
 	@Column(name="spr_id")
 	private Integer id;
 

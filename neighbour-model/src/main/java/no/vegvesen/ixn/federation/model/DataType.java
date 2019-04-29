@@ -12,7 +12,7 @@ public class DataType {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_generator")
-	@SequenceGenerator(name="dat_generator", sequenceName = "dat_seq", allocationSize=50)
+	@SequenceGenerator(name="dat_generator", sequenceName = "dat_seq")
 	@Column(name="dat_id")
 	private Integer data_id;
 

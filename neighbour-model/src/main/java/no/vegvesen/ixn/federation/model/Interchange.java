@@ -15,7 +15,7 @@ public class Interchange {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ixn_generator")
-	@SequenceGenerator(name="ixn_generator", sequenceName = "ixn_seq", allocationSize=50)
+	@SequenceGenerator(name="ixn_generator", sequenceName = "ixn_seq")
 	@Column(name="ixn_id")
 	private Integer ixn_id;
 
