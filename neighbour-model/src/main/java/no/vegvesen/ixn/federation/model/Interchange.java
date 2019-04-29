@@ -22,16 +22,16 @@ public class Interchange {
 	private String name; // common name from the certificate
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "ixn_id_cap", referencedColumnName = "cap_id")
+	@JoinColumn(name = "ixn_id_cap", referencedColumnName = "cap_id", foreignKey = @ForeignKey(name="fk_cap_ixn"))
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 
 	@OneToOne(cascade= CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name="ixn_id_sub_out", referencedColumnName = "subreq_id")
+	@JoinColumn(name="ixn_id_sub_out", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name="fk_subreq_ixn_sub_out"))
 	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 
 	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name= "ixn_id_fed_in", referencedColumnName = "subreq_id")
+	@JoinColumn(name= "ixn_id_fed_in", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name="fk_subreq_ixn_fed_in"))
 	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 
 	@UpdateTimestamp
