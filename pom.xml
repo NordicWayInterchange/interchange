@@ -98,10 +98,7 @@
         </dependencies>
     </dependencyManagement>
 
-
-
     <modules>
-        <module>interchangenode</module>
         <module>ssl-utils</module>
         <module>neighbour-model</module>
         <module>neighbour-server</module>

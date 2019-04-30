@@ -22,7 +22,7 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-model</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

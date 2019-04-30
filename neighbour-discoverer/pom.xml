@@ -60,11 +60,9 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--TODO: Verify if needed-->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
 
