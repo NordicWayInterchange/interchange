@@ -35,7 +35,7 @@ public class ServerDatabaseHelperImpl implements DatabaseHelperInterface {
 		volvoCloud.setCapabilities(Stream.of(volvoDataTypeOne, volvoDataTypeTwo).collect(Collectors.toSet()));
 
 		Subscription volvoSubscription = new Subscription();
-		volvoSubscription.setSelector("where1 LIKE 'FI'");
+		volvoSubscription.setSelector("where LIKE 'FI'");
 		volvoSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		volvoCloud.setSubscriptions(Collections.singleton(volvoSubscription));
 		serviceProviderRepository.save(volvoCloud);
@@ -46,7 +46,7 @@ public class ServerDatabaseHelperImpl implements DatabaseHelperInterface {
 		scaniaCloud.setCapabilities(Stream.of(scaniaDataTypeTwo, scaniaDataTypeOne).collect(Collectors.toSet()));
 
 		Subscription scaniaSubscription = new Subscription();
-		scaniaSubscription.setSelector("where1 LIKE 'DK'");
+		scaniaSubscription.setSelector("where LIKE 'DK'");
 		scaniaSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		scaniaCloud.setSubscriptions(Collections.singleton(scaniaSubscription));
 		serviceProviderRepository.save(scaniaCloud);

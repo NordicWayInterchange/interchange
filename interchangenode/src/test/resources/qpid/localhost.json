@@ -10,30 +10,30 @@
       "durableBindings": [
         {
           "arguments": {
-            "x-filter-jms-selector": "where1='NO'"
+            "x-filter-jms-selector": "where='NO'"
           },
-          "bindingKey": "where1",
+          "bindingKey": "where",
           "destination": "NO-out"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where1 LIKE '%'"
+            "x-filter-jms-selector": "where LIKE '%'"
           },
-          "bindingKey": "where1",
+          "bindingKey": "where",
           "destination": "test-out"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where1='NO' AND what='Obstruction'"
+            "x-filter-jms-selector": "where='NO' AND what='Obstruction'"
           },
-          "bindingKey": "where1, what",
+          "bindingKey": "where, what",
           "destination": "NO-Obstruction"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where1='SE'"
+            "x-filter-jms-selector": "where='SE'"
           },
-          "bindingKey": "where1",
+          "bindingKey": "where",
           "destination": "SE-out"
         }
       ]

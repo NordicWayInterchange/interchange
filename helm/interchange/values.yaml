@@ -37,12 +37,12 @@ qpid:
   ## each user specified here will receive access to the onramp queue as well as their own queue/binding
   users: []
   # - name: king_harald
-  #   binding: "where1='NO'"
+  #   binding: "where='NO'"
   # - name: king_gustaf
-  #   binding: "where1='SE'"
+  #   binding: "where='SE'"
 
   ## if a user requires additional queues, they can be specified here
   additional_queues: []
   # - name: odin
-  #   binding: "where1='valhalla'"
+  #   binding: "where='valhalla'"
   #   user: king_harald

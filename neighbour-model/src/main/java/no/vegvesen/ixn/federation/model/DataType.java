@@ -17,8 +17,9 @@ public class DataType {
 	@Column(name="dat_id")
 	private Integer data_id;
 
-	private String where1;
+	private String where;
 	private String how;
+	@JsonIgnore
 	private String what;
 
 	@Column
@@ -27,18 +28,18 @@ public class DataType {
 
 	public DataType(){}
 
-	public DataType(String how, String where1, String what) {
+	public DataType(String how, String where, String what) {
 		this.how = how;
 		this.what = what;
-		this.where1 = where1;
+		this.where = where;
 	}
 
-	public String getWhere1() {
-		return where1;
+	public String getWhere() {
+		return where;
 	}
 
-	public void setWhere1(String where1) {
-		this.where1 = where1;
+	public void setWhere(String where) {
+		this.where = where;
 	}
 
 	public String getHow() {
@@ -59,7 +60,7 @@ public class DataType {
 
 	public boolean isContainedInSet(Set<DataType> capabilities){
 		for (DataType other : capabilities) {
-			if (this.getHow().equals(other.getHow()) && this.getWhat().equals(other.getWhat()) && this.getWhere1().equals(other.getWhere1())) {
+			if (this.getHow().equals(other.getHow()) && this.getWhat().equals(other.getWhat()) && this.getWhere().equals(other.getWhere())) {
 				return true;
 			}
 		}
@@ -70,7 +71,7 @@ public class DataType {
 	public String toString() {
 		return "DataType{" +
 				"data_id=" + data_id +
-				", where1='" + where1 + '\'' +
+				", where='" + where + '\'' +
 				", how='" + how + '\'' +
 				", what='" + what + '\'' +
 				", lastUpdated=" + lastUpdated +

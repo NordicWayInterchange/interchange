@@ -23,7 +23,7 @@ public class CapabilityMatcher {
 		DataTypeFilter(DataType dataType) {
 			headers.put("how", dataType.getHow());
 			headers.put("what", dataType.getWhat());
-			headers.put("where1", dataType.getWhere1());
+			headers.put("where", dataType.getWhere());
 		}
 
 		@Override

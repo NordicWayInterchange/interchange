@@ -18,7 +18,7 @@ public class TestIxnMessageConsumer {
 		long now = System.currentTimeMillis();
 		System.out.println("now         : " + now);
 		System.out.println("latency : " + (now - textMessage.getJMSDeliveryTime()));
-		System.out.println("where1: " + textMessage.getStringProperty("where1") );
+		System.out.println("where: " + textMessage.getStringProperty("where") );
 	}
 
 }

@@ -54,9 +54,9 @@ public class NeighbourDiscovererTest {
 	private ServiceProvider illegalServiceProvider;
 	private Iterable<ServiceProvider> serviceProviders;
 	private Iterable<ServiceProvider> illegalServiceProviders;
-	private Subscription firstSubscription = new Subscription("where1 LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
-	private Subscription secondSubscription = new Subscription("where1 LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
-	private Subscription illegalSubscription = new Subscription("(where1 LIKE 'DK') OR (1=1)", Subscription.SubscriptionStatus.REQUESTED);
+	private Subscription firstSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+	private Subscription secondSubscription = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
+	private Subscription illegalSubscription = new Subscription("(where LIKE 'DK') OR (1=1)", Subscription.SubscriptionStatus.REQUESTED);
 
 
 
@@ -362,7 +362,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void successfulPollOfSubscriptionCallsSaveOnRepository(){
 
-		Subscription subscription = new Subscription("where1 LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		ericsson.setFedIn(ericssonSubscription);
 		when(interchangeRepository.findInterchangesToPollForSubscriptionStatus()).thenReturn(Collections.singletonList(ericsson));
