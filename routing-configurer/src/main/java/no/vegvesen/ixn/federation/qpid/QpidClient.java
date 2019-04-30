@@ -20,7 +20,7 @@ import java.util.*;
 
 @Service
 public class QpidClient {
-	private Logger logger = LoggerFactory.getLogger(QpidClient.class);
+	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
 	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s/nwEx";
 	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
