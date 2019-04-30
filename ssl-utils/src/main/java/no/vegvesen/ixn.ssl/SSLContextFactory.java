@@ -21,7 +21,7 @@ public class SSLContextFactory {
 		try {
 			keyStore = KeyStore.getInstance(details.getType().toString());
 			keyStore.load(new FileInputStream(details.getFileName()), details.getPassword().toCharArray());
-		} catch (Exception e1) {
+		} catch (Throwable e1) {
 			throw new InvalidSSLConfig(e1);
 		}
 		return keyStore;
@@ -46,7 +46,7 @@ public class SSLContextFactory {
 	}
 
 	public static class InvalidSSLConfig extends RuntimeException {
-		InvalidSSLConfig(Exception e) {
+		InvalidSSLConfig(Throwable e) {
 			super(e);
 		}
 	}
