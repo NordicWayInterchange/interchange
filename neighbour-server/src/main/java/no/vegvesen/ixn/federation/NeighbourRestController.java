@@ -135,7 +135,7 @@ public class NeighbourRestController {
 	// Method used to check for duplicate capabilities
 	boolean setContainsDataType(DataType dataType, Set<DataType> capabilities){
 		for(DataType d : capabilities){
-			if(dataType.getHow().equals(d.getHow()) && dataType.getWhat().equals(d.getWhat()) && dataType.getWhere1().equals(d.getWhere1())){
+			if(dataType.getHow().equals(d.getHow()) && dataType.getWhat().equals(d.getWhat()) && dataType.getWhere().equals(d.getWhere())){
 				return true;
 			}
 		}

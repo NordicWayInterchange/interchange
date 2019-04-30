@@ -110,7 +110,7 @@ public class NeighbourRestControllerTest {
 		bouvet.setName("bouvet");
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
-		Subscription subscription = new Subscription("where1 LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 
 		bouvet.setSubscriptionRequest(subscriptionRequest);
@@ -123,7 +123,7 @@ public class NeighbourRestControllerTest {
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		updatedInterchange.setCapabilities(capabilities);
 
-		Subscription firstSubscription = new Subscription("where1 LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription firstSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		firstSubscription.setPath("/bouvet/subscription/1");
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		updatedInterchange.setSubscriptionRequest(returnedSubscriptionRequest);

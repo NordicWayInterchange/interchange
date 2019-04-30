@@ -81,7 +81,7 @@ public class AccessControlIT extends IxnBaseIT {
 		message.setStringProperty("what", "Conditions");
 		message.setStringProperty("lat", "63.0");
 		message.setStringProperty("lon", "10.0");
-		message.setStringProperty("where1", "NO");
+		message.setStringProperty("where", "NO");
 
 		messageProducer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 	}

@@ -84,7 +84,7 @@ public class DebugClient{
 			message.setStringProperty("version", "1.0");
 			message.setStringProperty("lat", "63.0");
 			message.setStringProperty("lon", "10.0");
-			message.setStringProperty("where1", where);
+			message.setStringProperty("where", where);
 			message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 			printWithColor(BROWN, " sending message");
 			printWithColor(BLACK, " ");

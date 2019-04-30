@@ -56,7 +56,7 @@ CREATE TABLE public.data_types (
   how character varying(255),
   last_updated timestamp without time zone,
   what character varying(255),
-  where1 character varying(255),
+  where character varying(255),
   spr_id_cap integer,
   ixn_id_cap integer
 );
@@ -167,7 +167,7 @@ SELECT pg_catalog.setval('public.dat_seq', 51, true);
 -- Data for Name: data_types; Type: TABLE DATA; Schema: public; Owner: federation
 --
 
-COPY public.data_types (dat_id, how, last_updated, what, where1, spr_id_cap, ixn_id_cap) FROM stdin;
+COPY public.data_types (dat_id, how, last_updated, what, where, spr_id_cap, ixn_id_cap) FROM stdin;
 1	datex2;1.0	2019-03-29 13:48:38.007	Conditions	NO	1	\N
 2	datex2;1.0	2019-03-29 13:48:38.01	Works	NO	1	\N
 3	datex2;1.0	2019-03-29 13:49:10.011	Works	NO	2	\N
@@ -219,8 +219,8 @@ SELECT pg_catalog.setval('public.sub_seq', 51, true);
 --
 
 COPY public.subscriptions (sub_id, last_updated, path, selector, subscription_status, spr_id_sub, ixn_id_sub_out, ixn_id_fed_in) FROM stdin;
-1	2019-03-29 13:48:38.012	\N	where1 LIKE 'FI'	REQUESTED	1	\N	\N
-2	2019-03-29 13:49:10.014	\N	where1 LIKE 'DK'	REQUESTED	2	\N	\N
+1	2019-03-29 13:48:38.012	\N	where LIKE 'FI'	REQUESTED	1	\N	\N
+2	2019-03-29 13:49:10.014	\N	where LIKE 'DK'	REQUESTED	2	\N	\N
 \.
 
 

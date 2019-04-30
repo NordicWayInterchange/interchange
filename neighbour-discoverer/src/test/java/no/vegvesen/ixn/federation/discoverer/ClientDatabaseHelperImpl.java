@@ -38,7 +38,7 @@ public class ClientDatabaseHelperImpl implements DatabaseHelperInterface {
 		teslaCloud.setCapabilities(Stream.of(teslaDataTypeOne, teslaDataTypeTwo).collect(Collectors.toSet()));
 
 		Subscription teslaSubscription = new Subscription();
-		teslaSubscription.setSelector("where1 LIKE 'NO'");
+		teslaSubscription.setSelector("where LIKE 'NO'");
 		teslaSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		teslaCloud.setSubscriptions(Collections.singleton(teslaSubscription));
 		serviceProviderRepository.save(teslaCloud);
@@ -50,7 +50,7 @@ public class ClientDatabaseHelperImpl implements DatabaseHelperInterface {
 		BMWCloud.setCapabilities(Stream.of(bmwDataTypeTwo, bmwDataTypeOne).collect(Collectors.toSet()));
 
 		Subscription BMWSubscription = new Subscription();
-		BMWSubscription.setSelector("where1 LIKE 'SE'");
+		BMWSubscription.setSelector("where LIKE 'SE'");
 		BMWSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		BMWCloud.setSubscriptions(Collections.singleton(BMWSubscription));
 		serviceProviderRepository.save(BMWCloud);

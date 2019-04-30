@@ -83,7 +83,7 @@ public class NeighbourRESTFacadeTest {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where1 LIKE 'NO'");
+		subscription.setSelector("where LIKE 'NO'");
 
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest=null;
@@ -114,7 +114,7 @@ public class NeighbourRESTFacadeTest {
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where1 LIKE 'NO'");
+		subscription.setSelector("where LIKE 'NO'");
 
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 

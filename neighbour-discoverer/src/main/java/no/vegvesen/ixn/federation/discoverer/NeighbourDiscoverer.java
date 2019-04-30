@@ -132,7 +132,7 @@ public class NeighbourDiscoverer {
 		try { // capability matcher trows Parse Exception or Illegal Argument Exception if selector is always true
 
 			for (DataType dataType : neighbourInterchange.getCapabilities().getDataTypes()) {
-				logger.info("Capability of node " + neighbourInterchange.getName() + " : " + dataType.getWhere1() + ", " + dataType.getWhat() + ", " + dataType.getHow());
+				logger.info("Capability of node " + neighbourInterchange.getName() + " : " + dataType.getWhere() + ", " + dataType.getWhat() + ", " + dataType.getHow());
 
 				logger.info("subscriptions of discovering interchange: " + discoveringInterchange.getSubscriptionRequest());
 
@@ -144,7 +144,7 @@ public class NeighbourDiscoverer {
 					if (CapabilityMatcher.matches(dataType, subscription.getSelector())) {
 
 						logger.debug("Node " + neighbourInterchange.getName() + " has capability (" + dataType.getHow() + ", "
-								+ dataType.getWhat() + ", " + dataType.getWhere1()
+								+ dataType.getWhat() + ", " + dataType.getWhere()
 								+ ") that matches subscription (" + subscription.getSelector() + ")");
 
 						subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);

@@ -53,7 +53,7 @@ public class ServiceProviderRepositoryIT {
 		ServiceProvider volvo = new ServiceProvider("Volvo");
 
 		Subscription volvoSubscription = new Subscription();
-		volvoSubscription.setSelector("where1 LIKE 'FI'");
+		volvoSubscription.setSelector("where LIKE 'FI'");
 		volvo.setSubscriptions(Collections.singleton(volvoSubscription));
 
 		repository.save(volvo);

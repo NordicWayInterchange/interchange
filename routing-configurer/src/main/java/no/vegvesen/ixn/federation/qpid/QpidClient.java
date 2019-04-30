@@ -60,7 +60,7 @@ public class QpidClient {
 	public void updateBinding(String binding, String queueName) throws Exception {
 		JSONObject json = new JSONObject();
 		json.put("destination", queueName);
-		json.put("bindingKey", "where1");
+		json.put("bindingKey", "where");
 		json.put("replaceExistingArguments", true);
 
 		JSONObject innerjson = new JSONObject();
