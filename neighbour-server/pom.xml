@@ -20,13 +20,12 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-model</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.5</version>
         </dependency>
 
         <dependency>
@@ -34,14 +33,6 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.vaadin.external.google</groupId>
-            <artifactId>android-json</artifactId>
-            <version>RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
-
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
