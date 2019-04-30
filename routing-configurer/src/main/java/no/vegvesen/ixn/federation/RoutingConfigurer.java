@@ -25,7 +25,7 @@ public class RoutingConfigurer {
 
 	@Scheduled(fixedRateString = "${routing.configurer.interval}")
 	public void checkForInterchangesToSetupRoutingFor() {
-		List<Interchange> readyToSetupRouting = repository.findInterchangesWithStatusNEW(); //TODO Use correct criteria
+		List<Interchange> readyToSetupRouting = repository.findInterchangesForSubscriptionRequest(); //TODO Use correct criteria
 		for (Interchange setUp : readyToSetupRouting) {
 			qpidClient.setupRouting(setUp);
 		}

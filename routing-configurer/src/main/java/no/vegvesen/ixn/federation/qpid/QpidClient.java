@@ -61,36 +61,28 @@ public class QpidClient {
 
 	// Updates the binding of a queue to a new binding.
 	private void updateBinding(String binding, String queueName, String bindingKey) {
-		try {
-			JSONObject json = new JSONObject();
-			json.put("destination", queueName);
-			json.put("bindingKey", bindingKey);
-			json.put("replaceExistingArguments", true);
+		JSONObject json = new JSONObject();
+		json.put("destination", queueName);
+		json.put("bindingKey", bindingKey);
+		json.put("replaceExistingArguments", true);
 
-			JSONObject innerjson = new JSONObject();
-			innerjson.put("x-filter-jms-selector", binding);
+		JSONObject innerjson = new JSONObject();
+		innerjson.put("x-filter-jms-selector", binding);
 
-			json.put("arguments", innerjson);
-			String jsonString = json.toString();
+		json.put("arguments", innerjson);
+		String jsonString = json.toString();
 
-			logger.info("Json string: " + jsonString);
-			postQpid(exchangeURL, jsonString, "/bind");
-		} catch (JSONException e) {
-			throw new RoutingConfigurerException(e);
-		}
+		logger.info("Json string: " + jsonString);
+		postQpid(exchangeURL, jsonString, "/bind");
 	}// Creates a new queue for a neighbouring Interchange.
 
 	void createQueue(Interchange interchange) {
-		try {
-			JSONObject json = new JSONObject();
-			json.put("name", interchange.getName());
-			json.put("durable", true);
-			String jsonString = json.toString();
-			logger.info("Creating queue:" + jsonString);
-			postQpid(queuesURL, jsonString, "/");
-		} catch (JSONException e) {
-			throw new RoutingConfigurerException(e);
-		}
+		JSONObject json = new JSONObject();
+		json.put("name", interchange.getName());
+		json.put("durable", true);
+		String jsonString = json.toString();
+		logger.info("Creating queue:" + jsonString);
+		postQpid(queuesURL, jsonString, "/");
 	}
 
 	boolean queueExists(String queueName) {
@@ -119,11 +111,10 @@ public class QpidClient {
 	public void setupRouting(Interchange interchange) {
 		if (queueExists(interchange.getName())) {
 			unbindOldUnwantedBindings(interchange);
-		}
-		else {
+		} else {
 			createQueue(interchange);
 		}
-		for (Subscription subscription : interchange.getSubscriptions()) {
+		for (Subscription subscription : interchange.getSubscriptionRequest().getSubscriptions()) {
 			updateBinding(subscription.getSelector(), interchange.getName(), bindKey(interchange, subscription));
 		}
 	}
@@ -136,17 +127,13 @@ public class QpidClient {
 	}
 
 	private void unbindBindKey(Interchange interchange, String unwantedBindKey) {
-		try {
-			JSONObject json = new JSONObject();
-			json.put("destination", interchange.getName());
-			json.put("bindingKey", unwantedBindKey);
-			String jsonString = json.toString();
+		JSONObject json = new JSONObject();
+		json.put("destination", interchange.getName());
+		json.put("bindingKey", unwantedBindKey);
+		String jsonString = json.toString();
 
-			logger.info("Json string: " + jsonString);
-			postQpid(exchangeURL, jsonString, "/unbind");
-		} catch (JSONException e) {
-			throw new RoutingConfigurerException(e);
-		}
+		logger.info("Json string: " + jsonString);
+		postQpid(exchangeURL, jsonString, "/unbind");
 	}
 
 	private Set<String> getUnwantedBindKeys(Interchange interchange) {
@@ -159,7 +146,7 @@ public class QpidClient {
 
 	private Set<String> wantedBindings(Interchange interchange) {
 		Set<String> wantedBindings = new HashSet<>();
-		for (Subscription subscription : interchange.getSubscriptions()) {
+		for (Subscription subscription : interchange.getSubscriptionRequest().getSubscriptions()) {
 			wantedBindings.add(bindKey(interchange, subscription));
 		}
 		return wantedBindings;
@@ -173,17 +160,18 @@ public class QpidClient {
 		HashSet<String> existingBindKeys = new HashSet<>();
 		String url = queuesURL + "/" + queueName + "/getPublishingLinks";
 
-		ResponseEntity<List<Map<String,Object>>> response = restTemplate.exchange(
+		ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
 				url,
 				HttpMethod.GET,
 				null,
-				new ParameterizedTypeReference<List<Map<String,Object>>>(){});
-		List<Map<String,Object>> queueBindings = response.getBody();
+				new ParameterizedTypeReference<List<Map<String, Object>>>() {
+				});
+		List<Map<String, Object>> queueBindings = response.getBody();
 		if (queueBindings != null) {
 			for (Map<String, Object> binding : queueBindings) {
 				Object bindingKey = binding.get("bindingKey");
 				if (bindingKey instanceof String) {
-					existingBindKeys.add((String)bindingKey);
+					existingBindKeys.add((String) bindingKey);
 				}
 			}
 		}

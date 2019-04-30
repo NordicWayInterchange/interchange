@@ -30,7 +30,7 @@ public class QpidClientIT {
 	}
 
 	@Test
-	public void createQueue(){
+	public void createQueue() {
 		Interchange findus = new Interchange("findus", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 
 		client.createQueue(findus);
@@ -59,7 +59,8 @@ public class QpidClientIT {
 	@Test
 	public void interchangeWithOneBindingIsCreated() {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", Subscription.SubscriptionStatus.REQUESTED)));
-		Interchange flounder = new Interchange("flounder", Collections.emptySet(), subscriptions, Collections.emptySet());
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		Interchange flounder = new Interchange("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(flounder);
 		assertThat(client.queueExists(flounder.getName())).isTrue();
 	}
@@ -69,7 +70,8 @@ public class QpidClientIT {
 		Subscription s1 = new Subscription("a = b", Subscription.SubscriptionStatus.REQUESTED);
 		Subscription s2 = new Subscription("b = c", Subscription.SubscriptionStatus.REQUESTED);
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
-		Interchange halibut = new Interchange("halibut", Collections.emptySet(), subscriptions, Collections.emptySet());
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		Interchange halibut = new Interchange("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(halibut);
 		assertThat(client.queueExists(halibut.getName())).isTrue();
 	}
@@ -77,7 +79,8 @@ public class QpidClientIT {
 	@Test
 	public void interchangeIsBothCreatedAndUpdated() {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", Subscription.SubscriptionStatus.REQUESTED)));
-		Interchange seabass = new Interchange("seabass", Collections.emptySet(), subscriptions, Collections.emptySet());
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		Interchange seabass = new Interchange("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(seabass);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
 		client.setupRouting(seabass);
@@ -89,12 +92,14 @@ public class QpidClientIT {
 		Subscription s1 = new Subscription("a = b", Subscription.SubscriptionStatus.REQUESTED);
 		Subscription s2 = new Subscription("b = c", Subscription.SubscriptionStatus.REQUESTED);
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
-		Interchange trout = new Interchange("trout", Collections.emptySet(), subscriptions, Collections.emptySet());
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		Interchange trout = new Interchange("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
 		subscriptions = new HashSet<>(Collections.singletonList(s1));
-		trout = new Interchange("trout", Collections.emptySet(), subscriptions, Collections.emptySet());
+		subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		trout = new Interchange("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		client.setupRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
@@ -102,7 +107,7 @@ public class QpidClientIT {
 
 	@Test
 	public void tearDownQueue() {
-		Interchange crab = new Interchange("crab", Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+		Interchange crab = new Interchange("crab", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 
 		//Set up a new queue
 		client.createQueue(crab);
