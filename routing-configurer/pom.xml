@@ -12,6 +12,10 @@
 
     <artifactId>routing-configurer</artifactId>
 
+    <properties>
+        <start-class>no.vegvesen.ixn.federation.RoutingConfigurerApplication</start-class>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
