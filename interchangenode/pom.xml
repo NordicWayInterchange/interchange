@@ -53,6 +53,13 @@
             <artifactId>netty-handler</artifactId>
             <version>4.1.33.Final</version>
         </dependency>
+
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>ssl-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
