@@ -1,10 +1,8 @@
 package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "subscriptions")
@@ -21,10 +19,6 @@ public class Subscription {
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;
-
-	@Column
-	@UpdateTimestamp
-	private LocalDateTime lastUpdated;
 
 	private String selector;
 
@@ -72,7 +66,6 @@ public class Subscription {
 		return "Subscription{" +
 				"sub_id=" + sub_id +
 				", subscriptionStatus=" + subscriptionStatus +
-				", lastUpdated=" + lastUpdated +
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +
 				'}';

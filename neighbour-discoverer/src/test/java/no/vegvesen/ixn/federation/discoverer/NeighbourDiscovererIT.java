@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 
-import no.vegvesen.ixn.federation.model.Interchange;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +20,15 @@ public class NeighbourDiscovererIT {
 
 		neighbourDiscoverer.checkForNewInterchanges();
 
-		neighbourDiscoverer.capabilityExchangeWithNewNeighbour();
+		neighbourDiscoverer.capabilityExchange();
+
+		neighbourDiscoverer.subscriptionRequest();
+
+		//neighbourDiscoverer.pollSubscriptions();
 
 		try {
 			Thread.sleep(20000);
-		}catch (InterruptedException e){
-
+		}catch (InterruptedException ignore){
 		}
 	}
 

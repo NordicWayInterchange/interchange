@@ -15,6 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 public class QpidClientIT {
 
+	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
+	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
+
 	@Autowired
 	QpidClient client;
 
@@ -25,13 +28,15 @@ public class QpidClientIT {
 
 	@Test
 	public void createQueue() throws Exception {
-		Interchange findus = new Interchange("findus", Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+		Interchange findus = new Interchange("findus", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
+
 		client.createQueue(findus);
 	}
 
 	@Test(expected = Exception.class)
 	public void createQueueWithIllegalCharactersInIdFails() throws Exception {
-		Interchange torsk = new Interchange("torsk", Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+		Interchange torsk = new Interchange("torsk", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
+
 		client.createQueue(torsk);
 		client.createQueue(torsk); //create some queue that already exists
 	}

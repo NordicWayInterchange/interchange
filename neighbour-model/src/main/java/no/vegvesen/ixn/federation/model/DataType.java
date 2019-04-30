@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "data_types")
@@ -12,7 +13,7 @@ public class DataType {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_generator")
-	@SequenceGenerator(name="dat_generator", sequenceName = "dat_seq", allocationSize=50)
+	@SequenceGenerator(name="dat_generator", sequenceName = "dat_seq")
 	@Column(name="dat_id")
 	private Integer data_id;
 
@@ -54,6 +55,15 @@ public class DataType {
 
 	public void setWhat(String what) {
 		this.what = what;
+	}
+
+	public boolean isContainedInSet(Set<DataType> capabilities){
+		for (DataType other : capabilities) {
+			if (this.getHow().equals(other.getHow()) && this.getWhat().equals(other.getWhat()) && this.getWhere1().equals(other.getWhere1())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

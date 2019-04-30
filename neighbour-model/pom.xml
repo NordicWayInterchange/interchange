@@ -92,7 +92,7 @@
                                             <POSTGRES_DB>federation</POSTGRES_DB>
                                         </env>
                                         <wait>
-                                            <time>1000</time>
+                                            <time>5000</time>
                                         </wait>
                                     </run>
                                 </image>

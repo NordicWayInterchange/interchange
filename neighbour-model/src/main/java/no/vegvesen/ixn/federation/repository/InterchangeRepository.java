@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -15,20 +14,26 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from INTERCHANGES where name=?1", nativeQuery = true)
 	Interchange findByName(String name);
 
-	@Query(value = "select * from interchanges where last_updated between ?1 and ?2",  nativeQuery = true)
-	List<Interchange> findInterchangeOlderThan(Timestamp then, Timestamp now);
 
-	@Query(value = "select * from interchanges where ixn_id in (select ixn_id_cap from data_types where last_updated between ?1 and ?2)", nativeQuery=true)
-	List<Interchange> findInterchangesWithRecentCapabilityChanges(Timestamp then, Timestamp now);
+	// Find interchanges with fedIn status requested; Poll for subscription status
+	@Query(value = "select * from interchanges where ixn_id_fed_in in(select subreq_id from subscription_request where status='REQUESTED')", nativeQuery = true)
+	List<Interchange> findInterchangesToPollForSubscriptionStatus();
 
-	@Query(value = "select * from interchanges where interchange_status='NEW'", nativeQuery = true)
-	List<Interchange> findInterchangesWithStatusNEW();
+	// Selectors for capability and subscription exchange
+	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'UNKNOWN')", nativeQuery = true)
+	List<Interchange> findInterchangesForCapabilityExchange();
 
-	@Query(value = "select * from interchanges where interchange_status='FAILED_CAPABILITY_EXCHANGE'", nativeQuery = true)
-	List<Interchange> findInterchangesWithStatusFAILED_CAPABILITY_EXCHANGE();
+	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'KNOWN') intersect select * from interchanges where ixn_id_sub_out in (select subreq_id from subscription_request where status = 'EMPTY')", nativeQuery = true)
+	List<Interchange> findInterchangesForSubscriptionRequest();
 
-	@Query(value = "select * from interchanges where interchange_status='FAILED_SUBSCRIPTION_REQUEST'", nativeQuery = true)
-	List<Interchange> findInterchangesWithStatusFAILED_SUBSCRIPTION_REQUEST();
+
+	// Selectors for graceful backoff
+	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id from subscription_request where status ='FAILED')", nativeQuery = true)
+	List<Interchange> findInterchangesWithFailedFedIn();
+
+	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'FAILED')", nativeQuery = true)
+	List<Interchange> findInterchangesWithFailedCapabilityExchange();
+
 
 
 }
