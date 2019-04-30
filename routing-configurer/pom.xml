@@ -13,11 +13,6 @@
     <artifactId>routing-configurer</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <properties>
-        <java.version>1.8</java.version>
-        <start-class>no.vegvesen.ixn.federation.qpid.QpidClient</start-class>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
