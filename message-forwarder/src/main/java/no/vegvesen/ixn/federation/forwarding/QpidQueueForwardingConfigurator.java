@@ -1,5 +1,8 @@
 package no.vegvesen.ixn.federation.forwarding;
 
+import no.vegvesen.ixn.ssl.KeystoreDetails;
+import no.vegvesen.ixn.ssl.KeystoreType;
+import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,39 +37,10 @@ public class QpidQueueForwardingConfigurator {
     @Value("${forwarder.truststoretype}")
     private String truststoreType;
 
-    private StoreDetails keystoreDetails() {
-        return new StoreDetails(keystorePath,keystorePassword,keystoreType);
-    }
-
-    private StoreDetails trustStoreDetails() {
-        return new StoreDetails(truststorePath,truststorePassword,truststoreType);
-    }
-
     @Bean
-    public SSLContext createSSLContext() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
-        return createSSLContext(keystoreDetails(),trustStoreDetails());
-    }
-    
-    private SSLContext createSSLContext(StoreDetails keyStoreDetails, StoreDetails trustStoreDetails) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableKeyException, KeyManagementException {
-        KeyStore keyStore = readStore(keyStoreDetails);
-        KeyStore trustStore = readStore(trustStoreDetails);
-
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(keyStore,keyStoreDetails.getPassword().toCharArray()); //TODO this assumes the same password for the key store as the actual keys...
-
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmf.init(trustStore);
-
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(kmf.getKeyManagers(),tmf.getTrustManagers(),null);
-        return context;
-    }
-    
-    private KeyStore readStore(StoreDetails storeDetails) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
-        try (InputStream keyStoreStream = Files.newInputStream(Paths.get(storeDetails.getPath())) ) {
-            KeyStore keyStore = KeyStore.getInstance(storeDetails.getStoreType());
-            keyStore.load(keyStoreStream,storeDetails.getPassword().toCharArray());
-            return keyStore;
-        }
+    public SSLContext createSSLContext() {
+        KeystoreDetails keystore = new KeystoreDetails(keystorePath,keystorePassword, KeystoreType.valueOf(keystoreType));
+        KeystoreDetails trustStore = new KeystoreDetails(truststorePath,truststorePassword,KeystoreType.valueOf(truststoreType),truststorePassword);
+        return SSLContextFactory.sslContextFromKeyAndTrustStores(keystore,trustStore);
     }
 }

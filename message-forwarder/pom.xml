@@ -25,7 +25,12 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-model</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>ssl-utils</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -47,13 +52,12 @@
             <version>42.2.5</version>
         </dependency>
         <!-- TODO for tests. Remove if not used. -->
-        <!--
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
+            <version>1.4.197</version>
         </dependency>
-        -->
             <dependency>
             <groupId>org.amqphub.spring</groupId>
             <artifactId>amqp-10-jms-spring-boot-starter</artifactId>
@@ -65,7 +69,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
     </dependencies>
 
     <build>
