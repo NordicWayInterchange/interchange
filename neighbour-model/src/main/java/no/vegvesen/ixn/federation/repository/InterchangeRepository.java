@@ -47,6 +47,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges i where exists (select 'x' from subscription_request sr where i.ixn_id_sub_out = sr.subreq_id and sr.status = 'TEAR_DOWN')", nativeQuery = true)
 	List<Interchange> findInterchangesForOutgoingSubscriptionTearDown();
 
-
+	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id from subscription_request where status ='ESTABLISHED,')", nativeQuery = true)
+	List<Interchange> findInterchangesForMessageForwarding();
 
 }

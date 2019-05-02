@@ -1,0 +1,138 @@
+{
+  "name": "${broker.name}",
+  "modelVersion": "7.0",
+  "authenticationproviders": [
+    {
+      "name": "clientCerts",
+      "type": "External"
+    },
+    {
+      "name": "passwordFile",
+      "type": "PlainPasswordFile",
+      "path": "${PASSWD_FILE}"
+    }
+  ],
+  "brokerloggers" : [
+    {
+      "name" : "console",
+      "type" : "Console",
+      "lastUpdatedBy" : "admin",
+      "brokerloginclusionrules" : [ {
+        "name" : "rootInclude",
+        "type" : "NameAndLevel",
+        "durable" : true,
+        "level" : "INFO"
+      } ]
+    }
+  ],
+  "keystores": [
+    {
+    "name" : "default",
+    "type" : "NonJavaKeyStore",
+    "certificateUrl" : "${CERTIFICATE_FILE}",
+    "privateKeyUrl" : "${PRIVATE_KEY_FILE}"
+    }
+  ],
+  "plugins": [
+    {
+      "type": "MANAGEMENT-HTTP",
+      "name": "httpManagement"
+    }
+  ],
+  "ports": [
+    {
+      "name": "AMQP",
+      "type": "AMQP",
+      "authenticationProvider": "passwordFile",
+      "port": "5672",
+      "protocols": ["AMQP_1_0"],
+      "virtualhostaliases": [
+        {
+          "name": "defaultAlias",
+          "type": "defaultAlias"
+        },
+        {
+          "name": "hostnameAlias",
+          "type": "hostnameAlias"
+        },
+        {
+          "name": "nameAlias",
+          "type": "nameAlias"
+        }
+      ]
+    },
+    {
+      "name": "AMQPS",
+      "type": "AMQP",
+      "authenticationProvider": "clientCerts",
+      "bindingAddress": "*",
+      "keyStore": "default",
+      "needClientAuth": true,
+      "port": "5671",
+      "protocols": ["AMQP_1_0"],
+      "transports": [
+        "SSL",
+        "TCP"
+      ],
+      "trustStores": ["default"],
+      "wantClientAuth": false,
+      "virtualhostaliases": [
+        {
+          "name": "defaultAlias",
+          "type": "defaultAlias"
+        },
+        {
+          "name": "hostnameAlias",
+          "type": "hostnameAlias"
+        },
+        {
+          "name": "nameAlias",
+          "type": "nameAlias"
+        }
+      ]
+    },
+    {
+      "name": "HTTP",
+      "port": "8080",
+      "authenticationProvider": "passwordFile",
+      "protocols": ["HTTP"]
+    },
+    {
+      "name": "HTTPS",
+      "type" : "HTTP",
+      "authenticationProvider" : "clientCerts",
+      "bindingAddress" : "*",
+      "port" : "443",
+      "trustStores": ["default"],
+      "keyStore": "default",
+      "needClientAuth": true,
+      "wantClientAuth": false,
+      "transports": [
+        "SSL",
+        "TCP"
+      ]
+    }
+  ],
+  "truststores": [
+    {
+      "name": "default",
+      "type": "NonJavaTrustStore",
+      "exposedAsMessageSource": false,
+      "trustAnchorValidityEnforced": false,
+      "certificatesUrl": "${CA_CERT_FILE}"
+    }
+  ],
+  "virtualhostnodes": [
+    {
+      "name": "default",
+      "type": "JSON",
+      "defaultVirtualHostNode": "true",
+      "virtualHostInitialConfiguration": "{}"
+    }
+  ],
+  "groupproviders" : [ {
+    "name" : "default",
+    "type" : "GroupFile",
+    "path" : "${GROUPS_FILE}"
+  } ]
+}
