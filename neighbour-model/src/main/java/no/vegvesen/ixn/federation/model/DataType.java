@@ -17,6 +17,7 @@ public class DataType {
 	@Column(name="dat_id")
 	private Integer data_id;
 
+	@Column(name = "header_where")
 	private String where;
 	private String how;
 	@JsonIgnore
