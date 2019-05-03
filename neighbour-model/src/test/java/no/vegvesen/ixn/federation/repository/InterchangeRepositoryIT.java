@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.*;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,5 +81,34 @@ public class InterchangeRepositoryIT {
 		assertNotNull(thirdInterchange.getCapabilities());
 	}
 
+	@Test
+	public void interchangeReadyToSetupRouting() {
+		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		Set<Subscription> requestedSubscriptions = new HashSet<>();
+		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'fish'", Subscription.SubscriptionStatus.ACCEPTED));
+		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", Subscription.SubscriptionStatus.ACCEPTED));
+		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
+		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
+		Interchange readyToSetup = new Interchange("freddy", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
+		repository.save(readyToSetup);
 
+		List<Interchange> forSetupFromRepo = repository.findInterchangesForOutgoingSubscriptionSetup();
+
+		assertThat(forSetupFromRepo).hasSize(1);
+		assertThat(forSetupFromRepo.iterator().next().getName()).isEqualTo("freddy");
+	}
+
+	@Test
+	public void interchangeReadyToTearDownRouting() {
+		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		SubscriptionRequest tearDownSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN, Collections.emptySet());
+		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
+		Interchange tearDownIxn = new Interchange("torry", caps, tearDownSubscriptionRequest, noIncomingSubscriptions);
+		repository.save(tearDownIxn);
+
+		List<Interchange> forTearDownFromRepo = repository.findInterchangesForOutgoingSubscriptionTearDown();
+
+		assertThat(forTearDownFromRepo).hasSize(1);
+		assertThat(forTearDownFromRepo.iterator().next().getName()).isEqualTo("torry");
+	}
 }

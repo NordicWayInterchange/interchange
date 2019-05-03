@@ -11,11 +11,11 @@ public class Subscription {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
-	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq", allocationSize = 50)
+	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq")
 	@Column(name = "sub_id")
 	private Integer sub_id;
 
-	public enum SubscriptionStatus {REQUESTED, CREATED, REJECTED}
+	public enum SubscriptionStatus {REQUESTED, CREATED, ACCEPTED, REJECTED}
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;

@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,7 @@ public class QpidClient {
 	}
 
 	// Updates the binding of a queue to a new binding.
+	@SuppressWarnings("unchecked")
 	private void updateBinding(String binding, String queueName, String bindingKey) {
 		JSONObject json = new JSONObject();
 		json.put("destination", queueName);
@@ -76,6 +78,7 @@ public class QpidClient {
 		postQpid(exchangeURL, jsonString, "/bind");
 	}// Creates a new queue for a neighbouring Interchange.
 
+	@SuppressWarnings("unchecked")
 	void createQueue(Interchange interchange) {
 		JSONObject json = new JSONObject();
 		json.put("name", interchange.getName());
@@ -108,15 +111,19 @@ public class QpidClient {
 		return null;
 	}
 
-	public void setupRouting(Interchange interchange) {
-		if (queueExists(interchange.getName())) {
-			unbindOldUnwantedBindings(interchange);
+	public SubscriptionRequest setupRouting(Interchange toSetUp) {
+		if (queueExists(toSetUp.getName())) {
+			unbindOldUnwantedBindings(toSetUp);
 		} else {
-			createQueue(interchange);
+			createQueue(toSetUp);
 		}
-		for (Subscription subscription : interchange.getSubscriptionRequest().getSubscriptions()) {
-			updateBinding(subscription.getSelector(), interchange.getName(), bindKey(interchange, subscription));
+		SubscriptionRequest subscriptionRequest = toSetUp.getSubscriptionRequest();
+		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
+			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription));
+			subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
 		}
+		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		return subscriptionRequest;
 	}
 
 	private void unbindOldUnwantedBindings(Interchange interchange) {
@@ -126,6 +133,7 @@ public class QpidClient {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void unbindBindKey(Interchange interchange, String unwantedBindKey) {
 		JSONObject json = new JSONObject();
 		json.put("destination", interchange.getName());

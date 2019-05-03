@@ -34,6 +34,9 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'FAILED')", nativeQuery = true)
 	List<Interchange> findInterchangesWithFailedCapabilityExchange();
 
+	@Query(value = "select * from interchanges i where exists (select 'x' from subscription_request sr where i.ixn_id_sub_out = sr.subreq_id and sr.status = 'REQUESTED' and exists(select 'x' from subscriptions s where sr.subreq_id = s.subreq_id_sub and s.subscription_status = 'ACCEPTED'))", nativeQuery = true)
+	List<Interchange> findInterchangesForOutgoingSubscriptionSetup();
 
-
+	@Query(value = "select * from interchanges i where exists (select 'x' from subscription_request sr where i.ixn_id_sub_out = sr.subreq_id and sr.status = 'TEAR_DOWN')", nativeQuery = true)
+	List<Interchange> findInterchangesForOutgoingSubscriptionTearDown();
 }
