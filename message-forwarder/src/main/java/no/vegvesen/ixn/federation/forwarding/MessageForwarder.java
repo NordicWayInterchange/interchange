@@ -9,14 +9,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.Destination;
+import javax.jms.ExceptionListener;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
-import java.security.*;
-import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 @Service
@@ -46,7 +53,7 @@ public class MessageForwarder {
     }
 
     @Scheduled(fixedRate = 60000)
-    public void runSchedule() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, NamingException, JMSException, IOException {
+    public void runSchedule() throws NamingException, JMSException {
         checkListenerList();
         setupConnectionsToNewNeighbours();
     }
@@ -63,7 +70,7 @@ public class MessageForwarder {
 
     }
 
-    public void setupConnectionsToNewNeighbours() throws NamingException, JMSException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+    public void setupConnectionsToNewNeighbours() throws NamingException, JMSException {
         List<Interchange> interchanges = neighbourFetcher.listNeighbourCandidates();
         for (Interchange ixn : interchanges) {
             String name = ixn.getName();
@@ -83,7 +90,7 @@ public class MessageForwarder {
         }
     }
 
-    public MessageConsumer createConsumerFromLocal(Interchange ixn) throws NamingException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableKeyException, KeyManagementException, JMSException {
+    public MessageConsumer createConsumerFromLocal(Interchange ixn) throws NamingException, JMSException {
         String readUrl = String.format("amqps://%s:%s",localIxnDomainName,localIxnFederationPort);
         String readQueue = ixn.getName();
         Hashtable<Object, Object> env = createReadContext(readUrl, readQueue);
@@ -94,7 +101,6 @@ public class MessageForwarder {
         factory.setSslContext(sslContext);
         Destination queueR = (Destination) context.lookup("receiveQueue");
 
-        //TODO need to set key and trust managers on this
         Connection connection = factory.createConnection("local", "password");
         connection.start();
 
