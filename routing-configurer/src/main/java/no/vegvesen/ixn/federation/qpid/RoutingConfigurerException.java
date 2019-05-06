@@ -9,4 +9,8 @@ public class RoutingConfigurerException extends RuntimeException {
 	public RoutingConfigurerException(String message) {
 		super(message);
 	}
+
+	public RoutingConfigurerException(String errorMessage, Throwable e) {
+		super(errorMessage, e);
+	}
 }

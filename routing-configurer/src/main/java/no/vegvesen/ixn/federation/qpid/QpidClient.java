@@ -10,13 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 @Service
@@ -51,16 +51,20 @@ public class QpidClient {
 	// A method that posts a json object to the Qpid REST api, using a given URI and a given command.
 	private void postQpid(String urlString, String message, String command) {
 		String url = urlString + command;
-		logger.info("URL: " + url);
+		logger.debug("POST to QPID URL {} with message {} ", url, message);
 
 		ResponseEntity<String> response = restTemplate.postForEntity(url, message, String.class);
 		logger.debug("Resonse code for POST to {} with payload {} is {}", url, message, response.getStatusCodeValue());
 		if (response.getStatusCode().isError()) {
-			throw new RoutingConfigurerException(String.format("could not post to %s with payload %s", url, message));
+			String errorMessage = String.format("Error posting to QPID REST API %s with message %s, cause: %s",
+					url,
+					message,
+					response.getStatusCode().getReasonPhrase());
+			logger.error(errorMessage);
+			throw new RoutingConfigurerException(errorMessage);
 		}
 	}
 
-	// Updates the binding of a queue to a new binding.
 	@SuppressWarnings("unchecked")
 	private void updateBinding(String binding, String queueName, String bindingKey) {
 		JSONObject json = new JSONObject();
@@ -74,9 +78,8 @@ public class QpidClient {
 		json.put("arguments", innerjson);
 		String jsonString = json.toString();
 
-		logger.info("Json string: " + jsonString);
 		postQpid(exchangeURL, jsonString, "/bind");
-	}// Creates a new queue for a neighbouring Interchange.
+	}
 
 	@SuppressWarnings("unchecked")
 	void createQueue(Interchange interchange) {
@@ -84,29 +87,31 @@ public class QpidClient {
 		json.put("name", interchange.getName());
 		json.put("durable", true);
 		String jsonString = json.toString();
-		logger.info("Creating queue:" + jsonString);
 		postQpid(queuesURL, jsonString, "/");
 	}
 
 	boolean queueExists(String queueName) {
-		return queueId(queueName) != null;
+		return lookupQueueId(queueName) != null;
 	}
 
-	private String queueId(String queueName) {
+	private String lookupQueueId(String queueName) {
 		String queueQueryUrl = queuesURL + "/" + queueName;
-		logger.info("quering for queue {} with url {}", queueName, queueQueryUrl);
+		logger.debug("quering for queue {} with url {}", queueName, queueQueryUrl);
 		ResponseEntity<HashMap> response;
 		try {
 			response = restTemplate.getForEntity(new URI(queueQueryUrl), HashMap.class);
 		} catch (HttpClientErrorException.NotFound notFound) {
 			return null;
-		} catch (URISyntaxException e) {
-			throw new RoutingConfigurerException(e);
+		} catch (Throwable e) {
+			throw new RoutingConfigurerException(String.format("Could not query for QPID queue %s", queueName), e);
 		}
-		if (response.getStatusCode().is2xxSuccessful()) {
+		HttpStatus statusCode = response.getStatusCode();
+		if (statusCode.is2xxSuccessful()) {
 			if (response.getBody() != null) {
 				return (String) response.getBody().get("id");
 			}
+		} else {
+			logger.error("Status code {} querying for QPID queue {}", statusCode.value(), queueName);
 		}
 		return null;
 	}
@@ -140,7 +145,6 @@ public class QpidClient {
 		json.put("bindingKey", unwantedBindKey);
 		String jsonString = json.toString();
 
-		logger.info("Json string: " + jsonString);
 		postQpid(exchangeURL, jsonString, "/unbind");
 	}
 
@@ -187,7 +191,7 @@ public class QpidClient {
 	}
 
 	public void removeQueue(String queueName) {
-		String queueId = queueId(queueName);
+		String queueId = lookupQueueId(queueName);
 		restTemplate.delete(queuesURL + "?id=" + queueId);
 	}
 }
