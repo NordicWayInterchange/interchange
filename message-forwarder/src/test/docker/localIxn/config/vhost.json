@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "qpid.test.io",
+  "name": "bouvet",
   "modelVersion": "7.0",
   "exchanges": [
     {

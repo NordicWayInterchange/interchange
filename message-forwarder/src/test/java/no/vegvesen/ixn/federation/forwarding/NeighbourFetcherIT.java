@@ -25,11 +25,11 @@ public class NeighbourFetcherIT {
 
     @Before
     public void setUp() {
-        repository.save(new Interchange("Intermittent Interchange",
+        repository.save(new Interchange("interchangeA",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.EMPTY_SET),
                 new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.EMPTY_SET)));
-        repository.save(new Interchange("Other Interchange",
+        repository.save(new Interchange("interchangeB",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED,Collections.EMPTY_SET),
                 new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.EMPTY_SET)));
@@ -38,10 +38,7 @@ public class NeighbourFetcherIT {
 
     @Test
     public void testFetchingNeighbourWithCorrectStatus() {
-
-
         NeighbourFetcher fetcher = new NeighbourFetcher(repository);
-
         List<Interchange> interchanges = fetcher.listNeighbourCandidates();
         assertThat(interchanges).size().isEqualTo(1);
 
