@@ -40,8 +40,8 @@ public class QpidQueueForwardingConfigurator {
 
     @Bean
     public SSLContext createSSLContext() {
-        KeystoreDetails keystore = new KeystoreDetails(getFilePath(keystorePath),keystorePassword, KeystoreType.valueOf(keystoreType),keystorePassword);
-        KeystoreDetails trustStore = new KeystoreDetails(getFilePath(truststorePath),truststorePassword,KeystoreType.valueOf(truststoreType));
+        KeystoreDetails keystore = new KeystoreDetails(keystorePath,keystorePassword, KeystoreType.valueOf(keystoreType),keystorePassword);
+        KeystoreDetails trustStore = new KeystoreDetails(truststorePath,truststorePassword,KeystoreType.valueOf(truststoreType));
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystore,trustStore);
     }
 
