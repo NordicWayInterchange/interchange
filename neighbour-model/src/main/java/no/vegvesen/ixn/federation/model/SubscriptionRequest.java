@@ -5,6 +5,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -21,11 +22,11 @@ public class SubscriptionRequest {
 	public enum SubscriptionRequestStatus{REQUESTED, ESTABLISHED, NO_OVERLAP, TEAR_DOWN, EMPTY, FAILED, UNREACHABLE}
 
 	@Enumerated(EnumType.STRING)
-	private SubscriptionRequestStatus status;
+	private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "subreq_id_sub", foreignKey = @ForeignKey(name="fk_sub_subreq"))
-	private Set<Subscription> subscription;
+	private Set<Subscription> subscription = new HashSet<>();
 
 	@Column
 	@UpdateTimestamp

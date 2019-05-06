@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.HashSet;
 
 
 @Entity
@@ -23,16 +23,16 @@ public class Interchange {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "ixn_id_cap", referencedColumnName = "cap_id", foreignKey = @ForeignKey(name="fk_cap_ixn"))
-	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
+	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToOne(cascade= CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name="ixn_id_sub_out", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name="fk_subreq_ixn_sub_out"))
-	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
+	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name= "ixn_id_fed_in", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name="fk_subreq_ixn_fed_in"))
-	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
+	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
