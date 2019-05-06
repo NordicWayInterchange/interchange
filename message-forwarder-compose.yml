@@ -1,0 +1,63 @@
+version: '3'
+services:
+
+  federation-build:
+    build:
+      dockerfile: federation-docker-files/Federation_build
+      context: ./
+    image: federation-build
+
+  db:
+    image: postgres:9.6
+    container_name: message-forwarder-db
+    ports:
+      - 5432
+    environment:
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation
+
+  bouvet_qpid:
+    build: ./qpid
+    container_name: bouvet
+    hostname: bouvet
+    command: dev
+    ports:
+      - 8080
+      - 443
+      - 5671
+      - 5672
+    volumes:
+      - "./message-forwarder/src/test/docker/localIxn:/config"
+      - "./tmp:/tmp"
+      - "./qpid/messages/bouvet:/work/bouvet/messages"
+    environment:
+      SERVER_CN: "bouvet"
+      CERTIFICATE_FILE: "/tmp/keys/server.crt"
+      PRIVATE_KEY_FILE: "/tmp/keys/server.key"
+      VHOST_FILE: "/config/vhost.json"
+      GROUPS_FILE: "/config/groups"
+      PASSWD_FILE: "/config/passwd"
+
+  remote_qpid:
+    build: ./qpid
+    container_name: remote
+    hostname: remote
+    command: dev
+    ports:
+    - 8080
+    - 443
+    - 5671
+    - 5672
+    volumes:
+    - "./message-forwarder/src/test/docker/remoteIxn:/config"
+    - "./remoteTemp:/tmp"
+    - "./qpid/messages/remote:/work/remote/messages"
+    environment:
+      SERVER_CN: "remote"
+      CERTIFICATE_FILE: "/tmp/keys/server.crt"
+      PRIVATE_KEY_FILE: "/tmp/keys/server.key"
+      VHOST_FILE: "/config/vhost.json"
+      GROUPS_FILE: "/config/groups"
+      PASSWD_FILE: "/config/passwd"
+
