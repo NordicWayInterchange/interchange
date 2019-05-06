@@ -20,10 +20,12 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	List<Interchange> findInterchangesToPollForSubscriptionStatus();
 
 	// Selectors for capability and subscription exchange
+	// Capability exchange: when neighbour capabilities is UNKNOWN
 	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'UNKNOWN')", nativeQuery = true)
 	List<Interchange> findInterchangesForCapabilityExchange();
 
-	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'KNOWN') intersect select * from interchanges where ixn_id_sub_out in (select subreq_id from subscription_request where status = 'EMPTY')", nativeQuery = true)
+	// Subscription request: When neighbour capabilities is KNOWN and neighbour fedIn is EMPTY
+	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'KNOWN') intersect select * from interchanges where ixn_id_fed_in in (select subreq_id from subscription_request where status = 'EMPTY')", nativeQuery = true)
 	List<Interchange> findInterchangesForSubscriptionRequest();
 
 
