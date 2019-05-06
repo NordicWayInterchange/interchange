@@ -51,14 +51,7 @@
             <artifactId>postgresql</artifactId>
             <version>42.2.5</version>
         </dependency>
-        <!-- TODO for tests. Remove if not used. -->
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-            <version>1.4.197</version>
-        </dependency>
-            <dependency>
             <groupId>org.amqphub.spring</groupId>
             <artifactId>amqp-10-jms-spring-boot-starter</artifactId>
             <version>2.1.2</version>
