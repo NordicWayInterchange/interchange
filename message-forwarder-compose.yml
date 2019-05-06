@@ -28,7 +28,7 @@ services:
       - 5671
       - 5672
     volumes:
-      - "./message-forwarder/src/test/docker/localIxn:/config"
+      - "./message-forwarder/src/test/docker/localIxn/config:/config"
       - "./tmp:/tmp"
       - "./qpid/messages/bouvet:/work/bouvet/messages"
     environment:
@@ -50,7 +50,7 @@ services:
     - 5671
     - 5672
     volumes:
-    - "./message-forwarder/src/test/docker/remoteIxn:/config"
+    - "./message-forwarder/src/test/docker/remoteIxn/config:/config"
     - "./remoteTemp:/tmp"
     - "./qpid/messages/remote:/work/remote/messages"
     environment:
