@@ -11,7 +11,7 @@ services:
     - 5671
     - 5672
     volumes:
-    - "./message-forwarder/src/test/docker/localIxn:/config"
+    - "./message-forwarder/src/test/docker/localIxn/config:/config"
     - "./tmp:/tmp"
     - "./qpid/messages/bouvet:/work/bouvet/messages"
     environment:

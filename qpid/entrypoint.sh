@@ -29,5 +29,5 @@ for file in $(find ${QPID_WORK} -name *.lck); do
     set +x
 done
 
-#/usr/local/qpid/bin/qpid-server
+/usr/local/qpid/bin/qpid-server
 
