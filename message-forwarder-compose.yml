@@ -10,6 +10,7 @@ services:
   db:
     image: postgres:9.6
     container_name: message-forwarder-db
+    hostname: database
     ports:
       - 5432
     environment:
@@ -61,3 +62,11 @@ services:
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
 
+  message_forwarder_app:
+    build: ./message-forwarder
+    depends_on:
+      - db
+      - bouvet_qpid
+      - remote_qpid
+    volumes:
+      - "./tmp:/tmp"
