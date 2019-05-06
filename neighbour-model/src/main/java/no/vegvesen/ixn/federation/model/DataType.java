@@ -1,12 +1,14 @@
 package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "data_types")
 public class DataType {
 
@@ -67,7 +69,6 @@ public class DataType {
 		}
 		return false;
 	}
-
 	@Override
 	public String toString() {
 		return "DataType{" +
