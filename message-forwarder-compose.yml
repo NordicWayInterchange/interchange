@@ -12,7 +12,7 @@ services:
     container_name: message-forwarder-db
     hostname: database
     ports:
-      - 5432
+      - 7080:5432
     environment:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
