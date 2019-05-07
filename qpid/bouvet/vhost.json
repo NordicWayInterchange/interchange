@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "localhost",
+  "name": "bouvet",
   "modelVersion": "7.0",
   "exchanges": [
     {
@@ -17,70 +17,83 @@
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where1 LIKE '%'"
+            "x-filter-jms-selector": "where1='NO'"
           },
           "bindingKey": "where1",
-          "destination": "test-out"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where1='NO' AND what='Obstruction'"
-          },
-          "bindingKey": "where1, what",
-          "destination": "NO-Obstruction"
+          "destination": "king_harald"
         },
         {
           "arguments": {
             "x-filter-jms-selector": "where1='SE'"
           },
           "bindingKey": "where1",
-          "destination": "SE-out"
+          "destination": "king_gustaf"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where1 LIKE '%'"
+          },
+          "bindingKey": "where1",
+          "destination": "test-out"
         }
       ]
     }
   ],
   "queues": [
     {
-      "name": "onramp",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
-    {
-      "name": "test-out",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
-    {
+      "id": "bb885764-c684-4138-8e9d-b1342c7582ae",
       "name": "dlqueue",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
-      "owner": null
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
     },
     {
-      "name": "NO-Obstruction",
+      "id": "62db8a58-26c6-4121-8a79-2d6db32e13f9",
+      "name": "king_gustaf",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
-      "owner": null
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
     },
     {
-      "name": "NO-out",
+      "id": "ada38ba3-a880-4abd-8ecb-d5fb517523db",
+      "name": "king_harald",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
-      "owner": null
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
     },
     {
-      "name": "SE-out",
+      "id": "502bde7b-a4e9-47cb-912d-d960647746b9",
+      "name": "onramp",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
-      "owner": null
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
+    },
+    {
+      "id": "0c78cf35-f87b-4720-906f-6548d0786ec6",
+      "name": "test-out",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
     }
   ],
   "virtualhostaccesscontrolproviders": [
@@ -91,14 +104,14 @@
       "rules": [
         {
           "objectType": "ALL",
-          "identity": "interchange",
+          "identity": "administrators",
           "operation": "ALL",
           "outcome": "ALLOW_LOG",
           "attributes": {}
         },
         {
           "objectType": "ALL",
-          "identity": "administrators",
+          "identity": "interchange",
           "operation": "ALL",
           "outcome": "ALLOW_LOG",
           "attributes": {}
@@ -119,7 +132,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "localhost"
+            "NAME": "qpid.test.io"
           }
         },
         {
@@ -129,78 +142,6 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "test-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "NO-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "SE-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "dlqueue"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "NO-Obstruction"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_harald",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "NO-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "interchange",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "onramp"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_gustaf",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "SE-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "guest"
           }
         },
         {

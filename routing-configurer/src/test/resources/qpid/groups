@@ -1,1 +1,1 @@
-administrators.users=qpid-admin,localhost
+administrators.users=qpid-admin,routing_configurer

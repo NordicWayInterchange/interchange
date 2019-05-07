@@ -12,11 +12,22 @@
 
     <artifactId>routing-configurer</artifactId>
 
+    <properties>
+        <start-class>no.vegvesen.ixn.federation.RoutingConfigurerApplication</start-class>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-model</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>ssl-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -24,10 +35,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
         </dependency>
 
         <dependency>
@@ -35,46 +49,37 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-        </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 
     <profiles>
+        <profile>
+            <id>PKG</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>IT</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
                         <version>0.27.2</version>
-
-
                         <configuration>
                             <images>
                                 <image>
@@ -115,8 +120,6 @@
                                 </image>
                             </images>
                         </configuration>
-
-
                         <executions>
                             <execution>
                                 <id>start</id>
@@ -126,7 +129,6 @@
                                     <goal>start</goal>
                                 </goals>
                             </execution>
-
                             <execution>
                                 <id>stop</id>
                                 <phase>post-integration-test</phase>
@@ -140,5 +142,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>
