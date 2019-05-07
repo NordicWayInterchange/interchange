@@ -21,9 +21,7 @@ services:
       - POSTGRES_DB=federation
 
   server_node1:
-    build:
-      dockerfile: neighbour-server/Dockerfile
-      context: ../../../../
+    build: ../../../../neighbour-server
     container_name: server_node1
     depends_on:
       - server_db
@@ -48,9 +46,7 @@ services:
       - POSTGRES_DB=federation
 
   server_node2:
-    build:
-      dockerfile: neighbour-server/Dockerfile
-      context: ../../../../
+    build: ../../../../neighbour-server
     container_name: server_node2
     depends_on:
       - client_db

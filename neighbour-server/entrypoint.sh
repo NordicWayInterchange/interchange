@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -eu
 
 echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 
