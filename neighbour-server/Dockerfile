@@ -1,8 +1,11 @@
-FROM federation-build:latest
+FROM federation-build:latest as build
 
-COPY neighbour-server/entrypoint.sh /entrypoint.sh
-COPY --from=federation-build:latest neighbour-server/target/neighbour-server-1.0-SNAPSHOT.jar neighbour-server.jar
+FROM java:8-alpine
+RUN apk add --no-cache bash
+
+COPY --from=build neighbour-server/target/neighbour-server-1.0-SNAPSHOT.jar neighbour-server.jar
+
+ADD entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-
-CMD tail -f /dev/null
