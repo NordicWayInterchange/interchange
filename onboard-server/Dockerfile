@@ -1,8 +1,11 @@
 FROM federation_build as build
 
-COPY onboard-server/entrypoint.sh /entrypoint.sh
+FROM java:8-alpine
+RUN apk add --no-cache bash
+
 COPY --from=build onboard-server/target/onboard-server-1.0-SNAPSHOT.jar onboard-server.jar
 
-ENTRYPOINT ["/entrypoint.sh"]
+ADD entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
-CMD tail -f /dev/null
+ENTRYPOINT ["/entrypoint.sh"]

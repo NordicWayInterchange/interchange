@@ -1,8 +1,11 @@
-FROM federation_build as build
+FROM federation-build:latest as build
 
-COPY neighbour-discoverer/entrypoint.sh /entrypoint.sh
+FROM java:8-alpine
+RUN apk add --no-cache bash
+
 COPY --from=build neighbour-discoverer/target/neighbour-discoverer-1.0-SNAPSHOT.jar neighbour-discoverer.jar
 
-ENTRYPOINT ["/entrypoint.sh"]
+ADD entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
-CMD tail -f /dev/null
+ENTRYPOINT ["/entrypoint.sh"]
