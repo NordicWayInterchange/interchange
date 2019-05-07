@@ -1,8 +1,13 @@
-FROM federation-build:latest
+FROM federation-build:latest as build
 
-COPY entrypoint.sh /entrypoint.sh
-COPY --from=federation-build:latest routing-configurer/target/routing-configurer-1.0-SNAPSHOT.jar routing-configurer.jar
+FROM java:8-alpine
+RUN apk update && apk add bash
+
+COPY --from=build routing-configurer/target/routing-configurer-1.0-SNAPSHOT.jar routing-configurer.jar
+
+ADD entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD tail -f /dev/null
+#CMD tail -f /dev/null
