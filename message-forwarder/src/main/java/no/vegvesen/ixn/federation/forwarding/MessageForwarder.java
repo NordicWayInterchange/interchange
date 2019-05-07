@@ -75,7 +75,7 @@ public class MessageForwarder {
         for (Interchange ixn : interchanges) {
             String name = ixn.getName();
             if (! listeners.containsKey(name)) {
-                System.out.println(String.format("name: %s, address %s:%s, fedIn: %s status: %s",ixn.getName(),ixn.getDomainName(),ixn.getControlChannelPort(),ixn.getFedIn(),ixn.getSubscriptionRequest().getStatus()));
+                System.out.println(String.format("name: %s, address %s:%s, fedIn: %s status: %s",ixn.getName(),ixn.getDomainName(),ixn.getMessageChannelPort(),ixn.getFedIn(),ixn.getSubscriptionRequest().getStatus()));
                 logger.debug("Found nex Ixn %s, setting up connections");
                 MessageProducer producer = createProducerToRemote(ixn);
                 MessageConsumer messageConsumer = createConsumerFromLocal(ixn);
@@ -115,7 +115,7 @@ public class MessageForwarder {
         //the write queue to.
         //remote queue:
         //amqp://<ixn.getDomainName()>:<ixn.getControlChannelPort>, queue name "fedEx"
-        String writeUrl = String.format("amqps://%s:%s",ixn.getDomainName(),ixn.getControlChannelPort());
+        String writeUrl = String.format("amqps://%s:%s",ixn.getDomainName(),ixn.getMessageChannelPort());
         String writeQueue = "fedEx";
         Hashtable<Object, Object> writeEnv = createWriteContext(writeUrl, writeQueue);
 
