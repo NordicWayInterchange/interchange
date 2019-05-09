@@ -35,9 +35,8 @@ services:
       - "./tmp:/tmp"
       - "./qpid/messages/bouvet:/work/bouvet/messages"
     environment:
+      CA_CN: "my_ca"
       SERVER_CN: "bouvet"
-      CERTIFICATE_FILE: "/tmp/keys/server.crt"
-      PRIVATE_KEY_FILE: "/tmp/keys/server.key"
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
