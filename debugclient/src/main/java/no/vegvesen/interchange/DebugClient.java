@@ -108,7 +108,7 @@ public class DebugClient{
 
 		String message = "Hello world";
 		c.sendMessage("SE", message);
-
+		c.close();
 	}
 
 
