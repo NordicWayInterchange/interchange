@@ -3,8 +3,8 @@
 # uses password "password" on keystores and truststore
 
 pushd $(dirname $0)
-SERVER_CN=${SERVER_CN:-localhost}
-USER_CNS=${USER_CNS:-king_gustaf king_harald}
+CA_CN=${CA_CN:-my_ca}
+KEY_CNS=${KEY_CNS:-localhost king_gustaf king_harald}
 KEYS_DIR=../tmp/keys
 
 genCaCert() {
@@ -35,7 +35,8 @@ generateCertificate() {
 rm -rf ${KEYS_DIR} && mkdir -p ${KEYS_DIR} && pushd ${KEYS_DIR}
 
 genCaCert ${CA_CN}
-generateCertificate ${SERVER_CN}
-for user in ${USER_CNS}; do
-    generateCertificate ${user}
+for commonName in ${KEY_CNS}; do
+    generateCertificate ${commonName}
 done
+
+echo fisk > /tmp/ready.txt

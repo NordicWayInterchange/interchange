@@ -1,11 +1,21 @@
 version: '3'
 services:
 
-  bouvet_gen_keys_qpid:
+  gen_keys:
+    build: ./key-gen
+    container_name: key_gen
+    volumes:
+      - "./tmp:/tmp"
+    environment:
+      CA_CN: "my_ca"
+      KEY_CNS: "bouvet king_harald"
+
+  bouvet_use_keys_1_qpid:
     build: ./qpid
-    container_name: bouvet_gen
-    hostname: bouvet_gen
-    command: dev
+    container_name: bouvet_use_keys_1
+    depends_on:
+      - gen_keys
+    hostname: bouvet_use_keys_1
     ports:
       - 8081:8080
       - 443:443
@@ -14,20 +24,21 @@ services:
     volumes:
       - "./qpid/bouvet:/config"
       - "./tmp:/tmp"
-      - "./qpid/messages/bouvet:/work/bouvet_gen/messages"
+      - "./qpid/messages/bouvet:/work/bouvet_use_keys_1_/messages"
     environment:
-      CA_CN: "my_ca"
-      SERVER_CN: "bouvet"
+      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
+      SERVER_CERTIFICATE_FILE: /tmp/keys/bouvet.crt
+      SERVER_PRIVATE_KEY_FILE: /tmp/keys/bouvet.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
 
-  bouvet_use_keys_qpid:
+  bouvet_use_keys_2_qpid:
     build: ./qpid
-    container_name: bouvet_use
+    container_name: bouvet_use_keys_2
     depends_on:
-      - bouvet_gen_keys_qpid
-    hostname: bouvet_use
+      - gen_keys
+    hostname: bouvet_use_keys_2
     ports:
       - 9081:8080
       - 543:443
