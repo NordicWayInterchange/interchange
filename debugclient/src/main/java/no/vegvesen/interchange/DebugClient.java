@@ -1,20 +1,12 @@
 package no.vegvesen.interchange;
 
 import org.apache.qpid.jms.JmsConnectionFactory;
-import org.apache.qpid.jms.message.JmsBytesMessage;
-import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 
 import javax.jms.*;
 import javax.naming.Context;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Hashtable;
 
 public class DebugClient{
@@ -32,12 +24,11 @@ public class DebugClient{
 	private Session session;
 	private MessageProducer messageProducer;
 
-	private DebugClient(String url, String sendQueue, String receiveQueue) {
+	private DebugClient(String url, String sendQueue) {
 		try {
 			Hashtable<Object, Object> env = new Hashtable<>();
 			env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
 			env.put("connectionfactory.myFactoryLookupTLS", url);
-			env.put("queue.receiveQueue", receiveQueue);
 			env.put("queue.sendQueue", sendQueue);
 			javax.naming.Context context = new javax.naming.InitialContext(env);
 
@@ -46,9 +37,7 @@ public class DebugClient{
 
 			printWithColor(TURQUOISE, "Connecting to: " + factory.getRemoteURI());
 
-			Destination queueR = (Destination) context.lookup("receiveQueue");
 			Destination queueS = (Destination) context.lookup("sendQueue");
-			printWithColor(TURQUOISE, " rece queue: " + queueR.toString());
 			printWithColor(TURQUOISE, " send queue: " + queueS.toString());
 
 			if (USER != null && USER.length() > 0) {
@@ -62,7 +51,6 @@ public class DebugClient{
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
 			messageProducer = session.createProducer(queueS);
-			printWithColor(YELLOW, " Waiting for messages..");
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -107,20 +95,16 @@ public class DebugClient{
 	public static void main(String[] args){
 		String url = "amqp://localhost:5672";
 		String sendQueue = "nwEx";
-		String receiveQueue = "test-out";
 
-		if (args.length == 3) {
+		if (args.length == 2) {
 			url = args[0];
 			sendQueue = args[1];
-			receiveQueue = args[2];
 		} else if (args.length == 1) {
 			url = args[0];
 		}
-		printWithColor(TURQUOISE, String.format("Using url [%s] sendQueue [%s] outQueue [%s]", url, sendQueue, receiveQueue));
+		printWithColor(TURQUOISE, String.format("Using url [%s] sendQueue [%s] ", url, sendQueue));
 
-		DebugClient c = new DebugClient(url, sendQueue, receiveQueue);
-
-		BufferedReader commandLine = new BufferedReader(new InputStreamReader(System.in));
+		DebugClient c = new DebugClient(url, sendQueue);
 
 		String message = "Hello world";
 		c.sendMessage("SE", message);
