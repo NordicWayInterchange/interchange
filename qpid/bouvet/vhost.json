@@ -132,7 +132,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "qpid.test.io"
+            "NAME": "bouvet"
           }
         },
         {
