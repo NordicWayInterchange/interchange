@@ -14,7 +14,6 @@ ENV QPID_WORK=/work
 
 ADD config.json /work/
 ADD entrypoint.sh /
-ADD generate-keys.sh /scripts/
 
 RUN chmod +x /entrypoint.sh
 
