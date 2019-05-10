@@ -7,6 +7,16 @@ services:
       context: ./
     image: federation-build
 
+  gen_keys:
+    build: ./key-gen
+    container_name: key_gen
+    volumes:
+      - "./tmp:/tmp"
+    environment:
+      CA_CN: "my_ca"
+      KEY_CNS: "bouvet"
+
+
   bouvet_db:
     build:
       dockerfile: Dockerfile
@@ -24,7 +34,8 @@ services:
     build: ./qpid
     container_name: bouvet
     hostname: bouvet
-    command: dev
+    depends_on:
+      - gen_keys
     ports:
       - 8081:8080
       - 443:443
@@ -35,8 +46,9 @@ services:
       - "./tmp:/tmp"
       - "./qpid/messages/bouvet:/work/bouvet/messages"
     environment:
-      CA_CN: "my_ca"
-      SERVER_CN: "bouvet"
+      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
+      SERVER_CERTIFICATE_FILE: /tmp/keys/bouvet.crt
+      SERVER_PRIVATE_KEY_FILE: /tmp/keys/bouvet.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
@@ -60,6 +72,7 @@ services:
     depends_on:
       - bouvet_qpid
       - federation-build
+      - gen_keys
     volumes:
       - "./tmp:/tmp"
     environment:
@@ -68,7 +81,7 @@ services:
       - VHOST_NAME=bouvet
       - TRUSTSTORE_NAME=/tmp/keys/truststore.jks
       - TRUSTSTORE_PASSWORD=password
-      - KEYSTORE_NAME=/tmp/keys/server.p12
+      - KEYSTORE_NAME=/tmp/keys/bouvet.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
 
