@@ -1,13 +1,11 @@
-FROM maven:3.6.0-jdk-8 as build
+FROM federation-build:latest as build
 
-COPY pom.xml pom.xml
-COPY src src
+FROM java:8-alpine
+RUN apk add --no-cache bash
 
-RUN mvn clean install -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B
+COPY --from=build interchangenode/target/interchange-node-1.0-SNAPSHOT.jar interchange-node.jar
 
-FROM java:8
-
-COPY entrypoint.sh /entrypoint.sh
-COPY --from=build target/interchange-node-1.0-SNAPSHOT.jar interchange-node.jar
+ADD entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
