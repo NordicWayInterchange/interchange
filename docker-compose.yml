@@ -5,16 +5,29 @@ services:
     build: ./interchangenode
     container_name: interchangenode
     hostname: interchangenode
+    depends_on:
+      - qpid
+      - gen_keys
     environment:
       AMQP_URI: amqp://qpid
       AMQP_USER: interchange
       AMQP_PASSWORD: "12345678"
 
+  gen_keys:
+    build: ./key-gen
+    container_name: key_gen
+    volumes:
+      - "./tmp:/tmp"
+    environment:
+      CA_CN: "my_ca"
+      KEY_CNS: "qpid.test.io"
+
   qpid:
     build: ./qpid
     container_name: qpid
     hostname: qpid
-    command: dev
+    depends_on:
+      - gen_keys
     ports:
     - 8081:8080
     - 5671:5671
@@ -24,8 +37,9 @@ services:
     - "./tmp:/tmp"
     - "./qpid/messages:/work/qpid.test.io/messages"
     environment:
-      CERTIFICATE_FILE: "/tmp/keys/server.crt"
-      PRIVATE_KEY_FILE: "/tmp/keys/server.key"
+      CA_CERTIFICATE_FILE: "/tmp/keys/my_ca.crt"
+      SERVER_CERTIFICATE_FILE: "/tmp/keys/qpid.test.io.crt"
+      SERVER_PRIVATE_KEY_FILE: "/tmp/keys/qpid.test.io.key"
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
