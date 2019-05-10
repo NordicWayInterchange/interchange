@@ -163,8 +163,9 @@
                                             </bind>
                                         </volumes>
                                         <env>
-                                            <CERTIFICATE_FILE>/tmp/localhost.crt</CERTIFICATE_FILE>
-                                            <PRIVATE_KEY_FILE>/tmp/localhost.key</PRIVATE_KEY_FILE>
+                                            <CA_CERTIFICATE_FILE>/tmp/localhost.crt</CA_CERTIFICATE_FILE>
+                                            <SERVER_CERTIFICATE_FILE>/tmp/localhost.crt</SERVER_CERTIFICATE_FILE>
+                                            <SERVER_PRIVATE_KEY_FILE>/tmp/localhost.key</SERVER_PRIVATE_KEY_FILE>
                                             <VHOST_FILE>/config/localhost.json</VHOST_FILE>
                                             <GROUPS_FILE>/config/groups</GROUPS_FILE>
                                             <PASSWD_FILE>/config/passwd</PASSWD_FILE>
@@ -195,8 +196,9 @@
                                             </bind>
                                         </volumes>
                                         <env>
-                                            <CERTIFICATE_FILE>/tmp/localhost.crt</CERTIFICATE_FILE>
-                                            <PRIVATE_KEY_FILE>/tmp/localhost.key</PRIVATE_KEY_FILE>
+                                            <CA_CERTIFICATE_FILE>/tmp/localhost.crt</CA_CERTIFICATE_FILE>
+                                            <SERVER_CERTIFICATE_FILE>/tmp/localhost.crt</SERVER_CERTIFICATE_FILE>
+                                            <SERVER_PRIVATE_KEY_FILE>/tmp/localhost.key</SERVER_PRIVATE_KEY_FILE>
                                             <VHOST_FILE>/config/localhost.json</VHOST_FILE>
                                             <GROUPS_FILE>/config/groups</GROUPS_FILE>
                                             <PASSWD_FILE>/config/passwd</PASSWD_FILE>
