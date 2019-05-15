@@ -7,6 +7,15 @@ services:
       context: ./
     image: federation-build
 
+  gen_keys:
+    build: ./key-gen
+    container_name: key_gen
+    volumes:
+      - "./tmp:/tmp"
+    environment:
+      CA_CN: "my_ca"
+      KEY_CNS: "bouvet remote"
+
   db:
     image: postgres:9.6
     container_name: message-forwarder-db
@@ -22,20 +31,18 @@ services:
     build: ./qpid
     container_name: bouvet
     hostname: bouvet
-    command: dev
+    depends_on:
+      - gen_keys
     ports:
-      - 8080
-      - 443
-      - 5671
-      - 5672
+      - 5600:5671
     volumes:
       - "./message-forwarder/src/test/docker/localIxn/config:/config"
       - "./tmp:/tmp"
       - "./qpid/messages/bouvet:/work/bouvet/messages"
     environment:
-      SERVER_CN: "bouvet"
-      CERTIFICATE_FILE: "/tmp/keys/server.crt"
-      PRIVATE_KEY_FILE: "/tmp/keys/server.key"
+      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
+      SERVER_CERTIFICATE_FILE: /tmp/keys/bouvet.crt
+      SERVER_PRIVATE_KEY_FILE: /tmp/keys/bouvet.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
@@ -44,20 +51,18 @@ services:
     build: ./qpid
     container_name: remote
     hostname: remote
-    command: dev
+    depends_on:
+     - gen_keys
     ports:
-    - 8080
-    - 443
-    - 5671
-    - 5672
+     - 5601:5671
     volumes:
     - "./message-forwarder/src/test/docker/remoteIxn/config:/config"
-    - "./remoteTemp:/tmp"
+    - "./tmp:/tmp"
     - "./qpid/messages/remote:/work/remote/messages"
     environment:
-      SERVER_CN: "remote"
-      CERTIFICATE_FILE: "/tmp/keys/server.crt"
-      PRIVATE_KEY_FILE: "/tmp/keys/server.key"
+      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
+      SERVER_CERTIFICATE_FILE: /tmp/keys/remote.crt
+      SERVER_PRIVATE_KEY_FILE: /tmp/keys/remote.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
@@ -70,3 +75,10 @@ services:
       - remote_qpid
     volumes:
       - "./tmp:/tmp"
+    environment:
+      KEY_STORE_FILE: "/tmp/keys/bouvet.p12"
+      KEY_STORE_PASSWORD: "password"
+      KEY_STORE_TYPE: "PKCS12"
+      TRUST_STORE_PATH: "/tmp/keys/truststore.jks"
+      TRUST_STORE_PASSWORD: "password"
+      TRUST_STORE_TYPE: "JKS"

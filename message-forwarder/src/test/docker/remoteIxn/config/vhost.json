@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "qpid.test.io",
+  "name": "remote",
   "modelVersion": "7.0",
   "exchanges": [ {
     "name" : "fedEx",
@@ -149,7 +149,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "qpid.test.io"
+            "NAME": "remote"
           }
         },
         {
