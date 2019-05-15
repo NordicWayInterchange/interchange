@@ -2,6 +2,7 @@
 
 echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 
+#TODO need to put more of the settings into env variables.
 java \
 -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect \
 -Dspring.datasource.url="jdbc:postgresql://message-forwarder-db:5432/federation" \
@@ -12,10 +13,10 @@ java \
 -Dlogging.level.org.hibernate.SQL=debug \
 -Dforwarder.localIxnDomainName=bouvet \
 -Dforwarder.localIxnFederationPort=5671 \
--Dforwarder.keystorepath=/tmp/keys/server.p12 \
--Dforwarder.keystorepassword=password \
--Dforwarder.keystoretype=PKCS12 \
--Dforwarder.truststorepath=/tmp/keys/truststore.jks \
--Dforwarder.truststorepassword=password \
--Dforwarder.truststoretype=JKS \
+-Dforwarder.keystorepath="$KEY_STORE_FILE" \
+-Dforwarder.keystorepassword="$KEY_STORE_PASSWORD" \
+-Dforwarder.keystoretype="$KEY_STORE_TYPE" \
+-Dforwarder.truststorepath="$TRUST_STORE_PATH" \
+-Dforwarder.truststorepassword="$TRUST_STORE_PASSWORD" \
+-Dforwarder.truststoretype="$TRUST_STORE_TYPE" \
 -jar message-forwarder.jar

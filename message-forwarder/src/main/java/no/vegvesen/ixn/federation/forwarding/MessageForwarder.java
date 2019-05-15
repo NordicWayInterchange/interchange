@@ -52,7 +52,7 @@ public class MessageForwarder {
         this.sslContext = sslContext;
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 30000)
     public void runSchedule() throws NamingException, JMSException {
         checkListenerList();
         setupConnectionsToNewNeighbours();
