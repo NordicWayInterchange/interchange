@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import java.util.Collections;
 
+import static junit.framework.TestCase.assertTrue;
+
 public class SubscriptionTransformerTest {
 
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
@@ -25,7 +27,10 @@ public class SubscriptionTransformerTest {
 		Interchange transformed = subscriptionTransformer.subscriptionRequestApiToInterchange(subscriptionRequestApi);
 
 		// Verify that the transformation gives same output.
-		Assert.assertTrue(interchange.equals(transformed));
+		for(Subscription s : transformed.getSubscriptionRequest().getSubscriptions()){
+			assertTrue(subscription.getSelector().equals(s.getSelector()));
+		}
+		Assert.assertTrue(interchange.getName().equals(transformed.getName()));
 
 	}
 
@@ -41,7 +46,10 @@ public class SubscriptionTransformerTest {
 		Interchange interchange = subscriptionTransformer.subscriptionRequestApiToInterchange(subscriptionRequestApi);
 		SubscriptionRequestApi transformed = subscriptionTransformer.interchangeToSubscriptionRequestApi(interchange);
 
-		Assert.assertTrue(subscriptionRequestApi.equals(transformed));
+		for(Subscription s: transformed.getSubscriptions()){
+			assertTrue(subscription.getSelector().equals(s.getSelector()));
+		}
+		Assert.assertTrue(subscriptionRequestApi.getName().equals(transformed.getName()));
 	}
 
 

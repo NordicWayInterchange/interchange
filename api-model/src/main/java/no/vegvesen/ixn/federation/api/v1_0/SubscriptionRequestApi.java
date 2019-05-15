@@ -9,7 +9,7 @@ public class SubscriptionRequestApi {
 	private String name;
 	private Set<Subscription> subscriptions;
 
-	public SubscriptionRequestApi() {
+	SubscriptionRequestApi() {
 	}
 
 	public SubscriptionRequestApi(String name, Set<Subscription> subscriptions) {

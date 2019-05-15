@@ -15,7 +15,7 @@ public class CapabilityApi {
 
 	private Logger logger = LoggerFactory.getLogger(CapabilityApi.class);
 
-	public CapabilityApi() {
+	CapabilityApi() {
 	}
 
 	public CapabilityApi(String name, Set<DataType> capabilities) {
@@ -23,7 +23,7 @@ public class CapabilityApi {
 		this.capabilities = capabilities;
 	}
 
-	public static String getVersion() {
+	public String getVersion() {
 		return version;
 	}
 
@@ -53,14 +53,6 @@ public class CapabilityApi {
 		if (!name.equals(that.name)) return false;
 		if (!capabilities.equals(that.capabilities)) return false;
 		return logger.equals(that.logger);
-	}
-
-	@Override
-	public int hashCode() {
-		int result = name.hashCode();
-		result = 31 * result + capabilities.hashCode();
-		result = 31 * result + logger.hashCode();
-		return result;
 	}
 
 	@Override
