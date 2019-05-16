@@ -86,7 +86,7 @@
     },
     {
       "id": "0c78cf35-f87b-4720-906f-6548d0786ec6",
-      "name": "test-out",
+      "name": "remote",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
@@ -141,10 +141,10 @@
         {
           "objectType": "QUEUE",
           "identity": "messaging-users",
-          "operation": "CONSUME",
+          "operation": "ALL",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "test-out"
+            "NAME": "remote"
           }
         },
         {

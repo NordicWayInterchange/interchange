@@ -14,7 +14,7 @@ services:
       - "./tmp:/tmp"
     environment:
       CA_CN: "my_ca"
-      KEY_CNS: "bouvet remote"
+      KEY_CNS: "bouvet remote localhost"
 
   db:
     image: postgres:9.6
@@ -35,6 +35,7 @@ services:
       - gen_keys
     ports:
       - 5600:5671
+      - 8080:8080
     volumes:
       - "./message-forwarder/src/test/docker/localIxn/config:/config"
       - "./tmp:/tmp"
