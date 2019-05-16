@@ -154,11 +154,11 @@
         },
         {
           "objectType": "QUEUE",
-          "identity": "messaging-users",
+          "identity": "ALL",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "test-out"
+            "NAME": "fedTest"
           }
         },
         {
