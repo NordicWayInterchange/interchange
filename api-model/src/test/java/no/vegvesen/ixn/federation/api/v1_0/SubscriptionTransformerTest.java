@@ -4,11 +4,14 @@ import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.model.Subscription;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
 
 import static junit.framework.TestCase.assertTrue;
 
+@RunWith(MockitoJUnitRunner.class)
 public class SubscriptionTransformerTest {
 
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
@@ -50,6 +53,21 @@ public class SubscriptionTransformerTest {
 			assertTrue(subscription.getSelector().equals(s.getSelector()));
 		}
 		Assert.assertTrue(subscriptionRequestApi.getName().equals(transformed.getName()));
+	}
+
+	@Test
+	public void interchangeWithEmptySubscriptionToSubscriptionRequest(){
+
+		Interchange interchange = new Interchange();
+		interchange.setName("Test 3");
+
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionTransformer.interchangeToSubscriptionRequestApi(interchange);
+		Interchange transformed = subscriptionTransformer.subscriptionRequestApiToInterchange(subscriptionRequestApi);
+
+		Assert.assertTrue(interchange.getSubscriptionRequest().getSubscriptions().equals(transformed.getSubscriptionRequest().getSubscriptions()));
+		Assert.assertTrue(interchange.getName().equals(transformed.getName()));
+
+
 	}
 
 

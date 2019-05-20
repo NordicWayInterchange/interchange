@@ -4,11 +4,13 @@ import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.Interchange;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
 
 import static junit.framework.TestCase.assertTrue;
-
+@RunWith(MockitoJUnitRunner.class)
 public class CapabilityTransformerTest {
 
 
