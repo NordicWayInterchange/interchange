@@ -20,6 +20,18 @@
         </dependency>
 
         <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>api-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>ssl-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>compile</scope>
@@ -42,12 +54,6 @@
             <artifactId>dnsjava</artifactId>
         </dependency>
 
-
-        <dependency>
-            <groupId>org.apache.qpid</groupId>
-            <artifactId>qpid-broker-core</artifactId>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
