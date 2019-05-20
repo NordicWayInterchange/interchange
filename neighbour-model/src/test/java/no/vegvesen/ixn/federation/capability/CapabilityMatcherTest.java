@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.discoverer.capability;
+package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.model.DataType;
 import org.apache.qpid.server.filter.selector.ParseException;

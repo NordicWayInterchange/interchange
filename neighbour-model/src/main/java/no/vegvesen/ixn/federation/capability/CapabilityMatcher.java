@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.discoverer.capability;
+package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.model.DataType;
 import org.apache.qpid.server.filter.Filterable;
@@ -22,7 +22,6 @@ public class CapabilityMatcher {
 
 		DataTypeFilter(DataType dataType) {
 			headers.put("how", dataType.getHow());
-			headers.put("what", dataType.getWhat());
 			headers.put("where", dataType.getWhere());
 		}
 
