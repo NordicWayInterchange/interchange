@@ -30,6 +30,8 @@ public class NeighbourDiscovererTest {
 	private String myName = "bouvet";
 	private int backoffIntervalLength = 120;
 	private int allowedNumberOfBackoffAttempts = 4;
+	private int allowedNumberOfPolls = 7;
+	private int randomShiftUpperLimit = 60000;
 
 
 
@@ -40,7 +42,9 @@ public class NeighbourDiscovererTest {
 			neighbourRESTFacade,
 			myName,
 			backoffIntervalLength,
-			allowedNumberOfBackoffAttempts);
+			allowedNumberOfBackoffAttempts,
+			allowedNumberOfPolls,
+			randomShiftUpperLimit);
 
 
 	private List<Interchange> neighbours = new ArrayList<>();
@@ -209,6 +213,7 @@ public class NeighbourDiscovererTest {
 
 		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesForCapabilityExchange();
 		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
+		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
 
 		neighbourDiscoverer.capabilityExchange();
 
@@ -224,6 +229,7 @@ public class NeighbourDiscovererTest {
 		doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).calculateCustomSubscriptionForNeighbour(ericsson);
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		doReturn(subscriptionRequestResponse).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
+		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
 
 		neighbourDiscoverer.subscriptionRequest();
 
@@ -321,6 +327,7 @@ public class NeighbourDiscovererTest {
 		doReturn(ericssonSubscriptionRequest).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
+		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
@@ -365,7 +372,7 @@ public class NeighbourDiscovererTest {
 		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		ericsson.setFedIn(ericssonSubscription);
-		when(interchangeRepository.findInterchangesToPollForSubscriptionStatus()).thenReturn(Collections.singletonList(ericsson));
+		when(interchangeRepository.findInterchangesWithSubscriptionToPoll()).thenReturn(Collections.singletonList(ericsson));
 		doReturn(subscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
 
 		neighbourDiscoverer.pollSubscriptions();

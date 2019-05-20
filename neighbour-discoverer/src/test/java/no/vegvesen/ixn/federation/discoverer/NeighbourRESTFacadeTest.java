@@ -1,5 +1,10 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityTransformer;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionTransformer;
+import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.Subscription;
@@ -23,15 +28,20 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class NeighbourRESTFacadeTest {
 
-
 	// Mocks
 	private RestTemplate restTemplate = mock(RestTemplate.class);
+	private CapabilityTransformer capabilityTransformer = mock(CapabilityTransformer.class);
+	private SubscriptionTransformer subscriptionTransformer = mock(SubscriptionTransformer.class);
 
 	private String subscriptionRequestPath = "/requestSubscription";
 	private String capabilityExchangePath = "/updateCapabilities";
 
 	@Spy
-	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(subscriptionRequestPath, capabilityExchangePath, restTemplate);
+	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(subscriptionRequestPath,
+			capabilityExchangePath,
+			restTemplate,
+			capabilityTransformer,
+			subscriptionTransformer);
 
 	private Interchange ericsson;
 
@@ -55,76 +65,76 @@ public class NeighbourRESTFacadeTest {
 	@Test(expected = CapabilityPostException.class)
 	public void nullCapabilitiesPostResponseThrowsCapabilityPostException() {
 
-		Interchange returnInterchange = new Interchange();
-		returnInterchange.setName("ReturnInterchange");
-		returnInterchange = null;
-		ResponseEntity<Interchange> response = new ResponseEntity<>(returnInterchange, HttpStatus.CREATED);
-		when(restTemplate.postForEntity(any(String.class), any(Interchange.class), eq(Interchange.class))).thenReturn(response);
+		CapabilityApi capabilityApi = null;
+
+		ResponseEntity<CapabilityApi> response = new ResponseEntity<>(capabilityApi, HttpStatus.OK);
+		when(restTemplate.exchange(any(String.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(CapabilityApi.class))).thenReturn(response);
 
 		neighbourRESTFacade.postCapabilities(ericsson, ericsson);
 
 	}
 
 	@Test(expected = CapabilityPostException.class)
-	public void unsuccessfulPostOfCapabilitiesThrowsCapabilityPostException(){
-		Interchange returnInterchange = new Interchange();
-		returnInterchange.setName("ReturnInterchange");
+	public void unsuccessfulPostOfCapabilitiesThrowsCapabilityPostException() {
 
-		ResponseEntity<Interchange> response = new ResponseEntity<>(returnInterchange, HttpStatus.INTERNAL_SERVER_ERROR);
-		when(restTemplate.postForEntity(any(String.class), any(Interchange.class), eq(Interchange.class))).thenReturn(response);
+		DataType dataType = new DataType("datex2;1.0", "NO", "conditions");
+		CapabilityApi capabilityApi = new CapabilityApi("ericsson", Collections.singleton(dataType));
+
+		ResponseEntity<CapabilityApi> response = new ResponseEntity<>(capabilityApi, HttpStatus.INTERNAL_SERVER_ERROR);
+		when(restTemplate.exchange(any(String.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(CapabilityApi.class))).thenReturn(response);
 
 		neighbourRESTFacade.postCapabilities(ericsson, ericsson);
 	}
 
 
 	@Test(expected = SubscriptionRequestException.class)
-	public void nullSubscriptionRequestResponseThrowsSubscriptionRequestException(){
+	public void nullSubscriptionRequestResponseThrowsSubscriptionRequestException() {
 
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+		SubscriptionRequestApi subscriptionRequestApi = null;
 
-		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
-
-		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
-		subscriptionRequest=null;
-
-		ResponseEntity<SubscriptionRequest> response = new ResponseEntity<>(subscriptionRequest, HttpStatus.ACCEPTED);
-		when(restTemplate.exchange(any(String.class),eq(HttpMethod.POST),any(HttpEntity.class), eq(SubscriptionRequest.class))).thenReturn(response);
+		ResponseEntity<SubscriptionRequestApi> response = new ResponseEntity<>(subscriptionRequestApi, HttpStatus.ACCEPTED);
+		when(restTemplate.exchange(any(String.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(SubscriptionRequestApi.class))).thenReturn(response);
 
 		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
 	}
 
 	@Test(expected = SubscriptionRequestException.class)
-	public void subscriptionRequestResponseIsEmptyListOfSubscriptions(){
+	public void clientSubscriptionRequestNotEmptyButServerResponseEmptySubscriptionRequest() {
 
-
+		// Posting interchange with subscription request not empty
+		Subscription subscription = new Subscription();
+		subscription.setSelector("where LIKE 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
+		ericsson.setSubscriptionRequest(subscriptionRequest);
 
-		subscriptionRequest.setSubscriptions(Collections.emptySet());
+		// Receive empty subscription request from server
+		SubscriptionRequestApi serverResponse = new SubscriptionRequestApi("ericsson", Collections.emptySet());
+		ResponseEntity<SubscriptionRequestApi> response = new ResponseEntity<>(serverResponse, HttpStatus.ACCEPTED);
+		doReturn(response).when(restTemplate).exchange(any(String.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(SubscriptionRequestApi.class));
 
-		ResponseEntity<SubscriptionRequest> response = new ResponseEntity<>(subscriptionRequest, HttpStatus.ACCEPTED);
-		when(restTemplate.exchange(any(String.class),eq(HttpMethod.POST),any(HttpEntity.class), eq(SubscriptionRequest.class))).thenReturn(response);
+		Interchange returnInterchange = new Interchange();
+		returnInterchange.setName("ericsson");
+		doReturn(returnInterchange).when(subscriptionTransformer).subscriptionRequestApiToInterchange(any(SubscriptionRequestApi.class));
 
+		// Should throw a SubscriptionRequestException
 		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
-
 	}
 
 	@Test(expected = SubscriptionRequestException.class)
-	public void failedSubscriptionRequestThrowsException(){
+	public void serverErrorThrowsSubscriptionRequestException() {
 
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
+		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("ericsson", Collections.singleton(subscription));
 
-		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 
-		ResponseEntity<SubscriptionRequest> response = new ResponseEntity<>(subscriptionRequest, HttpStatus.INTERNAL_SERVER_ERROR);
-		when(restTemplate.exchange(any(String.class),eq(HttpMethod.POST),any(HttpEntity.class), eq(SubscriptionRequest.class))).thenReturn(response);
+		ResponseEntity<SubscriptionRequestApi> response = new ResponseEntity<>(subscriptionRequestApi, HttpStatus.INTERNAL_SERVER_ERROR);
+		when(restTemplate.exchange(any(String.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(SubscriptionRequestApi.class))).thenReturn(response);
 
 		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
 
 	}
-
 
 
 }
