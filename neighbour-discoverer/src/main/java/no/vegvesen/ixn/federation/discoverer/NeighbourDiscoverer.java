@@ -2,11 +2,13 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
-import no.vegvesen.ixn.federation.discoverer.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.utils.MDCUtil;
+import org.apache.qpid.server.filter.selector.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.*;
 
 /***
@@ -38,6 +41,8 @@ public class NeighbourDiscoverer {
 	private String myName;
 	private int backoffIntervalLength;
 	private int allowedNumberOfBackoffAttempts;
+	private int allowedNumberOfPolls;
+	private int randomShiftUpperLimit;
 	private NeighbourRESTFacade neighbourRESTFacade;
 
 	@Autowired
@@ -47,7 +52,9 @@ public class NeighbourDiscoverer {
 						NeighbourRESTFacade neighbourRESTFacade,
 						@Value("${interchange.node-provider.name}") String myName,
 						@Value("${neighbour.graceful-backoff.start-interval-length}") int backoffIntervalLength,
-						@Value("${neighbour.graceful-backoff.number-of-attempts}") int allowedNumberOfBackoffAttempts) {
+						@Value("${neighbour.graceful-backoff.number-of-attempts}") int allowedNumberOfBackoffAttempts,
+						@Value("${neighbour.subscription-polling.number-of-attempts}") int allowedNumberOfPolls,
+						@Value("${neighbour.graceful-backoff.random-shift}") int randomShiftUpperLimit) {
 		this.dnsFacade = dnsFacade;
 		this.interchangeRepository = interchangeRepository;
 		this.serviceProviderRepository = serviceProviderRepository;
@@ -55,6 +62,8 @@ public class NeighbourDiscoverer {
 		this.backoffIntervalLength = backoffIntervalLength;
 		this.allowedNumberOfBackoffAttempts = allowedNumberOfBackoffAttempts;
 		this.neighbourRESTFacade = neighbourRESTFacade;
+		this.allowedNumberOfPolls = allowedNumberOfPolls;
+		this.randomShiftUpperLimit = randomShiftUpperLimit;
 	}
 
 	boolean setContainsSubscription(Subscription subscription, Set<Subscription> subscriptions) {
@@ -75,7 +84,7 @@ public class NeighbourDiscoverer {
 
 			for (DataType dataType : serviceProviderCapabilities) {
 				// Remove duplicate capabilities.
-				if (!dataType.isContainedInSet(capabilities)) { // check if dataType already in capabilities list
+				if (!dataType.isContainedInSet(capabilities)) {
 					capabilities.add(dataType);
 				}
 			}
@@ -104,274 +113,348 @@ public class NeighbourDiscoverer {
 		myRepresentation.setName(myName);
 		Capabilities discoveringInterchangeCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getLocalServiceProviderCapabilities());
 		myRepresentation.setCapabilities(discoveringInterchangeCapabilities);
-		myRepresentation.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
+
+		logger.info("Representation of discovering interchange with capabilities: {}", myRepresentation.toString());
 
 		return myRepresentation;
 	}
 
-	Interchange getDiscoveringInterchangeWithSubscriptions() {
-		Interchange myRepresentation = new Interchange();
-		myRepresentation.setName(myName);
-		SubscriptionRequest discoveringInterchangeSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, getLocalServiceProviderSubscriptions());
-		myRepresentation.setSubscriptionRequest(discoveringInterchangeSubscriptionRequest);
-		myRepresentation.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()));
+	Set<Subscription> calculateCustomSubscriptionForNeighbour(Interchange neighbour) {
+		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 
-		logger.info("Representation of discovering interchange: \n" + myRepresentation.toString());
+		Set<Subscription> calculatedSubscriptions = new HashSet<>();
 
-		return myRepresentation;
-	}
+		try {
+			for (DataType neighbourDataType : neighbour.getCapabilities().getDataTypes()) {
+				for (Subscription localSubscription : getLocalServiceProviderSubscriptions()) {
 
-	Set<Subscription> calculateCustomSubscriptionForNeighbour(Interchange neighbourInterchange) {
-		logger.info("Calculating custom subscription for node: " + neighbourInterchange.getName());
+					// Trows ParseException if selector is invalid or IllegalArgumentException if selector is always true
+					if (CapabilityMatcher.matches(neighbourDataType, localSubscription.getSelector())) {
 
-		Set<Subscription> calculatedFedInSubscriptions = new HashSet<>();
-		Interchange discoveringInterchange = getDiscoveringInterchangeWithSubscriptions();
+						// Subscription to be returned only has selector set.
+						Subscription matchingSubscription = new Subscription();
+						matchingSubscription.setSelector(localSubscription.getSelector());
 
-		logger.info("Neighbour capabilities: " + neighbourInterchange.getCapabilities());
+						calculatedSubscriptions.add(matchingSubscription);
 
-		try { // capability matcher trows Parse Exception or Illegal Argument Exception if selector is always true
-
-			for (DataType dataType : neighbourInterchange.getCapabilities().getDataTypes()) {
-				logger.info("Capability of node " + neighbourInterchange.getName() + " : " + dataType.getWhere() + ", " + dataType.getWhat() + ", " + dataType.getHow());
-
-				logger.info("subscriptions of discovering interchange: " + discoveringInterchange.getSubscriptionRequest());
-
-				for (Subscription subscription : discoveringInterchange.getSubscriptionRequest().getSubscriptions()) {
-					// If the subscription selector string matches the data type,
-					// add the subscription to the new set of Subscriptions.
-
-					logger.info("Matching single subscription " + subscription.toString() + " with neighbour  ");
-					if (CapabilityMatcher.matches(dataType, subscription.getSelector())) {
-
-						logger.debug("Node " + neighbourInterchange.getName() + " has capability (" + dataType.getHow() + ", "
-								+ dataType.getWhat() + ", " + dataType.getWhere()
-								+ ") that matches subscription (" + subscription.getSelector() + ")");
-
-						subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
-						calculatedFedInSubscriptions.add(subscription);
+						logger.debug("Neighbour {} has capability ({}, {}, {}) that matches local subscription ({})", neighbour.getName(),  neighbourDataType.getHow(), neighbourDataType.getWhat(), neighbourDataType.getWhere(), localSubscription.getSelector());
 					}
 				}
 			}
-		} catch (Exception e) {
-			logger.error("Could not calculate custom subscription for neighbouring node \n " + neighbourInterchange.getName(), e);
-			return Collections.emptySet();
+		} catch (ParseException e) {
+			logger.error("Caught a ParseException. Returning empty set of subscriptions.");
+			logger.error("Error message: {}", e.getMessage());
+			return new HashSet<>();
+		} catch (IllegalArgumentException e){
+			logger.error("Caught IllegalArgumentException. Returning empty set of subscriptions.");
+			logger.error("Error message: {}", e.getMessage());
+			return new HashSet<>();
 		}
-		logger.info("Custom subscription: " + calculatedFedInSubscriptions);
-		return calculatedFedInSubscriptions;
+		logger.info("Calculated custom subscription for neighbour: {}", calculatedSubscriptions);
+		return calculatedSubscriptions;
 	}
 
-	@Scheduled(fixedRateString = "${neighbour.capabilities.update.interval}",
-			initialDelayString = "${neighbour.capabilities.initial-delay}")
-	public void pollSubscriptions() {
+	@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}", initialDelayString = "${neighbour.graceful-backoff.check-offset}")
+	public void gracefulBackoffPollSubscriptions(){
 
-		// TODO: backoff if this fails?
-		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesToPollForSubscriptionStatus();
+		// All neighbours with a failed subscription in fedIn
+		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangedWithFailedSubscriptionsInFedIn();
+
+		for(Interchange neighbour : interchangesWithFailedSubscriptionsInFedIn){
+			for(Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()){
+
+				MDCUtil.setLogVariables(myName, neighbour.getName());
+
+				// Check if we can retry poll (Exponential back-off)
+				if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
+
+					try {
+						logger.info("Polling subscription with path {} in graceful backoff", failedSubscription.getPath());
+
+						// Throws SubscriptionPollException if poll is unsuccessful
+						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(failedSubscription, neighbour);
+
+						// Poll was successful
+						logger.info("Successfully re-established contact with neighbour in subscription polling graceful backoff.");
+						failedSubscription.setStatus(polledSubscription.getStatus());
+						neighbour.setBackoffAttempts(0); // Reset number of back-offs to 0 after contact is re-established.
+
+					} catch (SubscriptionPollException e) {
+						// Poll was not successful
+						neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
+						logger.error("Unsuccessful poll of subscription with id {} from neighbour {}", failedSubscription.getId(), neighbour.getName());
+
+						if (neighbour.getBackoffAttempts() > allowedNumberOfBackoffAttempts) {
+							// We have exceeded allowed  number of tries
+							failedSubscription.setStatus(Subscription.SubscriptionStatus.UNREACHABLE);
+							logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
+						}
+					} finally {
+						interchangeRepository.save(neighbour);
+						MDCUtil.removeLogVariables();
+					}
+				}
+			}
+		}
+	}
+
+	@Scheduled(fixedRateString = "${neighbour.capabilities.update-interval}", initialDelayString = "${neighbour.capabilities.initial-delay}")
+	public void pollSubscriptions() {
+		// All interchanges with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
+		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesWithSubscriptionToPoll();
 
 		for (Interchange neighbour : interchangesToPoll) {
-			for (Subscription subscription : neighbour.getFedIn().getSubscriptions()) {
+			for (Subscription subscription : neighbour.getSubscriptionsForPolling()) {
+
+				MDCUtil.setLogVariables(myName, neighbour.getName());
+
 				try {
-					Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
+					// Check if we are allowed to poll the subscription
+					if(subscription.getNumberOfPolls() < allowedNumberOfPolls) {
 
-					// update status of subscription
-					subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
+						logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
 
-					interchangeRepository.save(neighbour);
+						// Throws SubscriptionPollException if unsuccessful
+						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
+
+						subscription.setStatus(polledSubscription.getStatus());
+						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
+						logger.info("Successfully polled subscription to neighbour {}. Subscription status: {}  - Number of polls: {}", neighbour.getName(), subscription.getStatus(), subscription.getNumberOfPolls());
+
+					}else{
+						// Number of poll attempts exceeds allowed number of poll attempts.
+						subscription.setStatus(Subscription.SubscriptionStatus.GIVE_UP);
+						logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
+					}
 				} catch (SubscriptionPollException e) {
-					logger.info(e.getMessage());
+
+					subscription.setStatus(Subscription.SubscriptionStatus.FAILED);
+					neighbour.setBackoffAttempts(0);
+					neighbour.setBackoffStart(LocalDateTime.now());
+
+					logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.");
+
+
+				}finally{
+					interchangeRepository.save(neighbour);
+					MDCUtil.removeLogVariables();
 				}
 			}
 		}
 	}
 
 
+	// Calculates next possible post attempt time, using exponential backoff
 	LocalDateTime getNextPostAttemptTime(Interchange neighbour) {
-		logger.info("Backoff interval length in seconds: {}", backoffIntervalLength);
-		int randomShift = new Random().nextInt(60);
-		double exponential = neighbour.getBackoffAttempts();
-		long exponentialBackoffWithRandomizationSeconds = (long) (Math.pow(2, exponential) * backoffIntervalLength) + randomShift;
-		LocalDateTime nextPostAttempt = neighbour.getBackoffStartTime().plusSeconds(exponentialBackoffWithRandomizationSeconds);
 
-		logger.info("Calculated next possible post time: {}", nextPostAttempt.toString());
+		int randomShift = new Random().nextInt(randomShiftUpperLimit);
+		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, neighbour.getBackoffAttempts()) * backoffIntervalLength) + randomShift;
+		LocalDateTime nextPostAttempt = neighbour.getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
+
+		logger.info("Waiting {} millis for next attempt at contacting neighbour.", exponentialBackoffWithRandomizationMillis);
+
 		return nextPostAttempt;
 	}
 
-	@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}",
-			initialDelayString = "${neighbour.graceful-backoff.check-offset}")
+	//@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}", initialDelayString = "${neighbour.graceful-backoff.check-offset}")
 	public void gracefulBackoffPostCapabilities() {
 
 		List<Interchange> neighboursWithFailedCapabilityExchange = interchangeRepository.findInterchangesWithFailedCapabilityExchange();
 
 		for (Interchange neighbour : neighboursWithFailedCapabilityExchange) {
-
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
 
-				try { // Throws CapabilityPostException if unsuccessful.
+				MDCUtil.setLogVariables(myName, neighbour.getName());
+				logger.info("Posting capabilities to neighbour {} in graceful backoff.", neighbour.getName());
+
+				try {
 					Interchange discoveringInterchange = getDiscoveringInterchangeWithCapabilities();
+
+					// Throws CapabilityPostException if unsuccessful.
 					Interchange neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringInterchange, neighbour);
 
-					logger.info("Successfully posted capabilities to neighbour in graceful backoff.");
 					neighbour.setCapabilities(neighbourRepresentation.getCapabilities());
-
-					// Set the statuses that will trigger subscription exchange
 					neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-					neighbour.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY); // Updated capabilities means we need to recalculate our subscription to the neighbour.
 					neighbour.setBackoffAttempts(0);
+
+					logger.info("Successfully posted capabilities to neighbour in graceful backoff.");
 
 				} catch (CapabilityPostException e) {
 					// Increase number of attempts by 1.
 					neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
-					logger.error("Unsuccessful post of capabilities in backoff.Increasing number of backoff attempts to {} ", neighbour.getBackoffAttempts());
+					logger.error("Unsuccessful post of capabilities to neighbour {} in backoff.Increasing number of backoff attempts to {} ",neighbour.getName(),neighbour.getBackoffAttempts());
 
 					if (neighbour.getBackoffAttempts() > allowedNumberOfBackoffAttempts) {
 						neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNREACHABLE);
+						logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
 					}
-
 				} finally {
 					interchangeRepository.save(neighbour);
+					logger.info("Saving updated neighbour: {}", neighbour.toString());
+					MDCUtil.removeLogVariables();
 				}
 			}
 		}
 	}
 
 
-	// TODO: finding interchanges for subscription backoff. Based on fedIn(). Our subscriptions to the neighbour have failed. Try these again.
-	@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}",
-			initialDelayString = "${neighbour.graceful-backoff.check-offset}")
+	@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}", initialDelayString = "${neighbour.graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
 
 		List<Interchange> neighboursWithFailedSubscriptionRequest = interchangeRepository.findInterchangesWithFailedFedIn();
 
 		for (Interchange neighbour : neighboursWithFailedSubscriptionRequest) {
-
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
 
+				MDCUtil.setLogVariables(myName, neighbour.getName());
+				logger.info("Posting subscription request to neighbour {} in graceful backoff.", neighbour.getName());
+
 				try {
+					// Create representation of discovering interchange and calculate custom subscription for neighbour.
 					Interchange discoveringInterchange = getDiscoveringInterchangeWithCapabilities();
-					Set<Subscription> neighbourFedInSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour);
-					discoveringInterchange.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, neighbourFedInSubscriptions));
+					discoveringInterchange.getSubscriptionRequest().setSubscriptions(calculateCustomSubscriptionForNeighbour(neighbour));
 
+					// Throws SubscriptionRequestException if unsuccessful.
 					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(discoveringInterchange, neighbour);
-					logger.info("Successfully posted subscription request to neighbour in graceful backoff.");
 
-					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 					neighbour.setBackoffAttempts(0);
 					neighbour.setFedIn(postResponseSubscriptionRequest);
-					// each subscription in fedIn has a status and a path.
+					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+
+					logger.info("Successfully posted subscription request to neighbour in graceful backoff.");
 
 				} catch (SubscriptionRequestException e) {
 					neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
-					logger.info("Unsuccessful post of subscription request in backoff. Increasing number of backoff attempts to {} ", neighbour.getBackoffAttempts());
+					logger.error("Unsuccessful post of subscription request in backoff. Increasing number of backoff attempts to {} ", neighbour.getBackoffAttempts());
 
 					if (neighbour.getBackoffAttempts() > allowedNumberOfBackoffAttempts) {
 						neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.UNREACHABLE);
+						logger.error("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
 					}
 				} finally {
-					interchangeRepository.save(neighbour);
+					neighbour = interchangeRepository.save(neighbour);
+					logger.info("Saving updated neighbour: {}", neighbour.toString());
+					MDCUtil.removeLogVariables();
 				}
 			}
 		}
 	}
 
-	@Scheduled(fixedRateString = "${neighbour.capabilities.update.interval}",
-			initialDelayString = "${neighbour.capabilities.initial-delay}")
+	@Scheduled(fixedRateString = "${neighbour.subscription-request.update-interval}", initialDelayString = "${neighbour.subscription-request.initial-delay}")
 	public void subscriptionRequest() {
 
-		List<Interchange> interchangesForSubscriptionRequest = interchangeRepository.findInterchangesForSubscriptionRequest();
+		// All neighbours with capabilities KNOWN and fedIn EMPTY
+		List<Interchange> neighboursForSubscriptionRequest = interchangeRepository.findInterchangesForSubscriptionRequest();
 
-		for (Interchange neighbour : interchangesForSubscriptionRequest) {
+		for (Interchange neighbour : neighboursForSubscriptionRequest) {
+			MDCUtil.setLogVariables(myName, neighbour.getName());
+			logger.info("Neighbour for subscription request: {}", neighbour.getName());
 
-			// Calculate subscription and create my representation
-			Interchange discoveringInterchange = getDiscoveringInterchangeWithCapabilities();
+			// Create the representation of the discovering interchange and calculate the custom subscription for the neighbour.
+			Interchange discoveringInterchange = new Interchange();
+			discoveringInterchange.setName(myName);
+
 			Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour);
 
 			if(calculatedSubscriptionForNeighbour.isEmpty()){
+
+				// No overlap between neighbour capabilities and local service provider subscriptions.
+				// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
 				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
 
+				logger.info("Calculated subscription request for neighbour was empty. Setting Subscription status to NO_OVERLAP");
+
+				// Decide if we should post empty subscription request or not.
 				if(neighbour.getFedIn().getSubscriptions().isEmpty()){
-					// we do not have a subscription to this neighbour, nothing to tear down
+					// No existing subscription to this neighbour, nothing to tear down
 					interchangeRepository.save(neighbour);
+					logger.info("Subscription to neighbour is empty. Nothing to tear down.");
+					MDCUtil.removeLogVariables();
 					return;
 				}else{
-					// we want to post an empty subscription request to our neighbour.
+					// We have an existing subscription to the neighbour, tear it down
 					discoveringInterchange.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
+					logger.info("The calculated subscription request to neighbour {} is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.", neighbour.getName());
 				}
-
 			}else{
-				// calculated subscription is not empty, post as normal
+				// Calculated subscription is not empty, post as normal
 				discoveringInterchange.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, calculatedSubscriptionForNeighbour));
-
+				logger.info("The calculated subscription request to neighbour {} is not empty. Posting subscription request: {}", neighbour.getName(), discoveringInterchange.toString());
 			}
 
-			// post subscription to neighbour
-			// update fed in on neighbour if post is successful
 			try {
-				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringInterchange, neighbour); // throws exception
+				// Throws SubscriptionRequestException if unsuccessful
+				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringInterchange, neighbour);
+				neighbour.getFedIn().setSubscriptions(subscriptionRequestResponse.getSubscriptions());
+				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+
 				logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
-				neighbour.setFedIn(subscriptionRequestResponse);
 
 			} catch (SubscriptionRequestException e) {
-
-				logger.info("Failed subscription request. Setting status of neighbour fedIn to FAILED. \n ", e);
 				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
 
+				logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.");
+				logger.error("Error message: {}", e.getMessage());
+
 			} finally {
-				interchangeRepository.save(neighbour);
+				neighbour = interchangeRepository.save(neighbour);
+				logger.info("Saving updated neighbour: {}", neighbour.toString());
+				MDCUtil.removeLogVariables();
 			}
 		}
 	}
 
-	@Scheduled(fixedRateString = "${neighbour.capabilities.update.interval}",
-			initialDelayString = "${neighbour.capabilities.initial-delay}")
+	//@Scheduled(fixedRateString = "${neighbour.capabilities.update-interval}", initialDelayString = "${neighbour.capabilities.initial-delay}")
 	public void capabilityExchange() {
 
-		List<Interchange> newInterchanges = interchangeRepository.findInterchangesForCapabilityExchange();
+		// All neighbours with capabilities UNKNOWN
+		List<Interchange> neighboursForCapabilityExchange = interchangeRepository.findInterchangesForCapabilityExchange();
 
-		for (Interchange neighbour : newInterchanges) {
-			logger.info("Found interchange with capabilities status UNKNOWN: " + neighbour.getName());
+		for (Interchange neighbour : neighboursForCapabilityExchange) {
+			MDCUtil.setLogVariables(myName, neighbour.getName());
+			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 
 			Interchange discoveringInterchange = getDiscoveringInterchangeWithCapabilities();
 			Interchange neighbourResponse;
 
 			try {
-				// Capabilities exchange.
-				neighbourResponse = neighbourRESTFacade.postCapabilities(discoveringInterchange, neighbour); // throws exception if this fails.
-				logger.info("Received post response from neighbour: \n" + neighbourResponse.toString());
+				// Throws CapabilityPostException if unsuccessful.
+				neighbourResponse = neighbourRESTFacade.postCapabilities(discoveringInterchange, neighbour);
 
 				neighbour.setCapabilities(neighbourResponse.getCapabilities());
-				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN); // The capabilities are known to us now.
+				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+
 				logger.info("Successfully completed capability exchange.");
-				logger.info("Updated neighbour: \n" + neighbour.toString());
+				logger.debug("Updated neighbour: {}", neighbour.toString());
 
 			} catch (CapabilityPostException e) {
-
-				logger.error("Unable to post capabilities to neighbour. Setting status of neighbour capabilities to FAILED.\n", e);
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
 				neighbour.setBackoffAttempts(0);
 				neighbour.setBackoffStart(LocalDateTime.now());
-				logger.info("Updated neighbour: \n" + neighbour.toString());
+
+				logger.error("Unable to post capabilities to neighbour. Setting status of neighbour capabilities to FAILED.\n", e);
 
 			} finally {
-				logger.info("Saving updated neighbour in database.");
-				interchangeRepository.save(neighbour);
+				neighbour = interchangeRepository.save(neighbour);
+				logger.info("Saving updated neighbour: {}", neighbour.toString());
+				MDCUtil.removeLogVariables();
 			}
 		}
 	}
 
-	@Scheduled(fixedRateString = "${neighbour.capabilities.update.interval}",
-			initialDelayString = "${neighbour.capabilities.initial-delay}")
+	//@Scheduled(fixedRateString = "${dns.lookup.interval}", initialDelayString = "${dns.lookup.initial-delay}")
 	public void checkForNewInterchanges() {
+		logger.info("Checking DNS for new neighbours.");
 		List<Interchange> neighbours = dnsFacade.getNeighbours();
 
 		for (Interchange neighbourInterchange : neighbours) {
-			logger.info("DNS gave interchange with name: " + neighbourInterchange.getName());
-
 			if (interchangeRepository.findByName(neighbourInterchange.getName()) == null && !neighbourInterchange.getName().equals(myName)) {
 
-				// Found a new interchange, save it. Set capabilities status of neighbour to UNKNOWN to trigger
-				// capabilities exchange.
+				// Found a new interchange. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
 				neighbourInterchange.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
+				logger.info("Found a new neighbour. Saving in database");
 				interchangeRepository.save(neighbourInterchange);
-				logger.info("New neighbour saved in database");
 			}
 		}
 	}
