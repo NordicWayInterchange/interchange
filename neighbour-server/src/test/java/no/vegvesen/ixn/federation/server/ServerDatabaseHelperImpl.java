@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation;
+package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.dbhelper.DatabaseHelperInterface;
 import no.vegvesen.ixn.federation.model.DataType;
@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -36,7 +35,7 @@ public class ServerDatabaseHelperImpl implements DatabaseHelperInterface {
 
 		Subscription volvoSubscription = new Subscription();
 		volvoSubscription.setSelector("where LIKE 'FI'");
-		volvoSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+		volvoSubscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		volvoCloud.setSubscriptions(Collections.singleton(volvoSubscription));
 		serviceProviderRepository.save(volvoCloud);
 
@@ -47,7 +46,7 @@ public class ServerDatabaseHelperImpl implements DatabaseHelperInterface {
 
 		Subscription scaniaSubscription = new Subscription();
 		scaniaSubscription.setSelector("where LIKE 'DK'");
-		scaniaSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+		scaniaSubscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		scaniaCloud.setSubscriptions(Collections.singleton(scaniaSubscription));
 		serviceProviderRepository.save(scaniaCloud);
 
