@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation;
+package no.vegvesen.ixn.federation.server;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +18,8 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 				.select()
 				.apis(RequestHandlerSelectors.basePackage("no.vegvesen.ixn.federation"))
 				.build();
-
 	}
+
 	@Override
 	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("swagger-ui.html")
