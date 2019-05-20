@@ -10,36 +10,38 @@ import javax.persistence.*;
 @Table(name = "subscriptions")
 public class Subscription {
 
-	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
 	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq")
 	@Column(name = "sub_id")
 	private Integer sub_id;
 
-	public enum SubscriptionStatus {REQUESTED, CREATED, ACCEPTED, REJECTED}
+	public enum SubscriptionStatus {REQUESTED, ACCEPTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, GIVE_UP, FAILED, UNREACHABLE, REJECTED}
 
 	@Enumerated(EnumType.STRING)
-	private SubscriptionStatus subscriptionStatus;
+	private SubscriptionStatus status;
 
 	private String selector;
 
 	private String path;
 
+	@JsonIgnore
+	private int numberOfPolls = 0;
+
 	public Subscription() {
 	}
 
-	public Subscription(String selector, SubscriptionStatus subscriptionStatus) {
+	public Subscription(String selector, SubscriptionStatus status) {
 		this.selector = selector;
-		this.subscriptionStatus = subscriptionStatus;
+		this.status = status;
 	}
 
-	public SubscriptionStatus getSubscriptionStatus() {
-		return subscriptionStatus;
+	public SubscriptionStatus getStatus() {
+		return status;
 	}
 
-	public void setSubscriptionStatus(SubscriptionStatus subscriptionStatus) {
-		this.subscriptionStatus = subscriptionStatus;
+	public void setStatus(SubscriptionStatus status) {
+		this.status = status;
 	}
 
 	public String getSelector() {
@@ -50,7 +52,6 @@ public class Subscription {
 		this.selector = selector;
 	}
 
-	@JsonIgnore
 	public Integer getId() {
 		return sub_id;
 	}
@@ -63,11 +64,20 @@ public class Subscription {
 		this.path = path;
 	}
 
+	@JsonIgnore
+	public int getNumberOfPolls() {
+		return numberOfPolls;
+	}
+
+	public void setNumberOfPolls(int numberOfPolls) {
+		this.numberOfPolls = numberOfPolls;
+	}
+
 	@Override
 	public String toString() {
 		return "Subscription{" +
 				"sub_id=" + sub_id +
-				", subscriptionStatus=" + subscriptionStatus +
+				", status=" + status +
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +
 				'}';

@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
@@ -12,7 +11,6 @@ import java.util.Set;
 @Table(name = "subscription_request")
 public class SubscriptionRequest {
 
-	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subreq_generator")
 	@SequenceGenerator(name="subreq_generator", sequenceName = "subreq_seq")

@@ -61,9 +61,10 @@ public class DataType {
 		this.what = what;
 	}
 
+	// Only compares fields 'where' and 'how', not 'what'.
 	public boolean isContainedInSet(Set<DataType> capabilities){
 		for (DataType other : capabilities) {
-			if (this.getHow().equals(other.getHow()) && this.getWhat().equals(other.getWhat()) && this.getWhere().equals(other.getWhere())) {
+			if (this.getHow().equals(other.getHow()) && this.getWhere().equals(other.getWhere())) {
 				return true;
 			}
 		}
