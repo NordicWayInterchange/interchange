@@ -24,10 +24,9 @@ public abstract class NeighbourDiscovererIT {
 
 		neighbourDiscoverer.subscriptionRequest();
 
-		//neighbourDiscoverer.pollSubscriptions();
 
 		try {
-			Thread.sleep(20000);
+			Thread.sleep(240000); // Four minutes.
 		}catch (InterruptedException ignore){
 		}
 	}

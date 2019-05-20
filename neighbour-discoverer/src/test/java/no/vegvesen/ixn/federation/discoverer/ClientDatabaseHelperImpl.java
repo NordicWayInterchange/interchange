@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
 @Component
 public class ClientDatabaseHelperImpl implements DatabaseHelperInterface {
 
@@ -39,25 +38,11 @@ public class ClientDatabaseHelperImpl implements DatabaseHelperInterface {
 
 		Subscription teslaSubscription = new Subscription();
 		teslaSubscription.setSelector("where LIKE 'NO'");
-		teslaSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+		teslaSubscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		teslaCloud.setSubscriptions(Collections.singleton(teslaSubscription));
 		serviceProviderRepository.save(teslaCloud);
 
-		ServiceProvider BMWCloud = new ServiceProvider();
-		BMWCloud.setName("BMW Cloud");
-		DataType bmwDataTypeOne = new DataType("datex2;1.0", "DK", "Conditions");
-		DataType bmwDataTypeTwo = new DataType("datex2;1.0", "FI", "Conditions");
-		BMWCloud.setCapabilities(Stream.of(bmwDataTypeTwo, bmwDataTypeOne).collect(Collectors.toSet()));
-
-		Subscription BMWSubscription = new Subscription();
-		BMWSubscription.setSelector("where LIKE 'SE'");
-		BMWSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
-		BMWCloud.setSubscriptions(Collections.singleton(BMWSubscription));
-		serviceProviderRepository.save(BMWCloud);
-
 		logger.info(teslaCloud.toString());
-		logger.info(BMWCloud.toString());
-
 	}
 
 }
