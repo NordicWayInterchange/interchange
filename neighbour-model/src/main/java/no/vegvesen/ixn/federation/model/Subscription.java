@@ -10,6 +10,7 @@ import javax.persistence.*;
 @Table(name = "subscriptions")
 public class Subscription {
 
+	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
 	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq")
@@ -36,11 +37,11 @@ public class Subscription {
 		this.status = status;
 	}
 
-	public SubscriptionStatus getStatus() {
+	public SubscriptionStatus getSubscriptionStatus() {
 		return status;
 	}
 
-	public void setStatus(SubscriptionStatus status) {
+	public void setSubscriptionStatus(SubscriptionStatus status) {
 		this.status = status;
 	}
 
@@ -52,6 +53,7 @@ public class Subscription {
 		this.selector = selector;
 	}
 
+	@JsonIgnore
 	public Integer getId() {
 		return sub_id;
 	}

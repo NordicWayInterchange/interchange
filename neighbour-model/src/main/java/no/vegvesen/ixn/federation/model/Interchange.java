@@ -146,7 +146,7 @@ public class Interchange {
 		Set<Subscription> subscriptionsForPolling = new HashSet<>();
 
 		for(Subscription subscription : this.getFedIn().getSubscriptions()){
-			if(subscription.getStatus().equals(Subscription.SubscriptionStatus.REQUESTED) || subscription.getStatus().equals(Subscription.SubscriptionStatus.ACCEPTED)){
+			if(subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.REQUESTED) || subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.ACCEPTED)){
 				subscriptionsForPolling.add(subscription);
 			}
 		}
@@ -158,7 +158,7 @@ public class Interchange {
 		Set<Subscription> subscriptionsWithStatusFailed = new HashSet<>();
 
 		for(Subscription subscription : this.getFedIn().getSubscriptions()){
-			if(subscription.getStatus().equals(Subscription.SubscriptionStatus.FAILED)){
+			if(subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.FAILED)){
 				subscriptionsWithStatusFailed.add(subscription);
 			}
 		}
