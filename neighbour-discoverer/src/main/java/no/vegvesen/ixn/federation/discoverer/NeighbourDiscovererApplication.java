@@ -28,8 +28,8 @@ public class NeighbourDiscovererApplication {
 
 	private static SSLContext createSSLContext() {
 
-		String keystoreFilename = "/Users/ida.berge/Documents/Borealis/interchange/test_keys/bouvet.p12";
-		String truststoreFilename = "/Users/ida.berge/Documents/Borealis/interchange/test_keys/truststore.jks";
+		String keystoreFilename = "test_keys/bouvet.p12";
+		String truststoreFilename = "test_keys/truststore.jks";
 
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(keystoreFilename, "password", KeystoreType.PKCS12, "password"),
