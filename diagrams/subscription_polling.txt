@@ -1,0 +1,11 @@
+@startuml
+database "Client database" as client_db
+Actor "A\nclient" as A
+
+participant "B\nserver" as B
+database "Server database" as server_db
+
+A -> client_db: Get neighbours with fedIn
+
+
+@enduml

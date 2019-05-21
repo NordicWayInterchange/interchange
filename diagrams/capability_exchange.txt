@@ -1,0 +1,48 @@
+@startuml
+skinparam sequenceMessageAlign center
+
+box "Interchange A" #LightGrey
+database "Client database" as client_db
+Actor "A\nclient" as A
+end box
+
+box "Interchange B" #LightBlue
+participant "B\nserver" as B
+database "Server database" as server_db
+end box
+
+activate A
+A -> client_db: Get neighbours with //capabilities// status UNKNOWN \nand  //fedIn// status EMPTY
+A <-- client_db: Interchange B
+
+A -> client_db: Get local capabilities
+A <-- client_db: Capabilities interchange A
+
+== Capability exchange begins==
+
+A -> B : ** POST: A capabilities **
+
+activate B
+alt #transparent B has not seen A before
+  B -> server_db: Save new neighbour A
+
+else B has seen A before
+  B -> server_db: Update neighbour A
+end
+
+B <-- server_db: Saved neighbour A
+
+B -> server_db: Get local capabilities
+B <-- server_db: Capabilities interchange B
+
+A <-- B : ** POST response: B capabilities **
+deactivate B
+
+== Capability exchange finished ==
+
+A-> A: Set B //capabilities// status to KNOWN \nSet B //fedIn// status to EMPTY \nSet B //fedIn// to empty set
+
+A -> client_db: Save updated neighbour B
+A <-- client_db: Updated neighbour B
+
+@enduml
