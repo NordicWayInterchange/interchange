@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.federation.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityTransformer;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionTransformer;
+import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
@@ -37,7 +37,6 @@ public class NeighbourRestController {
 	private ServiceProviderRepository serviceProviderRepository;
 	private CapabilityTransformer capabilityTransformer;
 	private SubscriptionTransformer subscriptionTransformer;
-	private ObjectMapper mapper;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
@@ -45,14 +44,12 @@ public class NeighbourRestController {
 	public NeighbourRestController(InterchangeRepository interchangeRepository,
 								   ServiceProviderRepository serviceProviderRepository,
 								   CapabilityTransformer capabilityTransformer,
-								   SubscriptionTransformer subscriptionTransformer,
-								   ObjectMapper mapper) {
+								   SubscriptionTransformer subscriptionTransformer) {
 
 		this.interchangeRepository = interchangeRepository;
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
-		this.mapper = mapper;
 	}
 
 
@@ -66,33 +63,50 @@ public class NeighbourRestController {
 
 			// Initial value is NO_OVERLAP.
 			// This value is updated if selector matches a data type or is illegal or not valid.
-			neighbourSubscription.setStatus(Subscription.SubscriptionStatus.NO_OVERLAP);
+			neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NO_OVERLAP);
 
 			for (DataType localDataType : localCapabilities) {
 				try {
 					if (CapabilityMatcher.matches(localDataType, neighbourSubscription.getSelector())) {
 						// Subscription matches data type and everything is ok.
 						// Set subscription status requested.
-						neighbourSubscription.setStatus(Subscription.SubscriptionStatus.ACCEPTED);
+						neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
 					}
 				} catch (IllegalArgumentException e) {
 					// Illegal filter - filter always true
 					logger.info("Subscription had illegal selectors. Setting status ILLEGAL");
-					neighbourSubscription.setStatus(Subscription.SubscriptionStatus.ILLEGAL);
+					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ILLEGAL);
 
 				} catch (ParseException e) {
 					// Selector not valid
 					logger.info("Subscription has invalid selector. Setting status NOT_VALID");
-					neighbourSubscription.setStatus(Subscription.SubscriptionStatus.NOT_VALID);
+					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NOT_VALID);
 				}
 			}
 		}
 		return neighbourSubscriptionRequest;
 	}
 
+	void checkIfCommonNameMatchesNameInApiObject(String apiName){
+
+		Object principal = SecurityContextHolder.getContext().getAuthentication();
+		String commonName = ((Authentication) principal).getName();
+
+		if(!commonName.equals(apiName)){
+			logger.error("Received capability post from neighbour {}, but CN on certificate was {}. Rejecting...", apiName, commonName);
+			String errorMessage = "Received capability post from neighbour %s, but CN on certificate was %s. Rejecting...";
+			throw new CNAndApiObjectMismatchException(String.format(errorMessage, apiName, commonName));
+		}
+	}
+
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@RequestMapping(method = RequestMethod.POST, path = "/subscription", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Secured("ROLE_USER")
 	public SubscriptionRequestApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
+
+		// Check if CN of certificate matches name in api object. Reject if they do not match.
+
+		checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 
 		// Convert SubscriptionRequestApi object to Interchange object.
 		Interchange incomingSubscriptionRequestInterchange = subscriptionTransformer.subscriptionRequestApiToInterchange(neighbourSubscriptionRequest);
@@ -141,17 +155,20 @@ public class NeighbourRestController {
 	}
 
 
-	// TODO: should this method be protected in some way?
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = "{ixnName}/subscription/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Secured("ROLE_USER")
 	public Subscription pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId) {
+
+		// Check if CN of certificate matches name in api object. Reject if they do not match.
+		checkIfCommonNameMatchesNameInApiObject(ixnName);
 
 		Interchange interchange = interchangeRepository.findByName(ixnName);
 
 		if (interchange != null) {
 			try {
 				Subscription subscription = interchange.getSubscriptionById(subscriptionId);
-				logger.info("Neighbour {} polled for status of subscription {}. Returning: \n {}", interchange.getName(), subscriptionId, subscription.toString());
+				logger.info("Neighbour {} polled for status of subscription {}. Returning: {}", interchange.getName(), subscriptionId, subscription.toString());
 
 				return subscription;
 			} catch (SubscriptionNotFoundException subscriptionNotFound) {
@@ -202,15 +219,8 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	public CapabilityApi updateCapabilities(@RequestBody CapabilityApi neighbourCapabilities) {
 
-		// TODO: check if username and name in capability API object match. If not, reject the request.
-
-		Object principal = SecurityContextHolder.getContext().getAuthentication();
-		String commonName = ((Authentication) principal).getName();
-
-		if(!commonName.equals(neighbourCapabilities.getName())){
-			logger.error("Received capability post from neighbour {}, but CN on certificate was {}. Rejecting..", neighbourCapabilities.getName(), commonName);
-		}
-
+		// Check if CN of certificate matches name in api object. Reject if they do not match.
+		checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 
 		logger.info("Received capability post from neighbour {}: ", neighbourCapabilities.getName(), neighbourCapabilities.toString());
 

@@ -35,7 +35,7 @@ public class ServerDatabaseHelperImpl implements DatabaseHelperInterface {
 
 		Subscription volvoSubscription = new Subscription();
 		volvoSubscription.setSelector("where LIKE 'FI'");
-		volvoSubscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		volvoSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		volvoCloud.setSubscriptions(Collections.singleton(volvoSubscription));
 		serviceProviderRepository.save(volvoCloud);
 
@@ -46,7 +46,7 @@ public class ServerDatabaseHelperImpl implements DatabaseHelperInterface {
 
 		Subscription scaniaSubscription = new Subscription();
 		scaniaSubscription.setSelector("where LIKE 'DK'");
-		scaniaSubscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		scaniaSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		scaniaCloud.setSubscriptions(Collections.singleton(scaniaSubscription));
 		serviceProviderRepository.save(scaniaCloud);
 

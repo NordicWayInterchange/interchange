@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -45,12 +43,6 @@ public class NeighbourRestTestController {
 	@RequestMapping(method = RequestMethod.POST, value = "/createMyRepresentation")
 	@Secured("ROLE_USER")
 	public ServiceProvider createMyRepresentation(@RequestBody ServiceProvider serviceProvider){
-
-		Object principal = SecurityContextHolder.getContext().getAuthentication();
-		String commonName = ((Authentication) principal).getName();
-
-		logger.info("*** COMMON NAME FROM CERTIFICATE: {} ", commonName);
-
 		serviceProviderRepository.save(serviceProvider);
 		return serviceProvider;
 	}
@@ -75,7 +67,7 @@ public class NeighbourRestTestController {
 		if(interchange != null){
 			try {
 				Subscription updateSubscription = interchange.getSubscriptionById(subscriptionId);
-				updateSubscription.setStatus(Subscription.SubscriptionStatus.CREATED);
+				updateSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
 				interchangeRepository.save(interchange);
 				return updateSubscription;
 
@@ -96,7 +88,7 @@ public class NeighbourRestTestController {
 		for(Subscription subscription : neighbourSubscriptionRequest.getSubscriptions()){
 			i +=1;
 			subscription.setPath("test/"+neighbourSubscriptionRequest.getName()+"/subscription/"+i);
-			subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+			subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		}
 
 		return neighbourSubscriptionRequest;
@@ -114,7 +106,7 @@ public class NeighbourRestTestController {
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
 		subscription.setPath(ixnName + "/subscription/"+subscriptionId);
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 
 
 		if(pollingCounter <= 2){

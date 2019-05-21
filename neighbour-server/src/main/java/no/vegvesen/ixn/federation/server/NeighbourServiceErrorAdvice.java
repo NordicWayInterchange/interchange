@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
-import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
-import no.vegvesen.ixn.federation.exceptions.ServerErrorException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionNotAcceptedException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -40,6 +37,11 @@ public class NeighbourServiceErrorAdvice {
 	@ExceptionHandler({ServerErrorException.class})
 	public ResponseEntity<ErrorDetails> serverError(ServerErrorException e){
 		return error(INTERNAL_SERVER_ERROR, e);
+	}
+
+	@ExceptionHandler({CNAndApiObjectMismatchException.class})
+	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e){
+		return error(FORBIDDEN, e);
 	}
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
