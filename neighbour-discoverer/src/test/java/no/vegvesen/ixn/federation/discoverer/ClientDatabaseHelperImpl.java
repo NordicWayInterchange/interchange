@@ -38,7 +38,7 @@ public class ClientDatabaseHelperImpl implements DatabaseHelperInterface {
 
 		Subscription teslaSubscription = new Subscription();
 		teslaSubscription.setSelector("where LIKE 'NO'");
-		teslaSubscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		teslaSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		teslaCloud.setSubscriptions(Collections.singleton(teslaSubscription));
 		serviceProviderRepository.save(teslaCloud);
 

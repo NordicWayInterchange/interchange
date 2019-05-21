@@ -56,7 +56,7 @@ public class NeighbourRESTFacadeTest {
 
 	@Test
 	public void expectedUrlIsCreated() {
-		String expectedURL = "http://ericsson.itsinterchange.eu:8080";
+		String expectedURL = "https://ericsson.itsinterchange.eu:8080";
 		String actualURL = neighbourRESTFacade.getUrl(ericsson);
 
 		Assert.assertEquals(expectedURL, actualURL);

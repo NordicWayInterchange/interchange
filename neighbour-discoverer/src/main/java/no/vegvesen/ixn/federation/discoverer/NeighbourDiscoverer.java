@@ -176,7 +176,7 @@ public class NeighbourDiscoverer {
 
 						// Poll was successful
 						logger.info("Successfully re-established contact with neighbour in subscription polling graceful backoff.");
-						failedSubscription.setStatus(polledSubscription.getStatus());
+						failedSubscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						neighbour.setBackoffAttempts(0); // Reset number of back-offs to 0 after contact is re-established.
 
 					} catch (SubscriptionPollException e) {
@@ -186,7 +186,7 @@ public class NeighbourDiscoverer {
 
 						if (neighbour.getBackoffAttempts() > allowedNumberOfBackoffAttempts) {
 							// We have exceeded allowed  number of tries
-							failedSubscription.setStatus(Subscription.SubscriptionStatus.UNREACHABLE);
+							failedSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.UNREACHABLE);
 							logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
 						}
 					} finally {
@@ -217,18 +217,18 @@ public class NeighbourDiscoverer {
 						// Throws SubscriptionPollException if unsuccessful
 						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
 
-						subscription.setStatus(polledSubscription.getStatus());
+						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
-						logger.info("Successfully polled subscription to neighbour {}. Subscription status: {}  - Number of polls: {}", neighbour.getName(), subscription.getStatus(), subscription.getNumberOfPolls());
+						logger.info("Successfully polled subscription to neighbour {}. Subscription status: {}  - Number of polls: {}", neighbour.getName(), subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
 
 					}else{
 						// Number of poll attempts exceeds allowed number of poll attempts.
-						subscription.setStatus(Subscription.SubscriptionStatus.GIVE_UP);
+						subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.GIVE_UP);
 						logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
 					}
 				} catch (SubscriptionPollException e) {
 
-					subscription.setStatus(Subscription.SubscriptionStatus.FAILED);
+					subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.FAILED);
 					neighbour.setBackoffAttempts(0);
 					neighbour.setBackoffStart(LocalDateTime.now());
 
@@ -256,7 +256,7 @@ public class NeighbourDiscoverer {
 		return nextPostAttempt;
 	}
 
-	//@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}", initialDelayString = "${neighbour.graceful-backoff.check-offset}")
+	@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}", initialDelayString = "${neighbour.graceful-backoff.check-offset}")
 	public void gracefulBackoffPostCapabilities() {
 
 		List<Interchange> neighboursWithFailedCapabilityExchange = interchangeRepository.findInterchangesWithFailedCapabilityExchange();
@@ -405,7 +405,7 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	//@Scheduled(fixedRateString = "${neighbour.capabilities.update-interval}", initialDelayString = "${neighbour.capabilities.initial-delay}")
+	@Scheduled(fixedRateString = "${neighbour.capabilities.update-interval}", initialDelayString = "${neighbour.capabilities.initial-delay}")
 	public void capabilityExchange() {
 
 		// All neighbours with capabilities UNKNOWN
@@ -443,7 +443,7 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	//@Scheduled(fixedRateString = "${dns.lookup.interval}", initialDelayString = "${dns.lookup.initial-delay}")
+	@Scheduled(fixedRateString = "${dns.lookup.interval}", initialDelayString = "${dns.lookup.initial-delay}")
 	public void checkForNewInterchanges() {
 		logger.info("Checking DNS for new neighbours.");
 		List<Interchange> neighbours = dnsFacade.getNeighbours();
