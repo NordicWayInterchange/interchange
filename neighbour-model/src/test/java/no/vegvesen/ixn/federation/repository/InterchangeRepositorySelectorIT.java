@@ -117,7 +117,7 @@ public class InterchangeRepositorySelectorIT {
 
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		ericsson.getFedIn().setSubscriptions(Collections.singleton(subscription));
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		interchangeRepository.save(ericsson);
@@ -133,7 +133,7 @@ public class InterchangeRepositorySelectorIT {
 
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
-		subscription.setStatus(Subscription.SubscriptionStatus.FAILED);
+		subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.FAILED);
 		ericsson.getFedIn().setSubscriptions(Collections.singleton(subscription));
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		interchangeRepository.save(ericsson);
