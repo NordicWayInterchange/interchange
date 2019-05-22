@@ -20,7 +20,7 @@ public class Subscription {
 	public enum SubscriptionStatus {REQUESTED, ACCEPTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, GIVE_UP, FAILED, UNREACHABLE, REJECTED}
 
 	@Enumerated(EnumType.STRING)
-	private SubscriptionStatus status;
+	private SubscriptionStatus subscriptionStatus;
 
 	private String selector;
 
@@ -32,17 +32,17 @@ public class Subscription {
 	public Subscription() {
 	}
 
-	public Subscription(String selector, SubscriptionStatus status) {
+	public Subscription(String selector, SubscriptionStatus subscriptionStatus) {
 		this.selector = selector;
-		this.status = status;
+		this.subscriptionStatus = subscriptionStatus;
 	}
 
 	public SubscriptionStatus getSubscriptionStatus() {
-		return status;
+		return subscriptionStatus;
 	}
 
 	public void setSubscriptionStatus(SubscriptionStatus status) {
-		this.status = status;
+		this.subscriptionStatus = status;
 	}
 
 	public String getSelector() {
@@ -79,7 +79,7 @@ public class Subscription {
 	public String toString() {
 		return "Subscription{" +
 				"sub_id=" + sub_id +
-				", status=" + status +
+				", subscriptionStatus=" + subscriptionStatus +
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +
 				'}';
