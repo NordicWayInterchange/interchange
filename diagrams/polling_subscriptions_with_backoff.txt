@@ -66,5 +66,5 @@ note left: X.numberOfPolls = 7 \nX.numberOfBackoffAttempts = 0 \nX.status=REQUES
 
 == Subscription Polling finished ==
 
-note over A: X.numberOfPolls =  \nX.numberOfBackoffAttempts = 0 \nX.status=GIVE_UP
+note over A: X.numberOfPolls = 7  \nX.numberOfBackoffAttempts = 0 \nX.status=GIVE_UP
 @enduml
