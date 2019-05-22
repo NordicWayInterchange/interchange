@@ -16,7 +16,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 
 
 	// Subscription polling: all interchanges with subscriptions in fedIn with status REQUESTED or ACCEPTED
-	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id_sub from subscriptions where status = 'REQUESTED' or status ='ACCEPTED')", nativeQuery = true)
+	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id_sub from subscriptions where subscription_status = 'REQUESTED' or subscription_status ='ACCEPTED')", nativeQuery = true)
 	List<Interchange> findInterchangesWithSubscriptionToPoll();
 
 	// Selectors for capability and subscription exchange
@@ -36,7 +36,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'FAILED')", nativeQuery = true)
 	List<Interchange> findInterchangesWithFailedCapabilityExchange();
 
-	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id_sub from subscriptions where status = 'FAILED')", nativeQuery = true)
+	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id_sub from subscriptions where subscription_status = 'FAILED')", nativeQuery = true)
 	List<Interchange> findInterchangedWithFailedSubscriptionsInFedIn();
 
 
