@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
-import no.vegvesen.ixn.federation.exceptions.ServerErrorException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
@@ -114,13 +113,13 @@ public class NeighbourRestTestController {
 			return subscription;
 		}else if( pollingCounter >= 3 && pollingCounter <=4){
 			logger.error(" - Throwing error!!!");
-			throw new ServerErrorException("Error error ");
+			throw new RuntimeException("Error error ");
 		}else if(pollingCounter >= 5 && pollingCounter <= 6){
 			logger.info(" - Returning subscription");
 			return subscription;
 		}else if(pollingCounter >= 7 && pollingCounter <= 9){
 			logger.info(" - Throwing error!!!!");
-			throw new ServerErrorException("Error error again");
+			throw new RuntimeException("Error error again");
 		}else{
 			logger.info(" - Returning subscription.");
 			return subscription;

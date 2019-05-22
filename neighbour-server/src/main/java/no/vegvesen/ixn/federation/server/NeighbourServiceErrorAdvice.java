@@ -34,11 +34,6 @@ public class NeighbourServiceErrorAdvice {
 		return error(NOT_ACCEPTABLE, e);
 	}
 
-	@ExceptionHandler({ServerErrorException.class})
-	public ResponseEntity<ErrorDetails> serverError(ServerErrorException e){
-		return error(INTERNAL_SERVER_ERROR, e);
-	}
-
 	@ExceptionHandler({CNAndApiObjectMismatchException.class})
 	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e){
 		return error(FORBIDDEN, e);
