@@ -130,6 +130,17 @@
           }
         },
         {
+          "objectType": "EXCHANGE",
+          "identity": "messaging-users",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "ROUTING_KEY": "remote",
+            "NAME": ""
+          }
+
+        },
+        {
           "objectType": "VIRTUALHOST",
           "identity": "ALL",
           "operation": "ACCESS",
