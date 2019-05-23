@@ -1,1 +1,0 @@
-insert into interchanges (ixn_id, interchange_status, name, domain_name, control_channel_port) values (0,'FEDERATED','fedTest','remote','6671');
