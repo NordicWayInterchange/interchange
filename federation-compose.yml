@@ -57,13 +57,16 @@ services:
     build: ./neighbour-server
     container_name: bouvet_neighbour_server
     depends_on:
+      - gen_keys
       - bouvet_db
       - federation-build
     ports:
       - 8090:8090
+    volumes:
+      - "./tmp:/tmp"
     environment:
       - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
-      - SERVER_NAME=localhost
+      - SERVER_NAME=bouvet
 
   bouvet_routing_configurer:
     build: ./routing-configurer
