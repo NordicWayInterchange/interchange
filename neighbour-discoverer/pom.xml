@@ -12,6 +12,10 @@
 
     <artifactId>neighbour-discoverer</artifactId>
 
+    <properties>
+        <start-class>no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererApplication</start-class>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
@@ -76,4 +80,24 @@
     </dependencies>
 
 
+    <profiles>
+        <profile>
+            <id>PKG</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

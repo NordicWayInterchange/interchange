@@ -14,8 +14,7 @@ services:
       - "./tmp:/tmp"
     environment:
       CA_CN: "my_ca"
-      KEY_CNS: "bouvet"
-
+      KEY_CNS: "bouvet remote"
 
   bouvet_db:
     build:
@@ -88,3 +87,17 @@ services:
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
 
+  bouvet_neighbour_discoverer:
+    build: ./neighbour-discoverer
+    container_name: bouvet_neighbour_discoverer
+    depends_on:
+      - gen_keys
+      - bouvet_db
+      - federation-build
+    volumes:
+      - "./tmp:/tmp"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
+      - SERVER_NAME=bouvet
+      - DNS_MOCK_NAMES=bouvet,remote
+      - DNS_TYPE=mock
