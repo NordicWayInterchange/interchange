@@ -31,15 +31,13 @@ services:
 
   bouvet_qpid:
     build: ./qpid
-    container_name: bouvet_qpid
-    hostname: bouvet
     depends_on:
       - gen_keys
     ports:
-      - 8081:8080
-      - 443:443
-      - 5671:5671
-      - 5672:5672
+      - 8080
+      - 443
+      - 5671
+      - 5672
     volumes:
       - "./qpid/bouvet:/config"
       - "./tmp:/tmp"
@@ -54,7 +52,6 @@ services:
 
   bouvet_neighbour_server:
     build: ./neighbour-server
-    container_name: bouvet
     depends_on:
       - gen_keys
       - bouvet_db
@@ -69,8 +66,6 @@ services:
 
   bouvet_routing_configurer:
     build: ./routing-configurer
-    container_name: bouvet_routing_configurer
-    hostname: bouvet_routing_configurer
     depends_on:
       - bouvet_qpid
       - federation-build
@@ -89,12 +84,13 @@ services:
 
   bouvet_neighbour_discoverer:
     build: ./neighbour-discoverer
-    container_name: bouvet_neighbour_discoverer
     depends_on:
       - gen_keys
       - remote_neighbour_server
       - bouvet_db
       - federation-build
+    links:
+      - "remote_neighbour_server:remote"
     volumes:
       - "./tmp:/tmp"
     environment:
@@ -108,7 +104,6 @@ services:
       dockerfile: Dockerfile
       context: ./federation-it/src/test/docker/server_db
     image: remote_db
-    container_name: remote_db
     ports:
       - 32778:5432
     environment:
@@ -118,8 +113,6 @@ services:
 
   remote_neighbour_server:
     build: ./neighbour-server
-    container_name: remote
-    hostname: remote
     depends_on:
       - gen_keys
       - remote_db
@@ -134,12 +127,13 @@ services:
 
   remote_neighbour_discoverer:
     build: ./neighbour-discoverer
-    container_name: remote_neighbour_discoverer
     depends_on:
       - gen_keys
       - bouvet_neighbour_server
       - remote_db
       - federation-build
+    links:
+      - "bouvet_neighbour_server:bouvet"
     volumes:
       - "./tmp:/tmp"
     environment:
@@ -147,4 +141,3 @@ services:
       - SERVER_NAME=remote
       - DNS_MOCK_NAMES=bouvet,remote
       - DNS_TYPE=mock
-
