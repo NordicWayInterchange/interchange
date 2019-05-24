@@ -43,4 +43,10 @@ public class CapabilityMatcherTest {
 		DataType dataType = new DataType("spat",null, null);
 		CapabilityMatcher.matches(dataType, "how flike 'spat%' or 1=1");
 	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void filterWithDoubleQuotedStringValueIsNotAllowed() throws ParseException {
+		DataType dataType = new DataType("spat", "NO", null);
+		CapabilityMatcher.matches(dataType, "where = \"NO\"");
+	}
 }
