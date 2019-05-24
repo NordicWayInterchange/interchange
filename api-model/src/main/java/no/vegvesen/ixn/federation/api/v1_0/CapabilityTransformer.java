@@ -7,9 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CapabilityTransformer {
 
-
-
-
 	public CapabilityApi interchangeToCapabilityApi(Interchange interchange){
 
 		CapabilityApi capabilityApi = new CapabilityApi();

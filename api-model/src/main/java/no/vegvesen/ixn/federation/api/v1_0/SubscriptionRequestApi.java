@@ -2,12 +2,13 @@ package no.vegvesen.ixn.federation.api.v1_0;
 
 import no.vegvesen.ixn.federation.model.Subscription;
 
+import java.util.HashSet;
 import java.util.Set;
 
-public class SubscriptionRequestApi {
+public class SubscriptionRequestApi{
 
 	private String name;
-	private Set<Subscription> subscriptions;
+	private Set<Subscription> subscriptions = new HashSet<>();
 
 	SubscriptionRequestApi() {
 	}
@@ -31,24 +32,6 @@ public class SubscriptionRequestApi {
 
 	public void setSubscriptions(Set<Subscription> subscriptions) {
 		this.subscriptions = subscriptions;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof SubscriptionRequestApi)) return false;
-
-		SubscriptionRequestApi that = (SubscriptionRequestApi) o;
-
-		if (!name.equals(that.name)) return false;
-		return subscriptions.equals(that.subscriptions);
-	}
-
-	@Override
-	public int hashCode() {
-		int result = name.hashCode();
-		result = 31 * result + subscriptions.hashCode();
-		return result;
 	}
 
 	@Override

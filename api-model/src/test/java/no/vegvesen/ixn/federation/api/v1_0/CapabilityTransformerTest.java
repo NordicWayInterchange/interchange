@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static junit.framework.TestCase.assertTrue;
 @RunWith(MockitoJUnitRunner.class)
 public class CapabilityTransformerTest {
 
@@ -29,11 +29,7 @@ public class CapabilityTransformerTest {
 		CapabilityApi capabilityApi = capabilityTransformer.interchangeToCapabilityApi(interchange);
 		Interchange transformed = capabilityTransformer.capabilityApiToInterchange(capabilityApi);
 
-		for(DataType d : transformed.getCapabilities().getDataTypes()){
-			assertTrue(dataType.getHow().equals(d.getHow()) && dataType.getWhere().equals(d.getWhere()));
-		}
-
-		assertTrue(interchange.getName().equals(transformed.getName()) );
+		assertThat(transformed.getCapabilities().getDataTypes()).hasSize(1).contains(dataType);
 	}
 
 	@Test
@@ -46,11 +42,6 @@ public class CapabilityTransformerTest {
 		Interchange interchange = capabilityTransformer.capabilityApiToInterchange(capabilityApi);
 		CapabilityApi transformed = capabilityTransformer.interchangeToCapabilityApi(interchange);
 
-		for(DataType d : transformed.getCapabilities()){
-			assertTrue(capabilities.getHow().equals(d.getHow()) && capabilities.getWhere().equals(d.getWhere()));
-		}
-
-		assertTrue(capabilityApi.getName().equals(transformed.getName()));
-
+		assertThat(transformed.getCapabilities()).hasSize(1).contains(capabilities);
 	}
 }

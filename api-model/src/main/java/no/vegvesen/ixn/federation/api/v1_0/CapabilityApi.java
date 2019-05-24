@@ -1,21 +1,18 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
 import no.vegvesen.ixn.federation.model.DataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
-public class CapabilityApi {
+public class CapabilityApi{
 
 	private static final String version = "1.0";
 	private String name;
-	private Set<DataType> capabilities;
+	private Set<DataType> capabilities = new HashSet<>();
 
-	private Logger logger = LoggerFactory.getLogger(CapabilityApi.class);
-
-	CapabilityApi() {
+	public CapabilityApi() {
 	}
 
 	public CapabilityApi(String name, Set<DataType> capabilities) {
@@ -44,21 +41,10 @@ public class CapabilityApi {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof CapabilityApi)) return false;
-
-		CapabilityApi that = (CapabilityApi) o;
-
-		if (!name.equals(that.name)) return false;
-		if (!capabilities.equals(that.capabilities)) return false;
-		return logger.equals(that.logger);
-	}
-
-	@Override
 	public String toString() {
 		return "CapabilityApi{" +
-				"name='" + name + '\'' +
+				"version='" + version + '\''+
+				", name='" + name + '\'' +
 				", capabilities=" + capabilities +
 				'}';
 	}

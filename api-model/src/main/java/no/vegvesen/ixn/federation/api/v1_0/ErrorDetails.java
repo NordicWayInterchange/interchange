@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.api.v1_0;
 
 import java.time.LocalDateTime;
 
-public class ErrorDetails {
+public class ErrorDetails{
 
 	private String timestamp;
 	private String errorCode;
@@ -21,7 +21,7 @@ public class ErrorDetails {
 		return timestamp;
 	}
 
-	public void setTimestamp(LocalDateTime timestamp) {
+	public void setTimestamp(String timestamp) {
 		this.timestamp = timestamp.toString();
 	}
 
@@ -39,5 +39,14 @@ public class ErrorDetails {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	@Override
+	public String toString() {
+		return "ErrorDetails{" +
+				"timestamp='" + timestamp + '\'' +
+				", errorCode='" + errorCode + '\'' +
+				", message='" + message + '\'' +
+				'}';
 	}
 }

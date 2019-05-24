@@ -1,31 +1,26 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Subscription;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SubscriptionTransformer {
 
-	public SubscriptionRequestApi interchangeToSubscriptionRequestApi(Interchange interchange){
+	public SubscriptionApi subscriptionToSubscriptionApi(Subscription subscription){
+		SubscriptionApi subscriptionApi = new SubscriptionApi();
+		subscriptionApi.setSelector(subscription.getSelector());
+		subscriptionApi.setPath(subscription.getPath());
+		subscriptionApi.setStatus(subscription.getSubscriptionStatus());
 
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName(interchange.getName());
-
-		subscriptionRequestApi.setSubscriptions(interchange.getSubscriptionRequest().getSubscriptions());
-
-		return subscriptionRequestApi;
-
+		return subscriptionApi;
 	}
 
-	public Interchange subscriptionRequestApiToInterchange(SubscriptionRequestApi subscriptionRequestApi){
+	public Subscription subscriptionApiToSubscription(SubscriptionApi subscriptionApi){
+		Subscription subscription = new Subscription();
+		subscription.setSelector(subscriptionApi.getSelector());
+		subscription.setPath(subscriptionApi.getPath());
+		subscription.setSubscriptionStatus(subscriptionApi.getStatus());
 
-		Interchange interchange = new Interchange();
-
-		interchange.setName(subscriptionRequestApi.getName());
-
-		interchange.getSubscriptionRequest().setSubscriptions(subscriptionRequestApi.getSubscriptions());
-		return interchange;
-
+		return subscription;
 	}
-
 }

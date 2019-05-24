@@ -1,15 +1,11 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.model.Subscription;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Collections;
-
-import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SubscriptionTransformerTest {
@@ -17,58 +13,32 @@ public class SubscriptionTransformerTest {
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 
 	@Test
-	public void interchangeToSubscriptionRequestApiTest(){
+	public void canTransformSubscriptionApiToSubscription(){
 
-		Interchange interchange = new Interchange();
-		interchange.setName("Test");
-		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
-		interchange.getSubscriptionRequest().setSubscriptions(Collections.singleton(subscription));
+		SubscriptionApi subscriptionApi = new SubscriptionApi();
+		subscriptionApi.setPath("bouvet/subscription/1");
+		subscriptionApi.setSelector("where LIKE 'NO'");
+		subscriptionApi.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 
-		// transform to subscriptionRequestApi object and back to interchange
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionTransformer.interchangeToSubscriptionRequestApi(interchange);
-		Interchange transformed = subscriptionTransformer.subscriptionRequestApiToInterchange(subscriptionRequestApi);
+		Subscription subscription = subscriptionTransformer.subscriptionApiToSubscription(subscriptionApi);
 
-		// Verify that the transformation gives same output.
-		for(Subscription s : transformed.getSubscriptionRequest().getSubscriptions()){
-			assertTrue(subscription.getSelector().equals(s.getSelector()));
-		}
-		Assert.assertTrue(interchange.getName().equals(transformed.getName()));
-
+		assertThat(subscription.getSelector()).isEqualTo(subscriptionApi.getSelector());
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(subscriptionApi.getStatus());
+		assertThat(subscription.getPath()).isEqualTo(subscription.getPath());
 	}
 
 	@Test
-	public void subscriptionRequestApiToInterchange(){
+	public void canTransformSubscriptionToSubscriptionApi(){
 
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName("Test 2");
 		Subscription subscription = new Subscription();
+		subscription.setPath("bouvet/subscription/1");
 		subscription.setSelector("where LIKE 'NO'");
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscription));
+		subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 
-		Interchange interchange = subscriptionTransformer.subscriptionRequestApiToInterchange(subscriptionRequestApi);
-		SubscriptionRequestApi transformed = subscriptionTransformer.interchangeToSubscriptionRequestApi(interchange);
+		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 
-		for(Subscription s: transformed.getSubscriptions()){
-			assertTrue(subscription.getSelector().equals(s.getSelector()));
-		}
-		Assert.assertTrue(subscriptionRequestApi.getName().equals(transformed.getName()));
+		assertThat(subscriptionApi.getSelector()).isEqualTo(subscription.getSelector());
+		assertThat(subscriptionApi.getStatus()).isEqualTo(subscription.getSubscriptionStatus());
+		assertThat(subscriptionApi.getPath()).isEqualTo(subscription.getPath());
 	}
-
-	@Test
-	public void interchangeWithEmptySubscriptionToSubscriptionRequest(){
-
-		Interchange interchange = new Interchange();
-		interchange.setName("Test 3");
-
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionTransformer.interchangeToSubscriptionRequestApi(interchange);
-		Interchange transformed = subscriptionTransformer.subscriptionRequestApiToInterchange(subscriptionRequestApi);
-
-		Assert.assertTrue(interchange.getSubscriptionRequest().getSubscriptions().equals(transformed.getSubscriptionRequest().getSubscriptions()));
-		Assert.assertTrue(interchange.getName().equals(transformed.getName()));
-
-
-	}
-
-
 }
