@@ -1,16 +1,12 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
 
 @Entity
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "subscriptions")
 public class Subscription {
 
-	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
 	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq")
@@ -26,7 +22,6 @@ public class Subscription {
 
 	private String path;
 
-	@JsonIgnore
 	private int numberOfPolls = 0;
 
 	public Subscription() {
@@ -53,7 +48,6 @@ public class Subscription {
 		this.selector = selector;
 	}
 
-	@JsonIgnore
 	public Integer getId() {
 		return sub_id;
 	}
@@ -66,7 +60,6 @@ public class Subscription {
 		this.path = path;
 	}
 
-	@JsonIgnore
 	public int getNumberOfPolls() {
 		return numberOfPolls;
 	}
