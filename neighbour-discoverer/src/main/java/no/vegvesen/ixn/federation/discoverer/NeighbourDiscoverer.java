@@ -150,7 +150,7 @@ public class NeighbourDiscoverer {
 			logger.error("Error message: {}", e.getMessage());
 			return new HashSet<>();
 		}
-		logger.info("Calculated custom subscription for neighbour: {}", calculatedSubscriptions);
+		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;
 	}
 
