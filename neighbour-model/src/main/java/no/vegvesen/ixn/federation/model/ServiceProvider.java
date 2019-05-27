@@ -55,7 +55,10 @@ public class ServiceProvider {
 	}
 
 	public void setCapabilities(Set<DataType> capabilities) {
-		this.capabilities = capabilities;
+		this.capabilities.clear();
+		if (capabilities != null) {
+			this.capabilities.addAll(capabilities);
+		}
 	}
 
 	public Set<Subscription> getSubscriptions() {
@@ -63,7 +66,10 @@ public class ServiceProvider {
 	}
 
 	public void setSubscriptions(Set<Subscription> subscriptions) {
-		this.subscriptions = subscriptions;
+		this.subscriptions.clear();
+		if (subscriptions != null) {
+			this.subscriptions.addAll(subscriptions);
+		}
 	}
 
 	@Override
