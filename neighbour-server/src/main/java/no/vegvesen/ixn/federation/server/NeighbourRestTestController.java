@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/test")
-public class NeighbourRestTestController {
+public abstract class NeighbourRestTestController {
 
 	private InterchangeRepository interchangeRepository;
 	private ServiceProviderRepository serviceProviderRepository;
