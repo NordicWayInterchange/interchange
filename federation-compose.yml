@@ -8,10 +8,7 @@ services:
     image: federation-build
 
   bouvet_db:
-    build:
-      dockerfile: Dockerfile
-      context: ./federation-it/src/test/docker/server_db
-    image: bouvet_db
+    image: postgres:9.6
     container_name: bouvet_db
     ports:
       - 32777:5432
@@ -87,10 +84,7 @@ services:
       - DNS_TYPE=mock
 
   remote_db:
-    build:
-      dockerfile: Dockerfile
-      context: ./federation-it/src/test/docker/server_db
-    image: remote_db
+    image: postgres:9.6
     ports:
       - 32778:5432
     environment:
