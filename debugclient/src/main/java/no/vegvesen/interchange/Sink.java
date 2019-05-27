@@ -14,20 +14,31 @@ import java.util.Hashtable;
 
 public class Sink implements MessageListener {
     public static void main(String[] args) throws NamingException, JMSException {
-        KeystoreDetails keystoreDetails = new KeystoreDetails("C:\\temp_checkout\\interchange\\tmp\\keys\\localhost.p12",
-                "password",
-                KeystoreType.PKCS12,"password");
-        KeystoreDetails trustStoreDetails = new KeystoreDetails("c:\\temp_checkout\\interchange\\tmp\\keys\\truststore.jks",
-                "password",KeystoreType.JKS);
+
+        String url = "amqps://remote:5601";
+        //String url = "amqps://bouvet:5600";
+        String receiveQueue = "fedTest";
+        //String receiveQueue = "remote";
+        //String keystorePath = "C:\\temp_checkout\\interchange\\tmp\\keys\\bouvet.p12";
+        String keystorePath = "C:\\temp_checkout\\interchange\\tmp\\keys\\remote.p12";
+        String keystorePassword = "password";
+        String keyPassword = "password";
+        String trustStorePath = "c:\\temp_checkout\\interchange\\tmp\\keys\\truststore.jks";
+        String truststorePassword = "password";
+
+        KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
+                keystorePassword,
+                KeystoreType.PKCS12, keyPassword);
+        KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
+                truststorePassword,KeystoreType.JKS);
 
         SSLContext context = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
 
-        String url = String.format("amqps://%s:%s","remote","5601");
 
         Hashtable<Object, Object> env = new Hashtable<>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
         env.put("connectionfactory.myFactoryLookupTLS", url);
-        env.put("queue.receiveQueue", "fedTest");
+        env.put("queue.receiveQueue", receiveQueue);
         Context initialContext = new InitialContext(env);
         JmsConnectionFactory factory = (JmsConnectionFactory) initialContext.lookup("myFactoryLookupTLS");
         factory.setPopulateJMSXUserID(true);

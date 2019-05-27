@@ -6,7 +6,13 @@
     "name" : "fedEx",
     "type" : "direct",
     "durable" : true,
-    "durableBindings" : [ ]
+    "durableBindings": [
+    {
+      "arguments": {},
+      "bindingKey": "fedEx",
+      "destination": "fedTest"
+    }
+    ]
   },
     {
       "name": "nwEx",
