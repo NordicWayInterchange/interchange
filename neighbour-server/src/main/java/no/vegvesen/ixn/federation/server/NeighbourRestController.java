@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.federation.server;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityTransformer;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionTransformer;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
@@ -37,6 +34,7 @@ public class NeighbourRestController {
 	private ServiceProviderRepository serviceProviderRepository;
 	private CapabilityTransformer capabilityTransformer;
 	private SubscriptionTransformer subscriptionTransformer;
+	private SubscriptionRequestTransformer subscriptionRequestTransformer;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
@@ -44,12 +42,14 @@ public class NeighbourRestController {
 	public NeighbourRestController(InterchangeRepository interchangeRepository,
 								   ServiceProviderRepository serviceProviderRepository,
 								   CapabilityTransformer capabilityTransformer,
-								   SubscriptionTransformer subscriptionTransformer) {
+								   SubscriptionTransformer subscriptionTransformer,
+								   SubscriptionRequestTransformer subscriptionRequestTransformer) {
 
 		this.interchangeRepository = interchangeRepository;
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
+		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
 	}
 
 
@@ -109,7 +109,7 @@ public class NeighbourRestController {
 		checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 
 		// Convert SubscriptionRequestApi object to Interchange object.
-		Interchange incomingSubscriptionRequestInterchange = subscriptionTransformer.subscriptionRequestApiToInterchange(neighbourSubscriptionRequest);
+		Interchange incomingSubscriptionRequestInterchange = subscriptionRequestTransformer.subscriptionRequestApiToInterchange(neighbourSubscriptionRequest);
 		Interchange neighbourToUpdate = interchangeRepository.findByName(incomingSubscriptionRequestInterchange.getName());
 
 		if (neighbourToUpdate == null) {
@@ -151,14 +151,14 @@ public class NeighbourRestController {
 		interchangeRepository.save(neighbourToUpdate);
 
 
-		return subscriptionTransformer.interchangeToSubscriptionRequestApi(neighbourToUpdate);
+		return subscriptionRequestTransformer.interchangeToSubscriptionRequestApi(neighbourToUpdate);
 	}
 
 
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = "{ixnName}/subscription/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	public Subscription pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId) {
+	public SubscriptionApi pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId) {
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		checkIfCommonNameMatchesNameInApiObject(ixnName);
@@ -170,7 +170,7 @@ public class NeighbourRestController {
 				Subscription subscription = interchange.getSubscriptionById(subscriptionId);
 				logger.info("Neighbour {} polled for status of subscription {}. Returning: {}", interchange.getName(), subscriptionId, subscription.toString());
 
-				return subscription;
+				return subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 			} catch (SubscriptionNotFoundException subscriptionNotFound) {
 				logger.error(subscriptionNotFound.getMessage());
 				throw subscriptionNotFound;

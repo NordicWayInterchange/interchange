@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityTransformer;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionTransformer;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
@@ -53,7 +53,7 @@ public class NeighbourRestControllerTest {
 	CapabilityTransformer capabilityTransformer;
 
 	@Mock
-	SubscriptionTransformer subscriptionTransformer;
+	SubscriptionRequestTransformer subscriptionRequestTransformer;
 
 	@InjectMocks
 	private NeighbourRestController neighbourRestController;
@@ -122,7 +122,7 @@ public class NeighbourRestControllerTest {
 		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		bouvet.setSubscriptionRequest(subscriptionRequest);
-		doReturn(bouvet).when(subscriptionTransformer).subscriptionRequestApiToInterchange(any(SubscriptionRequestApi.class));
+		doReturn(bouvet).when(subscriptionRequestTransformer).subscriptionRequestApiToInterchange(any(SubscriptionRequestApi.class));
 
 		// Mock subscription api object sent to server.
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi(bouvet.getName(), bouvet.getSubscriptionRequest().getSubscriptions());
