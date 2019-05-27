@@ -45,7 +45,7 @@ data:
             {{- end }}
             {
               "arguments": {
-                "x-filter-jms-selector": "where1 LIKE '%'"
+                "x-filter-jms-selector": "where LIKE '%'"
               },
               "bindingKey": "binding_key",
               "destination": "test-out"

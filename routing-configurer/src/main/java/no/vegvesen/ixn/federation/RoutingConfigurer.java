@@ -27,7 +27,7 @@ public class RoutingConfigurer {
 	}
 
 
-	@Scheduled(fixedRateString = "${routing.configurer.interval}")
+	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForInterchangesToSetupRoutingFor() {
 		logger.debug("Checking for new nodes to setup routing");
 		List<Interchange> readyToSetupRouting = repository.findInterchangesForOutgoingSubscriptionSetup();

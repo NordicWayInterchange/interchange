@@ -28,7 +28,7 @@ generateCertificate() {
     openssl x509 -req -days 365 -in ${cn}.csr -out ${cn}.crt -CA ${CA_CERTIFICATE_FILE} \
         -CAkey ${CA_PRIVATE_KEY_FILE} -CAcreateserial -sha256
     rm -f ${cn}.csr ${cn}.srl
-    openssl pkcs12 -export -out ${cn}.p12 -inkey ${cn}.key -in ${cn}.crt \
+    openssl pkcs12 -export -out ${cn}.p12 -inkey ${cn}.key -in ${cn}.crt -name ${cn} \
         -CAfile ${CA_CERTIFICATE_FILE} -password pass:password
 }
 

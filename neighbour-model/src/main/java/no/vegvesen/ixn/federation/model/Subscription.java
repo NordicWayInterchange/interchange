@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 
@@ -8,14 +7,13 @@ import javax.persistence.*;
 @Table(name = "subscriptions")
 public class Subscription {
 
-	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
 	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq")
 	@Column(name = "sub_id")
 	private Integer sub_id;
 
-	public enum SubscriptionStatus {REQUESTED, CREATED, ACCEPTED, REJECTED}
+	public enum SubscriptionStatus {REQUESTED, ACCEPTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, GIVE_UP, FAILED, UNREACHABLE, REJECTED}
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;
@@ -23,6 +21,8 @@ public class Subscription {
 	private String selector;
 
 	private String path;
+
+	private int numberOfPolls = 0;
 
 	public Subscription() {
 	}
@@ -36,8 +36,8 @@ public class Subscription {
 		return subscriptionStatus;
 	}
 
-	public void setSubscriptionStatus(SubscriptionStatus subscriptionStatus) {
-		this.subscriptionStatus = subscriptionStatus;
+	public void setSubscriptionStatus(SubscriptionStatus status) {
+		this.subscriptionStatus = status;
 	}
 
 	public String getSelector() {
@@ -48,7 +48,6 @@ public class Subscription {
 		this.selector = selector;
 	}
 
-	@JsonIgnore
 	public Integer getId() {
 		return sub_id;
 	}
@@ -59,6 +58,14 @@ public class Subscription {
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public int getNumberOfPolls() {
+		return numberOfPolls;
+	}
+
+	public void setNumberOfPolls(int numberOfPolls) {
+		this.numberOfPolls = numberOfPolls;
 	}
 
 	@Override

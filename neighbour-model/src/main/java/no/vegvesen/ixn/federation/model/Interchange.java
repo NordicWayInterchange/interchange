@@ -1,18 +1,17 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
 @Table(	name = "interchanges", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_ixn_name"))
 public class Interchange {
 
-	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ixn_generator")
 	@SequenceGenerator(name="ixn_generator", sequenceName = "ixn_seq")
@@ -23,34 +22,23 @@ public class Interchange {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "ixn_id_cap", referencedColumnName = "cap_id", foreignKey = @ForeignKey(name="fk_cap_ixn"))
-	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
+	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToOne(cascade= CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name="ixn_id_sub_out", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name="fk_subreq_ixn_sub_out"))
-	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
+	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
-	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name= "ixn_id_fed_in", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name="fk_subreq_ixn_fed_in"))
-	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
+	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
-
-	@JsonIgnore
 	private LocalDateTime lastSeen;
-
-	@JsonIgnore
 	private LocalDateTime backoffStart;
-
-	@JsonIgnore
 	private int backoffAttempts = 0;
-
-	@JsonIgnore
 	private String domainName;
-	@JsonIgnore
 	private String messageChannelPort;
-	@JsonIgnore
 	private String controlChannelPort;
 
 	public Interchange(){}
@@ -152,6 +140,30 @@ public class Interchange {
 
 	public void setBackoffAttempts(int backoffAttempts) {
 		this.backoffAttempts = backoffAttempts;
+	}
+
+	public Set<Subscription> getSubscriptionsForPolling(){
+		Set<Subscription> subscriptionsForPolling = new HashSet<>();
+
+		for(Subscription subscription : this.getFedIn().getSubscriptions()){
+			if(subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.REQUESTED) || subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.ACCEPTED)){
+				subscriptionsForPolling.add(subscription);
+			}
+		}
+
+		return subscriptionsForPolling;
+	}
+
+	public Set<Subscription> getFailedFedInSubscriptions(){
+		Set<Subscription> subscriptionsWithStatusFailed = new HashSet<>();
+
+		for(Subscription subscription : this.getFedIn().getSubscriptions()){
+			if(subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.FAILED)){
+				subscriptionsWithStatusFailed.add(subscription);
+			}
+		}
+
+		return subscriptionsWithStatusFailed;
 	}
 
 	@Override

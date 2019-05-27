@@ -24,8 +24,6 @@ public class DNSFacadeTest {
 		Interchange ericsson = new Interchange();
 		ericsson.setName("ericsson");
 
-		List<Interchange> mockInterchanges = Arrays.asList(bouvet, ericsson);
-
 		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(bouvet, ericsson));
 	}
 
@@ -39,7 +37,7 @@ public class DNSFacadeTest {
 	}
 
 	@Test
-	public void testThatDiscoveredNeighborusAreNotNull(){
+	public void testThatDiscoveredNeighboursAreNotNull(){
 		List<Interchange> interchanges = dnsFacade.getNeighbours();
 
 		for(Interchange i : interchanges){

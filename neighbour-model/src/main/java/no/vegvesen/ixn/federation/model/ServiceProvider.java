@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -20,11 +21,11 @@ public class ServiceProvider {
 
 	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "spr_id_cap", foreignKey = @ForeignKey(name = "fk_dat_spr"))
-	private Set<DataType> capabilities;
+	private Set<DataType> capabilities = new HashSet<>();
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "spr_id_sub", foreignKey = @ForeignKey(name = "fk_sub_spr"))
-	private Set<Subscription> subscriptions;
+	private Set<Subscription> subscriptions = new HashSet<>();
 
 	public ServiceProvider() { }
 
@@ -54,7 +55,10 @@ public class ServiceProvider {
 	}
 
 	public void setCapabilities(Set<DataType> capabilities) {
-		this.capabilities = capabilities;
+		this.capabilities.clear();
+		if (capabilities != null) {
+			this.capabilities.addAll(capabilities);
+		}
 	}
 
 	public Set<Subscription> getSubscriptions() {
@@ -62,7 +66,10 @@ public class ServiceProvider {
 	}
 
 	public void setSubscriptions(Set<Subscription> subscriptions) {
-		this.subscriptions = subscriptions;
+		this.subscriptions.clear();
+		if (subscriptions != null) {
+			this.subscriptions.addAll(subscriptions);
+		}
 	}
 
 	@Override

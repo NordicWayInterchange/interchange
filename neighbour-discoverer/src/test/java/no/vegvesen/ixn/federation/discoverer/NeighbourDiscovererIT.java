@@ -11,6 +11,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public abstract class NeighbourDiscovererIT {
 
+	// TODO: WORK IN PROGRESS
+	// Used in manual testing of the client-server interaction.
+
 	@Autowired
 	NeighbourDiscoverer neighbourDiscoverer;
 
@@ -24,10 +27,9 @@ public abstract class NeighbourDiscovererIT {
 
 		neighbourDiscoverer.subscriptionRequest();
 
-		//neighbourDiscoverer.pollSubscriptions();
 
 		try {
-			Thread.sleep(20000);
+			Thread.sleep(240000); // Four minutes.
 		}catch (InterruptedException ignore){
 		}
 	}

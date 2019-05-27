@@ -93,7 +93,7 @@ public class InterchangeApp{
 
 		if(!message.hasCountries()){
 			// Message does not have any countries
-			logger.warn("Sending bad message to dead letter queue. 'where1' not set.");
+			logger.warn("Sending bad message to dead letter queue. 'where' not set.");
 			producer.sendMessage(DLQUEUE, message);
 		} else{
 			logger.info("Sending valid message to {}.", NWEXCHANGE);

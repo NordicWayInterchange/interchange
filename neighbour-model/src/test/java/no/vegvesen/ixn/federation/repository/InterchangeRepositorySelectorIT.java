@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,11 +10,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -31,8 +33,8 @@ public class InterchangeRepositorySelectorIT {
 		ericsson.setDomainName(".itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()));
-		ericsson.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
-		ericsson.setFedIn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
+		ericsson.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()));
+		ericsson.setFedIn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()));
 	}
 
 	public boolean interchangeInList(String interchangeName, List<Interchange> listOfInterchanges){
@@ -43,7 +45,6 @@ public class InterchangeRepositorySelectorIT {
 			}
 		}
 		return false;
-
 	}
 
 	@Test
@@ -60,8 +61,6 @@ public class InterchangeRepositorySelectorIT {
 	public void helperMethodIsFalseIfInterchangeNotInList(){
 		Interchange tesla = new Interchange();
 		tesla.setName("Tesla");
-		Interchange volvo = new Interchange();
-		volvo.setName("Volvo");
 
 		List<Interchange> volvoNotInList = Collections.singletonList(tesla);
 
@@ -113,14 +112,39 @@ public class InterchangeRepositorySelectorIT {
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedCapabilityExchange));
 	}
 
+
 	@Test
-	public void interchangeWithFedInStatusRequestedIsSelectedForPolling(){
+	public void interchangeWithRequestedSubscriptionsInFedInIsSelectedForPolling(){
 		ericsson.setName("ericsson-5");
+
+		Subscription subscription = new Subscription();
+		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+		ericsson.getFedIn().setSubscriptions(Collections.singleton(subscription));
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		interchangeRepository.save(ericsson);
 
-		List<Interchange> getInterchangeWithFedInRequested = interchangeRepository.findInterchangesToPollForSubscriptionStatus();
+		List<Interchange> getInterchangeWithRequestedSubscriptionsInFedIn = interchangeRepository.findInterchangesWithSubscriptionToPoll();
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeWithFedInRequested));
+		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeWithRequestedSubscriptionsInFedIn));
 	}
+
+	@Test
+	public void interchangeWithFailedSubscriptionInFedInIsSelectedForBackoff(){
+		ericsson.setName("ericsson-6");
+
+		Subscription subscription = new Subscription();
+		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.FAILED);
+		Set<Subscription> subscriptionSet = new HashSet<>();
+		subscriptionSet.add(subscription);
+		ericsson.getFedIn().setSubscriptions(subscriptionSet);
+		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		interchangeRepository.save(ericsson);
+
+		List<Interchange> getInterchangesWithFailedSubscriptionInFedIn = interchangeRepository.findInterchangesWithFailedSubscriptionsInFedIn();
+
+		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedSubscriptionInFedIn));
+	}
+
 }

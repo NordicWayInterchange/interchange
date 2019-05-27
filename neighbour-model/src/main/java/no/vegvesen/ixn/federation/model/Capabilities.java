@@ -5,6 +5,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -22,11 +23,11 @@ public class Capabilities {
 	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED, UNREACHABLE}
 
 	@Enumerated(EnumType.STRING)
-	private CapabilitiesStatus status;
+	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id_dat", foreignKey = @ForeignKey(name="fk_dat_cap"))
-	private Set<DataType> dataTypes;
+	private Set<DataType> dataTypes = new HashSet<>();
 
 	@Column
 	@UpdateTimestamp
@@ -53,7 +54,10 @@ public class Capabilities {
 	}
 
 	public void setDataTypes(Set<DataType> capabilities) {
-		this.dataTypes = capabilities;
+		this.dataTypes.clear();
+		if ( capabilities != null ) {
+			this.dataTypes.addAll(capabilities);
+		}
 	}
 
 	@Override

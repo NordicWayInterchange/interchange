@@ -14,20 +14,20 @@ import java.net.URL;
 @Configuration
 public class TestSSLContextConfig {
 
-	@Value("${qpid.rest.api.truststore.password}")
+	@Value("${routing-configurer.ssl.trust-store-password}")
 	String truststorePassword;
-	@Value("${qpid.rest.api.truststore.type}")
+	@Value("${routing-configurer.ssl.trust-store-type}")
 	String truststoreType;
-	@Value("${qpid.rest.api.truststore}")
+	@Value("${routing-configurer.ssl.trust-store}")
 	String truststoreName;
 
-	@Value("${qpid.rest.api.keystore.type}")
+	@Value("${routing-configurer.ssl.key-store-type}")
 	String keystoreType;
-	@Value("${qpid.rest.api.keystore}")
+	@Value("${routing-configurer.ssl.key-store}")
 	String keystoreName;
-	@Value("${qpid.rest.api.keystore.password}")
+	@Value("${routing-configurer.ssl.key-store-password}")
 	String keystorePassword;
-	@Value("${qpid.rest.api.keystore.key.password}")
+	@Value("${routing-configurer.ssl.key-password}")
 	String keyPassword;
 
 
