@@ -11,19 +11,19 @@ participant "B\nserver" as B
 database "Database" as server_db
 end box
 
-A -> client_db: Get all neighbours with //capabilities// status KNOWN \nand //fedIn// status EMPTY
+A -> client_db: Get all neighbours with //capabilities// subscriptionStatus KNOWN \nand //fedIn// subscriptionStatus EMPTY
 A <-- client_db: Interchange B
 
 A -> A: Calculate subscription for B \n(intersection of local SP subscriptions with B capabilities)
 
 alt #transparent **calculated subscription is empty**
-  A -> A: Set status of neighbour //fedIn// to NO_OVERLAP \nSet neighbour //fedIn// to empty set
+  A -> A: Set subscriptionStatus of neighbour //fedIn// to NO_OVERLAP \nSet neighbour //fedIn// to empty set
 
   alt #transparent **existing subscription to neighbour**
     A -> B: ** POST: empty subscription request **
 
     activate B
-    B -> B: Set neighbour A //subscription request// status to TEAR_DOWN \nSet neighbour A //subscription request// to empty set
+    B -> B: Set neighbour A //subscription request// subscriptionStatus to TEAR_DOWN \nSet neighbour A //subscription request// to empty set
     B -> server_db: Save updated neighbour A
     B <-- server_db: Saved updated neighbour A
     A <-- B: ** POST response: empty subscription request **
@@ -34,11 +34,11 @@ alt #transparent **calculated subscription is empty**
   A <-- client_db: Saved updated neighbour B
 
 else calculated subscription is not empty
-  A -> A: Set neighbour //fedIn// status to REQUESTED
+  A -> A: Set neighbour //fedIn// subscriptionStatus to REQUESTED
   A -> B: ** POST: Subscription request A to B **
 
   activate B
-  B -> B: Validate subscriptions in subscription request and set corresponding statuses \nGenerate subscription paths \nSet A //subscription request// to incoming subscription request \nSet status of A //subscription request// to REQUESTED
+  B -> B: Validate subscriptions in subscription request and set corresponding statuses \nGenerate subscription paths \nSet A //subscription request// to incoming subscription request \nSet subscriptionStatus of A //subscription request// to REQUESTED
   B -> server_db: Update neighbour A
   B <-- server_db: Updated neighbour A
   A <-- B: ** POST response: Subscription request A to B with paths and statuses. **

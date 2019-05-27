@@ -3,68 +3,68 @@ participant A as "A \nclient"
 participant B as "B \nserver"
 
 == Subscription polling starts ==
-A -[#black]> B : GET subscription X status
+A -[#black]> B : GET subscription X subscriptionStatus
 A <-[#green]- B: Status: REQUESTED
-note left: X.numberOfPolls = 1 \nX.numberOfBackoffAttempts = 0 \nX.status=REQUESTED
+note left: X.numberOfPolls = 1 \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=REQUESTED
 |||
-A -[#black]> B : GET subscription X status
+A -[#black]> B : GET subscription X subscriptionStatus
 A <-[#green]- B: Status: REQUESTED
-note left: X.numberOfPolls = 2 \nX.numberOfBackoffAttempts = 0 \nX.status=REQUESTED
+note left: X.numberOfPolls = 2 \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=REQUESTED
 |||
-A -[#black]> B : GET subscription X status
+A -[#black]> B : GET subscription X subscriptionStatus
 A <-[#red]- B: 500 Internal Server Error
-note left: X.numberOfPolls = 3 \nX.numberOfBackoffAttempts = 0 \nX.status=FAILED
+note left: X.numberOfPolls = 3 \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=FAILED
 |||
 
 group Subscription polling backoff starts. Normal polling is paused
-A -[#orange]> B : GET subscription X status
+A -[#orange]> B : GET subscription X subscriptionStatus
 A <-[#red]- B: 500 Internal Server Error
-note left: X.numberOfPolls = 3 \nX.numberOfBackoffAttempts = 1 \nX.status=FAILED
+note left: X.numberOfPolls = 3 \nX.numberOfBackoffAttempts = 1 \nX.subscriptionStatus=FAILED
 |||
-A -[#orange]> B : GET subscription X status
+A -[#orange]> B : GET subscription X subscriptionStatus
 A <-[#red]- B: 500 Internal Server Error
-note left: X.numberOfPolls = 3 \nX.numberOfBackoffAttempts = 2 \nX.status=FAILED
+note left: X.numberOfPolls = 3 \nX.numberOfBackoffAttempts = 2 \nX.subscriptionStatus=FAILED
 |||
-A -[#orange]> B : GET subscription X status
+A -[#orange]> B : GET subscription X subscriptionStatus
 A <-[#green]- B: Status: REQUESTED
-note left: X.numberOfPolls = 3 \nX.numberOfBackoffAttempts = 0 \nX.status=REQUESTED
+note left: X.numberOfPolls = 3 \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=REQUESTED
 end
 |||
-A -[#black]> B : GET subscription X status
+A -[#black]> B : GET subscription X subscriptionStatus
 A <-[#green]- B: Status: REQUESTED
-note left: X.numberOfPolls = 4 \nX.numberOfBackoffAttempts = 0 \nX.status=REQUESTED
+note left: X.numberOfPolls = 4 \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=REQUESTED
 |||
-A -[#black]> B : GET subscription X status
+A -[#black]> B : GET subscription X subscriptionStatus
 A <-[#red]- B: 500 Internal Server Error
-note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 0 \nX.status=FAILED
+note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=FAILED
 
 group Subscription polling backoff starts. Normal polling is paused
-A -[#orange]> B : GET subscription X status
+A -[#orange]> B : GET subscription X subscriptionStatus
 A <-[#red]- B: 500 Internal Server Error
-note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 1 \nX.status=FAILED
+note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 1 \nX.subscriptionStatus=FAILED
 |||
-A -[#orange]> B : GET subscription X status
+A -[#orange]> B : GET subscription X subscriptionStatus
 A <-[#red]- B: 500 Internal Server Error
-note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 2 \nX.status=FAILED
+note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 2 \nX.subscriptionStatus=FAILED
 |||
-A -[#orange]> B : GET subscription X status
+A -[#orange]> B : GET subscription X subscriptionStatus
 A <-[#red]- B: 500 Internal Server Error
-note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 3 \nX.status=FAILED
+note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 3 \nX.subscriptionStatus=FAILED
 |||
-A -[#orange]> B : GET subscription X status
+A -[#orange]> B : GET subscription X subscriptionStatus
 A <-[#green]- B: Status: REQUESTED
-note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 0 \nX.status=REQUESTED
+note left: X.numberOfPolls = 5 \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=REQUESTED
 end
 |||
-A -[#black]> B : GET subscription X status
+A -[#black]> B : GET subscription X subscriptionStatus
 A <-[#green]- B: Status: REQUESTED
-note left: X.numberOfPolls = 6 \nX.numberOfBackoffAttempts = 0 \nX.status=REQUESTED
+note left: X.numberOfPolls = 6 \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=REQUESTED
 
-A -[#black]> B : GET subscription X status
+A -[#black]> B : GET subscription X subscriptionStatus
 A <-[#green]- B: Status: REQUESTED
-note left: X.numberOfPolls = 7 \nX.numberOfBackoffAttempts = 0 \nX.status=REQUESTED
+note left: X.numberOfPolls = 7 \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=REQUESTED
 
 == Subscription Polling finished ==
 
-note over A: X.numberOfPolls = 7  \nX.numberOfBackoffAttempts = 0 \nX.status=GIVE_UP
+note over A: X.numberOfPolls = 7  \nX.numberOfBackoffAttempts = 0 \nX.subscriptionStatus=GIVE_UP
 @enduml

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-public class ServerDatabaseHelperImpl implements DatabaseHelperInterface {
+public abstract class ServerDatabaseHelperImpl implements DatabaseHelperInterface {
 
 	private Logger logger = LoggerFactory.getLogger(ServerDatabaseHelperImpl.class);
 	private ServiceProviderRepository serviceProviderRepository;

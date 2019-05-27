@@ -183,7 +183,7 @@ public class NeighbourRestController {
 
 	protected Interchange getInterchangeWithLocalCapabilities() {
 
-		logger.info("Getting capabilities of service providers for capabilities response.");
+		logger.info("Getting capabilities of service providers");
 
 		Interchange interchangeWithLocalCapabilities = new Interchange();
 		interchangeWithLocalCapabilities.setName(myName);

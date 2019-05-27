@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.qpid;
+package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -12,20 +12,20 @@ import javax.net.ssl.SSLContext;
 @Configuration
 public class SSLContextConfig {
 
-	@Value("${routing-configurer.ssl.trust-store-password}")
+	@Value("${neighbour.ssl.trust-store-password}")
 	String truststorePassword;
-	@Value("${routing-configurer.ssl.trust-store-type}")
+	@Value("${neighbour.ssl.trust-store-type}")
 	String truststoreType;
-	@Value("${routing-configurer.ssl.trust-store}")
+	@Value("${neighbour.ssl.trust-store}")
 	String truststoreName;
 
-	@Value("${routing-configurer.ssl.key-store-type}")
+	@Value("${neighbour.ssl.key-store-type}")
 	String keystoreType;
-	@Value("${routing-configurer.ssl.key-store}")
+	@Value("${neighbour.ssl.key-store}")
 	String keystoreName;
-	@Value("${routing-configurer.ssl.key-store-password}")
+	@Value("${neighbour.ssl.key-store-password}")
 	String keystorePassword;
-	@Value("${routing-configurer.ssl.key-password}")
+	@Value("${neighbour.ssl.key-password}")
 	String keyPassword;
 
 	@Bean

@@ -46,7 +46,7 @@ public class NeighbourDiscoverer {
 	private NeighbourRESTFacade neighbourRESTFacade;
 
 	@Autowired
-	NeighbourDiscoverer(DNSFacadeInterface dnsFacade,
+	NeighbourDiscoverer(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") DNSFacadeInterface dnsFacade,
 						InterchangeRepository interchangeRepository,
 						ServiceProviderRepository serviceProviderRepository,
 						NeighbourRESTFacade neighbourRESTFacade,
@@ -150,7 +150,7 @@ public class NeighbourDiscoverer {
 			logger.error("Error message: {}", e.getMessage());
 			return new HashSet<>();
 		}
-		logger.info("Calculated custom subscription for neighbour: {}", calculatedSubscriptions);
+		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;
 	}
 
@@ -300,7 +300,7 @@ public class NeighbourDiscoverer {
 	}
 
 
-	@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}", initialDelayString = "${neighbour.graceful-backoff.check-offset}")
+	//@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}", initialDelayString = "${neighbour.graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
 
 		List<Interchange> neighboursWithFailedSubscriptionRequest = interchangeRepository.findInterchangesWithFailedFedIn();
@@ -448,8 +448,9 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${dns.lookup.interval}", initialDelayString = "${dns.lookup.initial-delay}")
 	public void checkForNewInterchanges() {
-		logger.info("Checking DNS for new neighbours.");
+		logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
 		List<Interchange> neighbours = dnsFacade.getNeighbours();
+		logger.debug("Got neighbours from DNS {}.", neighbours);
 
 		for (Interchange neighbourInterchange : neighbours) {
 			if (interchangeRepository.findByName(neighbourInterchange.getName()) == null && !neighbourInterchange.getName().equals(myName)) {

@@ -14,6 +14,9 @@ COPY interchangenode/pom.xml interchangenode/pom.xml
 COPY neighbour-model/src neighbour-model/src
 COPY neighbour-model/pom.xml neighbour-model/pom.xml
 
+COPY api-model/src api-model/src
+COPY api-model/pom.xml api-model/pom.xml
+
 COPY neighbour-discoverer/src neighbour-discoverer/src
 COPY neighbour-discoverer/pom.xml neighbour-discoverer/pom.xml
 

@@ -102,6 +102,10 @@ public class CapabilityMatcher {
 	}
 
 	public static boolean matches(DataType capability, String selector) throws ParseException {
+		if (selector.contains("\"")) {
+			throw new IllegalArgumentException("String values in selectors must be quoted with single quoutes: " + selector);
+		}
+		logger.debug("Evaluating if selector [{}] matches capability [{}]", selector, capability);
 		JMSSelectorFilter filter = new JMSSelectorFilter(selector);
 		notAlwaysTrue(filter);
 		DataTypeFilter capabilityFilter = new DataTypeFilter(capability);

@@ -12,7 +12,7 @@ database "Server database" as server_db
 end box
 
 activate A
-A -> client_db: Get neighbours with //capabilities// status UNKNOWN \nand  //fedIn// status EMPTY
+A -> client_db: Get neighbours with //capabilities// subscriptionStatus UNKNOWN \nand  //fedIn// subscriptionStatus EMPTY
 A <-- client_db: Interchange B
 
 A -> client_db: Get local capabilities
@@ -40,7 +40,7 @@ deactivate B
 
 == Capability exchange finished ==
 
-A-> A: Set B //capabilities// status to KNOWN \nSet B //fedIn// status to EMPTY \nSet B //fedIn// to empty set
+A-> A: Set B //capabilities// subscriptionStatus to KNOWN \nSet B //fedIn// subscriptionStatus to EMPTY \nSet B //fedIn// to empty set
 
 A -> client_db: Save updated neighbour B
 A <-- client_db: Updated neighbour B
