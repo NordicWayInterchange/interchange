@@ -52,8 +52,11 @@ public class SubscriptionRequest {
 		return subscription;
 	}
 
-	public void setSubscriptions(Set<Subscription> subscription) {
-		this.subscription = subscription;
+	public void setSubscriptions(Set<Subscription> newSubscription) {
+		this.subscription.clear();
+		if (newSubscription != null) {
+			this.subscription.addAll(newSubscription);
+		}
 	}
 
 	@Override

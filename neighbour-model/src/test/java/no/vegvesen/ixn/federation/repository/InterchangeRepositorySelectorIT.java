@@ -13,7 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -31,8 +33,8 @@ public class InterchangeRepositorySelectorIT {
 		ericsson.setDomainName(".itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()));
-		ericsson.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
-		ericsson.setFedIn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
+		ericsson.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()));
+		ericsson.setFedIn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()));
 	}
 
 	public boolean interchangeInList(String interchangeName, List<Interchange> listOfInterchanges){
@@ -134,7 +136,9 @@ public class InterchangeRepositorySelectorIT {
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
 		subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.FAILED);
-		ericsson.getFedIn().setSubscriptions(Collections.singleton(subscription));
+		Set<Subscription> subscriptionSet = new HashSet<>();
+		subscriptionSet.add(subscription);
+		ericsson.getFedIn().setSubscriptions(subscriptionSet);
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		interchangeRepository.save(ericsson);
 

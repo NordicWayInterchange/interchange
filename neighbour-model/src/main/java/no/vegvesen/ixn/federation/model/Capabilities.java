@@ -54,7 +54,10 @@ public class Capabilities {
 	}
 
 	public void setDataTypes(Set<DataType> capabilities) {
-		this.dataTypes = capabilities;
+		this.dataTypes.clear();
+		if ( capabilities != null ) {
+			this.dataTypes.addAll(capabilities);
+		}
 	}
 
 	@Override

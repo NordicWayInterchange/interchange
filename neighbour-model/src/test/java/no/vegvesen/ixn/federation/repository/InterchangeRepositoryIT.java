@@ -111,4 +111,24 @@ public class InterchangeRepositoryIT {
 		assertThat(forTearDownFromRepo).hasSize(1);
 		assertThat(forTearDownFromRepo.iterator().next().getName()).isEqualTo("torry");
 	}
+
+	@Test
+	public void interchangeCanUpdateSubscriptionsSet() {
+		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		Set<Subscription> requestedSubscriptions = new HashSet<>();
+		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'fish'", Subscription.SubscriptionStatus.ACCEPTED));
+		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", Subscription.SubscriptionStatus.REQUESTED));
+		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
+		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
+		Interchange ixnForUpdate = new Interchange("4update", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
+		Interchange savedForUpdate = repository.save(ixnForUpdate);
+
+		Set<Subscription> subscriptionsForUpdating = new HashSet<>();
+
+		savedForUpdate.getSubscriptionRequest().setSubscriptions(subscriptionsForUpdating);
+		Interchange updated = repository.save(savedForUpdate);
+		assertThat(updated).isNotNull();
+		assertThat(updated.getSubscriptionRequest()).isNotNull();
+		assertThat(updated.getSubscriptionRequest().getSubscriptions()).hasSize(0);
+	}
 }
