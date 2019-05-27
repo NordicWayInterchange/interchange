@@ -37,7 +37,7 @@ public class DNSFacadeTest {
 	}
 
 	@Test
-	public void testThatDiscoveredNeighborusAreNotNull(){
+	public void testThatDiscoveredNeighboursAreNotNull(){
 		List<Interchange> interchanges = dnsFacade.getNeighbours();
 
 		for(Interchange i : interchanges){

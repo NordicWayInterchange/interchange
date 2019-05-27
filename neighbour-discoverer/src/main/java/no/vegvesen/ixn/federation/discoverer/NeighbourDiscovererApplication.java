@@ -1,18 +1,18 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
@@ -34,7 +34,6 @@ public class NeighbourDiscovererApplication {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(keystoreFilename, "password", KeystoreType.PKCS12, "password"),
 				new KeystoreDetails(truststoreFilename, "password", KeystoreType.JKS));
-
 	}
 
 	@Bean
@@ -45,10 +44,9 @@ public class NeighbourDiscovererApplication {
 	@Bean
 	public RestTemplate restTemplate() {
 
-		RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(createHttpClient()));
-		restTemplate.setErrorHandler(new DiscovererResponseErrorHandler());
+		// TODO: set custom timeout on rest template
 
-		return restTemplate;
+		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(createHttpClient()));
 	}
 
 	public static void main(String[] args){

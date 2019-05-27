@@ -218,7 +218,6 @@ public class NeighbourDiscovererTest {
 		neighbourDiscoverer.capabilityExchange();
 
 		verify(interchangeRepository, times(1)).save(any(Interchange.class));
-
 	}
 
 
@@ -234,7 +233,6 @@ public class NeighbourDiscovererTest {
 		neighbourDiscoverer.subscriptionRequest();
 
 		verify(interchangeRepository, times(1)).save(any(Interchange.class));
-
 	}
 
 
@@ -295,7 +293,21 @@ public class NeighbourDiscovererTest {
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
 		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+	}
 
+	@Test
+	public void gracefulBackoffPollOfSubscriptionDoesNotHappenBeforeAllowedTime(){
+		// Interchange ericsson has subscription to poll
+		when(interchangeRepository.findInterchangesWithFailedSubscriptionsInFedIn()).thenReturn(Collections.singletonList(ericsson));
+		// Setting up Ericsson's failed subscriptions
+		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.FAILED);
+		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
+		ericsson.setFedIn(subReq);
+		doReturn(LocalDateTime.now().plusSeconds(10)).when(neighbourDiscoverer).getNextPostAttemptTime(any(Interchange.class));
+
+		neighbourDiscoverer.gracefulBackoffPollSubscriptions();
+
+		verify(neighbourRESTFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
 	}
 
 	@Test
@@ -332,6 +344,27 @@ public class NeighbourDiscovererTest {
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
 		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
+	}
+
+	@Test
+	public void gracefulBackoffPollOfSubscriptionHappensIfAllowedPostTimeHasPassed(){
+
+		// Return an interchange with a subscription to poll.
+		when(interchangeRepository.findInterchangesWithFailedSubscriptionsInFedIn()).thenReturn(Collections.singletonList(ericsson));
+
+		// Mock result of polling in backoff.
+		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.FAILED);
+		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
+		ericsson.setFedIn(subReq);
+		doReturn(ericssonSubscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+
+		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
+		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
+		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
+
+		neighbourDiscoverer.gracefulBackoffPollSubscriptions();
+
+		verify(neighbourRESTFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
 	}
 
 	@Test

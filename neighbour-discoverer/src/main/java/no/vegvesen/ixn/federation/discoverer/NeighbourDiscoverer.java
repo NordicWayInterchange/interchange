@@ -158,9 +158,10 @@ public class NeighbourDiscoverer {
 	public void gracefulBackoffPollSubscriptions(){
 
 		// All neighbours with a failed subscription in fedIn
-		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangedWithFailedSubscriptionsInFedIn();
+		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangesWithFailedSubscriptionsInFedIn();
 
 		for(Interchange neighbour : interchangesWithFailedSubscriptionsInFedIn){
+
 			for(Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()){
 
 				MDCUtil.setLogVariables(myName, neighbour.getName());
@@ -330,7 +331,7 @@ public class NeighbourDiscoverer {
 
 					if (neighbour.getBackoffAttempts() > allowedNumberOfBackoffAttempts) {
 						neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.UNREACHABLE);
-						logger.error("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
+						logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
 					}
 				} finally {
 					neighbour = interchangeRepository.save(neighbour);
@@ -393,6 +394,8 @@ public class NeighbourDiscoverer {
 
 			} catch (SubscriptionRequestException e) {
 				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
+				neighbour.setBackoffAttempts(0);
+				neighbour.setBackoffStart(LocalDateTime.now());
 
 				logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.");
 				logger.error("Error message: {}", e.getMessage());

@@ -1,20 +1,24 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-
+import java.io.IOException;
 
 @Component
 public class NeighbourRESTFacade {
@@ -25,26 +29,31 @@ public class NeighbourRESTFacade {
 	private RestTemplate restTemplate;
 	private CapabilityTransformer capabilityTransformer;
 	private SubscriptionTransformer subscriptionTransformer;
+	private SubscriptionRequestTransformer subscriptionRequestTransformer;
+	private ObjectMapper mapper;
 
 	@Autowired
 	public NeighbourRESTFacade(@Value("${path.subscription-request}") String subscriptionRequestPath,
 							   @Value("${path.capabilities-exchange}") String capabilityExchangePath,
 							   RestTemplate restTemplate,
 							   CapabilityTransformer capabilityTransformer,
-							   SubscriptionTransformer subscriptionTransformer) {
+							   SubscriptionTransformer subscriptionTransformer,
+							   SubscriptionRequestTransformer subscriptionRequestTransformer,
+							   ObjectMapper mapper) {
 
 		this.capabilityExchangePath = capabilityExchangePath;
 		this.subscriptionRequestPath = subscriptionRequestPath;
 		this.restTemplate = restTemplate;
 		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
+		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
+		this.mapper = mapper;
 	}
 
 	String getUrl(Interchange neighbour) {
 		return "https://" + neighbour.getName() + neighbour.getDomainName() + ":" + neighbour.getControlChannelPort();
 	}
 
-	// Posts representation local service provider capabilities to neighbour
 	Interchange postCapabilities(Interchange discoveringInterchange, Interchange neighbour) {
 
 		String url = getUrl(neighbour) + capabilityExchangePath;
@@ -58,25 +67,32 @@ public class NeighbourRESTFacade {
 		CapabilityApi discoveringInterchangeToCapabilityApi = capabilityTransformer.interchangeToCapabilityApi(discoveringInterchange);
 		HttpEntity<CapabilityApi> entity = new HttpEntity<>(discoveringInterchangeToCapabilityApi, headers);
 
-		ResponseEntity<CapabilityApi> response = restTemplate.exchange(url, HttpMethod.POST, entity, CapabilityApi.class);
+		try {
+			ResponseEntity<CapabilityApi> response = restTemplate.exchange(url, HttpMethod.POST, entity, CapabilityApi.class);
+			CapabilityApi capabilityApi = response.getBody();
 
-		logger.debug("Response from {}: {}", neighbour.getName(), response.toString());
+			logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi.toString());
 
-		if (response.getBody() == null) {
-			throw new CapabilityPostException("Post response from interchange gave null object. Unsuccessful capabilities exchange. ");
-		}
+			return capabilityTransformer.capabilityApiToInterchange(capabilityApi);
 
-		// Convert response API object to Interchange representation of neighbour.
-		CapabilityApi neighbourResponse = response.getBody();
-		Interchange neighbourInterchangeRepresentation = capabilityTransformer.capabilityApiToInterchange(neighbourResponse);
+		}catch(HttpServerErrorException | HttpClientErrorException e){
 
-		HttpStatus responseStatusCode = response.getStatusCode();
 
-		if (responseStatusCode == HttpStatus.OK) {
-			logger.info("Response code for posting subscription request to {} is {}", url, response.getStatusCodeValue());
-			return neighbourInterchangeRepresentation;
-		} else {
-			throw new CapabilityPostException("Unable to post capabilities to neighbour " + neighbour.getName());
+			logger.error("Failed post of capabilities to neighbour. Server returned error code: {}", e.getStatusCode().toString());
+
+			byte[] errorResponse = e.getResponseBodyAsByteArray();
+
+			try {
+				ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
+				logger.error("Received error object from server: {}", errorDetails.toString());
+				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Received error response: " + errorDetails.toString());
+			} catch (JsonMappingException jme) {
+				logger.error("Unable to cast error response as ErrorDetails object.");
+				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetailsobject.");
+			} catch (IOException ioe) {
+				logger.error("Unable to cast error response as ErrorDetails object.");
+				throw new CapabilityPostException("Unable to post capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetails object.");
+			}
 		}
 	}
 
@@ -91,59 +107,84 @@ public class NeighbourRESTFacade {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionTransformer.interchangeToSubscriptionRequestApi(discoveringInterchange);
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.interchangeToSubscriptionRequestApi(discoveringInterchange);
 		HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
 
 		// Posting and receiving response
-		ResponseEntity<SubscriptionRequestApi> responseApi = restTemplate.exchange(url, HttpMethod.POST, entity, SubscriptionRequestApi.class);
 
-		if (responseApi.getBody() == null) {
-			throw new SubscriptionRequestException("Subscription request failed. Post response from neighbour gave null object.");
-		}
+		try {
+			ResponseEntity<SubscriptionRequestApi> response = restTemplate.exchange(url, HttpMethod.POST, entity, SubscriptionRequestApi.class);
+			SubscriptionRequestApi responseApi = response.getBody();
+			Interchange responseInterchange = subscriptionRequestTransformer.subscriptionRequestApiToInterchange(responseApi);
 
-		// convert response back to interchange.
-		Interchange responseInterchange = subscriptionTransformer.subscriptionRequestApiToInterchange(responseApi.getBody());
+			if (!discoveringInterchange.getSubscriptionRequest().getSubscriptions().isEmpty() && responseInterchange.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+				// we posted a non empty subscription request, but received an empty subscription request.
+				logger.error("Posted non empty subscription request to neighbour but received empty subscription request.");
+				throw new SubscriptionRequestException("Subscription request failed. Posted non-empty subscription request, but received response with empty subscription request from neighbour.");
+			}
 
-		HttpStatus statusCode = responseApi.getStatusCode();
-
-		if (!discoveringInterchange.getSubscriptionRequest().getSubscriptions().isEmpty() && responseInterchange.getSubscriptionRequest().getSubscriptions().isEmpty()) {
-			// we posted a non empty subscription request, but received an empty subscription request.
-			throw new SubscriptionRequestException("Subscription request failed. Posted non-empty subscription request, but received response with empty subscription request from neighbour.");
-		} else if (statusCode != HttpStatus.ACCEPTED) {
-			throw new SubscriptionRequestException("Subscription request failed. Neighbour returned bad status code:  " + responseApi.getStatusCodeValue());
-		} else {
-			// Everything went ok, set status of subscription request to requested.
-			logger.info("Response code for posting subscription request to {} is {}", url, responseApi.getStatusCodeValue());
 			responseInterchange.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+
+			logger.info("Response code for posting subscription request to {} is {}", url, response.getStatusCodeValue());
+			logger.debug("Successful post of subscription request to neighbour. Response is: {}", responseApi.toString());
+
 			return responseInterchange.getSubscriptionRequest();
+
+		}catch(HttpClientErrorException | HttpServerErrorException e){
+
+			HttpStatus status = e.getStatusCode();
+			logger.error("Failed post of subscription request to neighbour. Server returned error code: {}", status.toString());
+
+			byte[] errorResponse = e.getResponseBodyAsByteArray();
+
+			try {
+				ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
+				logger.error("Received error object from server: {}", errorDetails.toString());
+				throw new SubscriptionRequestException("Subscription request failed. Received error object from server: " + errorDetails.toString());
+			} catch (JsonMappingException jme) {
+				logger.error("Unable to cast response as ErrorDetails object. ");
+				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object.");
+			} catch (IOException ioe) {
+				logger.error("Unable to cast response as ErrorDetails object. ");
+				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object." );
+			}
 		}
 	}
 
 	Subscription pollSubscriptionStatus(Subscription subscription, Interchange neighbour) {
 
 		String url = getUrl(neighbour) + "/" + subscription.getPath();
-		logger.debug("URL: " + url);
 
-		ResponseEntity<Subscription> response = restTemplate.getForEntity(url, Subscription.class);
+		try {
+			ResponseEntity<SubscriptionApi> response = restTemplate.getForEntity(url, SubscriptionApi.class);
+			SubscriptionApi subscriptionApi = response.getBody();
+			Subscription returnSubscription = subscriptionTransformer.subscriptionApiToSubscription(subscriptionApi);
 
-		if(response.getBody() == null){
-			throw new SubscriptionPollException("Polling subscription failed. GET response from neighbour was null.");
+			logger.info("Successfully polled subscription with url: {}.", url);
+			logger.info("Response code: {}", response.getStatusCodeValue());
+			logger.info("Received subscription poll response: {}", returnSubscription.toString());
+
+			return returnSubscription;
+
+		} catch (HttpClientErrorException | HttpServerErrorException e) {
+
+			HttpStatus status = e.getStatusCode();
+			logger.error("Failed polling subscription {}. Server returned error code: {}", url, status.toString());
+
+			byte[] errorResponse = e.getResponseBodyAsByteArray();
+
+			try {
+				ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
+
+				logger.error("Received error object from server: {}", errorDetails.toString());
+				throw new SubscriptionPollException("Error in polling " + url + " for subscription status. Received error response from server: " + status.toString());
+			} catch (JsonMappingException jme) { // TODO: subclass of IOException - should we catch both?
+				logger.error("Unable to cast response as ErrorDetails object. ");
+				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
+			} catch (IOException ioe) {
+				logger.error("Unable to cast response as ErrorDetails object. ");
+				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
+			}
 		}
-
-		Subscription responseSubscription = response.getBody();
-		HttpStatus statusCode = response.getStatusCode();
-
-		if (statusCode != HttpStatus.OK) {
-			logger.info("Response code: {}", statusCode);
-			logger.info("Response body: {}", responseSubscription.toString());
-			throw new SubscriptionPollException("Polling subscription failed. Neighbour returned bad status code.");
-		} else {
-			logger.info("Response code: {}", statusCode);
-			logger.info("Received response: " + responseSubscription.toString());
-			return responseSubscription;
-		}
-
 	}
-
-
 }
