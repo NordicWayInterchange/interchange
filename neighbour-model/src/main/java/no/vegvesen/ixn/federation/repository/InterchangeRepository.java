@@ -37,7 +37,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	List<Interchange> findInterchangesWithFailedCapabilityExchange();
 
 	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id_sub from subscriptions where subscription_status = 'FAILED')", nativeQuery = true)
-	List<Interchange> findInterchangedWithFailedSubscriptionsInFedIn();
+	List<Interchange> findInterchangesWithFailedSubscriptionsInFedIn();
 
 
 	// Selectors for subscription set up and tear down

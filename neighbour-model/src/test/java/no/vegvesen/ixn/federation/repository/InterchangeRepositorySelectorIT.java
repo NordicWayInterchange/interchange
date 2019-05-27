@@ -138,7 +138,7 @@ public class InterchangeRepositorySelectorIT {
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		interchangeRepository.save(ericsson);
 
-		List<Interchange> getInterchangesWithFailedSubscriptionInFedIn = interchangeRepository.findInterchangedWithFailedSubscriptionsInFedIn();
+		List<Interchange> getInterchangesWithFailedSubscriptionInFedIn = interchangeRepository.findInterchangesWithFailedSubscriptionsInFedIn();
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedSubscriptionInFedIn));
 	}
