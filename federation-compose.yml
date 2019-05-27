@@ -7,15 +7,6 @@ services:
       context: ./
     image: federation-build
 
-  gen_keys:
-    build: ./key-gen
-    container_name: key_gen
-    volumes:
-      - "./tmp:/tmp"
-    environment:
-      CA_CN: "my_ca"
-      KEY_CNS: "bouvet remote"
-
   bouvet_db:
     build:
       dockerfile: Dockerfile
@@ -31,8 +22,6 @@ services:
 
   bouvet_qpid:
     build: ./qpid
-    depends_on:
-      - gen_keys
     ports:
       - 8080
       - 443
@@ -53,7 +42,6 @@ services:
   bouvet_neighbour_server:
     build: ./neighbour-server
     depends_on:
-      - gen_keys
       - bouvet_db
       - federation-build
     ports:
@@ -67,9 +55,9 @@ services:
   bouvet_routing_configurer:
     build: ./routing-configurer
     depends_on:
-      - bouvet_qpid
       - federation-build
-      - gen_keys
+    links:
+      - "bouvet_qpid:bouvet"
     volumes:
       - "./tmp:/tmp"
     environment:
@@ -85,7 +73,6 @@ services:
   bouvet_neighbour_discoverer:
     build: ./neighbour-discoverer
     depends_on:
-      - gen_keys
       - remote_neighbour_server
       - bouvet_db
       - federation-build
@@ -114,7 +101,6 @@ services:
   remote_neighbour_server:
     build: ./neighbour-server
     depends_on:
-      - gen_keys
       - remote_db
       - federation-build
     ports:
@@ -128,7 +114,6 @@ services:
   remote_neighbour_discoverer:
     build: ./neighbour-discoverer
     depends_on:
-      - gen_keys
       - bouvet_neighbour_server
       - remote_db
       - federation-build
@@ -141,3 +126,40 @@ services:
       - SERVER_NAME=remote
       - DNS_MOCK_NAMES=bouvet,remote
       - DNS_TYPE=mock
+
+  remote_qpid:
+    build: ./qpid
+    ports:
+      - 8080
+      - 443
+      - 5671
+      - 5672
+    volumes:
+      - "./qpid/remote:/config"
+      - "./tmp:/tmp"
+      - "./qpid/messages/remote:/work/remote/messages"
+    environment:
+      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
+      SERVER_CERTIFICATE_FILE: /tmp/keys/remote.crt
+      SERVER_PRIVATE_KEY_FILE: /tmp/keys/remote.key
+      VHOST_FILE: "/config/vhost.json"
+      GROUPS_FILE: "/config/groups"
+      PASSWD_FILE: "/config/passwd"
+
+  remote_routing_configurer:
+    build: ./routing-configurer
+    depends_on:
+      - federation-build
+    links:
+      - "remote_qpid:remote"
+    volumes:
+      - "./tmp:/tmp"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
+      - BASE_URL=https://remote
+      - VHOST_NAME=remote
+      - TRUSTSTORE_NAME=/tmp/keys/truststore.jks
+      - TRUSTSTORE_PASSWORD=password
+      - KEYSTORE_NAME=/tmp/keys/remote.p12
+      - KEYSTORE_PASSWORD=password
+      - KEY_PASSWORD=password
