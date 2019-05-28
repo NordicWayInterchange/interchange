@@ -9,10 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import javax.net.ssl.SSLContext;
+import java.net.URL;
 
 @Configuration
-@Profile("prod")
-public class SSLContextConfig {
+@Profile("test")
+public class TestSSLContextConfig {
 
 	@Value("${neighbour.ssl.trust-store-password}")
 	String truststorePassword;
@@ -31,9 +32,19 @@ public class SSLContextConfig {
 	String keyPassword;
 
 	@Bean
-	public SSLContext sslContextFromKeystoreAndTruststore() {
+	public SSLContext testSslContextFromKeystoreAndTruststore() {
+		String keystoreFileName = getFilePathFromClasspathResource(keystoreName);
+		String truststoreFileName = getFilePathFromClasspathResource(truststoreName);
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(keystoreName, keystorePassword, KeystoreType.valueOf(keystoreType), keyPassword),
-				new KeystoreDetails(truststoreName, truststorePassword, KeystoreType.valueOf(truststoreType)));
+				new KeystoreDetails(keystoreFileName, keystorePassword, KeystoreType.valueOf(keystoreType), keyPassword),
+				new KeystoreDetails(truststoreFileName, truststorePassword, KeystoreType.valueOf(truststoreType)));
+	}
+
+	private static String getFilePathFromClasspathResource(String classpathResource) {
+		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
+		if (resource != null) {
+			return resource.getFile();
+		}
+		throw new RuntimeException("Could not load classpath resource " + classpathResource);
 	}
 }
