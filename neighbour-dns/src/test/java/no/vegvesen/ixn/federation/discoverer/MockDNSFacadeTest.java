@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.model.Interchange;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,6 @@ public class MockDNSFacadeTest {
 	@Test
 	public void getNeighbours() {
 		List<Interchange> neighbours = dnsFacade.getNeighbours();
-		assertThat(neighbours).hasSize(2);
+		AssertionsForInterfaceTypes.assertThat(neighbours).hasSize(2);
 	}
 }
