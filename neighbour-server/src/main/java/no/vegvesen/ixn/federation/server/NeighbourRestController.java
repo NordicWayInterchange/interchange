@@ -1,16 +1,17 @@
 package no.vegvesen.ixn.federation.server;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
-import no.vegvesen.ixn.federation.discoverer.DNSFacadeInterface;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
+import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.InterchangeRepository;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import org.apache.qpid.server.filter.selector.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +22,17 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.apache.qpid.server.filter.selector.ParseException;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
+
+
+import java.util.*;
 
 //
 // TODO if possible : avoid hard coded paths for the API endpoints. Move them to application.properties
 //
+@Api(value="/",description="Nordic Way Federation API",produces ="application/json")
 @RestController("/")
 public class NeighbourRestController {
 
@@ -42,22 +45,19 @@ public class NeighbourRestController {
 	private SubscriptionRequestTransformer subscriptionRequestTransformer;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
-	private DNSFacadeInterface dnsFacade;
 
 	@Autowired
 	public NeighbourRestController(InterchangeRepository interchangeRepository,
 								   ServiceProviderRepository serviceProviderRepository,
 								   CapabilityTransformer capabilityTransformer,
 								   SubscriptionTransformer subscriptionTransformer,
-								   SubscriptionRequestTransformer subscriptionRequestTransformer,
-								   DNSFacadeInterface dnsFacade) {
+								   SubscriptionRequestTransformer subscriptionRequestTransformer) {
 
 		this.interchangeRepository = interchangeRepository;
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
 		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
-		this.dnsFacade = dnsFacade;
 	}
 
 
@@ -107,8 +107,11 @@ public class NeighbourRestController {
 		}
 	}
 
+	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiResponses({	@ApiResponse(code=202, message="Successfully requested a subscription", response=SubscriptionRequestApi.class),
+					@ApiResponse(code=403, message="Common name in certificate and interchange name in path does not match.", response=ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@RequestMapping(method = RequestMethod.POST, path = "/subscription", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionRequestApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 
@@ -162,9 +165,12 @@ public class NeighbourRestController {
 		return subscriptionRequestTransformer.interchangeToSubscriptionRequestApi(neighbourToUpdate);
 	}
 
-
+	@ApiOperation(value = "Enpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiResponses({	@ApiResponse(code=200, message="Successfully polled the subscription.", response=SubscriptionApi.class),
+					@ApiResponse(code=404, message="Invalid path, the subscription does not exist or the polling interchange does not exist.", response=ErrorDetails.class),
+					@ApiResponse(code=403, message="Common name in certificate and interchange name in path does not match.", response=ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(method = RequestMethod.GET, value = "{ixnName}/subscription/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, value = SUBSCRIPTION_POLLING_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionApi pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId) {
 
@@ -222,8 +228,11 @@ public class NeighbourRestController {
 		return interchangeWithLocalCapabilities;
 	}
 
+	@ApiOperation(value = "Endpoint for capability exchange. Receives a capabilities from a neighbour and responds with local capabilities.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiResponses({	@ApiResponse(code=200, message="Successfully posted capabilities.", response=CapabilityApi.class),
+					@ApiResponse(code=403, message="Common name in certificate and interchange name in path does not match.", response=ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(method = RequestMethod.POST, value = "/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public CapabilityApi updateCapabilities(@RequestBody CapabilityApi neighbourCapabilities) {
 
@@ -239,7 +248,7 @@ public class NeighbourRestController {
 
 		if (interchangeToUpdate == null) {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
-			interchangeToUpdate = findNeighbourInDns(neighbour);
+			interchangeToUpdate = neighbour;
 		} else {
 			logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 			interchangeToUpdate.setCapabilities(neighbour.getCapabilities());
