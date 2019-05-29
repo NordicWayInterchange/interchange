@@ -50,13 +50,9 @@ public class NeighbourRESTFacade {
 		this.mapper = mapper;
 	}
 
-	String getUrl(Interchange neighbour) {
-		return "https://" + neighbour.getName() + neighbour.getDomainName() + ":" + neighbour.getControlChannelPort();
-	}
-
 	Interchange postCapabilities(Interchange discoveringInterchange, Interchange neighbour) {
 
-		String url = getUrl(neighbour) + capabilityExchangePath;
+		String url = neighbour.getControlChannelUrl(capabilityExchangePath);
 		logger.debug("Posting capabilities to {} on URL: {}", neighbour.getName(), url);
 		logger.debug("Representation of discovering interchange: {}", discoveringInterchange.toString());
 
@@ -99,7 +95,7 @@ public class NeighbourRESTFacade {
 
 	SubscriptionRequest postSubscriptionRequest(Interchange discoveringInterchange, Interchange neighbour) {
 
-		String url = getUrl(neighbour) + subscriptionRequestPath;
+		String url = neighbour.getControlChannelUrl(subscriptionRequestPath);
 		logger.debug("Posting subscription request to {} on URL: {}", neighbour.getName(), url);
 		logger.debug("Representation of discovering interchange: {}", discoveringInterchange.toString());
 
@@ -153,7 +149,7 @@ public class NeighbourRESTFacade {
 
 	Subscription pollSubscriptionStatus(Subscription subscription, Interchange neighbour) {
 
-		String url = getUrl(neighbour) + "/" + subscription.getPath();
+		String url = neighbour.getControlChannelUrl(subscription.getPath());
 
 		try {
 			ResponseEntity<SubscriptionApi> response = restTemplate.getForEntity(url, SubscriptionApi.class);

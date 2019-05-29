@@ -50,7 +50,7 @@ public class NeighbourRESTFacadeTest {
 	public void setUp() {
 		ericsson = new Interchange();
 		ericsson.setName("ericsson");
-		ericsson.setDomainName(".itsinterchange.eu");
+		ericsson.setDomainName("itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
 
 		this.server = MockRestServiceServer.createServer(restTemplate);
@@ -59,9 +59,8 @@ public class NeighbourRESTFacadeTest {
 
 	@Test
 	public void expectedUrlIsCreated() {
-		String expectedURL = "https://ericsson.itsinterchange.eu:8080";
-		String actualURL = neighbourRESTFacade.getUrl(ericsson);
-
+		String expectedURL = "https://ericsson.itsinterchange.eu:8080/";
+		String actualURL = ericsson.getControlChannelUrl("/");
 		assertThat(expectedURL).isEqualTo(actualURL);
 	}
 
