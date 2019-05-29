@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import no.vegvesen.ixn.federation.model.Interchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.xbill.DNS.Lookup;
@@ -20,23 +20,12 @@ import java.util.List;
 @ConditionalOnProperty(name ="dns.type", havingValue = "prod", matchIfMissing = true)
 public class DNSFacade implements DNSFacadeInterface {
 
-	private String domain;
-	private String controlChannelPortnr;
-	private String messageChannelPortnr;
+	private DNSProperties dnsProperties;
 	private Logger logger = LoggerFactory.getLogger(DNSFacade.class);
 
-	public DNSFacade(@Value("${dns.lookup.domain.name}") String domain,
-					 @Value("${control.channel.portnr}") String controlChannelPortnr,
-					 @Value("${message.channel.portnr}") String messageChannelPortnr){
-
-		if(!domain.startsWith(".")){
-			this.domain = "."+domain;
-		}else {
-			this.domain = domain;
-		}
-
-		this.controlChannelPortnr = controlChannelPortnr;
-		this.messageChannelPortnr = messageChannelPortnr;
+	@Autowired
+	public DNSFacade(DNSProperties dnsProperties){
+		this.dnsProperties = dnsProperties;
 	}
 
 	// Returns a list of interchanges discovered through DNS lookup.
@@ -45,22 +34,27 @@ public class DNSFacade implements DNSFacadeInterface {
 
 		List<Interchange> interchanges = new ArrayList<>();
 
+		// TODO: get control channel port nr from separate SRV lookup.
+
 		try {
-			// SRV record lookup on each sub domain
-			Record[] records = new Lookup("_ixn._tcp" + domain, Type.SRV).run();
+			// SRV record lookup for message chanel port on each sub domain
+			String srvLookupString = "_ixn._tcp" + dnsProperties.getDomainName();
+
+
+			Record[] records = new Lookup(srvLookupString, Type.SRV).run();
 			for (Record record : records) {
 
 				SRVRecord srv = (SRVRecord) record;
-				logger.debug("Record: " + srv.toString());
+
+				String target = srv.getTarget().toString();
+				String messageChannelPort = String.valueOf(srv.getPort());
+				int lengthDomain = target.indexOf(dnsProperties.getDomainName());
 
 				Interchange interchange = new Interchange();
-				String target = srv.getTarget().toString();
-
-				int lengthDomain = target.indexOf(domain);
 				interchange.setName(target.substring(0, lengthDomain));
-				interchange.setControlChannelPort(controlChannelPortnr);
-				interchange.setMessageChannelPort(messageChannelPortnr);
-				interchange.setDomainName(domain);
+				interchange.setControlChannelPort(dnsProperties.getControlChannelPort());
+				interchange.setMessageChannelPort(messageChannelPort);
+				interchange.setDomainName(dnsProperties.getDomainName());
 
 				interchanges.add(interchange);
 				ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

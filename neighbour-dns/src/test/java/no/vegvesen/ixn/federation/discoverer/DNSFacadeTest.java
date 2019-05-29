@@ -2,36 +2,35 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.model.Interchange;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Arrays;
 import java.util.List;
+
+import static org.mockito.Mockito.*;
 
 
 @RunWith(MockitoJUnitRunner.class)
 public class DNSFacadeTest {
 
-	private DNSFacade dnsFacade = Mockito.mock(DNSFacade.class);
+	@Mock
+	private DNSProperties dnsProperties;
 
-	@Before
-	public void before(){
-		Interchange bouvet = new Interchange();
-		bouvet.setName("bouvet");
-
-		Interchange ericsson = new Interchange();
-		ericsson.setName("ericsson");
-
-		Mockito.when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(bouvet, ericsson));
-	}
-
+	@InjectMocks
+	private DNSFacade dnsFacade;
 
 	@Test
 	public void testNumberOfNeighbours(){
 
+		when(dnsProperties.getDomainName()).thenReturn(".itsinterchange.eu");
+		when(dnsProperties.getControlChannelPort()).thenReturn("8090");
+		when(dnsProperties.getMessageChannelPort()).thenReturn("5671");
+
+
+		// FIXME: how to check that this is correct when the number of neighbours in the network increases?
 		int expectedNumberOfNeighbours = 2;
 		List<Interchange> interchanges = dnsFacade.getNeighbours();
 		Assert.assertEquals(expectedNumberOfNeighbours, interchanges.size());
