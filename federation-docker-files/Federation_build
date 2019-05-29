@@ -17,6 +17,9 @@ COPY neighbour-model/pom.xml neighbour-model/pom.xml
 COPY api-model/src api-model/src
 COPY api-model/pom.xml api-model/pom.xml
 
+COPY neighbour-dns/src neighbour-dns/src
+COPY neighbour-dns/pom.xml neighbour-dns/pom.xml
+
 COPY neighbour-discoverer/src neighbour-discoverer/src
 COPY neighbour-discoverer/pom.xml neighbour-discoverer/pom.xml
 
