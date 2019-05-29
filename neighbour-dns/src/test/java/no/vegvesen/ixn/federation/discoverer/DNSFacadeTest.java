@@ -5,8 +5,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import static org.mockito.Mockito.*;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @RunWith(MockitoJUnitRunner.class)
 public class DNSFacadeTest {
 
-	private DNSFacade dnsFacade = mock(DNSFacade.class);
+	private DNSFacade dnsFacade = Mockito.mock(DNSFacade.class);
 
 	@Before
 	public void before(){
@@ -24,7 +25,7 @@ public class DNSFacadeTest {
 		Interchange ericsson = new Interchange();
 		ericsson.setName("ericsson");
 
-		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(bouvet, ericsson));
+		Mockito.when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(bouvet, ericsson));
 	}
 
 
