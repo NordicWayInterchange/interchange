@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
@@ -173,7 +174,7 @@ public class NeighbourDiscoverer {
 						logger.info("Polling subscription with path {} in graceful backoff", failedSubscription.getPath());
 
 						// Throws SubscriptionPollException if poll is unsuccessful
-						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(failedSubscription, neighbour);
+						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(failedSubscription, resolveInterchange(neighbour));
 
 						// Poll was successful
 						logger.info("Successfully re-established contact with neighbour in subscription polling graceful backoff.");
@@ -199,6 +200,19 @@ public class NeighbourDiscoverer {
 		}
 	}
 
+	private DNSResolvedInterchange resolveInterchange(Interchange neighbour) {
+		List<DNSResolvedInterchange> neighbours = dnsFacade.getNeighbours();
+		for (DNSResolvedInterchange dnsNeighbour : neighbours) {
+			if (dnsNeighbour.getName() == neighbour.getName()) {
+				DNSResolvedInterchange resolvedInterchange = new DNSResolvedInterchange(neighbour);
+				resolvedInterchange.setControlChannelPort(dnsNeighbour.getControlChannelPort());
+				resolvedInterchange.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
+				return resolvedInterchange;
+			}
+		}
+		throw new DiscoveryException(String.format("Could not discover neighbour %s in dns", neighbour.getName()));
+	}
+
 	@Scheduled(fixedRateString = "${neighbour.capabilities.update-interval}", initialDelayString = "${neighbour.capabilities.initial-delay}")
 	public void pollSubscriptions() {
 		// All interchanges with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
@@ -216,7 +230,7 @@ public class NeighbourDiscoverer {
 						logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
 
 						// Throws SubscriptionPollException if unsuccessful
-						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
+						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, resolveInterchange(neighbour));
 
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
@@ -272,7 +286,7 @@ public class NeighbourDiscoverer {
 					Interchange discoveringInterchange = getDiscoveringInterchangeWithCapabilities();
 
 					// Throws CapabilityPostException if unsuccessful.
-					Interchange neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringInterchange, neighbour);
+					Interchange neighbourRepresentation = neighbourRESTFacade.postCapabilities(resolveInterchange(discoveringInterchange), resolveInterchange(neighbour));
 
 					neighbour.setCapabilities(neighbourRepresentation.getCapabilities());
 					neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
@@ -317,7 +331,7 @@ public class NeighbourDiscoverer {
 					discoveringInterchange.getSubscriptionRequest().setSubscriptions(calculateCustomSubscriptionForNeighbour(neighbour));
 
 					// Throws SubscriptionRequestException if unsuccessful.
-					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(discoveringInterchange, neighbour);
+					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(resolveInterchange(discoveringInterchange), resolveInterchange(neighbour));
 
 					neighbour.setBackoffAttempts(0);
 					neighbour.setFedIn(postResponseSubscriptionRequest);
@@ -386,7 +400,7 @@ public class NeighbourDiscoverer {
 
 			try {
 				// Throws SubscriptionRequestException if unsuccessful
-				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringInterchange, neighbour);
+				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(resolveInterchange(discoveringInterchange), resolveInterchange(neighbour));
 				neighbour.getFedIn().setSubscriptions(subscriptionRequestResponse.getSubscriptions());
 				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
@@ -423,7 +437,7 @@ public class NeighbourDiscoverer {
 
 			try {
 				// Throws CapabilityPostException if unsuccessful.
-				neighbourResponse = neighbourRESTFacade.postCapabilities(discoveringInterchange, neighbour);
+				neighbourResponse = neighbourRESTFacade.postCapabilities(resolveInterchange(discoveringInterchange), resolveInterchange(neighbour));
 
 				neighbour.setCapabilities(neighbourResponse.getCapabilities());
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
@@ -449,7 +463,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${dns.lookup.interval}", initialDelayString = "${dns.lookup.initial-delay}")
 	public void checkForNewInterchanges() {
 		logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
-		List<Interchange> neighbours = dnsFacade.getNeighbours();
+		List<DNSResolvedInterchange> neighbours = dnsFacade.getNeighbours();
 		logger.debug("Got neighbours from DNS {}.", neighbours);
 
 		for (Interchange neighbourInterchange : neighbours) {

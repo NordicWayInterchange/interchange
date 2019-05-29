@@ -42,16 +42,13 @@ public class NeighbourRESTFacadeTest {
 			subscriptionRequestTransformer,
 			mapper);
 
-	private Interchange ericsson;
+	private DNSResolvedInterchange ericsson;
 
 	private MockRestServiceServer server;
 
 	@Before
 	public void setUp() {
-		ericsson = new Interchange();
-		ericsson.setName("ericsson");
-		ericsson.setDomainName("itsinterchange.eu");
-		ericsson.setControlChannelPort("8080");
+		ericsson = new DNSResolvedInterchange("ericsson", "itsinterchange.eu", 8080, 9867);
 
 		this.server = MockRestServiceServer.createServer(restTemplate);
 	}

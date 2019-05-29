@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.DNSResolvedInterchange;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+
 import java.io.IOException;
 
 @Component
@@ -50,7 +52,7 @@ public class NeighbourRESTFacade {
 		this.mapper = mapper;
 	}
 
-	Interchange postCapabilities(Interchange discoveringInterchange, Interchange neighbour) {
+	Interchange postCapabilities(DNSResolvedInterchange discoveringInterchange, DNSResolvedInterchange neighbour) {
 
 		String url = neighbour.getControlChannelUrl(capabilityExchangePath);
 		logger.debug("Posting capabilities to {} on URL: {}", neighbour.getName(), url);
@@ -67,7 +69,7 @@ public class NeighbourRESTFacade {
 			ResponseEntity<CapabilityApi> response = restTemplate.exchange(url, HttpMethod.POST, entity, CapabilityApi.class);
 			CapabilityApi capabilityApi = response.getBody();
 
-			logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi.toString());
+			logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi);
 
 			return capabilityTransformer.capabilityApiToInterchange(capabilityApi);
 
@@ -93,7 +95,7 @@ public class NeighbourRESTFacade {
 	}
 
 
-	SubscriptionRequest postSubscriptionRequest(Interchange discoveringInterchange, Interchange neighbour) {
+	SubscriptionRequest postSubscriptionRequest(DNSResolvedInterchange discoveringInterchange, DNSResolvedInterchange neighbour) {
 
 		String url = neighbour.getControlChannelUrl(subscriptionRequestPath);
 		logger.debug("Posting subscription request to {} on URL: {}", neighbour.getName(), url);
@@ -147,7 +149,7 @@ public class NeighbourRESTFacade {
 		}
 	}
 
-	Subscription pollSubscriptionStatus(Subscription subscription, Interchange neighbour) {
+	Subscription pollSubscriptionStatus(Subscription subscription, DNSResolvedInterchange neighbour) {
 
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
 

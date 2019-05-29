@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.DNSResolvedInterchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,13 +21,13 @@ import java.util.List;
 public class DNSFacade implements DNSFacadeInterface {
 
 	private String domain;
-	private String controlChannelPortnr;
-	private String messageChannelPortnr;
+	private int controlChannelPortnr;
+	private int messageChannelPortnr;
 	private Logger logger = LoggerFactory.getLogger(DNSFacade.class);
 
 	public DNSFacade(@Value("${dns.lookup.domain.name}") String domain,
-					 @Value("${control.channel.portnr}") String controlChannelPortnr,
-					 @Value("${message.channel.portnr}") String messageChannelPortnr){
+					 @Value("${control.channel.portnr}") int controlChannelPortnr,
+					 @Value("${message.channel.portnr}") int messageChannelPortnr){
 
 		if(!domain.startsWith(".")){
 			this.domain = "."+domain;
@@ -41,9 +41,9 @@ public class DNSFacade implements DNSFacadeInterface {
 
 	// Returns a list of interchanges discovered through DNS lookup.
 	@Override
-	public List<Interchange> getNeighbours() {
+	public List<DNSResolvedInterchange> getNeighbours() {
 
-		List<Interchange> interchanges = new ArrayList<>();
+		List<DNSResolvedInterchange> interchanges = new ArrayList<>();
 
 		try {
 			// SRV record lookup on each sub domain
@@ -53,14 +53,10 @@ public class DNSFacade implements DNSFacadeInterface {
 				SRVRecord srv = (SRVRecord) record;
 				logger.debug("Record: " + srv.toString());
 
-				Interchange interchange = new Interchange();
 				String target = srv.getTarget().toString();
 
 				int lengthDomain = target.indexOf(domain);
-				interchange.setName(target.substring(0, lengthDomain));
-				interchange.setControlChannelPort(controlChannelPortnr);
-				interchange.setMessageChannelPort(messageChannelPortnr);
-				interchange.setDomainName(domain);
+				DNSResolvedInterchange interchange = new DNSResolvedInterchange(target.substring(0, lengthDomain),domain, controlChannelPortnr, messageChannelPortnr);
 
 				interchanges.add(interchange);
 				ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

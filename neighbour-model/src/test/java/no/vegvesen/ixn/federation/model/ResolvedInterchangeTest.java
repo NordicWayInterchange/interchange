@@ -5,31 +5,26 @@ import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-public class InterchangeTest {
+public class ResolvedInterchangeTest {
 
 	@Test
 	public void getControlChannelUrlWithDomainNameAndSpecifiedNonDefaultPorts() {
-		Interchange fullDomainName = new Interchange("my-host", null, null, null);
+		DNSResolvedInterchange fullDomainName = new DNSResolvedInterchange("my-host", "my-domain.top", 1234, 5678);
 		fullDomainName.setDomainName("my-domain.top");
-		fullDomainName.setControlChannelPort("1234");
-		fullDomainName.setMessageChannelPort("5678");
 		assertThat(fullDomainName.getControlChannelUrl("/alive")).isEqualTo("https://my-host.my-domain.top:1234/alive");
 		assertThat(fullDomainName.getMessageChannelUrl()).isEqualTo("amqps://my-host.my-domain.top:5678/");
 	}
 
 	@Test
 	public void getMessageAndControlChannelUrlWithDomainNameAndSpecifiedDefaultPorts() {
-		Interchange fullDomainName = new Interchange("my-host", null, null, null);
-		fullDomainName.setDomainName("my-domain.top");
-		fullDomainName.setControlChannelPort("443");
-		fullDomainName.setMessageChannelPort("5671");
+		DNSResolvedInterchange fullDomainName = new DNSResolvedInterchange("my-host", "my-domain.top", 443, 5671);
 		assertThat(fullDomainName.getControlChannelUrl("/alive")).isEqualTo("https://my-host.my-domain.top/alive");
 		assertThat(fullDomainName.getMessageChannelUrl()).isEqualTo("amqps://my-host.my-domain.top/");
 	}
 
 	@Test
 	public void getMessageAndControlChannelUrlWithDomainNameDefaultPorts() {
-		Interchange fullDomainName = new Interchange("my-host", null, null, null);
+		DNSResolvedInterchange fullDomainName = new DNSResolvedInterchange("my-host", "my-domain.top", -1, -1);
 		fullDomainName.setDomainName("my-domain.top");
 		assertThat(fullDomainName.getControlChannelUrl("/alive")).isEqualTo("https://my-host.my-domain.top/alive");
 		assertThat(fullDomainName.getMessageChannelUrl()).isEqualTo("amqps://my-host.my-domain.top/");
@@ -37,12 +32,9 @@ public class InterchangeTest {
 
 	@Test
 	public void expectedUrlIsCreated() {
-		String expectedURL = "https://ericsson.itsinterchange.eu:8080/";
-		Interchange ericsson = new Interchange("ericsson", null, null, null);
-		ericsson.setControlChannelPort("8080");
-		ericsson.setDomainName("itsinterchange.eu");
+		DNSResolvedInterchange ericsson = new DNSResolvedInterchange("ericsson", "itsinterchange.eu", 8080, 5671);
 		String actualURL = ericsson.getControlChannelUrl("/");
-		assertThat(expectedURL).isEqualTo(actualURL);
+		assertThat(actualURL).isEqualTo("https://ericsson.itsinterchange.eu:8080/");
 	}
 
 	@Test(expected = DiscoveryException.class)

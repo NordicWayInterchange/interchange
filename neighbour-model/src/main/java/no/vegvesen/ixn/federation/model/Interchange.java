@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,10 +15,6 @@ import java.util.Set;
 @Entity
 @Table(name = "interchanges", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_ixn_name"))
 public class Interchange {
-
-	private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
-	private static final String DEFAULT_CONTROL_CHANNEL_PROTOCOL = "https";
-	private static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 
 	static Logger logger = LoggerFactory.getLogger(Interchange.class);
 
@@ -61,6 +55,11 @@ public class Interchange {
 		this.capabilities = capabilities;
 		this.subscriptionRequest = subscriptions;
 		this.fedIn = fedIn;
+	}
+
+	public Interchange(String name, String domain) {
+		this.name = name;
+		this.domainName = domain;
 	}
 
 	public Capabilities getCapabilities() {
@@ -127,22 +126,6 @@ public class Interchange {
 		this.domainName = domainName;
 	}
 
-	public String getMessageChannelPort() {
-		return messageChannelPort;
-	}
-
-	public void setMessageChannelPort(String messageChannelPort) {
-		this.messageChannelPort = messageChannelPort;
-	}
-
-	public String getControlChannelPort() {
-		return controlChannelPort;
-	}
-
-	public void setControlChannelPort(String controlChannelPort) {
-		this.controlChannelPort = controlChannelPort;
-	}
-
 	public LocalDateTime getBackoffStartTime() {
 		return backoffStart;
 	}
@@ -199,43 +182,5 @@ public class Interchange {
 				", messageChannelPort='" + messageChannelPort + '\'' +
 				", controlChannelPort='" + controlChannelPort + '\'' +
 				'}';
-	}
-
-
-	private String getFullDomainName() {
-		StringBuilder fullDomainName = new StringBuilder(this.getName());
-		if (this.getDomainName() != null) {
-			fullDomainName.append(".").append(this.getDomainName());
-		}
-		return fullDomainName.toString();
-	}
-
-	public String getControlChannelUrl(String file) {
-		try {
-			if (this.getControlChannelPort() == null || this.getControlChannelPort().equals(DEFAULT_CONTROL_CHANNEL_PORT)) {
-				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getFullDomainName(), file)
-						.toExternalForm();
-			} else {
-				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getFullDomainName(), Integer.parseInt(this.getControlChannelPort()), file)
-						.toExternalForm();
-			}
-		} catch (NumberFormatException | MalformedURLException e) {
-			logger.error("Could not create control channel url for interchange {}", this, e);
-			throw new DiscoveryException(e);
-		}
-	}
-
-	public String getMessageChannelUrl() {
-		URL url = null;
-		try {
-			if (this.getMessageChannelPort() == null || this.getMessageChannelPort().equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
-				return String.format("amqps://%s/", this.getFullDomainName());
-			} else {
-				return String.format("amqps://%s:%s/", this.getFullDomainName(), this.getMessageChannelPort());
-			}
-		} catch (NumberFormatException e) {
-			logger.error("Could not create message channel url for interchange {}", this, e);
-			throw new DiscoveryException(e);
-		}
 	}
 }

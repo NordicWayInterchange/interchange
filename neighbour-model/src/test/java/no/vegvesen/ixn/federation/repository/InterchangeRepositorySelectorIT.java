@@ -31,7 +31,6 @@ public class InterchangeRepositorySelectorIT {
 		ericsson = new Interchange();
 		ericsson.setName("ericsson");
 		ericsson.setDomainName("itsinterchange.eu");
-		ericsson.setControlChannelPort("8080");
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()));
 		ericsson.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()));
 		ericsson.setFedIn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()));

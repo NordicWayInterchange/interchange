@@ -50,7 +50,7 @@ public class NeighbourDiscovererTest {
 	private List<Interchange> neighbours = new ArrayList<>();
 
 	// Objects used in testing
-	private Interchange ericsson;
+	private DNSResolvedInterchange ericsson;
 	private DataType firstDataType = new DataType("datex2;1.0", "NO", "Obstruction");
 	private DataType secondDataType = new DataType("datex2;1.0", "SE", "Works");
 	private ServiceProvider firstServiceProvider;
@@ -61,6 +61,7 @@ public class NeighbourDiscovererTest {
 	private Subscription firstSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 	private Subscription secondSubscription = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
 	private Subscription illegalSubscription = new Subscription("(where LIKE 'DK') OR (1=1)", Subscription.SubscriptionStatus.REQUESTED);
+	DNSResolvedInterchange resolvedBouvet = new DNSResolvedInterchange("bouvet", "itsinterchange.eu", 1, 2);
 
 
 
@@ -68,10 +69,7 @@ public class NeighbourDiscovererTest {
 	public void before(){
 
 		// Neighbour interchange set up
-		ericsson = new Interchange();
-		ericsson.setName("ericsson");
-		ericsson.setDomainName("itsinterchange.eu");
-		ericsson.setControlChannelPort("8080");
+		ericsson = new DNSResolvedInterchange("ericsson", "itsinterchange.eu", 8080, 1234);
 		neighbours.add(ericsson);
 
 		// Service provider set up: two identical service providers with different names.
@@ -116,7 +114,7 @@ public class NeighbourDiscovererTest {
 	public void testInterchangeWithSameNameAsUsIsNotSaved(){
 		// Mocking finding ourselves in the DNS lookup.
 		Interchange discoveringNode = neighbourDiscoverer.getDiscoveringInterchangeWithCapabilities();
-		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(discoveringNode));
+		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(new DNSResolvedInterchange(discoveringNode)));
 
 		neighbourDiscoverer.checkForNewInterchanges();
 
@@ -212,8 +210,9 @@ public class NeighbourDiscovererTest {
 	public void successfulCapabilitiesPostCallsSaveOnRepository(){
 
 		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesForCapabilityExchange();
-		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
+		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
+		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
 
 		neighbourDiscoverer.capabilityExchange();
 
@@ -227,8 +226,9 @@ public class NeighbourDiscovererTest {
 		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesForSubscriptionRequest();
 		doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).calculateCustomSubscriptionForNeighbour(ericsson);
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
-		doReturn(subscriptionRequestResponse).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
+		doReturn(subscriptionRequestResponse).when(neighbourRESTFacade).postSubscriptionRequest(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
+		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
 
 		neighbourDiscoverer.subscriptionRequest();
 
@@ -242,7 +242,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.capabilityExchange();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 	}
 
 
@@ -280,7 +280,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 	}
 
 	@Test
@@ -292,7 +292,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 	}
 
 	@Test
@@ -307,7 +307,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPollSubscriptions();
 
-		verify(neighbourRESTFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(DNSResolvedInterchange.class));
 	}
 
 	@Test
@@ -321,14 +321,15 @@ public class NeighbourDiscovererTest {
 		ericssonResponse.setCapabilities(ericssonCapabilities);
 		ericssonResponse.setSubscriptionRequest(ericssonSubscriptionRequest);
 
-		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
+		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
+		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(1)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(1)).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 	}
 
 	@Test
@@ -336,14 +337,15 @@ public class NeighbourDiscovererTest {
 
 		when(interchangeRepository.findInterchangesWithFailedFedIn()).thenReturn(Collections.singletonList(ericsson));
 		SubscriptionRequest ericssonSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
-		doReturn(ericssonSubscriptionRequest).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
+		doReturn(ericssonSubscriptionRequest).when(neighbourRESTFacade).postSubscriptionRequest(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
+		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
-		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 	}
 
 	@Test
@@ -356,15 +358,16 @@ public class NeighbourDiscovererTest {
 		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.FAILED);
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
-		doReturn(ericssonSubscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+		doReturn(ericssonSubscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(DNSResolvedInterchange.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
+		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
 
 		neighbourDiscoverer.gracefulBackoffPollSubscriptions();
 
-		verify(neighbourRESTFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(DNSResolvedInterchange.class));
 	}
 
 	@Test
@@ -374,7 +377,8 @@ public class NeighbourDiscovererTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
-		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
+		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
+		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
@@ -391,7 +395,9 @@ public class NeighbourDiscovererTest {
 		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
+		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
+
+		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
@@ -406,7 +412,8 @@ public class NeighbourDiscovererTest {
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		ericsson.setFedIn(ericssonSubscription);
 		when(interchangeRepository.findInterchangesWithSubscriptionToPoll()).thenReturn(Collections.singletonList(ericsson));
-		doReturn(subscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+		doReturn(subscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(DNSResolvedInterchange.class));
+		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
 
 		neighbourDiscoverer.pollSubscriptions();
 

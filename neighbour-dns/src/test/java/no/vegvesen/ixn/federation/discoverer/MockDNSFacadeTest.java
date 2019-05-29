@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.DNSResolvedInterchange;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +28,7 @@ public class MockDNSFacadeTest {
 
 	@Test
 	public void getNeighbours() {
-		List<Interchange> neighbours = dnsFacade.getNeighbours();
+		List<DNSResolvedInterchange> neighbours = dnsFacade.getNeighbours();
 		AssertionsForInterfaceTypes.assertThat(neighbours).hasSize(2);
 	}
 }
