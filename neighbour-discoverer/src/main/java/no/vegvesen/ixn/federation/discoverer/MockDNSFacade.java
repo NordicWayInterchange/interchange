@@ -34,9 +34,9 @@ public class MockDNSFacade implements DNSFacadeInterface{
 			node1.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()));
 			node1.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
 			node1.setFedIn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
-			node1.setDomainName("");
 			node1.setMessageChannelPort("5672");
 			node1.setControlChannelPort("8090");
+			logger.debug("Mocking interchange {}", node1);
 			interchanges.add(node1);
 		}
 
