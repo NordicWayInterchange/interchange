@@ -26,14 +26,10 @@ public class NeighbourDiscovererTest {
 	private ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
 	private DNSFacade dnsFacade = mock(DNSFacade.class);
 	private NeighbourRESTFacade neighbourRESTFacade = mock(NeighbourRESTFacade.class);
+	private NeighbourDiscovererProperties discovererProperties = mock(NeighbourDiscovererProperties.class);
+	private GracefulBackoffProperties backoffProperties = mock(GracefulBackoffProperties.class);
 
 	private String myName = "bouvet";
-	private int backoffIntervalLength = 120;
-	private int allowedNumberOfBackoffAttempts = 4;
-	private int allowedNumberOfPolls = 7;
-	private int randomShiftUpperLimit = 60000;
-
-
 
 	@Spy
 	private NeighbourDiscoverer neighbourDiscoverer = new NeighbourDiscoverer(dnsFacade,
@@ -41,10 +37,8 @@ public class NeighbourDiscovererTest {
 			serviceProviderRepository,
 			neighbourRESTFacade,
 			myName,
-			backoffIntervalLength,
-			allowedNumberOfBackoffAttempts,
-			allowedNumberOfPolls,
-			randomShiftUpperLimit);
+			backoffProperties,
+			discovererProperties);
 
 
 	private List<Interchange> neighbours = new ArrayList<>();
@@ -256,7 +250,7 @@ public class NeighbourDiscovererTest {
 		LocalDateTime now = LocalDateTime.now();
 
 		double exponential = 0;
-		long expectedBackoff = (long) Math.pow(2, exponential)*backoffIntervalLength;
+		long expectedBackoff = (long) Math.pow(2, exponential)*2000;
 
 		LocalDateTime lowerLimit = now.plusSeconds(expectedBackoff);
 		LocalDateTime upperLimit = now.plusSeconds(expectedBackoff+60);
@@ -266,6 +260,10 @@ public class NeighbourDiscovererTest {
 
 		ericsson.setBackoffAttempts(0);
 		ericsson.setBackoffStart(now);
+
+		doReturn(2000).when(backoffProperties).getStartIntervalLength();
+		doReturn(60000).when(backoffProperties).getRandomShiftUpperLimit();
+
 
 		LocalDateTime result = neighbourDiscoverer.getNextPostAttemptTime(ericsson);
 
@@ -406,7 +404,7 @@ public class NeighbourDiscovererTest {
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		ericsson.setFedIn(ericssonSubscription);
 		when(interchangeRepository.findInterchangesWithSubscriptionToPoll()).thenReturn(Collections.singletonList(ericsson));
-		doReturn(subscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+		// unnecessary mockito stubbing: doReturn(subscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
 
 		neighbourDiscoverer.pollSubscriptions();
 
