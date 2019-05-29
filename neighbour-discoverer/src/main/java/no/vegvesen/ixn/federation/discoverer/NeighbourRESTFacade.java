@@ -12,7 +12,6 @@ import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -20,12 +19,12 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
+
 @Component
 public class NeighbourRESTFacade {
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRESTFacade.class);
-	private String capabilityExchangePath;
-	private String subscriptionRequestPath;
 	private RestTemplate restTemplate;
 	private CapabilityTransformer capabilityTransformer;
 	private SubscriptionTransformer subscriptionTransformer;
@@ -33,16 +32,11 @@ public class NeighbourRESTFacade {
 	private ObjectMapper mapper;
 
 	@Autowired
-	public NeighbourRESTFacade(@Value("${path.subscription-request}") String subscriptionRequestPath,
-							   @Value("${path.capabilities-exchange}") String capabilityExchangePath,
-							   RestTemplate restTemplate,
+	public NeighbourRESTFacade(RestTemplate restTemplate,
 							   CapabilityTransformer capabilityTransformer,
 							   SubscriptionTransformer subscriptionTransformer,
 							   SubscriptionRequestTransformer subscriptionRequestTransformer,
 							   ObjectMapper mapper) {
-
-		this.capabilityExchangePath = capabilityExchangePath;
-		this.subscriptionRequestPath = subscriptionRequestPath;
 		this.restTemplate = restTemplate;
 		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
@@ -52,7 +46,7 @@ public class NeighbourRESTFacade {
 
 	Interchange postCapabilities(Interchange discoveringInterchange, Interchange neighbour) {
 
-		String url = neighbour.getControlChannelUrl(capabilityExchangePath);
+		String url = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		logger.debug("Posting capabilities to {} on URL: {}", neighbour.getName(), url);
 		logger.debug("Representation of discovering interchange: {}", discoveringInterchange.toString());
 
@@ -95,7 +89,7 @@ public class NeighbourRESTFacade {
 
 	SubscriptionRequest postSubscriptionRequest(Interchange discoveringInterchange, Interchange neighbour) {
 
-		String url = neighbour.getControlChannelUrl(subscriptionRequestPath);
+		String url = neighbour.getControlChannelUrl(SUBSCRIPTION_PATH);
 		logger.debug("Posting subscription request to {} on URL: {}", neighbour.getName(), url);
 		logger.debug("Representation of discovering interchange: {}", discoveringInterchange.toString());
 

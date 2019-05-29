@@ -28,14 +28,11 @@ public class NeighbourRESTFacadeTest {
 
 	private RestTemplate restTemplate = new RestTemplate();
 	private ObjectMapper mapper = new ObjectMapper();
-	private String subscriptionRequestPath = "/subscription";
-	private String capabilityExchangePath = "/capabilities";
 	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer();
 
-	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(subscriptionRequestPath,
-			capabilityExchangePath,
+	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(
 			restTemplate,
 			capabilityTransformer,
 			subscriptionTransformer,
