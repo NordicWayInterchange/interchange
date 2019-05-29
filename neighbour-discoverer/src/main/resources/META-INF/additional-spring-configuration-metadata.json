@@ -1,0 +1,99 @@
+{
+  "groups": [
+    {
+      "name": "dns",
+      "type": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "discoverer.capabilities-update-interval",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
+    },
+    {
+      "name": "discoverer.capability-exchange-path",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
+    },
+    {
+      "name": "discoverer.capability-post-initial-delay",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
+    },
+    {
+      "name": "discoverer.node-provider-name",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
+    },
+    {
+      "name": "discoverer.subscription-request-initial-delay",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
+    },
+    {
+      "name": "discoverer.subscription-request-path",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
+    },
+    {
+      "name": "discoverer.subscription-request-update-interval",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
+    },
+    {
+      "name": "dns.control-channel-port",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
+      "defaultValue": "8090"
+    },
+    {
+      "name": "dns.domain-name",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
+    },
+    {
+      "name": "dns.initial-delay",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
+    },
+    {
+      "name": "dns.lookup-interval",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
+    },
+    {
+      "name": "dns.message-channel-port",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
+      "defaultValue": "5671"
+    },
+    {
+      "name": "dns.mock-names",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
+    },
+    {
+      "name": "dns.type",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
+      "defaultValue": "prod"
+    }
+  ],
+  "hints": [
+    {
+      "name": "dns.type",
+      "values": [
+        {
+          "value": "prod",
+          "description": "DNSFacade for production."
+        },
+        {
+          "value": "mock",
+          "description": "DNSFacade for testing."
+        }
+      ]
+    }
+  ]
+}
