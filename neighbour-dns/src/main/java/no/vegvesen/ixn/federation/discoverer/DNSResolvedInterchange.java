@@ -1,27 +1,22 @@
-package no.vegvesen.ixn.federation.model;
+package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
+import no.vegvesen.ixn.federation.model.Interchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 
-@Entity
-@Table(name = "interchanges", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_ixn_name"))
 public class DNSResolvedInterchange extends Interchange {
 
 	private static final int DEFAULT_CONTROL_CHANNEL_PORT = 443;
 	private static final String DEFAULT_CONTROL_CHANNEL_PROTOCOL = "https";
 	private static final int DEFAULT_MESSAGE_CHANNEL_PORT = 5671;
 
-	static Logger logger = LoggerFactory.getLogger(DNSResolvedInterchange.class);
+	private static Logger logger = LoggerFactory.getLogger(DNSResolvedInterchange.class);
 
-	private String domainName;
 	private int messageChannelPort;
 	private int controlChannelPort;
 
@@ -31,39 +26,31 @@ public class DNSResolvedInterchange extends Interchange {
 		this.controlChannelPort = -1;
 	}
 
-	public DNSResolvedInterchange(Interchange interchange, int messageChannelPort, int controlChannelPort) {
-		super(interchange.getName(), interchange.getCapabilities(), interchange.getSubscriptionRequest(), interchange.getFedIn());
-		this.controlChannelPort = controlChannelPort;
-		this.messageChannelPort = messageChannelPort;
-	}
-
 	public DNSResolvedInterchange(String name, String domain, int controlChannelPort, int messageChannelPort) {
 		super(name, domain);
 		this.controlChannelPort = controlChannelPort;
 		this.messageChannelPort = messageChannelPort;
 	}
 
-	public int getMessageChannelPort() {
-		return messageChannelPort;
-	}
-
-	public void setMessageChannelPort(int messageChannelPort) {
+	public DNSResolvedInterchange(Interchange neighbour, Integer controlChannelPort, Integer messageChannelPort) {
+		super(neighbour.getName(), neighbour.getDomainName());
+		this.controlChannelPort = controlChannelPort;
 		this.messageChannelPort = messageChannelPort;
 	}
 
-	public int getControlChannelPort() {
-		return controlChannelPort;
+	Integer getMessageChannelPort() {
+		return messageChannelPort;
 	}
 
-	public void setControlChannelPort(int controlChannelPort) {
-		this.controlChannelPort = controlChannelPort;
+	Integer getControlChannelPort() {
+		return controlChannelPort;
 	}
 
 	@Override
 	public String toString() {
 		return "ResolvedInterchange{" +
 				", name='" + this.getName() + '\'' +
-				", domainName='" + domainName + '\'' +
+				", domainName='" + this.getDomainName() + '\'' +
 				", messageChannelPort='" + messageChannelPort + '\'' +
 				", controlChannelPort='" + controlChannelPort + '\'' +
 				'}';
@@ -78,7 +65,7 @@ public class DNSResolvedInterchange extends Interchange {
 		return fullDomainName.toString();
 	}
 
-	public String getControlChannelUrl(String file) {
+	String getControlChannelUrl(String file) {
 		try {
 			if (this.getControlChannelPort() == -1 || this.getControlChannelPort() == DEFAULT_CONTROL_CHANNEL_PORT) {
 				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getFullDomainName(), file)
@@ -93,8 +80,7 @@ public class DNSResolvedInterchange extends Interchange {
 		}
 	}
 
-	public String getMessageChannelUrl() {
-		URL url = null;
+	String getMessageChannelUrl() {
 		try {
 			if (this.getMessageChannelPort() == -1 || this.getMessageChannelPort() == DEFAULT_MESSAGE_CHANNEL_PORT) {
 				return String.format("amqps://%s/", this.getFullDomainName());

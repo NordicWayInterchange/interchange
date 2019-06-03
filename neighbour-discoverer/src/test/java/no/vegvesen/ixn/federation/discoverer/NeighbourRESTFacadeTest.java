@@ -2,12 +2,18 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.exceptions.*;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.DataType;
+import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.http.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
@@ -17,10 +23,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class NeighbourRESTFacadeTest {
@@ -33,6 +38,7 @@ public class NeighbourRESTFacadeTest {
 	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer();
+	private MockDNSFacade dnsFacade = new MockDNSFacade(new String[]{"ericsson"}, "itsinterchange.eu", 8080, 9876);
 
 	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(subscriptionRequestPath,
 			capabilityExchangePath,
@@ -40,7 +46,8 @@ public class NeighbourRESTFacadeTest {
 			capabilityTransformer,
 			subscriptionTransformer,
 			subscriptionRequestTransformer,
-			mapper);
+			mapper,
+			dnsFacade);
 
 	private DNSResolvedInterchange ericsson;
 

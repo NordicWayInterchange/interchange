@@ -1,6 +1,7 @@
-package no.vegvesen.ixn.federation.model;
+package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
+import no.vegvesen.ixn.federation.model.Interchange;
 import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;

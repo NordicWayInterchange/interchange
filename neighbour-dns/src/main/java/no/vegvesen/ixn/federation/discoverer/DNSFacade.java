@@ -2,7 +2,8 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import no.vegvesen.ixn.federation.model.DNSResolvedInterchange;
+import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
+import no.vegvesen.ixn.federation.model.Interchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,6 +70,17 @@ public class DNSFacade implements DNSFacadeInterface {
 		}
 
 		return interchanges;
+	}
+
+	@Override
+	public DNSResolvedInterchange resolveInterchange(Interchange neighbour) {
+		List<DNSResolvedInterchange> neighbours = getNeighbours();
+		for (DNSResolvedInterchange dnsNeighbour : neighbours) {
+			if (dnsNeighbour.getName().equals(neighbour.getName())) {
+				return new DNSResolvedInterchange(neighbour, dnsNeighbour.getControlChannelPort(), dnsNeighbour.getMessageChannelPort());
+			}
+		}
+		throw new DiscoveryException(String.format("Could not discover neighbour %s in dns", neighbour.getName()));
 	}
 
 }

@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import no.vegvesen.ixn.federation.model.DNSResolvedInterchange;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.Test;
 import org.junit.runner.RunWith;

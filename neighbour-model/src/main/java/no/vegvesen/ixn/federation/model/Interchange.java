@@ -44,8 +44,6 @@ public class Interchange {
 	private LocalDateTime backoffStart;
 	private int backoffAttempts = 0;
 	private String domainName;
-	private String messageChannelPort;
-	private String controlChannelPort;
 
 	public Interchange() {
 	}
@@ -178,9 +176,6 @@ public class Interchange {
 				", lastSeen=" + lastSeen +
 				", backoffStart=" + backoffStart +
 				", backoffAttempts=" + backoffAttempts +
-				", domainName='" + domainName + '\'' +
-				", messageChannelPort='" + messageChannelPort + '\'' +
-				", controlChannelPort='" + controlChannelPort + '\'' +
-				'}';
+				", domainName='" + domainName + '}';
 	}
 }

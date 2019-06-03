@@ -7,7 +7,6 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.Interchange;
-import no.vegvesen.ixn.federation.model.DNSResolvedInterchange;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.slf4j.Logger;
@@ -33,6 +32,7 @@ public class NeighbourRESTFacade {
 	private SubscriptionTransformer subscriptionTransformer;
 	private SubscriptionRequestTransformer subscriptionRequestTransformer;
 	private ObjectMapper mapper;
+	private DNSFacadeInterface dnsFacade;
 
 	@Autowired
 	public NeighbourRESTFacade(@Value("${path.subscription-request}") String subscriptionRequestPath,
@@ -41,7 +41,8 @@ public class NeighbourRESTFacade {
 							   CapabilityTransformer capabilityTransformer,
 							   SubscriptionTransformer subscriptionTransformer,
 							   SubscriptionRequestTransformer subscriptionRequestTransformer,
-							   ObjectMapper mapper) {
+							   ObjectMapper mapper,
+							   DNSFacadeInterface dnsFacade) {
 
 		this.capabilityExchangePath = capabilityExchangePath;
 		this.subscriptionRequestPath = subscriptionRequestPath;
@@ -50,11 +51,12 @@ public class NeighbourRESTFacade {
 		this.subscriptionTransformer = subscriptionTransformer;
 		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
 		this.mapper = mapper;
+		this.dnsFacade = dnsFacade;
 	}
 
-	Interchange postCapabilities(Interchange discoveringInterchange, DNSResolvedInterchange neighbour) {
+	Interchange postCapabilities(Interchange discoveringInterchange, Interchange neighbour) {
+		String url = getControlChannelUrl(neighbour, capabilityExchangePath);
 
-		String url = neighbour.getControlChannelUrl(capabilityExchangePath);
 		logger.debug("Posting capabilities to {} on URL: {}", neighbour.getName(), url);
 		logger.debug("Representation of discovering interchange: {}", discoveringInterchange.toString());
 
@@ -94,11 +96,10 @@ public class NeighbourRESTFacade {
 		}
 	}
 
-
-	SubscriptionRequest postSubscriptionRequest(DNSResolvedInterchange discoveringInterchange, DNSResolvedInterchange neighbour) {
-
-		String url = neighbour.getControlChannelUrl(subscriptionRequestPath);
+	SubscriptionRequest postSubscriptionRequest(Interchange discoveringInterchange, Interchange neighbour) {
+		String url = getControlChannelUrl(neighbour, subscriptionRequestPath);
 		logger.debug("Posting subscription request to {} on URL: {}", neighbour.getName(), url);
+
 		logger.debug("Representation of discovering interchange: {}", discoveringInterchange.toString());
 
 		// Post representation to neighbour
@@ -146,9 +147,8 @@ public class NeighbourRESTFacade {
 		}
 	}
 
-	Subscription pollSubscriptionStatus(Subscription subscription, DNSResolvedInterchange neighbour) {
-
-		String url = neighbour.getControlChannelUrl(subscription.getPath());
+	Subscription pollSubscriptionStatus(Subscription subscription, Interchange neighbour) {
+		String url = getControlChannelUrl(neighbour, subscription.getPath());
 
 		try {
 			ResponseEntity<SubscriptionApi> response = restTemplate.getForEntity(url, SubscriptionApi.class);
@@ -178,5 +178,10 @@ public class NeighbourRESTFacade {
 				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
 			}
 		}
+	}
+
+	private String getControlChannelUrl(Interchange neighbour, String path) {
+		DNSResolvedInterchange resolvedNeighbour = dnsFacade.resolveInterchange(neighbour);
+		return resolvedNeighbour.getControlChannelUrl(path);
 	}
 }
