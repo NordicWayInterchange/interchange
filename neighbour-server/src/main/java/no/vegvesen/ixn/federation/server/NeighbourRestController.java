@@ -138,7 +138,7 @@ public class NeighbourRestController {
 
 			// Create a path for each subscription
 			for (Subscription subscription : neighbourToUpdate.getSubscriptionRequest().getSubscriptions()) {
-				String path = neighbourToUpdate.getName() + "/subscription/" + subscription.getId();
+				String path = "/" + neighbourToUpdate.getName() + "/subscription/" + subscription.getId();
 				logger.info("Path for subscription {}: {}", subscription.toString(), path);
 				subscription.setPath(path);
 			}
@@ -156,7 +156,7 @@ public class NeighbourRestController {
 
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(method = RequestMethod.GET, value = "{ixnName}/subscription/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscription/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionApi pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId) {
 

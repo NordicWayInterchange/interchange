@@ -123,7 +123,7 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPollOfSubscriptionReturnsSubscription()throws Exception{
 
 		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
-		subscription.setPath("bouvet/subscription/1");
+		subscription.setPath("/bouvet/subscription/1");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
 

@@ -66,6 +66,9 @@ public class DNSResolvedInterchange extends Interchange {
 	}
 
 	String getControlChannelUrl(String file) {
+		if (!file.startsWith("/")) {
+			throw new DiscoveryException("Path to discover other node must start with \"/\"");
+		}
 		try {
 			if (this.getControlChannelPort() == -1 || this.getControlChannelPort() == DEFAULT_CONTROL_CHANNEL_PORT) {
 				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getFullDomainName(), file)
