@@ -124,7 +124,7 @@ public class NeighbourRESTFacade {
 			responseInterchange.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
 			logger.info("Response code for posting subscription request to {} is {}", url, response.getStatusCodeValue());
-			logger.debug("Successful post of subscription request to neighbour. Response is: {}", responseApi.toString());
+			logger.debug("Successful post of subscription request to neighbour. Response is: {}", responseApi);
 
 			return responseInterchange.getSubscriptionRequest();
 
@@ -139,12 +139,9 @@ public class NeighbourRESTFacade {
 				ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
 				logger.error("Received error object from server: {}", errorDetails.toString());
 				throw new SubscriptionRequestException("Subscription request failed. Received error object from server: " + errorDetails.toString());
-			} catch (JsonMappingException jme) {
-				logger.error("Unable to cast response as ErrorDetails object. ");
-				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object.");
 			} catch (IOException ioe) {
-				logger.error("Unable to cast response as ErrorDetails object. ");
-				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object." );
+				logger.error("Unable to cast response as ErrorDetails object. ", ioe);
+				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object.");
 			}
 		}
 	}
@@ -176,11 +173,8 @@ public class NeighbourRESTFacade {
 
 				logger.error("Received error object from server: {}", errorDetails.toString());
 				throw new SubscriptionPollException("Error in polling " + url + " for subscription status. Received error response from server: " + status.toString());
-			} catch (JsonMappingException jme) { // TODO: subclass of IOException - should we catch both?
-				logger.error("Unable to cast response as ErrorDetails object. ");
-				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
 			} catch (IOException ioe) {
-				logger.error("Unable to cast response as ErrorDetails object. ");
+				logger.error("Unable to cast response as ErrorDetails object. ", ioe);
 				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
 			}
 		}

@@ -61,7 +61,7 @@ public class NeighbourDiscovererTest {
 	private Subscription firstSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 	private Subscription secondSubscription = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
 	private Subscription illegalSubscription = new Subscription("(where LIKE 'DK') OR (1=1)", Subscription.SubscriptionStatus.REQUESTED);
-	DNSResolvedInterchange resolvedBouvet = new DNSResolvedInterchange("bouvet", "itsinterchange.eu", 1, 2);
+	private DNSResolvedInterchange resolvedBouvet = new DNSResolvedInterchange("bouvet", "itsinterchange.eu", 1, 2);
 
 
 
