@@ -203,7 +203,7 @@ public class NeighbourDiscoverer {
 	private DNSResolvedInterchange resolveInterchange(Interchange neighbour) {
 		List<DNSResolvedInterchange> neighbours = dnsFacade.getNeighbours();
 		for (DNSResolvedInterchange dnsNeighbour : neighbours) {
-			if (dnsNeighbour.getName() == neighbour.getName()) {
+			if (dnsNeighbour.getName().equals(neighbour.getName())) {
 				DNSResolvedInterchange resolvedInterchange = new DNSResolvedInterchange(neighbour);
 				resolvedInterchange.setControlChannelPort(dnsNeighbour.getControlChannelPort());
 				resolvedInterchange.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
@@ -286,7 +286,7 @@ public class NeighbourDiscoverer {
 					Interchange discoveringInterchange = getDiscoveringInterchangeWithCapabilities();
 
 					// Throws CapabilityPostException if unsuccessful.
-					Interchange neighbourRepresentation = neighbourRESTFacade.postCapabilities(resolveInterchange(discoveringInterchange), resolveInterchange(neighbour));
+					Interchange neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringInterchange, resolveInterchange(neighbour));
 
 					neighbour.setCapabilities(neighbourRepresentation.getCapabilities());
 					neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
@@ -437,7 +437,7 @@ public class NeighbourDiscoverer {
 
 			try {
 				// Throws CapabilityPostException if unsuccessful.
-				neighbourResponse = neighbourRESTFacade.postCapabilities(resolveInterchange(discoveringInterchange), resolveInterchange(neighbour));
+				neighbourResponse = neighbourRESTFacade.postCapabilities(discoveringInterchange, resolveInterchange(neighbour));
 
 				neighbour.setCapabilities(neighbourResponse.getCapabilities());
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);

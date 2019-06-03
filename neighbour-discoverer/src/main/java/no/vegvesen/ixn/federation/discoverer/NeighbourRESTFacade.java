@@ -52,7 +52,7 @@ public class NeighbourRESTFacade {
 		this.mapper = mapper;
 	}
 
-	Interchange postCapabilities(DNSResolvedInterchange discoveringInterchange, DNSResolvedInterchange neighbour) {
+	Interchange postCapabilities(Interchange discoveringInterchange, DNSResolvedInterchange neighbour) {
 
 		String url = neighbour.getControlChannelUrl(capabilityExchangePath);
 		logger.debug("Posting capabilities to {} on URL: {}", neighbour.getName(), url);

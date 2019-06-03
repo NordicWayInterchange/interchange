@@ -210,7 +210,7 @@ public class NeighbourDiscovererTest {
 	public void successfulCapabilitiesPostCallsSaveOnRepository(){
 
 		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesForCapabilityExchange();
-		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
+		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(DNSResolvedInterchange.class));
 		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
 		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
 
@@ -242,7 +242,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.capabilityExchange();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(DNSResolvedInterchange.class));
 	}
 
 
@@ -280,7 +280,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(DNSResolvedInterchange.class));
 	}
 
 	@Test
@@ -292,7 +292,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(DNSResolvedInterchange.class));
 	}
 
 	@Test
@@ -321,7 +321,7 @@ public class NeighbourDiscovererTest {
 		ericssonResponse.setCapabilities(ericssonCapabilities);
 		ericssonResponse.setSubscriptionRequest(ericssonSubscriptionRequest);
 
-		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
+		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(DNSResolvedInterchange.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
@@ -329,7 +329,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(1)).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
+		verify(neighbourRESTFacade, times(1)).postCapabilities(any(Interchange.class), any(DNSResolvedInterchange.class));
 	}
 
 	@Test
@@ -378,7 +378,7 @@ public class NeighbourDiscovererTest {
 
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
-		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
+		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(DNSResolvedInterchange.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
@@ -397,7 +397,7 @@ public class NeighbourDiscovererTest {
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 		when(dnsFacade.getNeighbours()).thenReturn(Arrays.asList(ericsson, resolvedBouvet));
 
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(DNSResolvedInterchange.class), any(DNSResolvedInterchange.class));
+		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(DNSResolvedInterchange.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
