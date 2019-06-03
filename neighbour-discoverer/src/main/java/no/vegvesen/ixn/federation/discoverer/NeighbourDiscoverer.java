@@ -300,7 +300,7 @@ public class NeighbourDiscoverer {
 	}
 
 
-	//@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}", initialDelayString = "${neighbour.graceful-backoff.check-offset}")
+	@Scheduled(fixedRateString = "${neighbour.graceful-backoff.check-interval}", initialDelayString = "${neighbour.graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
 
 		List<Interchange> neighboursWithFailedSubscriptionRequest = interchangeRepository.findInterchangesWithFailedFedIn();
