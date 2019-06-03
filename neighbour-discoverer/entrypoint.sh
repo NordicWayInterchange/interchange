@@ -5,6 +5,7 @@ echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 java -Dspring.datasource.url=${POSTGRES_URI} \
      -Ddns.mock-names=${DNS_MOCK_NAMES} \
      -Ddns.type=${DNS_TYPE} \
+     -Ddns.lookup.domain.name=${DNS_DOMAIN} \
      -Dneighbour.ssl.trust-store-password=password \
      -Dneighbour.ssl.trust-store=/tmp/keys/truststore.jks \
      -Dneighbour.ssl.key-store=/tmp/keys/${SERVER_NAME}.p12 \

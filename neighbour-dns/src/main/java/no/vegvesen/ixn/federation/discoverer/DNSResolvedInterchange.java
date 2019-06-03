@@ -59,7 +59,7 @@ public class DNSResolvedInterchange extends Interchange {
 
 	private String getFullDomainName() {
 		StringBuilder fullDomainName = new StringBuilder(this.getName());
-		if (this.getDomainName() != null) {
+		if (this.getDomainName() != null && this.getDomainName().length() > 0) {
 			fullDomainName.append(".").append(this.getDomainName());
 		}
 		return fullDomainName.toString();

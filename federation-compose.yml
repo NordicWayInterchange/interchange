@@ -70,7 +70,6 @@ services:
   bouvet_neighbour_discoverer:
     build: ./neighbour-discoverer
     depends_on:
-      - remote_neighbour_server
       - bouvet_db
       - federation-build
     links:
@@ -82,6 +81,7 @@ services:
       - SERVER_NAME=bouvet
       - DNS_MOCK_NAMES=bouvet,remote
       - DNS_TYPE=mock
+      - DNS_DOMAIN=
 
   remote_db:
     image: postgres:9.6
@@ -108,7 +108,6 @@ services:
   remote_neighbour_discoverer:
     build: ./neighbour-discoverer
     depends_on:
-      - bouvet_neighbour_server
       - remote_db
       - federation-build
     links:
@@ -120,6 +119,7 @@ services:
       - SERVER_NAME=remote
       - DNS_MOCK_NAMES=bouvet,remote
       - DNS_TYPE=mock
+      - DNS_DOMAIN=
 
   remote_qpid:
     build: ./qpid
