@@ -19,6 +19,5 @@ RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-#HEALTHCHECK --interval=5s --timeout=3s CMD nc -zv localhost 5671
+HEALTHCHECK --interval=5s --timeout=3s CMD nc -zv localhost 5671
 
-CMD tail -f /dev/null
