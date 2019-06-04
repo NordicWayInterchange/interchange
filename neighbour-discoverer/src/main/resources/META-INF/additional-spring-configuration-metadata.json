@@ -64,6 +64,26 @@
       "defaultValue": "prod"
     },
     {
+      "name": "dns.mock.control-channel-port",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
+    },
+    {
+      "name": "dns.mock.domain-name",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
+    },
+    {
+      "name": "dns.mock.message-channel-port",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
+    },
+    {
+      "name": "dns.mock.mock-names",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
+    },
+    {
       "name": "discoverer.capabilities-update-interval",
       "type": "java.lang.String",
       "description": "Time, in milliseconds, between each capability post to neighbours.",

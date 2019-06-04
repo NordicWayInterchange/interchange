@@ -20,10 +20,10 @@ public class MockDNSFacade implements DNSFacadeInterface{
 
 	private Logger logger = LoggerFactory.getLogger(DNSFacade.class);
 
-	private DNSProperties dnsProperties;
+	private MockDNSProperties dnsProperties;
 
 	@Autowired
-	public MockDNSFacade(DNSProperties dnsProperties){
+	public MockDNSFacade(MockDNSProperties dnsProperties){
 		this.dnsProperties = dnsProperties;
 	}
 
@@ -31,7 +31,7 @@ public class MockDNSFacade implements DNSFacadeInterface{
 	@Override
 	public List<Interchange> getNeighbours() {
 
-		logger.info("DNSProperties: {}", dnsProperties.toString());
+		logger.info("MockDNSProperties: {}", dnsProperties.toString());
 
 		List<Interchange> interchanges = new ArrayList<>();
 		for (String dnsMockName : dnsProperties.getMockNames()) {
@@ -40,7 +40,7 @@ public class MockDNSFacade implements DNSFacadeInterface{
 			node1.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()));
 			node1.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
 			node1.setFedIn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
-			node1.setDomainName("");
+			node1.setDomainName(dnsProperties.getDomainName());
 			node1.setMessageChannelPort(dnsProperties.getMessageChannelPort());
 			node1.setControlChannelPort(dnsProperties.getControlChannelPort());
 			logger.debug("Mocking interchange {}", node1);
