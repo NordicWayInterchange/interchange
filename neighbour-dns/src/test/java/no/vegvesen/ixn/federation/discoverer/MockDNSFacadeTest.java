@@ -10,7 +10,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes= {MockDNSFacade.class, DNSFacade.class, DNSProperties.class})
+@SpringBootTest(classes= {MockDNSFacade.class, DNSFacade.class, MockDNSProperties.class})
 public class MockDNSFacadeTest {
 
 	@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")

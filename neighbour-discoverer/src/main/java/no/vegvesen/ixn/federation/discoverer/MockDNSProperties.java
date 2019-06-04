@@ -11,7 +11,7 @@ public class MockDNSProperties {
 
 	private String controlChannelPort;
 	private String messageChannelPort;
-	private String domainName;
+	private String domainName = "";
 	private List<String> mockNames;
 
 	public String getControlChannelPort() {
