@@ -48,6 +48,8 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
       - SERVER_NAME=bouvet
+      - DNS_MOCK_NAMES=bouvet,remote
+      - DNS_TYPE=mock
 
   bouvet_routing_configurer:
     build: ./routing-configurer
@@ -70,7 +72,6 @@ services:
   bouvet_neighbour_discoverer:
     build: ./neighbour-discoverer
     depends_on:
-      - remote_neighbour_server
       - bouvet_db
       - federation-build
     links:
@@ -104,11 +105,12 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
       - SERVER_NAME=remote
+      - DNS_MOCK_NAMES=bouvet,remote
+      - DNS_TYPE=mock
 
   remote_neighbour_discoverer:
     build: ./neighbour-discoverer
     depends_on:
-      - bouvet_neighbour_server
       - remote_db
       - federation-build
     links:

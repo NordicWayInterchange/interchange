@@ -1,13 +1,16 @@
 package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.discoverer.DNSFacadeInterface;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
+import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
-import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import org.apache.qpid.server.filter.selector.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +21,11 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.apache.qpid.server.filter.selector.ParseException;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 //
 // TODO if possible : avoid hard coded paths for the API endpoints. Move them to application.properties
@@ -37,19 +42,22 @@ public class NeighbourRestController {
 	private SubscriptionRequestTransformer subscriptionRequestTransformer;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
+	private DNSFacadeInterface dnsFacade;
 
 	@Autowired
 	public NeighbourRestController(InterchangeRepository interchangeRepository,
 								   ServiceProviderRepository serviceProviderRepository,
 								   CapabilityTransformer capabilityTransformer,
 								   SubscriptionTransformer subscriptionTransformer,
-								   SubscriptionRequestTransformer subscriptionRequestTransformer) {
+								   SubscriptionRequestTransformer subscriptionRequestTransformer,
+								   DNSFacadeInterface dnsFacade) {
 
 		this.interchangeRepository = interchangeRepository;
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
 		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
+		this.dnsFacade = dnsFacade;
 	}
 
 
@@ -231,7 +239,7 @@ public class NeighbourRestController {
 
 		if (interchangeToUpdate == null) {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
-			interchangeToUpdate = neighbour;
+			interchangeToUpdate = findNeighbourInDns(neighbour);
 		} else {
 			logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 			interchangeToUpdate.setCapabilities(neighbour.getCapabilities());
@@ -254,4 +262,23 @@ public class NeighbourRestController {
 		return capabilityApiResponse;
 	}
 
+	private Interchange findNeighbourInDns(Interchange neighbour) {
+		List<Interchange> dnsNeighbours = dnsFacade.getNeighbours();
+		Interchange dnsNeighbour = null;
+		for (Interchange dnsNeighbourCandidate : dnsNeighbours) {
+			if (dnsNeighbourCandidate.getName().equals(neighbour.getName())) {
+				dnsNeighbour = dnsNeighbourCandidate;
+			}
+		}
+		if (dnsNeighbour != null) {
+			neighbour.setControlChannelPort(dnsNeighbour.getControlChannelPort());
+			neighbour.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
+			neighbour.setDomainName(dnsNeighbour.getDomainName());
+		}
+		else
+		{
+			throw new DiscoveryException(String.format("Received capability post from neighbour %s, but could not find in DNS", neighbour.getName()));
+		}
+		return neighbour;
+	}
 }

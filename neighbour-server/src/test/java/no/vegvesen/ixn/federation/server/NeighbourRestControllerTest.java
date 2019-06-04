@@ -5,7 +5,9 @@ import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityTransformer;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestTransformer;
+import no.vegvesen.ixn.federation.discoverer.DNSFacadeInterface;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
+import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -29,9 +31,7 @@ import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.isA;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,6 +55,9 @@ public class NeighbourRestControllerTest {
 	@Mock
 	SubscriptionRequestTransformer subscriptionRequestTransformer;
 
+	@Mock
+	DNSFacadeInterface dnsFacade;
+
 	@InjectMocks
 	private NeighbourRestController neighbourRestController;
 
@@ -68,21 +71,21 @@ public class NeighbourRestControllerTest {
 	@Before
 	public void setUp() {
 		mockMvc = MockMvcBuilders.standaloneSetup(neighbourRestController).build();
+	}
 
-		// Mocking the incoming certificate
+	private void mockCertificate(String commonName) {
 		Authentication principal = mock(Authentication.class);
-		when(principal.getName()).thenReturn("bouvet");
+		when(principal.getName()).thenReturn(commonName);
 		SecurityContext securityContext = mock(SecurityContext.class);
 		when(securityContext.getAuthentication()).thenReturn(principal);
 		SecurityContextHolder.setContext(securityContext);
 	}
 
-
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
 	public void postingCapabilitiesReturnsStatusCreated() throws Exception {
-
+		mockCertificate("bouvet");
 
 		// Mock incoming interchange to be result of conversion from CapabilityApi object to Interchange by server.
 		Interchange bouvet = new Interchange();
@@ -92,6 +95,7 @@ public class NeighbourRestControllerTest {
 		bouvetCapabilities.setDataTypes(Collections.singleton(bouvetDataType));
 		bouvet.setCapabilities(bouvetCapabilities);
 		doReturn(bouvet).when(capabilityTransformer).capabilityApiToInterchange(any(CapabilityApi.class));
+		doReturn(Collections.singletonList(bouvet)).when(dnsFacade).getNeighbours();
 
 		// Create capability api object to send to the server
 		CapabilityApi capabilityApiToServer = new CapabilityApi(bouvet.getName(), bouvet.getCapabilities().getDataTypes());
@@ -113,7 +117,38 @@ public class NeighbourRestControllerTest {
 	}
 
 	@Test
+	public void postingCapabilitiesUnknownInDNSReturnsError() throws Exception {
+		expectedException.expectCause(isA(DiscoveryException.class));
+
+		// Mocking the incoming certificate
+		mockCertificate("unknowninterchange");
+
+		// Mock incoming interchange to be result of conversion from CapabilityApi object to Interchange by server.
+		Interchange unknowninterchange = new Interchange();
+		unknowninterchange.setName("unknowninterchange");
+		DataType bouvetDataType = new DataType("datex2;1.0", "NO", "Obstruction");
+		Capabilities unknownCapabilities = new Capabilities();
+		unknownCapabilities.setDataTypes(Collections.singleton(bouvetDataType));
+		unknowninterchange.setCapabilities(unknownCapabilities);
+		doReturn(unknowninterchange).when(capabilityTransformer).capabilityApiToInterchange(any(CapabilityApi.class));
+		doReturn(Collections.emptyList()).when(dnsFacade).getNeighbours();
+
+		// Create capability api object to send to the server
+		CapabilityApi capabilityApiToServer = new CapabilityApi(unknowninterchange.getName(), unknowninterchange.getCapabilities().getDataTypes());
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApiToServer);
+
+		mockMvc.perform(
+				post(capabilityExchangePath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().is4xxClientError());
+	}
+
+	@Test
 	public void postingSubscriptionRequestReturnsStatusAccepted() throws Exception {
+		mockCertificate("bouvet");
 
 		// Mock interchange object to be result of converting SubscriptionRequestApi object to Interchange by server.
 		Interchange bouvet = new Interchange();
@@ -150,9 +185,8 @@ public class NeighbourRestControllerTest {
 
 	@Test
 	public void postThrowsExceptionIfCommonNameOfCertificateIsNotTheSameAsNameInApiObject() throws Exception {
-
+		mockCertificate("bouvet");
 		expectedException.expectCause(isA(CNAndApiObjectMismatchException.class));
-
 
 		// Mock incoming interchange to be result of conversion from CapabilityApi object to Interchange by server.
 		Interchange bouvet = new Interchange();
@@ -174,7 +208,5 @@ public class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-
-
 	}
 }
