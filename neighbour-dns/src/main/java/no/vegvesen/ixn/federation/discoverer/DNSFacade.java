@@ -17,14 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@ConditionalOnProperty(name ="dns.type", havingValue = "prod", matchIfMissing = true)
+@ConditionalOnProperty(name = "dns.type", havingValue = "prod", matchIfMissing = true)
 public class DNSFacade implements DNSFacadeInterface {
 
 	private DNSProperties dnsProperties;
 	private Logger logger = LoggerFactory.getLogger(DNSFacade.class);
 
 	@Autowired
-	public DNSFacade(DNSProperties dnsProperties){
+	public DNSFacade(DNSProperties dnsProperties) {
 		this.dnsProperties = dnsProperties;
 	}
 
@@ -42,25 +42,20 @@ public class DNSFacade implements DNSFacadeInterface {
 
 			Record[] records = new Lookup(srvLookupString, Type.SRV).run();
 
+			if (records == null) {
+				throw new RuntimeException("DNS lookup failed. Returned SRV records for " + srvLookupString + " was null.");
+			}
+
 			for (Record record : records) {
 
 				SRVRecord srv = (SRVRecord) record;
-
 				String target = srv.getTarget().toString();
 				String messageChannelPort = String.valueOf(srv.getPort());
-
 				int lengthDomain = target.indexOf(dnsProperties.getDomainName());
 
 				Interchange interchange = new Interchange();
 				interchange.setName(target.substring(0, lengthDomain));
-
-				// If port is null, use default port
-				if(messageChannelPort == null){
-					interchange.setMessageChannelPort(dnsProperties.getMessageChannelPort());
-				}else{
-					interchange.setMessageChannelPort(messageChannelPort);
-				}
-
+				interchange.setMessageChannelPort(messageChannelPort);
 				interchange.setControlChannelPort(dnsProperties.getControlChannelPort());
 				interchange.setDomainName(dnsProperties.getDomainName());
 
