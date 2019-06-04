@@ -56,10 +56,16 @@ public class NeighbourRESTFacade {
 		// Convert discovering interchange to CapabilityApi object and post to neighbour
 		CapabilityApi discoveringInterchangeToCapabilityApi = capabilityTransformer.interchangeToCapabilityApi(discoveringInterchange);
 		HttpEntity<CapabilityApi> entity = new HttpEntity<>(discoveringInterchangeToCapabilityApi, headers);
+		logger.debug("Posting capability api object: {}", discoveringInterchangeToCapabilityApi.toString());
+		logger.debug("Posting HttpEntity: {}", entity.toString());
+		logger.debug("Posting Headers: {}", headers.toString());
 
 		try {
 			ResponseEntity<CapabilityApi> response = restTemplate.exchange(url, HttpMethod.POST, entity, CapabilityApi.class);
 			CapabilityApi capabilityApi = response.getBody();
+			logger.debug("Received capability api: {}", response.getBody());
+			logger.debug("Received response entity: {}", response.toString());
+			logger.debug("Received headers: {}", response.getHeaders().toString());
 
 			logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi.toString());
 
@@ -77,10 +83,10 @@ public class NeighbourRESTFacade {
 				logger.error("Received error object from server: {}", errorDetails.toString());
 				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Received error response: " + errorDetails.toString());
 			} catch (JsonMappingException jme) {
-				logger.error("Unable to cast error response as ErrorDetails object.");
+				logger.error("Unable to cast error response as ErrorDetails object.", jme);
 				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetailsobject.");
 			} catch (IOException ioe) {
-				logger.error("Unable to cast error response as ErrorDetails object.");
+				logger.error("Unable to cast error response as ErrorDetails object.", ioe);
 				throw new CapabilityPostException("Unable to post capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetails object.");
 			}
 		}
@@ -91,7 +97,6 @@ public class NeighbourRESTFacade {
 
 		String url = neighbour.getControlChannelUrl(SUBSCRIPTION_PATH);
 		logger.debug("Posting subscription request to {} on URL: {}", neighbour.getName(), url);
-		logger.debug("Representation of discovering interchange: {}", discoveringInterchange.toString());
 
 		// Post representation to neighbour
 		HttpHeaders headers = new HttpHeaders();
@@ -99,11 +104,18 @@ public class NeighbourRESTFacade {
 
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.interchangeToSubscriptionRequestApi(discoveringInterchange);
 		HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
+		logger.debug("Posting Subscription request api object: {}", subscriptionRequestApi.toString());
+		logger.debug("Posting HttpEntity: {}", entity.toString());
+		logger.debug("Posting Headers: {}", headers.toString());
 
 		// Posting and receiving response
 
 		try {
 			ResponseEntity<SubscriptionRequestApi> response = restTemplate.exchange(url, HttpMethod.POST, entity, SubscriptionRequestApi.class);
+			logger.debug("Received subscription request api: {}", response.getBody());
+			logger.debug("Received response entity: {}", response.toString());
+			logger.debug("Received headers: {}", response.getHeaders().toString());
+
 			SubscriptionRequestApi responseApi = response.getBody();
 			Interchange responseInterchange = subscriptionRequestTransformer.subscriptionRequestApiToInterchange(responseApi);
 
@@ -115,8 +127,8 @@ public class NeighbourRESTFacade {
 
 			responseInterchange.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
-			logger.info("Response code for posting subscription request to {} is {}", url, response.getStatusCodeValue());
-			logger.debug("Successful post of subscription request to neighbour. Response is: {}", responseApi.toString());
+			logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
+			logger.debug("Received response object: {}", responseApi.toString());
 
 			return responseInterchange.getSubscriptionRequest();
 
@@ -132,10 +144,10 @@ public class NeighbourRESTFacade {
 				logger.error("Received error object from server: {}", errorDetails.toString());
 				throw new SubscriptionRequestException("Subscription request failed. Received error object from server: " + errorDetails.toString());
 			} catch (JsonMappingException jme) {
-				logger.error("Unable to cast response as ErrorDetails object. ");
+				logger.error("Unable to cast response as ErrorDetails object.", jme);
 				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object.");
 			} catch (IOException ioe) {
-				logger.error("Unable to cast response as ErrorDetails object. ");
+				logger.error("Unable to cast response as ErrorDetails object.", ioe);
 				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object." );
 			}
 		}
@@ -145,21 +157,22 @@ public class NeighbourRESTFacade {
 
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
 
+		logger.debug("Polling subscription to {} with URL: {}", neighbour.getName(), url);
+
 		try {
 			ResponseEntity<SubscriptionApi> response = restTemplate.getForEntity(url, SubscriptionApi.class);
 			SubscriptionApi subscriptionApi = response.getBody();
 			Subscription returnSubscription = subscriptionTransformer.subscriptionApiToSubscription(subscriptionApi);
 
-			logger.info("Successfully polled subscription with url: {}.", url);
-			logger.info("Response code: {}", response.getStatusCodeValue());
-			logger.info("Received subscription poll response: {}", returnSubscription.toString());
+			logger.debug("Successfully polled subscription. Response code: {}", response.getStatusCodeValue());
+			logger.debug("Received response object: {}", returnSubscription.toString());
 
 			return returnSubscription;
 
 		} catch (HttpClientErrorException | HttpServerErrorException e) {
 
 			HttpStatus status = e.getStatusCode();
-			logger.error("Failed polling subscription {}. Server returned error code: {}", url, status.toString());
+			logger.error("Failed polling subscription with url {}. Server returned error code: {}", url, status.toString());
 
 			byte[] errorResponse = e.getResponseBodyAsByteArray();
 
@@ -169,10 +182,10 @@ public class NeighbourRESTFacade {
 				logger.error("Received error object from server: {}", errorDetails.toString());
 				throw new SubscriptionPollException("Error in polling " + url + " for subscription status. Received error response from server: " + status.toString());
 			} catch (JsonMappingException jme) { // TODO: subclass of IOException - should we catch both?
-				logger.error("Unable to cast response as ErrorDetails object. ");
+				logger.error("Unable to cast response as ErrorDetails object.", jme);
 				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
 			} catch (IOException ioe) {
-				logger.error("Unable to cast response as ErrorDetails object. ");
+				logger.error("Unable to cast response as ErrorDetails object.", ioe);
 				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
 			}
 		}
