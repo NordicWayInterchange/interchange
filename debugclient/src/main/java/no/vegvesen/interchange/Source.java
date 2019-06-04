@@ -63,7 +63,7 @@ public class Source {
 		message.setStringProperty("version", "1.0");
 		message.setStringProperty("lat", "63.0");
 		message.setStringProperty("lon", "10.0");
-		message.setStringProperty("where1", "NO");
+		message.setStringProperty("where", "NO");
 		message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
 		producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE, new CompletionListener() {
