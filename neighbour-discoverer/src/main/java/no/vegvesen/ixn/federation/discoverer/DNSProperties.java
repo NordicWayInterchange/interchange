@@ -14,19 +14,17 @@ public class DNSProperties {
 	private String initialDelay;
 	private String type;
 	private String controlChannelPort;
-	private String messageChannelPort;
 	private String domainName;
 
 
 	public DNSProperties() {
 	}
 
-	public DNSProperties(String lookupInterval, String initialDelay, String type, String controlChannelPort, String messageChannelPort, String domainName, List<String> mockNames) {
+	public DNSProperties(String lookupInterval, String initialDelay, String type, String controlChannelPort, String domainName, List<String> mockNames) {
 		this.lookupInterval = lookupInterval;
 		this.initialDelay = initialDelay;
 		this.type = type;
 		this.controlChannelPort = controlChannelPort;
-		this.messageChannelPort = messageChannelPort;
 		this.domainName = domainName;
 	}
 
@@ -70,13 +68,6 @@ public class DNSProperties {
 		this.domainName = domainName;
 	}
 
-	public String getMessageChannelPort() {
-		return messageChannelPort;
-	}
-
-	public void setMessageChannelPort(String messageChannelPort) {
-		this.messageChannelPort = messageChannelPort;
-	}
 
 	@Override
 	public String toString() {
@@ -85,7 +76,6 @@ public class DNSProperties {
 				", initialDelay='" + initialDelay + '\'' +
 				", type='" + type + '\'' +
 				", controlChannelPort='" + controlChannelPort + '\'' +
-				", messageChannelPort='" + messageChannelPort + '\'' +
 				", domainName='" + domainName + '\'' +
 				'}';
 	}

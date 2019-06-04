@@ -25,13 +25,6 @@
       "defaultValue": "8090"
     },
     {
-      "name": "dns.message-channel-port",
-      "type": "java.lang.String",
-      "description": "The port number for the message channel on the neighbouring interchange.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
-      "defaultValue": "5671"
-    },
-    {
       "name": "dns.domain-name",
       "type": "java.lang.String",
       "description": "The domain name used in the interchange network.",
