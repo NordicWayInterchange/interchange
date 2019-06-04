@@ -50,4 +50,18 @@ public class InterchangeTest {
 		Interchange ericsson = new Interchange("ericsson", null, null, null);
 		ericsson.setDomainName(".itsinterchange.eu");
 	}
+
+	@Test
+	public void getMessageChannelUrlWithoutDomainNameAndSpecificPort() {
+		Interchange fullDomainName = new Interchange("my-host", null, null, null);
+		fullDomainName.setMessageChannelPort("5678");
+		assertThat(fullDomainName.getMessageChannelUrl()).isEqualTo("amqps://my-host:5678/");
+	}
+
+	@Test
+	public void getControlChannelUrlWithoutDomainNameAndSpecificPort() {
+		Interchange fullDomainName = new Interchange("my-host", null, null, null);
+		fullDomainName.setControlChannelPort("1234");
+		assertThat(fullDomainName.getControlChannelUrl("/thePath")).isEqualTo("https://my-host:1234/thePath");
+	}
 }
