@@ -121,7 +121,7 @@ public class Interchange {
 	}
 
 	public void setDomainName(String domainName) {
-		if (domainName.startsWith(".")) {
+		if (domainName != null && domainName.startsWith(".")) {
 			throw new DiscoveryException("Domain name shall not start with \".\"");
 		}
 		this.domainName = domainName;
