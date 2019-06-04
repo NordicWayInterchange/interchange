@@ -1,5 +1,6 @@
 package no.vegvesen.interchange;
 
+import no.vegvesen.ixn.ssl.KeystoreType;
 import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsTextMessage;
 
@@ -16,7 +17,7 @@ public class DebugClient{
 	private static final String YELLOW = "[33m";
 	private static final String TURQUOISE = "[36m";
 
-	private static final String USER = "interchange";
+	private static final String USER = null; // "interchange";
 	private static final String PASSWORD = "12345678";
 	private static final int TIME_TO_LIVE_THIRTY_SECONDS = 30000;
 
@@ -53,7 +54,7 @@ public class DebugClient{
 			messageProducer = session.createProducer(queueS);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -78,7 +79,8 @@ public class DebugClient{
 			printWithColor(BLACK, " ");
 			messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 		} catch (JMSException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
+
 		}
 	}
 
@@ -88,13 +90,13 @@ public class DebugClient{
 			printWithColor(BLACK, " ");
 			connection.close();
 		} catch (JMSException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 
 	public static void main(String[] args){
-		String url = "amqp://localhost:5672";
-		String sendQueue = "nwEx";
+		String url = "amqps://localhost:5601";
+		String sendQueue = "fedEx";
 
 		if (args.length == 2) {
 			url = args[0];

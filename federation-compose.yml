@@ -29,12 +29,12 @@ services:
       - "./tmp:/tmp"
       - "./qpid/messages/bouvet:/work/bouvet/messages"
     environment:
-      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
-      SERVER_CERTIFICATE_FILE: /tmp/keys/bouvet.crt
-      SERVER_PRIVATE_KEY_FILE: /tmp/keys/bouvet.key
-      VHOST_FILE: "/config/vhost.json"
-      GROUPS_FILE: "/config/groups"
-      PASSWD_FILE: "/config/passwd"
+      - CA_CERTIFICATE_FILE=/tmp/keys/my_ca.crt
+      - SERVER_CERTIFICATE_FILE=/tmp/keys/bouvet.crt
+      - SERVER_PRIVATE_KEY_FILE=/tmp/keys/bouvet.key
+      - VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/config/groups
+      - PASSWD_FILE=/config/passwd
 
   bouvet_neighbour_server:
     build: ./neighbour-server
@@ -135,12 +135,12 @@ services:
       - "./tmp:/tmp"
       - "./qpid/messages/remote:/work/remote/messages"
     environment:
-      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
-      SERVER_CERTIFICATE_FILE: /tmp/keys/remote.crt
-      SERVER_PRIVATE_KEY_FILE: /tmp/keys/remote.key
-      VHOST_FILE: "/config/vhost.json"
-      GROUPS_FILE: "/config/groups"
-      PASSWD_FILE: "/config/passwd"
+      - CA_CERTIFICATE_FILE=/tmp/keys/my_ca.crt
+      - SERVER_CERTIFICATE_FILE=/tmp/keys/remote.crt
+      - SERVER_PRIVATE_KEY_FILE=/tmp/keys/remote.key
+      - VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/config/groups
+      - PASSWD_FILE=/config/passwd
 
   remote_routing_configurer:
     build: ./routing-configurer
@@ -159,3 +159,35 @@ services:
       - KEYSTORE_NAME=/tmp/keys/remote.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
+
+  bouvet_message_forwarder_app:
+    build: ./message-forwarder
+    depends_on:
+      - bouvet_db
+    volumes:
+      - "./tmp:/tmp"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
+      - KEY_STORE_FILE=/tmp/keys/bouvet.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_TYPE=PKCS12
+      - TRUST_STORE_PATH=/tmp/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE_TYPE=JKS
+      - SERVER_NAME=bouvet
+
+  remote_message_forwarder_app:
+    build: ./message-forwarder
+    depends_on:
+      - remote_db
+    volumes:
+      - "./tmp:/tmp"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
+      - KEY_STORE_FILE=/tmp/keys/remote.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_TYPE=PKCS12
+      - TRUST_STORE_PATH=/tmp/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE_TYPE=JKS
+      - SERVER_NAME=remote
