@@ -28,7 +28,11 @@ public class SubscriptionRequestTransformerTest {
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.interchangeToSubscriptionRequestApi(interchange);
 		Interchange transformed = subscriptionRequestTransformer.subscriptionRequestApiToInterchange(subscriptionRequestApi);
 
-		assertThat(transformed.getSubscriptionRequest().getSubscriptions()).contains(subscription);
+		Subscription onlySubscription = transformed.getSubscriptionRequest().getSubscriptions().iterator().next();
+
+		assertThat(transformed.getSubscriptionRequest().getSubscriptions()).hasSize(1);
+		assertThat(transformed.getName()).isEqualTo(interchange.getName());
+		assertThat(onlySubscription.getSelector()).isEqualTo(subscription.getSelector());
 	}
 
 	@Test
@@ -43,7 +47,13 @@ public class SubscriptionRequestTransformerTest {
 		Interchange interchange = subscriptionRequestTransformer.subscriptionRequestApiToInterchange(subscriptionRequestApi);
 		SubscriptionRequestApi transformed = subscriptionRequestTransformer.interchangeToSubscriptionRequestApi(interchange);
 
-		assertThat(transformed.getSubscriptions()).contains(subscription);
+		Subscription onlySubscription = transformed.getSubscriptions().iterator().next();
+
+		assertThat(transformed.getSubscriptions()).hasSize(1);
+		assertThat(transformed.getName()).isEqualTo(interchange.getName());
+		assertThat(onlySubscription.getSelector()).isEqualTo(subscription.getSelector());
+
+
 	}
 
 	@Test
