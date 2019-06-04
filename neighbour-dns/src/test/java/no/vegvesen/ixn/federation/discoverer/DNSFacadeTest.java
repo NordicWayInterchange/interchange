@@ -27,7 +27,6 @@ public class DNSFacadeTest {
 
 		when(dnsProperties.getDomainName()).thenReturn(".itsinterchange.eu");
 		when(dnsProperties.getControlChannelPort()).thenReturn("8090");
-		when(dnsProperties.getMessageChannelPort()).thenReturn("5671");
 
 
 		// FIXME: how to check that this is correct when the number of neighbours in the network increases?
