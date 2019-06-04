@@ -40,20 +40,28 @@ public class DNSFacade implements DNSFacadeInterface {
 			// SRV record lookup for message chanel port on each sub domain
 			String srvLookupString = "_ixn._tcp" + dnsProperties.getDomainName();
 
-
 			Record[] records = new Lookup(srvLookupString, Type.SRV).run();
+
 			for (Record record : records) {
 
 				SRVRecord srv = (SRVRecord) record;
 
 				String target = srv.getTarget().toString();
 				String messageChannelPort = String.valueOf(srv.getPort());
+
 				int lengthDomain = target.indexOf(dnsProperties.getDomainName());
 
 				Interchange interchange = new Interchange();
 				interchange.setName(target.substring(0, lengthDomain));
+
+				// If port is null, use default port
+				if(messageChannelPort == null){
+					interchange.setMessageChannelPort(dnsProperties.getMessageChannelPort());
+				}else{
+					interchange.setMessageChannelPort(messageChannelPort);
+				}
+
 				interchange.setControlChannelPort(dnsProperties.getControlChannelPort());
-				interchange.setMessageChannelPort(messageChannelPort);
 				interchange.setDomainName(dnsProperties.getDomainName());
 
 				interchanges.add(interchange);
