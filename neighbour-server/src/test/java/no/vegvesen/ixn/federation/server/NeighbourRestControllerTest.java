@@ -5,9 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityTransformer;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestTransformer;
-import no.vegvesen.ixn.federation.discoverer.DNSFacadeInterface;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -95,7 +93,6 @@ public class NeighbourRestControllerTest {
 		bouvetCapabilities.setDataTypes(Collections.singleton(bouvetDataType));
 		bouvet.setCapabilities(bouvetCapabilities);
 		doReturn(bouvet).when(capabilityTransformer).capabilityApiToInterchange(any(CapabilityApi.class));
-		doReturn(Collections.singletonList(bouvet)).when(dnsFacade).getNeighbours();
 
 		// Create capability api object to send to the server
 		CapabilityApi capabilityApiToServer = new CapabilityApi(bouvet.getName(), bouvet.getCapabilities().getDataTypes());
@@ -186,6 +183,7 @@ public class NeighbourRestControllerTest {
 	public void postThrowsExceptionIfCommonNameOfCertificateIsNotTheSameAsNameInApiObject() throws Exception {
 		mockCertificate("bouvet");
 		expectedException.expectCause(isA(CNAndApiObjectMismatchException.class));
+
 
 		// Mock incoming interchange to be result of conversion from CapabilityApi object to Interchange by server.
 		Interchange bouvet = new Interchange();
