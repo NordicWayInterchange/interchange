@@ -116,7 +116,7 @@ public class MessageForwarder {
         //the write queue to.
         //remote queue:
         //amqp://<ixn.getDomainName()>:<ixn.getControlChannelPort>, queue name "fedEx"
-        String writeUrl = String.format("amqps://%s:%s",ixn.getDomainName(),ixn.getMessageChannelPort());
+        String writeUrl = ixn.getMessageChannelUrl();
         String writeQueue = "fedTest";
         Hashtable<Object, Object> writeEnv = createWriteContext(writeUrl, writeQueue);
 
