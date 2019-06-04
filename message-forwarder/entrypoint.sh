@@ -5,13 +5,8 @@ echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 #TODO need to put more of the settings into env variables.
 java \
 -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect \
--Dspring.datasource.url="jdbc:postgresql://message-forwarder-db:5432/federation" \
--Dspring.datasource.username=federation \
--Dspring.datasource.password=federation \
--Dspring.jpa.hibernate.ddl-auto=create-drop \
--Dlogging.pattern.console='%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n' \
--Dlogging.level.org.hibernate.SQL=debug \
--Dforwarder.localIxnDomainName=bouvet \
+-Dspring.datasource.url=${POSTGRES_URI} \
+-Dforwarder.localIxnDomainName=${SERVER_NAME} \
 -Dforwarder.localIxnFederationPort=5671 \
 -Dforwarder.keystorepath="$KEY_STORE_FILE" \
 -Dforwarder.keystorepassword="$KEY_STORE_PASSWORD" \
