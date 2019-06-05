@@ -8,14 +8,14 @@ import java.util.Set;
 public class SubscriptionRequestApi{
 
 	private String name;
-	private Set<Subscription> subscriptions = new HashSet<>();
+	private Set<SubscriptionApi> subscriptions = new HashSet<>();
 
 	SubscriptionRequestApi() {
 	}
 
 	public SubscriptionRequestApi(String name, Set<Subscription> subscriptions) {
 		this.name = name;
-		this.subscriptions = subscriptions;
+		setSubscriptions(subscriptions);
 	}
 
 	public String getName() {
@@ -27,11 +27,25 @@ public class SubscriptionRequestApi{
 	}
 
 	public Set<Subscription> getSubscriptions() {
-		return subscriptions;
+		Set<Subscription> returnSubscriptions = new HashSet<>();
+		SubscriptionTransformer transformer = new SubscriptionTransformer();
+
+		for(SubscriptionApi s : subscriptions){
+			Subscription converted = transformer.subscriptionApiToSubscription(s);
+			returnSubscriptions.add(converted);
+		}
+
+		return returnSubscriptions;
 	}
 
-	public void setSubscriptions(Set<Subscription> subscriptions) {
-		this.subscriptions = subscriptions;
+	public void setSubscriptions(Set<Subscription> subscriptionSet) {
+		this.subscriptions.clear();
+		SubscriptionTransformer transformer = new SubscriptionTransformer();
+
+		for(Subscription s : subscriptionSet){
+			SubscriptionApi converted = transformer.subscriptionToSubscriptionApi(s);
+			subscriptions.add(converted);
+		}
 	}
 
 	@Override

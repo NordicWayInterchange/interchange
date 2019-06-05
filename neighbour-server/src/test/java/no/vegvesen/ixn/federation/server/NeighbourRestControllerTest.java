@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.federation.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityTransformer;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestTransformer;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacadeInterface;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
@@ -27,7 +24,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.isA;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,7 +94,6 @@ public class NeighbourRestControllerTest {
 		bouvetCapabilities.setDataTypes(Collections.singleton(bouvetDataType));
 		bouvet.setCapabilities(bouvetCapabilities);
 		doReturn(bouvet).when(capabilityTransformer).capabilityApiToInterchange(any(CapabilityApi.class));
-		doReturn(Collections.singletonList(bouvet)).when(dnsFacade).getNeighbours();
 
 		// Create capability api object to send to the server
 		CapabilityApi capabilityApiToServer = new CapabilityApi(bouvet.getName(), bouvet.getCapabilities().getDataTypes());
@@ -105,6 +103,10 @@ public class NeighbourRestControllerTest {
 		// Mock CapabilityApi object returned from the server
 		CapabilityApi capabilityApi = new CapabilityApi("bouvet", Collections.singleton(bouvetDataType));
 		doReturn(capabilityApi).when(capabilityTransformer).interchangeToCapabilityApi(any(Interchange.class));
+
+		// Mock dns lookup
+		List<Interchange> dnsReturn = Arrays.asList(bouvet);
+		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
 
 
 		mockMvc.perform(
@@ -186,6 +188,7 @@ public class NeighbourRestControllerTest {
 	public void postThrowsExceptionIfCommonNameOfCertificateIsNotTheSameAsNameInApiObject() throws Exception {
 		mockCertificate("bouvet");
 		expectedException.expectCause(isA(CNAndApiObjectMismatchException.class));
+
 
 		// Mock incoming interchange to be result of conversion from CapabilityApi object to Interchange by server.
 		Interchange bouvet = new Interchange();
