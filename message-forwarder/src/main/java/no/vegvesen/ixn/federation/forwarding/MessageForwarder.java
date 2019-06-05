@@ -5,17 +5,13 @@ import no.vegvesen.ixn.federation.model.Interchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 @Service
@@ -96,9 +92,7 @@ public class MessageForwarder {
     public MessageProducer createProducerToRemote(Interchange ixn) throws NamingException, JMSException {
         System.out.println(String.format("Connecting to %s",ixn.getDomainName()));
         String writeUrl = ixn.getMessageChannelUrl();
-        Hashtable<Object, Object> writeEnv = createWriteContext(writeUrl,properties.getRemoteWritequeue());
-
-        IxnContext writeContext = new IxnContext(writeUrl, writeQueue, null);
+        IxnContext writeContext = new IxnContext(writeUrl, properties.getRemoteWritequeue(), null);
 
         Destination queueS = writeContext.getSendQueue();
         Connection writeConnection = writeContext.createConnection(sslContext);
