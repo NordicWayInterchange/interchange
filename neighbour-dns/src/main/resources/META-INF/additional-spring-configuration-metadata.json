@@ -1,0 +1,70 @@
+{
+  "groups": [
+    {
+      "name": "dns",
+      "type": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
+    },
+    {
+      "name": "dns.mock",
+      "type": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "dns.control-channel-port",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
+      "defaultValue": "8090"
+    },
+    {
+      "name": "dns.domain-name",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
+    },
+    {
+      "name": "dns.mock.control-channel-port",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties",
+      "defaultValue": "8090"
+    },
+    {
+      "name": "dns.mock.domain-name",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
+    },
+    {
+      "name": "dns.mock.message-channel-port",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties",
+      "defaultValue": "5671"
+    },
+    {
+      "name": "dns.mock.mock-names",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
+    },
+    {
+      "name": "dns.type",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
+      "defaultValue": "prod"
+    }
+  ],
+  "hints": [
+    {
+      "name": "dns.type",
+      "values": [
+        {
+          "value": "prod",
+          "description": "DNSFacade for production."
+        },
+        {
+          "value": "mock",
+          "description": "DNSFacade for testing."
+        }
+      ]
+    }
+  ]
+}
