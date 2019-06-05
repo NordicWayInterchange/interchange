@@ -4,12 +4,11 @@ import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.Test;
 
 import javax.jms.*;
-import javax.naming.Context;
 
 /**
  * Verifies access control lists where username comes from the common name (CN) of the user certificate.
  */
-public class AccessControlIT extends IxnBaseIT {
+public class AccessControlIT {
 
 	// Keystore and trust store files for integration testing.
 	private static final String JKS_KING_HARALD_P_12 = "jks/king_harald.p12";
@@ -25,10 +24,10 @@ public class AccessControlIT extends IxnBaseIT {
 
 	@Test(expected = JMSSecurityException.class)
 	public void testKingHaraldCanNotConsumeSE_OUT() throws Exception {
-		Context context = setContext(URI, SE_OUT, "onramp");
+		IxnContext context = new IxnContext(URI, "onramp", SE_OUT);
 
-		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Destination queueR = (Destination) context.lookup("receiveQueue");
+		Connection connection = context.createConnection(TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
+		Destination queueR = context.getReceiveQueue();
 		connection.start();
 
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -37,9 +36,9 @@ public class AccessControlIT extends IxnBaseIT {
 
 	@Test(expected = JMSSecurityException.class)
 	public void testKingGustafCanNotConsumeNO_OUT() throws Exception {
-		Context context = setContext(URI, NO_OUT, "onramp");
-		Connection connection = createConnection(context, JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS);
-		Destination queueR = (Destination) context.lookup("receiveQueue");
+		IxnContext context = new IxnContext(URI, "onramp", NO_OUT);
+		Connection connection = context.createConnection(TestKeystoreHelper.sslContext(JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS));
+		Destination queueR = context.getReceiveQueue();
 		connection.start();
 
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -49,10 +48,9 @@ public class AccessControlIT extends IxnBaseIT {
 
 	@Test(expected = JMSSecurityException.class)
 	public void KingHaraldCanNotConsumeFromOnramp() throws Exception {
-		Context context = setContext(URI, "onramp", "onramp");
-
-		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Destination queueR = (Destination) context.lookup("receiveQueue");
+		IxnContext context = new IxnContext(URI, "onramp", "onramp");
+		Connection connection = context.createConnection(TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
+		Destination queueR = context.getReceiveQueue();
 		connection.start();
 
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -62,11 +60,11 @@ public class AccessControlIT extends IxnBaseIT {
 
 	@Test(expected = JMSException.class)
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
-		Context context = setContext(URI, NO_OUT, "nwEx");
+		IxnContext context = new IxnContext(URI, "nwEx", NO_OUT);
 
-		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
-		Destination queueR = (Destination) context.lookup("receiveQueue");
-		Destination queueS = (Destination) context.lookup("sendQueue");
+		Connection connection = context.createConnection(TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
+		Destination queueR = context.getReceiveQueue();
+		Destination queueS = context.getSendQueue();
 		connection.start();
 
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -88,19 +86,18 @@ public class AccessControlIT extends IxnBaseIT {
 
 	@Test(expected = JMSException.class)
 	public void userWithInvalidCertificateCannotConnect() throws Exception {
-		Context context = setContext(URI, "test-out", "onramp");
+		IxnContext context = new IxnContext(URI, "onramp", "test-out");
 
-		Connection connection = createConnection(context, JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS);
+		Connection connection = context.createConnection(TestKeystoreHelper.sslContext(JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		connection.start();
 	}
 
 	@Test
 	public void userWithValidCertificateCanConnect() throws Exception {
-		Context context = setContext(URI, NO_OUT, "onramp");
+		IxnContext context = new IxnContext(URI, "onramp", NO_OUT);
 
-		Connection connection = createConnection(context, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS);
+		Connection connection = context.createConnection(TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		connection.start();
 	}
-
 
 }

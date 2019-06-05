@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.forwarding;
 
+import no.vegvesen.ixn.IxnContext;
 import no.vegvesen.ixn.federation.model.Interchange;
-import org.apache.qpid.jms.JmsConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,18 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.naming.Context;
+import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,15 +82,11 @@ public class MessageForwarder {
     public MessageConsumer createConsumerFromLocal(Interchange ixn) throws NamingException, JMSException {
         String readUrl = String.format("amqps://%s:%s",properties.getLocalIxnDomainName(),properties.getLocalIxnFederationPort());
         String readQueue = ixn.getName();
-        Hashtable<Object, Object> env = createReadContext(readUrl, readQueue);
 
-        Context context = new javax.naming.InitialContext(env);
-        JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup("myFactoryLookupTLS");
-        factory.setPopulateJMSXUserID(true);
-        factory.setSslContext(sslContext);
-        Destination queueR = (Destination) context.lookup("receiveQueue");
+        IxnContext context = new IxnContext(readUrl, null, readQueue);
+        Destination queueR = context.getReceiveQueue();
 
-        Connection connection = factory.createConnection("local", "password");
+        Connection connection = context.createConnection(sslContext);
         connection.start();
 
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -106,48 +94,18 @@ public class MessageForwarder {
     }
 
     public MessageProducer createProducerToRemote(Interchange ixn) throws NamingException, JMSException {
-
         System.out.println(String.format("Connecting to %s",ixn.getDomainName()));
         String writeUrl = ixn.getMessageChannelUrl();
         Hashtable<Object, Object> writeEnv = createWriteContext(writeUrl,properties.getRemoteWritequeue());
 
+        IxnContext writeContext = new IxnContext(writeUrl, writeQueue, null);
 
-        Context writeContext = new javax.naming.InitialContext(writeEnv);
-        JmsConnectionFactory writeFactory = (JmsConnectionFactory) writeContext.lookup("myFactoryLookupTLS");
-        writeFactory.setPopulateJMSXUserID(true);
-        writeFactory.setSslContext(sslContext);
-
-        //TODO take username and password from other places
-        Destination queueS = (Destination) writeContext.lookup("sendQueue");
-        Connection writeConnection = writeFactory.createConnection("remote", "password");
+        Destination queueS = writeContext.getSendQueue();
+        Connection writeConnection = writeContext.createConnection(sslContext);
         writeConnection.setExceptionListener(exceptionListener);
         writeConnection.start();
         Session writeSession = writeConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         return writeSession.createProducer(queueS);
     }
-
-    private Hashtable<Object, Object> createReadContext(String readUrl, String readQueue) {
-        Hashtable<Object, Object> env = createContext();
-        env.put("connectionfactory.myFactoryLookupTLS", readUrl);
-        env.put("queue.receiveQueue", readQueue);
-        return env;
-    }
-
-    private Hashtable<Object, Object> createWriteContext(String writeUrl, String writeQueue) {
-        Hashtable<Object, Object> env = createContext();
-        env.put("connectionfactory.myFactoryLookupTLS", writeUrl);
-        env.put("queue.sendQueue", writeQueue);
-        return env;
-    }
-
-
-    private Hashtable<Object,Object> createContext() {
-        Hashtable<Object, Object> env = new Hashtable<>();
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
-        return  env;
-    }
-
-
-
 
 }
