@@ -5,7 +5,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.discoverer.DNSFacadeInterface;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
+import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
@@ -43,19 +45,22 @@ public class NeighbourRestController {
 	private SubscriptionRequestTransformer subscriptionRequestTransformer;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
+	private DNSFacadeInterface dnsFacade;
 
 	@Autowired
 	public NeighbourRestController(InterchangeRepository interchangeRepository,
 								   ServiceProviderRepository serviceProviderRepository,
 								   CapabilityTransformer capabilityTransformer,
 								   SubscriptionTransformer subscriptionTransformer,
-								   SubscriptionRequestTransformer subscriptionRequestTransformer) {
+								   SubscriptionRequestTransformer subscriptionRequestTransformer,
+								   DNSFacadeInterface dnsFacade) {
 
 		this.interchangeRepository = interchangeRepository;
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
 		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
+		this.dnsFacade = dnsFacade;
 	}
 
 
@@ -273,7 +278,7 @@ public class NeighbourRestController {
 
 		if (interchangeToUpdate == null) {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
-			interchangeToUpdate = neighbour;
+			interchangeToUpdate = findNeighbourInDns(neighbour);
 		} else {
 			logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 			interchangeToUpdate.setCapabilities(neighbour.getCapabilities());
