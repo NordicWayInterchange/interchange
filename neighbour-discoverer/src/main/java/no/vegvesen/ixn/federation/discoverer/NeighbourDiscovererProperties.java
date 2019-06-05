@@ -13,8 +13,26 @@ public class NeighbourDiscovererProperties {
 	private String subscriptionRequestInitialDelay;
 	private String subscriptionPollUpdateInterval;
 	private String subscriptionPollInitialDelay;
-
+	private String dnsLookupInterval;
+	private String dnsInitialStartDelay;
 	private int subscriptionPollingNumberOfAttempts;
+
+
+	public String getDnsLookupInterval() {
+		return dnsLookupInterval;
+	}
+
+	public void setDnsLookupInterval(String dnsLookupInterval) {
+		this.dnsLookupInterval = dnsLookupInterval;
+	}
+
+	public String getDnsInitialStartDelay() {
+		return dnsInitialStartDelay;
+	}
+
+	public void setDnsInitialStartDelay(String dnsInitialStartDelay) {
+		this.dnsInitialStartDelay = dnsInitialStartDelay;
+	}
 
 	public String getCapabilitiesUpdateInterval() {
 		return capabilitiesUpdateInterval;
@@ -80,7 +98,9 @@ public class NeighbourDiscovererProperties {
 				", subscriptionRequestUpdateInterval='" + subscriptionRequestUpdateInterval + '\'' +
 				", subscriptionRequestInitialDelay='" + subscriptionRequestInitialDelay + '\'' +
 				", subscriptionPollUpdateInterval='" + subscriptionPollUpdateInterval + '\'' +
-				", subscriptionPollInitialDelay=" + subscriptionPollInitialDelay +
+				", subscriptionPollInitialDelay='" + subscriptionPollInitialDelay + '\'' +
+				", dnsLookupInterval='" + dnsLookupInterval + '\'' +
+				", dnsInitialStartDelay='" + dnsInitialStartDelay + '\'' +
 				", subscriptionPollingNumberOfAttempts=" + subscriptionPollingNumberOfAttempts +
 				'}';
 	}

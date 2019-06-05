@@ -9,6 +9,11 @@
       "name": "graceful-backoff",
       "type": "no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties",
       "sourceType": "no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties"
+    },
+    {
+      "name": "neighbour.ssl",
+      "type": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
     }
   ],
   "properties": [
@@ -16,13 +21,27 @@
       "name": "discoverer.capabilities-update-interval",
       "type": "java.lang.String",
       "description": "Time, in milliseconds, between each capability post to neighbours.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
+      "defaultValue": "15000"
     },
     {
       "name": "discoverer.capability-post-initial-delay",
       "type": "java.lang.String",
       "description": "Time, in milliseconds, from application start-up to first capability exchange.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
+      "defaultValue": "3000"
+    },
+    {
+      "name": "discoverer.dns-initial-start-delay",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
+      "defaultValue": "5000"
+    },
+    {
+      "name": "discoverer.dns-lookup-interval",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
+      "defaultValue": "15000"
     },
     {
       "name": "discoverer.subscription-poll-initial-delay",
@@ -93,8 +112,42 @@
       "description": "The length, in milliseconds, of the base waiting time of backoff.",
       "sourceType": "no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties",
       "defaultValue": 2000
+    },
+    {
+      "name": "neighbour.ssl.key-password",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
+    },
+    {
+      "name": "neighbour.ssl.key-store",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
+    },
+    {
+      "name": "neighbour.ssl.key-store-password",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
+    },
+    {
+      "name": "neighbour.ssl.key-store-type",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
+    },
+    {
+      "name": "neighbour.ssl.trust-store",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
+    },
+    {
+      "name": "neighbour.ssl.trust-store-password",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
+    },
+    {
+      "name": "neighbour.ssl.trust-store-type",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
     }
   ],
-  "hints": [
-  ]
+  "hints": []
 }
