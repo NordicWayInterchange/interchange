@@ -32,16 +32,8 @@ public class MessageForwarder {
     //TODO This is the interface to use in order to set the listener running flag to false
     ExceptionListener exceptionListener = (e) -> e.printStackTrace();
 
-    @Value("${forwarder.localIxnDomainName}")
-    private String localIxnDomainName;
-
-    @Value("${forwarder.localIxnFederationPort}")
-    private String localIxnFederationPort;
-
-    @Value(("${forwarder.remote.writequeue}"))
-    private String writeQueue;
-
     private NeighbourFetcher neighbourFetcher;
+    private ForwarderProperties properties;
     private final SSLContext sslContext;
     //TODO this will probably not work in a threaded environment...
     private Map<String,MessageForwardListener> listeners;
@@ -49,8 +41,9 @@ public class MessageForwarder {
 
 
     @Autowired
-    public MessageForwarder(NeighbourFetcher fetcher, SSLContext sslContext) {
+    public MessageForwarder(NeighbourFetcher fetcher, SSLContext sslContext, ForwarderProperties properties) {
         this.neighbourFetcher = fetcher;
+        this.properties = properties;
         this.listeners = new HashMap<>();
         this.sslContext = sslContext;
     }
@@ -95,7 +88,7 @@ public class MessageForwarder {
     }
 
     public MessageConsumer createConsumerFromLocal(Interchange ixn) throws NamingException, JMSException {
-        String readUrl = String.format("amqps://%s:%s",localIxnDomainName,localIxnFederationPort);
+        String readUrl = String.format("amqps://%s:%s",properties.getLocalIxnDomainName(),properties.getLocalIxnFederationPort());
         String readQueue = ixn.getName();
         Hashtable<Object, Object> env = createReadContext(readUrl, readQueue);
 
@@ -116,7 +109,7 @@ public class MessageForwarder {
 
         System.out.println(String.format("Connecting to %s",ixn.getDomainName()));
         String writeUrl = ixn.getMessageChannelUrl();
-        Hashtable<Object, Object> writeEnv = createWriteContext(writeUrl, writeQueue);
+        Hashtable<Object, Object> writeEnv = createWriteContext(writeUrl,properties.getRemoteWritequeue());
 
 
         Context writeContext = new javax.naming.InitialContext(writeEnv);
