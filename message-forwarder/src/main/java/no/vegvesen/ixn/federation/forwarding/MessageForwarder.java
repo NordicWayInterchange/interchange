@@ -38,6 +38,9 @@ public class MessageForwarder {
     @Value("${forwarder.localIxnFederationPort}")
     private String localIxnFederationPort;
 
+    @Value(("${forwarder.remote.writequeue}"))
+    private String writeQueue;
+
     private NeighbourFetcher neighbourFetcher;
     private final SSLContext sslContext;
     //TODO this will probably not work in a threaded environment...
@@ -110,14 +113,9 @@ public class MessageForwarder {
     }
 
     public MessageProducer createProducerToRemote(Interchange ixn) throws NamingException, JMSException {
+
         System.out.println(String.format("Connecting to %s",ixn.getDomainName()));
-        //First, create a connection for the output, then the input,
-        //TODO for now, assume the read queue name is the name of the interchange we're connecting
-        //the write queue to.
-        //remote queue:
-        //amqp://<ixn.getDomainName()>:<ixn.getControlChannelPort>, queue name "fedEx"
         String writeUrl = ixn.getMessageChannelUrl();
-        String writeQueue = "fedTest";
         Hashtable<Object, Object> writeEnv = createWriteContext(writeUrl, writeQueue);
 
 

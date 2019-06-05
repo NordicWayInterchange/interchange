@@ -19,7 +19,6 @@ services:
   db:
     image: postgres:9.6
     container_name: message-forwarder-db
-    hostname: database
     ports:
       - 7080:5432
     environment:
@@ -78,6 +77,8 @@ services:
     volumes:
       - "./tmp:/tmp"
     environment:
+      POSTGRES_URI: "jdbc:postgresql://db:5432/federation"
+      SERVER_NAME: "bouvet"
       KEY_STORE_FILE: "/tmp/keys/bouvet.p12"
       KEY_STORE_PASSWORD: "password"
       KEY_STORE_TYPE: "PKCS12"

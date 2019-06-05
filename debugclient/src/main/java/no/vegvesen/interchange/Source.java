@@ -26,13 +26,13 @@ public class Source {
     public static void main(String[] args) throws NamingException, JMSException {
         String url = "amqps://bouvet:5600";
         String sendQueue = "remote";
-        String keystorePath = "C:\\temp_checkout\\interchange\\tmp\\keys\\bouvet.p12";
+        String keystorePath = "/interchange/tmp/keys/bouvet.p12";
         String keystorePassword = "password";
         String keyPassword = "password";
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
                 keystorePassword,
                 KeystoreType.PKCS12, keyPassword);
-        String trustStorePath = "c:\\temp_checkout\\interchange\\tmp\\keys\\truststore.jks";
+        String trustStorePath = "/interchange/tmp/keys/truststore.jks";
         String trustStorePassword = "password";
         KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
                 trustStorePassword,KeystoreType.JKS);
