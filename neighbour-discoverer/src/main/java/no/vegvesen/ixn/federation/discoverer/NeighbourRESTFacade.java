@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
@@ -82,12 +81,9 @@ public class NeighbourRESTFacade {
 				ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
 				logger.error("Received error object from server: {}", errorDetails.toString());
 				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Received error response: " + errorDetails.toString());
-			} catch (JsonMappingException jme) {
-				logger.error("Unable to cast error response as ErrorDetails object.", jme);
-				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetailsobject.");
 			} catch (IOException ioe) {
 				logger.error("Unable to cast error response as ErrorDetails object.", ioe);
-				throw new CapabilityPostException("Unable to post capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetails object.");
+				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetailsobject.");
 			}
 		}
 	}
@@ -143,9 +139,6 @@ public class NeighbourRESTFacade {
 				ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
 				logger.error("Received error object from server: {}", errorDetails.toString());
 				throw new SubscriptionRequestException("Subscription request failed. Received error object from server: " + errorDetails.toString());
-			} catch (JsonMappingException jme) {
-				logger.error("Unable to cast response as ErrorDetails object.", jme);
-				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object.");
 			} catch (IOException ioe) {
 				logger.error("Unable to cast response as ErrorDetails object.", ioe);
 				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object." );
@@ -181,9 +174,6 @@ public class NeighbourRESTFacade {
 
 				logger.error("Received error object from server: {}", errorDetails.toString());
 				throw new SubscriptionPollException("Error in polling " + url + " for subscription status. Received error response from server: " + status.toString());
-			} catch (JsonMappingException jme) { // TODO: subclass of IOException - should we catch both?
-				logger.error("Unable to cast response as ErrorDetails object.", jme);
-				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
 			} catch (IOException ioe) {
 				logger.error("Unable to cast response as ErrorDetails object.", ioe);
 				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
