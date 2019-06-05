@@ -437,7 +437,7 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	@Scheduled(fixedRateString = "${dns.lookup-interval}", initialDelayString = "${dns.initial-delay}")
+	@Scheduled(fixedRateString = "${discoverer.dns-lookup-interval}", initialDelayString = "${discoverer.dns-initial-start-delay}")
 	public void checkForNewInterchanges() {
 		logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
 		List<Interchange> neighbours = dnsFacade.getNeighbours();
