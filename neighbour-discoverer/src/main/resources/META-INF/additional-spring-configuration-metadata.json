@@ -1,11 +1,6 @@
 {
   "groups": [
     {
-      "name": "dns",
-      "type": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
-    },
-    {
       "name": "discoverer",
       "type": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
       "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
@@ -17,65 +12,6 @@
     }
   ],
   "properties": [
-    {
-      "name": "dns.control-channel-port",
-      "type": "java.lang.String",
-      "description": "The port number for the control channel on the neighbouring interchange.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
-      "defaultValue": "8090"
-    },
-    {
-      "name": "dns.domain-name",
-      "type": "java.lang.String",
-      "description": "The domain name used in the interchange network.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
-    },
-    {
-      "name": "dns.initial-delay",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, from application start-up to DNS lookup starts.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
-      "defaultValue": "5000"
-    },
-    {
-      "name": "dns.lookup-interval",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, between each DNS lookup.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
-      "defaultValue": "15000"
-    },
-    {
-      "name": "dns.mock-names",
-      "type": "java.util.List<java.lang.String>",
-      "description": "The interchanges to be returned by the MockDNSFacade. Used for testing.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties"
-    },
-    {
-      "name": "dns.type",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.DNSProperties",
-      "defaultValue": "prod"
-    },
-    {
-      "name": "dns.mock.control-channel-port",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
-    },
-    {
-      "name": "dns.mock.domain-name",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
-    },
-    {
-      "name": "dns.mock.message-channel-port",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
-    },
-    {
-      "name": "dns.mock.mock-names",
-      "type": "java.util.List<java.lang.String>",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.MockDNSProperties"
-    },
     {
       "name": "discoverer.capabilities-update-interval",
       "type": "java.lang.String",
@@ -160,18 +96,5 @@
     }
   ],
   "hints": [
-    {
-      "name": "dns.type",
-      "values": [
-        {
-          "value": "prod",
-          "description": "DNSFacade for production."
-        },
-        {
-          "value": "mock",
-          "description": "DNSFacade for testing."
-        }
-      ]
-    }
   ]
 }
