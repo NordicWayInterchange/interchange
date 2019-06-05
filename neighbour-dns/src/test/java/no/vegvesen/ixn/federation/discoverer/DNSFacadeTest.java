@@ -25,7 +25,7 @@ public class DNSFacadeTest {
 	@Test
 	public void testNumberOfNeighbours(){
 
-		when(dnsProperties.getDomainName()).thenReturn(".itsinterchange.eu");
+		when(dnsProperties.getDomainName()).thenReturn("itsinterchange.eu");
 		when(dnsProperties.getControlChannelPort()).thenReturn("8090");
 
 

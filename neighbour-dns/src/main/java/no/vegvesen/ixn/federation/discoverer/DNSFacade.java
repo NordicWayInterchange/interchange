@@ -38,7 +38,7 @@ public class DNSFacade implements DNSFacadeInterface {
 
 		try {
 			// SRV record lookup for message chanel port on each sub domain
-			String srvLookupString = "_ixn._tcp" + dnsProperties.getDomainName();
+			String srvLookupString = "_ixn._tcp." + dnsProperties.getDomainName();
 
 			Record[] records = new Lookup(srvLookupString, Type.SRV).run();
 
