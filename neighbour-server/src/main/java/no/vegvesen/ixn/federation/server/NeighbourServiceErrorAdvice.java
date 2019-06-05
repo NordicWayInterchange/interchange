@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.exceptions.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,6 +15,9 @@ import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 public class NeighbourServiceErrorAdvice {
+
+	private Logger logger = LoggerFactory.getLogger(NeighbourServiceErrorAdvice.class);
+
 
 	@ExceptionHandler({RuntimeException.class})
 	public ResponseEntity<ErrorDetails> handleRunTimeException(RuntimeException e) {
@@ -41,6 +46,8 @@ public class NeighbourServiceErrorAdvice {
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
+
+		logger.error("Error in interchange server. ", e);
 		return new ResponseEntity<>(errorDetails, status);
 	}
 

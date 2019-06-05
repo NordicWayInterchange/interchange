@@ -32,7 +32,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
 
 import java.util.*;
 
-@Api(value="/",description="Nordic Way Federation API",produces ="application/json")
+@Api(value = "/", description = "Nordic Way Federation API", produces = "application/json")
 @RestController("/")
 public class NeighbourRestController {
 
@@ -86,7 +86,7 @@ public class NeighbourRestController {
 				} catch (IllegalArgumentException e) {
 					// Illegal filter - filter always true
 					logger.error("Subscription had illegal selectors.", e);
-					logger.warn( "Setting status of subscription to ILLEGAL");
+					logger.warn("Setting status of subscription to ILLEGAL");
 					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ILLEGAL);
 
 				} catch (ParseException e) {
@@ -100,12 +100,12 @@ public class NeighbourRestController {
 		return neighbourSubscriptionRequest;
 	}
 
-	void checkIfCommonNameMatchesNameInApiObject(String apiName){
+	void checkIfCommonNameMatchesNameInApiObject(String apiName) {
 
 		Object principal = SecurityContextHolder.getContext().getAuthentication();
 		String commonName = ((Authentication) principal).getName();
 
-		if(!commonName.equals(apiName)){
+		if (!commonName.equals(apiName)) {
 			logger.error("Received capability post from neighbour {}, but CN on certificate was {}. Rejecting...", apiName, commonName);
 			String errorMessage = "Received capability post from neighbour %s, but CN on certificate was %s. Rejecting...";
 			throw new CNAndApiObjectMismatchException(String.format(errorMessage, apiName, commonName));
@@ -113,8 +113,8 @@ public class NeighbourRestController {
 	}
 
 	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({	@ApiResponse(code=202, message="Successfully requested a subscription", response=SubscriptionRequestApi.class),
-					@ApiResponse(code=403, message="Common name in certificate and interchange name in path does not match.", response=ErrorDetails.class)})
+	@ApiResponses({@ApiResponse(code = 202, message = "Successfully requested a subscription", response = SubscriptionRequestApi.class),
+			@ApiResponse(code = 403, message = "Common name in certificate and interchange name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -144,7 +144,7 @@ public class NeighbourRestController {
 		}
 
 		//Check if subscription request is empty or not
-		if(neighbourToUpdate.getSubscriptionRequest().getSubscriptions().isEmpty() && incomingSubscriptionRequestInterchange.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+		if (neighbourToUpdate.getSubscriptionRequest().getSubscriptions().isEmpty() && incomingSubscriptionRequestInterchange.getSubscriptionRequest().getSubscriptions().isEmpty()) {
 			logger.info("Neighbour with no existing subscription posted empty subscription request.");
 			logger.info("Returning empty subscription request.");
 			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
@@ -189,9 +189,9 @@ public class NeighbourRestController {
 	}
 
 	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({	@ApiResponse(code=200, message="Successfully polled the subscription.", response=SubscriptionApi.class),
-					@ApiResponse(code=404, message="Invalid path, the subscription does not exist or the polling interchange does not exist.", response=ErrorDetails.class),
-					@ApiResponse(code=403, message="Common name in certificate and interchange name in path does not match.", response=ErrorDetails.class)})
+	@ApiResponses({@ApiResponse(code = 200, message = "Successfully polled the subscription.", response = SubscriptionApi.class),
+			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the polling interchange does not exist.", response = ErrorDetails.class),
+			@ApiResponse(code = 403, message = "Common name in certificate and interchange name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = SUBSCRIPTION_POLLING_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -207,16 +207,12 @@ public class NeighbourRestController {
 		Interchange interchange = interchangeRepository.findByName(ixnName);
 
 		if (interchange != null) {
-			try {
-				Subscription subscription = interchange.getSubscriptionById(subscriptionId);
-				logger.info("Neighbour {} polled for status of subscription {}.", interchange.getName(), subscriptionId);
-				logger.info("Returning: {}", subscription.toString());
 
-				return subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
-			} catch (SubscriptionNotFoundException e) {
-				logger.error("Could not find subscription.", e);
-				throw e; // TODO: Is this necessary?
-			}
+			Subscription subscription = interchange.getSubscriptionById(subscriptionId);
+			logger.info("Neighbour {} polled for status of subscription {}.", interchange.getName(), subscriptionId);
+			logger.info("Returning: {}", subscription.toString());
+
+			return subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		} else {
 			throw new InterchangeNotFoundException("The requested interchange does not exist.");
 		}
@@ -257,8 +253,8 @@ public class NeighbourRestController {
 	}
 
 	@ApiOperation(value = "Endpoint for capability exchange. Receives a capabilities from a neighbour and responds with local capabilities.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({	@ApiResponse(code=200, message="Successfully posted capabilities.", response=CapabilityApi.class),
-					@ApiResponse(code=403, message="Common name in certificate and interchange name in path does not match.", response=ErrorDetails.class)})
+	@ApiResponses({@ApiResponse(code = 200, message = "Successfully posted capabilities.", response = CapabilityApi.class),
+			@ApiResponse(code = 403, message = "Common name in certificate and interchange name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -311,9 +307,7 @@ public class NeighbourRestController {
 			neighbour.setControlChannelPort(dnsNeighbour.getControlChannelPort());
 			neighbour.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
 			neighbour.setDomainName(dnsNeighbour.getDomainName());
-		}
-		else
-		{
+		} else {
 			throw new DiscoveryException(String.format("Received capability post from neighbour %s, but could not find in DNS", neighbour.getName()));
 		}
 		return neighbour;
