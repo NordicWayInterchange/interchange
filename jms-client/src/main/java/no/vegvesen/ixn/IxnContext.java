@@ -21,8 +21,12 @@ public class IxnContext {
 		Hashtable<Object, Object> env = new Hashtable<>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
 		env.put("connectionfactory." + JMS_JNDI_INITIAL_CONTEXT_FACTORY, URI);
-		env.put("queue." + JMS_JNDI_RECEIVE_QUEUE_PROPERTY, receiveQueue);
-		env.put("queue." + JMS_JNDI_SEND_QUEUE_PROPERTY, sendQueue);
+		if (receiveQueue != null) {
+			env.put("queue." + JMS_JNDI_RECEIVE_QUEUE_PROPERTY, receiveQueue);
+		}
+		if (sendQueue != null) {
+			env.put("queue." + JMS_JNDI_SEND_QUEUE_PROPERTY, sendQueue);
+		}
 		this.context = new javax.naming.InitialContext(env);
 	}
 
