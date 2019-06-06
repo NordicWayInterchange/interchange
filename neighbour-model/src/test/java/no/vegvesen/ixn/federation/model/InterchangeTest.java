@@ -51,6 +51,11 @@ public class InterchangeTest {
 		ericsson.setDomainName(".itsinterchange.eu");
 	}
 
+	@Test(expected = DiscoveryException.class)
+	public void serverNameEndWithoutDot() {
+		Interchange ericsson = new Interchange("ericsson.", null, null, null);
+	}
+
 	@Test
 	public void getMessageChannelUrlWithoutDomainNameAndSpecificPort() {
 		Interchange fullDomainName = new Interchange("my-host", null, null, null);

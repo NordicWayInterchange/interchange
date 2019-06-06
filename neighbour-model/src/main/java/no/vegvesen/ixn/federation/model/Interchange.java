@@ -57,7 +57,7 @@ public class Interchange {
 	}
 
 	public Interchange(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn) {
-		this.name = name;
+		this.setName(name);
 		this.capabilities = capabilities;
 		this.subscriptionRequest = subscriptions;
 		this.fedIn = fedIn;
@@ -76,6 +76,9 @@ public class Interchange {
 	}
 
 	public void setName(String name) {
+		if (name != null && name.endsWith(".")) {
+			throw new DiscoveryException(String.format("Server name '%s' shall not end with \".\"", name));
+		}
 		this.name = name;
 	}
 
@@ -122,7 +125,7 @@ public class Interchange {
 
 	public void setDomainName(String domainName) {
 		if (domainName != null && domainName.startsWith(".")) {
-			throw new DiscoveryException("Domain name shall not start with \".\"");
+			throw new DiscoveryException(String.format("Domain name '%s' shall not start with \".\"", domainName));
 		}
 		this.domainName = domainName;
 	}
