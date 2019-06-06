@@ -4,15 +4,12 @@ import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import javax.net.ssl.SSLContext;
 
 @Configuration
-@Profile("prod")
 public class SSLContextConfig {
 
 	private NeighbourSSLProperties sslProperties;

@@ -13,7 +13,16 @@ import java.net.URL;
 
 @Configuration
 @Profile("test")
-public class TestSSLContextConfig {
+/**
+ * made abstract because of work-in-progress on NeighbourDiscovererIT
+ * Profile("test") must be matched with a different profile for the bean used in SSLContextConfig:
+ * @Configuration
+ * @Profile("prod")
+ * public class SSLContextConfig
+ * and a default profile in application.properties:
+ * spring.profiles.active=prod
+ */
+public abstract class TestSSLContextConfig {
 
 	@Value("${neighbour.ssl.trust-store-password}")
 	String truststorePassword;
