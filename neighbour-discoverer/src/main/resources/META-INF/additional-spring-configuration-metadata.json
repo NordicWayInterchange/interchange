@@ -131,7 +131,8 @@
     {
       "name": "neighbour.ssl.key-store-type",
       "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties",
+      "defaultValue": "PKCS12"
     },
     {
       "name": "neighbour.ssl.trust-store",
@@ -146,7 +147,8 @@
     {
       "name": "neighbour.ssl.trust-store-type",
       "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties",
+      "defaultValue": "JKS"
     }
   ],
   "hints": []

@@ -1,16 +1,16 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 @ConfigurationProperties(prefix ="neighbour.ssl")
 public class NeighbourSSLProperties {
 
 	private String trustStorePassword;
-	private String trustStoreType;
+	private String trustStoreType = "JKS";
 	private String trustStore;
-	private String keyStoreType;
+	private String keyStoreType = "PKCS12";
 	private String keyStore;
 	private String keyStorePassword;
 	private String keyPassword;
