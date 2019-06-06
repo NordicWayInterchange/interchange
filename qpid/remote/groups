@@ -1,2 +1,2 @@
-messaging-users.users=guest,king_harald,king_gustaf
+messaging-users.users=guest,king_harald,king_gustaf,remote,bouvet
 administrators.users=qpid-admin,remote

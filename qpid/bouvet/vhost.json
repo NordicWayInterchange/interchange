@@ -4,6 +4,41 @@
   "modelVersion": "7.0",
   "exchanges": [
     {
+      "name" : "fedEx",
+      "type" : "direct",
+      "durable" : true,
+      "durableBindings": [
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where='NO'"
+          },
+          "bindingKey": "where",
+          "destination": "NO-out"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where='NO'"
+          },
+          "bindingKey": "where",
+          "destination": "king_harald"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where='SE'"
+          },
+          "bindingKey": "where",
+          "destination": "king_gustaf"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where LIKE '%'"
+          },
+          "bindingKey": "where",
+          "destination": "test-out"
+        }
+      ]
+    },
+    {
       "name": "nwEx",
       "type": "headers",
       "durable": true,
