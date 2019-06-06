@@ -187,6 +187,9 @@ services:
     build: ./message-forwarder
     depends_on:
       - bouvet_db
+    links:
+      - "bouvet_qpid:bouvet"
+      - "remote_qpid:remote"
     volumes:
       - "./tmp:/tmp"
     environment:
@@ -203,6 +206,9 @@ services:
     build: ./message-forwarder
     depends_on:
       - remote_db
+    links:
+      - "bouvet_qpid:bouvet"
+      - "remote_qpid:remote"
     volumes:
       - "./tmp:/tmp"
     environment:
