@@ -17,6 +17,17 @@ services:
       - POSTGRES_PASSWORD=federation
       - POSTGRES_DB=federation
 
+  bouvet_db_filler:
+    build: ./test-data-helpers
+    environment:
+    - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
+    - DB_HELPER_TYPE=subscriber
+    container_name: bouvet_db_filler
+    hostname: bouvet_db_filler
+    depends_on:
+    - bouvet_db
+    - federation-build
+
   bouvet_qpid:
     build: ./qpid
     ports:
@@ -86,12 +97,24 @@ services:
 
   remote_db:
     image: postgres:9.6
+    container_name: remote_db
     ports:
       - 32778:5432
     environment:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - POSTGRES_DB=federation
+
+  remote_db_filler:
+    build: ./test-data-helpers
+    environment:
+    - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
+    - DB_HELPER_TYPE=provider
+    container_name: remote_db_filler
+    hostname: remote_db_filler
+    depends_on:
+    - remote_db
+    - federation-build
 
   remote_neighbour_server:
     build: ./neighbour-server
