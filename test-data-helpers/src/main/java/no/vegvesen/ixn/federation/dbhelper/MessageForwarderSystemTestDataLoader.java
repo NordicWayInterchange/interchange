@@ -5,11 +5,13 @@ import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 
 @Component
+@ConditionalOnProperty(name = "db-helper.type", havingValue = "message-forwarder")
 public class MessageForwarderSystemTestDataLoader implements DatabaseHelperInterface {
 
 
