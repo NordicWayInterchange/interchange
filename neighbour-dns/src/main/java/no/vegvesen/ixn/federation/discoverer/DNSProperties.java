@@ -2,14 +2,14 @@ package no.vegvesen.ixn.federation.discoverer;
 
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 @ConfigurationProperties(prefix ="dns")
 public class DNSProperties {
 
-	private String type;
-	private String controlChannelPort;
+	private String type = "prod";
+	private String controlChannelPort = "443";
 	private String domainName;
 
 

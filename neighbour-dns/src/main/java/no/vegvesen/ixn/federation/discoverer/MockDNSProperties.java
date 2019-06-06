@@ -1,28 +1,18 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Configuration
+@Component
 @ConfigurationProperties(prefix ="dns.mock")
 public class MockDNSProperties {
 
-	private String controlChannelPort;
-	private String messageChannelPort;
+	private String controlChannelPort = "8090";
+	private String messageChannelPort = "5671";
 	private String domainName = null;
 	private List<String> mockNames;
-/*
-	public MockDNSProperties() {
-	}
-
-	public MockDNSProperties(String controlChannelPort, String messageChannelPort, String domainName, List<String> mockNames) {
-		this.controlChannelPort = controlChannelPort;
-		this.messageChannelPort = messageChannelPort;
-		this.domainName = domainName;
-		this.mockNames = mockNames;
-	}*/
 
 	public String getControlChannelPort() {
 		return controlChannelPort;
