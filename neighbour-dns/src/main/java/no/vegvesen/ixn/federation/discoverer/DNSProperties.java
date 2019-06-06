@@ -4,8 +4,6 @@ package no.vegvesen.ixn.federation.discoverer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-
 @Configuration
 @ConfigurationProperties(prefix ="dns")
 public class DNSProperties {
@@ -18,7 +16,7 @@ public class DNSProperties {
 	public DNSProperties() {
 	}
 
-	public DNSProperties(String type, String controlChannelPort, String domainName, List<String> mockNames) {
+	public DNSProperties(String type, String controlChannelPort, String domainName) {
 		this.type = type;
 		this.controlChannelPort = controlChannelPort;
 		this.domainName = domainName;

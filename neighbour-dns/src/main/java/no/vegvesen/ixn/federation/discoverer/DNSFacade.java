@@ -37,6 +37,9 @@ public class DNSFacade implements DNSFacadeInterface {
 		// TODO: get control channel port nr from separate SRV lookup.
 
 		try {
+			if (dnsProperties.getDomainName() == null || dnsProperties.getDomainName().length() == 0) {
+				throw new RuntimeException("DNS lookup with no domain");
+			}
 			// SRV record lookup for message chanel port on each sub domain
 			String srvLookupString = "_ixn._tcp." + dnsProperties.getDomainName();
 
@@ -51,7 +54,7 @@ public class DNSFacade implements DNSFacadeInterface {
 				SRVRecord srv = (SRVRecord) record;
 				String target = srv.getTarget().toString();
 				String messageChannelPort = String.valueOf(srv.getPort());
-				int lengthDomain = target.indexOf(dnsProperties.getDomainName());
+				int lengthDomain = target.indexOf(dnsProperties.getDomainName()) - 1;
 
 				Interchange interchange = new Interchange();
 				interchange.setName(target.substring(0, lengthDomain));

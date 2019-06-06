@@ -13,6 +13,16 @@ public class MockDNSProperties {
 	private String messageChannelPort;
 	private String domainName = null;
 	private List<String> mockNames;
+/*
+	public MockDNSProperties() {
+	}
+
+	public MockDNSProperties(String controlChannelPort, String messageChannelPort, String domainName, List<String> mockNames) {
+		this.controlChannelPort = controlChannelPort;
+		this.messageChannelPort = messageChannelPort;
+		this.domainName = domainName;
+		this.mockNames = mockNames;
+	}*/
 
 	public String getControlChannelPort() {
 		return controlChannelPort;

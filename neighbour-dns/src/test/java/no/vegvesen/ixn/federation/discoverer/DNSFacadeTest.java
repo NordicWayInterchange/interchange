@@ -4,35 +4,28 @@ import no.vegvesen.ixn.federation.model.Interchange;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
-import static org.mockito.Mockito.*;
 
-
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {DNSFacade.class, DNSProperties.class, MockDNSFacade.class})
+@ActiveProfiles("real")
+@EnableConfigurationProperties
 public class DNSFacadeTest {
 
-	@Mock
-	private DNSProperties dnsProperties;
-
-	@InjectMocks
+	@Autowired
 	private DNSFacade dnsFacade;
 
 	@Test
 	public void testNumberOfNeighbours(){
-
-		when(dnsProperties.getDomainName()).thenReturn("itsinterchange.eu");
-		when(dnsProperties.getControlChannelPort()).thenReturn("8090");
-
-
-		// FIXME: how to check that this is correct when the number of neighbours in the network increases?
-		int expectedNumberOfNeighbours = 2;
 		List<Interchange> interchanges = dnsFacade.getNeighbours();
-		Assert.assertEquals(expectedNumberOfNeighbours, interchanges.size());
+		Assert.assertTrue("Number of known interchanges in the actual dns is less than two", interchanges.size() >= 2);
 	}
 
 	@Test
@@ -44,4 +37,16 @@ public class DNSFacadeTest {
 		}
 	}
 
+	@Test
+	public void ericssonPresent() {
+		Interchange ericsson = null;
+		for (Interchange neighbour : dnsFacade.getNeighbours()) {
+			System.out.println("control channel url: " + neighbour.getControlChannelUrl("/"));
+			System.out.println("message channel url: " + neighbour.getMessageChannelUrl());
+			if (neighbour.getName().equals("ericsson")){
+				ericsson = neighbour;
+			}
+		}
+		Assert.assertNotNull(ericsson);
+	}
 }
