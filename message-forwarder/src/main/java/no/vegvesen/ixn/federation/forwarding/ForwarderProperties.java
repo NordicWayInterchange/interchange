@@ -1,14 +1,17 @@
 package no.vegvesen.ixn.federation.forwarding;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+//TODO: generate additional-spring-configuration-metadata.json
+//TODO: set default values
+@Component
 @ConfigurationProperties(prefix ="forwarder")
 public class ForwarderProperties {
 
 	private String localIxnDomainName;
 	private String localIxnFederationPort;
+	//TODO: Use NeighbourSSLProperties
 	private String keystorepath;
 	private String keystorepassword;
 	private String keystoretype;

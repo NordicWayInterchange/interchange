@@ -1,23 +1,24 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 @ConfigurationProperties(prefix ="discoverer")
 public class NeighbourDiscovererProperties {
 
-	private String capabilitiesUpdateInterval;
-	private String capabilityPostInitialDelay;
-	private String subscriptionRequestUpdateInterval;
-	private String subscriptionRequestInitialDelay;
-	private String subscriptionPollUpdateInterval;
-	private String subscriptionPollInitialDelay;
-	private String dnsLookupInterval;
-	private String dnsInitialStartDelay;
-	private int subscriptionPollingNumberOfAttempts;
+	private String capabilitiesUpdateInterval = "15000";
+	private String capabilityPostInitialDelay = "3000";
+	private String subscriptionRequestUpdateInterval = "15000";
+	private String subscriptionRequestInitialDelay = "10000";
+	private String subscriptionPollUpdateInterval = "15000";
+	private String subscriptionPollInitialDelay = "20000";
+	private String dnsLookupInterval = "15000";
+	private String dnsInitialStartDelay = "5000";
+	private int subscriptionPollingNumberOfAttempts = 7;
 
 
+	//TODO: check usage
 	public String getDnsLookupInterval() {
 		return dnsLookupInterval;
 	}

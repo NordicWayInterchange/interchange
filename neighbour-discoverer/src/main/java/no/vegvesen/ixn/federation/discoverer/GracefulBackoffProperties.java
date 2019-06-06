@@ -1,18 +1,18 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 @ConfigurationProperties(prefix ="graceful-backoff")
 public class GracefulBackoffProperties {
 
-	private int startIntervalLength;
-	private int numberOfAttempts;
-	private int randomShiftUpperLimit;
+	private int startIntervalLength = 2000;
+	private int numberOfAttempts = 4;
+	private int randomShiftUpperLimit = 60000;
 
-	private String checkInterval;
-	private String checkOffset;
+	private String checkInterval = "30000";
+	private String checkOffset = "60000";
 
 	public int getStartIntervalLength() {
 		return startIntervalLength;
