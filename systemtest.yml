@@ -28,8 +28,38 @@ services:
     - bouvet_db
     - federation-build
 
+  bouvet_interchange_app:
+    build: ./interchangenode
+    container_name: bouvet_interchange_app
+    hostname: bouvet_interchange_app
+    links:
+    - "bouvet_qpid:bouvet"
+    environment:
+      AMQP_URI: amqp://bouvet
+      AMQP_USER: interchange
+      AMQP_PASSWORD: "12345678"
+      POSTGIS_URI: jdbc:postgresql://bouvet_postgis:5432/geolookup
+
+
+  bouvet_postgis:
+    build: ./postgis
+    environment:
+    - POSTGRES_USER=geolookup
+    - POSTGRES_PASSWORD=geolookup
+    - POSTGRES_DB=geolookup
+    container_name: bouvet_postgis
+    hostname: bouvet_postgis
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "geolookup"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+    - 8899:5432
+
   bouvet_qpid:
     build: ./qpid
+    container_name: bouvet_qpid
     ports:
       - 8080
       - 443
@@ -49,6 +79,7 @@ services:
 
   bouvet_neighbour_server:
     build: ./neighbour-server
+    container_name: bouvet_neighbour_server
     depends_on:
       - bouvet_db
       - federation-build
@@ -64,8 +95,10 @@ services:
 
   bouvet_routing_configurer:
     build: ./routing-configurer
+    container_name: bouvet_routing_configurer
     depends_on:
       - federation-build
+      - bouvet_db
     links:
       - "bouvet_qpid:bouvet"
     volumes:
@@ -79,12 +112,15 @@ services:
       - KEYSTORE_NAME=/tmp/keys/bouvet.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
+      - JAVA_TMP_PATH=/javatmp
 
   bouvet_neighbour_discoverer:
     build: ./neighbour-discoverer
+    container_name: bouvet_neighbour_discoverer
     depends_on:
       - bouvet_db
       - federation-build
+      - bouvet_db_filler
     links:
       - "remote_neighbour_server:remote"
     volumes:
@@ -94,6 +130,27 @@ services:
       - SERVER_NAME=bouvet
       - DNS_MOCK_NAMES=bouvet,remote
       - DNS_TYPE=mock
+
+  bouvet_message_forwarder_app:
+    build: ./message-forwarder
+    container_name: bouvet_message_forwarder_app
+    depends_on:
+    - federation-build
+    - bouvet_db
+    links:
+    - "bouvet_qpid:bouvet"
+    - "remote_qpid:remote"
+    volumes:
+    - "./tmp:/tmp"
+    environment:
+    - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
+    - KEY_STORE_FILE=/tmp/keys/bouvet.p12
+    - KEY_STORE_PASSWORD=password
+    - KEY_STORE_TYPE=PKCS12
+    - TRUST_STORE_PATH=/tmp/keys/truststore.jks
+    - TRUST_STORE_PASSWORD=password
+    - TRUST_STORE_TYPE=JKS
+    - SERVER_NAME=bouvet
 
   remote_db:
     image: postgres:9.6
@@ -116,8 +173,41 @@ services:
     - remote_db
     - federation-build
 
+  remote_interchange_app:
+    build: ./interchangenode
+    container_name: remote_interchange_app
+    hostname: remote_interchange_app
+    links:
+    - "remote_qpid:remote"
+    environment:
+      AMQP_URI: amqp://remote
+      AMQP_USER: interchange
+      AMQP_PASSWORD: "12345678"
+      POSTGIS_URI: jdbc:postgresql://remote_postgis:5432/geolookup
+    depends_on:
+    - remote_postgis
+
+
+  remote_postgis:
+    build: ./postgis
+    environment:
+    - POSTGRES_USER=geolookup
+    - POSTGRES_PASSWORD=geolookup
+    - POSTGRES_DB=geolookup
+    container_name: remote_postgis
+    hostname: remote_postgis
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "geolookup"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+    - 6677:5432
+
+
   remote_neighbour_server:
     build: ./neighbour-server
+    container_name: remote_neighbour_server
     depends_on:
       - remote_db
       - federation-build
@@ -133,9 +223,11 @@ services:
 
   remote_neighbour_discoverer:
     build: ./neighbour-discoverer
+    container_name: remote_neighbour_discoverer
     depends_on:
       - remote_db
       - federation-build
+      - remote_db_filler
     links:
       - "bouvet_neighbour_server:bouvet"
     volumes:
@@ -148,6 +240,7 @@ services:
 
   remote_qpid:
     build: ./qpid
+    container_name: remote_qpid
     ports:
       - 8080
       - 443
@@ -167,8 +260,10 @@ services:
 
   remote_routing_configurer:
     build: ./routing-configurer
+    container_name: remote_routing_configurer
     depends_on:
       - federation-build
+      - remote_db
     links:
       - "remote_qpid:remote"
     volumes:
@@ -182,29 +277,13 @@ services:
       - KEYSTORE_NAME=/tmp/keys/remote.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
-
-  bouvet_message_forwarder_app:
-    build: ./message-forwarder
-    depends_on:
-      - bouvet_db
-    links:
-      - "bouvet_qpid:bouvet"
-      - "remote_qpid:remote"
-    volumes:
-      - "./tmp:/tmp"
-    environment:
-      - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
-      - KEY_STORE_FILE=/tmp/keys/bouvet.p12
-      - KEY_STORE_PASSWORD=password
-      - KEY_STORE_TYPE=PKCS12
-      - TRUST_STORE_PATH=/tmp/keys/truststore.jks
-      - TRUST_STORE_PASSWORD=password
-      - TRUST_STORE_TYPE=JKS
-      - SERVER_NAME=bouvet
+      - JAVA_TMP_PATH=/javatmp
 
   remote_message_forwarder_app:
     build: ./message-forwarder
+    container_name: remote_message_forwarder_app
     depends_on:
+      - federation-build
       - remote_db
     links:
       - "bouvet_qpid:bouvet"
