@@ -8,6 +8,7 @@ ADD entrypoint.sh /
 ADD generate-keys.sh /scripts/
 
 RUN chmod +x /entrypoint.sh
+RUN chmod +x /scripts/generate-keys.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
