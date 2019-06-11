@@ -9,27 +9,42 @@ import org.apache.qpid.jms.message.JmsTextMessage;
 import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Properties;
 
 public class Source implements AutoCloseable {
 
     /**
      * A message source. Sends a single message, and exits.
-     * TODO Take out the paths and stuff, move to args or properties so it can be run as a standalone (container?)
+     * Note that the main file does not make use of any Spring Boot stuff.
+     * However, an instance of the class could easilly be used from Spring Boot, as all
+     * dependent settings are handled in the main method, and passed as parameters to the instance.
      * @param args
      */
     public static void main(String[] args) throws NamingException, JMSException {
-        String url = "amqps://bouvet:5600";
-        String sendQueue = "remote";
-        String keystorePath = "/interchange/tmp/keys/bouvet.p12";
-        String keystorePassword = "password";
-        String keyPassword = "password";
+
+        String propertiesFile = "/application.properties";
+        Properties props = new Properties();
+        try (InputStream in = Source.class.getResourceAsStream(propertiesFile)) {
+            props.load(in);
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("The file %s could not be read",propertiesFile));
+        }
+
+
+        String url = props.getProperty("source.url");
+        String sendQueue = props.getProperty("source.sendQueue");
+        String keystorePath = props.getProperty("source.keyStorepath") ;
+        String keystorePassword = props.getProperty("source.keyStorepass");
+        String keyPassword = props.getProperty("source.keypass");
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
                 keystorePassword,
                 KeystoreType.PKCS12, keyPassword);
-        String trustStorePath = "/interchange/tmp/keys/truststore.jks";
-        String trustStorePassword = "password";
+        String trustStorePath = props.getProperty("source.trustStorepath");
+        String trustStorePassword = props.getProperty("source.trustStorepass");
         KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
                 trustStorePassword,KeystoreType.JKS);
 
