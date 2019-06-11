@@ -1,0 +1,36 @@
+
+{
+  "groups": [
+    {
+      "name": "db-helper",
+      "type": "no.vegvesen.ixn.federation.dbhelper.DbHelperProperties",
+      "sourceType": "no.vegvesen.ixn.federation.dbhelper.DbHelperProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "db-helper.type",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.dbhelper.DbHelperProperties"
+    }
+  ],
+  "hints": [
+    {
+      "name": "db-helper.type",
+      "values": [
+        {
+          "value": "message-forwarder",
+          "description": "Database filler for message forwarder."
+        },
+        {
+          "value": "subscriber",
+          "description": "Database filler for subscribing interchange."
+        },
+        {
+          "value": "provider",
+          "description": "Database filler for providing interchange."
+        }
+      ]
+    }
+  ]
+}
