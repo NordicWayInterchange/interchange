@@ -7,16 +7,18 @@ import no.vegvesen.ixn.ssl.SSLContextFactory;
 
 import javax.jms.*;
 import javax.net.ssl.SSLContext;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class Sink implements MessageListener {
     public static void main(String[] args) throws Exception {
 
-        String url = "amqps://remote:5601";
-        String receiveQueue = "fedTest";
-        String keystorePath = "/interchange/tmp/keys/remote.p12";
+        String url = "amqps://bouvet:63002";
+        String receiveQueue = "king_gustaf";
+        String keystorePath = "./tmp/keys/king_gustaf.p12";
         String keystorePassword = "password";
         String keyPassword = "password";
-        String trustStorePath = "/interchange/tmp/keys/truststore.jks";
+        String trustStorePath = "./tmp/keys/truststore.jks";
         String truststorePassword = "password";
 
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
@@ -41,15 +43,22 @@ public class Sink implements MessageListener {
     public void onMessage(Message message) {
         try {
             message.acknowledge();
-        } catch (JMSException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("Message received");
-        try {
-            System.out.println(((TextMessage)message).getText());
-        } catch (JMSException e) {
-            throw new RuntimeException(e);
-        }
-
+			int delay = -1;
+			if (message.getStringProperty("when") != null) {
+				try {
+					delay = (int) ZonedDateTime.parse(message.getStringProperty("when")).until(ZonedDateTime.now(), ChronoUnit.MILLIS);
+				} catch (Exception e) {
+					System.err.println("Could not parse \"when\"-field to calculate delay; " + message.getStringProperty("when"));
+				}
+			}
+			System.out.println("Message received");
+			try {
+				System.out.println(((TextMessage)message).getText() + " delay " + delay + " ms");
+			} catch (JMSException e) {
+				throw new RuntimeException(e);
+			}
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
+		}
     }
 }

@@ -8,4 +8,4 @@ services:
       - "./tmp:/tmp"
     environment:
       CA_CN: "my_ca"
-      KEY_CNS: "bouvet remote"
+      KEY_CNS: "bouvet remote king_gustaf"

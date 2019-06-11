@@ -63,7 +63,7 @@ services:
     ports:
       - 8080
       - 443
-      - 5671
+      - 63002:5671
       - 5672
     volumes:
       - "./qpid/bouvet:/config"
@@ -243,7 +243,7 @@ services:
     ports:
       - 8080
       - 443
-      - 5671
+      - 63001:5671
       - 5672
     volumes:
       - "./qpid/remote:/config"
