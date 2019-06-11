@@ -112,7 +112,6 @@ services:
       - KEYSTORE_NAME=/tmp/keys/bouvet.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
-      - JAVA_TMP_PATH=/javatmp
 
   bouvet_neighbour_discoverer:
     build: ./neighbour-discoverer
@@ -277,7 +276,6 @@ services:
       - KEYSTORE_NAME=/tmp/keys/remote.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
-      - JAVA_TMP_PATH=/javatmp
 
   remote_message_forwarder_app:
     build: ./message-forwarder

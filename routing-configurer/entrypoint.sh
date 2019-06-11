@@ -2,8 +2,7 @@
 
 echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 
-java -Djava.io.tmpdir=${JAVA_TMP_PATH} \
--Dspring.datasource.url=${POSTGRES_URI} \
+java -Dspring.datasource.url=${POSTGRES_URI} \
 -Dqpid.rest.api.baseUrl=${BASE_URL} \
 -Dqpid.rest.api.vhost=${VHOST_NAME} \
 -Drouting-configurer.ssl.trust-store=${TRUSTSTORE_NAME} \
