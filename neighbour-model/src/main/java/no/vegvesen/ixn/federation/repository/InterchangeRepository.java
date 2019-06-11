@@ -16,27 +16,27 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 
 
 	// Subscription polling: all interchanges with subscriptions in fedIn with status REQUESTED or ACCEPTED
-	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id_sub from subscriptions where subscription_status = 'REQUESTED' or subscription_status ='ACCEPTED')", nativeQuery = true)
+	@Query(value = "select * from interchanges i where exists(select 'x' from subscriptions s where i.ixn_id_fed_in=s.subreq_id_sub and s.subscription_status in('ACCEPTED', 'REQUESTED'));", nativeQuery = true)
 	List<Interchange> findInterchangesWithSubscriptionToPoll();
 
 	// Selectors for capability and subscription exchange
 	// Capability exchange: when neighbour capabilities is UNKNOWN
-	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'UNKNOWN')", nativeQuery = true)
+	@Query(value = "select * from interchanges i where exists(select 'x' from capabilities c where i.ixn_id_cap=cap_id and c.status='UNKNOWN');", nativeQuery = true)
 	List<Interchange> findInterchangesForCapabilityExchange();
 
 	// Subscription request: When neighbour capabilities is KNOWN and neighbour fedIn is EMPTY
-	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'KNOWN') intersect select * from interchanges where ixn_id_fed_in in (select subreq_id from subscription_request where status = 'EMPTY')", nativeQuery = true)
+	@Query(value = "select * from interchanges i where exists((select 'x' from capabilities c where i.ixn_id_cap=c.cap_id and c.status='KNOWN') intersect (select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='EMPTY'));", nativeQuery = true)
 	List<Interchange> findInterchangesForSubscriptionRequest();
 
 
 	// Selectors for graceful backoff
-	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id from subscription_request where status ='FAILED')", nativeQuery = true)
+	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='FAILED')", nativeQuery = true)
 	List<Interchange> findInterchangesWithFailedFedIn();
 
-	@Query(value = "select * from interchanges where ixn_id_cap in (select cap_id from capabilities where status = 'FAILED')", nativeQuery = true)
+	@Query(value = "select * from interchanges i where exists(select 'x' from capabilities c where i.ixn_id_cap=c.cap_id and c.status='FAILED')", nativeQuery = true)
 	List<Interchange> findInterchangesWithFailedCapabilityExchange();
 
-	@Query(value = "select * from interchanges where ixn_id_fed_in in (select subreq_id_sub from subscriptions where subscription_status = 'FAILED')", nativeQuery = true)
+	@Query(value = "select * from interchanges i where exists(select 'x' from subscriptions s where i.ixn_id_fed_in=s.subreq_id_sub and s.subscription_status='FAILED')", nativeQuery = true)
 	List<Interchange> findInterchangesWithFailedSubscriptionsInFedIn();
 
 
@@ -47,7 +47,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges i where exists (select 'x' from subscription_request sr where i.ixn_id_sub_out = sr.subreq_id and sr.status = 'TEAR_DOWN')", nativeQuery = true)
 	List<Interchange> findInterchangesForOutgoingSubscriptionTearDown();
 
-	@Query(value = "select * from interchanges where ixn_id_sub_out in (select subreq_id from subscription_request where status ='ESTABLISHED')", nativeQuery = true)
+	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_sub_out=s.subreq_id and s.status='ESTABLISHED')", nativeQuery = true)
 	List<Interchange> findInterchangesForMessageForwarding();
 
 }
