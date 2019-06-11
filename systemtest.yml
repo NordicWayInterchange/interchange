@@ -63,16 +63,16 @@ services:
     ports:
       - 8080
       - 443
-      - 5671
+      - 63002:5671
       - 5672
     volumes:
       - "./qpid/bouvet:/config"
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
       - "./qpid/messages/bouvet:/work/bouvet/messages"
     environment:
-      - CA_CERTIFICATE_FILE=/tmp/keys/my_ca.crt
-      - SERVER_CERTIFICATE_FILE=/tmp/keys/bouvet.crt
-      - SERVER_PRIVATE_KEY_FILE=/tmp/keys/bouvet.key
+      - CA_CERTIFICATE_FILE=/jks/keys/my_ca.crt
+      - SERVER_CERTIFICATE_FILE=/jks/keys/bouvet.crt
+      - SERVER_PRIVATE_KEY_FILE=/jks/keys/bouvet.key
       - VHOST_FILE=/config/vhost.json
       - GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
@@ -86,7 +86,7 @@ services:
     ports:
       - 8090
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
       - SERVER_NAME=bouvet
@@ -102,14 +102,14 @@ services:
     links:
       - "bouvet_qpid:bouvet"
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
       - BASE_URL=https://bouvet
       - VHOST_NAME=bouvet
-      - TRUSTSTORE_NAME=/tmp/keys/truststore.jks
+      - TRUSTSTORE_NAME=/jks/keys/truststore.jks
       - TRUSTSTORE_PASSWORD=password
-      - KEYSTORE_NAME=/tmp/keys/bouvet.p12
+      - KEYSTORE_NAME=/jks/keys/bouvet.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
 
@@ -123,7 +123,7 @@ services:
     links:
       - "remote_neighbour_server:remote"
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
       - SERVER_NAME=bouvet
@@ -140,13 +140,13 @@ services:
     - "bouvet_qpid:bouvet"
     - "remote_qpid:remote"
     volumes:
-    - "./tmp:/tmp"
+    - "./tmp:/jks"
     environment:
     - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
-    - KEY_STORE_FILE=/tmp/keys/bouvet.p12
+    - KEY_STORE_FILE=/jks/keys/bouvet.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE_PATH=/tmp/keys/truststore.jks
+    - TRUST_STORE_PATH=/jks/keys/truststore.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=bouvet
@@ -213,7 +213,7 @@ services:
     ports:
       - 8090
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
       - SERVER_NAME=remote
@@ -230,7 +230,7 @@ services:
     links:
       - "bouvet_neighbour_server:bouvet"
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
       - SERVER_NAME=remote
@@ -243,16 +243,16 @@ services:
     ports:
       - 8080
       - 443
-      - 5671
+      - 63001:5671
       - 5672
     volumes:
       - "./qpid/remote:/config"
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
       - "./qpid/messages/remote:/work/remote/messages"
     environment:
-      - CA_CERTIFICATE_FILE=/tmp/keys/my_ca.crt
-      - SERVER_CERTIFICATE_FILE=/tmp/keys/remote.crt
-      - SERVER_PRIVATE_KEY_FILE=/tmp/keys/remote.key
+      - CA_CERTIFICATE_FILE=/jks/keys/my_ca.crt
+      - SERVER_CERTIFICATE_FILE=/jks/keys/remote.crt
+      - SERVER_PRIVATE_KEY_FILE=/jks/keys/remote.key
       - VHOST_FILE=/config/vhost.json
       - GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
@@ -266,14 +266,14 @@ services:
     links:
       - "remote_qpid:remote"
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
       - BASE_URL=https://remote
       - VHOST_NAME=remote
-      - TRUSTSTORE_NAME=/tmp/keys/truststore.jks
+      - TRUSTSTORE_NAME=/jks/keys/truststore.jks
       - TRUSTSTORE_PASSWORD=password
-      - KEYSTORE_NAME=/tmp/keys/remote.p12
+      - KEYSTORE_NAME=/jks/keys/remote.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
 
@@ -287,13 +287,13 @@ services:
       - "bouvet_qpid:bouvet"
       - "remote_qpid:remote"
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - KEY_STORE_FILE=/tmp/keys/remote.p12
+      - KEY_STORE_FILE=/jks/keys/remote.p12
       - KEY_STORE_PASSWORD=password
       - KEY_STORE_TYPE=PKCS12
-      - TRUST_STORE_PATH=/tmp/keys/truststore.jks
+      - TRUST_STORE_PATH=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=remote

@@ -12,12 +12,12 @@ services:
     - 5672
     volumes:
     - "./message-forwarder/src/test/docker/localIxn/config/:/config"
-    - "./tmp:/tmp"
+    - "./tmp:/jks"
     - "./qpid/messages/bouvet:/work/bouvet/messages"
     environment:
       SERVER_CN: "bouvet"
-      CERTIFICATE_FILE: "/tmp/keys/server.crt"
-      PRIVATE_KEY_FILE: "/tmp/keys/server.key"
+      CERTIFICATE_FILE: "/jks/keys/server.crt"
+      PRIVATE_KEY_FILE: "/jks/keys/server.key"
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"

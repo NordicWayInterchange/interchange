@@ -5,7 +5,7 @@ services:
     build: ./key-gen
     container_name: key_gen
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       CA_CN: "my_ca"
-      KEY_CNS: "bouvet remote"
+      KEY_CNS: "bouvet remote king_gustaf"

@@ -5,7 +5,7 @@
 pushd $(dirname $0)
 CA_CN=${CA_CN:-my_ca}
 KEY_CNS=${KEY_CNS:-localhost king_gustaf king_harald}
-KEYS_DIR=../tmp/keys
+KEYS_DIR=../jks/keys
 
 genCaCert() {
     local cn=$1
@@ -39,4 +39,4 @@ for commonName in ${KEY_CNS}; do
     generateCertificate ${commonName}
 done
 
-echo fisk > /tmp/ready.txt
+echo fisk > /jks/ready.txt
