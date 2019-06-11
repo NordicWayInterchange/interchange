@@ -8,8 +8,8 @@ fi
 SERVER=${1:-localhost}
 
 USER=king_harald
-KEYSTORE_FILE="./tmp/keys/${USER}.p12"
-TRUSTSTORE_FILE="./tmp/keys/truststore.jks"
+KEYSTORE_FILE="./jks/keys/${USER}.p12"
+TRUSTSTORE_FILE="./jks/keys/truststore.jks"
 PASSWORD=password
 CLIENT_JAR=debugclient/target/debugclient-1.0-SNAPSHOT-jar-with-dependencies.jar
 SERVER_URI="amqps://${SERVER}:5671"

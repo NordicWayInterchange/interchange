@@ -5,7 +5,7 @@ services:
     build: ./key-gen
     container_name: key_gen
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       CA_CN: "my_ca"
       KEY_CNS: "bouvet king_harald"
@@ -23,12 +23,12 @@ services:
       - 5672:5672
     volumes:
       - "./qpid/bouvet:/config"
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
       - "./qpid/messages/bouvet:/work/bouvet_use_keys_1_/messages"
     environment:
-      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
-      SERVER_CERTIFICATE_FILE: /tmp/keys/bouvet.crt
-      SERVER_PRIVATE_KEY_FILE: /tmp/keys/bouvet.key
+      CA_CERTIFICATE_FILE: /jks/keys/my_ca.crt
+      SERVER_CERTIFICATE_FILE: /jks/keys/bouvet.crt
+      SERVER_PRIVATE_KEY_FILE: /jks/keys/bouvet.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
@@ -46,12 +46,12 @@ services:
       - 6672:5672
     volumes:
       - "./qpid/bouvet:/config"
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
       - "./qpid/messages/bouvet:/work/bouvet_use/messages"
     environment:
-      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
-      SERVER_CERTIFICATE_FILE: /tmp/keys/bouvet.crt
-      SERVER_PRIVATE_KEY_FILE: /tmp/keys/bouvet.key
+      CA_CERTIFICATE_FILE: /jks/keys/my_ca.crt
+      SERVER_CERTIFICATE_FILE: /jks/keys/bouvet.crt
+      SERVER_PRIVATE_KEY_FILE: /jks/keys/bouvet.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"

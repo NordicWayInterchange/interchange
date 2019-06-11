@@ -100,14 +100,14 @@
                                                     ${project.basedir}/src/test/resources/qpid:/config
                                                 </volume>
                                                 <volume>
-                                                    ${project.basedir}/src/test/resources/jks:/tmp
+                                                    ${project.basedir}/src/test/resources/jks:/jks
                                                 </volume>
                                             </bind>
                                         </volumes>
                                         <env>
-                                            <CA_CERTIFICATE_FILE>/tmp/localhost.crt</CA_CERTIFICATE_FILE>
-                                            <SERVER_CERTIFICATE_FILE>/tmp/localhost.crt</SERVER_CERTIFICATE_FILE>
-                                            <SERVER_PRIVATE_KEY_FILE>/tmp/localhost.key</SERVER_PRIVATE_KEY_FILE>
+                                            <CA_CERTIFICATE_FILE>/jks/localhost.crt</CA_CERTIFICATE_FILE>
+                                            <SERVER_CERTIFICATE_FILE>/jks/localhost.crt</SERVER_CERTIFICATE_FILE>
+                                            <SERVER_PRIVATE_KEY_FILE>/jks/localhost.key</SERVER_PRIVATE_KEY_FILE>
                                             <VHOST_FILE>/config/localhost.json</VHOST_FILE>
                                             <GROUPS_FILE>/config/groups</GROUPS_FILE>
                                             <PASSWD_FILE>/config/passwd</PASSWD_FILE>

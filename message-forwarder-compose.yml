@@ -11,7 +11,7 @@ services:
     build: ./key-gen
     container_name: key_gen
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       CA_CN: "my_ca"
       KEY_CNS: "bouvet remote kyrre"
@@ -37,12 +37,12 @@ services:
       - 8080:8080
     volumes:
       - "./message-forwarder/src/test/docker/localIxn/config:/config"
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
       - "./qpid/messages/bouvet:/work/bouvet/messages"
     environment:
-      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
-      SERVER_CERTIFICATE_FILE: /tmp/keys/bouvet.crt
-      SERVER_PRIVATE_KEY_FILE: /tmp/keys/bouvet.key
+      CA_CERTIFICATE_FILE: /jks/keys/my_ca.crt
+      SERVER_CERTIFICATE_FILE: /jks/keys/bouvet.crt
+      SERVER_PRIVATE_KEY_FILE: /jks/keys/bouvet.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
@@ -58,12 +58,12 @@ services:
      - 8081:8080
     volumes:
     - "./message-forwarder/src/test/docker/remoteIxn/config:/config"
-    - "./tmp:/tmp"
+    - "./tmp:/jks"
     - "./qpid/messages/remote:/work/remote/messages"
     environment:
-      CA_CERTIFICATE_FILE: /tmp/keys/my_ca.crt
-      SERVER_CERTIFICATE_FILE: /tmp/keys/remote.crt
-      SERVER_PRIVATE_KEY_FILE: /tmp/keys/remote.key
+      CA_CERTIFICATE_FILE: /jks/keys/my_ca.crt
+      SERVER_CERTIFICATE_FILE: /jks/keys/remote.crt
+      SERVER_PRIVATE_KEY_FILE: /jks/keys/remote.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
@@ -75,13 +75,13 @@ services:
       - bouvet_qpid
       - remote_qpid
     volumes:
-      - "./tmp:/tmp"
+      - "./tmp:/jks"
     environment:
       POSTGRES_URI: "jdbc:postgresql://db:5432/federation"
       SERVER_NAME: "bouvet"
-      KEY_STORE_FILE: "/tmp/keys/bouvet.p12"
+      KEY_STORE_FILE: "/jks/keys/bouvet.p12"
       KEY_STORE_PASSWORD: "password"
       KEY_STORE_TYPE: "PKCS12"
-      TRUST_STORE_PATH: "/tmp/keys/truststore.jks"
+      TRUST_STORE_PATH: "/jks/keys/truststore.jks"
       TRUST_STORE_PASSWORD: "password"
       TRUST_STORE_TYPE: "JKS"
