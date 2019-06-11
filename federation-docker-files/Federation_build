@@ -32,6 +32,7 @@ COPY onboard-server/pom.xml onboard-server/pom.xml
 COPY routing-configurer/src routing-configurer/src
 COPY routing-configurer/pom.xml routing-configurer/pom.xml
 
+COPY federation-st/src federation-st/src
 COPY federation-st/pom.xml federation-st/pom.xml
 
 COPY test-data-helpers/src test-data-helpers/src
