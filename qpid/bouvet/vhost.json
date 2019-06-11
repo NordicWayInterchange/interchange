@@ -5,7 +5,7 @@
   "exchanges": [
     {
       "name" : "fedEx",
-      "type" : "direct",
+      "type" : "headers",
       "durable" : true,
       "durableBindings": [
         {
@@ -159,6 +159,15 @@
           "attributes": {
             "ROUTING_KEY": "onramp",
             "NAME": ""
+          }
+        },
+        {
+          "objectType" : "EXCHANGE",
+          "identity" : "messaging-users",
+          "operation" : "PUBLISH",
+          "outcome" : "ALLOW_LOG",
+          "attributes" : {
+            "NAME" : "fedEx"
           }
         },
         {

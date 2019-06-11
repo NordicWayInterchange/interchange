@@ -36,8 +36,7 @@ public class SubscribingInterchangeDbFiller implements DatabaseHelperInterface{
 		ServiceProvider volvoCloud = new ServiceProvider();
 		volvoCloud.setName("Volvo Cloud");
 		DataType volvoDataTypeOne = new DataType("datex2;1.0", "FI", "Obstruction" );
-		DataType volvoDataTypeTwo = new DataType("datex2;1.0", "DK", "Conditions");
-		volvoCloud.setCapabilities(Stream.of(volvoDataTypeOne, volvoDataTypeTwo).collect(Collectors.toSet()));
+		volvoCloud.setCapabilities(Collections.singleton(volvoDataTypeOne));
 
 		Subscription volvoSubscriptions = new Subscription();
 		volvoSubscriptions.setSelector("where LIKE 'SE'");
