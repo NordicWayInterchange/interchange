@@ -20,7 +20,6 @@ import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("test")
 public class InterchangeRepositorySelectorIT {
 
 	private Interchange ericsson;
