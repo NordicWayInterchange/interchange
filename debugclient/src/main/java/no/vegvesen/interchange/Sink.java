@@ -8,21 +8,32 @@ import no.vegvesen.ixn.ssl.SSLContextFactory;
 import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Properties;
 
 public class Sink implements MessageListener, AutoCloseable {
 
 
     public static void main(String[] args) throws Exception {
 
-        String url = "amqps://remote:5601";
-        String receiveQueue = "fedTest";
-        String keystorePath = "/interchange/tmp/keys/remote.p12";
-        String keystorePassword = "password";
-        String keyPassword = "password";
-        String trustStorePath = "/interchange/tmp/keys/truststore.jks";
-        String truststorePassword = "password";
+        String propertiesFile = "/sink.properties";
+        Properties props = new Properties();
+        try (InputStream in = Source.class.getResourceAsStream(propertiesFile)) {
+            props.load(in);
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("The file %s could not be read",propertiesFile));
+        }
+
+        String url = props.getProperty("sink.url");
+        String receiveQueue = props.getProperty("sink.receiveQueue");
+        String keystorePath = props.getProperty("sink.keyStorepath");
+        String keystorePassword = props.getProperty("sink.keyStorepass");
+        String keyPassword = props.getProperty("sink.keypass");
+        String trustStorePath = props.getProperty("sink.trustStorepath");
+        String truststorePassword = props.getProperty("sink.trustStorepass");
 
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
                 keystorePassword,

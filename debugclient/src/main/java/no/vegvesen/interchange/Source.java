@@ -26,7 +26,7 @@ public class Source implements AutoCloseable {
      */
     public static void main(String[] args) throws NamingException, JMSException {
 
-        String propertiesFile = "/application.properties";
+        String propertiesFile = "/source.properties";
         Properties props = new Properties();
         try (InputStream in = Source.class.getResourceAsStream(propertiesFile)) {
             props.load(in);
