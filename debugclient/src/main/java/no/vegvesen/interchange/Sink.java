@@ -6,20 +6,34 @@ import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 
 import javax.jms.*;
+import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Properties;
 
-public class Sink implements MessageListener {
+public class Sink implements MessageListener, AutoCloseable {
+
+
     public static void main(String[] args) throws Exception {
 
-        String url = "amqps://bouvet:63002";
-        String receiveQueue = "king_gustaf";
-        String keystorePath = "./tmp/keys/king_gustaf.p12";
-        String keystorePassword = "password";
-        String keyPassword = "password";
-        String trustStorePath = "./tmp/keys/truststore.jks";
-        String truststorePassword = "password";
+        String propertiesFile = "/sink.properties";
+        Properties props = new Properties();
+        try (InputStream in = Source.class.getResourceAsStream(propertiesFile)) {
+            props.load(in);
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("The file %s could not be read",propertiesFile));
+        }
+
+        String url = props.getProperty("sink.url");
+        String receiveQueue = props.getProperty("sink.receiveQueue");
+        String keystorePath = props.getProperty("sink.keyStorepath");
+        String keystorePassword = props.getProperty("sink.keyStorepass");
+        String keyPassword = props.getProperty("sink.keypass");
+        String trustStorePath = props.getProperty("sink.trustStorepath");
+        String truststorePassword = props.getProperty("sink.trustStorepass");
 
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
                 keystorePassword,
@@ -29,14 +43,30 @@ public class Sink implements MessageListener {
 
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
 
+        Sink sink = new Sink(url,receiveQueue,sslContext);
+        sink.start();
+    }
 
-        IxnContext context = new IxnContext(url, null, receiveQueue);
-        Connection connection = context.createConnection(sslContext);
-        Destination destination = context.getReceiveQueue();
+    private final String url;
+    private final String queueName;
+    private final SSLContext sslContext;
+    private Connection connection;
+
+    public Sink(String url, String queueName, SSLContext sslContext) {
+        this.url = url;
+        this.queueName = queueName;
+        this.sslContext = sslContext;
+    }
+
+
+    public void start() throws JMSException, NamingException {
+        IxnContext ixnContext = new IxnContext(url,null,queueName);
+        connection = ixnContext.createConnection(sslContext);
+        Destination destination = ixnContext.getReceiveQueue();
         connection.start();
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         MessageConsumer consumer = session.createConsumer(destination);
-        consumer.setMessageListener(new Sink());
+        consumer.setMessageListener(this);
     }
 
     @Override
@@ -60,5 +90,13 @@ public class Sink implements MessageListener {
 		} catch (JMSException e) {
 			throw new RuntimeException(e);
 		}
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (connection != null)  {
+            connection.close();
+        }
+
     }
 }
