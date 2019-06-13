@@ -297,3 +297,10 @@ services:
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=remote
+
+  execute_test:
+    build: ./federation-st
+    volumes:
+      - "./tmp:/jks"
+    depends_on:
+      - remote_message_forwarder_app

@@ -22,4 +22,4 @@ COPY onboard-server/pom.xml onboard-server/pom.xml
 COPY routing-configurer/src routing-configurer/src
 COPY routing-configurer/pom.xml routing-configurer/pom.xml
 
-RUN mvn clean test -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B
+RUN mvn clean test -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
