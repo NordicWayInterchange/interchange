@@ -46,8 +46,7 @@ public class NeighbourRESTFacadeTest {
 	@Before
 	public void setUp() {
 		ericsson = new Interchange();
-		ericsson.setName("ericsson");
-		ericsson.setDomainName("itsinterchange.eu");
+		ericsson.setName("ericsson.itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
 
 		this.server = MockRestServiceServer.createServer(restTemplate);
