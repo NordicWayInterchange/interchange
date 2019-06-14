@@ -306,7 +306,6 @@ public class NeighbourRestController {
 		if (dnsNeighbour != null) {
 			neighbour.setControlChannelPort(dnsNeighbour.getControlChannelPort());
 			neighbour.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
-			neighbour.setDomainName(dnsNeighbour.getDomainName());
 		} else {
 			throw new DiscoveryException(String.format("Received capability post from neighbour %s, but could not find in DNS", neighbour.getName()));
 		}
