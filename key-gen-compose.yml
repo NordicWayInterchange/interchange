@@ -8,7 +8,7 @@ services:
       - "./tmp:/jks"
     environment:
       CA_CN: "itsinterchange.eu"
-      KEY_CNS: "local.itsinterchange.eu remote.itsinterchange.eu king_harald"
+      KEY_CNS: "local.itsinterchange.eu remote.itsinterchange.eu king_gustaf"
 
   local_use_keys_1_qpid:
     build: ./qpid

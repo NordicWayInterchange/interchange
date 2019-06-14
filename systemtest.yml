@@ -57,12 +57,14 @@ services:
     container_name: local_interchange_app
     hostname: local_interchange_app
     links:
-    - "local_qpid:local"
+    - "local_qpid:local.itsinterchange.eu"
     environment:
-      AMQP_URI: amqp://local
+      AMQP_URI: amqp://local.itsinterchange.eu
       AMQP_USER: interchange
       AMQP_PASSWORD: "12345678"
       POSTGIS_URI: jdbc:postgresql://local_postgis:5432/geolookup
+    depends_on:
+      - local_postgis
     networks:
     - testing_net
 
@@ -120,8 +122,9 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
       - SERVER_NAME=local.itsinterchange.eu
-      - NODE_PROVIDER_NAME=local # "my name"
+      - NODE_PROVIDER_NAME=local.itsinterchange.eu # "my name"
       - DNS_TYPE=prod
+      - DOMAIN_NAME=itsinterchange.eu
     networks:
     - testing_net
     dns: 172.28.1.1
@@ -133,13 +136,13 @@ services:
       - federation-build
       - local_db
     links:
-      - "local_qpid:local"
+      - "local_qpid:local.itsinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
-      - BASE_URL=https://local
-      - VHOST_NAME=local
+      - BASE_URL=https://local.itsinterchange.eu
+      - VHOST_NAME=local.itsinterchange.eu
       - TRUSTSTORE_NAME=/jks/keys/truststore.jks
       - TRUSTSTORE_PASSWORD=password
       - KEYSTORE_NAME=/jks/keys/local.itsinterchange.eu.p12
@@ -162,7 +165,7 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
       - SERVER_NAME=local.itsinterchange.eu
-      - NODE_PROVIDER_NAME=local # "my name"
+      - NODE_PROVIDER_NAME=local.itsinterchange.eu # "my name"
       - DNS_TYPE=prod
       - DOMAIN_NAME=itsinterchange.eu
       - CTRL_CHNL_PORT=8090
@@ -225,9 +228,9 @@ services:
     container_name: remote_interchange_app
     hostname: remote_interchange_app
     links:
-    - "remote_qpid:remote"
+    - "remote_qpid:remote.itsinterchange.eu"
     environment:
-      AMQP_URI: amqp://remote
+      AMQP_URI: amqp://remote.itsinterchange.eu
       AMQP_USER: interchange
       AMQP_PASSWORD: "12345678"
       POSTGIS_URI: jdbc:postgresql://remote_postgis:5432/geolookup
@@ -269,7 +272,7 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
       - SERVER_NAME=remote.itsinterchange.eu
-      - NODE_PROVIDER_NAME=remote # "my name"
+      - NODE_PROVIDER_NAME=remote.itsinterchange.eu # "my name"
       - DNS_TYPE=prod
       - DOMAIN_NAME=itsinterchange.eu
       - CTRL_CHNL_PORT=8090
@@ -291,7 +294,7 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
       - SERVER_NAME=remote.itsinterchange.eu
-      - NODE_PROVIDER_NAME=remote # "my name"
+      - NODE_PROVIDER_NAME=remote.itsinterchange.eu # "my name"
       - DNS_TYPE=prod
       - DOMAIN_NAME=itsinterchange.eu
       - CTRL_CHNL_PORT=8090
@@ -328,13 +331,13 @@ services:
       - federation-build
       - remote_db
     links:
-      - "remote_qpid:remote"
+      - "remote_qpid:remote.itsinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - BASE_URL=https://remote
-      - VHOST_NAME=remote
+      - BASE_URL=https://remote.itsinterchange.eu
+      - VHOST_NAME=remote.itsinterchange.eu
       - TRUSTSTORE_NAME=/jks/keys/truststore.jks
       - TRUSTSTORE_PASSWORD=password
       - KEYSTORE_NAME=/jks/keys/remote.itsinterchange.eu.p12
