@@ -1,0 +1,6 @@
+FROM alpine:latest
+
+RUN apk add --no-cache bind-tools dnsmasq
+COPY dnsmasq.conf /etc/
+
+ENTRYPOINT ["dnsmasq", "-k"]
