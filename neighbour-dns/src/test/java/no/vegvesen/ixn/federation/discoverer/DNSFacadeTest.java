@@ -33,6 +33,7 @@ public class DNSFacadeTest {
 		List<Interchange> interchanges = dnsFacade.getNeighbours();
 
 		for(Interchange i : interchanges){
+			System.out.println(i.toString());
 			Assert.assertNotNull(i);
 		}
 	}
@@ -43,7 +44,7 @@ public class DNSFacadeTest {
 		for (Interchange neighbour : dnsFacade.getNeighbours()) {
 			System.out.println("control channel url: " + neighbour.getControlChannelUrl("/"));
 			System.out.println("message channel url: " + neighbour.getMessageChannelUrl());
-			if (neighbour.getName().equals("ericsson")){
+			if (neighbour.getName().equals("ericsson.itsinterchange.eu")){
 				ericsson = neighbour;
 			}
 		}

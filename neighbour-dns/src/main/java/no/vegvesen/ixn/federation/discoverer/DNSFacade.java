@@ -52,15 +52,13 @@ public class DNSFacade implements DNSFacadeInterface {
 			for (Record record : records) {
 
 				SRVRecord srv = (SRVRecord) record;
-				String target = srv.getTarget().toString();
+				String domainName = srv.getTarget().toString();
 				String messageChannelPort = String.valueOf(srv.getPort());
-				int lengthDomain = target.indexOf(dnsProperties.getDomainName()) - 1;
 
 				Interchange interchange = new Interchange();
-				interchange.setName(target.substring(0, lengthDomain));
+				interchange.setName(domainName.substring(0, domainName.length()-1));
 				interchange.setMessageChannelPort(messageChannelPort);
 				interchange.setControlChannelPort(dnsProperties.getControlChannelPort());
-				interchange.setDomainName(dnsProperties.getDomainName());
 
 				interchanges.add(interchange);
 				ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
