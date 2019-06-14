@@ -20,10 +20,10 @@ public class FederationSystemST {
 	public void setUp() throws Exception {
 		KeystoreDetails truststoreDetails = new KeystoreDetails("/jks/keys/truststore.jks", "password", KeystoreType.JKS);
 
-		KeystoreDetails sourceKeystore = new KeystoreDetails("/jks/keys/remote.p12", "password", KeystoreType.PKCS12, "password");
+		KeystoreDetails sourceKeystore = new KeystoreDetails("/jks/keys/remote.itsinterchange.eu.p12", "password", KeystoreType.PKCS12, "password");
 		sourceSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(sourceKeystore, truststoreDetails);
 
-		KeystoreDetails sinkKeystore = new KeystoreDetails("/jks/keys/bouvet.p12", "password", KeystoreType.PKCS12, "password");
+		KeystoreDetails sinkKeystore = new KeystoreDetails("/jks/keys/local.itsinterchange.eu.p12", "password", KeystoreType.PKCS12, "password");
 		sinkSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(sinkKeystore, truststoreDetails);
 	}
 
