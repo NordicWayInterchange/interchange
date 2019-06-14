@@ -1,2 +1,2 @@
 messaging-users.users=guest,king_harald,king_gustaf,remote.itsinterchange.eu,local.itsinterchange.eu
-administrators.users=qpid-admin,remote.itsinterchange.eu
+administrators.users=qpid-admin,local.itsinterchange.eu

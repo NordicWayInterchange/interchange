@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "bouvet",
+  "name": "local.itsinterchange.eu",
   "modelVersion": "7.0",
   "exchanges": [
     {
@@ -176,7 +176,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "bouvet"
+            "NAME": "local.itsinterchange.eu"
           }
         },
         {
