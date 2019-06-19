@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "remote",
+  "name": "remote.itsinterchange.eu",
   "modelVersion": "7.0",
   "exchanges": [
     {
@@ -167,7 +167,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "remote"
+            "NAME": "remote.itsinterchange.eu"
           }
         },
         {

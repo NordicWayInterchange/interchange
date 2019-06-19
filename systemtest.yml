@@ -1,54 +1,82 @@
 version: '3'
 services:
 
+# Note: now all the containers are on the same network - testing_net
+# An idea for later would be to have two separate networks, one for each node,
+# where the modules that need to communicate with each other are a part of both networks.
+
   federation-build:
     build:
       dockerfile: federation-docker-files/Federation_build
       context: ./
     image: federation-build
 
-  bouvet_db:
+  mock-dns-server:
+    build:
+      context: ./fake-dns-server
+      dockerfile: dns-dockerfile
+    cap_add:
+    - NET_ADMIN
+    container_name: mock-dns-server
+    hostname: mock-dns-server
+    networks:
+      testing_net:
+        ipv4_address: 172.28.1.1
+        aliases:
+          - dsn.itsinterchange.eu
+
+  local_db:
     image: postgres:9.6
-    container_name: bouvet_db
+    container_name: local_db
+    depends_on:
+      - mock-dns-server
     ports:
       - 32777:5432
     environment:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - POSTGRES_DB=federation
+    networks:
+    - testing_net
 
-  bouvet_db_filler:
+  local_db_filler:
     build: ./test-data-helpers
     environment:
-    - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
+    - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
     - DB_HELPER_TYPE=subscriber
-    container_name: bouvet_db_filler
-    hostname: bouvet_db_filler
+    container_name: local_db_filler
+    hostname: local_db_filler
     depends_on:
-    - bouvet_db
+    - local_db
     - federation-build
+    networks:
+    - testing_net
 
-  bouvet_interchange_app:
+  local_interchange_app:
     build: ./interchangenode
-    container_name: bouvet_interchange_app
-    hostname: bouvet_interchange_app
+    container_name: local_interchange_app
+    hostname: local_interchange_app
     links:
-    - "bouvet_qpid:bouvet"
+    - "local_qpid:local.itsinterchange.eu"
     environment:
-      AMQP_URI: amqp://bouvet
+      AMQP_URI: amqp://local.itsinterchange.eu
       AMQP_USER: interchange
       AMQP_PASSWORD: "12345678"
-      POSTGIS_URI: jdbc:postgresql://bouvet_postgis:5432/geolookup
+      POSTGIS_URI: jdbc:postgresql://local_postgis:5432/geolookup
+    depends_on:
+      - local_postgis
+    networks:
+    - testing_net
 
 
-  bouvet_postgis:
+  local_postgis:
     build: ./postgis
     environment:
     - POSTGRES_USER=geolookup
     - POSTGRES_PASSWORD=geolookup
     - POSTGRES_DB=geolookup
-    container_name: bouvet_postgis
-    hostname: bouvet_postgis
+    container_name: local_postgis
+    hostname: local_postgis
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "geolookup"]
       interval: 10s
@@ -56,110 +84,132 @@ services:
       retries: 5
     ports:
     - 8899:5432
+    networks:
+    - testing_net
 
-  bouvet_qpid:
+  local_qpid:
     build: ./qpid
-    container_name: bouvet_qpid
+    container_name: local_qpid
     ports:
       - 8080
       - 443
       - 63002:5671
       - 5672
     volumes:
-      - "./qpid/bouvet:/config"
+      - "./qpid/local:/config"
       - "./tmp:/jks"
-      - "./qpid/messages/bouvet:/work/bouvet/messages"
+      - "./qpid/messages/local:/work/local/messages"
     environment:
-      - CA_CERTIFICATE_FILE=/jks/keys/my_ca.crt
-      - SERVER_CERTIFICATE_FILE=/jks/keys/bouvet.crt
-      - SERVER_PRIVATE_KEY_FILE=/jks/keys/bouvet.key
+      - CA_CERTIFICATE_FILE=/jks/keys/itsinterchange.eu.crt
+      - SERVER_CERTIFICATE_FILE=/jks/keys/local.itsinterchange.eu.crt
+      - SERVER_PRIVATE_KEY_FILE=/jks/keys/local.itsinterchange.eu.key
       - VHOST_FILE=/config/vhost.json
       - GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
+    networks:
+    - testing_net
 
-  bouvet_neighbour_server:
+  local_neighbour_server:
     build: ./neighbour-server
-    container_name: bouvet_neighbour_server
+    container_name: local_neighbour_server
     depends_on:
-      - bouvet_db
+      - local_db
       - federation-build
     ports:
       - 8090
     volumes:
       - "./tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
-      - SERVER_NAME=bouvet
-      - DNS_MOCK_NAMES=bouvet,remote
-      - DNS_TYPE=mock
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - SERVER_NAME=local.itsinterchange.eu
+      - NODE_PROVIDER_NAME=local.itsinterchange.eu # "my name"
+      - DNS_TYPE=prod
+      - DOMAIN_NAME=itsinterchange.eu
+      - CTRL_CHNL_PORT=8090
+    networks:
+    - testing_net
+    dns: 172.28.1.1
 
-  bouvet_routing_configurer:
+  local_routing_configurer:
     build: ./routing-configurer
-    container_name: bouvet_routing_configurer
+    container_name: local_routing_configurer
     depends_on:
       - federation-build
-      - bouvet_db
+      - local_db
     links:
-      - "bouvet_qpid:bouvet"
+      - "local_qpid:local.itsinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
-      - BASE_URL=https://bouvet
-      - VHOST_NAME=bouvet
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - BASE_URL=https://local.itsinterchange.eu
+      - VHOST_NAME=local.itsinterchange.eu
       - TRUSTSTORE_NAME=/jks/keys/truststore.jks
       - TRUSTSTORE_PASSWORD=password
-      - KEYSTORE_NAME=/jks/keys/bouvet.p12
+      - KEYSTORE_NAME=/jks/keys/local.itsinterchange.eu.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
+    networks:
+    - testing_net
 
-  bouvet_neighbour_discoverer:
+  local_neighbour_discoverer:
     build: ./neighbour-discoverer
-    container_name: bouvet_neighbour_discoverer
+    container_name: local_neighbour_discoverer
     depends_on:
-      - bouvet_db
+      - local_db
       - federation-build
-      - bouvet_db_filler
+      - local_db_filler
     links:
-      - "remote_neighbour_server:remote"
+     - "remote_neighbour_server:remote.itsinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
-      - SERVER_NAME=bouvet
-      - DNS_MOCK_NAMES=bouvet,remote
-      - DNS_TYPE=mock
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - SERVER_NAME=local.itsinterchange.eu
+      - NODE_PROVIDER_NAME=local.itsinterchange.eu # "my name"
+      - DNS_TYPE=prod
+      - DOMAIN_NAME=itsinterchange.eu
+      - CTRL_CHNL_PORT=8090
+    dns: 172.28.1.1
+    networks:
+    - testing_net
 
-  bouvet_message_forwarder_app:
+  local_message_forwarder_app:
     build: ./message-forwarder
-    container_name: bouvet_message_forwarder_app
+    container_name: local_message_forwarder_app
     depends_on:
     - federation-build
-    - bouvet_db
+    - local_db
     links:
-    - "bouvet_qpid:bouvet"
-    - "remote_qpid:remote"
+    - "local_qpid:local.itsinterchange.eu"
+    - "remote_qpid:remote.itsinterchange.eu"
     volumes:
     - "./tmp:/jks"
     environment:
-    - POSTGRES_URI=jdbc:postgresql://bouvet_db:5432/federation
-    - KEY_STORE_FILE=/jks/keys/bouvet.p12
+    - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+    - KEY_STORE_FILE=/jks/keys/local.itsinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
     - TRUST_STORE_PATH=/jks/keys/truststore.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
-    - SERVER_NAME=bouvet
+    - SERVER_NAME=local.itsinterchange.eu
+    networks:
+    - testing_net
 
   remote_db:
     image: postgres:9.6
     container_name: remote_db
+    depends_on:
+    - mock-dns-server
     ports:
       - 32778:5432
     environment:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - POSTGRES_DB=federation
+    networks:
+    - testing_net
 
   remote_db_filler:
     build: ./test-data-helpers
@@ -171,20 +221,24 @@ services:
     depends_on:
     - remote_db
     - federation-build
+    networks:
+    - testing_net
 
   remote_interchange_app:
     build: ./interchangenode
     container_name: remote_interchange_app
     hostname: remote_interchange_app
     links:
-    - "remote_qpid:remote"
+    - "remote_qpid:remote.itsinterchange.eu"
     environment:
-      AMQP_URI: amqp://remote
+      AMQP_URI: amqp://remote.itsinterchange.eu
       AMQP_USER: interchange
       AMQP_PASSWORD: "12345678"
       POSTGIS_URI: jdbc:postgresql://remote_postgis:5432/geolookup
     depends_on:
     - remote_postgis
+    networks:
+    - testing_net
 
 
   remote_postgis:
@@ -202,6 +256,8 @@ services:
       retries: 5
     ports:
     - 6677:5432
+    networks:
+    - testing_net
 
 
   remote_neighbour_server:
@@ -216,9 +272,14 @@ services:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - SERVER_NAME=remote
-      - DNS_MOCK_NAMES=bouvet,remote
-      - DNS_TYPE=mock
+      - SERVER_NAME=remote.itsinterchange.eu
+      - NODE_PROVIDER_NAME=remote.itsinterchange.eu # "my name"
+      - DNS_TYPE=prod
+      - DOMAIN_NAME=itsinterchange.eu
+      - CTRL_CHNL_PORT=8090
+    networks:
+      - testing_net
+    dns: 172.28.1.1
 
   remote_neighbour_discoverer:
     build: ./neighbour-discoverer
@@ -228,14 +289,19 @@ services:
       - federation-build
       - remote_db_filler
     links:
-      - "bouvet_neighbour_server:bouvet"
+      - "local_neighbour_server:local.itsinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - SERVER_NAME=remote
-      - DNS_MOCK_NAMES=bouvet,remote
-      - DNS_TYPE=mock
+      - SERVER_NAME=remote.itsinterchange.eu
+      - NODE_PROVIDER_NAME=remote.itsinterchange.eu # "my name"
+      - DNS_TYPE=prod
+      - DOMAIN_NAME=itsinterchange.eu
+      - CTRL_CHNL_PORT=8090
+    networks:
+    - testing_net
+    dns: 172.28.1.1
 
   remote_qpid:
     build: ./qpid
@@ -250,12 +316,14 @@ services:
       - "./tmp:/jks"
       - "./qpid/messages/remote:/work/remote/messages"
     environment:
-      - CA_CERTIFICATE_FILE=/jks/keys/my_ca.crt
-      - SERVER_CERTIFICATE_FILE=/jks/keys/remote.crt
-      - SERVER_PRIVATE_KEY_FILE=/jks/keys/remote.key
+      - CA_CERTIFICATE_FILE=/jks/keys/itsinterchange.eu.crt
+      - SERVER_CERTIFICATE_FILE=/jks/keys/remote.itsinterchange.eu.crt
+      - SERVER_PRIVATE_KEY_FILE=/jks/keys/remote.itsinterchange.eu.key
       - VHOST_FILE=/config/vhost.json
       - GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
+    networks:
+    - testing_net
 
   remote_routing_configurer:
     build: ./routing-configurer
@@ -264,18 +332,20 @@ services:
       - federation-build
       - remote_db
     links:
-      - "remote_qpid:remote"
+      - "remote_qpid:remote.itsinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - BASE_URL=https://remote
-      - VHOST_NAME=remote
+      - BASE_URL=https://remote.itsinterchange.eu
+      - VHOST_NAME=remote.itsinterchange.eu
       - TRUSTSTORE_NAME=/jks/keys/truststore.jks
       - TRUSTSTORE_PASSWORD=password
-      - KEYSTORE_NAME=/jks/keys/remote.p12
+      - KEYSTORE_NAME=/jks/keys/remote.itsinterchange.eu.p12
       - KEYSTORE_PASSWORD=password
       - KEY_PASSWORD=password
+    networks:
+    - testing_net
 
   remote_message_forwarder_app:
     build: ./message-forwarder
@@ -284,23 +354,36 @@ services:
       - federation-build
       - remote_db
     links:
-      - "bouvet_qpid:bouvet"
-      - "remote_qpid:remote"
+      - "local_qpid:local.itsinterchange.eu"
+      - "remote_qpid:remote.itsinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - KEY_STORE_FILE=/jks/keys/remote.p12
+      - KEY_STORE_FILE=/jks/keys/remote.itsinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_STORE_TYPE=PKCS12
       - TRUST_STORE_PATH=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
-      - SERVER_NAME=remote
+      - SERVER_NAME=remote.itsinterchange.eu
+    networks:
+    - testing_net
 
   execute_test:
     build: ./federation-st
     volumes:
-      - "./tmp:/jks"
+    - "./tmp:/jks"
     depends_on:
-      - remote_message_forwarder_app
+    - remote_message_forwarder_app
+    networks:
+      - testing_net
+
+networks:
+  testing_net:
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.28.1.0/16
+
+

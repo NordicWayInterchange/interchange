@@ -49,7 +49,6 @@ public class Interchange {
 	private LocalDateTime lastSeen;
 	private LocalDateTime backoffStart;
 	private int backoffAttempts = 0;
-	private String domainName;
 	private String messageChannelPort;
 	private String controlChannelPort;
 
@@ -117,17 +116,6 @@ public class Interchange {
 	@PrePersist
 	public void setLastSeen() {
 		this.lastSeen = LocalDateTime.now();
-	}
-
-	public String getDomainName() {
-		return domainName;
-	}
-
-	public void setDomainName(String domainName) {
-		if (domainName != null && domainName.startsWith(".")) {
-			throw new DiscoveryException(String.format("Domain name '%s' shall not start with \".\"", domainName));
-		}
-		this.domainName = domainName;
 	}
 
 	public String getMessageChannelPort() {
@@ -198,28 +186,18 @@ public class Interchange {
 				", lastSeen=" + lastSeen +
 				", backoffStart=" + backoffStart +
 				", backoffAttempts=" + backoffAttempts +
-				", domainName='" + domainName + '\'' +
 				", messageChannelPort='" + messageChannelPort + '\'' +
 				", controlChannelPort='" + controlChannelPort + '\'' +
 				'}';
 	}
 
-
-	private String getFullDomainName() {
-		StringBuilder fullDomainName = new StringBuilder(this.getName());
-		if (this.getDomainName() != null) {
-			fullDomainName.append(".").append(this.getDomainName());
-		}
-		return fullDomainName.toString();
-	}
-
 	public String getControlChannelUrl(String file) {
 		try {
 			if (this.getControlChannelPort() == null || this.getControlChannelPort().equals(DEFAULT_CONTROL_CHANNEL_PORT)) {
-				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getFullDomainName(), file)
+				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getName(), file)
 						.toExternalForm();
 			} else {
-				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getFullDomainName(), Integer.parseInt(this.getControlChannelPort()), file)
+				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getName(), Integer.parseInt(this.getControlChannelPort()), file)
 						.toExternalForm();
 			}
 		} catch (NumberFormatException | MalformedURLException e) {
@@ -229,12 +207,11 @@ public class Interchange {
 	}
 
 	public String getMessageChannelUrl() {
-		URL url = null;
 		try {
 			if (this.getMessageChannelPort() == null || this.getMessageChannelPort().equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
-				return String.format("amqps://%s/", this.getFullDomainName());
+				return String.format("amqps://%s/", this.getName());
 			} else {
-				return String.format("amqps://%s:%s/", this.getFullDomainName(), this.getMessageChannelPort());
+				return String.format("amqps://%s:%s/", this.getName(), this.getMessageChannelPort());
 			}
 		} catch (NumberFormatException e) {
 			logger.error("Could not create message channel url for interchange {}", this, e);

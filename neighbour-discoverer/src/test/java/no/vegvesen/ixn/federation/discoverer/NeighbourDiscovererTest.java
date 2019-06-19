@@ -63,8 +63,7 @@ public class NeighbourDiscovererTest {
 
 		// Neighbour interchange set up
 		ericsson = new Interchange();
-		ericsson.setName("ericsson");
-		ericsson.setDomainName("itsinterchange.eu");
+		ericsson.setName("ericsson.itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
 		neighbours.add(ericsson);
 

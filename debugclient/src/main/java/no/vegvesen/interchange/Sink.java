@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Enumeration;
 import java.util.Properties;
 
 public class Sink implements MessageListener, AutoCloseable {
@@ -81,9 +82,17 @@ public class Sink implements MessageListener, AutoCloseable {
 					System.err.println("Could not parse \"when\"-field to calculate delay; " + message.getStringProperty("when"));
 				}
 			}
-			System.out.println("Message received");
+			System.out.println("** Message received **");
+			Enumeration<String> messageNames =  message.getPropertyNames();
+
+			while (messageNames.hasMoreElements()) {
+				String messageName = messageNames.nextElement();
+				String value = message.getStringProperty(messageName);
+				System.out.println(String.format("%s:%s",messageName,value));
+			}
+
 			try {
-				System.out.println(((TextMessage)message).getText() + " delay " + delay + " ms");
+				System.out.println(((TextMessage)message).getText() + " delay " + delay + " ms \n");
 			} catch (JMSException e) {
 				throw new RuntimeException(e);
 			}

@@ -7,51 +7,51 @@ services:
     volumes:
       - "./tmp:/jks"
     environment:
-      CA_CN: "my_ca"
-      KEY_CNS: "bouvet king_harald"
+      CA_CN: "itsinterchange.eu"
+      KEY_CNS: "local.itsinterchange.eu remote.itsinterchange.eu king_gustaf"
 
-  bouvet_use_keys_1_qpid:
+  local_use_keys_1_qpid:
     build: ./qpid
-    container_name: bouvet_use_keys_1
+    container_name: local_use_keys_1
     depends_on:
       - gen_keys
-    hostname: bouvet_use_keys_1
+    hostname: local_use_keys_1
     ports:
       - 8081:8080
       - 443:443
       - 5671:5671
       - 5672:5672
     volumes:
-      - "./qpid/bouvet:/config"
+      - "./qpid/local:/config"
       - "./tmp:/jks"
-      - "./qpid/messages/bouvet:/work/bouvet_use_keys_1_/messages"
+      - "./qpid/messages/local:/work/local_use_keys_1_/messages"
     environment:
       CA_CERTIFICATE_FILE: /jks/keys/my_ca.crt
-      SERVER_CERTIFICATE_FILE: /jks/keys/bouvet.crt
-      SERVER_PRIVATE_KEY_FILE: /jks/keys/bouvet.key
+      SERVER_CERTIFICATE_FILE: /jks/keys/local.crt
+      SERVER_PRIVATE_KEY_FILE: /jks/keys/local.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
 
-  bouvet_use_keys_2_qpid:
+  local_use_keys_2_qpid:
     build: ./qpid
-    container_name: bouvet_use_keys_2
+    container_name: local_use_keys_2
     depends_on:
       - gen_keys
-    hostname: bouvet_use_keys_2
+    hostname: local_use_keys_2
     ports:
       - 9081:8080
       - 543:443
       - 6671:5671
       - 6672:5672
     volumes:
-      - "./qpid/bouvet:/config"
+      - "./qpid/local:/config"
       - "./tmp:/jks"
-      - "./qpid/messages/bouvet:/work/bouvet_use/messages"
+      - "./qpid/messages/local:/work/local_use/messages"
     environment:
       CA_CERTIFICATE_FILE: /jks/keys/my_ca.crt
-      SERVER_CERTIFICATE_FILE: /jks/keys/bouvet.crt
-      SERVER_PRIVATE_KEY_FILE: /jks/keys/bouvet.key
+      SERVER_CERTIFICATE_FILE: /jks/keys/local.crt
+      SERVER_PRIVATE_KEY_FILE: /jks/keys/local.key
       VHOST_FILE: "/config/vhost.json"
       GROUPS_FILE: "/config/groups"
       PASSWD_FILE: "/config/passwd"
