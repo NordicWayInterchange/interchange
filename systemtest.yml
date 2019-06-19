@@ -125,6 +125,7 @@ services:
       - NODE_PROVIDER_NAME=local.itsinterchange.eu # "my name"
       - DNS_TYPE=prod
       - DOMAIN_NAME=itsinterchange.eu
+      - CTRL_CHNL_PORT=8090
     networks:
     - testing_net
     dns: 172.28.1.1
