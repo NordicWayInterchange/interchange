@@ -269,7 +269,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostCapabilities() {
 
-		List<Interchange> neighboursWithFailedCapabilityExchange = interchangeRepository.findInterchangesWithFailedCapabilityExchange();
+		List<Interchange> neighboursWithFailedCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
 
 		for (Interchange neighbour : neighboursWithFailedCapabilityExchange) {
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {

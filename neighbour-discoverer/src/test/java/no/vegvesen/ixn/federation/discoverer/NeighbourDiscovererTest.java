@@ -271,7 +271,7 @@ public class NeighbourDiscovererTest {
 
 	@Test
 	public void gracefulBackoffPostOfCapabilityDoesNotHappenBeforeAllowedPostTime(){
-		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Collections.singletonList(ericsson));
+		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 
@@ -310,7 +310,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPostOfCapabilitiesHappensIfAllowedPostTimeHasPassed(){
 
-		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Collections.singletonList(ericsson));
+		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 
 		Interchange ericssonResponse = new Interchange();
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
@@ -367,7 +367,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void failedPostOfCapabilitiesInBackoffIncreasesNumberOfBackoffAttempts(){
 		ericsson.setBackoffAttempts(0);
-		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Collections.singletonList(ericsson));
+		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
@@ -385,7 +385,7 @@ public class NeighbourDiscovererTest {
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(firstDataType));
 		ericsson.setCapabilities(ericssonCapabilities);
 
-		when(interchangeRepository.findInterchangesWithFailedCapabilityExchange()).thenReturn(Collections.singletonList(ericsson));
+		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));

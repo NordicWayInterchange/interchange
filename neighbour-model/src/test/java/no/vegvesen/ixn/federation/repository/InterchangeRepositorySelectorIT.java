@@ -106,7 +106,7 @@ public class InterchangeRepositorySelectorIT {
 		ericsson.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
 		interchangeRepository.save(ericsson);
 
-		List<Interchange> getInterchangesWithFailedCapabilityExchange = interchangeRepository.findInterchangesWithFailedCapabilityExchange();
+		List<Interchange> getInterchangesWithFailedCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedCapabilityExchange));
 	}
