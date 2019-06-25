@@ -423,8 +423,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void capabilityExchange() {
 
-		// All neighbours with capabilities UNKNOWN
-		List<Interchange> neighboursForCapabilityExchange = interchangeRepository.findInterchangesForCapabilityExchange();
+		List<Interchange> neighboursForCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 
 		for (Interchange neighbour : neighboursForCapabilityExchange) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());

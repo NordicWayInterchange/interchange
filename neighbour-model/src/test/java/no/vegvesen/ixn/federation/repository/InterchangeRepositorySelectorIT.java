@@ -84,7 +84,7 @@ public class InterchangeRepositorySelectorIT {
 		ericsson.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
 		interchangeRepository.save(ericsson);
 
-		List<Interchange> getInterchangesForCapabilityExchange = interchangeRepository.findInterchangesForCapabilityExchange();
+		List<Interchange> getInterchangesForCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesForCapabilityExchange));
 	}

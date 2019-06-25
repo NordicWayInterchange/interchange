@@ -204,7 +204,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void successfulCapabilitiesPostCallsSaveOnRepository(){
 
-		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesForCapabilityExchange();
+		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
 		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
 
@@ -231,7 +231,7 @@ public class NeighbourDiscovererTest {
 
 	@Test
 	public void noNeighboursFoundForCapabilityExchangeCausesNoPost(){
-		when(interchangeRepository.findInterchangesForCapabilityExchange()).thenReturn(Collections.emptyList());
+		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN)).thenReturn(Collections.emptyList());
 
 		neighbourDiscoverer.capabilityExchange();
 

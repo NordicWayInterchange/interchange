@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.repository;
 
 
+import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Interchange;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -13,6 +14,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 
 	Interchange findByName(String name);
 
+	List<Interchange> findByCapabilities_Status(Capabilities.CapabilitiesStatus capabilitiesStatus);
 
 	// Subscription polling: all interchanges with subscriptions in fedIn with status REQUESTED or ACCEPTED
 	@Query(value = "select * from interchanges i where exists(select 'x' from subscriptions s where i.ixn_id_fed_in=s.subreq_id_sub and s.subscription_status in('ACCEPTED', 'REQUESTED'));", nativeQuery = true)
@@ -26,10 +28,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='REJECTED')", nativeQuery = true)
 	List<Interchange> findInterchangesToRemoveFromQpidGroups();
 
-	// Selectors for capability and subscription exchange
-	// Capability exchange: when neighbour capabilities is UNKNOWN
-	@Query(value = "select * from interchanges i where exists(select 'x' from capabilities c where i.ixn_id_cap=cap_id and c.status='UNKNOWN');", nativeQuery = true)
-	List<Interchange> findInterchangesForCapabilityExchange();
+
 
 	// Subscription request: When neighbour capabilities is KNOWN and neighbour fedIn is EMPTY
 	@Query(value = "select * from interchanges i where exists((select 'x' from capabilities c where i.ixn_id_cap=c.cap_id and c.status='KNOWN') intersect (select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='EMPTY'));", nativeQuery = true)
