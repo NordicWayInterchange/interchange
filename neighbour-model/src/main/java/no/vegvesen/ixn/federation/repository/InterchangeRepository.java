@@ -11,7 +11,6 @@ import java.util.List;
 @Repository
 public interface InterchangeRepository extends CrudRepository<Interchange, Integer> {
 
-	@Query(value = "select * from interchanges where name=?1", nativeQuery = true)
 	Interchange findByName(String name);
 
 
