@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -40,6 +41,46 @@ public class RoutingConfigurer {
 		List<Interchange> readyToTearDownRouting = repository.findInterchangesForOutgoingSubscriptionTearDown();
 		for (Interchange tearDownInterchange : readyToTearDownRouting) {
 			tearDownRoutingForNode(tearDownInterchange);
+		}
+	}
+
+	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.add}")
+	private void setupUserInFederationGroup() {
+		logger.debug("Looking for users with fedIn REQUESTED or ESTABLISHED to add to Qpid groups.");
+		String groupName = "federated-interchanges";
+
+		List<Interchange> neighboursToAddToGroups = repository.findInterchangesToAddToQpidGroups();
+		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
+
+		for(Interchange neighbour : neighboursToAddToGroups){
+			logger.info("Attempting to add neighbour {} to the groups file", neighbour.getName());
+			logger.info("Groups file contains the following users: {}", Arrays.toString(userNames.toArray()));
+			if(!userNames.contains(neighbour.getName())){
+				logger.info("Neighbour {} did not exist in the groups file. Adding...");
+				qpidClient.addInterchangeUserToGroups(neighbour.getName(), groupName);
+				logger.info("Added neighbour {} to Qpid groups", neighbour.getName());
+			}else{
+				logger.info("Neighbour {} already exists in the groups file.", neighbour.getName());
+			}
+		}
+	}
+
+	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.remove}")
+	private void removeNeighbourFromGroups(){
+		logger.debug("Looking for neighbours with rejected fedIn to remove from Qpid groups.");
+		String groupName = "federated-interchanges";
+
+		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
+		List<Interchange> neighboursToRemoveFromGroups = repository.findInterchangesToRemoveFromQpidGroups();
+
+		for(Interchange neighbour : neighboursToRemoveFromGroups){
+			if(userNames.contains(neighbour.getName())){
+				logger.info("Neighbour {} found in the groups file. Removing...");
+				qpidClient.removeInterchangeUserFromGroups(groupName, neighbour.getName());
+				logger.info("Removed neighbour {} from Qpid groups", neighbour.getName());
+			}else{
+				logger.info("Neighbour {} does not exist in the groups file and cannot be removed.", neighbour.getName());
+			}
 		}
 	}
 

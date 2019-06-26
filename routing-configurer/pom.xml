@@ -39,9 +39,10 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
+
         <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
         </dependency>
 
         <dependency>
@@ -50,7 +51,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
     <profiles>
         <profile>
