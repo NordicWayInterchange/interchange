@@ -1,2 +1,3 @@
-messaging-users.users=guest,king_harald,king_gustaf,remote.itsinterchange.eu,local.itsinterchange.eu
-administrators.users=qpid-admin,local.itsinterchange.eu
+federated-interchanges.users=
+administrators.users=local.itsinterchange.eu,qpid-admin
+service-providers.users=guest,king_gustaf,king_harald
