@@ -103,7 +103,7 @@ public class InterchangeRepositoryIT {
 		Interchange tearDownIxn = new Interchange("torry", caps, tearDownSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(tearDownIxn);
 
-		List<Interchange> forTearDownFromRepo = repository.findInterchangesForOutgoingSubscriptionTearDown();
+		List<Interchange> forTearDownFromRepo = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
 
 		assertThat(forTearDownFromRepo).hasSize(1);
 		assertThat(forTearDownFromRepo.iterator().next().getName()).isEqualTo("torry");

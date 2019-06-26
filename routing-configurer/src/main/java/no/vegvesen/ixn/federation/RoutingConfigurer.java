@@ -38,7 +38,7 @@ public class RoutingConfigurer {
 		}
 
 		logger.debug("Checking for nodes to tear down routing");
-		List<Interchange> readyToTearDownRouting = repository.findInterchangesForOutgoingSubscriptionTearDown();
+		List<Interchange> readyToTearDownRouting = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
 		for (Interchange tearDownInterchange : readyToTearDownRouting) {
 			tearDownRoutingForNode(tearDownInterchange);
 		}
