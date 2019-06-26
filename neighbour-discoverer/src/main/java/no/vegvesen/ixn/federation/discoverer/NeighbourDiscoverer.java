@@ -165,7 +165,7 @@ public class NeighbourDiscoverer {
 	public void gracefulBackoffPollSubscriptions() {
 
 		// All neighbours with a failed subscription in fedIn
-		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangesWithFailedSubscriptionsInFedIn();
+		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.FAILED);
 
 		for (Interchange neighbour : interchangesWithFailedSubscriptionsInFedIn) {
 			for (Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()) {

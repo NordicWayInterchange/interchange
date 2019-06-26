@@ -295,7 +295,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPollOfSubscriptionDoesNotHappenBeforeAllowedTime(){
 		// Interchange ericsson has subscription to poll
-		when(interchangeRepository.findInterchangesWithFailedSubscriptionsInFedIn()).thenReturn(Collections.singletonList(ericsson));
+		when(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		// Setting up Ericsson's failed subscriptions
 		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.FAILED);
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
@@ -347,7 +347,7 @@ public class NeighbourDiscovererTest {
 	public void gracefulBackoffPollOfSubscriptionHappensIfAllowedPostTimeHasPassed(){
 
 		// Return an interchange with a subscription to poll.
-		when(interchangeRepository.findInterchangesWithFailedSubscriptionsInFedIn()).thenReturn(Collections.singletonList(ericsson));
+		when(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 
 		// Mock result of polling in backoff.
 		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.FAILED);
