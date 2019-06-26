@@ -128,4 +128,24 @@ public class InterchangeRepositoryIT {
 		assertThat(updated.getSubscriptionRequest()).isNotNull();
 		assertThat(updated.getSubscriptionRequest().getSubscriptions()).hasSize(0);
 	}
+
+	@Test
+	public void interchangeReadyForForwarding() {
+		Set<Subscription> subscriptions = new HashSet<>();
+		subscriptions.add(new Subscription("where = 'NO' and what = 'fish'", Subscription.SubscriptionStatus.CREATED));
+		SubscriptionRequest outgoing = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, subscriptions);
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		Interchange ixnForwards = new Interchange("norwegian-fish", capabilities, outgoing, null);
+		repository.save(ixnForwards);
+
+		Capabilities capabilitiesSe = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		SubscriptionRequest noOverlap = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
+		SubscriptionRequest noOverlapIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
+		Interchange noForwards = new Interchange("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
+		repository.save(noForwards);
+
+		List<Interchange> establishedOutgoingSubscriptions = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		assertThat(establishedOutgoingSubscriptions).hasSize(1);
+		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
+	}
 }

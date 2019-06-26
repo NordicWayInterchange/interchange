@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,8 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	Interchange findByName(String name);
 
 	List<Interchange> findByCapabilities_Status(Capabilities.CapabilitiesStatus capabilitiesStatus);
+
+	List<Interchange> findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus status);
 
 	// Subscription polling: all interchanges with subscriptions in fedIn with status REQUESTED or ACCEPTED
 	@Query(value = "select * from interchanges i where exists(select 'x' from subscriptions s where i.ixn_id_fed_in=s.subreq_id_sub and s.subscription_status in('ACCEPTED', 'REQUESTED'));", nativeQuery = true)
@@ -49,8 +52,5 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 
 	@Query(value = "select * from interchanges i where exists (select 'x' from subscription_request sr where i.ixn_id_sub_out = sr.subreq_id and sr.status = 'TEAR_DOWN')", nativeQuery = true)
 	List<Interchange> findInterchangesForOutgoingSubscriptionTearDown();
-
-	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_sub_out=s.subreq_id and s.status='ESTABLISHED')", nativeQuery = true)
-	List<Interchange> findInterchangesForMessageForwarding();
 
 }
