@@ -208,7 +208,8 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void pollSubscriptions() {
 		// All interchanges with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
-		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesWithSubscriptionToPoll();
+		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+		interchangesToPoll.addAll(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED));
 
 		for (Interchange neighbour : interchangesToPoll) {
 			for (Subscription subscription : neighbour.getSubscriptionsForPolling()) {

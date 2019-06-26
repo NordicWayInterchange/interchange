@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -114,7 +115,7 @@ public class InterchangeRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithRequestedSubscriptionsInFedInIsSelectedForPolling(){
-		ericsson.setName("ericsson-5");
+		ericsson.setName("ericsson-5-R");
 
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
@@ -123,9 +124,20 @@ public class InterchangeRepositorySelectorIT {
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		interchangeRepository.save(ericsson);
 
-		List<Interchange> getInterchangeWithRequestedSubscriptionsInFedIn = interchangeRepository.findInterchangesWithSubscriptionToPoll();
+		Subscription subscriptionA = new Subscription();
+		subscriptionA.setSelector("where LIKE 'OM'");
+		subscriptionA.setSubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
+		SubscriptionRequest fedin = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Sets.newSet(subscriptionA));
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
+		Interchange ericssonA = new Interchange("ericsson-5-A", capabilities, null, fedin);
+		interchangeRepository.save(ericssonA);
+
+		List<Interchange> getInterchangeWithRequestedSubscriptionsInFedIn;
+		getInterchangeWithRequestedSubscriptionsInFedIn = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
+		getInterchangeWithRequestedSubscriptionsInFedIn.addAll(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED));
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeWithRequestedSubscriptionsInFedIn));
+		Assert.assertTrue(interchangeInList(ericssonA.getName(), getInterchangeWithRequestedSubscriptionsInFedIn));
 	}
 
 	@Test

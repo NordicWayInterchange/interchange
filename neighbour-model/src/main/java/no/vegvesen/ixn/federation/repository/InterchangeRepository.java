@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -21,9 +22,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 
 	List<Interchange> findByFedIn_Status(SubscriptionRequest.SubscriptionRequestStatus status);
 
-	// Subscription polling: all interchanges with subscriptions in fedIn with status REQUESTED or ACCEPTED
-	@Query(value = "select * from interchanges i where exists(select 'x' from subscriptions s where i.ixn_id_fed_in=s.subreq_id_sub and s.subscription_status in('ACCEPTED', 'REQUESTED'));", nativeQuery = true)
-	List<Interchange> findInterchangesWithSubscriptionToPoll();
+	List<Interchange> findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus subscriptionStatus);
 
 	// Neighbours to add to qpid groups file: fedIn status REQUESTED or ESTABLISHED
 	@Query(value ="select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status in('REQUESTED', 'ESTABLISHED'))", nativeQuery = true)
