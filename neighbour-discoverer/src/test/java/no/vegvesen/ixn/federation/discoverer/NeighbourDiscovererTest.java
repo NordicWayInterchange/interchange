@@ -283,7 +283,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPostOfSubscriptionRequestDoesNotHappenBeforeAllowedTime(){
 
-		when(interchangeRepository.findInterchangesWithFailedFedIn()).thenReturn(Collections.singletonList(ericsson));
+		when(interchangeRepository.findByFedIn_Status(SubscriptionRequest.SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 
@@ -331,7 +331,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPostOfSubscriptionRequestHappensIfAllowedPostTimeHasPassed(){
 
-		when(interchangeRepository.findInterchangesWithFailedFedIn()).thenReturn(Collections.singletonList(ericsson));
+		when(interchangeRepository.findByFedIn_Status(SubscriptionRequest.SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		SubscriptionRequest ericssonSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		doReturn(ericssonSubscriptionRequest).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
