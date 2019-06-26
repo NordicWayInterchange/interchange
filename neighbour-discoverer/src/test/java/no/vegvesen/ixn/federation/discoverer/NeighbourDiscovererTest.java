@@ -438,7 +438,7 @@ public class NeighbourDiscovererTest {
 	}
 
 	@Test
-	public void allSubscriptionsRejectedFlipsFedInStatusToEstablished(){
+	public void allSubscriptionsRejectedFlipsFedInStatusToRejected(){
 		Interchange spyInterchange = spy(Interchange.class);
 
 		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
@@ -454,6 +454,25 @@ public class NeighbourDiscovererTest {
 		neighbourDiscoverer.pollSubscriptions();
 
 		Assert.assertEquals(spyInterchange.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+	}
+
+	@Test
+	public void subscriptionStatusAcceptedKeepsFedInStatusRequested(){
+		Interchange spyInterchange = spy(Interchange.class);
+
+		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setNumberOfPolls(0);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		spyInterchange.setFedIn(subscriptionRequest);
+		when(interchangeRepository.findInterchangesWithSubscriptionToPoll()).thenReturn(Collections.singletonList(spyInterchange));
+
+		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.ACCEPTED);
+		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Interchange.class))).thenReturn(createdSubscription);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
+
+		neighbourDiscoverer.pollSubscriptions();
+
+		Assert.assertEquals(spyInterchange.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 	}
 
 

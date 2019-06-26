@@ -147,16 +147,14 @@ public class NeighbourDiscoverer {
 
 	public Interchange updateFedInStatus(Interchange neighbour) {
 
-		if (neighbour.getFedIn().subscriptionRequestAccepted() && neighbour.getFedIn().allSubscriptionsHaveFinalStatus()) {
-
-			logger.info("All subscriptions in neighbour fedIn have final statuses. Setting status of fedIn to ESTABLISHED");
+		if (neighbour.getFedIn().subscriptionRequestEstablished()) {
+			logger.info("At least one subscription in fedIn has status CREATED. Setting status of fedIn to ESTABLISHED");
 			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
-
-		} else if (!neighbour.getFedIn().subscriptionRequestAccepted()) {
+		} else if (neighbour.getFedIn().subscriptionRequestRejected()) {
 			logger.info("All subscriptions in neighbour fedIn were rejected. Setting status of fedIn to REJECTED");
 			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
 		} else {
-			logger.info("Some subscriptions in neighbour fedIn do not have a final status. Keeping status of fedIn REQUESTED");
+			logger.info("Some subscriptions in neighbour fedIn do not have a final status or have not been rejected. Keeping status of fedIn REQUESTED");
 			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		}
 
