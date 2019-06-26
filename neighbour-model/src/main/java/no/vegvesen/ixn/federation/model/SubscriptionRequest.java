@@ -59,25 +59,24 @@ public class SubscriptionRequest {
 		}
 	}
 
-	public boolean allSubscriptionsHaveFinalStatus(){
+	public boolean subscriptionRequestRejected(){
 		for(Subscription s : subscription){
-			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.REQUESTED || s.getSubscriptionStatus() == Subscription.SubscriptionStatus.ACCEPTED){
+			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.CREATED
+				|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.ACCEPTED
+				|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.REQUESTED){
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public boolean subscriptionRequestAccepted(){
+	public boolean subscriptionRequestEstablished(){
 		for(Subscription s : subscription){
-			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.REJECTED
-					|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.NO_OVERLAP
-					|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.ILLEGAL
-					|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.NOT_VALID){
-				return false;
+			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.CREATED){
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	@Override
