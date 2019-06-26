@@ -217,7 +217,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void successfulSubscriptionRequestCallsSaveOnRepository(){
 
-		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesForSubscriptionRequest();
+		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 		doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).calculateCustomSubscriptionForNeighbour(ericsson);
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		doReturn(subscriptionRequestResponse).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));

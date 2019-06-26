@@ -74,7 +74,7 @@ public class InterchangeRepositorySelectorIT {
 		ericsson.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 		interchangeRepository.save(ericsson);
 
-		List<Interchange> getInterchangeForSubscriptionRequest = interchangeRepository.findInterchangesForSubscriptionRequest();
+		List<Interchange> getInterchangeForSubscriptionRequest = interchangeRepository.findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeForSubscriptionRequest));
 	}

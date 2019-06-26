@@ -360,7 +360,7 @@ public class NeighbourDiscoverer {
 	public void subscriptionRequest() {
 
 		// All neighbours with capabilities KNOWN and fedIn EMPTY
-		List<Interchange> neighboursForSubscriptionRequest = interchangeRepository.findInterchangesForSubscriptionRequest();
+		List<Interchange> neighboursForSubscriptionRequest = interchangeRepository.findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
 		for (Interchange neighbour : neighboursForSubscriptionRequest) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());

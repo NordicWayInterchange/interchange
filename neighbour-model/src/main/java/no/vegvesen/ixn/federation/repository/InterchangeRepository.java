@@ -24,6 +24,8 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 
 	List<Interchange> findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus subscriptionStatus);
 
+	List<Interchange> findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus capabilitiesStatus, SubscriptionRequest.SubscriptionRequestStatus requestStatus);
+
 	// Neighbours to add to qpid groups file: fedIn status REQUESTED or ESTABLISHED
 	@Query(value ="select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status in('REQUESTED', 'ESTABLISHED'))", nativeQuery = true)
 	List<Interchange> findInterchangesToAddToQpidGroups();
