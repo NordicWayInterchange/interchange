@@ -395,6 +395,9 @@ public class NeighbourDiscovererTest {
 		Assert.assertEquals(ericsson.getCapabilities().getStatus(), Capabilities.CapabilitiesStatus.UNREACHABLE);
 	}
 
+	/*
+		Subscription polling tests
+	 */
 
 	@Test
 	public void successfulPollOfSubscriptionCallsSaveOnRepository(){
@@ -404,9 +407,72 @@ public class NeighbourDiscovererTest {
 		ericsson.setFedIn(ericssonSubscription);
 		when(interchangeRepository.findInterchangesWithSubscriptionToPoll()).thenReturn(Collections.singletonList(ericsson));
 
+		Subscription polledSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.ACCEPTED);
+		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Interchange.class))).thenReturn(polledSubscription);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
+
 		neighbourDiscoverer.pollSubscriptions();
 
 		verify(interchangeRepository, times(1)).save(any(Interchange.class));
+	}
+
+	@Test
+	public void allSubscriptionsHaveFinalStatusFlipsFedInStatusToEstablished(){
+
+		Interchange spyInterchange = spy(Interchange.class);
+
+		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setNumberOfPolls(0);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		spyInterchange.setFedIn(subscriptionRequest);
+		when(interchangeRepository.findInterchangesWithSubscriptionToPoll()).thenReturn(Collections.singletonList(spyInterchange));
+
+		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.CREATED);
+		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Interchange.class))).thenReturn(createdSubscription);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
+
+		neighbourDiscoverer.pollSubscriptions();
+
+		Assert.assertEquals(spyInterchange.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+
+	}
+
+	@Test
+	public void allSubscriptionsRejectedFlipsFedInStatusToRejected(){
+		Interchange spyInterchange = spy(Interchange.class);
+
+		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setNumberOfPolls(0);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		spyInterchange.setFedIn(subscriptionRequest);
+		when(interchangeRepository.findInterchangesWithSubscriptionToPoll()).thenReturn(Collections.singletonList(spyInterchange));
+
+		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REJECTED);
+		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Interchange.class))).thenReturn(createdSubscription);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
+
+		neighbourDiscoverer.pollSubscriptions();
+
+		Assert.assertEquals(spyInterchange.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+	}
+
+	@Test
+	public void subscriptionStatusAcceptedKeepsFedInStatusRequested(){
+		Interchange spyInterchange = spy(Interchange.class);
+
+		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setNumberOfPolls(0);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		spyInterchange.setFedIn(subscriptionRequest);
+		when(interchangeRepository.findInterchangesWithSubscriptionToPoll()).thenReturn(Collections.singletonList(spyInterchange));
+
+		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.ACCEPTED);
+		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Interchange.class))).thenReturn(createdSubscription);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
+
+		neighbourDiscoverer.pollSubscriptions();
+
+		Assert.assertEquals(spyInterchange.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 	}
 
 

@@ -152,8 +152,33 @@
           "attributes": {}
         },
         {
+          "objectType": "VIRTUALHOST",
+          "identity": "federated-interchanges",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {}
+        },
+        {
+          "objectType" : "EXCHANGE",
+          "identity" : "federated-interchanges",
+          "operation" : "PUBLISH",
+          "outcome" : "ALLOW_LOG",
+          "attributes" : {
+            "NAME" : "fedEx"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "service-providers",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "remote.itsinterchange.eu"
+          }
+        },
+        {
           "objectType": "EXCHANGE",
-          "identity": "messaging-users",
+          "identity": "service-providers",
           "operation": "PUBLISH",
           "outcome": "ALLOW_LOG",
           "attributes": {
@@ -162,17 +187,8 @@
           }
         },
         {
-          "objectType": "VIRTUALHOST",
-          "identity": "messaging-users",
-          "operation": "ACCESS",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "remote.itsinterchange.eu"
-          }
-        },
-        {
           "objectType": "QUEUE",
-          "identity": "messaging-users",
+          "identity": "service-providers",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {

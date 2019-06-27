@@ -17,7 +17,7 @@ public class SubscriptionRequest {
 	@Column(name="subreq_id")
 	private Integer subreq_id;
 
-	public enum SubscriptionRequestStatus{REQUESTED, ESTABLISHED, NO_OVERLAP, TEAR_DOWN, EMPTY, FAILED, UNREACHABLE}
+	public enum SubscriptionRequestStatus{REQUESTED, ESTABLISHED, NO_OVERLAP, TEAR_DOWN, EMPTY, FAILED, UNREACHABLE, REJECTED}
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
@@ -57,6 +57,26 @@ public class SubscriptionRequest {
 		if (newSubscription != null) {
 			this.subscription.addAll(newSubscription);
 		}
+	}
+
+	public boolean subscriptionRequestRejected(){
+		for(Subscription s : subscription){
+			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.CREATED
+				|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.ACCEPTED
+				|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.REQUESTED){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean subscriptionRequestEstablished(){
+		for(Subscription s : subscription){
+			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.CREATED){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

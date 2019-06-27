@@ -145,6 +145,22 @@ public class NeighbourDiscoverer {
 		return calculatedSubscriptions;
 	}
 
+	public Interchange updateFedInStatus(Interchange neighbour) {
+
+		if (neighbour.getFedIn().subscriptionRequestEstablished()) {
+			logger.info("At least one subscription in fedIn has status CREATED. Setting status of fedIn to ESTABLISHED");
+			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		} else if (neighbour.getFedIn().subscriptionRequestRejected()) {
+			logger.info("All subscriptions in neighbour fedIn were rejected. Setting status of fedIn to REJECTED");
+			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+		} else {
+			logger.info("Some subscriptions in neighbour fedIn do not have a final status or have not been rejected. Keeping status of fedIn REQUESTED");
+			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		}
+
+		return neighbour;
+	}
+
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPollSubscriptions() {
 
@@ -167,6 +183,8 @@ public class NeighbourDiscoverer {
 						logger.info("Successfully re-established contact with neighbour in subscription polling graceful backoff.");
 						failedSubscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						neighbour.setBackoffAttempts(0); // Reset number of back-offs to 0 after contact is re-established.
+
+						neighbour = updateFedInStatus(neighbour);
 
 					} catch (SubscriptionPollException e) {
 						// Poll was not successful
@@ -207,7 +225,10 @@ public class NeighbourDiscoverer {
 
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
-						logger.info("Successfully polled subscription to neighbour {}. Subscription status: {}  - Number of polls: {}", neighbour.getName(), subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
+						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
+
+						neighbour = updateFedInStatus(neighbour);
+
 
 					} else {
 						// Number of poll attempts exceeds allowed number of poll attempts.

@@ -146,4 +146,53 @@ public class InterchangeRepositorySelectorIT {
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedSubscriptionInFedIn));
 	}
 
+	@Test
+	public void neighbourWithFedInRequestedIsSelectedForGroups(){
+
+		ericsson.setName("ericsson-7");
+		Subscription subscription = new Subscription();
+		subscription.setSelector("where LIKE 'NO'");
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
+		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		ericsson.setFedIn(subscriptionRequest);
+		interchangeRepository.save(ericsson);
+
+		List<Interchange> interchangeWithFedInRequested = interchangeRepository.findInterchangesToAddToQpidGroups();
+
+		Assert.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInRequested));
+	}
+
+	@Test
+	public void neigbourWithFedInEstablishedIsSelectedForGroups(){
+		ericsson.setName("ericsson-8");
+		Subscription subscription = new Subscription();
+		subscription.setSelector("where LIKE 'NO'");
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
+		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		ericsson.setFedIn(subscriptionRequest);
+		interchangeRepository.save(ericsson);
+
+		List<Interchange> interchangeWithFedInEstablished = interchangeRepository.findInterchangesToAddToQpidGroups();
+
+		Assert.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInEstablished));
+	}
+
+	@Test
+	public void neighbourWithFedInRejectedIsSelectedForRemovalFromGroups(){
+		ericsson.setName("ericsson-9");
+		Subscription subscription = new Subscription();
+		subscription.setSelector("where LIKE 'NO'");
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
+		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+		ericsson.setFedIn(subscriptionRequest);
+		interchangeRepository.save(ericsson);
+
+		List<Interchange> interchangeWithFedInRejected = interchangeRepository.findInterchangesToRemoveFromQpidGroups();
+
+		Assert.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInRejected));
+	}
+
 }

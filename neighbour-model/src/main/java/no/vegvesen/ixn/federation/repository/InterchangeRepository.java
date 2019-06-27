@@ -19,6 +19,14 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges i where exists(select 'x' from subscriptions s where i.ixn_id_fed_in=s.subreq_id_sub and s.subscription_status in('ACCEPTED', 'REQUESTED'));", nativeQuery = true)
 	List<Interchange> findInterchangesWithSubscriptionToPoll();
 
+	// Neighbours to add to qpid groups file: fedIn status REQUESTED or ESTABLISHED
+	@Query(value ="select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status in('REQUESTED', 'ESTABLISHED'))", nativeQuery = true)
+	List<Interchange> findInterchangesToAddToQpidGroups();
+
+	// Neighbours to remove from qpid groups file: fedIn status REJECTED
+	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='REJECTED')", nativeQuery = true)
+	List<Interchange> findInterchangesToRemoveFromQpidGroups();
+
 	// Selectors for capability and subscription exchange
 	// Capability exchange: when neighbour capabilities is UNKNOWN
 	@Query(value = "select * from interchanges i where exists(select 'x' from capabilities c where i.ixn_id_cap=cap_id and c.status='UNKNOWN');", nativeQuery = true)

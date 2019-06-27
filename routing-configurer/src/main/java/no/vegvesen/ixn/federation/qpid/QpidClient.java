@@ -3,7 +3,8 @@ package no.vegvesen.ixn.federation.qpid;
 import no.vegvesen.ixn.federation.model.Interchange;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,12 @@ public class QpidClient {
 	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s/nwEx";
 	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
+	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
 
 	private final String exchangeURL;
 	private final String queuesURL;
 	private final String pingURL;
-
+	private final String groupsUrl;
 	private final RestTemplate restTemplate;
 
 	@Autowired
@@ -39,6 +41,7 @@ public class QpidClient {
 		this.exchangeURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
 		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
+		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
 		this.restTemplate = restTemplate;
 	}
 
@@ -193,5 +196,37 @@ public class QpidClient {
 	public void removeQueue(String queueName) {
 		String queueId = lookupQueueId(queueName);
 		restTemplate.delete(queuesURL + "?id=" + queueId);
+	}
+
+	public List<String> getInterchangesUserNames(String groupName) {
+		String url = groupsUrl + groupName;
+		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+		logger.info("Received members of group {} from Qpid: {}", groupName, response.getBody());
+
+		JSONArray jsonArray = new JSONArray(response.getBody());
+		ArrayList<String> groupMemberNames = new ArrayList<>();
+
+		for(int i=0; i<jsonArray.length(); i++){
+			JSONObject ob = jsonArray.getJSONObject(i);
+			String userName = ob.getString("name");
+			groupMemberNames.add(userName);
+		}
+
+		logger.info("Returning list of group members: {}", groupMemberNames.toString());
+		return groupMemberNames;
+	}
+
+	public void removeInterchangeUserFromGroups(String groupName, String neighbourName) {
+		String url = groupsUrl + groupName + "/" + neighbourName;
+		restTemplate.delete(url);
+	}
+
+	public void addInterchangeUserToGroups(String name, String groupName) {
+		JSONObject groupJsonObject = new JSONObject();
+		groupJsonObject.put("name", name);
+		String jsonString = groupJsonObject.toString();
+
+		postQpid(groupsUrl, jsonString, groupName);
 	}
 }

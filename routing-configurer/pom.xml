@@ -39,9 +39,10 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
+
         <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
         </dependency>
 
         <dependency>
@@ -50,7 +51,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
     <profiles>
         <profile>
@@ -97,7 +97,7 @@
                                         <volumes>
                                             <bind>
                                                 <volume>
-                                                    ${project.basedir}/src/test/resources/qpid:/config
+                                                    ${project.basedir}/target/test-classes/qpid:/config
                                                 </volume>
                                                 <volume>
                                                     ${project.basedir}/src/test/resources/jks:/jks

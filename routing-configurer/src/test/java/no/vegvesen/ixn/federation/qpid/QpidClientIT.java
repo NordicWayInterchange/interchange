@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -116,5 +113,27 @@ public class QpidClientIT {
 		//Delete the queue
 		client.removeQueue(crab.getName());
 		assertThat(client.queueExists(crab.getName())).isFalse();
+	}
+
+	@Test
+	public void addAnInterchangeToGroups(){
+		String newUser = "herring";
+		client.addInterchangeUserToGroups(newUser, "federated-interchanges");
+
+		List<String> userNames = client.getInterchangesUserNames("federated-interchanges");
+
+		assertThat(userNames.contains(newUser));
+	}
+
+	@Test
+	public void deleteAnInterchangeFromGroups(){
+		String deleteUser = "carp";
+		client.addInterchangeUserToGroups(deleteUser, "federated-interchanges");
+		List<String> userNames = client.getInterchangesUserNames("federated-interchanges");
+		assertThat(userNames.contains(deleteUser));
+
+		client.removeInterchangeUserFromGroups("federated-interchanges", deleteUser);
+		userNames = client.getInterchangesUserNames("federated-interchanges");
+		assertThat(!userNames.contains(deleteUser));
 	}
 }
