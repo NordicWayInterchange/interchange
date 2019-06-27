@@ -97,7 +97,7 @@
                                         <volumes>
                                             <bind>
                                                 <volume>
-                                                    ${project.basedir}/src/test/resources/qpid:/config
+                                                    ${project.basedir}/target/test-classes/qpid:/config
                                                 </volume>
                                                 <volume>
                                                     ${project.basedir}/src/test/resources/jks:/jks
