@@ -34,19 +34,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='REJECTED')", nativeQuery = true)
 	List<Interchange> findInterchangesToRemoveFromQpidGroups();
 
-
-
-	// Subscription request: When neighbour capabilities is KNOWN and neighbour fedIn is EMPTY
-	@Query(value = "select * from interchanges i where exists((select 'x' from capabilities c where i.ixn_id_cap=c.cap_id and c.status='KNOWN') intersect (select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='EMPTY'));", nativeQuery = true)
-	List<Interchange> findInterchangesForSubscriptionRequest();
-
-
-
-	@Query(value = "select * from interchanges i where exists(select 'x' from subscriptions s where i.ixn_id_fed_in=s.subreq_id_sub and s.subscription_status='FAILED')", nativeQuery = true)
-	List<Interchange> findInterchangesWithFailedSubscriptionsInFedIn();
-
-
 	// Selectors for subscription set up and tear down
-	@Query(value = "select * from interchanges i where exists (select 'x' from subscription_request sr where i.ixn_id_sub_out = sr.subreq_id and sr.status = 'REQUESTED' and exists(select 'x' from subscriptions s where sr.subreq_id = s.subreq_id_sub and s.subscription_status = 'ACCEPTED'))", nativeQuery = true)
+	@Query(value = "select distinct i from Interchange i join i.subscriptionRequest sr join sr.subscription s where sr.status = 'REQUESTED' and s.subscriptionStatus = 'ACCEPTED'")
 	List<Interchange> findInterchangesForOutgoingSubscriptionSetup();
 }
