@@ -50,7 +50,7 @@ public class RoutingConfigurer {
 		logger.debug("Looking for users with fedIn REQUESTED or ESTABLISHED to add to Qpid groups.");
 		String groupName = "federated-interchanges";
 
-		List<Interchange> neighboursToAddToGroups = repository.findInterchangesToAddToQpidGroups();
+		List<Interchange> neighboursToAddToGroups = repository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
 
 		for(Interchange neighbour : neighboursToAddToGroups){
@@ -72,7 +72,7 @@ public class RoutingConfigurer {
 		String groupName = "federated-interchanges";
 
 		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
-		List<Interchange> neighboursToRemoveFromGroups = repository.findInterchangesToRemoveFromQpidGroups();
+		List<Interchange> neighboursToRemoveFromGroups = repository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
 
 		for(Interchange neighbour : neighboursToRemoveFromGroups){
 			if(userNames.contains(neighbour.getName())){

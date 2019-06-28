@@ -165,7 +165,7 @@ public class NeighbourDiscoverer {
 	public void gracefulBackoffPollSubscriptions() {
 
 		// All neighbours with a failed subscription in fedIn
-		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.FAILED);
+		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED);
 
 		for (Interchange neighbour : interchangesWithFailedSubscriptionsInFedIn) {
 			for (Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()) {
@@ -208,8 +208,8 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void pollSubscriptions() {
 		// All interchanges with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
-		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
-		interchangesToPoll.addAll(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED));
+		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(
+				Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 
 		for (Interchange neighbour : interchangesToPoll) {
 			for (Subscription subscription : neighbour.getSubscriptionsForPolling()) {
@@ -315,7 +315,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
 
-		List<Interchange> neighboursWithFailedSubscriptionRequest = interchangeRepository.findByFedIn_Status(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
+		List<Interchange> neighboursWithFailedSubscriptionRequest = interchangeRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
 
 		for (Interchange neighbour : neighboursWithFailedSubscriptionRequest) {
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
