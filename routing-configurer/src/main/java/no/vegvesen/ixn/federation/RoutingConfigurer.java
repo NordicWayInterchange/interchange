@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
@@ -16,7 +17,7 @@ import java.util.List;
 @Component
 public class RoutingConfigurer {
 
-	static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
+	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
 	private final InterchangeRepository repository;
 	private final QpidClient qpidClient;
@@ -31,7 +32,7 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForInterchangesToSetupRoutingFor() {
 		logger.debug("Checking for new nodes to setup routing");
-		List<Interchange> readyToSetupRouting = repository.findInterchangesForOutgoingSubscriptionSetup();
+		List<Interchange> readyToSetupRouting = repository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} nodes to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
 		for (Interchange setUpInterchange : readyToSetupRouting) {
 			setupRoutingForNode(setUpInterchange);

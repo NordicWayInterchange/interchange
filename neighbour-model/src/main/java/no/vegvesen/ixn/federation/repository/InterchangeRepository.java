@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 
 	List<Interchange> findByFedIn_Status(SubscriptionRequest.SubscriptionRequestStatus status);
 
+	@SuppressWarnings("SpringDataRepositoryMethodParametersInspection")
 	List<Interchange> findInterchangesByFedIn_Subscription_SubscriptionStatus(Subscription.SubscriptionStatus subscriptionStatus);
 
 	List<Interchange> findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus capabilitiesStatus, SubscriptionRequest.SubscriptionRequestStatus requestStatus);
@@ -34,7 +36,9 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='REJECTED')", nativeQuery = true)
 	List<Interchange> findInterchangesToRemoveFromQpidGroups();
 
-	// Selectors for subscription set up and tear down
-	@Query(value = "select distinct i from Interchange i join i.subscriptionRequest sr join sr.subscription s where sr.status = 'REQUESTED' and s.subscriptionStatus = 'ACCEPTED'")
-	List<Interchange> findInterchangesForOutgoingSubscriptionSetup();
+	@Query(value = "select distinct i from Interchange i join i.subscriptionRequest sr join sr.subscription s where sr.status = :subscriptionRequestStatus and s.subscriptionStatus = :subscriptionStatus")
+	List<Interchange> findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(
+			@Param("subscriptionRequestStatus") SubscriptionRequest.SubscriptionRequestStatus subscriptionRequestStatus,
+			@Param("subscriptionStatus") Subscription.SubscriptionStatus subscriptionStatus
+	);
 }

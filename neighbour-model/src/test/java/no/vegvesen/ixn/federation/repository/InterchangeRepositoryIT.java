@@ -89,7 +89,7 @@ public class InterchangeRepositoryIT {
 		Interchange readyToSetup = new Interchange("freddy", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(readyToSetup);
 
-		List<Interchange> forSetupFromRepo = repository.findInterchangesForOutgoingSubscriptionSetup();
+		List<Interchange> forSetupFromRepo = repository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 
 		assertThat(forSetupFromRepo).hasSize(1);
 		assertThat(forSetupFromRepo.iterator().next().getName()).isEqualTo("freddy");
