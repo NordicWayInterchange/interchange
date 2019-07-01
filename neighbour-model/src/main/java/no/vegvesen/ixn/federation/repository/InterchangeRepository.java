@@ -28,10 +28,6 @@ public interface InterchangeRepository extends CrudRepository<Interchange, Integ
 
 	List<Interchange> findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus capabilitiesStatus, SubscriptionRequest.SubscriptionRequestStatus requestStatus);
 
-	// Neighbours to remove from qpid groups file: fedIn status REJECTED
-	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='REJECTED')", nativeQuery = true)
-	List<Interchange> findInterchangesToRemoveFromQpidGroups();
-
 	@Query(value = "select distinct i from Interchange i join i.subscriptionRequest sr join sr.subscription s where sr.status = :subscriptionRequestStatus and s.subscriptionStatus = :subscriptionStatus")
 	List<Interchange> findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(
 			@Param("subscriptionRequestStatus") SubscriptionRequest.SubscriptionRequestStatus subscriptionRequestStatus,
