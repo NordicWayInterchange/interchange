@@ -42,10 +42,8 @@ spec:
           mountPath: /jks/keys/
         ports:
         - name: ctrl
-          containerPort: 8090
+          containerPort: 443
       volumes:
       - name: secure
         secret:
           secretName: {{ required "must provide .Values.neighbour_discoverer.tls_secret_name" .Values.neighbour_discoverer.tls_secret_name }}
-
-
