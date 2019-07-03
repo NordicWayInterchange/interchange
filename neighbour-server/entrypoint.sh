@@ -7,6 +7,7 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Ddns.domain-name=${DOMAIN_NAME}\
      -Ddns.control-channel-port=${CTRL_CHNL_PORT} \
      -Dserver.ssl.key-store=/jks/keys/${SERVER_NAME}.p12\
+     -Dserver.port=${CTRL_CHNL_PORT} \
      -Dserver.ssl.key-store-password=password \
      -Dserver.ssl.key-alias=${SERVER_NAME} \
      -Dserver.ssl.trust-store=/jks/keys/truststore.jks \
