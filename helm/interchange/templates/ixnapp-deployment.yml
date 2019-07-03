@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: interchange
-        image: {{ .Values.interchange.image | quote }}
+        image: "{{ .Values.interchange.image.repository }}:{{ .Values.interchange.image.tag }}"
         env:
         - name: AMQP_URI
           value: amqp://{{ .Release.Name }}-qpid?amqp.vhost={{ .Values.external_name }}

@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: postgis
-        image: {{ .Values.postgis.image | quote }}
+        image: "{{ .Values.postgis.image.repository }}:{{ .Values.postgis.image.tag }}"
         env:
         - name: POSTGRES_USER
           value: geolookup

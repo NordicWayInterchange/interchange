@@ -8,8 +8,6 @@ postgis:
   image: eu.gcr.io/nordic-way-aad182cc/postgis:latest
 
 qpid:
-  image: eu.gcr.io/nordic-way-aad182cc/qpid:latest
-
   persistence:
     enabled: false
     storageClassName: standard
@@ -23,8 +21,9 @@ qpid:
   ## which includes a private key and a signed certificate.
   ## the cert must have the same CN as .Values.external_name
   # tls_secret_name: qpid-certs
-  private_key_file: server.key
-  certificate_file: server.crt
+  server_private_key_file: server.key
+  server_certificate_file: server.crt
+  ca_certificate_file: ca.crt
 
   ## credentials used by the interchange server(s)
   interchange_user: interchange

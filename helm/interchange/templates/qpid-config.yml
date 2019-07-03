@@ -12,7 +12,8 @@ data:
     {{ .Values.qpid.admin_user }}:{{ .Values.qpid.admin_password }}
     {{ .Values.qpid.interchange_user }}:{{ .Values.qpid.interchange_password }}
   groups: |
-    messaging-users.users={{ range .Values.qpid.users }}{{ .name }},{{ end }}
+    service-providers.users={{ range .Values.qpid.users }}{{ .name }},{{ end }}
+    federated-interchanges.users=
     administrators.users={{ .Values.qpid.admin_user }}
   default.json: |
     {
@@ -20,6 +21,38 @@ data:
       "name": "{{ .Values.external_name }}",
       "modelVersion": "7.0",
       "exchanges": [
+        {
+          "name" : "fedEx",
+          "type" : "headers",
+          "durable" : true,
+          "durableBindings": [
+            {{- range .Values.qpid.users }}
+            {
+              "arguments": {
+                "x-filter-jms-selector": "{{ .binding }}"
+              },
+              "bindingKey": "binding_key",
+              "destination": "{{ .name }}"
+            },
+            {{- end }}
+            {{- range .Values.qpid.additional_queues }}
+            {
+              "arguments": {
+                "x-filter-jms-selector": "{{ .binding }}"
+              },
+              "bindingKey": "binding_key",
+              "destination": "{{ .name }}"
+            },
+            {{- end }}
+            {
+              "arguments": {
+                "x-filter-jms-selector": "where LIKE '%'"
+              },
+              "bindingKey": "binding_key",
+              "destination": "test-out"
+            }
+          ]
+        },
         {
           "name": "nwEx",
           "type": "headers",
@@ -131,7 +164,7 @@ data:
             },
             {
               "objectType": "EXCHANGE",
-              "identity": "messaging-users",
+              "identity": "service-providers",
               "operation": "PUBLISH",
               "outcome": "ALLOW_LOG",
               "attributes": {
@@ -141,7 +174,7 @@ data:
             },
             {
               "objectType": "VIRTUALHOST",
-              "identity": "messaging-users",
+              "identity": "service-providers",
               "operation": "ACCESS",
               "outcome": "ALLOW_LOG",
               "attributes": {
@@ -149,8 +182,24 @@ data:
               }
             },
             {
+              "objectType" : "EXCHANGE",
+              "identity" : "federated-interchanges",
+              "operation" : "PUBLISH",
+              "outcome" : "ALLOW_LOG",
+              "attributes" : {
+                "NAME" : "fedEx"
+              }
+            },
+            {
+              "objectType": "VIRTUALHOST",
+              "identity": "federated-interchanges",
+              "operation": "ACCESS",
+              "outcome": "ALLOW_LOG",
+              "attributes": {}
+            },
+            {
               "objectType": "QUEUE",
-              "identity": "messaging-users",
+              "identity": "service-providers",
               "operation": "CONSUME",
               "outcome": "ALLOW_LOG",
               "attributes": {
