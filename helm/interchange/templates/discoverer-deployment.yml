@@ -1,0 +1,51 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-neighbour-discoverer
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: neighbour-discoverer
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: neighbour-discoverer
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: neighbour-discoverer
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: neighbour-discoverer
+        image: "{{ .Values.neighbour_discoverer.image.repository }}:{{ .Values.neighbour_discoverer.image.tag }}"
+        env:
+        - name: POSTGRES_URI
+          value: jdbc:postgresql://{{ .Release.Name }}-database:5432/federation
+        - name: SERVER_NAME
+          value: local.itsinterchange.eu
+        - name: NODE_PROVIDER_NAME
+          value: local.itsinterchange.eu
+        - name: DNS_TYPE
+          value: prod
+        - name: DOMAIN_NAME
+          value: itsinterchange.eu
+        - name: CTRL_CHNL_PORT
+          value: {{ .Values.neighbour_discoverer.CTRL_CHNL_PORT | quote }}
+        volumeMounts:
+        - name: secure
+          mountPath: /jks/keys/
+        ports:
+        - name: ctrl
+          containerPort: 8090
+      volumes:
+      - name: secure
+        secret:
+          secretName: {{ required "must provide .Values.neighbour_discoverer.tls_secret_name" .Values.neighbour_discoverer.tls_secret_name }}
+
+

@@ -1,0 +1,52 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-message-forwarder
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: message-forwarder
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: message-forwarder
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: message-forwarder
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: message-forwarder
+        image: "{{ .Values.message_forwarder.image.repository }}:{{ .Values.message_forwarder.image.tag }}"
+        env:
+        - name: POSTGRES_URI
+          value: jdbc:postgresql://{{ .Release.Name }}-database:5432/federation
+        - name: KEY_STORE_FILE
+          value: /jks/keys/local.itsinterchange.eu.p12
+        - name: KEY_STORE_PASSWORD
+          value: password
+        - name: KEY_STORE_TYPE
+          value: PKCS12
+        - name: DOMAIN_NAME
+          value: itsinterchange.eu
+        - name: TRUST_STORE_PATH
+          value: /jks/keys/truststore.jks
+        - name: TRUST_STORE_PASSWORD
+          value: password
+        - name: TRUST_STORE_TYPE
+          value: JKS
+        - name: SERVER_NAME
+          value: local.itsinterchange.eu
+        volumeMounts:
+        - name: secure
+          mountPath: /jks/keys/
+      volumes:
+      - name: secure
+        secret:
+          secretName: {{ required "must provide .Values.neighbour_discoverer.tls_secret_name" .Values.neighbour_discoverer.tls_secret_name }}

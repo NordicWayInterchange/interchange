@@ -1,0 +1,36 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-database
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: database
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: database
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: database
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: postgis
+        image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag}}"
+        env:
+        - name: POSTGRES_USER
+          value: federation
+        - name: POSTGRES_PASSWORD
+          value: federation
+        - name: POSTGRES_DB
+          value: federation
+        ports:
+        - name: db
+          containerPort: 5432

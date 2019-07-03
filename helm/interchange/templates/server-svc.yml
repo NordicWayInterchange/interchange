@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-neighbour-server
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: neighbour-server
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    component: neighbour-server
+    release: {{ .Release.Name }}
+  type: LoadBalancer
+  ports:
+  - name: ctrl
+    port: 443
+    targetPort: ctrl
