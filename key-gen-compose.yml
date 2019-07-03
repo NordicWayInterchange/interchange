@@ -7,7 +7,7 @@ services:
     volumes:
       - "./tmp:/jks"
     environment:
-      CA_CN: "itsinterchange.eu"
+      CA_CN: "ca.itsinterchange.eu"
       KEY_CNS: "local.itsinterchange.eu remote.itsinterchange.eu king_gustaf"
 
   local_use_keys_1_qpid:
