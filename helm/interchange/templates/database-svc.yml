@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-postgis
+  name: {{ .Release.Name }}-database
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    component: postgis
+    component: database
     release: {{ .Release.Name }}
 spec:
   selector:
     app: {{ .Chart.Name }}
-    component: postgis
+    component: database
     release: {{ .Release.Name }}
   ports:
   - name: db

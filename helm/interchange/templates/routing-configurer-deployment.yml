@@ -1,0 +1,50 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-routing-configurer
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: routing-configurer
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: routing-configurer
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: routing-configurer
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: routing-configurer
+        image: "{{ .Values.routing_configurer.image.repository }}:{{ .Values.routing_configurer.image.tag }}"
+        env:
+        - name: POSTGRES_URI
+          value: jdbc:postgresql://{{ .Release.Name }}-database:5432/federation
+        - name: BASE_URL
+          value: https://local.itsinterchange.eu
+        - name: VHOST_NAME
+          value: local.itsinterchange.eu
+        - name: TRUSTSTORE_NAME
+          value: /jks/keys/truststore.jks
+        - name: TRUSTSTORE_PASSWORD
+          value: password
+        - name: KEYSTORE_NAME
+          value: /jks/keys/local.itsinterchange.eu.p12
+        - name: KEYSTORE_PASSWORD
+          value: password
+        - name: KEY_PASSWORD
+          value: password
+        volumeMounts:
+        - name: secure
+          mountPath: /jks/keys/
+      volumes:
+      - name: secure
+        secret:
+          secretName: {{ required "must provide .Values.routing_configurer.tls_secret_name" .Values.routing_configurer.tls_secret_name }}
