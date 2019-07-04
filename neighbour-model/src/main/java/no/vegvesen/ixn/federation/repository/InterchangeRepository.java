@@ -1,9 +1,13 @@
 package no.vegvesen.ixn.federation.repository;
 
 
+import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,51 +15,22 @@ import java.util.List;
 @Repository
 public interface InterchangeRepository extends CrudRepository<Interchange, Integer> {
 
-	@Query(value = "select * from interchanges where name=?1", nativeQuery = true)
 	Interchange findByName(String name);
 
+	List<Interchange> findByCapabilities_Status(Capabilities.CapabilitiesStatus capabilitiesStatus);
 
-	// Subscription polling: all interchanges with subscriptions in fedIn with status REQUESTED or ACCEPTED
-	@Query(value = "select * from interchanges i where exists(select 'x' from subscriptions s where i.ixn_id_fed_in=s.subreq_id_sub and s.subscription_status in('ACCEPTED', 'REQUESTED'));", nativeQuery = true)
-	List<Interchange> findInterchangesWithSubscriptionToPoll();
+	List<Interchange> findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus status);
 
-	// Neighbours to add to qpid groups file: fedIn status REQUESTED or ESTABLISHED
-	@Query(value ="select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status in('REQUESTED', 'ESTABLISHED'))", nativeQuery = true)
-	List<Interchange> findInterchangesToAddToQpidGroups();
+	List<Interchange> findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus... statuses);
 
-	// Neighbours to remove from qpid groups file: fedIn status REJECTED
-	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='REJECTED')", nativeQuery = true)
-	List<Interchange> findInterchangesToRemoveFromQpidGroups();
+	@SuppressWarnings("SpringDataRepositoryMethodParametersInspection")
+	List<Interchange> findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus... subscriptionStatus);
 
-	// Selectors for capability and subscription exchange
-	// Capability exchange: when neighbour capabilities is UNKNOWN
-	@Query(value = "select * from interchanges i where exists(select 'x' from capabilities c where i.ixn_id_cap=cap_id and c.status='UNKNOWN');", nativeQuery = true)
-	List<Interchange> findInterchangesForCapabilityExchange();
+	List<Interchange> findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus capabilitiesStatus, SubscriptionRequest.SubscriptionRequestStatus requestStatus);
 
-	// Subscription request: When neighbour capabilities is KNOWN and neighbour fedIn is EMPTY
-	@Query(value = "select * from interchanges i where exists((select 'x' from capabilities c where i.ixn_id_cap=c.cap_id and c.status='KNOWN') intersect (select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='EMPTY'));", nativeQuery = true)
-	List<Interchange> findInterchangesForSubscriptionRequest();
-
-
-	// Selectors for graceful backoff
-	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_fed_in=s.subreq_id and s.status='FAILED')", nativeQuery = true)
-	List<Interchange> findInterchangesWithFailedFedIn();
-
-	@Query(value = "select * from interchanges i where exists(select 'x' from capabilities c where i.ixn_id_cap=c.cap_id and c.status='FAILED')", nativeQuery = true)
-	List<Interchange> findInterchangesWithFailedCapabilityExchange();
-
-	@Query(value = "select * from interchanges i where exists(select 'x' from subscriptions s where i.ixn_id_fed_in=s.subreq_id_sub and s.subscription_status='FAILED')", nativeQuery = true)
-	List<Interchange> findInterchangesWithFailedSubscriptionsInFedIn();
-
-
-	// Selectors for subscription set up and tear down
-	@Query(value = "select * from interchanges i where exists (select 'x' from subscription_request sr where i.ixn_id_sub_out = sr.subreq_id and sr.status = 'REQUESTED' and exists(select 'x' from subscriptions s where sr.subreq_id = s.subreq_id_sub and s.subscription_status = 'ACCEPTED'))", nativeQuery = true)
-	List<Interchange> findInterchangesForOutgoingSubscriptionSetup();
-
-	@Query(value = "select * from interchanges i where exists (select 'x' from subscription_request sr where i.ixn_id_sub_out = sr.subreq_id and sr.status = 'TEAR_DOWN')", nativeQuery = true)
-	List<Interchange> findInterchangesForOutgoingSubscriptionTearDown();
-
-	@Query(value = "select * from interchanges i where exists(select 'x' from subscription_request s where i.ixn_id_sub_out=s.subreq_id and s.status='ESTABLISHED')", nativeQuery = true)
-	List<Interchange> findInterchangesForMessageForwarding();
-
+	@Query(value = "select distinct i from Interchange i join i.subscriptionRequest sr join sr.subscription s where sr.status = :subscriptionRequestStatus and s.subscriptionStatus = :subscriptionStatus")
+	List<Interchange> findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(
+			@Param("subscriptionRequestStatus") SubscriptionRequest.SubscriptionRequestStatus subscriptionRequestStatus,
+			@Param("subscriptionStatus") Subscription.SubscriptionStatus subscriptionStatus
+	);
 }

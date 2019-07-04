@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
@@ -16,7 +17,7 @@ import java.util.List;
 @Component
 public class RoutingConfigurer {
 
-	static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
+	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
 	private final InterchangeRepository repository;
 	private final QpidClient qpidClient;
@@ -31,14 +32,14 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForInterchangesToSetupRoutingFor() {
 		logger.debug("Checking for new nodes to setup routing");
-		List<Interchange> readyToSetupRouting = repository.findInterchangesForOutgoingSubscriptionSetup();
+		List<Interchange> readyToSetupRouting = repository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} nodes to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
 		for (Interchange setUpInterchange : readyToSetupRouting) {
 			setupRoutingForNode(setUpInterchange);
 		}
 
 		logger.debug("Checking for nodes to tear down routing");
-		List<Interchange> readyToTearDownRouting = repository.findInterchangesForOutgoingSubscriptionTearDown();
+		List<Interchange> readyToTearDownRouting = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
 		for (Interchange tearDownInterchange : readyToTearDownRouting) {
 			tearDownRoutingForNode(tearDownInterchange);
 		}
@@ -49,7 +50,7 @@ public class RoutingConfigurer {
 		logger.debug("Looking for users with fedIn REQUESTED or ESTABLISHED to add to Qpid groups.");
 		String groupName = "federated-interchanges";
 
-		List<Interchange> neighboursToAddToGroups = repository.findInterchangesToAddToQpidGroups();
+		List<Interchange> neighboursToAddToGroups = repository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
 
 		for(Interchange neighbour : neighboursToAddToGroups){
@@ -71,7 +72,7 @@ public class RoutingConfigurer {
 		String groupName = "federated-interchanges";
 
 		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
-		List<Interchange> neighboursToRemoveFromGroups = repository.findInterchangesToRemoveFromQpidGroups();
+		List<Interchange> neighboursToRemoveFromGroups = repository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
 
 		for(Interchange neighbour : neighboursToRemoveFromGroups){
 			if(userNames.contains(neighbour.getName())){

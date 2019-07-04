@@ -165,7 +165,7 @@ public class NeighbourDiscoverer {
 	public void gracefulBackoffPollSubscriptions() {
 
 		// All neighbours with a failed subscription in fedIn
-		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangesWithFailedSubscriptionsInFedIn();
+		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED);
 
 		for (Interchange neighbour : interchangesWithFailedSubscriptionsInFedIn) {
 			for (Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()) {
@@ -208,7 +208,8 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void pollSubscriptions() {
 		// All interchanges with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
-		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesWithSubscriptionToPoll();
+		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(
+				Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 
 		for (Interchange neighbour : interchangesToPoll) {
 			for (Subscription subscription : neighbour.getSubscriptionsForPolling()) {
@@ -269,7 +270,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostCapabilities() {
 
-		List<Interchange> neighboursWithFailedCapabilityExchange = interchangeRepository.findInterchangesWithFailedCapabilityExchange();
+		List<Interchange> neighboursWithFailedCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
 
 		for (Interchange neighbour : neighboursWithFailedCapabilityExchange) {
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
@@ -314,7 +315,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
 
-		List<Interchange> neighboursWithFailedSubscriptionRequest = interchangeRepository.findInterchangesWithFailedFedIn();
+		List<Interchange> neighboursWithFailedSubscriptionRequest = interchangeRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
 
 		for (Interchange neighbour : neighboursWithFailedSubscriptionRequest) {
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
@@ -359,7 +360,7 @@ public class NeighbourDiscoverer {
 	public void subscriptionRequest() {
 
 		// All neighbours with capabilities KNOWN and fedIn EMPTY
-		List<Interchange> neighboursForSubscriptionRequest = interchangeRepository.findInterchangesForSubscriptionRequest();
+		List<Interchange> neighboursForSubscriptionRequest = interchangeRepository.findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
 		for (Interchange neighbour : neighboursForSubscriptionRequest) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
@@ -423,8 +424,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void capabilityExchange() {
 
-		// All neighbours with capabilities UNKNOWN
-		List<Interchange> neighboursForCapabilityExchange = interchangeRepository.findInterchangesForCapabilityExchange();
+		List<Interchange> neighboursForCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 
 		for (Interchange neighbour : neighboursForCapabilityExchange) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());

@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -92,7 +89,7 @@ public class InterchangeRepositoryIT {
 		Interchange readyToSetup = new Interchange("freddy", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(readyToSetup);
 
-		List<Interchange> forSetupFromRepo = repository.findInterchangesForOutgoingSubscriptionSetup();
+		List<Interchange> forSetupFromRepo = repository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 
 		assertThat(forSetupFromRepo).hasSize(1);
 		assertThat(forSetupFromRepo.iterator().next().getName()).isEqualTo("freddy");
@@ -106,7 +103,7 @@ public class InterchangeRepositoryIT {
 		Interchange tearDownIxn = new Interchange("torry", caps, tearDownSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(tearDownIxn);
 
-		List<Interchange> forTearDownFromRepo = repository.findInterchangesForOutgoingSubscriptionTearDown();
+		List<Interchange> forTearDownFromRepo = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
 
 		assertThat(forTearDownFromRepo).hasSize(1);
 		assertThat(forTearDownFromRepo.iterator().next().getName()).isEqualTo("torry");
@@ -130,5 +127,25 @@ public class InterchangeRepositoryIT {
 		assertThat(updated).isNotNull();
 		assertThat(updated.getSubscriptionRequest()).isNotNull();
 		assertThat(updated.getSubscriptionRequest().getSubscriptions()).hasSize(0);
+	}
+
+	@Test
+	public void interchangeReadyForForwarding() {
+		Set<Subscription> subscriptions = new HashSet<>();
+		subscriptions.add(new Subscription("where = 'NO' and what = 'fish'", Subscription.SubscriptionStatus.CREATED));
+		SubscriptionRequest outgoing = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, subscriptions);
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		Interchange ixnForwards = new Interchange("norwegian-fish", capabilities, outgoing, null);
+		repository.save(ixnForwards);
+
+		Capabilities capabilitiesSe = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		SubscriptionRequest noOverlap = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
+		SubscriptionRequest noOverlapIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
+		Interchange noForwards = new Interchange("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
+		repository.save(noForwards);
+
+		List<Interchange> establishedOutgoingSubscriptions = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		assertThat(establishedOutgoingSubscriptions).hasSize(1);
+		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
 	}
 }
