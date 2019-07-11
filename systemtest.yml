@@ -100,7 +100,7 @@ services:
       - "./tmp:/jks"
       - "./qpid/messages/local:/work/local/messages"
     environment:
-      - CA_CERTIFICATE_FILE=/jks/keys/itsinterchange.eu.crt
+      - CA_CERTIFICATE_FILE=/jks/keys/ca.itsinterchange.eu.crt
       - SERVER_CERTIFICATE_FILE=/jks/keys/local.itsinterchange.eu.crt
       - SERVER_PRIVATE_KEY_FILE=/jks/keys/local.itsinterchange.eu.key
       - VHOST_FILE=/config/vhost.json
@@ -316,7 +316,7 @@ services:
       - "./tmp:/jks"
       - "./qpid/messages/remote:/work/remote/messages"
     environment:
-      - CA_CERTIFICATE_FILE=/jks/keys/itsinterchange.eu.crt
+      - CA_CERTIFICATE_FILE=/jks/keys/ca.itsinterchange.eu.crt
       - SERVER_CERTIFICATE_FILE=/jks/keys/remote.itsinterchange.eu.crt
       - SERVER_PRIVATE_KEY_FILE=/jks/keys/remote.itsinterchange.eu.key
       - VHOST_FILE=/config/vhost.json
