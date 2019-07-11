@@ -1,0 +1,48 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-haproxy
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: haproxy
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: haproxy
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/qpid-config.yml") . | sha256sum }}
+      labels:
+        app: {{ .Chart.Name }}
+        component: haproxy
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: haproxy
+        image: haproxy:latest
+        ports:
+        - name: amqp
+          containerPort: 5672
+        - name: amqps
+          containerPort: 5671
+        - name: http-qpid
+          containerPort: 8080
+        - name: https-nbr
+          containerPort: 443
+        volumeMounts:
+        - name: config
+          mountPath: /usr/local/etc/haproxy/
+        readinessProbe:
+          initialDelaySeconds: 5
+          tcpSocket:
+            port: amqps
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-haproxy

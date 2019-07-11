@@ -1,25 +1,3 @@
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: {{ .Release.Name }}-qpid
-  labels:
-    app: {{ .Chart.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    component: qpid
-    release: {{ .Release.Name }}
-spec:
-  selector:
-    app: {{ .Chart.Name }}
-    component: qpid
-    release: {{ .Release.Name }}
-  type: ClusterIP
-  ports:
-  - name: amqp
-    port: 5672
-    targetPort: amqp
-
----
 kind: Service
 apiVersion: v1
 metadata:
@@ -34,12 +12,10 @@ spec:
     app: {{ .Chart.Name }}
     component: qpid
     release: {{ .Release.Name }}
-{{- if .Values.qpid.expose_amqps }}
-  type: LoadBalancer
-{{- else }}
-  type: ClusterIP
-{{- end }}
   ports:
   - name: amqps
     port: 5671
     targetPort: amqps
+  - name: http-qpid
+    port: 8080
+    targetPort: http-qpid
