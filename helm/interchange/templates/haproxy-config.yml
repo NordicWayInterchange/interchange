@@ -28,6 +28,7 @@ data:
     frontend qpid-api-frontend
         log global
         bind *:8080
+        mode http
         default_backend qpid-api
 
     frontend qpid-messaging-frontend
