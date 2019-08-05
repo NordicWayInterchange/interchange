@@ -31,7 +31,7 @@ spec:
           containerPort: 5672
         - name: amqps
           containerPort: 5671
-        - name: http
+        - name: http-qpid-gui
           containerPort: 8080
         env:
         - name: SERVER_CERTIFICATE_FILE

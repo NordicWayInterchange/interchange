@@ -1,0 +1,53 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-haproxy
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: haproxy
+    release: {{ .Release.Name }}
+data:
+  haproxy.cfg: |
+    global
+        daemon
+        maxconn 4096
+
+    defaults
+        mode http
+        timeout connect 5000ms
+        timeout client 50000ms
+        timeout server 50000ms
+
+    frontend neighbour-server-frontend
+        log global
+        bind *:443
+        mode tcp
+        default_backend neighbour-server
+
+    frontend qpid-api-frontend
+        log global
+        bind *:8080
+        mode http
+        default_backend qpid-api
+
+    frontend qpid-messaging-frontend
+        mode tcp
+        log global
+        bind *:5671
+        default_backend qpid-messaging
+
+
+    backend neighbour-server
+        mode tcp
+        server federated-neighbour-server federated-neighbour-server:443 maxconn 32
+
+    backend qpid-api
+        balance roundrobin
+        option httpclose
+        option forwardfor
+        server federated-qpid-secure federated-qpid-secure:8080 maxconn 32
+
+    backend qpid-messaging
+        mode tcp
+        server federated-qpid-secure federated-qpid-secure:5671 maxconn 32

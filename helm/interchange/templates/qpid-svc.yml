@@ -34,12 +34,10 @@ spec:
     app: {{ .Chart.Name }}
     component: qpid
     release: {{ .Release.Name }}
-{{- if .Values.qpid.expose_amqps }}
-  type: LoadBalancer
-{{- else }}
-  type: ClusterIP
-{{- end }}
   ports:
   - name: amqps
     port: 5671
     targetPort: amqps
+  - name: http-qpid-gui
+    port: 8080
+    targetPort: http-qpid-gui

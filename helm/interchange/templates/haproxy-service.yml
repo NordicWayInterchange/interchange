@@ -1,18 +1,25 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ .Release.Name }}-neighbour-server
+  name: {{ .Release.Name }}-haproxy
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    component: neighbour-server
+    component: haproxy
     release: {{ .Release.Name }}
 spec:
   selector:
     app: {{ .Chart.Name }}
-    component: neighbour-server
+    component: haproxy
     release: {{ .Release.Name }}
+  type: LoadBalancer
   ports:
+  - name: amqps
+    port: 5671
+    targetPort: amqps
+  - name: http-qpid-gui
+    port: 8080
+    targetPort: http-qpid-gui
   - name: https-control
     port: 443
     targetPort: https-control

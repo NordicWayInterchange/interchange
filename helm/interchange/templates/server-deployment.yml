@@ -41,7 +41,7 @@ spec:
         - name: secure
           mountPath: /jks/keys/
         ports:
-        - name: ctrl
+        - name: https-control
           containerPort: 443
       volumes:
       - name: secure
