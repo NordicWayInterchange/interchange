@@ -13,6 +13,6 @@ spec:
     component: neighbour-server
     release: {{ .Release.Name }}
   ports:
-  - name: https-nbr
+  - name: https-control
     port: 443
-    targetPort: https-nbr
+    targetPort: https-control

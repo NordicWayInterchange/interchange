@@ -16,8 +16,6 @@ spec:
       release: {{ .Release.Name }}
   template:
     metadata:
-      annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/qpid-config.yml") . | sha256sum }}
       labels:
         app: {{ .Chart.Name }}
         component: haproxy
@@ -31,9 +29,9 @@ spec:
           containerPort: 5672
         - name: amqps
           containerPort: 5671
-        - name: http-qpid
+        - name: http-qpid-gui
           containerPort: 8080
-        - name: https-nbr
+        - name: https-control
           containerPort: 443
         volumeMounts:
         - name: config
