@@ -1,11 +1,11 @@
 version: '3'
 services:
 
- key_gen:
+  gen_keys:
     build: ./key-gen
     container_name: key_gen
     volumes:
       - "./tmp:/jks"
     environment:
-      CA_CN: "my_ca"
-      KEY_CNS: "bouvet remote king_gustaf"
+      CA_CN: "ca.itsinterchange.eu"
+      KEY_CNS: "local.itsinterchange.eu remote.itsinterchange.eu king_gustaf"
