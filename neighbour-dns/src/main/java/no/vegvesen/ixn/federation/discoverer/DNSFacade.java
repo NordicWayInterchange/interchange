@@ -6,7 +6,6 @@ import no.vegvesen.ixn.federation.model.Interchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@ConditionalOnProperty(name = "dns.type", havingValue = "prod", matchIfMissing = true)
 public class DNSFacade implements DNSFacadeInterface {
 
 	private DNSProperties dnsProperties;
@@ -37,7 +35,7 @@ public class DNSFacade implements DNSFacadeInterface {
 		// TODO: get control channel port nr from separate SRV lookup.
 
 		try {
-			if (dnsProperties.getDomainName() == null || dnsProperties.getDomainName().length() == 0) {
+			if (dnsProperties.getDomainName() == null || dnsProperties.getDomainName().isEmpty()) {
 				throw new RuntimeException("DNS lookup with no domain");
 			}
 			// SRV record lookup for message chanel port on each sub domain
