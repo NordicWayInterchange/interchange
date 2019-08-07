@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import no.vegvesen.ixn.federation.model.Subscription;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,10 +8,10 @@ public class SubscriptionRequestApi{
 	private String name;
 	private Set<SubscriptionApi> subscriptions = new HashSet<>();
 
-	SubscriptionRequestApi() {
+	public SubscriptionRequestApi() {
 	}
 
-	public SubscriptionRequestApi(String name, Set<Subscription> subscriptions) {
+	public SubscriptionRequestApi(String name, Set<SubscriptionApi> subscriptions) {
 		this.name = name;
 		setSubscriptions(subscriptions);
 	}
@@ -26,26 +24,13 @@ public class SubscriptionRequestApi{
 		this.name = name;
 	}
 
-	public Set<Subscription> getSubscriptions() {
-		Set<Subscription> returnSubscriptions = new HashSet<>();
-		SubscriptionTransformer transformer = new SubscriptionTransformer();
-
-		for(SubscriptionApi s : subscriptions){
-			Subscription converted = transformer.subscriptionApiToSubscription(s);
-			returnSubscriptions.add(converted);
-		}
-
-		return returnSubscriptions;
+	public Set<SubscriptionApi> getSubscriptions() {
+		return subscriptions;
 	}
 
-	public void setSubscriptions(Set<Subscription> subscriptionSet) {
+	public void setSubscriptions(Set<SubscriptionApi> subscriptionSet) {
 		this.subscriptions.clear();
-		SubscriptionTransformer transformer = new SubscriptionTransformer();
-
-		for(Subscription s : subscriptionSet){
-			SubscriptionApi converted = transformer.subscriptionToSubscriptionApi(s);
-			subscriptions.add(converted);
-		}
+		this.subscriptions = subscriptionSet;
 	}
 
 	@Override
