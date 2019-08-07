@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class DNSFacadeErrorTest {
 
 	@Test
 	public void testGetNeighbourFailsWithWrongConfiguration(){
-		List<Interchange> neighbours = dnsFacade.getNeighbours();
+		List<Neighbour> neighbours = dnsFacade.getNeighbours();
 		assertThat(neighbours).isEmpty();
 	}
 }
