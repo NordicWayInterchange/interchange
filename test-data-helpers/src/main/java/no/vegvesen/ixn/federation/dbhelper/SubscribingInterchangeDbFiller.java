@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.dbhelper;
 
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +9,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 @ConditionalOnProperty(name = "db-helper.type", havingValue = "subscriber")
@@ -26,7 +22,7 @@ public class SubscribingInterchangeDbFiller implements DatabaseHelperInterface{
 		this.serviceProviderRepository = serviceProviderRepository;
 	}
 
-	// Capabilities: FI, DK
+	// Capabilities: FI
 	// Subscriptions: SE
 	@Override
 	public void fillDatabase() {
@@ -36,12 +32,14 @@ public class SubscribingInterchangeDbFiller implements DatabaseHelperInterface{
 		ServiceProvider volvoCloud = new ServiceProvider();
 		volvoCloud.setName("Volvo Cloud");
 		DataType volvoDataTypeOne = new DataType("datex2;1.0", "FI", "Obstruction" );
-		volvoCloud.setCapabilities(Collections.singleton(volvoDataTypeOne));
+		Capabilities volvoCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(volvoDataTypeOne));
+		volvoCloud.setCapabilities(volvoCapabilities);
 
 		Subscription volvoSubscriptions = new Subscription();
 		volvoSubscriptions.setSelector("where LIKE 'SE'");
 		volvoSubscriptions.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
-		volvoCloud.setSubscriptions(Collections.singleton(volvoSubscriptions));
+		SubscriptionRequest volvoSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(volvoSubscriptions));
+		volvoCloud.setSubscriptionRequest(volvoSubscriptionRequest);
 		serviceProviderRepository.save(volvoCloud);
 
 		logger.info(volvoCloud.toString());

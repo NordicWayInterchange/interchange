@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.dbhelper;
 
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +36,15 @@ public class ProvidingInterchangeDbFiller implements DatabaseHelperInterface{
 		teslaCloud.setName("Tesla Cloud");
 		DataType teslaDataTypeOne = new DataType("datex2;1.0", "NO", "Obstruction" );
 		DataType teslaDataTypeTwo = new DataType("datex2;1.0", "SE", "Conditions");
-		teslaCloud.setCapabilities(Stream.of(teslaDataTypeOne, teslaDataTypeTwo).collect(Collectors.toSet()));
+		Capabilities teslaCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(teslaDataTypeOne, teslaDataTypeTwo).collect(Collectors.toSet()));
+		teslaCloud.setCapabilities(teslaCapabilities);
 
 
 		Subscription teslaSubscription = new Subscription();
 		teslaSubscription.setSelector("where LIKE 'DK'");
 		teslaSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
-		teslaCloud.setSubscriptions(Collections.singleton(teslaSubscription));
+		SubscriptionRequest teslaSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED,Collections.singleton(teslaSubscription) );
+		teslaCloud.setSubscriptionRequest(teslaSubscriptionRequest);
 		serviceProviderRepository.save(teslaCloud);
 
 		logger.info(teslaCloud.toString());
