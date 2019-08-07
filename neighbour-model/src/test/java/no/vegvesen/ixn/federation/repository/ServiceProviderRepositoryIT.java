@@ -54,11 +54,11 @@ public class ServiceProviderRepositoryIT {
 
 		Subscription volvoSubscription = new Subscription();
 		volvoSubscription.setSelector("where LIKE 'FI'");
-		volvo.setSubscriptions(Collections.singleton(volvoSubscription));
+		volvo.getSubscriptionRequest().setSubscriptions(Collections.singleton(volvoSubscription));
 
 		repository.save(volvo);
 
 		ServiceProvider volvoFromRepository = repository.findByName("Volvo");
-		Assert.assertNotNull(volvoFromRepository.getSubscriptions());
+		Assert.assertNotNull(volvoFromRepository.getSubscriptionRequest().getSubscriptions());
 	}
 }
