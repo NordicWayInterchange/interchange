@@ -28,14 +28,14 @@ public class QpidClientIT {
 
 	@Test
 	public void createQueue() {
-		Interchange findus = new Interchange("findus", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
+		Neighbour findus = new Neighbour("findus", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 
 		client.createQueue(findus);
 	}
 
 	@Test(expected = Exception.class)
 	public void createQueueWithIllegalCharactersInIdFails() {
-		Interchange torsk = new Interchange("torsk", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
+		Neighbour torsk = new Neighbour("torsk", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 
 		client.createQueue(torsk);
 		client.createQueue(torsk); //create some queue that already exists
@@ -43,7 +43,7 @@ public class QpidClientIT {
 
 	@Test
 	public void createdQueueCanBeQueriedFromQpid() {
-		Interchange leroy = new Interchange("leroy", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
+		Neighbour leroy = new Neighbour("leroy", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 		client.createQueue(leroy);
 		assertThat(client.queueExists(leroy.getName())).isTrue();
 	}
@@ -57,7 +57,7 @@ public class QpidClientIT {
 	public void interchangeWithOneBindingIsCreated() {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", Subscription.SubscriptionStatus.REQUESTED)));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
-		Interchange flounder = new Interchange("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(flounder);
 		assertThat(client.queueExists(flounder.getName())).isTrue();
 	}
@@ -68,7 +68,7 @@ public class QpidClientIT {
 		Subscription s2 = new Subscription("b = c", Subscription.SubscriptionStatus.REQUESTED);
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
-		Interchange halibut = new Interchange("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(halibut);
 		assertThat(client.queueExists(halibut.getName())).isTrue();
 	}
@@ -77,7 +77,7 @@ public class QpidClientIT {
 	public void interchangeIsBothCreatedAndUpdated() {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", Subscription.SubscriptionStatus.REQUESTED)));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
-		Interchange seabass = new Interchange("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(seabass);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
 		client.setupRouting(seabass);
@@ -90,13 +90,13 @@ public class QpidClientIT {
 		Subscription s2 = new Subscription("b = c", Subscription.SubscriptionStatus.REQUESTED);
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
-		Interchange trout = new Interchange("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		Neighbour trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
 		subscriptions = new HashSet<>(Collections.singletonList(s1));
 		subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
-		trout = new Interchange("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+		trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		client.setupRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
@@ -104,7 +104,7 @@ public class QpidClientIT {
 
 	@Test
 	public void tearDownQueue() {
-		Interchange crab = new Interchange("crab", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
+		Neighbour crab = new Neighbour("crab", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 
 		//Set up a new queue
 		client.createQueue(crab);
