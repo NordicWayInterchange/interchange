@@ -19,13 +19,13 @@ public class ServiceProvider {
 
 	private String name;
 
-	@OneToMany(cascade= CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "spr_id_cap", foreignKey = @ForeignKey(name = "fk_dat_spr"))
-	private Set<DataType> capabilities = new HashSet<>();
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "spr_id_cap", referencedColumnName = "cap_id", foreignKey = @ForeignKey(name = "fk_cap_spr"))
+	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "spr_id_sub", foreignKey = @ForeignKey(name = "fk_sub_spr"))
-	private Set<Subscription> subscriptions = new HashSet<>();
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "spr_id_sub", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_spr"))
+	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	public ServiceProvider() { }
 
@@ -50,26 +50,20 @@ public class ServiceProvider {
 		this.id = id;
 	}
 
-	public Set<DataType> getCapabilities() {
+	public Capabilities getCapabilities() {
 		return capabilities;
 	}
 
-	public void setCapabilities(Set<DataType> capabilities) {
-		this.capabilities.clear();
-		if (capabilities != null) {
-			this.capabilities.addAll(capabilities);
-		}
+	public void setCapabilities(Capabilities capabilities) {
+		this.capabilities = capabilities;
 	}
 
-	public Set<Subscription> getSubscriptions() {
-		return subscriptions;
+	public SubscriptionRequest getSubscriptionRequest() {
+		return subscriptionRequest;
 	}
 
-	public void setSubscriptions(Set<Subscription> subscriptions) {
-		this.subscriptions.clear();
-		if (subscriptions != null) {
-			this.subscriptions.addAll(subscriptions);
-		}
+	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
+		this.subscriptionRequest = subscriptionRequest;
 	}
 
 	@Override
@@ -78,7 +72,7 @@ public class ServiceProvider {
 				"id=" + id +
 				", name='" + name + '\'' +
 				", capabilities=" + capabilities +
-				", subscriptions=" + subscriptions +
+				", subscriptionRequest=" + subscriptionRequest +
 				'}';
 	}
 }
