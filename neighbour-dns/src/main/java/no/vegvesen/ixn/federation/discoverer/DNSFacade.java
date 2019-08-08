@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class DNSFacade implements DNSFacadeInterface {
+public class DNSFacade {
 
 	private DNSProperties dnsProperties;
 	private Logger logger = LoggerFactory.getLogger(DNSFacade.class);
@@ -27,7 +27,7 @@ public class DNSFacade implements DNSFacadeInterface {
 	}
 
 	// Returns a list of interchanges discovered through DNS lookup.
-	@Override
+	//@Override
 	public List<Interchange> getNeighbours() {
 
 		List<Interchange> interchanges = new ArrayList<>();
