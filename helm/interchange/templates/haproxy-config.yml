@@ -40,14 +40,14 @@ data:
 
     backend neighbour-server
         mode tcp
-        server federated-neighbour-server federated-neighbour-server:443 maxconn 32
+        server {{ .Release.Name }}-neighbour-server {{ .Release.Name }}-neighbour-server:443 maxconn 32
 
     backend qpid-api
         balance roundrobin
         option httpclose
         option forwardfor
-        server federated-qpid-secure federated-qpid-secure:8080 maxconn 32
+        server {{ .Release.Name }}-qpid-secure {{ .Release.Name }}-qpid-secure:8080 maxconn 32
 
     backend qpid-messaging
         mode tcp
-        server federated-qpid-secure federated-qpid-secure:5671 maxconn 32
+        server {{ .Release.Name }}-qpid-secure {{ .Release.Name }}-qpid-secure:5671 maxconn 32

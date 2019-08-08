@@ -27,26 +27,26 @@ spec:
         env:
         - name: POSTGRES_URI
           value: jdbc:postgresql://{{ .Release.Name }}-database:5432/federation
-        - name: KEY_STORE_FILE
-          value: /jks/keys/local.itsinterchange.eu.p12
+        - name: KEY_STORE
+          value: {{ .Values.self.secret_mount_path }}{{ .Values.self.key_store }}
         - name: KEY_STORE_PASSWORD
-          value: password
+          value: {{ .Values.self.key_store_password | quote }}
         - name: KEY_STORE_TYPE
-          value: PKCS12
+          value: {{ .Values.message_forwarder.key_store_type | quote }}
         - name: DOMAIN_NAME
-          value: itsinterchange.eu
-        - name: TRUST_STORE_PATH
-          value: /jks/keys/truststore.jks
+          value: {{ .Values.self.domain_name | quote }}
+        - name: TRUST_STORE
+          value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
         - name: TRUST_STORE_PASSWORD
-          value: password
+          value: {{ .Values.self.trust_store_password | quote }}
         - name: TRUST_STORE_TYPE
-          value: JKS
+          value: {{ .Values.message_forwarder.trust_store_type | quote }}
         - name: SERVER_NAME
-          value: local.itsinterchange.eu
+          value: {{ .Values.external_name | quote }}
         volumeMounts:
         - name: secure
-          mountPath: /jks/keys/
+          mountPath: {{ .Values.self.secret_mount_path | quote }}
       volumes:
       - name: secure
         secret:
-          secretName: {{ required "must provide .Values.neighbour_discoverer.tls_secret_name" .Values.neighbour_discoverer.tls_secret_name }}
+          secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}

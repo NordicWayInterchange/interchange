@@ -26,11 +26,11 @@ spec:
         image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag}}"
         env:
         - name: POSTGRES_USER
-          value: federation
+          value: {{ .Values.database.postgres_user | quote }}
         - name: POSTGRES_PASSWORD
-          value: federation
+          value: {{ .Values.database.postgres_password | quote }}
         - name: POSTGRES_DB
-          value: federation
+          value: {{ .Values.database.postgres_db | quote }}
         ports:
         - name: db
           containerPort: 5432
