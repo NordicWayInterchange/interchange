@@ -5,12 +5,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.discoverer.DNSFacadeInterface;
+import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.repository.InterchangeRepository;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -45,7 +44,7 @@ public class NeighbourRestController {
 	private SubscriptionRequestTransformer subscriptionRequestTransformer;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
-	private DNSFacadeInterface dnsFacade;
+	private DNSFacade dnsFacade;
 
 	@Autowired
 	public NeighbourRestController(InterchangeRepository interchangeRepository,
@@ -53,7 +52,7 @@ public class NeighbourRestController {
 								   CapabilityTransformer capabilityTransformer,
 								   SubscriptionTransformer subscriptionTransformer,
 								   SubscriptionRequestTransformer subscriptionRequestTransformer,
-								   DNSFacadeInterface dnsFacade) {
+								   DNSFacade dnsFacade) {
 
 		this.interchangeRepository = interchangeRepository;
 		this.serviceProviderRepository = serviceProviderRepository;

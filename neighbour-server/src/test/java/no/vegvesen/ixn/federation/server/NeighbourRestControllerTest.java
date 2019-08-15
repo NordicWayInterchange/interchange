@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.discoverer.DNSFacadeInterface;
+import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.model.*;
@@ -55,7 +55,7 @@ public class NeighbourRestControllerTest {
 	SubscriptionRequestTransformer subscriptionRequestTransformer;
 
 	@Mock
-	DNSFacadeInterface dnsFacade;
+	DNSFacade dnsFacade;
 
 	@InjectMocks
 	private NeighbourRestController neighbourRestController;

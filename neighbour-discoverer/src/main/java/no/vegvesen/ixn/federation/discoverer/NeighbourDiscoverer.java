@@ -36,7 +36,7 @@ public class NeighbourDiscoverer {
 
 	private InterchangeRepository interchangeRepository;
 	private ServiceProviderRepository serviceProviderRepository;
-	private DNSFacadeInterface dnsFacade;
+	private DNSFacade dnsFacade;
 	private Logger logger = LoggerFactory.getLogger(NeighbourDiscoverer.class);
 	private String myName;
 	private NeighbourRESTFacade neighbourRESTFacade;
@@ -46,7 +46,7 @@ public class NeighbourDiscoverer {
 
 
 	@Autowired
-	NeighbourDiscoverer(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") DNSFacadeInterface dnsFacade,
+	NeighbourDiscoverer(DNSFacade dnsFacade,
 						InterchangeRepository interchangeRepository,
 						ServiceProviderRepository serviceProviderRepository,
 						NeighbourRESTFacade neighbourRESTFacade,
