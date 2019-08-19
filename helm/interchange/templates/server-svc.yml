@@ -14,5 +14,5 @@ spec:
     release: {{ .Release.Name }}
   ports:
   - name: https-control
-    port: 443
+    port: {{ .Values.self.control_channel_port }}
     targetPort: https-control

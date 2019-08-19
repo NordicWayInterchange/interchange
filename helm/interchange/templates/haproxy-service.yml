@@ -15,11 +15,11 @@ spec:
   type: LoadBalancer
   ports:
   - name: amqps
-    port: 5671
+    port: {{ .Values.self.secure_message_channel_port }}
     targetPort: amqps
   - name: http-qpid-gui
-    port: 8080
+    port: {{ .Values.qpid.gui_port }}
     targetPort: http-qpid-gui
   - name: https-control
-    port: 443
+    port: {{ .Values.self.control_channel_port }}
     targetPort: https-control

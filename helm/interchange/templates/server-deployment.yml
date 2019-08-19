@@ -46,7 +46,7 @@ spec:
           mountPath: /jks/keys/
         ports:
         - name: https-control
-          containerPort: 443
+          containerPort: {{ .Values.self.control_channel_port }}
       volumes:
       - name: secure
         secret:

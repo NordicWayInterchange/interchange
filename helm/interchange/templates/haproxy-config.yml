@@ -21,33 +21,33 @@ data:
 
     frontend neighbour-server-frontend
         log global
-        bind *:443
+        bind *:{{ .Values.self.control_channel_port }}
         mode tcp
         default_backend neighbour-server
 
     frontend qpid-api-frontend
         log global
-        bind *:8080
+        bind *:{{ .Values.qpid.gui_port }}
         mode http
         default_backend qpid-api
 
     frontend qpid-messaging-frontend
         mode tcp
         log global
-        bind *:5671
+        bind *:{{ .Values.self.secure_message_channel_port }}
         default_backend qpid-messaging
 
 
     backend neighbour-server
         mode tcp
-        server {{ .Release.Name }}-neighbour-server {{ .Release.Name }}-neighbour-server:443 maxconn 32
+        server {{ .Release.Name }}-neighbour-server {{ .Release.Name }}-neighbour-server:{{ .Values.self.control_channel_port }} maxconn 32
 
     backend qpid-api
         balance roundrobin
         option httpclose
         option forwardfor
-        server {{ .Release.Name }}-qpid-secure {{ .Release.Name }}-qpid-secure:8080 maxconn 32
+        server {{ .Release.Name }}-qpid-secure {{ .Release.Name }}-qpid-secure:{{ .Values.qpid.gui_port }} maxconn 32
 
     backend qpid-messaging
         mode tcp
-        server {{ .Release.Name }}-qpid-secure {{ .Release.Name }}-qpid-secure:5671 maxconn 32
+        server {{ .Release.Name }}-qpid-secure {{ .Release.Name }}-qpid-secure:{{ .Values.self.secure_message_channel_port }} maxconn 32
