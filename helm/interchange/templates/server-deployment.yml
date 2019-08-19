@@ -43,7 +43,7 @@ spec:
           value: {{ .Values.self.key_store_password | quote }}
         volumeMounts:
         - name: secure
-          mountPath: /jks/keys/
+          mountPath: {{ .Values.self.secret_mount_path | quote }}
         ports:
         - name: https-control
           containerPort: {{ .Values.self.control_channel_port }}
