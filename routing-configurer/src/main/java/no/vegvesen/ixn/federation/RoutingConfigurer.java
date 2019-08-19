@@ -19,12 +19,12 @@ public class RoutingConfigurer {
 
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
-	private final NeighbourRepository repository;
+	private final NeighbourRepository neighbourRepository;
 	private final QpidClient qpidClient;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourRepository repository, QpidClient qpidClient) {
-		this.repository = repository;
+	public RoutingConfigurer(NeighbourRepository neighbourRepository, QpidClient qpidClient) {
+		this.neighbourRepository = neighbourRepository;
 		this.qpidClient = qpidClient;
 	}
 
@@ -32,14 +32,14 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForInterchangesToSetupRoutingFor() {
 		logger.debug("Checking for new nodes to setup routing");
-		List<Neighbour> readyToSetupRouting = repository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
+		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} nodes to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
 		for (Neighbour setUpInterchange : readyToSetupRouting) {
 			setupRoutingForNode(setUpInterchange);
 		}
 
 		logger.debug("Checking for nodes to tear down routing");
-		List<Neighbour> readyToTearDownRouting = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
+		List<Neighbour> readyToTearDownRouting = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
 		for (Neighbour tearDownInterchange : readyToTearDownRouting) {
 			tearDownRoutingForNode(tearDownInterchange);
 		}
@@ -50,7 +50,7 @@ public class RoutingConfigurer {
 		logger.debug("Looking for users with fedIn REQUESTED or ESTABLISHED to add to Qpid groups.");
 		String groupName = "federated-interchanges";
 
-		List<Neighbour> neighboursToAddToGroups = repository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		List<Neighbour> neighboursToAddToGroups = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
 
 		for(Neighbour neighbour : neighboursToAddToGroups){
@@ -72,7 +72,7 @@ public class RoutingConfigurer {
 		String groupName = "federated-interchanges";
 
 		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
-		List<Neighbour> neighboursToRemoveFromGroups = repository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+		List<Neighbour> neighboursToRemoveFromGroups = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
 
 		for(Neighbour neighbour : neighboursToRemoveFromGroups){
 			if(userNames.contains(neighbour.getName())){
@@ -91,7 +91,7 @@ public class RoutingConfigurer {
 			qpidClient.removeQueue(tearDownInterchange.getName());
 			logger.info("Removed routing for node {}", tearDownInterchange.getName());
 			tearDownInterchange.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
-			repository.save(tearDownInterchange);
+			neighbourRepository.save(tearDownInterchange);
 			logger.debug("Saved node {} with subscription request status EMPTY", tearDownInterchange.getName());
 		} catch (Exception e) {
 			logger.error("Could not remove routing for node {}", tearDownInterchange.getName(), e);
@@ -104,7 +104,7 @@ public class RoutingConfigurer {
 			SubscriptionRequest setUpSubscriptionRequest = qpidClient.setupRouting(setUpInterchange);
 			logger.info("Routing set up for node {}", setUpInterchange.getName());
 			setUpInterchange.setSubscriptionRequest(setUpSubscriptionRequest);
-			repository.save(setUpInterchange);
+			neighbourRepository.save(setUpInterchange);
 			logger.debug("Saved node {} with subscription request status ESTABLISHED", setUpInterchange.getName());
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for node {}", setUpInterchange.getName(), e);
