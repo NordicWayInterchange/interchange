@@ -7,14 +7,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import static no.vegvesen.ixn.MessageProperties.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -129,9 +133,35 @@ public class InterchangeAppTest {
         when(textMessage.getStringProperty(WHAT)).thenReturn("Obstructions");
         when(textMessage.getStringProperty(WHO)).thenReturn("Bouvet Island Traffic Agency");
         when(textMessage.getDoubleProperty(any())).thenReturn(1.0d);
+        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(WHO, WHAT)));
         when(geoLookup.getCountries(anyDouble(), anyDouble())).thenReturn(Collections.singletonList("NO"));
 
         app.receiveMessage(textMessage);
         verify(producer, times(1)).sendMessage(eq(InterchangeApp.NWEXCHANGE), any(IxnMessage.class));
     }
+
+    @Test
+    public void receivedValidTextMessageWithExtraHeadersIsSentToExchange() throws JMSException{
+        TextMessage textMessage = mock(TextMessage.class);
+        when(textMessage.getText()).thenReturn("fisk");
+        String otherHeader = "otherHeader";
+        when(textMessage.getPropertyNames()).thenReturn(Collections.enumeration(Arrays.asList(WHAT, WHO, LAT, LON, otherHeader)));
+        when(textMessage.getStringProperty(WHAT)).thenReturn("Obstructions");
+        when(textMessage.getStringProperty(WHO)).thenReturn("Bouvet Island Traffic Agency");
+        when(textMessage.getStringProperty(otherHeader)).thenReturn("other value");
+        when(textMessage.getDoubleProperty(any())).thenReturn(1.0d);
+        when(geoLookup.getCountries(anyDouble(), anyDouble())).thenReturn(Collections.singletonList("NO"));
+
+        ArgumentCaptor<IxnMessage> sentMessage = ArgumentCaptor.forClass(IxnMessage.class);
+
+        app.receiveMessage(textMessage);
+
+        verify(producer, times(1)).sendMessage(eq(InterchangeApp.NWEXCHANGE), sentMessage.capture());
+        Map<String, String> otherStringAttributes = sentMessage.getValue().getOtherStringAttributes();
+        assertThat(otherStringAttributes).containsKey(otherHeader);
+        assertThat(otherStringAttributes).doesNotContainKey("other value");
+        assertThat(otherStringAttributes).doesNotContainKey(LAT);
+        assertThat(otherStringAttributes).doesNotContainKey(LON);
+    }
+
 }

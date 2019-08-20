@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.model;
 
+import no.vegvesen.ixn.MessageProperties;
+
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static no.vegvesen.ixn.MessageProperties.*;
 
@@ -21,6 +21,7 @@ public class IxnMessage {
     private List<String> countries = new ArrayList<>();
     private String how;
     private String when;
+    private Map<String, String> otherStringAttributes = new HashMap<>();
 
     public IxnMessage(TextMessage textMessage) throws JMSException {
         this(textMessage.getStringProperty(WHO),
@@ -37,6 +38,15 @@ public class IxnMessage {
         String when = textMessage.getStringProperty(WHEN);
         if (when != null) {
             this.when = when;
+        }
+
+        Enumeration propertyNames = textMessage.getPropertyNames();
+        while (propertyNames.hasMoreElements()) {
+            String propertyName = (String) propertyNames.nextElement();
+            String propertyValue = textMessage.getStringProperty(propertyName);
+            if (!MessageProperties.isKnownProperty(propertyName) && propertyValue != null) {
+                this.addOtherStringAttribute(propertyName, propertyValue);
+            }
         }
     }
 
@@ -115,5 +125,13 @@ public class IxnMessage {
 
     public String getWhen() {
         return when;
+    }
+
+    public Map<String, String> getOtherStringAttributes() {
+        return this.otherStringAttributes;
+    }
+
+    public void addOtherStringAttribute(String name, String value) {
+        this.otherStringAttributes.put(name, value);
     }
 }

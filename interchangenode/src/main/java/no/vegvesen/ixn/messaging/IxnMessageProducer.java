@@ -67,6 +67,11 @@ public class IxnMessageProducer {
 					if (message.getWhen() != null) {
 						outgoingMessage.setStringProperty(WHEN, message.getWhen());
 					}
+					for (String stringAttribute : message.getOtherStringAttributes().keySet()) {
+						String value = message.getOtherStringAttributes().get(stringAttribute);
+						logger.debug("Other string attribute {} value {}", stringAttribute, value);
+						outgoingMessage.setStringProperty(stringAttribute, value);
+					}
 					long expiration = message.getExpiration();
 					logger.debug("message expire time " + expiration);
 					outgoingMessage.setJMSExpiration(expiration);

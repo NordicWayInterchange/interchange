@@ -19,6 +19,7 @@ public class TestIxnMessageConsumer {
 		System.out.println("now         : " + now);
 		System.out.println("latency : " + (now - textMessage.getJMSDeliveryTime()));
 		System.out.println("where1: " + textMessage.getStringProperty("where1") );
+		System.out.println("type: " + textMessage.getStringProperty("type"));
 	}
 
 }

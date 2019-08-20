@@ -16,7 +16,7 @@ import java.util.Collections;
  * This test is run with profile "62" and uses ports in the 62...-series.
  * The amqp-url, username and password is specified in the application-62.properties.
  *
- * @See AccessControlIT uses separate user client connections.
+ * See AccessControlIT uses separate user client connections.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -42,6 +42,7 @@ public class InterchangeAppIT {
 				Collections.singletonList("traffic jam"),
 				"jam, jam - spam, spam");
 		message.setCountries(Collections.singletonList("no"));
+		message.addOtherStringAttribute("type", "Accident");
 		producer.sendMessage("onramp", message);
 		try {
 			Thread.sleep(2000);
