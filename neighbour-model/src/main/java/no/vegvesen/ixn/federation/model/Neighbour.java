@@ -18,7 +18,7 @@ import java.util.Set;
 @Table(name = "neighbours", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_neighbour_name"))
 public class Neighbour {
 
-private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
+	private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
 	private static final String DEFAULT_CONTROL_CHANNEL_PROTOCOL = "https";
 	private static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 
@@ -56,7 +56,7 @@ private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
 	}
 
 	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn) {
-		this.name = name;
+		this.setName(name);
 		this.capabilities = capabilities;
 		this.subscriptionRequest = subscriptions;
 		this.fedIn = fedIn;
@@ -67,6 +67,9 @@ private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
 	}
 
 	public void setName(String name) {
+		if (name != null && name.endsWith(".")) {
+			throw new DiscoveryException(String.format("Server name '%s' shall not end with \".\"", name));
+		}
 		this.name = name;
 	}
 
