@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.api.v1_0;
 
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Self;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +48,14 @@ public class CapabilityTransformer {
 		capabilityApi.setName(serviceProvider.getName());
 		capabilityApi.setCapabilities(serviceProvider.getCapabilities().getDataTypes());
 
+		return capabilityApi;
+	}
+
+	public CapabilityApi selfToCapabilityApi(Self self){
+
+		CapabilityApi capabilityApi = new CapabilityApi();
+		capabilityApi.setName(self.getName());
+		capabilityApi.setCapabilities(self.getLocalCapabilities());
 		return capabilityApi;
 	}
 }
