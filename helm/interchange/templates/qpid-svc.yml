@@ -16,7 +16,7 @@ spec:
   type: ClusterIP
   ports:
   - name: amqp
-    port: {{ .Values.self.message_channel_port }}
+    port: 5672
     targetPort: amqp
 
 ---
@@ -36,8 +36,8 @@ spec:
     release: {{ .Release.Name }}
   ports:
   - name: amqps
-    port: {{ .Values.self.secure_message_channel_port }}
+    port: 5671
     targetPort: amqps
   - name: http-qpid-gui
-    port: {{ .Values.qpid.gui_port }}
+    port: 8080
     targetPort: http-qpid-gui

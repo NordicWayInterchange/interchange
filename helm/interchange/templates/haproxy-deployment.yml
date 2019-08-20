@@ -26,9 +26,9 @@ spec:
         image: haproxy:latest
         ports:
         - name: amqps
-          containerPort: {{ .Values.self.secure_message_channel_port }}
+          containerPort: 5671
         - name: http-qpid-gui
-          containerPort: {{ .Values.qpid.gui_port }}
+          containerPort: 8080
         - name: https-control
           containerPort: {{ .Values.self.control_channel_port }}
         volumeMounts:

@@ -28,11 +28,11 @@ spec:
         image: "{{ .Values.qpid.image.repository }}:{{ .Values.qpid.image.tag}}"
         ports:
         - name: amqp
-          containerPort: {{ .Values.self.message_channel_port }}
+          containerPort: 5672
         - name: amqps
-          containerPort: {{ .Values.self.secure_message_channel_port }}
+          containerPort: 5671
         - name: http-qpid-gui
-          containerPort: {{ .Values.qpid.gui_port }}
+          containerPort: 8080
         env:
         - name: SERVER_CERTIFICATE_FILE
           value: /secure/{{ .Values.qpid.server_certificate_file }}
