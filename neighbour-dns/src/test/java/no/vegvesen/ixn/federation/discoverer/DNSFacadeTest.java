@@ -40,7 +40,8 @@ public class DNSFacadeTest {
 	public void ericssonPresent() {
 		Neighbour ericsson = null;
 		for (Neighbour neighbour : dnsFacade.getNeighbours()) {
-			if (neighbour.getName().equals("ericsson.itsNeighbour.eu")){
+
+			if (neighbour.getName().equals("ericsson.itsinterchange.eu")){
 				ericsson = neighbour;
 			}
 		}
