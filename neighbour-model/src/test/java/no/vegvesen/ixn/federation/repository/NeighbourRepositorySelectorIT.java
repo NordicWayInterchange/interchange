@@ -74,7 +74,7 @@ public class NeighbourRepositorySelectorIT {
 		ericsson.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> getInterchangeForSubscriptionRequest = neighbourRepository.findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		List<Neighbour> getInterchangeForSubscriptionRequest = neighbourRepository.findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeForSubscriptionRequest));
 	}
@@ -132,7 +132,7 @@ public class NeighbourRepositorySelectorIT {
 		Neighbour ericssonA = new Neighbour("ericsson-5-A", capabilities, null, fedin);
 		neighbourRepository.save(ericssonA);
 
-		List<Neighbour> getInterchangeWithRequestedSubscriptionsInFedIn = neighbourRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(
+		List<Neighbour> getInterchangeWithRequestedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
 				Subscription.SubscriptionStatus.ACCEPTED, Subscription.SubscriptionStatus.REQUESTED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeWithRequestedSubscriptionsInFedIn));
@@ -152,7 +152,7 @@ public class NeighbourRepositorySelectorIT {
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> getInterchangesWithFailedSubscriptionInFedIn = neighbourRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED);
+		List<Neighbour> getInterchangesWithFailedSubscriptionInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedSubscriptionInFedIn));
 	}

@@ -48,7 +48,6 @@ public class Self {
 	}
 
 	public void setLocalCapabilities(Set<DataType> localCapabilities) {
-		this.localCapabilities.clear();
 		if (localCapabilities != null) {
 			this.localCapabilities.addAll(localCapabilities);
 		}
@@ -59,7 +58,6 @@ public class Self {
 	}
 
 	public void setLocalSubscriptions(Set<Subscription> localSubscriptions) {
-		this.localSubscriptions.clear();
 		if(localSubscriptions != null){
 			this.localSubscriptions = localSubscriptions;
 		}
@@ -84,7 +82,9 @@ public class Self {
 	@Override
 	public String toString() {
 		return "Self{" +
-				"localCapabilities=" + localCapabilities +
+				"self_id=" + self_id +
+				", name='" + name + '\'' +
+				", localCapabilities=" + localCapabilities +
 				", localSubscriptions=" + localSubscriptions +
 				", lastUpdatedLocalCapabilities=" + lastUpdatedLocalCapabilities +
 				", lastUpdatedLocalSubscriptions=" + lastUpdatedLocalSubscriptions +
