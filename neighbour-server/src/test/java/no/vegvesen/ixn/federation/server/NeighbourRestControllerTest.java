@@ -6,15 +6,16 @@ import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.InterchangeRepository;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -42,23 +43,25 @@ public class NeighbourRestControllerTest {
 
 	private MockMvc mockMvc;
 
-	@Mock
-	InterchangeRepository interchangeRepository;
+	// Mocks
+	private NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
+	private ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
+	private SelfRepository selfRepository = mock(SelfRepository.class);
+	private DNSFacade dnsFacade = mock(DNSFacade.class);
 
-	@Mock
-	ServiceProviderRepository serviceProviderRepository;
+	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
+	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
-	@Mock
-	CapabilityTransformer capabilityTransformer;
-
-	@Mock
-	SubscriptionRequestTransformer subscriptionRequestTransformer;
-
-	@Mock
-	DNSFacade dnsFacade;
-
-	@InjectMocks
-	private NeighbourRestController neighbourRestController;
+	@Spy
+	private NeighbourRestController neighbourRestController = new NeighbourRestController(
+			neighbourRepository,
+			serviceProviderRepository,
+			selfRepository,
+			capabilityTransformer,
+			subscriptionTransformer,
+			subscriptionRequestTransformer,
+			dnsFacade );
 
 	private String subscriptionRequestPath = "/subscription";
 	private String capabilityExchangePath = "/capabilities";
@@ -84,30 +87,22 @@ public class NeighbourRestControllerTest {
 
 	@Test
 	public void postingCapabilitiesReturnsStatusCreated() throws Exception {
-		mockCertificate("bouvet");
+		mockCertificate("ericsson");
 
-		// Mock incoming interchange to be result of conversion from CapabilityApi object to Interchange by server.
-		Interchange bouvet = new Interchange();
-		bouvet.setName("bouvet");
-		DataType bouvetDataType = new DataType("datex2;1.0", "NO", "Obstruction");
-		Capabilities bouvetCapabilities = new Capabilities();
-		bouvetCapabilities.setDataTypes(Collections.singleton(bouvetDataType));
-		bouvet.setCapabilities(bouvetCapabilities);
-		doReturn(bouvet).when(capabilityTransformer).capabilityApiToInterchange(any(CapabilityApi.class));
+		// Mock incoming capabiity API
+		CapabilityApi ericsson = new CapabilityApi();
+		ericsson.setName("ericsson");
+		DataType ericssonDataType = new DataType("datex2;1.0", "NO", "Obstruction");
+		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
-		// Create capability api object to send to the server
-		CapabilityApi capabilityApiToServer = new CapabilityApi(bouvet.getName(), bouvet.getCapabilities().getDataTypes());
-		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApiToServer);
-
-
-		// Mock CapabilityApi object returned from the server
-		CapabilityApi capabilityApi = new CapabilityApi("bouvet", Collections.singleton(bouvetDataType));
-		doReturn(capabilityApi).when(capabilityTransformer).interchangeToCapabilityApi(any(Interchange.class));
+		// Create JSON string of capability api object to send to the server
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		// Mock dns lookup
-		List<Interchange> dnsReturn = Arrays.asList(bouvet);
+		Neighbour ericssonNeighbour = new Neighbour();
+		ericssonNeighbour.setName("ericsson");
+		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
 		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
-
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -123,21 +118,18 @@ public class NeighbourRestControllerTest {
 		expectedException.expectCause(isA(DiscoveryException.class));
 
 		// Mocking the incoming certificate
-		mockCertificate("unknowninterchange");
+		mockCertificate("unknownNeighbour");
 
-		// Mock incoming interchange to be result of conversion from CapabilityApi object to Interchange by server.
-		Interchange unknowninterchange = new Interchange();
-		unknowninterchange.setName("unknowninterchange");
-		DataType bouvetDataType = new DataType("datex2;1.0", "NO", "Obstruction");
-		Capabilities unknownCapabilities = new Capabilities();
-		unknownCapabilities.setDataTypes(Collections.singleton(bouvetDataType));
-		unknowninterchange.setCapabilities(unknownCapabilities);
-		doReturn(unknowninterchange).when(capabilityTransformer).capabilityApiToInterchange(any(CapabilityApi.class));
+		// Mock the incoming API object.
+		CapabilityApi unknownNeighbour = new CapabilityApi();
+		unknownNeighbour.setName("unknownNeighbour");
+		unknownNeighbour.setCapabilities(Collections.singleton(new DataType("datex2;1.0", "NO", "Obstruction")));
+
+		// Mock response from DNS facade on Server
 		doReturn(Collections.emptyList()).when(dnsFacade).getNeighbours();
 
 		// Create capability api object to send to the server
-		CapabilityApi capabilityApiToServer = new CapabilityApi(unknowninterchange.getName(), unknowninterchange.getCapabilities().getDataTypes());
-		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApiToServer);
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(unknownNeighbour);
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -149,31 +141,27 @@ public class NeighbourRestControllerTest {
 
 	@Test
 	public void postingSubscriptionRequestReturnsStatusAccepted() throws Exception {
-		mockCertificate("bouvet");
+		mockCertificate("ericsson");
 
-		// Mock interchange object to be result of converting SubscriptionRequestApi object to Interchange by server.
-		Interchange bouvet = new Interchange();
-		bouvet.setName("bouvet");
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
-		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
-		bouvet.setSubscriptionRequest(subscriptionRequest);
-		doReturn(bouvet).when(subscriptionRequestTransformer).subscriptionRequestApiToInterchange(any(SubscriptionRequestApi.class));
 
-		// Mock subscription api object sent to server.
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi(bouvet.getName(), bouvet.getSubscriptionRequest().getSubscriptions());
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+		// Create incoming subscription request api objcet
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
+		ericsson.setName("ericsson");
+		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("where LIKE 'FI'", "", Subscription.SubscriptionStatus.REQUESTED)));
 
-		// Mock saving interchange to interchange repository
-		Interchange updatedInterchange = new Interchange();
-		updatedInterchange.setName("bouvet");
+		// Convert to JSON
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
+
+		// Mock saving Neighbour to Neighbour repository
+		Neighbour updatedNeighbour = new Neighbour();
+		updatedNeighbour.setName("ericsson");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
-		updatedInterchange.setCapabilities(capabilities);
-		Subscription firstSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
-		firstSubscription.setPath("/bouvet/subscription/1");
+		updatedNeighbour.setCapabilities(capabilities);
+		Subscription firstSubscription = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
+		firstSubscription.setPath("/ericsson/subscription/1");
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
-		updatedInterchange.setSubscriptionRequest(returnedSubscriptionRequest);
-		doReturn(updatedInterchange).when(interchangeRepository).save(any(Interchange.class));
+		updatedNeighbour.setSubscriptionRequest(returnedSubscriptionRequest);
+		doReturn(updatedNeighbour).when(neighbourRepository).save(any(Neighbour.class));
 
 
 		mockMvc.perform(post(subscriptionRequestPath)
@@ -189,19 +177,13 @@ public class NeighbourRestControllerTest {
 		mockCertificate("bouvet");
 		expectedException.expectCause(isA(CNAndApiObjectMismatchException.class));
 
+		// Create incoming capability api object.
+		CapabilityApi ericsson = new CapabilityApi();
+		ericsson.setName("ericsson");
+		ericsson.setCapabilities(Collections.singleton(new DataType("datex2;1.0", "NO", "Obstruction")));
 
-		// Mock incoming interchange to be result of conversion from CapabilityApi object to Interchange by server.
-		Interchange bouvet = new Interchange();
-		bouvet.setName("ericsson");
-		DataType bouvetDataType = new DataType("datex2;1.0", "NO", "Obstruction");
-		Capabilities bouvetCapabilities = new Capabilities();
-		bouvetCapabilities.setDataTypes(Collections.singleton(bouvetDataType));
-		bouvet.setCapabilities(bouvetCapabilities);
-
-		// Create capability api object to send to the server
-		CapabilityApi capabilityApiToServer = new CapabilityApi(bouvet.getName(), bouvet.getCapabilities().getDataTypes());
-		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApiToServer);
-
+		// Convert to JSON
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
