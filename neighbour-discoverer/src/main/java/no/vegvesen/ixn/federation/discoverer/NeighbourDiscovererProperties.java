@@ -13,6 +13,7 @@ public class NeighbourDiscovererProperties {
 	private String subscriptionRequestInitialDelay = "10000";
 	private String subscriptionPollUpdateInterval = "15000";
 	private String subscriptionPollInitialDelay = "20000";
+	private String updatedServiceProviderCheckInterval = "20000";
 	private String dnsLookupInterval = "15000";
 	private String dnsInitialStartDelay = "5000";
 	private int subscriptionPollingNumberOfAttempts = 7;
@@ -91,6 +92,14 @@ public class NeighbourDiscovererProperties {
 		this.subscriptionPollInitialDelay = subscriptionPollInitialDelay;
 	}
 
+	public String getUpdatedServiceProviderCheckInterval() {
+		return updatedServiceProviderCheckInterval;
+	}
+
+	public void setUpdatedServiceProviderCheckInterval(String updatedServiceProviderCheckInterval) {
+		this.updatedServiceProviderCheckInterval = updatedServiceProviderCheckInterval;
+	}
+
 	@Override
 	public String toString() {
 		return "NeighbourDiscovererProperties{" +
@@ -100,6 +109,7 @@ public class NeighbourDiscovererProperties {
 				", subscriptionRequestInitialDelay='" + subscriptionRequestInitialDelay + '\'' +
 				", subscriptionPollUpdateInterval='" + subscriptionPollUpdateInterval + '\'' +
 				", subscriptionPollInitialDelay='" + subscriptionPollInitialDelay + '\'' +
+				", updatedServiceProviderCheckInterval='" + updatedServiceProviderCheckInterval + '\'' +
 				", dnsLookupInterval='" + dnsLookupInterval + '\'' +
 				", dnsInitialStartDelay='" + dnsInitialStartDelay + '\'' +
 				", subscriptionPollingNumberOfAttempts=" + subscriptionPollingNumberOfAttempts +

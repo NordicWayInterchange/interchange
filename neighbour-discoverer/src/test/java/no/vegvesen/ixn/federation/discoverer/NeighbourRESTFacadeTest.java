@@ -30,7 +30,7 @@ public class NeighbourRESTFacadeTest {
 	private ObjectMapper mapper = new ObjectMapper();
 	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
-	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer();
+	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
 	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(
 			restTemplate,
@@ -39,13 +39,13 @@ public class NeighbourRESTFacadeTest {
 			subscriptionRequestTransformer,
 			mapper);
 
-	private Interchange ericsson;
+	private Neighbour ericsson;
 
 	private MockRestServiceServer server;
 
 	@Before
 	public void setUp() {
-		ericsson = new Interchange();
+		ericsson = new Neighbour();
 		ericsson.setName("ericsson.itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
 
@@ -75,7 +75,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Interchange response = neighbourRESTFacade.postCapabilities(ericsson, ericsson);
+		Neighbour response = neighbourRESTFacade.postCapabilities(ericsson, ericsson);
 
 		assertThat(response.getName()).isEqualTo(capabilityApi.getName());
 		assertThat(response.getCapabilities().getDataTypes()).hasSize(1);
@@ -90,8 +90,10 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfSubscriptionRequestReturnsSubscriptionRequest() throws Exception{
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("remote server", Collections.singleton(subscription) );
+		SubscriptionApi subscriptionApi = new SubscriptionApi();
+		subscriptionApi.setSelector("where LIKE 'NO'");
+		subscriptionApi.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("remote server", Collections.singleton(subscriptionApi) );
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionRequestApi);
 
@@ -107,8 +109,8 @@ public class NeighbourRESTFacadeTest {
 		Iterator<Subscription> subscriptions = response.getSubscriptions().iterator();
 		Subscription subscriptionInSubscriptionRequest = subscriptions.next();
 
-		assertThat(subscriptionInSubscriptionRequest.getSelector()).isEqualTo(subscription.getSelector());
-		assertThat(subscriptionInSubscriptionRequest.getSubscriptionStatus()).isEqualTo(subscription.getSubscriptionStatus());
+		assertThat(subscriptionInSubscriptionRequest.getSelector()).isEqualTo(subscriptionApi.getSelector());
+		assertThat(subscriptionInSubscriptionRequest.getSubscriptionStatus()).isEqualTo(subscriptionApi.getStatus());
 	}
 
 	@Test

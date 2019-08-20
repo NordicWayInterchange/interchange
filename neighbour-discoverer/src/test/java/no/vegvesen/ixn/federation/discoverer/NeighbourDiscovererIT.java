@@ -23,11 +23,13 @@ public abstract class NeighbourDiscovererIT {
 	@Test
 	public void verifyCorrectRepresentationInRemoteDatabase(){
 
-		neighbourDiscoverer.checkForNewInterchanges();
+		neighbourDiscoverer.checkForNewNeighbours();
 
+		/*
 		neighbourDiscoverer.capabilityExchange();
 
 		neighbourDiscoverer.subscriptionRequest();
+		*/
 
 
 		try {

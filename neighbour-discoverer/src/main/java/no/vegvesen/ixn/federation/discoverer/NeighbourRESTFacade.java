@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.slf4j.Logger;
@@ -43,19 +43,19 @@ public class NeighbourRESTFacade {
 		this.mapper = mapper;
 	}
 
-	Interchange postCapabilities(Interchange discoveringInterchange, Interchange neighbour) {
+	Neighbour postCapabilities(Neighbour discoveringNeighbour, Neighbour neighbour) {
 
 		String url = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		logger.debug("Posting capabilities to {} on URL: {}", neighbour.getName(), url);
-		logger.debug("Representation of discovering interchange: {}", discoveringInterchange.toString());
+		logger.debug("Representation of discovering Neighbour: {}", discoveringNeighbour.toString());
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		// Convert discovering interchange to CapabilityApi object and post to neighbour
-		CapabilityApi discoveringInterchangeToCapabilityApi = capabilityTransformer.interchangeToCapabilityApi(discoveringInterchange);
-		HttpEntity<CapabilityApi> entity = new HttpEntity<>(discoveringInterchangeToCapabilityApi, headers);
-		logger.debug("Posting capability api object: {}", discoveringInterchangeToCapabilityApi.toString());
+		// Convert discovering Neighbour to CapabilityApi object and post to neighbour
+		CapabilityApi discoveringNeighbourToCapabilityApi = capabilityTransformer.neighbourToCapabilityApi(discoveringNeighbour);
+		HttpEntity<CapabilityApi> entity = new HttpEntity<>(discoveringNeighbourToCapabilityApi, headers);
+		logger.debug("Posting capability api object: {}", discoveringNeighbourToCapabilityApi.toString());
 		logger.debug("Posting HttpEntity: {}", entity.toString());
 		logger.debug("Posting Headers: {}", headers.toString());
 
@@ -68,7 +68,7 @@ public class NeighbourRESTFacade {
 
 			logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi.toString());
 
-			return capabilityTransformer.capabilityApiToInterchange(capabilityApi);
+			return capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
 
 		}catch(HttpServerErrorException | HttpClientErrorException e){
 
@@ -89,7 +89,7 @@ public class NeighbourRESTFacade {
 	}
 
 
-	SubscriptionRequest postSubscriptionRequest(Interchange discoveringInterchange, Interchange neighbour) {
+	SubscriptionRequest postSubscriptionRequest(Neighbour discoveringNeighbour, Neighbour neighbour) {
 
 		String url = neighbour.getControlChannelUrl(SUBSCRIPTION_PATH);
 		logger.debug("Posting subscription request to {} on URL: {}", neighbour.getName(), url);
@@ -98,7 +98,7 @@ public class NeighbourRESTFacade {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.interchangeToSubscriptionRequestApi(discoveringInterchange);
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(discoveringNeighbour);
 		HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
 		logger.debug("Posting Subscription request api object: {}", subscriptionRequestApi.toString());
 		logger.debug("Posting HttpEntity: {}", entity.toString());
@@ -113,20 +113,20 @@ public class NeighbourRESTFacade {
 			logger.debug("Received headers: {}", response.getHeaders().toString());
 
 			SubscriptionRequestApi responseApi = response.getBody();
-			Interchange responseInterchange = subscriptionRequestTransformer.subscriptionRequestApiToInterchange(responseApi);
+			Neighbour responseNeighbour = subscriptionRequestTransformer.subscriptionRequestApiToNeighbour(responseApi);
 
-			if (!discoveringInterchange.getSubscriptionRequest().getSubscriptions().isEmpty() && responseInterchange.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+			if (!discoveringNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty() && responseNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
 				// we posted a non empty subscription request, but received an empty subscription request.
 				logger.error("Posted non empty subscription request to neighbour but received empty subscription request.");
 				throw new SubscriptionRequestException("Subscription request failed. Posted non-empty subscription request, but received response with empty subscription request from neighbour.");
 			}
 
-			responseInterchange.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+			responseNeighbour.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
 			logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
 			logger.debug("Received response object: {}", responseApi.toString());
 
-			return responseInterchange.getSubscriptionRequest();
+			return responseNeighbour.getSubscriptionRequest();
 
 		}catch(HttpClientErrorException | HttpServerErrorException e){
 
@@ -146,7 +146,7 @@ public class NeighbourRESTFacade {
 		}
 	}
 
-	Subscription pollSubscriptionStatus(Subscription subscription, Interchange neighbour) {
+	Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour) {
 
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
 
