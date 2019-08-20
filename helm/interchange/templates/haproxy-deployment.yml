@@ -25,14 +25,12 @@ spec:
       - name: haproxy
         image: haproxy:latest
         ports:
-        - name: amqp
-          containerPort: 5672
         - name: amqps
           containerPort: 5671
         - name: http-qpid-gui
           containerPort: 8080
         - name: https-control
-          containerPort: 443
+          containerPort: {{ .Values.self.control_channel_port }}
         volumeMounts:
         - name: config
           mountPath: /usr/local/etc/haproxy/

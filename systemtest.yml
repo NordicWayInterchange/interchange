@@ -122,10 +122,12 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
       - SERVER_NAME=local.itsinterchange.eu
-      - NODE_PROVIDER_NAME=local.itsinterchange.eu # "my name"
-      - DNS_TYPE=prod
       - DOMAIN_NAME=itsinterchange.eu
       - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
     networks:
     - testing_net
     dns: 172.28.1.1
@@ -143,11 +145,11 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
       - BASE_URL=https://local.itsinterchange.eu
-      - VHOST_NAME=local.itsinterchange.eu
-      - TRUSTSTORE_NAME=/jks/keys/truststore.jks
-      - TRUSTSTORE_PASSWORD=password
-      - KEYSTORE_NAME=/jks/keys/local.itsinterchange.eu.p12
-      - KEYSTORE_PASSWORD=password
+      - SERVER_NAME=local.itsinterchange.eu
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
     networks:
     - testing_net
@@ -166,10 +168,13 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
       - SERVER_NAME=local.itsinterchange.eu
-      - NODE_PROVIDER_NAME=local.itsinterchange.eu # "my name"
-      - DNS_TYPE=prod
       - DOMAIN_NAME=itsinterchange.eu
       - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_PASSWORD=password
     dns: 172.28.1.1
     networks:
     - testing_net
@@ -187,10 +192,10 @@ services:
     - "./tmp:/jks"
     environment:
     - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
-    - KEY_STORE_FILE=/jks/keys/local.itsinterchange.eu.p12
+    - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE_PATH=/jks/keys/truststore.jks
+    - TRUST_STORE=/jks/keys/truststore.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=local.itsinterchange.eu
@@ -273,10 +278,12 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
       - SERVER_NAME=remote.itsinterchange.eu
-      - NODE_PROVIDER_NAME=remote.itsinterchange.eu # "my name"
-      - DNS_TYPE=prod
       - DOMAIN_NAME=itsinterchange.eu
       - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
     networks:
       - testing_net
     dns: 172.28.1.1
@@ -295,10 +302,14 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
       - SERVER_NAME=remote.itsinterchange.eu
-      - NODE_PROVIDER_NAME=remote.itsinterchange.eu # "my name"
-      - DNS_TYPE=prod
+      #- NODE_PROVIDER_NAME=remote.itsinterchange.eu # "my name"
       - DOMAIN_NAME=itsinterchange.eu
       - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_PASSWORD=password
     networks:
     - testing_net
     dns: 172.28.1.1
@@ -338,11 +349,11 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
       - BASE_URL=https://remote.itsinterchange.eu
-      - VHOST_NAME=remote.itsinterchange.eu
-      - TRUSTSTORE_NAME=/jks/keys/truststore.jks
-      - TRUSTSTORE_PASSWORD=password
-      - KEYSTORE_NAME=/jks/keys/remote.itsinterchange.eu.p12
-      - KEYSTORE_PASSWORD=password
+      - SERVER_NAME=remote.itsinterchange.eu
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
     networks:
     - testing_net
@@ -360,10 +371,10 @@ services:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - KEY_STORE_FILE=/jks/keys/remote.itsinterchange.eu.p12
+      - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_STORE_TYPE=PKCS12
-      - TRUST_STORE_PATH=/jks/keys/truststore.jks
+      - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=remote.itsinterchange.eu

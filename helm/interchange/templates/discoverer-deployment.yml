@@ -28,22 +28,28 @@ spec:
         - name: POSTGRES_URI
           value: jdbc:postgresql://{{ .Release.Name }}-database:5432/federation
         - name: SERVER_NAME
-          value: local.itsinterchange.eu
-        - name: NODE_PROVIDER_NAME
-          value: local.itsinterchange.eu
-        - name: DNS_TYPE
-          value: prod
+          value: {{ .Values.external_name | quote }}
         - name: DOMAIN_NAME
-          value: itsinterchange.eu
+          value: {{ .Values.self.domain_name | quote }}
         - name: CTRL_CHNL_PORT
-          value: {{ .Values.neighbour_discoverer.CTRL_CHNL_PORT | quote }}
+          value: {{ .Values.self.control_channel_port | quote }}
+        - name: TRUST_STORE
+          value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
+        - name: TRUST_STORE_PASSWORD
+          value: {{ .Values.self.trust_store_password | quote }}
+        - name: KEY_STORE
+          value: {{ .Values.self.secret_mount_path }}{{ .Values.self.key_store }}
+        - name: KEY_STORE_PASSWORD
+          value: {{ .Values.self.key_store_password | quote }}
+        - name: KEY_PASSWORD
+          value: {{ .Values.self.key_password | quote }}
         volumeMounts:
         - name: secure
-          mountPath: /jks/keys/
+          mountPath: {{ .Values.self.secret_mount_path | quote }}
         ports:
         - name: ctrl
-          containerPort: 443
+          containerPort: {{ .Values.self.control_channel_port }}
       volumes:
       - name: secure
         secret:
-          secretName: {{ required "must provide .Values.neighbour_discoverer.tls_secret_name" .Values.neighbour_discoverer.tls_secret_name }}
+          secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
