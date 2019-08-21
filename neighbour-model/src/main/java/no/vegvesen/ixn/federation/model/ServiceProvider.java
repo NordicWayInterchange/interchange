@@ -5,11 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "service_providers", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_spr_name"))
-public class ServiceProvider {
+public class ServiceProvider implements Subscriber {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sp_generator")
@@ -34,6 +33,7 @@ public class ServiceProvider {
 		this.name = name;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -58,12 +58,29 @@ public class ServiceProvider {
 		this.capabilities = capabilities;
 	}
 
+	@Override
 	public SubscriptionRequest getSubscriptionRequest() {
 		return subscriptionRequest;
 	}
 
+	@Override
 	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
 		this.subscriptionRequest = subscriptionRequest;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ServiceProvider that = (ServiceProvider) o;
+
+		return name.equals(that.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return name.hashCode();
 	}
 
 	@Override

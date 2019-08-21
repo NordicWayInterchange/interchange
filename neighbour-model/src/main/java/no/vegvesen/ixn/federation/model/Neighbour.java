@@ -16,13 +16,13 @@ import java.util.Set;
 
 @Entity
 @Table(name = "neighbours", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_neighbour_name"))
-public class Neighbour {
+public class Neighbour implements Subscriber {
 
 	private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
 	private static final String DEFAULT_CONTROL_CHANNEL_PROTOCOL = "https";
 	private static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 
-	static Logger logger = LoggerFactory.getLogger(Neighbour.class);
+	private static Logger logger = LoggerFactory.getLogger(Neighbour.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neighbour_generator")
@@ -62,6 +62,7 @@ public class Neighbour {
 		this.fedIn = fedIn;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -81,10 +82,12 @@ public class Neighbour {
 		this.capabilities = capabilities;
 	}
 
+	@Override
 	public SubscriptionRequest getSubscriptionRequest() {
 		return subscriptionRequest;
 	}
 
+	@Override
 	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
 		this.subscriptionRequest = subscriptionRequest;
 	}
