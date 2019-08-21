@@ -39,18 +39,28 @@ services:
     networks:
     - testing_net
 
-  local_db_filler:
-    build: ./test-data-helpers
-    environment:
-    - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
-    - DB_HELPER_TYPE=subscriber
-    container_name: local_db_filler
-    hostname: local_db_filler
+  local_onboard_server:
+    build: ./onboard-server
+    container_name: local_onboard_server
     depends_on:
-    - local_db
-    - federation-build
+      - local_db
+      - federation-build
+    ports:
+      - 32666:8797
+    volumes:
+    - "./tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - SERVER_NAME=local.itsinterchange.eu
+      - DOMAIN_NAME=itsinterchange.eu
+      - SP_CHNL_PORT=8797
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
     networks:
-    - testing_net
+      - testing_net
+
 
   local_interchange_app:
     build: ./interchangenode
@@ -83,7 +93,7 @@ services:
       timeout: 5s
       retries: 5
     ports:
-    - 8899:5432
+    - 6677:5432
     networks:
     - testing_net
 
@@ -160,7 +170,6 @@ services:
     depends_on:
       - local_db
       - federation-build
-      - local_db_filler
     links:
      - "remote_neighbour_server:remote.itsinterchange.eu"
     volumes:
@@ -216,16 +225,25 @@ services:
     networks:
     - testing_net
 
-  remote_db_filler:
-    build: ./test-data-helpers
-    environment:
-    - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-    - DB_HELPER_TYPE=provider
-    container_name: remote_db_filler
-    hostname: remote_db_filler
+  remote_onboard_server:
+    build: ./onboard-server
+    container_name: remote_onboard_server
     depends_on:
     - remote_db
     - federation-build
+    ports:
+    - 32555:8696
+    volumes:
+    - "./tmp:/jks"
+    environment:
+    - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
+    - SERVER_NAME=remote.itsinterchange.eu
+    - DOMAIN_NAME=itsinterchange.eu
+    - SP_CHNL_PORT=8696
+    - TRUST_STORE=/jks/keys/truststore.jks
+    - TRUST_STORE_PASSWORD=password
+    - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
+    - KEY_STORE_PASSWORD=password
     networks:
     - testing_net
 
@@ -260,7 +278,7 @@ services:
       timeout: 5s
       retries: 5
     ports:
-    - 6677:5432
+    - 6688:5432
     networks:
     - testing_net
 
@@ -294,7 +312,6 @@ services:
     depends_on:
       - remote_db
       - federation-build
-      - remote_db_filler
     links:
       - "local_neighbour_server:local.itsinterchange.eu"
     volumes:
@@ -381,14 +398,14 @@ services:
     networks:
     - testing_net
 
-  execute_test:
-    build: ./federation-st
-    volumes:
-    - "./tmp:/jks"
-    depends_on:
-    - remote_message_forwarder_app
-    networks:
-      - testing_net
+  #execute_test:
+   # build: ./federation-st
+    #volumes:
+    #- "./tmp:/jks"
+    #depends_on:
+    #- remote_message_forwarder_app
+    #networks:
+    #  - testing_net
 
 networks:
   testing_net:

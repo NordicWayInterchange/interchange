@@ -1,4 +1,4 @@
-FROM federation_build as build
+FROM federation-build:latest as build
 
 FROM java:8-alpine
 RUN apk add --no-cache bash
