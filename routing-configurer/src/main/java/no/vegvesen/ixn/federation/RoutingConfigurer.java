@@ -1,10 +1,9 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,30 +19,48 @@ public class RoutingConfigurer {
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
 	private final NeighbourRepository neighbourRepository;
+	private final ServiceProviderRepository serviceProviderRepository;
 	private final QpidClient qpidClient;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourRepository neighbourRepository, QpidClient qpidClient) {
+	public RoutingConfigurer(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, QpidClient qpidClient) {
 		this.neighbourRepository = neighbourRepository;
+		this.serviceProviderRepository = serviceProviderRepository;
 		this.qpidClient = qpidClient;
 	}
-
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForInterchangesToSetupRoutingFor() {
 		logger.debug("Checking for new nodes to setup routing");
 		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} nodes to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
-		for (Neighbour setUpInterchange : readyToSetupRouting) {
-			setupRoutingForNode(setUpInterchange);
+		for (Subscriber setUpInterchange : readyToSetupRouting) {
+			setupRouting(setUpInterchange);
 		}
 
 		logger.debug("Checking for nodes to tear down routing");
 		List<Neighbour> readyToTearDownRouting = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
-		for (Neighbour tearDownInterchange : readyToTearDownRouting) {
-			tearDownRoutingForNode(tearDownInterchange);
+		for (Subscriber tearDownInterchange : readyToTearDownRouting) {
+			tearDownRouting(tearDownInterchange);
 		}
 	}
+
+	@Scheduled(fixedRateString = "${routing-configurer.interval}")
+	public void checkForServiceProvidersToSetupRoutingFor() {
+		logger.debug("Checking for new service providers to setup routing");
+		List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		logger.debug("Found {} service providers to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
+		for (Subscriber setUpInterchange : readyToSetupRouting) {
+			setupRouting(setUpInterchange);
+		}
+
+		logger.debug("Checking for service providers to tear down routing");
+		List<Neighbour> readyToTearDownRouting = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
+		for (Neighbour tearDownInterchange : readyToTearDownRouting) {
+			tearDownRouting(tearDownInterchange);
+		}
+	}
+
 
 	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.add}")
 	private void setupUserInFederationGroup() {
@@ -85,27 +102,35 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void tearDownRoutingForNode(Neighbour tearDownInterchange) {
+	private void tearDownRouting(Subscriber subscriber) {
 		try {
-			logger.debug("Removing routing for node {}", tearDownInterchange.getName());
-			qpidClient.removeQueue(tearDownInterchange.getName());
-			logger.info("Removed routing for node {}", tearDownInterchange.getName());
-			tearDownInterchange.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
-			neighbourRepository.save(tearDownInterchange);
-			logger.debug("Saved node {} with subscription request status EMPTY", tearDownInterchange.getName());
+			logger.debug("Removing routing for node {}", subscriber.getName());
+			qpidClient.removeQueue(subscriber.getName());
+			logger.info("Removed routing for node {}", subscriber.getName());
+			subscriber.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+			saveSubscriber(subscriber);
+			logger.debug("Saved subscriber {} with subscription request status EMPTY", subscriber.getName());
 		} catch (Exception e) {
-			logger.error("Could not remove routing for node {}", tearDownInterchange.getName(), e);
+			logger.error("Could not remove routing for subscriber {}", subscriber.getName(), e);
 		}
 	}
 
-	private void setupRoutingForNode(Neighbour setUpInterchange) {
+	private void saveSubscriber(Subscriber subscriber) {
+		if (subscriber instanceof Neighbour)
+			neighbourRepository.save((Neighbour) subscriber);
+		else if (subscriber instanceof ServiceProvider) {
+			serviceProviderRepository.save((ServiceProvider) subscriber);
+		}
+	}
+
+	private void setupRouting(Subscriber setUpInterchange) {
 		try {
 			logger.debug("Setting up routing for node {}", setUpInterchange.getName());
 			SubscriptionRequest setUpSubscriptionRequest = qpidClient.setupRouting(setUpInterchange);
 			logger.info("Routing set up for node {}", setUpInterchange.getName());
 			setUpInterchange.setSubscriptionRequest(setUpSubscriptionRequest);
-			neighbourRepository.save(setUpInterchange);
-			logger.debug("Saved node {} with subscription request status ESTABLISHED", setUpInterchange.getName());
+			saveSubscriber(setUpInterchange);
+			logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", setUpInterchange.getName());
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for node {}", setUpInterchange.getName(), e);
 		}

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Subscriber;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.json.JSONArray;
@@ -68,7 +68,6 @@ public class QpidClient {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void updateBinding(String binding, String queueName, String bindingKey) {
 		JSONObject json = new JSONObject();
 		json.put("destination", queueName);
@@ -84,8 +83,7 @@ public class QpidClient {
 		postQpid(exchangeURL, jsonString, "/bind");
 	}
 
-	@SuppressWarnings("unchecked")
-	void createQueue(Neighbour interchange) {
+	void createQueue(Subscriber interchange) {
 		JSONObject json = new JSONObject();
 		json.put("name", interchange.getName());
 		json.put("durable", true);
@@ -119,7 +117,7 @@ public class QpidClient {
 		return null;
 	}
 
-	public SubscriptionRequest setupRouting(Neighbour toSetUp) {
+	public SubscriptionRequest setupRouting(Subscriber toSetUp) {
 		if (queueExists(toSetUp.getName())) {
 			unbindOldUnwantedBindings(toSetUp);
 		} else {
@@ -134,15 +132,14 @@ public class QpidClient {
 		return subscriptionRequest;
 	}
 
-	private void unbindOldUnwantedBindings(Neighbour interchange) {
+	private void unbindOldUnwantedBindings(Subscriber interchange) {
 		Set<String> unwantedBindKeys = getUnwantedBindKeys(interchange);
 		for (String unwantedBindKey : unwantedBindKeys) {
 			unbindBindKey(interchange, unwantedBindKey);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private void unbindBindKey(Neighbour interchange, String unwantedBindKey) {
+	private void unbindBindKey(Subscriber interchange, String unwantedBindKey) {
 		JSONObject json = new JSONObject();
 		json.put("destination", interchange.getName());
 		json.put("bindingKey", unwantedBindKey);
@@ -151,7 +148,7 @@ public class QpidClient {
 		postQpid(exchangeURL, jsonString, "/unbind");
 	}
 
-	private Set<String> getUnwantedBindKeys(Neighbour interchange) {
+	private Set<String> getUnwantedBindKeys(Subscriber interchange) {
 		Set<String> existingBindKeys = getQueueBindKeys(interchange.getName());
 		Set<String> wantedBindKeys = wantedBindings(interchange);
 		Set<String> unwantedBindKeys = new HashSet<>(existingBindKeys);
@@ -159,7 +156,7 @@ public class QpidClient {
 		return unwantedBindKeys;
 	}
 
-	private Set<String> wantedBindings(Neighbour interchange) {
+	private Set<String> wantedBindings(Subscriber interchange) {
 		Set<String> wantedBindings = new HashSet<>();
 		for (Subscription subscription : interchange.getSubscriptionRequest().getSubscriptions()) {
 			wantedBindings.add(bindKey(interchange, subscription));
@@ -167,7 +164,7 @@ public class QpidClient {
 		return wantedBindings;
 	}
 
-	private String bindKey(Neighbour interchange, Subscription subscription) {
+	private String bindKey(Subscriber interchange, Subscription subscription) {
 		return interchange.getName() + "-" + subscription.getSelector().hashCode();
 	}
 
