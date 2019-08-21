@@ -45,7 +45,6 @@ public class NeighbourRestControllerTest {
 
 	// Mocks
 	private NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
-	private ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
 	private SelfRepository selfRepository = mock(SelfRepository.class);
 	private DNSFacade dnsFacade = mock(DNSFacade.class);
 
@@ -56,7 +55,6 @@ public class NeighbourRestControllerTest {
 	@Spy
 	private NeighbourRestController neighbourRestController = new NeighbourRestController(
 			neighbourRepository,
-			serviceProviderRepository,
 			selfRepository,
 			capabilityTransformer,
 			subscriptionTransformer,
@@ -162,6 +160,12 @@ public class NeighbourRestControllerTest {
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		updatedNeighbour.setSubscriptionRequest(returnedSubscriptionRequest);
 		doReturn(updatedNeighbour).when(neighbourRepository).save(any(Neighbour.class));
+
+
+		// Mock response from DNS facade on Server
+		Neighbour ericssonNeighbour = new Neighbour();
+		ericssonNeighbour.setName("ericsson");
+		doReturn(Collections.singletonList(ericssonNeighbour)).when(dnsFacade).getNeighbours();
 
 
 		mockMvc.perform(post(subscriptionRequestPath)

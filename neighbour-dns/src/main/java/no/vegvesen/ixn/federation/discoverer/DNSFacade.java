@@ -30,7 +30,7 @@ public class DNSFacade {
 	// Returns a list of neighbours discovered through DNS lookup.
 	public List<Neighbour> getNeighbours() {
 
-		List<Neighbour> Neighbours = new ArrayList<>();
+		List<Neighbour> neighbours = new ArrayList<>();
 
 		// TODO: get control channel port nr from separate SRV lookup.
 
@@ -58,7 +58,7 @@ public class DNSFacade {
 				neighbour.setMessageChannelPort(messageChannelPort);
 				neighbour.setControlChannelPort(dnsProperties.getControlChannelPort());
 
-				Neighbours.add(neighbour);
+				neighbours.add(neighbour);
 				ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 				String json = ow.writeValueAsString(neighbour);
 				logger.debug("DNS lookup gave Neighbour: \n" + json);
@@ -68,7 +68,7 @@ public class DNSFacade {
 			logger.error("Error in DNSFacade", e);
 		}
 
-		return Neighbours;
+		return neighbours;
 	}
 
 }

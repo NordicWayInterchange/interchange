@@ -39,7 +39,6 @@ public class NeighbourRestController {
 	@Value("${interchange.node-provider.name}")
 	private String myName;
 	private NeighbourRepository neighbourRepository;
-	private ServiceProviderRepository serviceProviderRepository;
 	private SelfRepository selfRepository;
 	private CapabilityTransformer capabilityTransformer;
 	private SubscriptionTransformer subscriptionTransformer;
@@ -50,7 +49,6 @@ public class NeighbourRestController {
 
 	@Autowired
 	public NeighbourRestController(NeighbourRepository neighbourRepository,
-								   ServiceProviderRepository serviceProviderRepository,
 								   SelfRepository selfRepository,
 								   CapabilityTransformer capabilityTransformer,
 								   SubscriptionTransformer subscriptionTransformer,
@@ -58,7 +56,6 @@ public class NeighbourRestController {
 								   DNSFacade dnsFacade) {
 
 		this.neighbourRepository = neighbourRepository;
-		this.serviceProviderRepository = serviceProviderRepository;
 		this.selfRepository = selfRepository;
 		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
@@ -81,31 +78,31 @@ public class NeighbourRestController {
 	// Sets the status of all the subscriptions in the subscription request accordingly.
 	private Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
 
+		// Get local Service Provider capabilities.
 		Self self = getSelf();
-
 		Set<DataType> localCapabilities = self.getLocalCapabilities();
 
+		// Process the subscription request
 		for (Subscription neighbourSubscription : neighbourSubscriptionRequest) {
 
-			// Initial value is NO_OVERLAP.
-			// This value is updated if selector matches a data type or is illegal or not valid.
+			// The initial status of a subscription is NO_OVERLAP.
+			// This status is updated if the selector matches a local data type or is illegal or not valid.
 			neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NO_OVERLAP);
 
 			for (DataType localDataType : localCapabilities) {
 				try {
 					if (CapabilityMatcher.matches(localDataType, neighbourSubscription.getSelector())) {
-						// Subscription matches data type and everything is ok.
-						// Set subscription status requested.
+						// Subscription matches local data type - update status to ACCEPTED
 						neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
 					}
 				} catch (IllegalArgumentException e) {
-					// Illegal filter - filter always true
+					// The subscription has an illegal selector - selector always true
 					logger.error("Subscription had illegal selectors.", e);
 					logger.warn("Setting status of subscription to ILLEGAL");
 					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ILLEGAL);
 
 				} catch (ParseException e) {
-					// Selector not valid
+					// The subscription has an invalid selector
 					logger.error("Subscription has invalid selector.", e);
 					logger.warn("Setting status of subscription to NOT_VALID");
 					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NOT_VALID);
@@ -149,13 +146,13 @@ public class NeighbourRestController {
 		Neighbour neighbourToUpdate = neighbourRepository.findByName(incomingSubscriptionRequestNeighbour.getName());
 
 		if (neighbourToUpdate == null) {
-			// Neighbour does not exist in DB. Set capabilities status UNKNOWN. TODO: lookup neighbour in DNS. If they don't exist in the dns, don't save them.
+			// Neighbour does not exist in DB. Set capabilities status UNKNOWN.
 			logger.info("Subscription request was from unknown neighbour");
 
-			neighbourToUpdate = incomingSubscriptionRequestNeighbour;
+			// Perform DNS lookup on neighbour and set capabilities status to UNKNOWN
+			neighbourToUpdate = findNeighbourInDns(incomingSubscriptionRequestNeighbour);
 			neighbourToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
 			logger.info("Setting capabilities status of neighbour to UNKNOWN.");
-			// TODO: DNS lookup
 		}
 
 		//Check if subscription request is empty or not
@@ -251,23 +248,23 @@ public class NeighbourRestController {
 		Neighbour neighbour = capabilityTransformer.capabilityApiToNeighbour(neighbourCapabilities);
 
 		logger.info("Looking up neighbour in DB.");
-		Neighbour NeighbourToUpdate = neighbourRepository.findByName(neighbour.getName());
+		Neighbour neighbourToUpdate = neighbourRepository.findByName(neighbour.getName());
 
-		if (NeighbourToUpdate == null) {
+		if (neighbourToUpdate == null) {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
-			NeighbourToUpdate = findNeighbourInDns(neighbour);
+			neighbourToUpdate = findNeighbourInDns(neighbour);
 		} else {
 			logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
-			NeighbourToUpdate.setCapabilities(neighbour.getCapabilities());
+			neighbourToUpdate.setCapabilities(neighbour.getCapabilities());
 		}
 
 		// Update status of capabilities to KNOWN, and set status of fedIn to EMPTY
 		// to trigger subscription request from client side.
-		NeighbourToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		NeighbourToUpdate.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		neighbourToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+		neighbourToUpdate.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
-		logger.info("Saving updated Neighbour: {}", NeighbourToUpdate.toString());
-		neighbourRepository.save(NeighbourToUpdate);
+		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
+		neighbourRepository.save(neighbourToUpdate);
 
 		// Post response
 		Self self = getSelf();

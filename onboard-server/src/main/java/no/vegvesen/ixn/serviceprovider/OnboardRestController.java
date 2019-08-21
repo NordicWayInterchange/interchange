@@ -19,16 +19,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
 
 @RestController
 public class OnboardRestController {
@@ -54,7 +53,8 @@ public class OnboardRestController {
 
 	}
 
-	void checkIfCommonNameMatchesNameInApiObject(String apiName) {
+
+	private void checkIfCommonNameMatchesNameInApiObject(String apiName) {
 
 		Object principal = SecurityContextHolder.getContext().getAuthentication();
 		String commonName = ((Authentication) principal).getName();
@@ -66,7 +66,7 @@ public class OnboardRestController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = "/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, path = CAPABILITIES_PATH , produces = MediaType.APPLICATION_JSON_VALUE)
 	public CapabilityApi addCapabilities(@RequestBody CapabilityApi capabilityApi) {
 
 		logger.info("Capabilities - Received POST from Service Provider: {}", capabilityApi.getName());
@@ -112,7 +112,7 @@ public class OnboardRestController {
 		return capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/capabilities")
+	@RequestMapping(method = RequestMethod.DELETE, path = CAPABILITIES_PATH)
 	public CapabilityApi deleteCapability(@RequestBody CapabilityApi capabilityApi) {
 
 		logger.info("Capabilities - Received DELETE from Service Provider: {}", capabilityApi.getName());
@@ -221,7 +221,7 @@ public class OnboardRestController {
 		return selfSubscriptions;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = "/subscription")
+	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH)
 	public SubscriptionRequestApi addSubscriptions(@RequestBody SubscriptionRequestApi subscriptionRequestApi) {
 
 		logger.info("Subscription - Received POST from Service Provider: {}", subscriptionRequestApi.getName());
@@ -274,7 +274,7 @@ public class OnboardRestController {
 
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/subscription")
+	@RequestMapping(method = RequestMethod.DELETE, path = SUBSCRIPTION_PATH)
 	public SubscriptionRequestApi deleteSubscription(@RequestBody SubscriptionRequestApi subscriptionRequestApi){
 
 		logger.info("Subscription - Received DELETE from Service Provider");
@@ -314,6 +314,34 @@ public class OnboardRestController {
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
 		return subscriptionRequestTransformer.serviceProviderToSubscriptionRequestApi(serviceProviderToUpdate);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = SP_CAPS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+	public CapabilityApi getServiceProviderCapabilities(@PathVariable String serviceProviderName)throws Exception{
+
+		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		if(serviceProvider == null){
+			throw new RuntimeException("The requesting Service Provider does not exist in the database."); // TODO: Change to a better exception?
+		}
+
+
+		return capabilityTransformer.serviceProviderToCapabilityApi(serviceProvider);
+
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = SP_SUBREQ_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+	public SubscriptionRequestApi getServiceProviderSubscriptionRequest(@PathVariable String serviceProviderName){
+
+		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		if(serviceProvider == null){
+			throw new RuntimeException("The requesting Service Provider does not exist in the database."); // TODO: Change to a better exception?
+		}
+
+		return subscriptionRequestTransformer.serviceProviderToSubscriptionRequestApi(serviceProvider);
 	}
 
 	// TODO: Remove
