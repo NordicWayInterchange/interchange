@@ -1,0 +1,54 @@
+@startuml
+actor "Node Administrator" as admin
+
+box "Interchange A" #LightBlue
+  participant "Onboarding Server" as server
+  database Database as db
+  participant "Neighbour Discoverer" as discoverer
+end box
+
+box "Interchange B" #LightYellow
+  participant "Neighbour Server" as nbs
+end box
+
+
+admin -> server: SubscriptionRequestApi representing \na Service Provider's subscriptions
+
+server -> db: Get representation of Self
+db --> server: Self
+
+server -> db: Lookup Service Provider from incoming CapabilityApi object
+
+alt Service provider exists in DB
+  db --> server: Service Provider
+  server -> server: Update Service Provider
+else Service Provider does not exist in DB
+  db --> server: null
+  server -> server: Create Service Provider
+end
+
+
+server -> server: Check if the updated/new Service Provider \nchanges the representation of Self
+
+
+alt  Self has changed
+  server -> server: update timestamp Self.lastUpdatedCapabilities
+end
+
+server -> db: Save Self
+server -> db: Save Service Provider
+
+server --> admin: CapabilityApi representing \nthe new/updated Service provider
+
+discoverer -> db: Get representation of Self
+
+loop Every 20 seconds
+  discoverer -> discoverer: Check if Self capabilities have been \nupdated since last capability exchange
+
+  alt Self capabilities have been updated
+    discoverer -> nbs: Post local capabilities to all neighbours
+  end
+end
+
+
+@enduml

@@ -99,7 +99,7 @@ public class NeighbourDiscoverer {
 		Self self = selfRepository.findByName(myName);
 		if(self == null){
 			// No local subscriptions
-			// TODO: handle this
+			return Collections.emptySet();
 		}
 
 		Set<Subscription> calculatedSubscriptions = new HashSet<>();
@@ -378,7 +378,7 @@ public class NeighbourDiscoverer {
 			return; // Wait for normal subscription request to be performed first
 		}
 
-		if(self.getLastUpdatedLocalSubscriptions().isBefore(discoveryState.getLastSubscriptionRequest())){
+		if(self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest())){
 			// Local Subscriptions have been updated since last time performed the subscription request.
 			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
 
@@ -490,7 +490,7 @@ public class NeighbourDiscoverer {
 
 		DiscoveryState discoveryState = getDiscoveryState();
 		if(discoveryState.getLastCapabilityExchange() == null){
-			return; // Wait for normal capability exchange to be performed first.
+			return; // Wait for normal capability exchange to be performed with neighbours found in the DNS first.
 		}
 
 		if(self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange())){
