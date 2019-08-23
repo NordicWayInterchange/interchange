@@ -71,14 +71,14 @@ public class RoutingConfigurer {
 		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
 
 		for(Neighbour neighbour : neighboursToAddToGroups){
-			logger.info("Attempting to add neighbour {} to the groups file", neighbour.getName());
-			logger.info("Groups file contains the following users: {}", Arrays.toString(userNames.toArray()));
+			logger.debug("Attempting to add neighbour {} to the groups file", neighbour.getName());
+			logger.debug("Groups file contains the following users: {}", Arrays.toString(userNames.toArray()));
 			if(!userNames.contains(neighbour.getName())){
-				logger.info("Neighbour {} did not exist in the groups file. Adding...");
+				logger.debug("Neighbour {} did not exist in the groups file. Adding...");
 				qpidClient.addInterchangeUserToGroups(neighbour.getName(), groupName);
 				logger.info("Added neighbour {} to Qpid groups", neighbour.getName());
 			}else{
-				logger.info("Neighbour {} already exists in the groups file.", neighbour.getName());
+				logger.warn("Neighbour {} already exists in the groups file.", neighbour.getName());
 			}
 		}
 	}
@@ -93,11 +93,11 @@ public class RoutingConfigurer {
 
 		for(Neighbour neighbour : neighboursToRemoveFromGroups){
 			if(userNames.contains(neighbour.getName())){
-				logger.info("Neighbour {} found in the groups file. Removing...");
+				logger.debug("Neighbour {} found in the groups file. Removing...");
 				qpidClient.removeInterchangeUserFromGroups(groupName, neighbour.getName());
 				logger.info("Removed neighbour {} from Qpid groups", neighbour.getName());
 			}else{
-				logger.info("Neighbour {} does not exist in the groups file and cannot be removed.", neighbour.getName());
+				logger.warn("Neighbour {} does not exist in the groups file and cannot be removed.", neighbour.getName());
 			}
 		}
 	}

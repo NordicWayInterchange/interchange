@@ -199,7 +199,7 @@ public class QpidClient {
 		String url = groupsUrl + groupName;
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-		logger.info("Received members of group {} from Qpid: {}", groupName, response.getBody());
+		logger.debug("Received members of group {} from Qpid: {}", groupName, response.getBody());
 
 		JSONArray jsonArray = new JSONArray(response.getBody());
 		ArrayList<String> groupMemberNames = new ArrayList<>();
@@ -210,7 +210,7 @@ public class QpidClient {
 			groupMemberNames.add(userName);
 		}
 
-		logger.info("Returning list of group members: {}", groupMemberNames.toString());
+		logger.debug("Returning list of group members: {}", groupMemberNames.toString());
 		return groupMemberNames;
 	}
 
