@@ -82,7 +82,7 @@ public class NeighbourDiscoverer {
 	}
 
 
-	DiscoveryState getDiscoveryState(){
+	private DiscoveryState getDiscoveryState(){
 		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
 
 		if(discoveryState == null) {
@@ -167,7 +167,6 @@ public class NeighbourDiscoverer {
 						failedSubscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						neighbour.setBackoffAttempts(0); // Reset number of back-offs to 0 after contact is re-established.
 
-						// TODO: verify that this updates the fedIn status of the neighbour.
 						updateFedInStatus(neighbour);
 
 					} catch (SubscriptionPollException e) {
@@ -212,9 +211,7 @@ public class NeighbourDiscoverer {
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
 						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
 
-						// TODO: verify that this updates the fedIn status of the neighbour.
 						updateFedInStatus(neighbour);
-
 
 					} else {
 						// Number of poll attempts exceeds allowed number of poll attempts.
@@ -489,13 +486,10 @@ public class NeighbourDiscoverer {
 			return; // We have nothing to post to our neighbours.
 		}
 
-		DiscoveryState discoveryState = getDiscoveryState();
-		if(discoveryState.getLastCapabilityExchange() == null){
-			logger.info("DiscoveryState was null. Waiting for normal capability exchange to be performed first.");
-			return; // Wait for normal capability exchange to be performed with neighbours found in the DNS first.
-		}
+		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
 
-		if(self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange())){
+		if(discoveryState == null || discoveryState.getLastCapabilityExchange()==null || self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange())){
+			// Capability post either not performed before, or Service Providers have been updated.
 			// Last updated capabilities is after last capability exchange - perform new capability exchange with all neighbours
 
 			logger.info("Local Service Providers have updated their subscriptions.");
