@@ -14,4 +14,6 @@ public interface ServiceProviderRepository extends CrudRepository<ServiceProvide
 
 	List<ServiceProvider> findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus status);
 
+	List<ServiceProvider> findBySubscriptionRequest_StatusIn(SubscriptionRequest.SubscriptionRequestStatus... statuses);
+
 }
