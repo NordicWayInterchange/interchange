@@ -201,7 +201,8 @@ public class OnboardRestController {
 			logger.info("Subscriptions have changed. Updating representation of self.");
 			self.setLocalSubscriptions(updatedSubscriptions);
 			self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
-			selfRepository.save(self);
+			Self updatedSelf = selfRepository.save(self);
+			logger.info("Updated Self: {}", updatedSelf.toString());
 			return;
 		}
 

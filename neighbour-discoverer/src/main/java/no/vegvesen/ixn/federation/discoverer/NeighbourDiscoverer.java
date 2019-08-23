@@ -356,6 +356,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void performSubscriptionRequestWithKnownNeighbours(){
 		// Perform subscription request with all neighbours with capabilities KNOWN and fedIn EMPTY
+		logger.info("Checking for any Neighbours with KNOWN capabilities and EMPTY fedIn for subscription request");
 		List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
 		if(!neighboursForSubscriptionRequest.isEmpty()){
@@ -368,36 +369,25 @@ public class NeighbourDiscoverer {
 		// Check if representation of Self has been updated by local Service Providers.
 		// If Self has updated Subscriptions since last time we posted a subscription request, we need to recalculate the subscription request for all neighbours.
 
+		logger.info("Checking if any Service Providers have updated their subscriptions...");
+		logger.info("Self name: {}", myName);
+
 		Self self = selfRepository.findByName(myName);
 		if(self == null || self.getLocalSubscriptions().isEmpty()){
 			return; // We have nothing to post to our neighbour
 		}
 
 		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
-		if(discoveryState.getLastSubscriptionRequest() == null){
-			return; // Wait for normal subscription request to be performed first
-		}
 
-		if(self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest())){
+		if(discoveryState == null || discoveryState.getLastSubscriptionRequest() == null || self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest())){
+			// Either first post or an upate.
 			// Local Subscriptions have been updated since last time performed the subscription request.
 			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
 
-			List<Neighbour> neighboursWeCurrentlySubscribeTo = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
-			List<Neighbour> neighboursForUpdatedSubscriptionRequest = new ArrayList<>();
+			logger.info("Local subscriptions have changed. Recalculating subscriptions to all neighbours...");
 
-			for(Neighbour neighbour : neighboursWeCurrentlySubscribeTo){
-
-				Set<Subscription> currentSubscription = neighbour.getFedIn().getSubscriptions();
-				Set<Subscription> recalculatedSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour);
-
-				if(!recalculatedSubscriptions.equals(currentSubscription)){
-					neighboursForUpdatedSubscriptionRequest.add(neighbour);
-				}
-			}
-
-			if(!neighboursForUpdatedSubscriptionRequest.isEmpty()){
-				subscriptionRequest(neighboursForUpdatedSubscriptionRequest);
-			}
+			List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findAll();
+			subscriptionRequest(neighboursForSubscriptionRequest);
 		}
 	}
 
@@ -437,6 +427,13 @@ public class NeighbourDiscoverer {
 				}
 			} else {
 				// Calculated subscription is not empty, post as normal
+
+				if(calculatedSubscriptionForNeighbour.equals(neighbour.getFedIn().getSubscriptions())){
+					// The subscription request we want to post is the same as what we already subscribe to. Skip.
+					return;
+				}
+
+				// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
 				discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, calculatedSubscriptionForNeighbour));
 				logger.info("The calculated subscription request is not empty. Posting subscription request: {}", neighbour.getName(), discoveringNeighbour.toString());
 			}
@@ -470,7 +467,8 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void performCapabilityExchangeWithUnknownNeighbours(){
-		// Perform capability exchange with all neighburs with capabilities status UNKNOWN that we have found through the DNS.
+		// Perform capability exchange with all neighbours with capabilities status UNKNOWN that we have found through the DNS.
+		logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
 		List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 
 		if(!neighboursForCapabilityExchange.isEmpty()){
@@ -483,21 +481,28 @@ public class NeighbourDiscoverer {
 		// Check if representation of Self has been updated by local Service Providers.
 		// If Self has updated Capabilities since last time we posted our capabilities, we need to post our capabilities to all neighbours.
 
+		logger.info("Checking if any Service Providers have updated their capabilities...");
+
 		Self self = selfRepository.findByName(myName);
 		if(self == null || self.getLocalCapabilities().isEmpty()){
+			logger.info("Self was null. Waiting for normal capability exchange to be performed first.");
 			return; // We have nothing to post to our neighbours.
 		}
 
 		DiscoveryState discoveryState = getDiscoveryState();
 		if(discoveryState.getLastCapabilityExchange() == null){
+			logger.info("DiscoveryState was null. Waiting for normal capability exchange to be performed first.");
 			return; // Wait for normal capability exchange to be performed with neighbours found in the DNS first.
 		}
 
 		if(self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange())){
 			// Last updated capabilities is after last capability exchange - perform new capability exchange with all neighbours
 
+			logger.info("Local Service Providers have updated their subscriptions.");
+
 			List<Neighbour> allNeighbours = neighbourRepository.findAll();
 			if(!allNeighbours.isEmpty()) {
+				logger.info("Performing new capability exchange with all neighbours");
 				capabilityExchange(allNeighbours);
 			}
 		}
