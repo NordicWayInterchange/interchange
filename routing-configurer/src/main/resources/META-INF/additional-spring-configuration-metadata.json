@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "routing-configurer.interval",
+      "type": "java.lang.String",
+      "description": "Time, in milliseconds, between each time neighbours and service providers are added to the message broker."
+    }
+  ]
+}
