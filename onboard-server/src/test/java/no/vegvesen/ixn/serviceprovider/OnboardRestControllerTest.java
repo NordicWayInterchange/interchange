@@ -177,7 +177,7 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		// The existing subscriptions of the Service Provider
-		Subscription a = new Subscription("where LIKE 'SE1", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription a = new Subscription("where LIKE 'SE'", Subscription.SubscriptionStatus.REQUESTED);
 		Subscription b = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
