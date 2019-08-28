@@ -159,6 +159,13 @@ public class QpidClientIT {
 				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
 		Sink readKingGustafQueue = new Sink("amqps://localhost:62671", "king_gustaf", kingGustafSslContext);
 		readKingGustafQueue.start();
+		Source writeOnrampQueue = new Source("amqps://localhost:62671", "onramp", kingGustafSslContext);
+		writeOnrampQueue.start();
+		try {
+			Sink readDlqueue = new Sink("amqps://localhost:62671", "onramp", kingGustafSslContext);
+			readDlqueue.start();
+			fail("Should not allow king_gustaf to read from queue not granted access on (onramp)");
+		} catch (Exception ignore) { }
 	}
 
 	private static String getFilePathFromClasspathResource(String classpathResource) {
