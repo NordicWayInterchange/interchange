@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.interchange.Sink;
+import no.vegvesen.interchange.Source;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -17,7 +18,9 @@ import javax.net.ssl.SSLContext;
 import java.net.URL;
 import java.util.*;
 
+import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
 @RunWith(SpringRunner.class)
@@ -126,9 +129,9 @@ public class QpidClientIT {
 	@Test
 	public void addAnInterchangeToGroups() {
 		String newUser = "herring";
-		client.addInterchangeUserToGroups(newUser, "federated-interchanges");
+		client.addInterchangeUserToGroups(newUser, FEDERATED_GROUP_NAME);
 
-		List<String> userNames = client.getInterchangesUserNames("federated-interchanges");
+		List<String> userNames = client.getInterchangesUserNames(FEDERATED_GROUP_NAME);
 
 		assertThat(userNames).contains(newUser);
 	}
@@ -136,12 +139,12 @@ public class QpidClientIT {
 	@Test
 	public void deleteAnInterchangeFromGroups() {
 		String deleteUser = "carp";
-		client.addInterchangeUserToGroups(deleteUser, "federated-interchanges");
-		List<String> userNames = client.getInterchangesUserNames("federated-interchanges");
+		client.addInterchangeUserToGroups(deleteUser, FEDERATED_GROUP_NAME);
+		List<String> userNames = client.getInterchangesUserNames(FEDERATED_GROUP_NAME);
 		assertThat(userNames).contains(deleteUser);
 
-		client.removeInterchangeUserFromGroups("federated-interchanges", deleteUser);
-		userNames = client.getInterchangesUserNames("federated-interchanges");
+		client.removeInterchangeUserFromGroups(FEDERATED_GROUP_NAME, deleteUser);
+		userNames = client.getInterchangesUserNames(FEDERATED_GROUP_NAME);
 		assertThat(userNames).doesNotContain(deleteUser);
 	}
 
@@ -149,7 +152,7 @@ public class QpidClientIT {
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		client.createQueue(king_gustaf);
-		client.addInterchangeUserToGroups(king_gustaf.getName(), "service-providers");
+		client.addInterchangeUserToGroups(king_gustaf.getName(), SERVICE_PROVIDERS_GROUP_NAME);
 		client.addReadAccess(king_gustaf, "king_gustaf");
 		SSLContext kingGustafSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(getFilePathFromClasspathResource("jks/king_gustaf.p12"), "password", KeystoreType.PKCS12, "password"),
@@ -180,8 +183,8 @@ public class QpidClientIT {
 		LinkedList<String> acl = new LinkedList<>();
 		acl.add("ACL ALLOW-LOG interchange ALL ALL");
 		acl.add("ACL ALLOW-LOG administrators ALL ALL");
-		acl.add("ACL ALLOW-LOG service-providers PUBLISH EXCHANGE routingkey = \"onramp\" name = \"\"");
-		acl.add("ACL ALLOW-LOG service-providers ACCESS VIRTUALHOST name = \"localhost\"");
+		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " PUBLISH EXCHANGE routingkey = \"onramp\" name = \"\"");
+		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " ACCESS VIRTUALHOST name = \"localhost\"");
 		acl.add("ACL ALLOW-LOG interchange CONSUME QUEUE name = \"onramp\"");
 		acl.add("ACL DENY-LOG ALL ALL ALL");
 		LinkedList<String> newAcl = new LinkedList<>(client.addOneConsumeRuleBeforeLastRule(new ServiceProvider("king_harald"), "king_harald", acl));

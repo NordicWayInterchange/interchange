@@ -13,11 +13,12 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
+import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
+
 @Component
 public class RoutingConfigurer {
 
-	private static final String FEDERATED_GROUP_NAME = "federated-interchanges";
-	private static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
 	private final NeighbourRepository neighbourRepository;

@@ -22,6 +22,10 @@ import java.util.*;
 
 @Service
 public class QpidClient {
+
+	public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
+	public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
+
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
 	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s/nwEx";
 	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
