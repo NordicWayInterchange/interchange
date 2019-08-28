@@ -151,9 +151,8 @@ public class QpidClientIT {
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		client.createQueue(king_gustaf);
+		client.setupRouting(king_gustaf);
 		client.addInterchangeUserToGroups(king_gustaf.getName(), SERVICE_PROVIDERS_GROUP_NAME);
-		client.addReadAccess(king_gustaf, "king_gustaf");
 		SSLContext kingGustafSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(getFilePathFromClasspathResource("jks/king_gustaf.p12"), "password", KeystoreType.PKCS12, "password"),
 				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));

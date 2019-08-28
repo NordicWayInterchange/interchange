@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscriber;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
@@ -134,6 +135,9 @@ public class QpidClient {
 		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
 			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription));
 			subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
+		}
+		if (toSetUp instanceof ServiceProvider) {
+			addReadAccess(toSetUp, toSetUp.getName());
 		}
 		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 		return subscriptionRequest;
