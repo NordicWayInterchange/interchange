@@ -27,12 +27,14 @@ public class QpidClient {
 	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
+	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
 
 	private final String exchangeURL;
 	private final String queuesURL;
 	private final String pingURL;
 	private final String groupsUrl;
 	private final RestTemplate restTemplate;
+	private final String aclRulesUrl;
 
 	@Autowired
 	public QpidClient(@Value("${qpid.rest.api.baseUrl}") String baseUrl,
@@ -42,6 +44,7 @@ public class QpidClient {
 		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
+		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
 		this.restTemplate = restTemplate;
 	}
 
@@ -83,9 +86,9 @@ public class QpidClient {
 		postQpid(exchangeURL, jsonString, "/bind");
 	}
 
-	void createQueue(Subscriber interchange) {
+	void createQueue(Subscriber subscriber) {
 		JSONObject json = new JSONObject();
-		json.put("name", interchange.getName());
+		json.put("name", subscriber.getName());
 		json.put("durable", true);
 		String jsonString = json.toString();
 		postQpid(queuesURL, jsonString, "/");
@@ -204,7 +207,7 @@ public class QpidClient {
 		JSONArray jsonArray = new JSONArray(response.getBody());
 		ArrayList<String> groupMemberNames = new ArrayList<>();
 
-		for(int i=0; i<jsonArray.length(); i++){
+		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject ob = jsonArray.getJSONObject(i);
 			String userName = ob.getString("name");
 			groupMemberNames.add(userName);
@@ -225,5 +228,40 @@ public class QpidClient {
 		String jsonString = groupJsonObject.toString();
 
 		postQpid(groupsUrl, jsonString, groupName);
+	}
+
+	void addReadAccess(Subscriber subscriber, String queue) {
+		List<String> aclRules = getACL();
+		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(subscriber, queue, aclRules);
+
+		StringBuilder newAclRules1 = new StringBuilder();
+		for (String aclRule : aclRules1) {
+			newAclRules1.append(aclRule).append("\r\n");
+		}
+		String newAclRules = newAclRules1.toString();
+
+		JSONObject base64EncodedAcl = new JSONObject();
+		base64EncodedAcl.put("path", "data:text/plain;base64," + Base64.getEncoder().encodeToString(newAclRules.getBytes()));
+		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
+		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
+		logger.info("Added read access to {} for Subscriber {}", queue, subscriber.getName());
+	}
+
+	List<String> addOneConsumeRuleBeforeLastRule(Subscriber subscriber, String newConsumeQueue, List<String> aclRulesLegacyFormat) {
+		LinkedList<String> aclRules = new LinkedList<>(aclRulesLegacyFormat);
+		String newAclEntry = String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", subscriber.getName(), newConsumeQueue);
+		aclRules.add(aclRules.size()-1, newAclEntry); // add the new rule before the last rule "DENY ALL"
+		logger.debug("new acl rules {}", aclRules);
+		return aclRules;
+	}
+
+	List<String> getACL() {
+		ResponseEntity<String> aclRulesResponse = restTemplate.getForEntity(aclRulesUrl + "/extractRules", String.class);
+		String aclRulesS = aclRulesResponse.getBody();
+		logger.debug("acl extractRules return code {}, body {}", aclRulesResponse.getStatusCodeValue(), aclRulesS);
+		if (aclRulesS == null) {
+			return new LinkedList<>();
+		}
+		return Arrays.asList(aclRulesS.split("\\r?\\n"));
 	}
 }

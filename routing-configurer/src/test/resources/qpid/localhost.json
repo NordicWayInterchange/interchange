@@ -48,35 +48,7 @@
       "owner": null
     },
     {
-      "name": "test-out",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
-    {
       "name": "dlqueue",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
-    {
-      "name": "NO-Obstruction",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
-    {
-      "name": "NO-out",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
-    {
-      "name": "SE-out",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
@@ -105,7 +77,7 @@
         },
         {
           "objectType": "EXCHANGE",
-          "identity": "messaging-users",
+          "identity": "service-providers",
           "operation": "PUBLISH",
           "outcome": "ALLOW_LOG",
           "attributes": {
@@ -115,65 +87,11 @@
         },
         {
           "objectType": "VIRTUALHOST",
-          "identity": "messaging-users",
+          "identity": "service-providers",
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "localhost"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "messaging-users",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "test-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "NO-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "SE-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "dlqueue"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "NO-Obstruction"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_harald",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "NO-out"
           }
         },
         {
@@ -183,42 +101,6 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "onramp"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_gustaf",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "SE-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "guest",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "guest"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_harald",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "king_harald"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_gustaf",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "king_gustaf"
           }
         },
         {
