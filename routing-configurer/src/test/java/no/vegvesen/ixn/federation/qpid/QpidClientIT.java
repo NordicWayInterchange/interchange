@@ -28,6 +28,8 @@ import static org.junit.Assert.fail;
 @RunWith(SpringRunner.class)
 public class QpidClientIT {
 
+	private static final String NW_EX = "nwEx";
+	private static final String FED_EX = "fedEx";
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
 
@@ -71,7 +73,7 @@ public class QpidClientIT {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", Subscription.SubscriptionStatus.REQUESTED)));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		client.setupRouting(flounder);
+		client.setupRouting(flounder, NW_EX);
 		assertThat(client.queueExists(flounder.getName())).isTrue();
 	}
 
@@ -82,7 +84,7 @@ public class QpidClientIT {
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		client.setupRouting(halibut);
+		client.setupRouting(halibut, NW_EX);
 		assertThat(client.queueExists(halibut.getName())).isTrue();
 	}
 
@@ -91,9 +93,9 @@ public class QpidClientIT {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", Subscription.SubscriptionStatus.REQUESTED)));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		client.setupRouting(seabass);
+		client.setupRouting(seabass, NW_EX);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
-		client.setupRouting(seabass);
+		client.setupRouting(seabass, NW_EX);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
 	}
 
@@ -104,14 +106,14 @@ public class QpidClientIT {
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		client.setupRouting(trout);
+		client.setupRouting(trout, NW_EX);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
 		subscriptions = new HashSet<>(Collections.singletonList(s1));
 		subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
 		trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		client.setupRouting(trout);
+		client.setupRouting(trout, NW_EX);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
 	}
 
@@ -153,7 +155,8 @@ public class QpidClientIT {
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		client.setupRouting(king_gustaf);
+		client.setupRouting(king_gustaf, NW_EX);
+		client.setupRouting(king_gustaf, FED_EX);
 		client.addInterchangeUserToGroups(king_gustaf.getName(), SERVICE_PROVIDERS_GROUP_NAME);
 		SSLContext kingGustafSslContext = setUpTestSslContext("jks/king_gustaf.p12");
 		Sink readKingGustafQueue = new Sink("amqps://localhost:62671", "king_gustaf", kingGustafSslContext);
@@ -204,7 +207,7 @@ public class QpidClientIT {
 		HashSet<Subscription> subscriptions = new HashSet<>();
 		subscriptions.add(new Subscription("where = 'SE'", Subscription.SubscriptionStatus.REQUESTED));
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions), null);
-		client.setupRouting(nordea);
+		client.setupRouting(nordea, NW_EX);
 		client.addInterchangeUserToGroups(nordea.getName(), FEDERATED_GROUP_NAME);
 		SSLContext nordeaSslContext = setUpTestSslContext("jks/nordea.p12");
 		Source writeFedExExchange = new Source("amqps://localhost:62671", "fedEx", nordeaSslContext);

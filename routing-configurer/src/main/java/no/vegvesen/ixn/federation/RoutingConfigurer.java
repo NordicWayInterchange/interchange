@@ -76,7 +76,11 @@ public class RoutingConfigurer {
 		for (Subscriber subscriber : readyToSetupRouting) {
 			try {
 				logger.debug("Setting up routing for subscriber {}", subscriber.getName());
-				SubscriptionRequest setUpSubscriptionRequest = qpidClient.setupRouting(subscriber);
+				//Both neighbour and service providers binds to nwEx, service provider also binds to fedEx ????
+				SubscriptionRequest setUpSubscriptionRequest = qpidClient.setupRouting(subscriber, "nwEx");
+				if (subscriber instanceof ServiceProvider) {
+					qpidClient.setupRouting(subscriber, "fedEx");
+				}
 				logger.info("Routing set up for subscriber {}", subscriber.getName());
 				addSubscribersToGroup(groupName, subscriber);
 

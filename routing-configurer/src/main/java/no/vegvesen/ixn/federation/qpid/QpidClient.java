@@ -28,13 +28,13 @@ public class QpidClient {
 	public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
 
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
-	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s/nwEx";
+	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s";
 	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
 	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
 
-	private final String exchangeURL;
+	private final String exchangesURL;
 	private final String queuesURL;
 	private final String pingURL;
 	private final String groupsUrl;
@@ -45,7 +45,7 @@ public class QpidClient {
 	public QpidClient(@Value("${qpid.rest.api.baseUrl}") String baseUrl,
 					  @Value("${qpid.rest.api.vhost}") String vhostName,
 					  RestTemplate restTemplate) {
-		this.exchangeURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
+		this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
 		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
@@ -76,7 +76,7 @@ public class QpidClient {
 		}
 	}
 
-	private void updateBinding(String binding, String queueName, String bindingKey) {
+	private void updateBinding(String binding, String queueName, String bindingKey, String exchangeName) {
 		JSONObject json = new JSONObject();
 		json.put("destination", queueName);
 		json.put("bindingKey", bindingKey);
@@ -88,7 +88,7 @@ public class QpidClient {
 		json.put("arguments", innerjson);
 		String jsonString = json.toString();
 
-		postQpid(exchangeURL, jsonString, "/bind");
+		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/bind");
 	}
 
 	void createQueue(Subscriber subscriber) {
@@ -125,15 +125,15 @@ public class QpidClient {
 		return null;
 	}
 
-	public SubscriptionRequest setupRouting(Subscriber toSetUp) {
+	public SubscriptionRequest setupRouting(Subscriber toSetUp, String exchangeName) {
 		if (queueExists(toSetUp.getName())) {
-			unbindOldUnwantedBindings(toSetUp);
+			unbindOldUnwantedBindings(toSetUp, exchangeName);
 		} else {
 			createQueue(toSetUp);
 		}
 		SubscriptionRequest subscriptionRequest = toSetUp.getSubscriptionRequest();
 		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
-			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription));
+			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription), exchangeName);
 			subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
 		}
 		if (toSetUp instanceof ServiceProvider) {
@@ -143,20 +143,20 @@ public class QpidClient {
 		return subscriptionRequest;
 	}
 
-	private void unbindOldUnwantedBindings(Subscriber interchange) {
+	private void unbindOldUnwantedBindings(Subscriber interchange, String exchangeName) {
 		Set<String> unwantedBindKeys = getUnwantedBindKeys(interchange);
 		for (String unwantedBindKey : unwantedBindKeys) {
-			unbindBindKey(interchange, unwantedBindKey);
+			unbindBindKey(interchange, unwantedBindKey, exchangeName);
 		}
 	}
 
-	private void unbindBindKey(Subscriber interchange, String unwantedBindKey) {
+	private void unbindBindKey(Subscriber interchange, String unwantedBindKey, String exchangeName) {
 		JSONObject json = new JSONObject();
 		json.put("destination", interchange.getName());
 		json.put("bindingKey", unwantedBindKey);
 		String jsonString = json.toString();
 
-		postQpid(exchangeURL, jsonString, "/unbind");
+		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/unbind");
 	}
 
 	private Set<String> getUnwantedBindKeys(Subscriber interchange) {
