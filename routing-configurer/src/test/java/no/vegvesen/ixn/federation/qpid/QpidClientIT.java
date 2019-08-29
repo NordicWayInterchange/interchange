@@ -155,9 +155,7 @@ public class QpidClientIT {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		client.setupRouting(king_gustaf);
 		client.addInterchangeUserToGroups(king_gustaf.getName(), SERVICE_PROVIDERS_GROUP_NAME);
-		SSLContext kingGustafSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(getFilePathFromClasspathResource("jks/king_gustaf.p12"), "password", KeystoreType.PKCS12, "password"),
-				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
+		SSLContext kingGustafSslContext = setUpTestSslContext("jks/king_gustaf.p12");
 		Sink readKingGustafQueue = new Sink("amqps://localhost:62671", "king_gustaf", kingGustafSslContext);
 		readKingGustafQueue.start();
 		Source writeOnrampQueue = new Source("amqps://localhost:62671", "onramp", kingGustafSslContext);
@@ -208,9 +206,7 @@ public class QpidClientIT {
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions), null);
 		client.setupRouting(nordea);
 		client.addInterchangeUserToGroups(nordea.getName(), FEDERATED_GROUP_NAME);
-		SSLContext nordeaSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(getFilePathFromClasspathResource("jks/nordea.p12"), "password", KeystoreType.PKCS12, "password"),
-				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
+		SSLContext nordeaSslContext = setUpTestSslContext("jks/nordea.p12");
 		Source writeFedExExchange = new Source("amqps://localhost:62671", "fedEx", nordeaSslContext);
 		writeFedExExchange.start();
 		writeFedExExchange.send("Ordinary business at the Nordea office.");
@@ -229,10 +225,14 @@ public class QpidClientIT {
 	 * @param queue name of the queue to be read by the node itself
 	 */
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String queue) throws NamingException, JMSException {
-		SSLContext localhostSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(getFilePathFromClasspathResource("jks/localhost.p12"), "password", KeystoreType.PKCS12, "password"),
-				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
+		SSLContext localhostSslContext = setUpTestSslContext("jks/localhost.p12");
 		Sink nordea = new Sink("amqps://localhost:62671", queue, localhostSslContext);
 		nordea.start();
+	}
+
+	public SSLContext setUpTestSslContext(String s) {
+		return SSLContextFactory.sslContextFromKeyAndTrustStores(
+				new KeystoreDetails(getFilePathFromClasspathResource(s), "password", KeystoreType.PKCS12, "password"),
+				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
 	}
 }
