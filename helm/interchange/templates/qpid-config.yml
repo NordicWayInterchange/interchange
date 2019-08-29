@@ -14,7 +14,7 @@ data:
   groups: |
     service-providers.users={{ range .Values.qpid.users }}{{ .name }},{{ end }}
     federated-interchanges.users=
-    administrators.users={{ .Values.qpid.admin_user }}
+    administrators.users={{ .Values.qpid.admin_user }},{{ .Values.external_name }}
   default.json: |
     {
       "type": "BDB",
@@ -158,6 +158,13 @@ data:
             {
               "objectType": "ALL",
               "identity": "{{ .Values.qpid.interchange_user }}",
+              "operation": "ALL",
+              "outcome": "ALLOW_LOG",
+              "attributes": {}
+            },
+            {
+              "objectType": "ALL",
+              "identity": "administrators",
               "operation": "ALL",
               "outcome": "ALLOW_LOG",
               "attributes": {}
