@@ -220,5 +220,19 @@ public class QpidClientIT {
 			writeOnramp.send("Make Nordea great again!");
 			fail("Should not allow nordea to write on (onramp)");
 		} catch (Exception ignore) { }
+		theNodeItselfCanReadFromAnyNeighbourQueue("nordea");
+	}
+
+
+	/**
+	 * Called from newNeighbourCanWriteToFedExButNotOnramp to avoid setting up more neighbour nodes in the test
+	 * @param queue name of the queue to be read by the node itself
+	 */
+	public void theNodeItselfCanReadFromAnyNeighbourQueue(String queue) throws NamingException, JMSException {
+		SSLContext localhostSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(
+				new KeystoreDetails(getFilePathFromClasspathResource("jks/localhost.p12"), "password", KeystoreType.PKCS12, "password"),
+				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
+		Sink nordea = new Sink("amqps://localhost:62671", queue, localhostSslContext);
+		nordea.start();
 	}
 }
