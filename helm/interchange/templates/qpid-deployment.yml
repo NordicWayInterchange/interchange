@@ -33,6 +33,8 @@ spec:
           containerPort: 5671
         - name: http-qpid-gui
           containerPort: 8080
+        - name: https-qpid-rest
+          containerPort: 443
         env:
         - name: SERVER_CERTIFICATE_FILE
           value: /secure/{{ .Values.qpid.server_certificate_file }}
