@@ -188,7 +188,7 @@ public class NeighbourRestController {
 			logger.info("Paths for requested subscriptions created.");
 			// Create a path for each subscription
 			for (Subscription subscription : neighbourToUpdate.getSubscriptionRequest().getSubscriptions()) {
-				String path = neighbourToUpdate.getName() + "/subscription/" + subscription.getId();
+				String path = "/" + neighbourToUpdate.getName() + "/subscription/" + subscription.getId();
 				subscription.setPath(path);
 				logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
 			}
