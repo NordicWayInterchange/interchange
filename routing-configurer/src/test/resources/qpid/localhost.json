@@ -8,34 +8,13 @@
       "type": "headers",
       "durable": true,
       "durableBindings": [
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where='NO'"
-          },
-          "bindingKey": "where",
-          "destination": "NO-out"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where LIKE '%'"
-          },
-          "bindingKey": "where",
-          "destination": "test-out"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where='NO' AND what='Obstruction'"
-          },
-          "bindingKey": "where, what",
-          "destination": "NO-Obstruction"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where='SE'"
-          },
-          "bindingKey": "where",
-          "destination": "SE-out"
-        }
+      ]
+    },
+    {
+      "name": "fedEx",
+      "type": "headers",
+      "durable": true,
+      "durableBindings": [
       ]
     }
   ],
@@ -92,6 +71,24 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "federated-interchanges",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "EXCHANGE",
+          "identity": "federated-interchanges",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "fedEx"
           }
         },
         {

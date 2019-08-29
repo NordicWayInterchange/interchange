@@ -18,7 +18,9 @@ import javax.net.ssl.SSLContext;
 import java.net.URL;
 import java.util.*;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
+import static java.util.Collections.emptySet;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
@@ -26,8 +28,8 @@ import static org.junit.Assert.fail;
 @RunWith(SpringRunner.class)
 public class QpidClientIT {
 
-	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
-	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
+	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, emptySet());
+	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
 
 	@Autowired
 	QpidClient client;
@@ -197,5 +199,26 @@ public class QpidClientIT {
 		assertThat(acl.getFirst()).isEqualTo(newAcl.getFirst());
 		assertThat(acl.getLast()).isEqualTo(newAcl.getLast());
 		assertThat(newAcl.get(newAcl.size()-2)).contains("king_harald");
+	}
+
+	@Test
+	public void newNeighbourCanWriteToFedExButNotOnramp() throws JMSException, NamingException {
+		HashSet<Subscription> subscriptions = new HashSet<>();
+		subscriptions.add(new Subscription("where = 'SE'", Subscription.SubscriptionStatus.REQUESTED));
+		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions), null);
+		client.setupRouting(nordea);
+		client.addInterchangeUserToGroups(nordea.getName(), FEDERATED_GROUP_NAME);
+		SSLContext nordeaSslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(
+				new KeystoreDetails(getFilePathFromClasspathResource("jks/nordea.p12"), "password", KeystoreType.PKCS12, "password"),
+				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
+		Source writeFedExExchange = new Source("amqps://localhost:62671", "fedEx", nordeaSslContext);
+		writeFedExExchange.start();
+		writeFedExExchange.send("Ordinary business at the Nordea office.");
+		try {
+			Source writeOnramp = new Source("amqps://localhost:62671", "onramp", nordeaSslContext);
+			writeOnramp.start();
+			writeOnramp.send("Make Nordea great again!");
+			fail("Should not allow nordea to write on (onramp)");
+		} catch (Exception ignore) { }
 	}
 }
