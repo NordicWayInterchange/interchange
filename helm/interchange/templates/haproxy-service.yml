@@ -23,3 +23,6 @@ spec:
   - name: https-control
     port: {{ .Values.self.control_channel_port }}
     targetPort: https-control
+  - name: onboard
+    port: {{ .Values.self.service_provider_port }}
+    targetPort: onboard

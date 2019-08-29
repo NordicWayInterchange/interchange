@@ -37,6 +37,12 @@ data:
         bind *:5671
         default_backend qpid-messaging
 
+    frontend service-provider-frontent
+        log global
+        bind *:{{ .Values.self.service_provider_port }}
+        mode tcp
+        default_backend onboard-server
+
 
     backend neighbour-server
         mode tcp
@@ -51,3 +57,7 @@ data:
     backend qpid-messaging
         mode tcp
         server {{ .Release.Name }}-qpid-secure {{ .Release.Name }}-qpid-secure:5671 maxconn 32
+
+    backend onboard-server
+        mode tcp
+        server {{ .Release.Name }}-onboard-server {{ .Release.Name }}-onboard-server:{{ .Values.self.service_provider_port }} maxconn 32

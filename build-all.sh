@@ -3,7 +3,7 @@
 REGISTRY=eu.gcr.io/nordic-way-aad182cc
 TAG="$(git rev-parse --short HEAD)"
 PUSH=${PUSH:-false}
-IMAGES="interchangenode qpid postgis message-forwarder neighbour-discoverer neighbour-server routing-configurer"
+IMAGES="interchangenode qpid postgis message-forwarder neighbour-discoverer neighbour-server routing-configurer onboard-server"
 
 docker build -f federation-docker-files/Federation_build -t federation-build:${TAG} .
 docker tag federation-build:${TAG} federation-build:latest
