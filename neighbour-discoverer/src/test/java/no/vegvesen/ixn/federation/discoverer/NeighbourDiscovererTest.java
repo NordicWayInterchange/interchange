@@ -1,8 +1,10 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,6 +13,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,29 +26,31 @@ import static org.mockito.Mockito.*;
 public class NeighbourDiscovererTest {
 
 	// Mocks
-	private InterchangeRepository interchangeRepository = mock(InterchangeRepository.class);
-	private ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
+	private NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
 	private DNSFacade dnsFacade = mock(DNSFacade.class);
 	private NeighbourRESTFacade neighbourRESTFacade = mock(NeighbourRESTFacade.class);
 	private NeighbourDiscovererProperties discovererProperties = mock(NeighbourDiscovererProperties.class);
-	private GracefulBackoffProperties backoffProperties = mock(GracefulBackoffProperties.class);
+	private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+	private SelfRepository selfRepository = mock(SelfRepository.class);
+	private DiscoveryStateRepository discoveryStateRepository = mock(DiscoveryStateRepository.class);
 
 	private String myName = "bouvet";
 
 	@Spy
 	private NeighbourDiscoverer neighbourDiscoverer = new NeighbourDiscoverer(dnsFacade,
-			interchangeRepository,
-			serviceProviderRepository,
+			neighbourRepository,
+			selfRepository,
+			discoveryStateRepository,
 			neighbourRESTFacade,
 			myName,
 			backoffProperties,
 			discovererProperties);
 
 
-	private List<Interchange> neighbours = new ArrayList<>();
+	private List<Neighbour> neighbours = new ArrayList<>();
 
 	// Objects used in testing
-	private Interchange ericsson;
+	private Neighbour ericsson;
 	private DataType firstDataType = new DataType("datex2;1.0", "NO", "Obstruction");
 	private DataType secondDataType = new DataType("datex2;1.0", "SE", "Works");
 	private ServiceProvider firstServiceProvider;
@@ -52,6 +58,7 @@ public class NeighbourDiscovererTest {
 	private ServiceProvider illegalServiceProvider;
 	private Iterable<ServiceProvider> serviceProviders;
 	private Iterable<ServiceProvider> illegalServiceProviders;
+	private Self self;
 	private Subscription firstSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 	private Subscription secondSubscription = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
 	private Subscription illegalSubscription = new Subscription("(where LIKE 'DK') OR (1=1)", Subscription.SubscriptionStatus.REQUESTED);
@@ -61,59 +68,74 @@ public class NeighbourDiscovererTest {
 	@Before
 	public void before(){
 
-		// Neighbour interchange set up
-		ericsson = new Interchange();
-		ericsson.setName("ericsson.itsinterchange.eu");
+		// Self setup
+		self = new Self("Bouvet");
+		Set<DataType> selfCapabilities = Collections.singleton(new DataType("datex2;1.0", "NO", "Obstruction"));
+		self.setLocalCapabilities(selfCapabilities);
+		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED));
+		self.setLocalSubscriptions(selfSubscriptions);
+
+		// Neighbour set up
+		ericsson = new Neighbour();
+		ericsson.setName("ericsson.itsNeighbour.eu");
 		ericsson.setControlChannelPort("8080");
 		neighbours.add(ericsson);
 
 		// Service provider set up: two identical service providers with different names.
 		firstServiceProvider = new ServiceProvider("Scania");
-		firstServiceProvider.setCapabilities(Collections.singleton(firstDataType));
-		firstServiceProvider.setSubscriptions(Collections.singleton(firstSubscription));
+		Capabilities firstCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
+		SubscriptionRequest firstSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
+		firstServiceProvider.setCapabilities(firstCapabilities);
+		firstServiceProvider.setSubscriptionRequest(firstSubscriptionRequest);
 
 		secondServiceProvider = new ServiceProvider("Volvo");
-		secondServiceProvider.setCapabilities(Collections.singleton(firstDataType));
-		secondServiceProvider.setSubscriptions(Collections.singleton(firstSubscription));
+		Capabilities secondCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
+		SubscriptionRequest secondSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
+		secondServiceProvider.setCapabilities(secondCapabilities);
+		secondServiceProvider.setSubscriptionRequest(secondSubscriptionRequest);
 
 		illegalServiceProvider = new ServiceProvider("Tesla");
-		illegalServiceProvider.setCapabilities(Collections.singleton(firstDataType));
-		illegalServiceProvider.setSubscriptions(Collections.singleton(illegalSubscription));
+		Capabilities illegalCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
+		SubscriptionRequest illegalSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(illegalSubscription));
+		illegalServiceProvider.setCapabilities(illegalCapabilities);
+		illegalServiceProvider.setSubscriptionRequest(illegalSubscriptionRequest);
 
 		serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 		illegalServiceProviders = Stream.of(illegalServiceProvider).collect(Collectors.toSet());
 	}
 
 	@Test
-	public void testNewInterchangeIsAddedToDatabase(){
+	public void testNewNeighbourIsAddedToDatabase(){
 		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(ericsson));
-		when(interchangeRepository.findByName(any(String.class))).thenReturn(null);
-		when(interchangeRepository.save(any(Interchange.class))).thenReturn(mock(Interchange.class));
+		when(neighbourRepository.findByName(any(String.class))).thenReturn(null);
+		when(neighbourRepository.save(any(Neighbour.class))).thenReturn(mock(Neighbour.class));
 
-		neighbourDiscoverer.checkForNewInterchanges();
+		neighbourDiscoverer.checkForNewNeighbours();
 
-		verify(interchangeRepository, times(1)).save(any(Interchange.class));
+		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
 
 	@Test
-	public void testKnownInterchangeIsNotAddedToDatabase(){
+	public void testKnownNeighbourIsNotAddedToDatabase(){
 		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(ericsson));
-		when(interchangeRepository.findByName(any(String.class))).thenReturn(ericsson);
+		when(neighbourRepository.findByName(any(String.class))).thenReturn(ericsson);
 
-		neighbourDiscoverer.checkForNewInterchanges();
+		neighbourDiscoverer.checkForNewNeighbours();
 
-		verify(interchangeRepository, times(0)).save(any(Interchange.class));
+		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
 	}
 
 	@Test
-	public void testInterchangeWithSameNameAsUsIsNotSaved(){
+	public void testNeighbourWithSameNameAsUsIsNotSaved(){
 		// Mocking finding ourselves in the DNS lookup.
-		Interchange discoveringNode = neighbourDiscoverer.getDiscoveringInterchangeWithCapabilities();
+		doReturn(self).when(selfRepository).findByName(any(String.class));
+
+		Neighbour discoveringNode = neighbourDiscoverer.getDiscoveringNeighbourWithCapabilities();
 		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(discoveringNode));
 
-		neighbourDiscoverer.checkForNewInterchanges();
+		neighbourDiscoverer.checkForNewNeighbours();
 
-		verify(interchangeRepository, times(0)).save(any(Interchange.class));
+		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
 	}
 
 
@@ -130,68 +152,39 @@ public class NeighbourDiscovererTest {
 	}
 
 	@Test
-	public void subscriptionInSubscriptionSetReturnsTrue(){
-		Set<Subscription> testSubscriptionsSet = Collections.singleton(firstSubscription);
-		Assert.assertTrue(neighbourDiscoverer.setContainsSubscription(firstSubscription, testSubscriptionsSet));
-	}
-
-	@Test
-	public void subscriptionNotInSubscriptionSetReturnsFalse(){
-		Set<Subscription> testSubscriptionSet = Collections.singleton(secondSubscription);
-
-		Assert.assertFalse(neighbourDiscoverer.setContainsSubscription(firstSubscription, testSubscriptionSet));
-	}
-
-	@Test
-	public void checkThatCapabilitiesDoesNotContainDuplicates(){
-		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
-
-		Set<DataType> interchangeCapabilities = neighbourDiscoverer.getLocalServiceProviderCapabilities();
-
-		Assert.assertEquals(1, interchangeCapabilities.size());
-	}
-
-	@Test
-	public void checkThatSubscriptionsDoesNotContainDuplicates(){
-		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
-
-		Set<Subscription> interchangeSubscriptions = neighbourDiscoverer.getLocalServiceProviderSubscriptions();
-
-		Assert.assertEquals(1, interchangeSubscriptions.size());
-	}
-
-	@Test
 	public void subscriptionRequestForNeighbourWithCommonInterestIsCalculatedCorrectly(){
-		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
-		Interchange neighbourInterchange = new Interchange();
-		neighbourInterchange.setName("BMW");
-		neighbourInterchange.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,Collections.singleton(firstDataType)));
+		Neighbour neighbourNeighbour = new Neighbour();
+		neighbourNeighbour.setName("BMW");
+		neighbourNeighbour.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,Collections.singleton(firstDataType)));
+		Subscription overlappingSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		self.setLocalSubscriptions(Collections.singleton(overlappingSubscription));
+		doReturn(self).when(selfRepository).findByName(any(String.class));
 
-		Set<Subscription> calculatedCustomSubscription = neighbourDiscoverer.calculateCustomSubscriptionForNeighbour(neighbourInterchange);
+		Set<Subscription> calculatedCustomSubscription = neighbourDiscoverer.calculateCustomSubscriptionForNeighbour(neighbourNeighbour);
 
 		Assert.assertEquals(1, calculatedCustomSubscription.size());
 	}
 
 	@Test
 	public void subscriptionRequestForNeighbourWithNoCommonInterestsIsEmpty(){
-		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
-		Interchange neighbourInterchange = new Interchange();
-		neighbourInterchange.setName("BMW");
-		neighbourInterchange.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(secondDataType)));
+		Neighbour neighbourNeighbour = new Neighbour();
+		neighbourNeighbour.setName("BMW");
+		neighbourNeighbour.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(secondDataType)));
+		doReturn(self).when(selfRepository).findByName(any(String.class));
 
-		Set<Subscription> calculatedCustomSubscription = neighbourDiscoverer.calculateCustomSubscriptionForNeighbour(neighbourInterchange);
+		Set<Subscription> calculatedCustomSubscription = neighbourDiscoverer.calculateCustomSubscriptionForNeighbour(neighbourNeighbour);
 
 		Assert.assertEquals(0, calculatedCustomSubscription.size());
 	}
 
 	@Test
 	public void illegalSelectorGivesEmptySubscription(){
-		when(serviceProviderRepository.findAll()).thenReturn(illegalServiceProviders);
-		Interchange neighbourInterchange = new Interchange();
-		neighbourInterchange.setName("BMW");
-		neighbourInterchange.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(secondDataType)));
+		Neighbour neighbourNeighbour = new Neighbour();
+		neighbourNeighbour.setName("BMW");
+		neighbourNeighbour.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(secondDataType)));
+		doReturn(self).when(selfRepository).findByName(any(String.class));
 
-		Set<Subscription> calculatedCustomSubscription = neighbourDiscoverer.calculateCustomSubscriptionForNeighbour(neighbourInterchange);
+		Set<Subscription> calculatedCustomSubscription = neighbourDiscoverer.calculateCustomSubscriptionForNeighbour(neighbourNeighbour);
 
 		Assert.assertTrue(calculatedCustomSubscription.isEmpty());
 	}
@@ -202,40 +195,37 @@ public class NeighbourDiscovererTest {
 	 */
 
 	@Test
-	public void successfulCapabilitiesPostCallsSaveOnRepository(){
+	public void successfulCapabilitiesPostCallsSaveOnRepository() throws Exception{
 
-		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
-		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
-		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
+		Method capabilityExchange = NeighbourDiscoverer.class.getDeclaredMethod("capabilityExchange", List.class);
+		capabilityExchange.setAccessible(true);
 
-		neighbourDiscoverer.capabilityExchange();
+		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
-		verify(interchangeRepository, times(1)).save(any(Interchange.class));
+
+		doReturn(self).when(selfRepository).findByName(any(String.class));
+
+		capabilityExchange.invoke(neighbourDiscoverer, Collections.singletonList(ericsson));
+
+		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
 
 
 	@Test
-	public void successfulSubscriptionRequestCallsSaveOnRepository(){
+	public void successfulSubscriptionRequestCallsSaveOnRepository() throws Exception{
 
-		doReturn(Collections.singletonList(ericsson)).when(interchangeRepository).findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		Method subscriptionRequest = NeighbourDiscoverer.class.getDeclaredMethod("subscriptionRequest", List.class);
+		subscriptionRequest.setAccessible(true);
+
 		doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).calculateCustomSubscriptionForNeighbour(ericsson);
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
-		doReturn(subscriptionRequestResponse).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
-		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
+		doReturn(subscriptionRequestResponse).when(neighbourRESTFacade).postSubscriptionRequest(any(Neighbour.class), any(Neighbour.class));
+		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
-		neighbourDiscoverer.subscriptionRequest();
+		subscriptionRequest.invoke(neighbourDiscoverer, Collections.singletonList(ericsson));
 
-		verify(interchangeRepository, times(1)).save(any(Interchange.class));
-	}
-
-
-	@Test
-	public void noNeighboursFoundForCapabilityExchangeCausesNoPost(){
-		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN)).thenReturn(Collections.emptyList());
-
-		neighbourDiscoverer.capabilityExchange();
-
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
 
 
@@ -248,9 +238,11 @@ public class NeighbourDiscovererTest {
 
 		LocalDateTime now = LocalDateTime.now();
 
+		// Mocking the first backoff attempt, where the exponential is 0.
 		double exponential = 0;
-		long expectedBackoff = (long) Math.pow(2, exponential)*2000;
+		long expectedBackoff = (long) Math.pow(2, exponential)*2; //
 
+		System.out.println("LocalDataTime now: "+ now.toString());
 		LocalDateTime lowerLimit = now.plusSeconds(expectedBackoff);
 		LocalDateTime upperLimit = now.plusSeconds(expectedBackoff+60);
 
@@ -260,118 +252,117 @@ public class NeighbourDiscovererTest {
 		ericsson.setBackoffAttempts(0);
 		ericsson.setBackoffStart(now);
 
-		doReturn(2000).when(backoffProperties).getStartIntervalLength();
-		doReturn(60000).when(backoffProperties).getRandomShiftUpperLimit();
-
-
 		LocalDateTime result = neighbourDiscoverer.getNextPostAttemptTime(ericsson);
 
-		Assert.assertTrue(result.isAfter(lowerLimit) || result.isBefore(upperLimit));
+		Assert.assertTrue(result.isAfter(lowerLimit) && result.isBefore(upperLimit));
 	}
 
 	@Test
 	public void gracefulBackoffPostOfCapabilityDoesNotHappenBeforeAllowedPostTime(){
-		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Neighbour.class), any(Neighbour.class));
 	}
 
 	@Test
 	public void gracefulBackoffPostOfSubscriptionRequestDoesNotHappenBeforeAllowedTime(){
 
-		when(interchangeRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Neighbour.class), any(Neighbour.class));
 	}
 
 	@Test
 	public void gracefulBackoffPollOfSubscriptionDoesNotHappenBeforeAllowedTime(){
-		// Interchange ericsson has subscription to poll
-		when(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		// Neighbour ericsson has subscription to poll
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		// Setting up Ericsson's failed subscriptions
 		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.FAILED);
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
-		doReturn(LocalDateTime.now().plusSeconds(10)).when(neighbourDiscoverer).getNextPostAttemptTime(any(Interchange.class));
+		doReturn(LocalDateTime.now().plusSeconds(10)).when(neighbourDiscoverer).getNextPostAttemptTime(any(Neighbour.class));
 
 		neighbourDiscoverer.gracefulBackoffPollSubscriptions();
 
-		verify(neighbourRESTFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
 
 	@Test
 	public void gracefulBackoffPostOfCapabilitiesHappensIfAllowedPostTimeHasPassed(){
 
-		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 
-		Interchange ericssonResponse = new Interchange();
+		Neighbour ericssonResponse = new Neighbour();
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
 		SubscriptionRequest ericssonSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		ericssonResponse.setCapabilities(ericssonCapabilities);
 		ericssonResponse.setSubscriptionRequest(ericssonSubscriptionRequest);
 
-		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
+		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
+		doReturn(self).when(selfRepository).findByName(any(String.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(1)).postCapabilities(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(1)).postCapabilities(any(Neighbour.class), any(Neighbour.class));
 	}
 
 	@Test
 	public void gracefulBackoffPostOfSubscriptionRequestHappensIfAllowedPostTimeHasPassed(){
 
-		when(interchangeRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		SubscriptionRequest ericssonSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
-		doReturn(ericssonSubscriptionRequest).when(neighbourRESTFacade).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
+		doReturn(ericssonSubscriptionRequest).when(neighbourRESTFacade).postSubscriptionRequest(any(Neighbour.class), any(Neighbour.class));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
-		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
+		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
+		doReturn(self).when(selfRepository).findByName(any(String.class));
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
-		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Interchange.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), any(Neighbour.class));
 	}
 
 	@Test
 	public void gracefulBackoffPollOfSubscriptionHappensIfAllowedPostTimeHasPassed(){
 
-		// Return an interchange with a subscription to poll.
-		when(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		// Return an Neighbour with a subscription to poll.
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 
 		// Mock result of polling in backoff.
 		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.FAILED);
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
-		doReturn(ericssonSubscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+		doReturn(ericssonSubscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
-		doReturn(ericsson).when(interchangeRepository).save(any(Interchange.class));
+		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 		neighbourDiscoverer.gracefulBackoffPollSubscriptions();
 
-		verify(neighbourRESTFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Interchange.class));
+		verify(neighbourRESTFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
 
 	@Test
 	public void failedPostOfCapabilitiesInBackoffIncreasesNumberOfBackoffAttempts(){
 		ericsson.setBackoffAttempts(0);
-		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
-		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
+		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+		doReturn(self).when(selfRepository).findByName(any(String.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
@@ -379,16 +370,18 @@ public class NeighbourDiscovererTest {
 	}
 
 	@Test
-	public void unsuccessfulPostOfCapabilitiesToNodeTooManyPreviousBackoffAttemptsMarksCapabilitiesUnreachable(){
+	public void unsuccessfulPostOfCapabilitiesToNodeWithTooManyPreviousBackoffAttemptsMarksCapabilitiesUnreachable(){
 		ericsson.setBackoffAttempts(4);
 
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(firstDataType));
 		ericsson.setCapabilities(ericssonCapabilities);
 
-		when(interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusSeconds(10);
 		doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Interchange.class), any(Interchange.class));
+		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+
+		doReturn(self).when(selfRepository).findByName(any(String.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
@@ -405,75 +398,75 @@ public class NeighbourDiscovererTest {
 		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		ericsson.setFedIn(ericssonSubscription);
-		when(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(ericsson));
 
 		Subscription polledSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.ACCEPTED);
-		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Interchange.class))).thenReturn(polledSubscription);
+		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neighbourDiscoverer.pollSubscriptions();
 
-		verify(interchangeRepository, times(1)).save(any(Interchange.class));
+		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
 
 	@Test
 	public void allSubscriptionsHaveFinalStatusFlipsFedInStatusToEstablished(){
 
-		Interchange spyInterchange = spy(Interchange.class);
+		Neighbour spyNeighbour = spy(Neighbour.class);
 
 		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		subscription.setNumberOfPolls(0);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
-		spyInterchange.setFedIn(subscriptionRequest);
-		when(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyInterchange));
+		spyNeighbour.setFedIn(subscriptionRequest);
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
 
 		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.CREATED);
-		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Interchange.class))).thenReturn(createdSubscription);
+		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neighbourDiscoverer.pollSubscriptions();
 
-		Assert.assertEquals(spyInterchange.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		Assert.assertEquals(spyNeighbour.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 
 	}
 
 	@Test
 	public void allSubscriptionsRejectedFlipsFedInStatusToRejected(){
-		Interchange spyInterchange = spy(Interchange.class);
+		Neighbour spyNeighbour = spy(Neighbour.class);
 
 		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		subscription.setNumberOfPolls(0);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
-		spyInterchange.setFedIn(subscriptionRequest);
-		when(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyInterchange));
+		spyNeighbour.setFedIn(subscriptionRequest);
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
 
 		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REJECTED);
-		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Interchange.class))).thenReturn(createdSubscription);
+		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neighbourDiscoverer.pollSubscriptions();
 
-		Assert.assertEquals(spyInterchange.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+		Assert.assertEquals(spyNeighbour.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
 	}
 
 	@Test
 	public void subscriptionStatusAcceptedKeepsFedInStatusRequested(){
-		Interchange spyInterchange = spy(Interchange.class);
+		Neighbour spyNeighbour = spy(Neighbour.class);
 
 		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
 		subscription.setNumberOfPolls(0);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
-		spyInterchange.setFedIn(subscriptionRequest);
+		spyNeighbour.setFedIn(subscriptionRequest);
 
-		when(interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyInterchange));
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
 
 		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.ACCEPTED);
-		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Interchange.class))).thenReturn(createdSubscription);
+		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neighbourDiscoverer.pollSubscriptions();
 
-		Assert.assertEquals(spyInterchange.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		Assert.assertEquals(spyNeighbour.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 	}
 
 

@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +26,11 @@ public class DNSFacade {
 		this.dnsProperties = dnsProperties;
 	}
 
-	// Returns a list of interchanges discovered through DNS lookup.
-	public List<Interchange> getNeighbours() {
 
-		List<Interchange> interchanges = new ArrayList<>();
+	// Returns a list of neighbours discovered through DNS lookup.
+	public List<Neighbour> getNeighbours() {
+
+		List<Neighbour> neighbours = new ArrayList<>();
 
 		// TODO: get control channel port nr from separate SRV lookup.
 
@@ -52,22 +53,22 @@ public class DNSFacade {
 				String domainName = srv.getTarget().toString();
 				String messageChannelPort = String.valueOf(srv.getPort());
 
-				Interchange interchange = new Interchange();
-				interchange.setName(domainName.substring(0, domainName.length()-1));
-				interchange.setMessageChannelPort(messageChannelPort);
-				interchange.setControlChannelPort(dnsProperties.getControlChannelPort());
+				Neighbour neighbour = new Neighbour();
+				neighbour.setName(domainName.substring(0, domainName.length()-1));
+				neighbour.setMessageChannelPort(messageChannelPort);
+				neighbour.setControlChannelPort(dnsProperties.getControlChannelPort());
 
-				interchanges.add(interchange);
+				neighbours.add(neighbour);
 				ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-				String json = ow.writeValueAsString(interchange);
-				logger.debug("DNS lookup gave interchange: \n" + json);
+				String json = ow.writeValueAsString(neighbour);
+				logger.debug("DNS lookup gave Neighbour: \n" + json);
 			}
 
 		} catch (Exception e) {
 			logger.error("Error in DNSFacade", e);
 		}
 
-		return interchanges;
+		return neighbours;
 	}
 
 }

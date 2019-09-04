@@ -77,6 +77,12 @@
       "description": "Time, in milliseconds, between each attempt at posting a subscription request.",
       "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
       "defaultValue": "15000"
+    },{
+      "name": "discoverer.updated-service-provider-check-interval",
+      "type": "java.lang.String",
+      "description": "Time, in milliseconds, between each check for updated Service Providers.",
+      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
+      "defaultValue": "20000"
     },
     {
       "name": "graceful-backoff.check-interval",

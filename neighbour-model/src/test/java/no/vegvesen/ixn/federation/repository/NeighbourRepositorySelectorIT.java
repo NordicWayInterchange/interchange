@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.junit.Assert;
@@ -20,16 +20,16 @@ import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class InterchangeRepositorySelectorIT {
+public class NeighbourRepositorySelectorIT {
 
-	private Interchange ericsson;
+	private Neighbour ericsson;
 
 	@Autowired
-	private InterchangeRepository interchangeRepository;
+	private NeighbourRepository neighbourRepository;
 
 	@Before
 	public void before(){
-		ericsson = new Interchange();
+		ericsson = new Neighbour();
 		ericsson.setName("ericsson.itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()));
@@ -37,9 +37,9 @@ public class InterchangeRepositorySelectorIT {
 		ericsson.setFedIn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()));
 	}
 
-	public boolean interchangeInList(String interchangeName, List<Interchange> listOfInterchanges){
+	public boolean interchangeInList(String interchangeName, List<Neighbour> listOfInterchanges){
 
-		for(Interchange i : listOfInterchanges){
+		for(Neighbour i : listOfInterchanges){
 			if(i.getName().equals(interchangeName)){
 				return true;
 			}
@@ -49,20 +49,20 @@ public class InterchangeRepositorySelectorIT {
 
 	@Test
 	public void helperMethodIsTrueIfInterchangeIsInList(){
-		Interchange volvo = new Interchange();
+		Neighbour volvo = new Neighbour();
 		volvo.setName("Volvo");
 
-		List<Interchange> volvoInList = Collections.singletonList(volvo);
+		List<Neighbour> volvoInList = Collections.singletonList(volvo);
 
 		Assert.assertTrue(interchangeInList("Volvo", volvoInList));
 	}
 
 	@Test
 	public void helperMethodIsFalseIfInterchangeNotInList(){
-		Interchange tesla = new Interchange();
+		Neighbour tesla = new Neighbour();
 		tesla.setName("Tesla");
 
-		List<Interchange> volvoNotInList = Collections.singletonList(tesla);
+		List<Neighbour> volvoNotInList = Collections.singletonList(tesla);
 
 		Assert.assertFalse(interchangeInList("Volvo", volvoNotInList));
 	}
@@ -72,9 +72,9 @@ public class InterchangeRepositorySelectorIT {
 		ericsson.setName("ericsson-1");
 		ericsson.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		ericsson.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
-		interchangeRepository.save(ericsson);
+		neighbourRepository.save(ericsson);
 
-		List<Interchange> getInterchangeForSubscriptionRequest = interchangeRepository.findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		List<Neighbour> getInterchangeForSubscriptionRequest = neighbourRepository.findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeForSubscriptionRequest));
 	}
@@ -83,9 +83,9 @@ public class InterchangeRepositorySelectorIT {
 	public void interchangeWithUnknownCapabilitiesIsSelectedForCapabilityExchange(){
 		ericsson.setName("ericsson-2");
 		ericsson.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-		interchangeRepository.save(ericsson);
+		neighbourRepository.save(ericsson);
 
-		List<Interchange> getInterchangesForCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
+		List<Neighbour> getInterchangesForCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesForCapabilityExchange));
 	}
@@ -94,9 +94,9 @@ public class InterchangeRepositorySelectorIT {
 	public void interchangeWithFailedInIsSelectedForGracefulBackoff(){
 		ericsson.setName("ericsson-3");
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
-		interchangeRepository.save(ericsson);
+		neighbourRepository.save(ericsson);
 
-		List<Interchange> getInterchangesWithFailedFedIn = interchangeRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
+		List<Neighbour> getInterchangesWithFailedFedIn = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedFedIn ));
 	}
@@ -105,9 +105,9 @@ public class InterchangeRepositorySelectorIT {
 	public void interchangeWithFailedCapabilityExchangeIsSelectedForGracefulBackoff(){
 		ericsson.setName("ericsson-4");
 		ericsson.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
-		interchangeRepository.save(ericsson);
+		neighbourRepository.save(ericsson);
 
-		List<Interchange> getInterchangesWithFailedCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
+		List<Neighbour> getInterchangesWithFailedCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedCapabilityExchange));
 	}
@@ -122,17 +122,17 @@ public class InterchangeRepositorySelectorIT {
 		subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
 		ericsson.getFedIn().setSubscriptions(Collections.singleton(subscription));
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
-		interchangeRepository.save(ericsson);
+		neighbourRepository.save(ericsson);
 
 		Subscription subscriptionA = new Subscription();
 		subscriptionA.setSelector("where LIKE 'OM'");
 		subscriptionA.setSubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
 		SubscriptionRequest fedin = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Sets.newSet(subscriptionA));
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
-		Interchange ericssonA = new Interchange("ericsson-5-A", capabilities, null, fedin);
-		interchangeRepository.save(ericssonA);
+		Neighbour ericssonA = new Neighbour("ericsson-5-A", capabilities, null, fedin);
+		neighbourRepository.save(ericssonA);
 
-		List<Interchange> getInterchangeWithRequestedSubscriptionsInFedIn = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(
+		List<Neighbour> getInterchangeWithRequestedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
 				Subscription.SubscriptionStatus.ACCEPTED, Subscription.SubscriptionStatus.REQUESTED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeWithRequestedSubscriptionsInFedIn));
@@ -150,9 +150,9 @@ public class InterchangeRepositorySelectorIT {
 		subscriptionSet.add(subscription);
 		ericsson.getFedIn().setSubscriptions(subscriptionSet);
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
-		interchangeRepository.save(ericsson);
+		neighbourRepository.save(ericsson);
 
-		List<Interchange> getInterchangesWithFailedSubscriptionInFedIn = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED);
+		List<Neighbour> getInterchangesWithFailedSubscriptionInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedSubscriptionInFedIn));
 	}
@@ -167,9 +167,9 @@ public class InterchangeRepositorySelectorIT {
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		ericsson.setFedIn(subscriptionRequest);
-		interchangeRepository.save(ericsson);
+		neighbourRepository.save(ericsson);
 
-		List<Interchange> interchangeWithFedInRequested = interchangeRepository.findByFedIn_StatusIn(
+		List<Neighbour> interchangeWithFedInRequested = neighbourRepository.findByFedIn_StatusIn(
 				SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInRequested));
@@ -184,9 +184,9 @@ public class InterchangeRepositorySelectorIT {
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 		ericsson.setFedIn(subscriptionRequest);
-		interchangeRepository.save(ericsson);
+		neighbourRepository.save(ericsson);
 
-		List<Interchange> interchangeWithFedInEstablished = interchangeRepository.findByFedIn_StatusIn(
+		List<Neighbour> interchangeWithFedInEstablished = neighbourRepository.findByFedIn_StatusIn(
 				SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInEstablished));
@@ -201,9 +201,9 @@ public class InterchangeRepositorySelectorIT {
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
 		ericsson.setFedIn(subscriptionRequest);
-		interchangeRepository.save(ericsson);
+		neighbourRepository.save(ericsson);
 
-		List<Interchange> interchangeWithFedInRejected = interchangeRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+		List<Neighbour> interchangeWithFedInRejected = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInRejected));
 	}

@@ -4,131 +4,34 @@
   "modelVersion": "7.0",
   "exchanges": [
     {
-      "name" : "fedEx",
-      "type" : "headers",
-      "durable" : true,
-      "durableBindings": [
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where='NO'"
-          },
-          "bindingKey": "where",
-          "destination": "NO-out"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where='NO'"
-          },
-          "bindingKey": "where",
-          "destination": "king_harald"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where='SE'"
-          },
-          "bindingKey": "where",
-          "destination": "king_gustaf"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where LIKE '%'"
-          },
-          "bindingKey": "where",
-          "destination": "test-out"
-        }
-      ]
-    },
-    {
       "name": "nwEx",
       "type": "headers",
       "durable": true,
       "durableBindings": [
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where='NO'"
-          },
-          "bindingKey": "where",
-          "destination": "NO-out"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where='NO'"
-          },
-          "bindingKey": "where",
-          "destination": "king_harald"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where='SE'"
-          },
-          "bindingKey": "where",
-          "destination": "king_gustaf"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "where LIKE '%'"
-          },
-          "bindingKey": "where",
-          "destination": "test-out"
-        }
+      ]
+    },
+    {
+      "name": "fedEx",
+      "type": "headers",
+      "durable": true,
+      "durableBindings": [
       ]
     }
   ],
   "queues": [
     {
-      "id": "bb885764-c684-4138-8e9d-b1342c7582ae",
-      "name": "dlqueue",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "messageDurability": "ALWAYS",
-      "owner": null,
-      "lastUpdatedBy": "interchange",
-      "createdBy": "interchange"
-    },
-    {
-      "id": "62db8a58-26c6-4121-8a79-2d6db32e13f9",
-      "name": "king_gustaf",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "messageDurability": "ALWAYS",
-      "owner": null,
-      "lastUpdatedBy": "interchange",
-      "createdBy": "interchange"
-    },
-    {
-      "id": "ada38ba3-a880-4abd-8ecb-d5fb517523db",
-      "name": "king_harald",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "messageDurability": "ALWAYS",
-      "owner": null,
-      "lastUpdatedBy": "interchange",
-      "createdBy": "interchange"
-    },
-    {
-      "id": "502bde7b-a4e9-47cb-912d-d960647746b9",
       "name": "onramp",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
-      "messageDurability": "ALWAYS",
-      "owner": null,
-      "lastUpdatedBy": "interchange",
-      "createdBy": "interchange"
+      "owner": null
     },
     {
-      "id": "0c78cf35-f87b-4720-906f-6548d0786ec6",
-      "name": "test-out",
+      "name": "dlqueue",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
-      "messageDurability": "ALWAYS",
-      "owner": null,
-      "lastUpdatedBy": "interchange",
-      "createdBy": "interchange"
+      "owner": null
     }
   ],
   "virtualhostaccesscontrolproviders": [
@@ -139,14 +42,14 @@
       "rules": [
         {
           "objectType": "ALL",
-          "identity": "administrators",
+          "identity": "interchange",
           "operation": "ALL",
           "outcome": "ALLOW_LOG",
           "attributes": {}
         },
         {
           "objectType": "ALL",
-          "identity": "interchange",
+          "identity": "administrators",
           "operation": "ALL",
           "outcome": "ALLOW_LOG",
           "attributes": {}
@@ -162,12 +65,12 @@
           }
         },
         {
-          "objectType" : "EXCHANGE",
-          "identity" : "federated-interchanges",
-          "operation" : "PUBLISH",
-          "outcome" : "ALLOW_LOG",
-          "attributes" : {
-            "NAME" : "fedEx"
+          "objectType": "VIRTUALHOST",
+          "identity": "service-providers",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
           }
         },
         {
@@ -175,42 +78,26 @@
           "identity": "federated-interchanges",
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
-          "attributes": {}
+          "attributes": {
+            "NAME": "localhost"
+          }
         },
         {
-          "objectType": "VIRTUALHOST",
-          "identity": "service-providers",
-          "operation": "ACCESS",
+          "objectType": "EXCHANGE",
+          "identity": "federated-interchanges",
+          "operation": "PUBLISH",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "local.itsinterchange.eu"
+            "NAME": "fedEx"
           }
         },
         {
           "objectType": "QUEUE",
-          "identity": "service-providers",
+          "identity": "interchange",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "test-out"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_harald",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "king_harald"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_gustaf",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "king_gustaf"
+            "NAME": "onramp"
           }
         },
         {

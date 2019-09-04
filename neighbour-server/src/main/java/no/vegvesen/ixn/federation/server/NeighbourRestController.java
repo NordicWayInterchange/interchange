@@ -9,9 +9,10 @@ import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
-import no.vegvesen.ixn.federation.repository.InterchangeRepository;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +38,8 @@ public class NeighbourRestController {
 
 	@Value("${interchange.node-provider.name}")
 	private String myName;
-	private InterchangeRepository interchangeRepository;
-	private ServiceProviderRepository serviceProviderRepository;
+	private NeighbourRepository neighbourRepository;
+	private SelfRepository selfRepository;
 	private CapabilityTransformer capabilityTransformer;
 	private SubscriptionTransformer subscriptionTransformer;
 	private SubscriptionRequestTransformer subscriptionRequestTransformer;
@@ -47,49 +48,61 @@ public class NeighbourRestController {
 	private DNSFacade dnsFacade;
 
 	@Autowired
-	public NeighbourRestController(InterchangeRepository interchangeRepository,
-								   ServiceProviderRepository serviceProviderRepository,
+	public NeighbourRestController(NeighbourRepository neighbourRepository,
+								   SelfRepository selfRepository,
 								   CapabilityTransformer capabilityTransformer,
 								   SubscriptionTransformer subscriptionTransformer,
 								   SubscriptionRequestTransformer subscriptionRequestTransformer,
 								   DNSFacade dnsFacade) {
 
-		this.interchangeRepository = interchangeRepository;
-		this.serviceProviderRepository = serviceProviderRepository;
+		this.neighbourRepository = neighbourRepository;
+		this.selfRepository = selfRepository;
 		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
 		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
 		this.dnsFacade = dnsFacade;
 	}
 
+	private Self getSelf(){
+		Self self = selfRepository.findByName(myName);
+
+		if(self == null){
+			self = new Self(myName);
+		}
+
+		return self;
+	}
+
 
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
-	Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
+	private Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
 
-		Set<DataType> localCapabilities = getInterchangeWithLocalCapabilities().getCapabilities().getDataTypes();
+		// Get local Service Provider capabilities.
+		Self self = getSelf();
+		Set<DataType> localCapabilities = self.getLocalCapabilities();
 
+		// Process the subscription request
 		for (Subscription neighbourSubscription : neighbourSubscriptionRequest) {
 
-			// Initial value is NO_OVERLAP.
-			// This value is updated if selector matches a data type or is illegal or not valid.
+			// The initial status of a subscription is NO_OVERLAP.
+			// This status is updated if the selector matches a local data type or is illegal or not valid.
 			neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NO_OVERLAP);
 
 			for (DataType localDataType : localCapabilities) {
 				try {
 					if (CapabilityMatcher.matches(localDataType, neighbourSubscription.getSelector())) {
-						// Subscription matches data type and everything is ok.
-						// Set subscription status requested.
+						// Subscription matches local data type - update status to ACCEPTED
 						neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
 					}
 				} catch (IllegalArgumentException e) {
-					// Illegal filter - filter always true
+					// The subscription has an illegal selector - selector always true
 					logger.error("Subscription had illegal selectors.", e);
 					logger.warn("Setting status of subscription to ILLEGAL");
 					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ILLEGAL);
 
 				} catch (ParseException e) {
-					// Selector not valid
+					// The subscription has an invalid selector
 					logger.error("Subscription has invalid selector.", e);
 					logger.warn("Setting status of subscription to NOT_VALID");
 					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NOT_VALID);
@@ -99,7 +112,7 @@ public class NeighbourRestController {
 		return neighbourSubscriptionRequest;
 	}
 
-	void checkIfCommonNameMatchesNameInApiObject(String apiName) {
+	private void checkIfCommonNameMatchesNameInApiObject(String apiName) {
 
 		Object principal = SecurityContextHolder.getContext().getAuthentication();
 		String commonName = ((Authentication) principal).getName();
@@ -113,7 +126,7 @@ public class NeighbourRestController {
 
 	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ApiResponses({@ApiResponse(code = 202, message = "Successfully requested a subscription", response = SubscriptionRequestApi.class),
-			@ApiResponse(code = 403, message = "Common name in certificate and interchange name in path does not match.", response = ErrorDetails.class)})
+			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -125,31 +138,31 @@ public class NeighbourRestController {
 		checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 		logger.info("Common name of certificate matched name in API object.");
 
-		// Convert SubscriptionRequestApi object to Interchange object.
-		Interchange incomingSubscriptionRequestInterchange = subscriptionRequestTransformer.subscriptionRequestApiToInterchange(neighbourSubscriptionRequest);
-		logger.info("Converted incoming subscription request api to Interchange representing neighbour {}.", incomingSubscriptionRequestInterchange.getName());
+		// Convert SubscriptionRequestApi object to Neighbour object.
+		Neighbour incomingSubscriptionRequestNeighbour = subscriptionRequestTransformer.subscriptionRequestApiToNeighbour(neighbourSubscriptionRequest);
+		logger.info("Converted incoming subscription request api to Neighbour representing neighbour {}.", incomingSubscriptionRequestNeighbour.getName());
 
 		logger.info("Looking up neighbour in database.");
-		Interchange neighbourToUpdate = interchangeRepository.findByName(incomingSubscriptionRequestInterchange.getName());
+		Neighbour neighbourToUpdate = neighbourRepository.findByName(incomingSubscriptionRequestNeighbour.getName());
 
 		if (neighbourToUpdate == null) {
-			// Neighbour does not exist in DB. Set capabilities status UNKNOWN. TODO: lookup neighbour in DNS. If they don't exist in the dns, don't save them.
+			// Neighbour does not exist in DB. Set capabilities status UNKNOWN.
 			logger.info("Subscription request was from unknown neighbour");
 
-			neighbourToUpdate = incomingSubscriptionRequestInterchange;
+			// Perform DNS lookup on neighbour and set capabilities status to UNKNOWN
+			neighbourToUpdate = findNeighbourInDns(incomingSubscriptionRequestNeighbour);
 			neighbourToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
 			logger.info("Setting capabilities status of neighbour to UNKNOWN.");
-			// TODO: DNS lookup
 		}
 
 		//Check if subscription request is empty or not
-		if (neighbourToUpdate.getSubscriptionRequest().getSubscriptions().isEmpty() && incomingSubscriptionRequestInterchange.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+		if (neighbourToUpdate.getSubscriptionRequest().getSubscriptions().isEmpty() && incomingSubscriptionRequestNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
 			logger.info("Neighbour with no existing subscription posted empty subscription request.");
 			logger.info("Returning empty subscription request.");
 			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
 
 			return new SubscriptionRequestApi(neighbourToUpdate.getName(), Collections.emptySet());
-		} else if (!neighbourToUpdate.getSubscriptionRequest().getSubscriptions().isEmpty() && incomingSubscriptionRequestInterchange.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+		} else if (!neighbourToUpdate.getSubscriptionRequest().getSubscriptions().isEmpty() && incomingSubscriptionRequestNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
 			// empty subscription request - tear down existing subscription.
 			logger.info("Received empty subscription request.");
 			logger.info("Neighbour has existing subscription: {}", neighbourToUpdate.getSubscriptionRequest().getSubscriptions().toString());
@@ -162,7 +175,7 @@ public class NeighbourRestController {
 
 			logger.info("Received non-empty subscription request.");
 			logger.info("Processing subscription request...");
-			Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(neighbourSubscriptionRequest.getSubscriptions());
+			Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(incomingSubscriptionRequestNeighbour.getSubscriptionRequest().getSubscriptions());
 			neighbourToUpdate.getSubscriptionRequest().setSubscriptions(processedSubscriptionRequest);
 			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
@@ -170,27 +183,27 @@ public class NeighbourRestController {
 
 			logger.info("Saving neighbour in DB to generate paths for the subscriptions.");
 			// Save neighbour in DB to generate subscription ids for subscription paths.
-			neighbourToUpdate = interchangeRepository.save(neighbourToUpdate);
+			neighbourToUpdate = neighbourRepository.save(neighbourToUpdate);
 
 			logger.info("Paths for requested subscriptions created.");
 			// Create a path for each subscription
 			for (Subscription subscription : neighbourToUpdate.getSubscriptionRequest().getSubscriptions()) {
-				String path = neighbourToUpdate.getName() + "/subscription/" + subscription.getId();
+				String path = "/" + neighbourToUpdate.getName() + "/subscription/" + subscription.getId();
 				subscription.setPath(path);
 				logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
 			}
 		}
 
 		// Save neighbour again, with generated paths.
-		interchangeRepository.save(neighbourToUpdate);
-		logger.info("Saving updated interchange: {}", neighbourToUpdate.toString());
-		return subscriptionRequestTransformer.interchangeToSubscriptionRequestApi(neighbourToUpdate);
+		neighbourRepository.save(neighbourToUpdate);
+		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
+		return subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbourToUpdate);
 	}
 
 	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ApiResponses({@ApiResponse(code = 200, message = "Successfully polled the subscription.", response = SubscriptionApi.class),
-			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the polling interchange does not exist.", response = ErrorDetails.class),
-			@ApiResponse(code = 403, message = "Common name in certificate and interchange name in path does not match.", response = ErrorDetails.class)})
+			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the polling Neighbour does not exist.", response = ErrorDetails.class),
+			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = SUBSCRIPTION_POLLING_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -200,60 +213,26 @@ public class NeighbourRestController {
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		checkIfCommonNameMatchesNameInApiObject(ixnName);
-		logger.info("Common name matches interchange name in path.");
+		logger.info("Common name matches Neighbour name in path.");
 
-		logger.info("Looking up polling interchange in DB.");
-		Interchange interchange = interchangeRepository.findByName(ixnName);
+		logger.info("Looking up polling Neighbour in DB.");
+		Neighbour Neighbour = neighbourRepository.findByName(ixnName);
 
-		if (interchange != null) {
+		if (Neighbour != null) {
 
-			Subscription subscription = interchange.getSubscriptionById(subscriptionId);
-			logger.info("Neighbour {} polled for status of subscription {}.", interchange.getName(), subscriptionId);
+			Subscription subscription = Neighbour.getSubscriptionById(subscriptionId);
+			logger.info("Neighbour {} polled for status of subscription {}.", Neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
 			return subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		} else {
-			throw new InterchangeNotFoundException("The requested interchange does not exist.");
+			throw new InterchangeNotFoundException("The requested Neighbour does not exist.");
 		}
-	}
-
-
-	protected Interchange getInterchangeWithLocalCapabilities() {
-
-		logger.info("Getting capabilities of local service providers");
-
-		Interchange interchangeWithLocalCapabilities = new Interchange();
-		interchangeWithLocalCapabilities.setName(myName);
-
-		// Create Interchange capabilities from Service Provider capabilities.
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-
-		// The set of data types to be returned
-		Set<DataType> setOfDataTypes = new HashSet<>();
-
-		for (ServiceProvider serviceProvider : serviceProviders) {
-			// Capabilities of current service provider
-			Set<DataType> serviceProviderCapabilities = serviceProvider.getCapabilities();
-
-			for (DataType dataType : serviceProviderCapabilities) {
-				// Remove duplicate capabilities.
-
-				if (!dataType.isContainedInSet(setOfDataTypes)) {
-					setOfDataTypes.add(dataType);
-				}
-			}
-		}
-
-		Capabilities serviceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, setOfDataTypes);
-		interchangeWithLocalCapabilities.setCapabilities(serviceProviderCapabilities);
-
-		logger.info("Interchange representation of local capabilities: {}", interchangeWithLocalCapabilities.toString());
-		return interchangeWithLocalCapabilities;
 	}
 
 	@ApiOperation(value = "Endpoint for capability exchange. Receives a capabilities from a neighbour and responds with local capabilities.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ApiResponses({@ApiResponse(code = 200, message = "Successfully posted capabilities.", response = CapabilityApi.class),
-			@ApiResponse(code = 403, message = "Common name in certificate and interchange name in path does not match.", response = ErrorDetails.class)})
+			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -263,41 +242,42 @@ public class NeighbourRestController {
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
-		logger.info("Common name of certificate matches interchange name in capability api object.");
+		logger.info("Common name of certificate matches Neighbour name in capability api object.");
 
-		// Transform CapabilityApi to Interchange to find posting neighbour in db
-		Interchange neighbour = capabilityTransformer.capabilityApiToInterchange(neighbourCapabilities);
+		// Transform CapabilityApi to Neighbour to find posting neighbour in db
+		Neighbour neighbour = capabilityTransformer.capabilityApiToNeighbour(neighbourCapabilities);
 
 		logger.info("Looking up neighbour in DB.");
-		Interchange interchangeToUpdate = interchangeRepository.findByName(neighbour.getName());
+		Neighbour neighbourToUpdate = neighbourRepository.findByName(neighbour.getName());
 
-		if (interchangeToUpdate == null) {
+		if (neighbourToUpdate == null) {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
-			interchangeToUpdate = findNeighbourInDns(neighbour);
+			neighbourToUpdate = findNeighbourInDns(neighbour);
 		} else {
 			logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
-			interchangeToUpdate.setCapabilities(neighbour.getCapabilities());
+			neighbourToUpdate.setCapabilities(neighbour.getCapabilities());
 		}
 
 		// Update status of capabilities to KNOWN, and set status of fedIn to EMPTY
 		// to trigger subscription request from client side.
-		interchangeToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		interchangeToUpdate.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		neighbourToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+		neighbourToUpdate.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
-		logger.info("Saving updated interchange: {}", interchangeToUpdate.toString());
-		interchangeRepository.save(interchangeToUpdate);
+		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
+		neighbourRepository.save(neighbourToUpdate);
 
 		// Post response
-		CapabilityApi capabilityApiResponse = capabilityTransformer.interchangeToCapabilityApi(getInterchangeWithLocalCapabilities());
+		Self self = getSelf();
+		CapabilityApi capabilityApiResponse = capabilityTransformer.selfToCapabilityApi(self);
 		logger.info("Responding with local capabilities: {}", capabilityApiResponse.toString());
 
 		return capabilityApiResponse;
 	}
 
-	private Interchange findNeighbourInDns(Interchange neighbour) {
-		List<Interchange> dnsNeighbours = dnsFacade.getNeighbours();
-		Interchange dnsNeighbour = null;
-		for (Interchange dnsNeighbourCandidate : dnsNeighbours) {
+	private Neighbour findNeighbourInDns(Neighbour neighbour) {
+		List<Neighbour> dnsNeighbours = dnsFacade.getNeighbours();
+		Neighbour dnsNeighbour = null;
+		for (Neighbour dnsNeighbourCandidate : dnsNeighbours) {
 			if (dnsNeighbourCandidate.getName().equals(neighbour.getName())) {
 				dnsNeighbour = dnsNeighbourCandidate;
 			}

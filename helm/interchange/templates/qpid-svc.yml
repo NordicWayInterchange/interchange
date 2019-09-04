@@ -41,3 +41,6 @@ spec:
   - name: http-qpid-gui
     port: 8080
     targetPort: http-qpid-gui
+  - name: https-qpid-rest
+    port: 443
+    targetPort: https-qpid-rest

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,15 +22,15 @@ public class DNSFacadeTest {
 
 	@Test
 	public void testNumberOfNeighbours(){
-		List<Interchange> interchanges = dnsFacade.getNeighbours();
-		Assert.assertTrue("Number of known interchanges in the actual dns is less than two", interchanges.size() >= 2);
+		List<Neighbour> neighbours = dnsFacade.getNeighbours();
+		Assert.assertTrue("Number of known Neighbours in the actual dns is less than two", neighbours.size() >= 2);
 	}
 
 	@Test
 	public void testThatDiscoveredNeighboursAreNotNull(){
-		List<Interchange> interchanges = dnsFacade.getNeighbours();
+		List<Neighbour> neighbours = dnsFacade.getNeighbours();
 
-		for(Interchange i : interchanges){
+		for(Neighbour i : neighbours){
 			System.out.println(i.toString());
 			Assert.assertNotNull(i);
 		}
@@ -38,8 +38,9 @@ public class DNSFacadeTest {
 
 	@Test
 	public void ericssonPresent() {
-		Interchange ericsson = null;
-		for (Interchange neighbour : dnsFacade.getNeighbours()) {
+		Neighbour ericsson = null;
+		for (Neighbour neighbour : dnsFacade.getNeighbours()) {
+
 			if (neighbour.getName().equals("ericsson.itsinterchange.eu")){
 				ericsson = neighbour;
 			}

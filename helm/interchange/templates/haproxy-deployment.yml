@@ -31,6 +31,8 @@ spec:
           containerPort: 8080
         - name: https-control
           containerPort: {{ .Values.self.control_channel_port }}
+        - name: onboard
+          containerPort: {{ .Values.self.service_provider_port }}
         volumeMounts:
         - name: config
           mountPath: /usr/local/etc/haproxy/

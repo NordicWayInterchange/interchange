@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.Subscriber;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.json.JSONArray;
@@ -22,26 +23,33 @@ import java.util.*;
 
 @Service
 public class QpidClient {
+
+	public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
+	public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
+
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
-	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s/nwEx";
+	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s";
 	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
+	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
 
-	private final String exchangeURL;
+	private final String exchangesURL;
 	private final String queuesURL;
 	private final String pingURL;
 	private final String groupsUrl;
 	private final RestTemplate restTemplate;
+	private final String aclRulesUrl;
 
 	@Autowired
 	public QpidClient(@Value("${qpid.rest.api.baseUrl}") String baseUrl,
 					  @Value("${qpid.rest.api.vhost}") String vhostName,
 					  RestTemplate restTemplate) {
-		this.exchangeURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
+		this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
 		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
 		this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
+		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
 		this.restTemplate = restTemplate;
 	}
 
@@ -68,8 +76,7 @@ public class QpidClient {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private void updateBinding(String binding, String queueName, String bindingKey) {
+	private void updateBinding(String binding, String queueName, String bindingKey, String exchangeName) {
 		JSONObject json = new JSONObject();
 		json.put("destination", queueName);
 		json.put("bindingKey", bindingKey);
@@ -81,13 +88,12 @@ public class QpidClient {
 		json.put("arguments", innerjson);
 		String jsonString = json.toString();
 
-		postQpid(exchangeURL, jsonString, "/bind");
+		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/bind");
 	}
 
-	@SuppressWarnings("unchecked")
-	void createQueue(Interchange interchange) {
+	void createQueue(Subscriber subscriber) {
 		JSONObject json = new JSONObject();
-		json.put("name", interchange.getName());
+		json.put("name", subscriber.getName());
 		json.put("durable", true);
 		String jsonString = json.toString();
 		postQpid(queuesURL, jsonString, "/");
@@ -119,39 +125,41 @@ public class QpidClient {
 		return null;
 	}
 
-	public SubscriptionRequest setupRouting(Interchange toSetUp) {
+	public SubscriptionRequest setupRouting(Subscriber toSetUp, String exchangeName) {
 		if (queueExists(toSetUp.getName())) {
-			unbindOldUnwantedBindings(toSetUp);
+			unbindOldUnwantedBindings(toSetUp, exchangeName);
 		} else {
 			createQueue(toSetUp);
 		}
 		SubscriptionRequest subscriptionRequest = toSetUp.getSubscriptionRequest();
 		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
-			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription));
+			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription), exchangeName);
 			subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
+		}
+		if (toSetUp instanceof ServiceProvider) {
+			addReadAccess(toSetUp, toSetUp.getName());
 		}
 		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 		return subscriptionRequest;
 	}
 
-	private void unbindOldUnwantedBindings(Interchange interchange) {
+	private void unbindOldUnwantedBindings(Subscriber interchange, String exchangeName) {
 		Set<String> unwantedBindKeys = getUnwantedBindKeys(interchange);
 		for (String unwantedBindKey : unwantedBindKeys) {
-			unbindBindKey(interchange, unwantedBindKey);
+			unbindBindKey(interchange, unwantedBindKey, exchangeName);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private void unbindBindKey(Interchange interchange, String unwantedBindKey) {
+	private void unbindBindKey(Subscriber interchange, String unwantedBindKey, String exchangeName) {
 		JSONObject json = new JSONObject();
 		json.put("destination", interchange.getName());
 		json.put("bindingKey", unwantedBindKey);
 		String jsonString = json.toString();
 
-		postQpid(exchangeURL, jsonString, "/unbind");
+		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/unbind");
 	}
 
-	private Set<String> getUnwantedBindKeys(Interchange interchange) {
+	private Set<String> getUnwantedBindKeys(Subscriber interchange) {
 		Set<String> existingBindKeys = getQueueBindKeys(interchange.getName());
 		Set<String> wantedBindKeys = wantedBindings(interchange);
 		Set<String> unwantedBindKeys = new HashSet<>(existingBindKeys);
@@ -159,7 +167,7 @@ public class QpidClient {
 		return unwantedBindKeys;
 	}
 
-	private Set<String> wantedBindings(Interchange interchange) {
+	private Set<String> wantedBindings(Subscriber interchange) {
 		Set<String> wantedBindings = new HashSet<>();
 		for (Subscription subscription : interchange.getSubscriptionRequest().getSubscriptions()) {
 			wantedBindings.add(bindKey(interchange, subscription));
@@ -167,7 +175,7 @@ public class QpidClient {
 		return wantedBindings;
 	}
 
-	private String bindKey(Interchange interchange, Subscription subscription) {
+	private String bindKey(Subscriber interchange, Subscription subscription) {
 		return interchange.getName() + "-" + subscription.getSelector().hashCode();
 	}
 
@@ -202,18 +210,18 @@ public class QpidClient {
 		String url = groupsUrl + groupName;
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-		logger.info("Received members of group {} from Qpid: {}", groupName, response.getBody());
+		logger.debug("Received members of group {} from Qpid: {}", groupName, response.getBody());
 
 		JSONArray jsonArray = new JSONArray(response.getBody());
 		ArrayList<String> groupMemberNames = new ArrayList<>();
 
-		for(int i=0; i<jsonArray.length(); i++){
+		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject ob = jsonArray.getJSONObject(i);
 			String userName = ob.getString("name");
 			groupMemberNames.add(userName);
 		}
 
-		logger.info("Returning list of group members: {}", groupMemberNames.toString());
+		logger.debug("Returning list of group members: {}", groupMemberNames.toString());
 		return groupMemberNames;
 	}
 
@@ -228,5 +236,40 @@ public class QpidClient {
 		String jsonString = groupJsonObject.toString();
 
 		postQpid(groupsUrl, jsonString, groupName);
+	}
+
+	void addReadAccess(Subscriber subscriber, String queue) {
+		List<String> aclRules = getACL();
+		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(subscriber, queue, aclRules);
+
+		StringBuilder newAclRules1 = new StringBuilder();
+		for (String aclRule : aclRules1) {
+			newAclRules1.append(aclRule).append("\r\n");
+		}
+		String newAclRules = newAclRules1.toString();
+
+		JSONObject base64EncodedAcl = new JSONObject();
+		base64EncodedAcl.put("path", "data:text/plain;base64," + Base64.getEncoder().encodeToString(newAclRules.getBytes()));
+		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
+		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
+		logger.info("Added read access to {} for Subscriber {}", queue, subscriber.getName());
+	}
+
+	List<String> addOneConsumeRuleBeforeLastRule(Subscriber subscriber, String newConsumeQueue, List<String> aclRulesLegacyFormat) {
+		LinkedList<String> aclRules = new LinkedList<>(aclRulesLegacyFormat);
+		String newAclEntry = String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", subscriber.getName(), newConsumeQueue);
+		aclRules.add(aclRules.size()-1, newAclEntry); // add the new rule before the last rule "DENY ALL"
+		logger.debug("new acl rules {}", aclRules);
+		return aclRules;
+	}
+
+	List<String> getACL() {
+		ResponseEntity<String> aclRulesResponse = restTemplate.getForEntity(aclRulesUrl + "/extractRules", String.class);
+		String aclRulesS = aclRulesResponse.getBody();
+		logger.debug("acl extractRules return code {}, body {}", aclRulesResponse.getStatusCodeValue(), aclRulesS);
+		if (aclRulesS == null) {
+			return new LinkedList<>();
+		}
+		return Arrays.asList(aclRulesS.split("\\r?\\n"));
 	}
 }

@@ -6,7 +6,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.InterchangeRepository;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +25,18 @@ import java.util.stream.Stream;
 @RequestMapping("/test")
 public abstract class NeighbourRestTestController {
 
-	private InterchangeRepository interchangeRepository;
+	private NeighbourRepository neighbourRepository;
 	private ServiceProviderRepository serviceProviderRepository;
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
 	private int pollingCounter = 0;
 
-	@Value("${interchange.node-provider.name}")
+	@Value("${Neighbour.node-provider.name}")
 	private String myName;
 
 	@Autowired
-	public NeighbourRestTestController(InterchangeRepository interchangeRepository, ServiceProviderRepository serviceProviderRepository){
-		this.interchangeRepository = interchangeRepository;
+	public NeighbourRestTestController(NeighbourRepository NeighbourRepository, ServiceProviderRepository serviceProviderRepository){
+		this.neighbourRepository = NeighbourRepository;
 		this.serviceProviderRepository = serviceProviderRepository;
 	}
 
@@ -47,28 +47,28 @@ public abstract class NeighbourRestTestController {
 		return serviceProvider;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/getStoredInterchanges")
-	public List<Interchange> getStoredInterchanges(){
-		Iterable<Interchange> storedInterchanges = interchangeRepository.findAll();
+	@RequestMapping(method = RequestMethod.GET, value = "/getStoredNeighbours")
+	public List<Neighbour> getStoredNeighbours(){
+		Iterable<Neighbour> storedNeighbours = neighbourRepository.findAll();
 
-		List<Interchange> interchanges = new ArrayList<>();
+		List<Neighbour> Neighbours = new ArrayList<>();
 
-		for(Interchange i : storedInterchanges){
-			interchanges.add(i);
+		for(Neighbour i : storedNeighbours){
+			Neighbours.add(i);
 		}
-		return interchanges;
+		return Neighbours;
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "{ixnName}/updateSubscriptionStatus/{subscriptionId}")
 	public Subscription updateSubscriptionStatus(@PathVariable String ixnName, @PathVariable Integer subscriptionId){
 
-		Interchange interchange = interchangeRepository.findByName(ixnName);
+		Neighbour Neighbour = neighbourRepository.findByName(ixnName);
 
-		if(interchange != null){
+		if(Neighbour != null){
 			try {
-				Subscription updateSubscription = interchange.getSubscriptionById(subscriptionId);
+				Subscription updateSubscription = Neighbour.getSubscriptionById(subscriptionId);
 				updateSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
-				interchangeRepository.save(interchange);
+				neighbourRepository.save(Neighbour);
 				return updateSubscription;
 
 			}catch(SubscriptionNotFoundException subscriptionNotFound){
@@ -76,7 +76,7 @@ public abstract class NeighbourRestTestController {
 				throw subscriptionNotFound;
 			}
 		} else{
-			throw new InterchangeNotFoundException("The requested interchange does not exist. ");
+			throw new InterchangeNotFoundException("The requested Neighbour does not exist. ");
 		}
 	}
 
@@ -85,10 +85,9 @@ public abstract class NeighbourRestTestController {
 	public SubscriptionRequestApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 
 		int i=0;
-		for(Subscription subscription : neighbourSubscriptionRequest.getSubscriptions()){
+		for(SubscriptionApi subscriptionApi : neighbourSubscriptionRequest.getSubscriptions()){
 			i +=1;
-			subscription.setPath("test/"+neighbourSubscriptionRequest.getName()+"/subscription/"+i);
-			subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+			subscriptionApi.setPath("test/"+neighbourSubscriptionRequest.getName()+"/subscription/"+i);
 		}
 
 		throw new RuntimeException("Error error");

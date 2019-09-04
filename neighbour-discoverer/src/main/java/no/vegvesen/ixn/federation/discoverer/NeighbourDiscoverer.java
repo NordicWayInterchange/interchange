@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.repository.InterchangeRepository;
+import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.utils.MDCUtil;
 import org.apache.qpid.server.filter.selector.ParseException;
 import org.slf4j.Logger;
@@ -34,8 +34,9 @@ import java.util.*;
 @Component
 public class NeighbourDiscoverer {
 
-	private InterchangeRepository interchangeRepository;
-	private ServiceProviderRepository serviceProviderRepository;
+	private NeighbourRepository neighbourRepository;
+	private SelfRepository selfRepository;
+	private DiscoveryStateRepository discoveryStateRepository;
 	private DNSFacade dnsFacade;
 	private Logger logger = LoggerFactory.getLogger(NeighbourDiscoverer.class);
 	private String myName;
@@ -47,82 +48,65 @@ public class NeighbourDiscoverer {
 
 	@Autowired
 	NeighbourDiscoverer(DNSFacade dnsFacade,
-						InterchangeRepository interchangeRepository,
-						ServiceProviderRepository serviceProviderRepository,
+						NeighbourRepository neighbourRepository,
+						SelfRepository selfRepository,
+						DiscoveryStateRepository discoveryStateRepository,
 						NeighbourRESTFacade neighbourRESTFacade,
 						@Value("${interchange.node-provider.name}") String myName,
 						GracefulBackoffProperties backoffProperties,
 						NeighbourDiscovererProperties discovererProperties) {
 		this.dnsFacade = dnsFacade;
-		this.interchangeRepository = interchangeRepository;
-		this.serviceProviderRepository = serviceProviderRepository;
+		this.neighbourRepository = neighbourRepository;
+		this.selfRepository = selfRepository;
+		this.discoveryStateRepository = discoveryStateRepository;
 		this.myName = myName;
 		this.neighbourRESTFacade = neighbourRESTFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
 	}
 
-	boolean setContainsSubscription(Subscription subscription, Set<Subscription> subscriptions) {
-		for (Subscription s : subscriptions) {
-			if (subscription.getSelector().equals(s.getSelector())) {
-				return true;
-			}
+	Neighbour getDiscoveringNeighbourWithCapabilities() {
+
+		Neighbour selfRepresentation = new Neighbour();
+		selfRepresentation.setName(myName);
+
+		Self self = selfRepository.findByName(myName);
+		if(self != null) {
+			Capabilities discoveringNeighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, self.getLocalCapabilities());
+			selfRepresentation.setCapabilities(discoveringNeighbourCapabilities);
 		}
-		return false;
+
+		logger.info("Representation of discovering Neighbour with capabilities: {}", selfRepresentation.toString());
+
+		return selfRepresentation;
 	}
 
-	Set<DataType> getLocalServiceProviderCapabilities() {
-		Set<DataType> capabilities = new HashSet<>();
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 
-		for (ServiceProvider serviceProvider : serviceProviders) {
-			Set<DataType> serviceProviderCapabilities = serviceProvider.getCapabilities();
+	private DiscoveryState getDiscoveryState(){
+		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
 
-			for (DataType dataType : serviceProviderCapabilities) {
-				// Remove duplicate capabilities.
-				if (!dataType.isContainedInSet(capabilities)) {
-					capabilities.add(dataType);
-				}
-			}
+		if(discoveryState == null) {
+			discoveryState = new DiscoveryState(myName);
+			discoveryStateRepository.save(discoveryState);
 		}
-		return capabilities;
+
+		return discoveryState;
 	}
 
-	Set<Subscription> getLocalServiceProviderSubscriptions() {
-		Set<Subscription> subscriptions = new HashSet<>();
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-
-		for (ServiceProvider serviceProvider : serviceProviders) {
-			Set<Subscription> serviceProviderSubscriptions = serviceProvider.getSubscriptions();
-			for (Subscription subscription : serviceProviderSubscriptions) {
-				// Remove duplicate subscriptions
-				if (!setContainsSubscription(subscription, subscriptions)) {
-					subscriptions.add(subscription);
-				}
-			}
-		}
-		return subscriptions;
-	}
-
-	Interchange getDiscoveringInterchangeWithCapabilities() {
-		Interchange myRepresentation = new Interchange();
-		myRepresentation.setName(myName);
-		Capabilities discoveringInterchangeCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getLocalServiceProviderCapabilities());
-		myRepresentation.setCapabilities(discoveringInterchangeCapabilities);
-
-		logger.info("Representation of discovering interchange with capabilities: {}", myRepresentation.toString());
-
-		return myRepresentation;
-	}
-
-	Set<Subscription> calculateCustomSubscriptionForNeighbour(Interchange neighbour) {
+	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
+
+		Self self = selfRepository.findByName(myName);
+		if(self == null){
+			// No local subscriptions
+			return Collections.emptySet();
+		}
 
 		Set<Subscription> calculatedSubscriptions = new HashSet<>();
 
 		try {
 			for (DataType neighbourDataType : neighbour.getCapabilities().getDataTypes()) {
-				for (Subscription localSubscription : getLocalServiceProviderSubscriptions()) {
+				for (Subscription localSubscription : self.getLocalSubscriptions()) {
 
 					// Trows ParseException if selector is invalid or IllegalArgumentException if selector is always true
 					if (CapabilityMatcher.matches(neighbourDataType, localSubscription.getSelector())) {
@@ -145,7 +129,7 @@ public class NeighbourDiscoverer {
 		return calculatedSubscriptions;
 	}
 
-	public Interchange updateFedInStatus(Interchange neighbour) {
+	private void updateFedInStatus(Neighbour neighbour) {
 
 		if (neighbour.getFedIn().subscriptionRequestEstablished()) {
 			logger.info("At least one subscription in fedIn has status CREATED. Setting status of fedIn to ESTABLISHED");
@@ -158,16 +142,15 @@ public class NeighbourDiscoverer {
 			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		}
 
-		return neighbour;
 	}
 
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPollSubscriptions() {
 
 		// All neighbours with a failed subscription in fedIn
-		List<Interchange> interchangesWithFailedSubscriptionsInFedIn = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED);
+		List<Neighbour> NeighboursWithFailedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED);
 
-		for (Interchange neighbour : interchangesWithFailedSubscriptionsInFedIn) {
+		for (Neighbour neighbour : NeighboursWithFailedSubscriptionsInFedIn) {
 			for (Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()) {
 
 				MDCUtil.setLogVariables(myName, neighbour.getName());
@@ -184,7 +167,7 @@ public class NeighbourDiscoverer {
 						failedSubscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						neighbour.setBackoffAttempts(0); // Reset number of back-offs to 0 after contact is re-established.
 
-						neighbour = updateFedInStatus(neighbour);
+						updateFedInStatus(neighbour);
 
 					} catch (SubscriptionPollException e) {
 						// Poll was not successful
@@ -197,7 +180,7 @@ public class NeighbourDiscoverer {
 							logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
 						}
 					} finally {
-						interchangeRepository.save(neighbour);
+						neighbourRepository.save(neighbour);
 						MDCUtil.removeLogVariables();
 					}
 				}
@@ -207,11 +190,11 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void pollSubscriptions() {
-		// All interchanges with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
-		List<Interchange> interchangesToPoll = interchangeRepository.findInterchangesByFedIn_Subscription_SubscriptionStatusIn(
+		// All Neighbours with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
+		List<Neighbour> NeighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
 				Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 
-		for (Interchange neighbour : interchangesToPoll) {
+		for (Neighbour neighbour : NeighboursToPoll) {
 			for (Subscription subscription : neighbour.getSubscriptionsForPolling()) {
 
 				MDCUtil.setLogVariables(myName, neighbour.getName());
@@ -228,8 +211,7 @@ public class NeighbourDiscoverer {
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
 						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
 
-						neighbour = updateFedInStatus(neighbour);
-
+						updateFedInStatus(neighbour);
 
 					} else {
 						// Number of poll attempts exceeds allowed number of poll attempts.
@@ -245,7 +227,7 @@ public class NeighbourDiscoverer {
 					logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.");
 				} finally {
 					logger.info("Saving updated neighbour: {}", neighbour.toString());
-					interchangeRepository.save(neighbour);
+					neighbourRepository.save(neighbour);
 					MDCUtil.removeLogVariables();
 				}
 			}
@@ -254,7 +236,7 @@ public class NeighbourDiscoverer {
 
 
 	// Calculates next possible post attempt time, using exponential backoff
-	LocalDateTime getNextPostAttemptTime(Interchange neighbour) {
+	LocalDateTime getNextPostAttemptTime(Neighbour neighbour) {
 
 		logger.info("Calculating next allowed time to contact neighbour.");
 		int randomShift = new Random().nextInt(backoffProperties.getRandomShiftUpperLimit());
@@ -270,24 +252,30 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostCapabilities() {
 
-		List<Interchange> neighboursWithFailedCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
+		DiscoveryState discoveryState = getDiscoveryState();
 
-		for (Interchange neighbour : neighboursWithFailedCapabilityExchange) {
+		List<Neighbour> neighboursWithFailedCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
+
+		for (Neighbour neighbour : neighboursWithFailedCapabilityExchange) {
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
 
 				MDCUtil.setLogVariables(myName, neighbour.getName());
 				logger.warn("Posting capabilities to neighbour {} in graceful backoff.", neighbour.getName());
 
 				try {
-					Interchange discoveringInterchange = getDiscoveringInterchangeWithCapabilities();
+					Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
 
 					// Throws CapabilityPostException if unsuccessful.
-					Interchange neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringInterchange, neighbour);
+					Neighbour neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringNeighbour, neighbour);
 
 					neighbour.setCapabilities(neighbourRepresentation.getCapabilities());
 					neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY); // Updated capabilities means we need to recalculate our subscription to the neighbour.
 					neighbour.setBackoffAttempts(0);
+
+					// Update discovery state
+					discoveryState.setLastCapabilityExchange(LocalDateTime.now());
+					discoveryStateRepository.save(discoveryState);
 
 					logger.info("Successfully posted capabilities to neighbour in graceful backoff.");
 
@@ -303,7 +291,7 @@ public class NeighbourDiscoverer {
 						logger.warn("Setting status of neighbour to UNREACHABLE.", neighbour.getName());
 					}
 				} finally {
-					interchangeRepository.save(neighbour);
+					neighbourRepository.save(neighbour);
 					logger.info("Saving updated neighbour: {}", neighbour.toString());
 					MDCUtil.removeLogVariables();
 				}
@@ -315,25 +303,31 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
 
-		List<Interchange> neighboursWithFailedSubscriptionRequest = interchangeRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
+		DiscoveryState discoveryState = getDiscoveryState();
 
-		for (Interchange neighbour : neighboursWithFailedSubscriptionRequest) {
+		List<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
+
+		for (Neighbour neighbour : neighboursWithFailedSubscriptionRequest) {
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
 
 				MDCUtil.setLogVariables(myName, neighbour.getName());
 				logger.info("Posting subscription request to neighbour {} in graceful backoff.", neighbour.getName());
 
 				try {
-					// Create representation of discovering interchange and calculate custom subscription for neighbour.
-					Interchange discoveringInterchange = getDiscoveringInterchangeWithCapabilities();
-					discoveringInterchange.getSubscriptionRequest().setSubscriptions(calculateCustomSubscriptionForNeighbour(neighbour));
+					// Create representation of discovering Neighbour and calculate custom subscription for neighbour.
+					Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
+					discoveringNeighbour.getSubscriptionRequest().setSubscriptions(calculateCustomSubscriptionForNeighbour(neighbour));
 
 					// Throws SubscriptionRequestException if unsuccessful.
-					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(discoveringInterchange, neighbour);
+					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
 
 					neighbour.setBackoffAttempts(0);
 					neighbour.setFedIn(postResponseSubscriptionRequest);
 					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+
+					// Update discovery state
+					discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+					discoveryStateRepository.save(discoveryState);
 
 					logger.info("Successfully posted subscription request to neighbour in graceful backoff.");
 
@@ -348,7 +342,7 @@ public class NeighbourDiscoverer {
 						logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
 					}
 				} finally {
-					neighbour = interchangeRepository.save(neighbour);
+					neighbour = neighbourRepository.save(neighbour);
 					logger.info("Saving updated neighbour: {}", neighbour.toString());
 					MDCUtil.removeLogVariables();
 				}
@@ -357,18 +351,54 @@ public class NeighbourDiscoverer {
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
-	public void subscriptionRequest() {
+	public void performSubscriptionRequestWithKnownNeighbours(){
+		// Perform subscription request with all neighbours with capabilities KNOWN and fedIn EMPTY
+		logger.info("Checking for any Neighbours with KNOWN capabilities and EMPTY fedIn for subscription request");
+		List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
-		// All neighbours with capabilities KNOWN and fedIn EMPTY
-		List<Interchange> neighboursForSubscriptionRequest = interchangeRepository.findInterchangesByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		if(!neighboursForSubscriptionRequest.isEmpty()){
+			subscriptionRequest(neighboursForSubscriptionRequest);
+		}
+	}
 
-		for (Interchange neighbour : neighboursForSubscriptionRequest) {
+	@Scheduled(fixedRateString = "${discoverer.updated-service-provider-check-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
+	public void checkForUpdatedServiceProviderSubscriptionRequests() {
+		// Check if representation of Self has been updated by local Service Providers.
+		// If Self has updated Subscriptions since last time we posted a subscription request, we need to recalculate the subscription request for all neighbours.
+
+		logger.info("Checking if any Service Providers have updated their subscriptions...");
+		logger.info("Self name: {}", myName);
+
+		Self self = selfRepository.findByName(myName);
+		if(self == null || self.getLocalSubscriptions().isEmpty()){
+			return; // We have nothing to post to our neighbour
+		}
+
+		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
+
+		if(discoveryState == null || discoveryState.getLastSubscriptionRequest() == null || self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest())){
+			// Either first post or an upate.
+			// Local Subscriptions have been updated since last time performed the subscription request.
+			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
+
+			logger.info("Local subscriptions have changed. Recalculating subscriptions to all neighbours...");
+
+			List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findAll();
+			subscriptionRequest(neighboursForSubscriptionRequest);
+		}
+	}
+
+	private void subscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest) {
+
+		DiscoveryState discoveryState = getDiscoveryState();
+
+		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 
-			// Create the representation of the discovering interchange and calculate the custom subscription for the neighbour.
-			Interchange discoveringInterchange = new Interchange();
-			discoveringInterchange.setName(myName);
+			// Create the representation of the discovering Neighbour and calculate the custom subscription for the neighbour.
+			Neighbour discoveringNeighbour = new Neighbour();
+			discoveringNeighbour.setName(myName);
 
 			Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour);
 
@@ -378,31 +408,42 @@ public class NeighbourDiscoverer {
 				// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
 				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
 
-				logger.info("Calculated subscription request for neighbour was empty. Setting Subscription status in fedIn to NO_OVERLAP");
+				logger.info("The calculated subscription request for neighbour {} was empty. Setting Subscription status in fedIn to NO_OVERLAP", neighbour.getName());
 
 				// Decide if we should post empty subscription request or not.
 				if (neighbour.getFedIn().getSubscriptions().isEmpty()) {
 					// No existing subscription to this neighbour, nothing to tear down
-					interchangeRepository.save(neighbour);
+					neighbourRepository.save(neighbour);
 					logger.info("Subscription to neighbour is empty. Nothing to tear down.");
 					MDCUtil.removeLogVariables();
 					return;
 				} else {
 					// We have an existing subscription to the neighbour, tear it down
-					discoveringInterchange.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
+					discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
 					logger.info("The calculated subscription request is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.", neighbour.getName());
 				}
 			} else {
 				// Calculated subscription is not empty, post as normal
-				discoveringInterchange.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, calculatedSubscriptionForNeighbour));
-				logger.info("The calculated subscription request is not empty. Posting subscription request: {}", neighbour.getName(), discoveringInterchange.toString());
+
+				if(calculatedSubscriptionForNeighbour.equals(neighbour.getFedIn().getSubscriptions())){
+					// The subscription request we want to post is the same as what we already subscribe to. Skip.
+					return;
+				}
+
+				// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
+				discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, calculatedSubscriptionForNeighbour));
+				logger.info("The calculated subscription request is not empty. Posting subscription request: {}", neighbour.getName(), discoveringNeighbour.toString());
 			}
 
 			try {
 				// Throws SubscriptionRequestException if unsuccessful
-				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringInterchange, neighbour);
+				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
 				neighbour.getFedIn().setSubscriptions(subscriptionRequestResponse.getSubscriptions());
 				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+
+				// Successful subscription request, update discovery state subscription request timestamp.
+				discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+				discoveryStateRepository.save(discoveryState);
 
 				logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
 
@@ -414,7 +455,7 @@ public class NeighbourDiscoverer {
 				logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
 
 			} finally {
-				neighbour = interchangeRepository.save(neighbour);
+				neighbour = neighbourRepository.save(neighbour);
 				logger.info("Saving updated neighbour: {}", neighbour.toString());
 				MDCUtil.removeLogVariables();
 			}
@@ -422,23 +463,66 @@ public class NeighbourDiscoverer {
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
-	public void capabilityExchange() {
+	public void performCapabilityExchangeWithUnknownNeighbours(){
+		// Perform capability exchange with all neighbours with capabilities status UNKNOWN that we have found through the DNS.
+		logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
+		List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 
-		List<Interchange> neighboursForCapabilityExchange = interchangeRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
+		if(!neighboursForCapabilityExchange.isEmpty()){
+			capabilityExchange(neighboursForCapabilityExchange);
+		}
+	}
 
-		for (Interchange neighbour : neighboursForCapabilityExchange) {
+	@Scheduled(fixedRateString = "${discoverer.updated-service-provider-check-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
+	public void checkForUpdatedServiceProviderCapabilities(){
+		// Check if representation of Self has been updated by local Service Providers.
+		// If Self has updated Capabilities since last time we posted our capabilities, we need to post our capabilities to all neighbours.
+
+		logger.info("Checking if any Service Providers have updated their capabilities...");
+
+		Self self = selfRepository.findByName(myName);
+		if(self == null || self.getLocalCapabilities().isEmpty()){
+			logger.info("Self was null. Waiting for normal capability exchange to be performed first.");
+			return; // We have nothing to post to our neighbours.
+		}
+
+		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
+
+		if(discoveryState == null || discoveryState.getLastCapabilityExchange()==null || self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange())){
+			// Capability post either not performed before, or Service Providers have been updated.
+			// Last updated capabilities is after last capability exchange - perform new capability exchange with all neighbours
+
+			logger.info("Local Service Providers have updated their subscriptions.");
+
+			List<Neighbour> allNeighbours = neighbourRepository.findAll();
+			if(!allNeighbours.isEmpty()) {
+				logger.info("Performing new capability exchange with all neighbours");
+				capabilityExchange(allNeighbours);
+			}
+		}
+	}
+
+	private void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
+
+		DiscoveryState discoveryState = getDiscoveryState();
+
+		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 
-			Interchange discoveringInterchange = getDiscoveringInterchangeWithCapabilities();
-			Interchange neighbourResponse;
+			Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
+			Neighbour neighbourResponse;
 
 			try {
 				// Throws CapabilityPostException if unsuccessful.
-				neighbourResponse = neighbourRESTFacade.postCapabilities(discoveringInterchange, neighbour);
+				neighbourResponse = neighbourRESTFacade.postCapabilities(discoveringNeighbour, neighbour);
 
 				neighbour.setCapabilities(neighbourResponse.getCapabilities());
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+
+				// Successful capability post, update discovery state capability post timestamp
+				discoveryState.setLastCapabilityExchange(LocalDateTime.now());
+				discoveryStateRepository.save(discoveryState);
 
 				logger.info("Successfully completed capability exchange.");
 				logger.debug("Updated neighbour: {}", neighbour.toString());
@@ -451,26 +535,28 @@ public class NeighbourDiscoverer {
 				logger.error("Unable to post capabilities to neighbour. Setting status of neighbour capabilities to FAILED.\n", e);
 
 			} finally {
-				neighbour = interchangeRepository.save(neighbour);
+				neighbour = neighbourRepository.save(neighbour);
 				logger.info("Saving updated neighbour: {}", neighbour.toString());
 				MDCUtil.removeLogVariables();
 			}
 		}
 	}
 
+
+
 	@Scheduled(fixedRateString = "${discoverer.dns-lookup-interval}", initialDelayString = "${discoverer.dns-initial-start-delay}")
-	public void checkForNewInterchanges() {
+	public void checkForNewNeighbours() {
 		logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
-		List<Interchange> neighbours = dnsFacade.getNeighbours();
+		List<Neighbour> neighbours = dnsFacade.getNeighbours();
 		logger.debug("Got neighbours from DNS {}.", neighbours);
 
-		for (Interchange neighbourInterchange : neighbours) {
-			if (interchangeRepository.findByName(neighbourInterchange.getName()) == null && !neighbourInterchange.getName().equals(myName)) {
+		for (Neighbour neighbourNeighbour : neighbours) {
+			if (neighbourRepository.findByName(neighbourNeighbour.getName()) == null && !neighbourNeighbour.getName().equals(myName)) {
 
-				// Found a new interchange. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
-				neighbourInterchange.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
+				// Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
+				neighbourNeighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
 				logger.info("Found a new neighbour. Saving in database");
-				interchangeRepository.save(neighbourInterchange);
+				neighbourRepository.save(neighbourNeighbour);
 			}
 		}
 	}

@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.api.v1_0;
 
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -19,15 +19,15 @@ public class CapabilityTransformerTest {
 	@Test
 	public void interchangeIsConvertedToCapabilityApiAndBack(){
 
-		Interchange interchange = new Interchange();
+		Neighbour interchange = new Neighbour();
 		interchange.setName("Test 1");
 		DataType dataType = new DataType("datex2;1.0", "NO", "Conditions");
 		Capabilities capabilities = new Capabilities();
 		capabilities.setDataTypes(Collections.singleton(dataType));
 		interchange.setCapabilities(capabilities);
 
-		CapabilityApi capabilityApi = capabilityTransformer.interchangeToCapabilityApi(interchange);
-		Interchange transformed = capabilityTransformer.capabilityApiToInterchange(capabilityApi);
+		CapabilityApi capabilityApi = capabilityTransformer.neighbourToCapabilityApi(interchange);
+		Neighbour transformed = capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
 
 		assertThat(transformed.getCapabilities().getDataTypes()).hasSize(1).contains(dataType);
 	}
@@ -39,8 +39,8 @@ public class CapabilityTransformerTest {
 		DataType capabilities = new DataType("datex2;1.0", "NO", "Conditions");
 		capabilityApi.setCapabilities(Collections.singleton(capabilities));
 
-		Interchange interchange = capabilityTransformer.capabilityApiToInterchange(capabilityApi);
-		CapabilityApi transformed = capabilityTransformer.interchangeToCapabilityApi(interchange);
+		Neighbour interchange = capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
+		CapabilityApi transformed = capabilityTransformer.neighbourToCapabilityApi(interchange);
 
 		assertThat(transformed.getCapabilities()).hasSize(1).contains(capabilities);
 	}

@@ -15,33 +15,33 @@ import java.util.Set;
 
 
 @Entity
-@Table(name = "interchanges", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_ixn_name"))
-public class Interchange {
+@Table(name = "neighbours", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_neighbour_name"))
+public class Neighbour implements Subscriber {
 
 	private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
 	private static final String DEFAULT_CONTROL_CHANNEL_PROTOCOL = "https";
 	private static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 
-	static Logger logger = LoggerFactory.getLogger(Interchange.class);
+	private static Logger logger = LoggerFactory.getLogger(Neighbour.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ixn_generator")
-	@SequenceGenerator(name = "ixn_generator", sequenceName = "ixn_seq")
-	@Column(name = "ixn_id")
-	private Integer ixn_id;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neighbour_generator")
+	@SequenceGenerator(name = "neighbour_generator", sequenceName = "neighbour_seq")
+	@Column(name = "neighbour_id")
+	private Integer neighbour_id;
 
-	private String name; // common name from the certificate
+	private String name;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "ixn_id_cap", referencedColumnName = "cap_id", foreignKey = @ForeignKey(name = "fk_cap_ixn"))
+	@JoinColumn(name = "neighbour_id_cap", referencedColumnName = "cap_id", foreignKey = @ForeignKey(name = "fk_cap_neighbour"))
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "ixn_id_sub_out", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_ixn_sub_out"))
+	@JoinColumn(name = "neighbour_id_sub_out", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_neighbour_sub_out"))
 	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "ixn_id_fed_in", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_ixn_fed_in"))
+	@JoinColumn(name = "neighbour_id_fed_in", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_neighbour_fed_in"))
 	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@UpdateTimestamp
@@ -52,24 +52,17 @@ public class Interchange {
 	private String messageChannelPort;
 	private String controlChannelPort;
 
-	public Interchange() {
+	public Neighbour() {
 	}
 
-	public Interchange(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn) {
+	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.subscriptionRequest = subscriptions;
 		this.fedIn = fedIn;
 	}
 
-	public Capabilities getCapabilities() {
-		return capabilities;
-	}
-
-	public void setCapabilities(Capabilities capabilities) {
-		this.capabilities = capabilities;
-	}
-
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -81,10 +74,20 @@ public class Interchange {
 		this.name = name;
 	}
 
+	public Capabilities getCapabilities() {
+		return capabilities;
+	}
+
+	public void setCapabilities(Capabilities capabilities) {
+		this.capabilities = capabilities;
+	}
+
+	@Override
 	public SubscriptionRequest getSubscriptionRequest() {
 		return subscriptionRequest;
 	}
 
+	@Override
 	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
 		this.subscriptionRequest = subscriptionRequest;
 	}
@@ -176,9 +179,9 @@ public class Interchange {
 
 	@Override
 	public String toString() {
-		return "Interchange{" +
-				"ixn_id=" + ixn_id +
-				", name='" + name + '\'' +
+		return "Neighbour{" +
+				"neighbour_id=" + neighbour_id +
+				", name='" + name +
 				", capabilities=" + capabilities +
 				", subscriptionRequest=" + subscriptionRequest +
 				", fedIn=" + fedIn +
@@ -186,18 +189,18 @@ public class Interchange {
 				", lastSeen=" + lastSeen +
 				", backoffStart=" + backoffStart +
 				", backoffAttempts=" + backoffAttempts +
-				", messageChannelPort='" + messageChannelPort + '\'' +
-				", controlChannelPort='" + controlChannelPort + '\'' +
+				", messageChannelPort='" + messageChannelPort +
+				", controlChannelPort='" + controlChannelPort +
 				'}';
 	}
 
 	public String getControlChannelUrl(String file) {
 		try {
 			if (this.getControlChannelPort() == null || this.getControlChannelPort().equals(DEFAULT_CONTROL_CHANNEL_PORT)) {
-				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getName(), file)
+				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, name, file)
 						.toExternalForm();
 			} else {
-				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, this.getName(), Integer.parseInt(this.getControlChannelPort()), file)
+				return new URL(DEFAULT_CONTROL_CHANNEL_PROTOCOL, name, Integer.parseInt(this.getControlChannelPort()), file)
 						.toExternalForm();
 			}
 		} catch (NumberFormatException | MalformedURLException e) {
@@ -209,9 +212,9 @@ public class Interchange {
 	public String getMessageChannelUrl() {
 		try {
 			if (this.getMessageChannelPort() == null || this.getMessageChannelPort().equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
-				return String.format("amqps://%s/", this.getName());
+				return String.format("amqps://%s/", name);
 			} else {
-				return String.format("amqps://%s:%s/", this.getName(), this.getMessageChannelPort());
+				return String.format("amqps://%s:%s/", name, this.getMessageChannelPort());
 			}
 		} catch (NumberFormatException e) {
 			logger.error("Could not create message channel url for interchange {}", this, e);

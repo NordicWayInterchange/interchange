@@ -28,7 +28,7 @@ spec:
         - name: POSTGRES_URI
           value: jdbc:postgresql://{{ .Release.Name }}-database:5432/federation
         - name: BASE_URL
-          value: https://{{ .Values.external_name }}
+          value: https://{{ .Release.Name }}-qpid-secure
         - name: SERVER_NAME
           value: {{ .Values.external_name | quote }}
         - name: TRUST_STORE

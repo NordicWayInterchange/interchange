@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "subscriptions")
@@ -66,6 +67,22 @@ public class Subscription {
 
 	public void setNumberOfPolls(int numberOfPolls) {
 		this.numberOfPolls = numberOfPolls;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) return false;
+		if (this == o) return true;
+		if (!(o instanceof Subscription)) return false;
+
+		Subscription that = (Subscription) o;
+
+		return selector.equals(that.selector);
+	}
+
+	@Override
+	public int hashCode() {
+		return selector.hashCode();
 	}
 
 	@Override

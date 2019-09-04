@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.forwarding;
 
 import no.vegvesen.ixn.IxnContext;
-import no.vegvesen.ixn.federation.model.Interchange;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +55,8 @@ public class MessageForwarder {
     }
 
     public void setupConnectionsToNewNeighbours() throws NamingException, JMSException {
-        List<Interchange> interchanges = neighbourFetcher.listNeighbourCandidates();
-        for (Interchange ixn : interchanges) {
+        List<Neighbour> interchanges = neighbourFetcher.listNeighbourCandidates();
+        for (Neighbour ixn : interchanges) {
             String name = ixn.getName();
             if (! listeners.containsKey(name)) {
                 logger.debug("Found ixn with name {}, port {}",ixn.getName(),ixn.getMessageChannelPort());
@@ -75,7 +75,7 @@ public class MessageForwarder {
         }
     }
 
-    public MessageConsumer createConsumerFromLocal(Interchange ixn) throws NamingException, JMSException {
+    public MessageConsumer createConsumerFromLocal(Neighbour ixn) throws NamingException, JMSException {
         String readUrl = String.format("amqps://%s:%s",properties.getLocalIxnDomainName(),properties.getLocalIxnFederationPort());
         String readQueue = ixn.getName();
 
@@ -89,7 +89,7 @@ public class MessageForwarder {
         return session.createConsumer(queueR);
     }
 
-    public MessageProducer createProducerToRemote(Interchange ixn) throws NamingException, JMSException {
+    public MessageProducer createProducerToRemote(Neighbour ixn) throws NamingException, JMSException {
         System.out.println(String.format("Connecting to %s",ixn.getName()));
         String writeUrl = ixn.getMessageChannelUrl();
         IxnContext writeContext = new IxnContext(writeUrl, properties.getRemoteWritequeue(), null);

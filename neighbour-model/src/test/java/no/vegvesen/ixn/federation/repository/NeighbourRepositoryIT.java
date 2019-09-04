@@ -15,22 +15,22 @@ import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class InterchangeRepositoryIT {
+public class NeighbourRepositoryIT {
 
 	@Autowired
-	InterchangeRepository repository;
+	NeighbourRepository repository;
 
 	@Test
 	public void nameFirstInterchangeIsNotStored() {
-		Interchange byName = repository.findByName("first-interchange");
+		Neighbour byName = repository.findByName("first-interchange");
 		assertThat(byName).isNull();
 	}
 
 	@Test
 	public void storedInterchangeIsPossibleToFindByName() {
-		Interchange firstInterchange = new Interchange("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest());
+		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest());
 		repository.save(firstInterchange);
-		Interchange foundInterchange = repository.findByName("another-interchange");
+		Neighbour foundInterchange = repository.findByName("another-interchange");
 		assertThat(foundInterchange).isNotNull();
 		assertThat(foundInterchange.getName()).isNotNull();
 	}
@@ -47,10 +47,10 @@ public class InterchangeRepositoryIT {
 		SubscriptionRequest inSubReq = new SubscriptionRequest();
 		inSubReq.setSubscriptions(inbound);
 
-		Interchange inOutIxn = new Interchange("in-out-interchange", new Capabilities(), outSubReq, inSubReq);
-		Interchange savedInOut = repository.save(inOutIxn);
+		Neighbour inOutIxn = new Neighbour("in-out-interchange", new Capabilities(), outSubReq, inSubReq);
+		Neighbour savedInOut = repository.save(inOutIxn);
 
-		Interchange foundInOut = repository.findByName(savedInOut.getName());
+		Neighbour foundInOut = repository.findByName(savedInOut.getName());
 		assertThat(foundInOut).isNotNull();
 		assertThat(foundInOut.getFedIn().getSubscriptions()).hasSize(1);
 
@@ -65,15 +65,15 @@ public class InterchangeRepositoryIT {
 
 	@Test
 	public void savedInterchangesCanBeUpdatedAndSavedAgain(){
-		Interchange thirdInterchange = new Interchange("Third Interchange", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()), new SubscriptionRequest(), new SubscriptionRequest());
+		Neighbour thirdInterchange = new Neighbour("Third Neighbour", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()), new SubscriptionRequest(), new SubscriptionRequest());
 		repository.save(thirdInterchange);
 
-		Interchange update = repository.findByName("Third Interchange");
+		Neighbour update = repository.findByName("Third Neighbour");
 		DataType aDataType = new DataType("datex2;1.0", "NO", "Obstruction");
 		Capabilities firstCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(aDataType));
 		update.setCapabilities(firstCapabilities);
 		repository.save(update);
-		Interchange updatedInterchange = repository.findByName("Third Interchange");
+		Neighbour updatedInterchange = repository.findByName("Third Neighbour");
 
 		assertNotNull(thirdInterchange.getCapabilities());
 	}
@@ -86,10 +86,10 @@ public class InterchangeRepositoryIT {
 		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", Subscription.SubscriptionStatus.ACCEPTED));
 		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
-		Interchange readyToSetup = new Interchange("freddy", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
+		Neighbour readyToSetup = new Neighbour("freddy", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(readyToSetup);
 
-		List<Interchange> forSetupFromRepo = repository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
+		List<Neighbour> forSetupFromRepo = repository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 
 		assertThat(forSetupFromRepo).hasSize(1);
 		assertThat(forSetupFromRepo.iterator().next().getName()).isEqualTo("freddy");
@@ -100,10 +100,10 @@ public class InterchangeRepositoryIT {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		SubscriptionRequest tearDownSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN, Collections.emptySet());
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
-		Interchange tearDownIxn = new Interchange("torry", caps, tearDownSubscriptionRequest, noIncomingSubscriptions);
+		Neighbour tearDownIxn = new Neighbour("torry", caps, tearDownSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(tearDownIxn);
 
-		List<Interchange> forTearDownFromRepo = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
+		List<Neighbour> forTearDownFromRepo = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
 
 		assertThat(forTearDownFromRepo).hasSize(1);
 		assertThat(forTearDownFromRepo.iterator().next().getName()).isEqualTo("torry");
@@ -117,13 +117,13 @@ public class InterchangeRepositoryIT {
 		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", Subscription.SubscriptionStatus.REQUESTED));
 		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
-		Interchange ixnForUpdate = new Interchange("4update", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
-		Interchange savedForUpdate = repository.save(ixnForUpdate);
+		Neighbour ixnForUpdate = new Neighbour("4update", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
+		Neighbour savedForUpdate = repository.save(ixnForUpdate);
 
 		Set<Subscription> subscriptionsForUpdating = new HashSet<>();
 
 		savedForUpdate.getSubscriptionRequest().setSubscriptions(subscriptionsForUpdating);
-		Interchange updated = repository.save(savedForUpdate);
+		Neighbour updated = repository.save(savedForUpdate);
 		assertThat(updated).isNotNull();
 		assertThat(updated.getSubscriptionRequest()).isNotNull();
 		assertThat(updated.getSubscriptionRequest().getSubscriptions()).hasSize(0);
@@ -135,16 +135,16 @@ public class InterchangeRepositoryIT {
 		subscriptions.add(new Subscription("where = 'NO' and what = 'fish'", Subscription.SubscriptionStatus.CREATED));
 		SubscriptionRequest outgoing = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, subscriptions);
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
-		Interchange ixnForwards = new Interchange("norwegian-fish", capabilities, outgoing, null);
+		Neighbour ixnForwards = new Neighbour("norwegian-fish", capabilities, outgoing, null);
 		repository.save(ixnForwards);
 
 		Capabilities capabilitiesSe = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		SubscriptionRequest noOverlap = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
 		SubscriptionRequest noOverlapIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
-		Interchange noForwards = new Interchange("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
+		Neighbour noForwards = new Neighbour("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
 		repository.save(noForwards);
 
-		List<Interchange> establishedOutgoingSubscriptions = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		List<Neighbour> establishedOutgoingSubscriptions = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
 		assertThat(establishedOutgoingSubscriptions).hasSize(1);
 		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
 	}
