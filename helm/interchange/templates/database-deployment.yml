@@ -31,6 +31,19 @@ spec:
           value: {{ .Values.database.postgres_password | quote }}
         - name: POSTGRES_DB
           value: {{ .Values.database.postgres_db | quote }}
+        - name: PGDATA
+          value: {{ .Values.database.pgdata | quote }}
         ports:
         - name: db
           containerPort: 5432
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: data
+      {{- if .Values.database.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-database
+      {{- else }}
+        emptyDir: {}
+      {{- end -}}

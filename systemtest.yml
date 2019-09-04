@@ -113,8 +113,10 @@ services:
       - CA_CERTIFICATE_FILE=/jks/keys/ca.itsinterchange.eu.crt
       - SERVER_CERTIFICATE_FILE=/jks/keys/local.itsinterchange.eu.crt
       - SERVER_PRIVATE_KEY_FILE=/jks/keys/local.itsinterchange.eu.key
-      - VHOST_FILE=/config/vhost.json
-      - GROUPS_FILE=/config/groups
+      - VHOST_FILE=/work/default/config/default.json
+      - STATIC_VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/work/default/config/groups
+      - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
     networks:
     - testing_net
@@ -347,8 +349,10 @@ services:
       - CA_CERTIFICATE_FILE=/jks/keys/ca.itsinterchange.eu.crt
       - SERVER_CERTIFICATE_FILE=/jks/keys/remote.itsinterchange.eu.crt
       - SERVER_PRIVATE_KEY_FILE=/jks/keys/remote.itsinterchange.eu.key
-      - VHOST_FILE=/config/vhost.json
-      - GROUPS_FILE=/config/groups
+      - VHOST_FILE=/work/default/config/default.json
+      - STATIC_VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/work/default/config/groups
+      - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
     networks:
     - testing_net
