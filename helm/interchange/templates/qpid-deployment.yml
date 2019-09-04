@@ -43,8 +43,12 @@ spec:
         - name: CA_CERTIFICATE_FILE
           value: /secure/{{ .Values.qpid.ca_certificate_file }}
         - name: VHOST_FILE
+          value: /work/default/config/default.json
+        - name: STATIC_VHOST_FILE
           value: /config/default.json
         - name: GROUPS_FILE
+          value: /work/default/config/groups
+        - name: STATIC_GROUPS_FILE
           value: /config/groups
         - name: PASSWD_FILE
           value: /config/passwd
