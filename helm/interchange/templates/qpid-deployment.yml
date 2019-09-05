@@ -52,7 +52,11 @@ spec:
         - name: secure
           mountPath: /secure
         - name: storage
+          mountPath: /work/default
+          subPath: default
+        - name: storage
           mountPath: /work/{{ required "must provide .Values.external_name" .Values.external_name }}
+          subPath: {{ required "must provide .Values.external_name" .Values.external_name }}
         readinessProbe:
           initialDelaySeconds: 5
           tcpSocket:
