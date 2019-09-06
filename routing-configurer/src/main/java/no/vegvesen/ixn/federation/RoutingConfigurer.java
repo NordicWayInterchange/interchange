@@ -93,6 +93,19 @@ public class RoutingConfigurer {
 		}
 	}
 
+	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.add}")
+	private void setupUserInFederationGroup() {
+		logger.debug("Looking for users with fedIn ESTABLISHED to add to Qpid groups.");
+		List<Neighbour> neighboursToAddToGroups = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		logger.debug("Found {} users to add to Qpid group {}", neighboursToAddToGroups, FEDERATED_GROUP_NAME);
+
+		for (Neighbour neighbour : neighboursToAddToGroups) {
+			addSubscribersToGroup(FEDERATED_GROUP_NAME, neighbour);
+			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.FEDERATED_ACCESS_GRANTED);
+			neighbourRepository.save(neighbour);
+		}
+	}
+
 	private void addSubscribersToGroup(String groupName, Subscriber subscriber) {
 		List<String> existingGroupMembers = qpidClient.getInterchangesUserNames(groupName);
 		logger.debug("Attempting to add subscriber {} to the groups file", subscriber.getName());
@@ -103,6 +116,28 @@ public class RoutingConfigurer {
 			logger.info("Added subscriber {} to Qpid group {}", subscriber.getName(), groupName);
 		} else {
 			logger.warn("Subscriber {} already exists in the group {}", subscriber.getName(), groupName);
+		}
+	}
+
+	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.remove}")
+	private void removeNeighbourFromGroups() {
+		logger.debug("Looking for neighbours with rejected fedIn to remove from Qpid groups.");
+		String groupName = "federated-interchanges";
+		List<Neighbour> neighboursToRemoveFromGroups = neighbourRepository.findByFedIn_StatusIn(
+				SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+
+		if (!neighboursToRemoveFromGroups.isEmpty()) {
+			List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
+			for (Neighbour neighbour : neighboursToRemoveFromGroups) {
+				if (userNames.contains(neighbour.getName())) {
+					logger.debug("Neighbour {} found in the groups file. Removing...");
+					qpidClient.removeInterchangeUserFromGroups(groupName, neighbour.getName());
+					logger.info("Removed neighbour {} from Qpid groups", neighbour.getName());
+				} else {
+					logger.warn("Neighbour {} does not exist in the groups file and cannot be removed.", neighbour.getName());
+				}
+				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+			}
 		}
 	}
 
