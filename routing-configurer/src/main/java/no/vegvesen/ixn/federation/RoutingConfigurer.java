@@ -49,7 +49,7 @@ public class RoutingConfigurer {
 			try {
 				logger.debug("Removing routing for subscriber {}", subscriber.getName());
 				qpidClient.removeQueue(subscriber.getName());
-				removeUsersFromGroup(groupName, subscriber);
+				removeUserFromGroup(groupName, subscriber);
 				logger.info("Removed routing for subscriber {}", subscriber.getName());
 				subscriber.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 				saveSubscriber(subscriber);
@@ -108,7 +108,7 @@ public class RoutingConfigurer {
 
 	private void addSubscribersToGroup(String groupName, Subscriber subscriber) {
 		List<String> existingGroupMembers = qpidClient.getInterchangesUserNames(groupName);
-		logger.debug("Attempting to add subscriber {} to the groups file", subscriber.getName());
+		logger.debug("Attempting to add subscriber {} to the group {}", subscriber.getName(), groupName);
 		logger.debug("Group {} contains the following members: {}", groupName, Arrays.toString(existingGroupMembers.toArray()));
 		if (!existingGroupMembers.contains(subscriber.getName())) {
 			logger.debug("Subscriber {} did not exist in the group {}. Adding...", subscriber, groupName);
@@ -127,26 +127,19 @@ public class RoutingConfigurer {
 				SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
 
 		if (!neighboursToRemoveFromGroups.isEmpty()) {
-			List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
 			for (Neighbour neighbour : neighboursToRemoveFromGroups) {
-				if (userNames.contains(neighbour.getName())) {
-					logger.debug("Neighbour {} found in the groups file. Removing...");
-					qpidClient.removeInterchangeUserFromGroups(groupName, neighbour.getName());
-					logger.info("Removed neighbour {} from Qpid groups", neighbour.getName());
-				} else {
-					logger.warn("Neighbour {} does not exist in the groups file and cannot be removed.", neighbour.getName());
-				}
+				removeUserFromGroup(groupName, neighbour);
 				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 			}
 		}
 	}
 
-	private void removeUsersFromGroup(String groupName, Subscriber subscriber) {
+	private void removeUserFromGroup(String groupName, Subscriber subscriber) {
 		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
 		if (userNames.contains(subscriber.getName())) {
-			logger.debug("Subscriber {} found in the groups file. Removing...");
+			logger.debug("Subscriber {} found in the groups {} Removing...", subscriber.getName(), groupName);
 			qpidClient.removeInterchangeUserFromGroups(groupName, subscriber.getName());
-			logger.info("Removed subscriber {} from Qpid groups", subscriber.getName());
+			logger.info("Removed subscriber {} from Qpid group {}", subscriber.getName(), groupName);
 		} else {
 			logger.warn("Subscriber {} does not exist in the group {} and cannot be removed.", subscriber.getName(), groupName);
 		}
