@@ -1,8 +1,5 @@
 version: 2.1
 jobs:
-  branches:
-    only:
-      - docker_hub_images
   build:
     docker:
       - image: maven:3.6.0-jdk-8
