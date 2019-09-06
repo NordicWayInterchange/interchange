@@ -70,7 +70,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "localhost"
+           "NAME": "remote.itsinterchange.eu"
           }
         },
         {
@@ -79,7 +79,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "localhost"
+           "NAME": "remote.itsinterchange.eu"
           }
         },
         {
