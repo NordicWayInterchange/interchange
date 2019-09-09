@@ -120,8 +120,10 @@
                                             <CA_CERTIFICATE_FILE>/jks/localhost.crt</CA_CERTIFICATE_FILE>
                                             <SERVER_CERTIFICATE_FILE>/jks/localhost.crt</SERVER_CERTIFICATE_FILE>
                                             <SERVER_PRIVATE_KEY_FILE>/jks/localhost.key</SERVER_PRIVATE_KEY_FILE>
-                                            <VHOST_FILE>/config/localhost.json</VHOST_FILE>
-                                            <GROUPS_FILE>/config/groups</GROUPS_FILE>
+                                            <VHOST_FILE>/work/default/config/default.json</VHOST_FILE>
+                                            <STATIC_VHOST_FILE>/config/localhost.json</STATIC_VHOST_FILE>
+                                            <GROUPS_FILE>/work/default/config/groups</GROUPS_FILE>
+                                            <STATIC_GROUPS_FILE>/config/groups</STATIC_GROUPS_FILE>
                                             <PASSWD_FILE>/config/passwd</PASSWD_FILE>
                                         </env>
                                         <wait>
