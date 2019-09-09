@@ -37,19 +37,21 @@ public class RoutingConfigurer {
 		logger.debug("Checking for new neighbours to setup routing");
 		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} neighbours to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
-		setupRouting(readyToSetupRouting, FEDERATED_GROUP_NAME);
+		setupRouting(readyToSetupRouting);
 
 		logger.debug("Checking for neighbours to tear down routing");
 		List<Neighbour> readyToTearDownRouting = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
-		tearDownRouting(readyToTearDownRouting, FEDERATED_GROUP_NAME);
+		tearDownRouting(readyToTearDownRouting);
 	}
 
-	private void tearDownRouting(List<? extends Subscriber> readyToTearDownRouting, String groupName) {
+	private void tearDownRouting(List<? extends Subscriber> readyToTearDownRouting) {
 		for (Subscriber subscriber : readyToTearDownRouting) {
 			try {
 				logger.debug("Removing routing for subscriber {}", subscriber.getName());
 				qpidClient.removeQueue(subscriber.getName());
-				removeUsersFromGroup(groupName, subscriber);
+				if (subscriber instanceof ServiceProvider) {
+					removeUserFromGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
+				}
 				logger.info("Removed routing for subscriber {}", subscriber.getName());
 				subscriber.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 				saveSubscriber(subscriber);
@@ -65,14 +67,14 @@ public class RoutingConfigurer {
 		logger.debug("Checking for new service providers to setup routing");
 		List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		logger.debug("Found {} service providers to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
-		setupRouting(readyToSetupRouting, SERVICE_PROVIDERS_GROUP_NAME);
+		setupRouting(readyToSetupRouting);
 
 		logger.debug("Checking for service providers to tear down routing");
 		List<ServiceProvider> readyToTearDownRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
-		tearDownRouting(readyToTearDownRouting, SERVICE_PROVIDERS_GROUP_NAME);
+		tearDownRouting(readyToTearDownRouting);
 	}
 
-	private void setupRouting(List<? extends Subscriber> readyToSetupRouting, String groupName) {
+	private void setupRouting(List<? extends Subscriber> readyToSetupRouting) {
 		for (Subscriber subscriber : readyToSetupRouting) {
 			try {
 				logger.debug("Setting up routing for subscriber {}", subscriber.getName());
@@ -80,9 +82,9 @@ public class RoutingConfigurer {
 				SubscriptionRequest setUpSubscriptionRequest = qpidClient.setupRouting(subscriber, "nwEx");
 				if (subscriber instanceof ServiceProvider) {
 					qpidClient.setupRouting(subscriber, "fedEx");
+					addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
 				}
 				logger.info("Routing set up for subscriber {}", subscriber.getName());
-				addSubscribersToGroup(groupName, subscriber);
 
 				subscriber.setSubscriptionRequest(setUpSubscriptionRequest);
 				saveSubscriber(subscriber);
@@ -93,9 +95,22 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void addSubscribersToGroup(String groupName, Subscriber subscriber) {
+	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.add}")
+	private void setupUserInFederationGroup() {
+		logger.debug("Looking for users with fedIn ESTABLISHED to add to Qpid groups.");
+		List<Neighbour> neighboursToAddToGroups = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		logger.debug("Found {} users to add to Qpid group {}", neighboursToAddToGroups, FEDERATED_GROUP_NAME);
+
+		for (Neighbour neighbour : neighboursToAddToGroups) {
+			addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour);
+			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.FEDERATED_ACCESS_GRANTED);
+			neighbourRepository.save(neighbour);
+		}
+	}
+
+	private void addSubscriberToGroup(String groupName, Subscriber subscriber) {
 		List<String> existingGroupMembers = qpidClient.getInterchangesUserNames(groupName);
-		logger.debug("Attempting to add subscriber {} to the groups file", subscriber.getName());
+		logger.debug("Attempting to add subscriber {} to the group {}", subscriber.getName(), groupName);
 		logger.debug("Group {} contains the following members: {}", groupName, Arrays.toString(existingGroupMembers.toArray()));
 		if (!existingGroupMembers.contains(subscriber.getName())) {
 			logger.debug("Subscriber {} did not exist in the group {}. Adding...", subscriber, groupName);
@@ -106,12 +121,27 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void removeUsersFromGroup(String groupName, Subscriber subscriber) {
+	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.remove}")
+	private void removeNeighbourFromGroups() {
+		logger.debug("Looking for neighbours with rejected fedIn to remove from Qpid groups.");
+		String groupName = "federated-interchanges";
+		List<Neighbour> neighboursToRemoveFromGroups = neighbourRepository.findByFedIn_StatusIn(
+				SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+
+		if (!neighboursToRemoveFromGroups.isEmpty()) {
+			for (Neighbour neighbour : neighboursToRemoveFromGroups) {
+				removeUserFromGroup(groupName, neighbour);
+				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+			}
+		}
+	}
+
+	private void removeUserFromGroup(String groupName, Subscriber subscriber) {
 		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
 		if (userNames.contains(subscriber.getName())) {
-			logger.debug("Subscriber {} found in the groups file. Removing...");
+			logger.debug("Subscriber {} found in the groups {} Removing...", subscriber.getName(), groupName);
 			qpidClient.removeInterchangeUserFromGroups(groupName, subscriber.getName());
-			logger.info("Removed subscriber {} from Qpid groups", subscriber.getName());
+			logger.info("Removed subscriber {} from Qpid group {}", subscriber.getName(), groupName);
 		} else {
 			logger.warn("Subscriber {} does not exist in the group {} and cannot be removed.", subscriber.getName(), groupName);
 		}

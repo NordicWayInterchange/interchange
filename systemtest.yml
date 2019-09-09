@@ -31,7 +31,7 @@ services:
     depends_on:
       - mock-dns-server
     ports:
-      - 32777:5432
+      - 5432
     environment:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
@@ -101,7 +101,7 @@ services:
     build: ./qpid
     container_name: local_qpid
     ports:
-      - 8080
+      - 8666:8080
       - 443
       - 63002:5671
       - 5672
@@ -219,7 +219,7 @@ services:
     depends_on:
     - mock-dns-server
     ports:
-      - 32778:5432
+      - 5432
     environment:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
@@ -337,7 +337,7 @@ services:
     build: ./qpid
     container_name: remote_qpid
     ports:
-      - 8080
+      - 8555:8080
       - 443
       - 63001:5671
       - 5672
