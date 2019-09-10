@@ -9,6 +9,7 @@ jobs:
       - run:
           name: Build the Container
           command: |
+            echo $DOCKER_MACHINE_NAME
             mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
 
 
