@@ -9,5 +9,9 @@ jobs:
           name: Build the Container
           command: |
             mvn package -PPKG -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
-
+  package_containers:
+    docker:
+      - image: java:8-alpine
+    steps:
+        name: Build actual container image for neighbour-discoverer
 
