@@ -10,6 +10,7 @@ jobs:
           name: Build the Container
           command: |
             echo $DOCKER_MACHINE_NAME
-            mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            mvn verify -PIT -Dspring.datasource.url=jdbc:postgresql://${DOCKER_MACHINE_NAME}:7080/federation \
+            -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
 
 
