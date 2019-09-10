@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -472,5 +473,8 @@ public class NeighbourDiscovererTest {
 		Assert.assertEquals(spyNeighbour.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 	}
 
-
+	@Test
+	public void shallNotBeMergedToFederationMaster() {
+		fail("circle ci is king");
+	}
 }
