@@ -12,5 +12,21 @@ jobs:
           name: Repackage the jars
           command: |
             mvn package -PPKG -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+      - run:
+          name: Docker client?
+          command: |
+            docker --help || echo "Docker not installed"
+      - run:
+          name: GCloud?
+          command: |
+            gcloud --help || echo "GCloud not installed"
+      - run:
+          name: Kubernetes?
+          command: |
+            kubectl --help || echo "Kubectl is not installed"
+      - run:
+          name: Git?
+          command: |
+            git --help || necho "Git not installed"
 
 
