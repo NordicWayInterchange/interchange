@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.forwarding;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class MessageForwarderIT {
 
 	private static final int AMQPS_PORT = 5671;
 
-	//@Rule
+	@Rule
 	private GenericContainer localContainer = new GenericContainer(
 			new ImageFromDockerfile().withFileFromPath(".", QPID_DOCKER_PATH))
 			.withClasspathResourceMapping("docker/localhost", "/config", BindMode.READ_ONLY)
