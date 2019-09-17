@@ -78,7 +78,7 @@ public class MessageForwarder {
     public MessageConsumer createConsumerFromLocal(Neighbour ixn) throws NamingException, JMSException {
         String readUrl = String.format("amqps://%s:%s",properties.getLocalIxnDomainName(),properties.getLocalIxnFederationPort());
         String readQueue = ixn.getName();
-
+        logger.debug("Creating destination for messages on queue [{}] from [{}]", readQueue, readUrl);
         IxnContext context = new IxnContext(readUrl, null, readQueue);
         Destination queueR = context.getReceiveQueue();
 
@@ -92,6 +92,7 @@ public class MessageForwarder {
     public MessageProducer createProducerToRemote(Neighbour ixn) throws NamingException, JMSException {
         System.out.println(String.format("Connecting to %s",ixn.getName()));
         String writeUrl = ixn.getMessageChannelUrl();
+        logger.debug("Creating producer on url [{}]", writeUrl);
         IxnContext writeContext = new IxnContext(writeUrl, properties.getRemoteWritequeue(), null);
 
         Destination queueS = writeContext.getSendQueue();

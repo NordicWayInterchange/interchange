@@ -70,6 +70,18 @@
             <artifactId>jms-client</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>test-ssl-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.12.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>

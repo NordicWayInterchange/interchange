@@ -1,0 +1,11 @@
+version: '3'
+services:
+
+ key_gen:
+    build: ../key-gen
+    container_name: key_gen
+    volumes:
+      - "./src/test/resources:/jks"
+    environment:
+      CA_CN: "my_ca"
+      KEY_CNS: "bouvet"
