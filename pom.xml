@@ -204,6 +204,7 @@
 
     <modules>
         <module>ssl-utils</module>
+        <module>test-ssl-utils</module>
         <module>api-model</module>
         <module>neighbour-dns</module>
         <module>neighbour-model</module>
