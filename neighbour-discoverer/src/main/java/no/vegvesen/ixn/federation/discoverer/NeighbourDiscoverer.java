@@ -367,17 +367,19 @@ public class NeighbourDiscoverer {
 		// If Self has updated Subscriptions since last time we posted a subscription request, we need to recalculate the subscription request for all neighbours.
 
 		logger.info("Checking if any Service Providers have updated their subscriptions...");
-		logger.info("Self name: {}", myName);
 
 		Self self = selfRepository.findByName(myName);
-		if(self == null || self.getLocalSubscriptions().isEmpty()){
+		if(self == null){
+
+			// || self.getLocalSubscriptions().isEmpty()
+			// TODO: if local subscriptions are empty, we have to check if we have any subscriptions to any neighbours that we need to tear down!! How to do this??
 			return; // We have nothing to post to our neighbour
 		}
 
 		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
 
 		if(discoveryState == null || discoveryState.getLastSubscriptionRequest() == null || self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest())){
-			// Either first post or an upate.
+			// Either first post or an update.
 			// Local Subscriptions have been updated since last time performed the subscription request.
 			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
 

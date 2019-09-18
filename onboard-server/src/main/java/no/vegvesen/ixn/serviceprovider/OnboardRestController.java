@@ -344,9 +344,11 @@ public class OnboardRestController {
 
 		if(currentServiceProviderSubscriptions.isEmpty()){
 			// Subscription is now empty, notify Routing Configurer to tear down the queue.
+			logger.info("Service Provider subscriptions are now empty. Setting status to TEAR_DOWN.");
 			serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
 		}else{
 			// Flip status to REQUESTED to notify Routing Configurer to change the queue filter.
+			logger.info("Service Provider subscriptions were updated, but are not empty. Setting status to REQUESTED");
 			serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		}
 
