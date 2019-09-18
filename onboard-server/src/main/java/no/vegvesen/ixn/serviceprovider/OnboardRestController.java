@@ -189,12 +189,15 @@ public class OnboardRestController {
 			self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 			self.setLocalCapabilities(updatedCapabilities);
 			selfRepository.save(self);
+			logger.info("Updated Self: {}", self.toString());
+			selfRepository.save(self);
 			return;
 		}
 		logger.info("Capabilities have not changed. Keeping the current representation of self.");
 	}
 
 	Set<DataType> calculateSelfCapabilities() {
+		logger.info("Calculating Self capabilities...");
 		Set<DataType> localCapabilities = new HashSet<>();
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 
@@ -204,8 +207,7 @@ public class OnboardRestController {
 			logger.info("Service Provider capabilities: {}", serviceProviderCapabilities.toString());
 			localCapabilities.addAll(serviceProviderCapabilities);
 		}
-
-		logger.info("!!! Calculated self capabilities: {}", localCapabilities);
+		logger.info("Calculated Self capabilities: {}", localCapabilities);
 		return localCapabilities;
 	}
 
@@ -219,25 +221,26 @@ public class OnboardRestController {
 			logger.info("Subscriptions have changed. Updating representation of self.");
 			self.setLocalSubscriptions(updatedSubscriptions);
 			self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
-			Self updatedSelf = selfRepository.save(self);
-			logger.info("Updated Self: {}", updatedSelf.toString());
+			selfRepository.save(self);
+			logger.info("Updated Self: {}", self.toString());
 			return;
 		}
-
 		logger.info("Subscriptions have not changed. Keeping the current representation of self.");
 	}
 
 	Set<Subscription> calculateSelfSubscriptions(){
-		Set<Subscription> selfSubscriptions = new HashSet<>();
+		logger.info("Calculating Self subscriptions...");
+		Set<Subscription> localSubscriptions = new HashSet<>();
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
+			logger.info("Service provider name: {}", serviceProvider.getName());
 			Set<Subscription> serviceProviderSubscriptions = serviceProvider.getSubscriptionRequest().getSubscriptions();
-
-			selfSubscriptions.addAll(serviceProviderSubscriptions);
+			logger.info("Service Provider Subscriptions: {}", serviceProviderSubscriptions.toString());
+			localSubscriptions.addAll(serviceProviderSubscriptions);
 		}
-		logger.info("Calculated Self subscriptions: {}", selfSubscriptions.toString());
-		return selfSubscriptions;
+		logger.info("Calculated Self subscriptions: {}", localSubscriptions.toString());
+		return localSubscriptions;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH)
