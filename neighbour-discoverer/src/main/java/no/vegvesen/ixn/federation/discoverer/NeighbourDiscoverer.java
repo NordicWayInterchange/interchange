@@ -375,7 +375,7 @@ public class NeighbourDiscoverer {
 
 		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
 
-		if(discoveryState == null || discoveryState.getLastSubscriptionRequest() == null || self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest())){
+		if(discoveryState == null || discoveryState.getLastSubscriptionRequest() == null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest()))){
 			// Either first post or an update.
 			// Local Subscriptions have been updated since last time performed the subscription request.
 			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
@@ -487,7 +487,7 @@ public class NeighbourDiscoverer {
 
 		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
 
-		if(discoveryState == null || discoveryState.getLastCapabilityExchange()==null || self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange())){
+		if(discoveryState == null || discoveryState.getLastCapabilityExchange()==null || (self.getLastUpdatedLocalCapabilities() != null && self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange()))){
 			// Capability post either not performed before, or Service Providers have been updated.
 			// Last updated capabilities is after last capability exchange - perform new capability exchange with all neighbours
 
