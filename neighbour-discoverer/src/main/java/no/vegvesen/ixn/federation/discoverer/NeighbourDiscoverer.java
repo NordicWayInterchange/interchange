@@ -370,9 +370,6 @@ public class NeighbourDiscoverer {
 
 		Self self = selfRepository.findByName(myName);
 		if(self == null){
-
-			// || self.getLocalSubscriptions().isEmpty()
-			// TODO: if local subscriptions are empty, we have to check if we have any subscriptions to any neighbours that we need to tear down!! How to do this??
 			return; // We have nothing to post to our neighbour
 		}
 
@@ -483,7 +480,7 @@ public class NeighbourDiscoverer {
 		logger.info("Checking if any Service Providers have updated their capabilities...");
 
 		Self self = selfRepository.findByName(myName);
-		if(self == null || self.getLocalCapabilities().isEmpty()){
+		if(self == null){
 			logger.info("Self was null. Waiting for normal capability exchange to be performed first.");
 			return; // We have nothing to post to our neighbours.
 		}
