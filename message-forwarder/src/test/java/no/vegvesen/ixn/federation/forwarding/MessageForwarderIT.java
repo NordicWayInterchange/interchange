@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.forwarding;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.qpid.QpidClient;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.Rule;
@@ -30,7 +31,7 @@ public class MessageForwarderIT {
 	private static final int AMQPS_PORT = 5671;
 	private static final Path QPID_DOCKER_PATH = getQpidDockerPath();
 
-	RestTemplate restTemplate() {
+	private RestTemplate restTemplate() {
 		CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(localSslContext()).build();
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
 	}
@@ -79,11 +80,11 @@ public class MessageForwarderIT {
 			.withEnv("VHOST_FILE", "/work/default/config/default.json")
 			.withEnv("GROUPS_FILE", "/work/default/config/groups")
 			.withEnv("CA_CERTIFICATE_FILE", "/jks/my_ca.crt")
-			.withEnv("SERVER_CERTIFICATE_FILE", "/jks/remote.crt")
-			.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/remote.key")
+			.withEnv("SERVER_CERTIFICATE_FILE", "/jks/localhost.crt")
+			.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/localhost.key")
 			.withExposedPorts(AMQPS_PORT, HTTPS_PORT);
 
-	SSLContext localSslContext() {
+	private SSLContext localSslContext() {
 		return TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks");
 	}
 
@@ -94,13 +95,13 @@ public class MessageForwarderIT {
 		properties.setLocalIxnDomainName("localhost");
 		properties.setRemoteWritequeue("fedEx");
 
+
 		Neighbour remoteNeighbour = mock(Neighbour.class);
 		when(remoteNeighbour.getName()).thenReturn("remote");
 		String remoteMessagePort = "" + remoteContainer.getMappedPort(AMQPS_PORT);
 		String remoteControlChannelPort = "" + remoteContainer.getMappedPort(HTTPS_PORT);
-		String remoteUrl = String.format("amqps://%s:%s",
-				remoteNeighbour.getName(),
-				remoteMessagePort);
+		// The both the local and remote server runs on localhost, but different ports
+		String remoteUrl = String.format("amqps://localhost:%s", remoteMessagePort);
 		when(remoteNeighbour.getControlChannelPort()).thenReturn(remoteControlChannelPort);
 		when(remoteNeighbour.getMessageChannelPort()).thenReturn(remoteMessagePort);
 		when(remoteNeighbour.getMessageChannelUrl()).thenReturn(remoteUrl);
@@ -109,10 +110,8 @@ public class MessageForwarderIT {
 		MessageForwarder messageForwarder = new MessageForwarder(fetcher, localSslContext(), properties);
 		messageForwarder.runSchedule();
 
-/*
 		QpidClient qpidClient = new QpidClient(String.format("https://localhost:%s/", localContainer.getMappedPort(HTTPS_PORT)), "localhost", restTemplate());
 		qpidClient.removeQueue("remote");
-*/
 
 
 	}
