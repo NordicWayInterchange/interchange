@@ -27,6 +27,7 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
                 producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
                 log.debug("Message sendt!");
             } catch (JMSException e) {
+                log.error("Problem receiving message", e);
                 //TODO what to do? Probably need to mark as unusable, and tear down???
                 try {
                     producer.close();

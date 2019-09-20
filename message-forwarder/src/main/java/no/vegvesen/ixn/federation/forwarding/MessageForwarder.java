@@ -49,6 +49,7 @@ public class MessageForwarder {
             MessageForwardListener listener = listeners.get(remoteName);
             if (! listener.isRunning()) {
                 listeners.remove(remoteName);
+                logger.debug("Removed listener {}", remoteName);
             }
         }
 
@@ -60,8 +61,6 @@ public class MessageForwarder {
             String name = ixn.getName();
             if (! listeners.containsKey(name)) {
                 logger.debug("Found ixn with name {}, port {}",ixn.getName(),ixn.getMessageChannelPort());
-                //System.out.println(String.format("name: %s, address %s:%s, fedIn: %s status: %s",ixn.getName(),ixn.getName(),ixn.getMessageChannelPort(),ixn.getFedIn(),ixn.getSubscriptionRequest().getStatus()));
-                //logger.debug("Found nex Ixn %s, setting up connections");
                 MessageProducer producer = createProducerToRemote(ixn);
                 MessageConsumer messageConsumer = createConsumerFromLocal(ixn);
                 MessageForwardListener messageListener = new MessageForwardListener(messageConsumer, producer);
@@ -90,7 +89,7 @@ public class MessageForwarder {
     }
 
     public MessageProducer createProducerToRemote(Neighbour ixn) throws NamingException, JMSException {
-        System.out.println(String.format("Connecting to %s",ixn.getName()));
+        logger.info("Connecting to {}", ixn.getName());
         String writeUrl = ixn.getMessageChannelUrl();
         logger.debug("Creating producer on url [{}]", writeUrl);
         IxnContext writeContext = new IxnContext(writeUrl, properties.getRemoteWritequeue(), null);

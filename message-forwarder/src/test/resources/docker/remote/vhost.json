@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "localhost",
+  "name": "remote",
   "modelVersion": "7.0",
   "exchanges": [
     {
@@ -77,7 +77,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "localhost"
+            "NAME": "remote"
           }
         },
         {
@@ -86,7 +86,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "localhost"
+            "NAME": "remote"
           }
         },
         {

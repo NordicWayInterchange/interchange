@@ -8,4 +8,4 @@ services:
       - "./src/test/resources:/jks"
     environment:
       CA_CN: "my_ca"
-      KEY_CNS: "bouvet"
+      KEY_CNS: "localhost remote"
