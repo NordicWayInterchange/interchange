@@ -1,6 +1,5 @@
-package no.vegvesen.interchange;
+package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.IxnContext;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;

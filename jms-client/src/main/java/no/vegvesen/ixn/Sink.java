@@ -1,6 +1,5 @@
-package no.vegvesen.interchange;
+package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.IxnContext;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -61,16 +60,20 @@ public class Sink implements MessageListener, AutoCloseable {
 
 
     public void start() throws JMSException, NamingException {
-        IxnContext ixnContext = new IxnContext(url,null,queueName);
-        connection = ixnContext.createConnection(sslContext);
-        Destination destination = ixnContext.getReceiveQueue();
-        connection.start();
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        MessageConsumer consumer = session.createConsumer(destination);
-        consumer.setMessageListener(this);
+		MessageConsumer consumer = createConsumer();
+		consumer.setMessageListener(this);
     }
 
-    @Override
+	public MessageConsumer createConsumer() throws NamingException, JMSException {
+		IxnContext ixnContext = new IxnContext(url,null,queueName);
+		connection = ixnContext.createConnection(sslContext);
+		Destination destination = ixnContext.getReceiveQueue();
+		connection.start();
+		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		return session.createConsumer(destination);
+	}
+
+	@Override
     public void onMessage(Message message) {
         try {
             message.acknowledge();
