@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.federation.forwarding;
 
+import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -16,12 +19,15 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -90,11 +96,7 @@ public class MessageForwarderIT {
 
 	@Test
 	public void connectToLocalQpidAndListenForMessagesToRemote() throws JMSException, NamingException {
-		ForwarderProperties properties = new ForwarderProperties();
-		properties.setLocalIxnFederationPort("" + localContainer.getMappedPort(AMQPS_PORT));
-		properties.setLocalIxnDomainName("localhost");
-		properties.setRemoteWritequeue("fedEx");
-
+		Integer localMessagePort = localContainer.getMappedPort(AMQPS_PORT);
 
 		Neighbour remoteNeighbour = mock(Neighbour.class);
 		when(remoteNeighbour.getName()).thenReturn("remote");
@@ -107,12 +109,35 @@ public class MessageForwarderIT {
 		when(remoteNeighbour.getMessageChannelUrl()).thenReturn(remoteUrl);
 		NeighbourFetcher fetcher = mock(NeighbourFetcher.class);
 		when(fetcher.listNeighbourCandidates()).thenReturn(Collections.singletonList(remoteNeighbour));
+		ForwarderProperties properties = new ForwarderProperties();
+		properties.setLocalIxnFederationPort("" + localMessagePort);
+		properties.setLocalIxnDomainName("localhost");
+		properties.setRemoteWritequeue("fedEx");
 		MessageForwarder messageForwarder = new MessageForwarder(fetcher, localSslContext(), properties);
 		messageForwarder.runSchedule();
 
+		String sendUrl = String.format("amqps://localhost:%s", localMessagePort);
+		Source source = new Source(sendUrl, "remote", localSslContext());
+		source.start();
+		source.send("fisk");
+
+		Sink sink = new Sink(remoteUrl, "se-out", localSslContext());
+		MessageConsumer sinkConsumer = sink.createConsumer();
+		Message receive1 = sinkConsumer.receive(1000);
+		assertThat(receive1).withFailMessage("no messages are routed").isNotNull();
+
+		logger.debug("Removing the queue 'remote' on local node, should give error on consumer");
 		QpidClient qpidClient = new QpidClient(String.format("https://localhost:%s/", localContainer.getMappedPort(HTTPS_PORT)), "localhost", restTemplate());
 		qpidClient.removeQueue("remote");
 
+		logger.debug("Recreating the message queue");
+		when(remoteNeighbour.getSubscriptionRequest()).thenReturn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
+		qpidClient.setupRouting(remoteNeighbour, "nwEx");
 
+		source.start();
+		source.send("mer fisk");
+		Message receive2 = sinkConsumer.receive(1000);
+		assertThat(receive2).withFailMessage("message sent after forwarding queue is recreated is not forwarded").isNotNull();
 	}
+
 }
