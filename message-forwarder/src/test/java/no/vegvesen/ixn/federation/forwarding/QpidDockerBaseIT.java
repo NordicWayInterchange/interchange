@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
 
 public class QpidDockerBaseIT {
@@ -15,16 +16,9 @@ public class QpidDockerBaseIT {
 	static final Path QPID_DOCKER_PATH = getQpidDockerPath();
 
 	private static Path getQpidDockerPath() {
-		Properties properties  = System.getProperties();
-
-		Enumeration<?> enumeration = properties.propertyNames();
-		while (enumeration.hasMoreElements()) {
-			Object o =  enumeration.nextElement();
-			if (o instanceof String ) {
-				String propertyName = (String)o;
-				logger.debug("property {} - {}",propertyName,properties.getProperty(propertyName));
-			}
-
+		Map<String, String> env = System.getenv();
+		for (String name : env.keySet()) {
+			logger.debug("env {} - {}",name,env.get(name));
 		}
 		Path run = Paths.get(".").toAbsolutePath();
 		logger.debug("Resolving qpid path from run path: " + run.toAbsolutePath().toString());
