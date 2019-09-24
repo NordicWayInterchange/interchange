@@ -39,6 +39,13 @@
       "durable": true,
       "holdOnPublishEnabled": false,
       "owner": null
+    },
+    {
+      "name": "remote-two",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
     }
   ],
   "virtualhostaccesscontrolproviders": [
