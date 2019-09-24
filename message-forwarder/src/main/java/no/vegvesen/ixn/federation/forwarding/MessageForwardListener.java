@@ -29,15 +29,7 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
                 log.debug("Message sendt!");
             } catch (JMSException e) {
                 log.error("Problem receiving message", e);
-                //TODO what to do? Probably need to mark as unusable, and tear down???
-                try {
-                    producer.close();
-                    messageConsumer.close();
-                } catch (JMSException e1) {
-                    throw new MessageForwarderException(e1);
-                } finally {
-                    running.set(false);
-                }
+                teardown();
                 throw new MessageForwarderException(e);
             }
         } else {
@@ -46,11 +38,22 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
         }
     }
 
+    public void teardown()  {
+        try {
+            producer.close();
+            messageConsumer.close();
+        } catch (JMSException ignore) {
+        } finally {
+            running.set(false);
+        }
+    }
+
     @Override
     public void onException(JMSException e) {
         log.error("Exception caught",e);
         running.set(false);
     }
+
 
     boolean isRunning() {
         return running.get();

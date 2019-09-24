@@ -22,4 +22,5 @@ public class NeighbourFetcher {
         List<Neighbour> interchanges = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
         return interchanges;
     }
+
 }

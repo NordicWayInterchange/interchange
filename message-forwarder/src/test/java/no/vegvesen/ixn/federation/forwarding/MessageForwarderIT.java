@@ -90,7 +90,6 @@ public class MessageForwarderIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Ignore("Ignored to await solution for MessageForwardListener discovers that the queue is gone")
 	public void reCreationOfForwardQueueWillForwardMessagesWhenNewQueueGetsAvailable() throws JMSException, NamingException {
 		Integer localMessagePort = localContainer.getMappedPort(AMQPS_PORT);
 
@@ -120,10 +119,15 @@ public class MessageForwarderIT extends QpidDockerBaseIT {
 		qpidClient.removeQueue("remote");
 
 
+		when(fetcher.listNeighbourCandidates()).thenReturn(Collections.emptyList());
+		messageForwarder.runSchedule();
+
+
 		logger.debug("Recreating the message queue");
 		when(remoteNeighbour.getSubscriptionRequest()).thenReturn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
 		qpidClient.setupRouting(remoteNeighbour, "nwEx");
 
+		when(fetcher.listNeighbourCandidates()).thenReturn(Collections.singletonList(remoteNeighbour));
 		messageForwarder.runSchedule();
 
 		source.start();

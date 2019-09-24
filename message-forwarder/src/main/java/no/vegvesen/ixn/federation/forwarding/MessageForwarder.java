@@ -17,13 +17,9 @@ import java.util.*;
 @Service
 public class MessageForwarder {
 
-    //TODO This is the interface to use in order to set the listener running flag to false
-    ExceptionListener exceptionListener = (e) -> e.printStackTrace();
-
     private NeighbourFetcher neighbourFetcher;
     private ForwarderProperties properties;
     private final SSLContext sslContext;
-    //TODO this will probably not work in a threaded environment...
     private Map<String,MessageForwardListener> listeners;
     private Logger logger = LoggerFactory.getLogger(MessageForwarder.class);
 
@@ -49,7 +45,7 @@ public class MessageForwarder {
             MessageForwardListener listener = listeners.get(remoteName);
             if (! listener.isRunning()) {
                 listeners.remove(remoteName);
-                logger.debug("Removed listener {}", remoteName);
+                logger.info("Removed stopped listener {}", remoteName);
             }
         }
 
@@ -57,10 +53,12 @@ public class MessageForwarder {
 
     public void setupConnectionsToNewNeighbours() throws NamingException, JMSException {
         List<Neighbour> interchanges = neighbourFetcher.listNeighbourCandidates();
+        List<String> interchangeNames = new ArrayList<>();
         for (Neighbour ixn : interchanges) {
             String name = ixn.getName();
+            interchangeNames.add(name);
             if (! listeners.containsKey(name)) {
-                logger.debug("Found ixn with name {}, port {}",ixn.getName(),ixn.getMessageChannelPort());
+                logger.info("Setting up ixn with name {}, port {}",ixn.getName(),ixn.getMessageChannelPort());
                 MessageProducer producer = createProducerToRemote(ixn);
 
                 IxnContext context = createContext(ixn);
@@ -71,10 +69,20 @@ public class MessageForwarder {
                 messageConsumer.setMessageListener(messageListener);
                 connection.setExceptionListener(messageListener);
                 
-                //TODO Should we have a single object that is a message consumer? Or one per destination? messageConsumer.setMessageListener(this);
                 listeners.put(name,messageListener);
             } else {
-                logger.debug("No new Ixn found");
+                if (listeners.get(name).isRunning()) {
+                    logger.debug("Listener for {} is still running with no changes", name);
+                } else {
+                    logger.debug("Non-running listener detected, name {}",name);
+                }
+            }
+        }
+        for (String ixnName : listeners.keySet()) {
+            if (! interchangeNames.contains(ixnName)) {
+                logger.info("Listener for {} is now being removed",ixnName);
+                MessageForwardListener toRemove = listeners.remove(ixnName);
+                toRemove.teardown();
             }
         }
     }
@@ -106,7 +114,6 @@ public class MessageForwarder {
 
         Destination queueS = writeContext.getSendQueue();
         Connection writeConnection = writeContext.createConnection(sslContext);
-        writeConnection.setExceptionListener(exceptionListener);
         writeConnection.start();
         Session writeSession = writeConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         return writeSession.createProducer(queueS);
