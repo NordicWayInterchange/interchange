@@ -5,7 +5,7 @@ RUN apk add --no-cache bash
 
 
 
-COPY --from=build routing-configurer/target/routing-configurer-1.0-SNAPSHOT.jar routing-configurer.jar
+COPY --from=build routing-configurer/target/routing-configurer-1.0-SNAPSHOT-exec.jar routing-configurer.jar
 
 ADD entrypoint.sh /
 RUN chmod +x /entrypoint.sh
