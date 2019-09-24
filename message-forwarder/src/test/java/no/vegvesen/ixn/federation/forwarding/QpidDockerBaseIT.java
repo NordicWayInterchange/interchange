@@ -18,8 +18,8 @@ public class QpidDockerBaseIT {
 		Path projectRoot = null;
 		String ciWorkdir = System.getenv(CI_WORKDIR);
 		if (ciWorkdir != null) {
-			logger.debug("Workdir {}", ciWorkdir);
 			projectRoot = Paths.get(ciWorkdir);
+			logger.debug("Workdir {}, resolved to {}", ciWorkdir, projectRoot.toAbsolutePath().toString());
 			return projectRoot.resolve("qpid");
 		} else {
 			Path run = Paths.get(".").toAbsolutePath();
