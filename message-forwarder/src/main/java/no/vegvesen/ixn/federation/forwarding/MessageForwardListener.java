@@ -12,7 +12,7 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
     private final MessageProducer producer;
     private Logger log = LoggerFactory.getLogger(MessageForwardListener.class);
 
-    public MessageForwardListener(MessageConsumer messageConsumer, MessageProducer producer) {
+    MessageForwardListener(MessageConsumer messageConsumer, MessageProducer producer) {
         this.messageConsumer = messageConsumer;
         this.producer = producer;
         this.running = new AtomicBoolean(true);
@@ -24,6 +24,7 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
         if (running.get()) {
             try {
                 log.debug("Sending message!");
+                //TODO: adhere to the originally published time to live, persistence from the message
                 producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
                 log.debug("Message sendt!");
             } catch (JMSException e) {
@@ -47,12 +48,11 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
 
     @Override
     public void onException(JMSException e) {
-        //TODO log the exception
         log.error("Exception caught",e);
         running.set(false);
     }
 
-    public boolean isRunning() {
+    boolean isRunning() {
         return running.get();
     }
 }

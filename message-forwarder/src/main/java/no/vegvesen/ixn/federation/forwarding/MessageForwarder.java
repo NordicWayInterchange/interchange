@@ -62,9 +62,14 @@ public class MessageForwarder {
             if (! listeners.containsKey(name)) {
                 logger.debug("Found ixn with name {}, port {}",ixn.getName(),ixn.getMessageChannelPort());
                 MessageProducer producer = createProducerToRemote(ixn);
-                MessageConsumer messageConsumer = createConsumerFromLocal(ixn);
+
+                IxnContext context = createContext(ixn);
+                Connection connection = createConnection(context);
+                MessageConsumer messageConsumer = createDestination(context, connection);
+
                 MessageForwardListener messageListener = new MessageForwardListener(messageConsumer, producer);
                 messageConsumer.setMessageListener(messageListener);
+                connection.setExceptionListener(messageListener);
                 
                 //TODO Should we have a single object that is a message consumer? Or one per destination? messageConsumer.setMessageListener(this);
                 listeners.put(name,messageListener);
@@ -74,17 +79,22 @@ public class MessageForwarder {
         }
     }
 
-    public MessageConsumer createConsumerFromLocal(Neighbour ixn) throws NamingException, JMSException {
+    public IxnContext createContext(Neighbour ixn) throws NamingException {
         String readUrl = String.format("amqps://%s:%s",properties.getLocalIxnDomainName(),properties.getLocalIxnFederationPort());
         String readQueue = ixn.getName();
         logger.debug("Creating destination for messages on queue [{}] from [{}]", readQueue, readUrl);
-        IxnContext context = new IxnContext(readUrl, null, readQueue);
-        Destination queueR = context.getReceiveQueue();
+        return new IxnContext(readUrl, null, readQueue);
+    }
 
+    public Connection createConnection(IxnContext context) throws NamingException, JMSException {
         Connection connection = context.createConnection(sslContext);
         connection.start();
+        return connection;
+    }
 
+    public MessageConsumer createDestination(IxnContext context, Connection connection) throws JMSException, NamingException {
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Destination queueR = context.getReceiveQueue();
         return session.createConsumer(queueR);
     }
 

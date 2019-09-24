@@ -23,41 +23,18 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MessageForwarderIT {
+public class MessageForwarderIT extends QpidDockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(MessageForwarderIT.class);
-	private static final int HTTPS_PORT = 443;
-	private static final int AMQPS_PORT = 5671;
-	private static final Path QPID_DOCKER_PATH = getQpidDockerPath();
 
 	private RestTemplate restTemplate() {
 		CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(localSslContext()).build();
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
-	}
-
-	private static Path getQpidDockerPath() {
-		Path run = Paths.get(".").toAbsolutePath();
-		logger.debug("Resolving qpid path from run path: " + run.toAbsolutePath().toString());
-		Path projectRoot = null;
-		while (projectRoot == null && run.getParent() != null) {
-			if (run.endsWith("interchange")) {
-				projectRoot = run;
-			}
-			run = run.getParent();
-		}
-		if (projectRoot != null) {
-			Path qpid = projectRoot.resolve("qpid");
-			logger.debug("Resolved qpid path {}", qpid.toAbsolutePath().toString());
-			return qpid;
-		}
-		throw new RuntimeException("Could not resolve path to qpid docker folder in parent folder of " + run.toString());
 	}
 
 	@Rule
@@ -95,7 +72,7 @@ public class MessageForwarderIT {
 	}
 
 	@Test
-	public void connectToLocalQpidAndListenForMessagesToRemote() throws JMSException, NamingException {
+	public void reCreationOfForwardQueueWillForwardMessagesWhenNewQueueGetsAvailable() throws JMSException, NamingException {
 		Integer localMessagePort = localContainer.getMappedPort(AMQPS_PORT);
 
 		Neighbour remoteNeighbour = mock(Neighbour.class);
@@ -130,9 +107,12 @@ public class MessageForwarderIT {
 		QpidClient qpidClient = new QpidClient(String.format("https://localhost:%s/", localContainer.getMappedPort(HTTPS_PORT)), "localhost", restTemplate());
 		qpidClient.removeQueue("remote");
 
+
 		logger.debug("Recreating the message queue");
 		when(remoteNeighbour.getSubscriptionRequest()).thenReturn(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
 		qpidClient.setupRouting(remoteNeighbour, "nwEx");
+
+		messageForwarder.runSchedule();
 
 		source.start();
 		source.send("mer fisk");
