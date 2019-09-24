@@ -41,7 +41,7 @@ public class DNSFacadeTest {
 		Neighbour ericsson = null;
 		for (Neighbour neighbour : dnsFacade.getNeighbours()) {
 
-			if (neighbour.getName().equals("ericsson.itsinterchange.eu")){
+			if (neighbour.getName().equals("bouveta-fed.itsinterchange.eu")){
 				ericsson = neighbour;
 			}
 		}
