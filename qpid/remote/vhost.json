@@ -93,6 +93,15 @@
         },
         {
           "objectType": "QUEUE",
+          "identity": "king_gustaf.itsinterchange.eu",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "king_gustaf.itsinterchange.eu"
+          }
+        },
+        {
+          "objectType": "QUEUE",
           "identity": "interchange",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
