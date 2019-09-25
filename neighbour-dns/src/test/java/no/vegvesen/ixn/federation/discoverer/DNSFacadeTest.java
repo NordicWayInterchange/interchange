@@ -11,6 +11,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {DNSFacade.class, DNSProperties.class})
@@ -31,23 +33,21 @@ public class DNSFacadeTest {
 		List<Neighbour> neighbours = dnsFacade.getNeighbours();
 
 		for(Neighbour i : neighbours){
-			System.out.println(i.toString());
-			Assert.assertNotNull(i);
+			assertThat(i).isNotNull();
 		}
 	}
 
 	@Test
-	public void ericssonPresent() {
-		Neighbour ericsson = null;
+	public void bouvetNodePresent() {
+		Neighbour bouvet = null;
 		for (Neighbour neighbour : dnsFacade.getNeighbours()) {
-
 			if (neighbour.getName().equals("bouveta-fed.itsinterchange.eu")){
-				ericsson = neighbour;
+				bouvet = neighbour;
 			}
 		}
-		Assert.assertNotNull(ericsson);
-		Assert.assertNotNull(ericsson.getControlChannelUrl("/"));
-		Assert.assertNotNull(ericsson.getMessageChannelPort());
+		assertThat(bouvet).isNotNull();
+		assertThat(bouvet.getControlChannelUrl("/")).isNotNull();
+		assertThat(bouvet.getMessageChannelPort()).isNotNull().isEqualTo("5671");
 
 	}
 }
