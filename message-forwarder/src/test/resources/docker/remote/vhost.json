@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "remote.itsinterchange.eu",
+  "name": "localhost",
   "modelVersion": "7.0",
   "exchanges": [
     {
@@ -15,6 +15,13 @@
       "type": "headers",
       "durable": true,
       "durableBindings": [
+        {
+          "arguments": {
+            "x-filter-jms-selector": "where='SE'"
+          },
+          "bindingKey": "where",
+          "destination": "se-out"
+        }
       ]
     }
   ],
@@ -28,6 +35,20 @@
     },
     {
       "name": "dlqueue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "localhost",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "se-out",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
@@ -70,7 +91,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-           "NAME": "remote.itsinterchange.eu"
+            "NAME": "localhost"
           }
         },
         {
@@ -79,7 +100,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-           "NAME": "remote.itsinterchange.eu"
+            "NAME": "localhost"
           }
         },
         {
@@ -93,20 +114,20 @@
         },
         {
           "objectType": "QUEUE",
-          "identity": "king_gustaf.itsinterchange.eu",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "king_gustaf.itsinterchange.eu"
-          }
-        },
-        {
-          "objectType": "QUEUE",
           "identity": "interchange",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "onramp"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "localhost",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "se-out"
           }
         },
         {

@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "remote.itsinterchange.eu",
+  "name": "localhost",
   "modelVersion": "7.0",
   "exchanges": [
     {
@@ -28,6 +28,20 @@
     },
     {
       "name": "dlqueue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "remote",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "remote-two",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,
@@ -70,7 +84,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-           "NAME": "remote.itsinterchange.eu"
+            "NAME": "localhost"
           }
         },
         {
@@ -79,7 +93,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-           "NAME": "remote.itsinterchange.eu"
+            "NAME": "localhost"
           }
         },
         {
@@ -89,15 +103,6 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "fedEx"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_gustaf.itsinterchange.eu",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "king_gustaf.itsinterchange.eu"
           }
         },
         {

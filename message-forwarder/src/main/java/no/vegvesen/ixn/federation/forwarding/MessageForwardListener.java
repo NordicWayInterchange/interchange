@@ -12,7 +12,7 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
     private final MessageProducer producer;
     private Logger log = LoggerFactory.getLogger(MessageForwardListener.class);
 
-    public MessageForwardListener(MessageConsumer messageConsumer, MessageProducer producer) {
+    MessageForwardListener(MessageConsumer messageConsumer, MessageProducer producer) {
         this.messageConsumer = messageConsumer;
         this.producer = producer;
         this.running = new AtomicBoolean(true);
@@ -24,18 +24,12 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
         if (running.get()) {
             try {
                 log.debug("Sending message!");
+                //TODO: adhere to the originally published time to live, persistence from the message
                 producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
                 log.debug("Message sendt!");
             } catch (JMSException e) {
-                //TODO what to do? Probably need to mark as unusable, and tear down???
-                try {
-                    producer.close();
-                    messageConsumer.close();
-                } catch (JMSException e1) {
-                    throw new MessageForwarderException(e1);
-                } finally {
-                    running.set(false);
-                }
+                log.error("Problem receiving message", e);
+                teardown();
                 throw new MessageForwarderException(e);
             }
         } else {
@@ -44,14 +38,24 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
         }
     }
 
+    public void teardown()  {
+        try {
+            producer.close();
+            messageConsumer.close();
+        } catch (JMSException ignore) {
+        } finally {
+            running.set(false);
+        }
+    }
+
     @Override
     public void onException(JMSException e) {
-        //TODO log the exception
         log.error("Exception caught",e);
         running.set(false);
     }
 
-    public boolean isRunning() {
+
+    boolean isRunning() {
         return running.get();
     }
 }

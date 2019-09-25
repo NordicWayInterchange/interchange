@@ -17,13 +17,9 @@ import java.util.*;
 @Service
 public class MessageForwarder {
 
-    //TODO This is the interface to use in order to set the listener running flag to false
-    ExceptionListener exceptionListener = (e) -> e.printStackTrace();
-
     private NeighbourFetcher neighbourFetcher;
     private ForwarderProperties properties;
     private final SSLContext sslContext;
-    //TODO this will probably not work in a threaded environment...
     private Map<String,MessageForwardListener> listeners;
     private Logger logger = LoggerFactory.getLogger(MessageForwarder.class);
 
@@ -49,6 +45,7 @@ public class MessageForwarder {
             MessageForwardListener listener = listeners.get(remoteName);
             if (! listener.isRunning()) {
                 listeners.remove(remoteName);
+                logger.info("Removed stopped listener {}", remoteName);
             }
         }
 
@@ -56,47 +53,67 @@ public class MessageForwarder {
 
     public void setupConnectionsToNewNeighbours() throws NamingException, JMSException {
         List<Neighbour> interchanges = neighbourFetcher.listNeighbourCandidates();
+        List<String> interchangeNames = new ArrayList<>();
         for (Neighbour ixn : interchanges) {
             String name = ixn.getName();
+            interchangeNames.add(name);
             if (! listeners.containsKey(name)) {
-                logger.debug("Found ixn with name {}, port {}",ixn.getName(),ixn.getMessageChannelPort());
-                //System.out.println(String.format("name: %s, address %s:%s, fedIn: %s status: %s",ixn.getName(),ixn.getName(),ixn.getMessageChannelPort(),ixn.getFedIn(),ixn.getSubscriptionRequest().getStatus()));
-                //logger.debug("Found nex Ixn %s, setting up connections");
+                logger.info("Setting up ixn with name {}, port {}",ixn.getName(),ixn.getMessageChannelPort());
                 MessageProducer producer = createProducerToRemote(ixn);
-                MessageConsumer messageConsumer = createConsumerFromLocal(ixn);
+
+                IxnContext context = createContext(ixn);
+                Connection connection = createConnection(context);
+                MessageConsumer messageConsumer = createDestination(context, connection);
+
                 MessageForwardListener messageListener = new MessageForwardListener(messageConsumer, producer);
                 messageConsumer.setMessageListener(messageListener);
+                connection.setExceptionListener(messageListener);
                 
-                //TODO Should we have a single object that is a message consumer? Or one per destination? messageConsumer.setMessageListener(this);
                 listeners.put(name,messageListener);
             } else {
-                logger.debug("No new Ixn found");
+                if (listeners.get(name).isRunning()) {
+                    logger.debug("Listener for {} is still running with no changes", name);
+                } else {
+                    logger.debug("Non-running listener detected, name {}",name);
+                }
+            }
+        }
+        for (String ixnName : listeners.keySet()) {
+            if (! interchangeNames.contains(ixnName)) {
+                logger.info("Listener for {} is now being removed",ixnName);
+                MessageForwardListener toRemove = listeners.remove(ixnName);
+                toRemove.teardown();
             }
         }
     }
 
-    public MessageConsumer createConsumerFromLocal(Neighbour ixn) throws NamingException, JMSException {
+    public IxnContext createContext(Neighbour ixn) throws NamingException {
         String readUrl = String.format("amqps://%s:%s",properties.getLocalIxnDomainName(),properties.getLocalIxnFederationPort());
         String readQueue = ixn.getName();
+        logger.debug("Creating destination for messages on queue [{}] from [{}]", readQueue, readUrl);
+        return new IxnContext(readUrl, null, readQueue);
+    }
 
-        IxnContext context = new IxnContext(readUrl, null, readQueue);
-        Destination queueR = context.getReceiveQueue();
-
+    public Connection createConnection(IxnContext context) throws NamingException, JMSException {
         Connection connection = context.createConnection(sslContext);
         connection.start();
+        return connection;
+    }
 
+    public MessageConsumer createDestination(IxnContext context, Connection connection) throws JMSException, NamingException {
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Destination queueR = context.getReceiveQueue();
         return session.createConsumer(queueR);
     }
 
     public MessageProducer createProducerToRemote(Neighbour ixn) throws NamingException, JMSException {
-        System.out.println(String.format("Connecting to %s",ixn.getName()));
+        logger.info("Connecting to {}", ixn.getName());
         String writeUrl = ixn.getMessageChannelUrl();
+        logger.debug("Creating producer on url [{}]", writeUrl);
         IxnContext writeContext = new IxnContext(writeUrl, properties.getRemoteWritequeue(), null);
 
         Destination queueS = writeContext.getSendQueue();
         Connection writeConnection = writeContext.createConnection(sslContext);
-        writeConnection.setExceptionListener(exceptionListener);
         writeConnection.start();
         Session writeSession = writeConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         return writeSession.createProducer(queueS);

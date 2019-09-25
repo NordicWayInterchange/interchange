@@ -14,7 +14,7 @@ public class TestKeystoreHelper {
 	private static final KeystoreType KEYSTORE_TYPE = KeystoreType.PKCS12;
 
 
-	static SSLContext sslContext(String keystore, String truststore) throws SSLContextFactory.InvalidSSLConfig {
+	public static SSLContext sslContext(String keystore, String truststore) throws SSLContextFactory.InvalidSSLConfig {
 		String keystoreFilePath = getFilePath(keystore);
 		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFilePath, TEST_KEYSTORE_PASSWORD, KEYSTORE_TYPE, TEST_KEYSTORE_PASSWORD);
 
@@ -23,7 +23,7 @@ public class TestKeystoreHelper {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
 	}
 
-	private static String getFilePath(String jksTestResource) {
+	public static String getFilePath(String jksTestResource) {
 		URL resource = Thread.currentThread().getContextClassLoader().getResource(jksTestResource);
 		if (resource != null) {
 			return resource.getFile();

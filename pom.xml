@@ -140,6 +140,12 @@
                 <artifactId>qpid-broker-core</artifactId>
                 <version>7.0.6</version>
             </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>1.12.1</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -204,6 +210,8 @@
 
     <modules>
         <module>ssl-utils</module>
+        <module>jms-client</module>
+        <module>test-ssl-utils</module>
         <module>api-model</module>
         <module>neighbour-dns</module>
         <module>neighbour-model</module>
@@ -216,6 +224,5 @@
         <module>interchangenode</module>
         <module>debugclient</module>
         <module>message-forwarder</module>
-        <module>jms-client</module>
     </modules>
 </project>

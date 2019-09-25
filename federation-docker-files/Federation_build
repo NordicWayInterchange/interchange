@@ -47,5 +47,8 @@ COPY jms-client/pom.xml jms-client/pom.xml
 COPY onboard-server/src onboard-server/src
 COPY onboard-server/pom.xml onboard-server/pom.xml
 
+COPY test-ssl-utils/src test-ssl-utils/src
+COPY test-ssl-utils/pom.xml test-ssl-utils/pom.xml
+
 RUN mvn clean package -PPKG -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
 
