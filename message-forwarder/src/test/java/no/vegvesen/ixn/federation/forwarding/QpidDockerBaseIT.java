@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@SuppressWarnings("WeakerAccess")
 public class QpidDockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
 	static final int HTTPS_PORT = 443;
@@ -18,13 +19,14 @@ public class QpidDockerBaseIT {
 
 		String ciWorkdir = System.getenv(CI_WORKDIR);
 		if (ciWorkdir != null) {
+			logger.debug("Circle CI because we got environment varaible [{}] with value [{}]");
 			Path ciWorkdirPath = Paths.get(ciWorkdir);
-			logger.debug("ci workdir {} resolves to {} full path", ciWorkdir, ciWorkdirPath.getFileName().toString(), ciWorkdirPath.toAbsolutePath());
+			logger.debug("ci workdir environment variable [{}] with folder name [{}] reolves to full path [{}]", ciWorkdir, ciWorkdirPath.getFileName().toString(), ciWorkdirPath.toAbsolutePath());
 			projectFolder = ciWorkdirPath.getFileName().toString();
 		}
 
 		Path run = Paths.get(".").toAbsolutePath();
-		logger.debug("Resolving qpid path from run path: " + run.toAbsolutePath().toString());
+		logger.debug("Resolving qpid path below [{}]from run path: [{}]", run.toAbsolutePath().toString());
 		Path projectRoot = null;
 		while (projectRoot == null && run.getParent() != null) {
 			if (run.endsWith(projectFolder)) {
@@ -34,7 +36,7 @@ public class QpidDockerBaseIT {
 		}
 		if (projectRoot != null) {
 			Path qpid = projectRoot.resolve("qpid");
-			logger.debug("Resolved qpid path {}", qpid.toAbsolutePath().toString());
+			logger.debug("Resolved qpid path [{}]", qpid.toAbsolutePath().toString());
 			return qpid;
 		}
 		throw new RuntimeException("Could not resolve path to qpid docker folder in parent folder of " + run.toString());
