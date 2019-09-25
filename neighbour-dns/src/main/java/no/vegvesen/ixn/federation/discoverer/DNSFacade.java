@@ -7,13 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.SRVRecord;
-import org.xbill.DNS.Type;
+import org.xbill.DNS.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class DNSFacade {
@@ -26,49 +22,67 @@ public class DNSFacade {
 		this.dnsProperties = dnsProperties;
 	}
 
-
 	// Returns a list of neighbours discovered through DNS lookup.
 	public List<Neighbour> getNeighbours() {
-
-		List<Neighbour> neighbours = new ArrayList<>();
-
-		// TODO: get control channel port nr from separate SRV lookup.
-
 		try {
 			if (dnsProperties.getDomainName() == null || dnsProperties.getDomainName().isEmpty()) {
 				throw new RuntimeException("DNS lookup with no domain");
 			}
-			// SRV record lookup for message chanel port on each sub domain
-			String srvLookupString = "_ixn._tcp." + dnsProperties.getDomainName();
+			Map<String, String> messageChannelPorts = getSrvRecords("_ixn._tcp.");
+			Map<String, String> controlChannelPorts = getSrvRecords("_ixc._tcp.");
 
-			Record[] records = new Lookup(srvLookupString, Type.SRV).run();
-
-			if (records == null) {
-				throw new RuntimeException("DNS lookup failed. Returned SRV records for " + srvLookupString + " was null.");
-			}
-
-			for (Record record : records) {
-
-				SRVRecord srv = (SRVRecord) record;
-				String domainName = srv.getTarget().toString();
-				String messageChannelPort = String.valueOf(srv.getPort());
-
+			List<Neighbour> neighbours = new LinkedList<>();
+			for (String nodeName : messageChannelPorts.keySet()) {
 				Neighbour neighbour = new Neighbour();
-				neighbour.setName(domainName.substring(0, domainName.length()-1));
-				neighbour.setMessageChannelPort(messageChannelPort);
-				neighbour.setControlChannelPort(dnsProperties.getControlChannelPort());
-
+				neighbour.setName(nodeName);
+				neighbour.setMessageChannelPort(messageChannelPorts.get(nodeName));
+				if (controlChannelPorts.containsKey(nodeName)) {
+					neighbour.setControlChannelPort(controlChannelPorts.get(nodeName));
+					logger.debug("DNS server has message channel port {} and control channel port {} for node {}",
+							neighbour.getMessageChannelPort(),
+							neighbour.getControlChannelPort(),
+							neighbour.getName());
+				}
+				else {
+					neighbour.setControlChannelPort(dnsProperties.getControlChannelPort());
+					logger.debug("DNS server has only message channel port {} for node, using standard port for control channel {} for node {}",
+							neighbour.getMessageChannelPort(),
+							neighbour.getControlChannelPort(),
+							neighbour.getName());
+				}
 				neighbours.add(neighbour);
 				ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 				String json = ow.writeValueAsString(neighbour);
 				logger.debug("DNS lookup gave Neighbour: \n" + json);
+
 			}
+			return neighbours;
 
 		} catch (Exception e) {
 			logger.error("Error in DNSFacade", e);
 		}
+		return Collections.emptyList();
+	}
 
-		return neighbours;
+	private Map<String, String> getSrvRecords(String srvRecordType) throws TextParseException {
+		Map<String, String> srvPorts = new HashMap<>();
+		// SRV record lookup for message chanel port on each sub domain
+		String srvLookupString = srvRecordType + dnsProperties.getDomainName();
+
+		Record[] records = new Lookup(srvLookupString, Type.SRV).run();
+
+		if (records == null) {
+			throw new RuntimeException("DNS lookup failed. Returned SRV records for " + srvLookupString + " was null.");
+		}
+
+		for (Record record : records) {
+			SRVRecord srv = (SRVRecord) record;
+			String domainName = srv.getTarget().toString();
+
+			String neighbourName = domainName.substring(0, domainName.length() - 1);
+			srvPorts.put(neighbourName, String.valueOf(srv.getPort()));
+		}
+		return srvPorts;
 	}
 
 }
