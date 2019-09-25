@@ -367,17 +367,16 @@ public class NeighbourDiscoverer {
 		// If Self has updated Subscriptions since last time we posted a subscription request, we need to recalculate the subscription request for all neighbours.
 
 		logger.info("Checking if any Service Providers have updated their subscriptions...");
-		logger.info("Self name: {}", myName);
 
 		Self self = selfRepository.findByName(myName);
-		if(self == null || self.getLocalSubscriptions().isEmpty()){
+		if(self == null){
 			return; // We have nothing to post to our neighbour
 		}
 
 		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
 
-		if(discoveryState == null || discoveryState.getLastSubscriptionRequest() == null || self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest())){
-			// Either first post or an upate.
+		if(discoveryState == null || discoveryState.getLastSubscriptionRequest() == null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest()))){
+			// Either first post or an update.
 			// Local Subscriptions have been updated since last time performed the subscription request.
 			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
 
@@ -481,14 +480,14 @@ public class NeighbourDiscoverer {
 		logger.info("Checking if any Service Providers have updated their capabilities...");
 
 		Self self = selfRepository.findByName(myName);
-		if(self == null || self.getLocalCapabilities().isEmpty()){
+		if(self == null){
 			logger.info("Self was null. Waiting for normal capability exchange to be performed first.");
 			return; // We have nothing to post to our neighbours.
 		}
 
 		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
 
-		if(discoveryState == null || discoveryState.getLastCapabilityExchange()==null || self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange())){
+		if(discoveryState == null || discoveryState.getLastCapabilityExchange()==null || (self.getLastUpdatedLocalCapabilities() != null && self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange()))){
 			// Capability post either not performed before, or Service Providers have been updated.
 			// Last updated capabilities is after last capability exchange - perform new capability exchange with all neighbours
 
