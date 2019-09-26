@@ -66,7 +66,7 @@ public class NeighbourRESTFacade {
 			logger.debug("Received response entity: {}", response.toString());
 			logger.debug("Received headers: {}", response.getHeaders().toString());
 
-			logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi.toString());
+			logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi == null ? "null" : capabilityApi.toString());
 
 			return capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
 
