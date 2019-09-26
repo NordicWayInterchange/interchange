@@ -26,3 +26,6 @@ spec:
   - name: onboard
     port: {{ .Values.self.service_provider_port }}
     targetPort: onboard
+  {{- if .Values.self.static_external_ip }}
+  loadBalancerIP: {{ .Values.self.static_external_ip }}
+  {{- end -}}
