@@ -16,9 +16,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+
 import java.io.IOException;
 
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.SUBSCRIPTION_PATH;
 
 @Component
 public class NeighbourRESTFacade {
@@ -61,14 +63,17 @@ public class NeighbourRESTFacade {
 
 		try {
 			ResponseEntity<CapabilityApi> response = restTemplate.exchange(url, HttpMethod.POST, entity, CapabilityApi.class);
-			CapabilityApi capabilityApi = response.getBody();
 			logger.debug("Received capability api: {}", response.getBody());
 			logger.debug("Received response entity: {}", response.toString());
 			logger.debug("Received headers: {}", response.getHeaders().toString());
 
-			logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi == null ? "null" : capabilityApi.toString());
-
-			return capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
+			if (response.getBody() != null) {
+				CapabilityApi capabilityApi = response.getBody();
+				logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi == null ? "null" : capabilityApi.toString());
+				return capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
+			} else {
+				throw new CapabilityPostException(String.format("Server returned http code %s with null capability response", response.getStatusCodeValue()));
+			}
 
 		}catch(HttpServerErrorException | HttpClientErrorException e){
 
@@ -112,7 +117,11 @@ public class NeighbourRESTFacade {
 			logger.debug("Received response entity: {}", response.toString());
 			logger.debug("Received headers: {}", response.getHeaders().toString());
 
+			if (response.getBody() == null) {
+				throw new SubscriptionRequestException("Returned empty response from subscription request");
+			}
 			SubscriptionRequestApi responseApi = response.getBody();
+			logger.debug("Received response object: {}", responseApi.toString());
 			Neighbour responseNeighbour = subscriptionRequestTransformer.subscriptionRequestApiToNeighbour(responseApi);
 
 			if (!discoveringNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty() && responseNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
@@ -124,7 +133,6 @@ public class NeighbourRESTFacade {
 			responseNeighbour.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
 			logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
-			logger.debug("Received response object: {}", responseApi.toString());
 
 			return responseNeighbour.getSubscriptionRequest();
 
