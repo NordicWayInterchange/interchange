@@ -85,4 +85,7 @@ public class DNSFacade {
 		return srvPorts;
 	}
 
+	public String getDnsServerName() {
+		return this.dnsProperties.getDomainName();
+	}
 }
