@@ -6,4 +6,8 @@ public class CapabilityPostException extends RuntimeException {
 		super(message);
 	}
 
+	public CapabilityPostException(String message, Throwable t) {
+		super(message,t);
+	}
+
 }

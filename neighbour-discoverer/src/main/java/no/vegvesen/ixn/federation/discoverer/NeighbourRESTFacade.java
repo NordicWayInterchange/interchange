@@ -15,6 +15,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -90,6 +91,10 @@ public class NeighbourRESTFacade {
 				logger.error("Unable to cast error response as ErrorDetails object.", ioe);
 				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetailsobject.");
 			}
+		} catch (RestClientException e) {
+			logger.error("Failed post of capabilities to neighbour, network layer error",e);
+			throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() + " due to exception",e);
+
 		}
 	}
 
