@@ -44,9 +44,9 @@ spec:
         - name: KEY_PASSWORD
           value: {{ .Values.self.key_password | quote }}
         - name: LOG_LEVELS
-          value: {{- range .Values.neighbour_discoverer.logging -}}
+          value: "{{- range .Values.neighbour_discoverer.logging -}}
                   -Dlogging.level{{ .location }}={{ .level }}{{ ` ` }}
-                  {{- end }}{{ quote }}
+                 {{- end }}"
         volumeMounts:
         - name: secure
           mountPath: {{ .Values.self.secret_mount_path | quote }}

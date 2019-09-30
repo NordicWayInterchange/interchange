@@ -10,4 +10,5 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Drouting-configurer.ssl.key-store=${KEY_STORE} \
      -Drouting-configurer.ssl.key-store-password=${KEY_STORE_PASSWORD} \
      -Drouting-configurer.ssl.key-password=${KEY_PASSWORD} \
+     ${LOG_LEVELS} \
      -jar routing-configurer.jar
