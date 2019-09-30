@@ -38,14 +38,16 @@ public class DNSFacade {
 				neighbour.setMessageChannelPort(messageChannelPorts.get(nodeName));
 				if (controlChannelPorts.containsKey(nodeName)) {
 					neighbour.setControlChannelPort(controlChannelPorts.get(nodeName));
-					logger.debug("DNS server has message channel port {} and control channel port {} for node {}",
+					logger.debug("DNS server {} has message channel port {} and control channel port {} for node {}",
+							getDnsServerName(),
 							neighbour.getMessageChannelPort(),
 							neighbour.getControlChannelPort(),
 							neighbour.getName());
 				}
 				else {
 					neighbour.setControlChannelPort(dnsProperties.getControlChannelPort());
-					logger.debug("DNS server has only message channel port {} for node, using standard port for control channel {} for node {}",
+					logger.debug("DNS server {} has only message channel port {} for node, using standard port for control channel {} for node {}",
+							getDnsServerName(),
 							neighbour.getMessageChannelPort(),
 							neighbour.getControlChannelPort(),
 							neighbour.getName());
@@ -53,13 +55,12 @@ public class DNSFacade {
 				neighbours.add(neighbour);
 				ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 				String json = ow.writeValueAsString(neighbour);
-				logger.debug("DNS lookup gave Neighbour: \n" + json);
-
+				logger.debug("DNS lookup in {} gave Neighbour {}", getDnsServerName(), json);
 			}
 			return neighbours;
 
 		} catch (Exception e) {
-			logger.error("Error in DNSFacade", e);
+			logger.error(String.format("Error in DNSFacade %s", getDnsServerName()), e);
 		}
 		return Collections.emptyList();
 	}
@@ -72,7 +73,8 @@ public class DNSFacade {
 		Record[] records = new Lookup(srvLookupString, Type.SRV).run();
 
 		if (records == null) {
-			throw new RuntimeException("DNS lookup failed. Returned SRV records for " + srvLookupString + " was null.");
+			throw new RuntimeException(String.format("DNS lookup in %s failed. Returned SRV records for %s was null.",
+					getDnsServerName(), srvLookupString));
 		}
 
 		for (Record record : records) {
@@ -85,4 +87,7 @@ public class DNSFacade {
 		return srvPorts;
 	}
 
+	public String getDnsServerName() {
+		return this.dnsProperties.getDomainName();
+	}
 }

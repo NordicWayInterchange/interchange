@@ -5,15 +5,15 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import org.apache.qpid.server.filter.selector.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +24,12 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.apache.qpid.server.filter.selector.ParseException;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
-
-
-import java.util.*;
 
 @Api(value = "/", description = "Nordic Way Federation API", produces = "application/json")
 @RestController("/")
@@ -283,10 +282,17 @@ public class NeighbourRestController {
 			}
 		}
 		if (dnsNeighbour != null) {
+			logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}, message {}",
+					neighbour.getName(),
+					dnsNeighbour.getControlChannelPort(),
+					dnsNeighbour.getMessageChannelPort());
 			neighbour.setControlChannelPort(dnsNeighbour.getControlChannelPort());
 			neighbour.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
 		} else {
-			throw new DiscoveryException(String.format("Received capability post from neighbour %s, but could not find in DNS", neighbour.getName()));
+			throw new DiscoveryException(
+					String.format("Received capability post from neighbour %s, but could not find in DNS %s",
+							neighbour.getName(),
+							dnsFacade.getDnsServerName()));
 		}
 		return neighbour;
 	}
