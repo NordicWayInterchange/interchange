@@ -11,4 +11,5 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Dneighbour.ssl.key-store-password=${KEY_STORE_PASSWORD}\
      -Dneighbour.ssl.key-password=${KEY_PASSWORD} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
+     ${LOG_LEVELS}
      -jar neighbour-discoverer.jar
