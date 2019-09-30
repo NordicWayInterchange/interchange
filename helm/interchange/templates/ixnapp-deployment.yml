@@ -15,11 +15,6 @@ spec:
       component: interchange
       release: {{ .Release.Name }}
   template:
-    metadata:
-      labels:
-        app: {{ .Chart.Name }}
-        component: interchange
-        release: {{ .Release.Name }}
     spec:
       containers:
       - name: interchange
@@ -35,5 +30,10 @@ spec:
           value: jdbc:postgresql://{{ .Release.Name }}-postgis:5432/geolookup
         - name: LOG_LEVELS
           value: "{{- range .Values.interchange.logging -}}
-                  -Dlogging.level{{ .location }}={{ .level }}{{ ` ` }}
-                  {- end }}"
+                     -Dlogging.level{{ .location }}={{ .level }}{{ ` ` }}
+                 {{- end }}"
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: interchange
+        release: {{ .Release.Name }}
