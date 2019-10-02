@@ -45,7 +45,7 @@ spec:
           value: {{ .Values.external_name | quote }}
         - name: LOG_LEVELS
           value: "{{- range .Values.message_forwarder.logging -}}
-                  -Dlogging.level{{ .location }}={{ .level }}{{ ` ` }}
+                  -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                   {{- end }}"
         volumeMounts:
         - name: secure

@@ -43,7 +43,7 @@ spec:
           value: {{ .Values.self.key_password | quote }}
         - name: LOG_LEVELS
           value: "{{- range .Values.routing_configurer.logging -}}
-                 -Dlogging.level{{ .location }}={{ .level }}{{ ` ` }}
+                 -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                  {{- end }}"
         volumeMounts:
         - name: secure

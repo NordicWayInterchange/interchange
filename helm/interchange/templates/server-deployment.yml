@@ -43,7 +43,7 @@ spec:
           value: {{ .Values.self.key_store_password | quote }}
         - name: LOG_LEVELS
           value: "{{- range .Values.neighbour_server.logging -}}
-                 -Dlogging.level{{ .location }}={{ .level }}{{ ` ` }}
+                 -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                  {{- end }}"
         volumeMounts:
         - name: secure

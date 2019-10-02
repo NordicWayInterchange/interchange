@@ -30,7 +30,7 @@ spec:
           value: jdbc:postgresql://{{ .Release.Name }}-postgis:5432/geolookup
         - name: LOG_LEVELS
           value: "{{- range .Values.interchange.logging -}}
-                     -Dlogging.level{{ .location }}={{ .level }}{{ ` ` }}
+                     -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                  {{- end }}"
     metadata:
       labels:
