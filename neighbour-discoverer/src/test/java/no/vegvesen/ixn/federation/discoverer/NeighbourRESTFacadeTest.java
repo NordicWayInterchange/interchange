@@ -248,10 +248,5 @@ public class NeighbourRESTFacadeTest {
 
 		Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
 
-		/*
-		assertThat(response.getSelector()).isEqualTo(subscription.getSelector());
-		assertThat(response.getPath()).isEqualTo(subscription.getPath());
-		assertThat(response.getSubscriptionStatus()).isEqualTo(subscription.getSubscriptionStatus());
-		*/
 	}
 }
