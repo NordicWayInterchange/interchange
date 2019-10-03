@@ -43,6 +43,10 @@ spec:
           value: {{ .Values.message_forwarder.trust_store_type | quote }}
         - name: SERVER_NAME
           value: {{ .Values.external_name | quote }}
+        - name: LOG_LEVELS
+          value: "{{- range .Values.message_forwarder.logging -}}
+                  -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
+                  {{- end }}"
         volumeMounts:
         - name: secure
           mountPath: {{ .Values.self.secret_mount_path | quote }}

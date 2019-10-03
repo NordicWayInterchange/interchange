@@ -13,4 +13,5 @@ java -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLD
      -Dforwarder.truststorepath=${TRUST_STORE} \
      -Dforwarder.truststorepassword=${TRUST_STORE_PASSWORD} \
      -Dforwarder.truststoretype=${TRUST_STORE_TYPE} \
+     ${LOG_LEVELS} \
      -jar message-forwarder.jar
