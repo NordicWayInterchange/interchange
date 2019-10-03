@@ -15,6 +15,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -90,6 +91,10 @@ public class NeighbourRESTFacade {
 				logger.error("Unable to cast error response as ErrorDetails object.", ioe);
 				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetailsobject.");
 			}
+		} catch (RestClientException e) {
+			logger.error("Failed post of capabilities to neighbour, network layer error",e);
+			throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() + " due to exception",e);
+
 		}
 	}
 
@@ -151,6 +156,9 @@ public class NeighbourRESTFacade {
 				logger.error("Unable to cast response as ErrorDetails object.", ioe);
 				throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object." );
 			}
+		} catch (RestClientException e) {
+			logger.error("Received network layer error",e);
+			throw new SubscriptionRequestException("Error in posting capabilities to neighbour " + neighbour.getName() + " due to exception",e);
 		}
 	}
 
@@ -186,6 +194,9 @@ public class NeighbourRESTFacade {
 				logger.error("Unable to cast response as ErrorDetails object.", ioe);
 				throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
 			}
+		} catch (RestClientException e) {
+			logger.error("Received network layer error",e);
+			throw new SubscriptionPollException("Error in posting capabilities to neighbour " + neighbour.getName() + " due to exception",e);
 		}
 	}
 }
