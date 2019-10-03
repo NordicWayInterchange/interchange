@@ -1,26 +1,36 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.exceptions.*;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.DataType;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.http.*;
+import org.mockito.Mockito;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class NeighbourRESTFacadeTest {
@@ -180,5 +190,68 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(withStatus(HttpStatus.OK).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+	}
+
+	@Test(expected = SubscriptionRequestException.class)
+	public void serverClosesConnectionUnexpectedlyOnSubscriptionRequestPost() throws Exception {
+		// Subscription request posted to neighbour has non empty subscription set.
+		Subscription subscription = new Subscription();
+		subscription.setSelector("where LIKE 'NO'");
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
+		ericsson.setSubscriptionRequest(subscriptionRequest);
+
+		// Subscription request received from the neighbour has empty set of subscription
+		SubscriptionRequestApi serverResponse = new SubscriptionRequestApi("remote server", new HashSet<>());
+		String errorDetailsJson = new ObjectMapper().writeValueAsString(serverResponse);
+
+		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
+		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
+
+		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond((request) -> mock);
+
+
+
+		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+	}
+
+	@Test(expected = CapabilityPostException.class)
+	public void capabilitiesPostServerUnexpectedlyClosesConnection() throws IOException {
+
+	    final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
+	    Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
+		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond((request) -> mock);
+
+		neighbourRESTFacade.postCapabilities(ericsson, ericsson);
+	}
+
+	@Test(expected = SubscriptionPollException.class)
+	public void test() throws IOException {
+
+		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setPath("bouvet/subscription/1");
+		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
+		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
+
+		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
+		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
+
+		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscription/1"))
+				.andExpect(method(HttpMethod.GET))
+				.andRespond((request) -> mock);
+
+		Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
+
+		/*
+		assertThat(response.getSelector()).isEqualTo(subscription.getSelector());
+		assertThat(response.getPath()).isEqualTo(subscription.getPath());
+		assertThat(response.getSubscriptionStatus()).isEqualTo(subscription.getSubscriptionStatus());
+		*/
 	}
 }
