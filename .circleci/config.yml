@@ -3,10 +3,9 @@ jobs:
   build:
     machine: true
     steps:
-      - checkout
       - run:
-          name: Build the Container
+          name: Test an environment variable
           command: |
-            mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
-
-
+            echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
