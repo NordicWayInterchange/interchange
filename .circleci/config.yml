@@ -17,4 +17,4 @@ jobs:
       - run:
           name: Push containers
           command: |
-            build-push-images.sh
+            ./build-push-images.sh
