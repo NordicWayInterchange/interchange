@@ -4,8 +4,17 @@ jobs:
     machine: true
     steps:
       - run:
-          name: Test an environment variable
+          name: Setup environment variable
           command: |
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
+      - checkout
+      - run:
+          name: Build the Container
+          command: |
+            mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+      - run:
+          name: Push containers
+          command: |
+            build-push-images.sh
