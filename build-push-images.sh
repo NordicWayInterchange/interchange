@@ -12,5 +12,6 @@ for image in ${IMAGES}; do
     docker tag ${image}:${TAG} ${image}:${BRANCH}
     docker tag ${image}:${TAG} ${REGISTRY}/${image}:${TAG}
     docker push ${REGISTRY}/${image}:${TAG}
+    docker push ${REGISTRY}/${image}:${BRANCH}
     popd
 done
