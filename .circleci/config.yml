@@ -5,9 +5,13 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Build the Container
+          name: run tests
           command: |
-            mvn install -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+      - run:
+          name: Package artifacts with dependencies
+          command: |
+            mvn package -PPKG -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - run:
           name: Push containers
           command: |

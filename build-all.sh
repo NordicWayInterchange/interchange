@@ -2,22 +2,24 @@
 
 REGISTRY=eu.gcr.io/nordic-way-aad182cc
 TAG="$(git rev-parse --short HEAD)"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 PUSH=${PUSH:-false}
 IMAGES="interchangenode qpid postgis message-forwarder neighbour-discoverer neighbour-server routing-configurer onboard-server"
 
-docker build -f federation-docker-files/Federation_build -t federation-build:${TAG} .
-docker tag federation-build:${TAG} federation-build:latest
+mvn clean install -PPKG
 
 for image in ${IMAGES}; do
     pushd ${image}
 
     docker build -t ${image}:${TAG} .
-    docker tag ${image}:${TAG} ${image}:latest
     docker tag ${image}:${TAG} ${REGISTRY}/${image}:${TAG}
-    docker tag ${image}:${TAG} ${REGISTRY}/${image}:fed_latest
+
+    docker tag ${image}:${TAG} ${image}:${BRANCH}
+    docker tag ${image}:${BRANCH} ${REGISTRY}/${image}:${BRANCH}
+
     if [[ ${PUSH} == true ]]; then
         docker push ${REGISTRY}/${image}:${TAG}
-        docker push ${REGISTRY}/${image}:fed_latest
+        docker push ${REGISTRY}/${image}:${BRANCH}
     fi
     popd
 done
@@ -25,4 +27,5 @@ done
 echo ""
 for image in ${IMAGES}; do
     echo "${REGISTRY}/${image}:${TAG}"
+    echo "${REGISTRY}/${image}:${BRANCH}"
 done
