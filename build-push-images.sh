@@ -3,7 +3,7 @@
 REGISTRY=eu.gcr.io/nordic-way-aad182cc
 TAG="$(git rev-parse --short HEAD)"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-IMAGES="interchangenode"
+IMAGES="interchangenode qpid"
 
 for image in ${IMAGES}; do
     pushd ${image}
