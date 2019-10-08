@@ -11,7 +11,7 @@ for image in ${IMAGES}; do
     docker build -t ${image}:${TAG} .
     docker tag ${image}:${TAG} ${image}:${BRANCH}
     docker tag ${image}:${TAG} ${REGISTRY}/${image}:${TAG}
-    docker push ${REGISTRY}/${image}:${TAG}
-    docker push ${REGISTRY}/${image}:${BRANCH}
+    gcloud docker push ${REGISTRY}/${image}:${TAG}
+    gcloud docker push ${REGISTRY}/${image}:${BRANCH}
     popd
 done
