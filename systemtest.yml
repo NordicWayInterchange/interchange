@@ -5,12 +5,6 @@ services:
 # An idea for later would be to have two separate networks, one for each node,
 # where the modules that need to communicate with each other are a part of both networks.
 
-  federation-build:
-    build:
-      dockerfile: federation-docker-files/Federation_build
-      context: ./
-    image: federation-build
-
   mock-dns-server:
     build:
       context: ./fake-dns-server
@@ -44,7 +38,6 @@ services:
     container_name: local_onboard_server
     depends_on:
       - local_db
-      - federation-build
     ports:
       - 32666:8797
     volumes:
@@ -126,7 +119,6 @@ services:
     container_name: local_neighbour_server
     depends_on:
       - local_db
-      - federation-build
     ports:
       - 8090
     volumes:
@@ -148,7 +140,6 @@ services:
     build: ./routing-configurer
     container_name: local_routing_configurer
     depends_on:
-      - federation-build
       - local_db
     links:
       - "local_qpid:local.itsinterchange.eu"
@@ -171,7 +162,6 @@ services:
     container_name: local_neighbour_discoverer
     depends_on:
       - local_db
-      - federation-build
     links:
      - "remote_neighbour_server:remote.itsinterchange.eu"
     volumes:
@@ -194,7 +184,6 @@ services:
     build: ./message-forwarder
     container_name: local_message_forwarder_app
     depends_on:
-    - federation-build
     - local_db
     links:
     - "local_qpid:local.itsinterchange.eu"
@@ -232,7 +221,6 @@ services:
     container_name: remote_onboard_server
     depends_on:
     - remote_db
-    - federation-build
     ports:
     - 32555:8696
     volumes:
@@ -290,7 +278,6 @@ services:
     container_name: remote_neighbour_server
     depends_on:
       - remote_db
-      - federation-build
     ports:
       - 8090
     volumes:
@@ -313,7 +300,6 @@ services:
     container_name: remote_neighbour_discoverer
     depends_on:
       - remote_db
-      - federation-build
     links:
       - "local_neighbour_server:local.itsinterchange.eu"
     volumes:
@@ -361,7 +347,6 @@ services:
     build: ./routing-configurer
     container_name: remote_routing_configurer
     depends_on:
-      - federation-build
       - remote_db
     links:
       - "remote_qpid:remote.itsinterchange.eu"
@@ -383,7 +368,6 @@ services:
     build: ./message-forwarder
     container_name: remote_message_forwarder_app
     depends_on:
-      - federation-build
       - remote_db
     links:
       - "local_qpid:local.itsinterchange.eu"
