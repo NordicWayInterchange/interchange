@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.serviceprovider;
+package no.vegvesen.ixn.federation.auth;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;

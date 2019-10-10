@@ -47,6 +47,9 @@ COPY jms-client/pom.xml jms-client/pom.xml
 COPY onboard-server/src onboard-server/src
 COPY onboard-server/pom.xml onboard-server/pom.xml
 
+COPY interchange-spring-security/src interchange-spring-security/src
+COPY interchange-spring-security/pom.xml interchange-spring-security/pom.xml
+
 COPY test-ssl-utils/src test-ssl-utils/src
 COPY test-ssl-utils/pom.xml test-ssl-utils/pom.xml
 
