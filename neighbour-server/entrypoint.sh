@@ -2,6 +2,9 @@
 
 echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 
+LOG_LEVELS=${LOG_LEVELS:-" "}
+
+
 java -Dspring.datasource.url=${POSTGRES_URI} \
      -Ddns.domain-name=${DOMAIN_NAME}\
      -Ddns.control-channel-port=${CTRL_CHNL_PORT} \
