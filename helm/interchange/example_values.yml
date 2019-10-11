@@ -1,0 +1,89 @@
+external_name: example-node.itsinterchange.eu
+self:                                                               # ------ Universal node settings ----------------
+  domain_name: .itsinterchange.eu
+  tls_secret_name: example-node                                     # Name of the secret created with kubectl that contains the certificates and keys.
+  control_channel_port: 443                                         # Specify the control channel port  for the Node
+  key_store: example-node.itsinterchange.eu.p12                     # Name of key store file
+  key_store_password: not-a-secure-password                         # Key store password
+  trust_store: truststore.jks                                       # Name of trust store file
+  trust_store_password: password                                    # Trust store password
+  key_password: password                                            # Password for the node's private key.
+  secret_mount_path: /jks/keys/                                     # Location of certificates and keys
+  service_provider_port: "4141"                                     # Port of the onboarding server rest controller
+
+                                                                    # ------ Component specific settings ----------
+qpid:                                                               # Apache Qpid message broker
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/qpid                  # Public container registry for Nordic Way where the docker images are located
+    tag: "074e6bd"                                                  # Image tag for the qpid-image
+  expose_amqps: true                                                # Run the node on AMPQS as apposed to AMQP
+  tls_secret_name: example-node                                     # The name of the secret containing keys and certificated
+  server_private_key_file: example-node.itsinterchange.eu.key       # Name of the server private key file
+  server_certificate_file: example-node.itsinterchange.eu.crt       # Name of the server certificate file
+  ca_certificate_file: example-ca.itsinterchange.eu.no.crt          # Name of the ca certificate file
+  interchange_password: not-a-secure-password                       # Password for the user that the interchange app uses to validate messages arriving on qpid
+  admin_password: not-a-secure-password                             # Password for a qpid administrative user
+  persistence:                                                      # Configure persistence of queueus in Qpid
+    enabled: true
+    storageClassName: standard
+    size: 3Gi
+postgis:                                                            # Database for lookup of lat/lon to country code (soon deprecated)
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/postgis
+    tag: "161216d"
+interchange:                                                        # Java application that validates incoming messages to qpid
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
+    tag: "074e6bd"
+  logging:                                                          # Possible to specify log level of the java application. Optional, and can be removed.
+  - logger_name: .root
+    level: info
+neighbour_discoverer:                                               # Java application that posts capabilities and subscriptions to discovered neighbouring interchanges.
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer
+    tag: "074e6bd"
+  logging:
+  - logger_name: .root
+    level: info
+database:                                                           # Database of neighbouring interchanges
+  image:
+    repository: postgres
+    tag: 9.6
+  postgres_user: federation                                         # Database user
+  postgres_password: federation                                     # Database password
+  postgres_db: federation                                           # Database name
+  persistence:                                                      # Persistence settings for the database.
+    enabled: true
+    storageClassName: standard
+    size: 3Gi
+  pgdata: /var/lib/postgresql/data/pgdata
+message_forwarder:                                                  # Java application that forwards local messages to neighbours.
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/message-forwarder
+    tag: "074e6bd"
+  logging:
+  - logger_name: .root
+    level: info
+  key_store_type: PKCS12
+  trust_store_type: JKS
+neighbour_server:                                                   # A java application running a REST endpoints that other neighbours contact us through
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/neighbour-server
+    tag: "074e6bd"
+  logging:
+  - logger_name: .root
+    level: info
+routing_configurer:                                                 # A java application that uses the qpid API to configure routing of messages
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/routing-configurer
+    tag: "074e6bd"
+  logging:
+  - logger_name: .no.vegvesen
+    level: debug
+onboard_server:                                                     # A java application running a REST endpoint for managing Service Providers(create, read, update, delete)
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/onboard-server
+    tag: "074e6bd"
+  logging:
+  - logger_name: .root
+    level: info
