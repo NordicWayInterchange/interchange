@@ -5,9 +5,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: run tests
+          name: run integration tests
           command: |
-            mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - run:
           name: Package artifacts with dependencies
           command: |
