@@ -225,5 +225,6 @@
         <module>interchangenode</module>
         <module>debugclient</module>
         <module>message-forwarder</module>
+        <module>dns-client</module>
     </modules>
 </project>
