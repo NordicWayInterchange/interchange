@@ -17,6 +17,6 @@ done
 
 echo ""
 for image in ${IMAGES}; do
-    echo ${image}:${TAG}"
-    echo ${image}:${BRANCH}"
+    echo "${image}:${TAG}"
+    echo "${image}:${BRANCH}"
 done
