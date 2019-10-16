@@ -21,8 +21,3 @@ jobs:
             gcloud docker --authorize-only
             chmod +x build-push-images.sh
             ./build-push-images.sh
-      - run:
-          name: Run system test
-          command: |
-            chmod +x systemtest.sh
-            ./systemtest.sh
