@@ -1,0 +1,209 @@
+version: '3'
+services:
+
+# Note: now all the containers are on the same network - testing_net
+# An idea for later would be to have two separate networks, one for each node,
+# where the modules that need to communicate with each other are a part of both networks.
+
+  mock-dns-server:
+    build:
+      context: ./fake-dns-server
+      dockerfile: dns-dockerfile
+    cap_add:
+    - NET_ADMIN
+    container_name: mock-dns-server
+    hostname: mock-dns-server
+    networks:
+      testing_net:
+        ipv4_address: 172.28.1.1
+        aliases:
+          - dsn.itsinterchange.eu
+
+  local_db:
+    image: postgres:9.6
+    container_name: local_db
+    depends_on:
+      - mock-dns-server
+    ports:
+      - 5432
+    environment:
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation
+    networks:
+    - testing_net
+
+  local_onboard_server:
+    image: eu.gcr.io/nordic-way-aad182cc/onboard-server:federation-master
+    container_name: local_onboard_server
+    depends_on:
+      - local_db
+    ports:
+      - 32666:8797
+    volumes:
+    - "./tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - SERVER_NAME=local.itsinterchange.eu
+      - DOMAIN_NAME=itsinterchange.eu
+      - SP_CHNL_PORT=8797
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - testing_net
+
+
+  local_interchange_app:
+    image: eu.gcr.io/nordic-way-aad182cc/interchangenode:federation-master
+    container_name: local_interchange_app
+    hostname: local_interchange_app
+    links:
+    - "local_qpid:local.itsinterchange.eu"
+    environment:
+      AMQP_URI: amqp://local.itsinterchange.eu
+      AMQP_USER: interchange
+      AMQP_PASSWORD: "12345678"
+      POSTGIS_URI: jdbc:postgresql://local_postgis:5432/geolookup
+    depends_on:
+      - local_postgis
+    networks:
+    - testing_net
+
+
+  local_postgis:
+    image: eu.gcr.io/nordic-way-aad182cc/postgis:federation-master
+    environment:
+    - POSTGRES_USER=geolookup
+    - POSTGRES_PASSWORD=geolookup
+    - POSTGRES_DB=geolookup
+    container_name: local_postgis
+    hostname: local_postgis
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "geolookup"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+    - 6677:5432
+    networks:
+    - testing_net
+
+  local_qpid:
+    image: eu.gcr.io/nordic-way-aad182cc/qpid:federation-master
+    container_name: local_qpid
+    ports:
+      - 8666:8080
+      - 443
+      - 63002:5671
+      - 5672
+    volumes:
+      - "./qpid/local:/config"
+      - "./tmp:/jks"
+      - "./qpid/messages/local:/work/local/messages"
+    environment:
+      - CA_CERTIFICATE_FILE=/jks/keys/ca.itsinterchange.eu.crt
+      - SERVER_CERTIFICATE_FILE=/jks/keys/local.itsinterchange.eu.crt
+      - SERVER_PRIVATE_KEY_FILE=/jks/keys/local.itsinterchange.eu.key
+      - VHOST_FILE=/work/default/config/default.json
+      - STATIC_VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/work/default/config/groups
+      - STATIC_GROUPS_FILE=/config/groups
+      - PASSWD_FILE=/config/passwd
+    networks:
+    - testing_net
+
+  local_neighbour_server:
+    image: eu.gcr.io/nordic-way-aad182cc/neighbour-server:federation-master
+    container_name: local_neighbour_server
+    depends_on:
+      - local_db
+    ports:
+      - 8090
+    volumes:
+      - "./tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - SERVER_NAME=local.itsinterchange.eu
+      - DOMAIN_NAME=itsinterchange.eu
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+    - testing_net
+    dns: 172.28.1.1
+
+  local_routing_configurer:
+    image: eu.gcr.io/nordic-way-aad182cc/routing-configurer:federation-master
+    container_name: local_routing_configurer
+    depends_on:
+      - local_db
+    links:
+      - "local_qpid:local.itsinterchange.eu"
+    volumes:
+      - "./tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - BASE_URL=https://local.itsinterchange.eu
+      - SERVER_NAME=local.itsinterchange.eu
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_PASSWORD=password
+    networks:
+    - testing_net
+
+  local_neighbour_discoverer:
+    image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer:federation-master
+    container_name: local_neighbour_discoverer
+    depends_on:
+      - local_db
+    volumes:
+      - "./tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - SERVER_NAME=local.itsinterchange.eu
+      - DOMAIN_NAME=itsinterchange.eu
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_PASSWORD=password
+    dns: 172.28.1.1
+    networks:
+    - testing_net
+
+  local_message_forwarder_app:
+    image: eu.gcr.io/nordic-way-aad182cc/message-forwarder:federation-master
+    container_name: local_message_forwarder_app
+    depends_on:
+    - local_db
+    links:
+    - "local_qpid:local.itsinterchange.eu"
+    volumes:
+    - "./tmp:/jks"
+    environment:
+    - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+    - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+    - KEY_STORE_PASSWORD=password
+    - KEY_STORE_TYPE=PKCS12
+    - TRUST_STORE=/jks/keys/truststore.jks
+    - TRUST_STORE_PASSWORD=password
+    - TRUST_STORE_TYPE=JKS
+    - SERVER_NAME=local.itsinterchange.eu
+    networks:
+    - testing_net
+
+networks:
+  testing_net:
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.28.1.0/16
+
+
