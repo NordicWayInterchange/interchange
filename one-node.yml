@@ -1,37 +1,15 @@
 version: '3'
 services:
 
-# Note: now all the containers are on the same network - testing_net
-# An idea for later would be to have two separate networks, one for each node,
-# where the modules that need to communicate with each other are a part of both networks.
-
-  mock-dns-server:
-    build:
-      context: ./fake-dns-server
-      dockerfile: dns-dockerfile
-    cap_add:
-    - NET_ADMIN
-    container_name: mock-dns-server
-    hostname: mock-dns-server
-    networks:
-      testing_net:
-        ipv4_address: 172.28.1.1
-        aliases:
-          - dsn.itsinterchange.eu
-
   local_db:
     image: postgres:9.6
     container_name: local_db
-    depends_on:
-      - mock-dns-server
     ports:
       - 5432
     environment:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - POSTGRES_DB=federation
-    networks:
-    - testing_net
 
   local_onboard_server:
     image: eu.gcr.io/nordic-way-aad182cc/onboard-server:federation-master
@@ -51,8 +29,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-    networks:
-      - testing_net
 
 
   local_interchange_app:
@@ -68,8 +44,6 @@ services:
       POSTGIS_URI: jdbc:postgresql://local_postgis:5432/geolookup
     depends_on:
       - local_postgis
-    networks:
-    - testing_net
 
 
   local_postgis:
@@ -87,8 +61,6 @@ services:
       retries: 5
     ports:
     - 6677:5432
-    networks:
-    - testing_net
 
   local_qpid:
     image: eu.gcr.io/nordic-way-aad182cc/qpid:federation-master
@@ -111,8 +83,6 @@ services:
       - GROUPS_FILE=/work/default/config/groups
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
-    networks:
-    - testing_net
 
   local_neighbour_server:
     image: eu.gcr.io/nordic-way-aad182cc/neighbour-server:federation-master
@@ -132,9 +102,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-    networks:
-    - testing_net
-    dns: 172.28.1.1
 
   local_routing_configurer:
     image: eu.gcr.io/nordic-way-aad182cc/routing-configurer:federation-master
@@ -154,8 +121,6 @@ services:
       - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
-    networks:
-    - testing_net
 
   local_neighbour_discoverer:
     image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer:federation-master
@@ -174,9 +139,6 @@ services:
       - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
-    dns: 172.28.1.1
-    networks:
-    - testing_net
 
   local_message_forwarder_app:
     image: eu.gcr.io/nordic-way-aad182cc/message-forwarder:federation-master
@@ -196,14 +158,3 @@ services:
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=local.itsinterchange.eu
-    networks:
-    - testing_net
-
-networks:
-  testing_net:
-    ipam:
-      driver: default
-      config:
-      - subnet: 172.28.1.0/16
-
-
