@@ -15,7 +15,8 @@ import java.util.Set;
 @Table(name="self", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_self_name"))
 public class Self {
 
-	Logger logger = LoggerFactory.getLogger(Self.class);
+	@Transient //To make sure it's not attempted to save this to the database
+	private static Logger logger = LoggerFactory.getLogger(Self.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "self_generator")
