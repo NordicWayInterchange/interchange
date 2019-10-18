@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;

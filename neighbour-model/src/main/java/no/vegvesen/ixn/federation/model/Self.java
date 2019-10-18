@@ -1,6 +1,11 @@
 package no.vegvesen.ixn.federation.model;
 
 
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import org.apache.qpid.server.filter.selector.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -9,6 +14,8 @@ import java.util.Set;
 @Entity
 @Table(name="self", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_self_name"))
 public class Self {
+
+	Logger logger = LoggerFactory.getLogger(Self.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "self_generator")
@@ -77,6 +84,33 @@ public class Self {
 
 	public void setLastUpdatedLocalSubscriptions(LocalDateTime lastUpdatedLocalSubscriptions) {
 		this.lastUpdatedLocalSubscriptions = lastUpdatedLocalSubscriptions;
+	}
+
+	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour) {
+		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
+		Set<Subscription> calculatedSubscriptions = new HashSet<>();
+		try {
+			for (DataType neighbourDataType : neighbour.getCapabilities().getDataTypes()) {
+				for (Subscription localSubscription : getLocalSubscriptions()) {
+
+					// Trows ParseException if selector is invalid or IllegalArgumentException if selector is always true
+					if (CapabilityMatcher.matches(neighbourDataType, localSubscription.getSelector())) {
+
+						// Subscription to be returned only has selector set.
+						Subscription matchingSubscription = new Subscription();
+						matchingSubscription.setSelector(localSubscription.getSelector());
+
+						calculatedSubscriptions.add(matchingSubscription);
+					}
+				}
+			}
+		} catch (ParseException | IllegalArgumentException e) {
+			logger.error("Error matching neighbour data type with local subscription. Returning empty set of subscriptions.", e);
+			return new HashSet<>();
+		}
+		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
+		return calculatedSubscriptions;
+
 	}
 
 	@Override

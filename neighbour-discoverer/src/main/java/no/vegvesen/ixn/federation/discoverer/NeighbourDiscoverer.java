@@ -63,6 +63,7 @@ public class NeighbourDiscoverer {
 		this.neighbourRESTFacade = neighbourRESTFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
+		MDCUtil.setDiscoveringInterchangeVariable(myName);
 	}
 
 	Neighbour getDiscoveringNeighbourWithCapabilities() {
@@ -91,42 +92,6 @@ public class NeighbourDiscoverer {
 		}
 
 		return discoveryState;
-	}
-
-	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour) {
-		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
-
-		Self self = selfRepository.findByName(myName);
-		if(self == null){
-			// No local subscriptions
-			return Collections.emptySet();
-		}
-
-		Set<Subscription> calculatedSubscriptions = new HashSet<>();
-
-		try {
-			for (DataType neighbourDataType : neighbour.getCapabilities().getDataTypes()) {
-				for (Subscription localSubscription : self.getLocalSubscriptions()) {
-
-					// Trows ParseException if selector is invalid or IllegalArgumentException if selector is always true
-					if (CapabilityMatcher.matches(neighbourDataType, localSubscription.getSelector())) {
-
-						// Subscription to be returned only has selector set.
-						Subscription matchingSubscription = new Subscription();
-						matchingSubscription.setSelector(localSubscription.getSelector());
-
-						calculatedSubscriptions.add(matchingSubscription);
-
-						logger.debug("Neighbour {} has capability ({}, {}, {}) that matches local subscription ({})", neighbour.getName(), neighbourDataType.getHow(), neighbourDataType.getWhat(), neighbourDataType.getWhere(), localSubscription.getSelector());
-					}
-				}
-			}
-		} catch (ParseException | IllegalArgumentException e) {
-			logger.error("Error matching neighbour data type with local subscription. Returning empty set of subscriptions.", e);
-			return new HashSet<>();
-		}
-		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
-		return calculatedSubscriptions;
 	}
 
 	private void updateFedInStatus(Neighbour neighbour) {
@@ -240,10 +205,7 @@ public class NeighbourDiscoverer {
 
 		logger.info("Calculating next allowed time to contact neighbour.");
 		int randomShift = new Random().nextInt(backoffProperties.getRandomShiftUpperLimit());
-		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, neighbour.getBackoffAttempts()) * backoffProperties.getStartIntervalLength()) + randomShift;
-		LocalDateTime nextPostAttempt = neighbour.getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
-
-		logger.debug("Waiting {} millis for next attempt at contacting neighbour.", exponentialBackoffWithRandomizationMillis);
+		LocalDateTime nextPostAttempt = neighbour.getNextPostAttempt(backoffProperties.getStartIntervalLength(),randomShift);
 
 		logger.info("Next allowed post time: {}", nextPostAttempt.toString());
 		return nextPostAttempt;
@@ -305,6 +267,11 @@ public class NeighbourDiscoverer {
 
 		DiscoveryState discoveryState = getDiscoveryState();
 
+		Self self = selfRepository.findByName(myName);
+		if (self == null) {
+			return;
+		}
+
 		List<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
 
 		for (Neighbour neighbour : neighboursWithFailedSubscriptionRequest) {
@@ -316,7 +283,7 @@ public class NeighbourDiscoverer {
 				try {
 					// Create representation of discovering Neighbour and calculate custom subscription for neighbour.
 					Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
-					discoveringNeighbour.getSubscriptionRequest().setSubscriptions(calculateCustomSubscriptionForNeighbour(neighbour));
+					discoveringNeighbour.getSubscriptionRequest().setSubscriptions(self.calculateCustomSubscriptionForNeighbour(neighbour));
 
 					// Throws SubscriptionRequestException if unsuccessful.
 					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
@@ -356,8 +323,13 @@ public class NeighbourDiscoverer {
 		logger.info("Checking for any Neighbours with KNOWN capabilities and EMPTY fedIn for subscription request");
 		List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 
+		Self self = selfRepository.findByName(myName);
+		if(self == null){
+			return; // We have nothing to post to our neighbour
+		}
+
 		if(!neighboursForSubscriptionRequest.isEmpty()){
-			subscriptionRequest(neighboursForSubscriptionRequest);
+			subscriptionRequest(neighboursForSubscriptionRequest,self);
 		}
 	}
 
@@ -383,11 +355,11 @@ public class NeighbourDiscoverer {
 			logger.info("Local subscriptions have changed. Recalculating subscriptions to all neighbours...");
 
 			List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
-			subscriptionRequest(neighboursForSubscriptionRequest);
+			subscriptionRequest(neighboursForSubscriptionRequest,self);
 		}
 	}
 
-	private void subscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest) {
+	private void subscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest,Self self) {
 
 		DiscoveryState discoveryState = getDiscoveryState();
 
@@ -400,7 +372,7 @@ public class NeighbourDiscoverer {
 				Neighbour discoveringNeighbour = new Neighbour();
 				discoveringNeighbour.setName(myName);
 
-				Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour);
+				Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
 
 				if (calculatedSubscriptionForNeighbour.isEmpty()) {
 
@@ -551,18 +523,17 @@ public class NeighbourDiscoverer {
 		List<Neighbour> neighbours = dnsFacade.getNeighbours();
 		logger.debug("Got neighbours from DNS {}.", neighbours);
 
-		for (Neighbour neighbourNeighbour : neighbours) {
-			if (neighbourRepository.findByName(neighbourNeighbour.getName()) == null && !neighbourNeighbour.getName().equals(myName)) {
+		for (Neighbour neighbour : neighbours) {
+		    MDCUtil.setNeigbourVariable(neighbour.getName());
+			if (neighbourRepository.findByName(neighbour.getName()) == null && !neighbour.getName().equals(myName)) {
 
 				// Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
-				neighbourNeighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
+				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
 				logger.info("Found a new neighbour. Saving in database");
-				neighbourRepository.save(neighbourNeighbour);
+				neighbourRepository.save(neighbour);
 			}
+			MDCUtil.removeNeighbourVariable();
 		}
 	}
 
-	public static void main(String[] args) {
-
-	}
 }
