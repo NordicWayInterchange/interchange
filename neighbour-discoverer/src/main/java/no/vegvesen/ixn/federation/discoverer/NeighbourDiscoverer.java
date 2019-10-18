@@ -382,7 +382,7 @@ public class NeighbourDiscoverer {
 
 			logger.info("Local subscriptions have changed. Recalculating subscriptions to all neighbours...");
 
-			List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findAll();
+			List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
 			subscriptionRequest(neighboursForSubscriptionRequest);
 		}
 	}
@@ -393,70 +393,72 @@ public class NeighbourDiscoverer {
 
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
-			logger.info("Found neighbour for subscription request: {}", neighbour.getName());
+			if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
+				logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 
-			// Create the representation of the discovering Neighbour and calculate the custom subscription for the neighbour.
-			Neighbour discoveringNeighbour = new Neighbour();
-			discoveringNeighbour.setName(myName);
+				// Create the representation of the discovering Neighbour and calculate the custom subscription for the neighbour.
+				Neighbour discoveringNeighbour = new Neighbour();
+				discoveringNeighbour.setName(myName);
 
-			Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour);
+				Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour);
 
-			if (calculatedSubscriptionForNeighbour.isEmpty()) {
+				if (calculatedSubscriptionForNeighbour.isEmpty()) {
 
-				// No overlap between neighbour capabilities and local service provider subscriptions.
-				// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
-				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
+					// No overlap between neighbour capabilities and local service provider subscriptions.
+					// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
+					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
 
-				logger.info("The calculated subscription request for neighbour {} was empty. Setting Subscription status in fedIn to NO_OVERLAP", neighbour.getName());
+					logger.info("The calculated subscription request for neighbour {} was empty. Setting Subscription status in fedIn to NO_OVERLAP", neighbour.getName());
 
-				// Decide if we should post empty subscription request or not.
-				if (neighbour.getFedIn().getSubscriptions().isEmpty()) {
-					// No existing subscription to this neighbour, nothing to tear down
-					neighbourRepository.save(neighbour);
-					logger.info("Subscription to neighbour is empty. Nothing to tear down.");
-					MDCUtil.removeLogVariables();
-					return;
+					// Decide if we should post empty subscription request or not.
+					if (neighbour.getFedIn().getSubscriptions().isEmpty()) {
+						// No existing subscription to this neighbour, nothing to tear down
+						neighbourRepository.save(neighbour);
+						logger.info("Subscription to neighbour is empty. Nothing to tear down.");
+						MDCUtil.removeLogVariables();
+						return;
+					} else {
+						// We have an existing subscription to the neighbour, tear it down
+						discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
+						logger.info("The calculated subscription request is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.", neighbour.getName());
+					}
 				} else {
-					// We have an existing subscription to the neighbour, tear it down
-					discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
-					logger.info("The calculated subscription request is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.", neighbour.getName());
+					// Calculated subscription is not empty, post as normal
+
+					if (calculatedSubscriptionForNeighbour.equals(neighbour.getFedIn().getSubscriptions())) {
+						// The subscription request we want to post is the same as what we already subscribe to. Skip.
+						return;
+					}
+
+					// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
+					discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, calculatedSubscriptionForNeighbour));
+					logger.info("The calculated subscription request is not empty. Posting subscription request: {}", neighbour.getName(), discoveringNeighbour.toString());
 				}
-			} else {
-				// Calculated subscription is not empty, post as normal
 
-				if(calculatedSubscriptionForNeighbour.equals(neighbour.getFedIn().getSubscriptions())){
-					// The subscription request we want to post is the same as what we already subscribe to. Skip.
-					return;
+				try {
+					// Throws SubscriptionRequestException if unsuccessful
+					SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
+					neighbour.getFedIn().setSubscriptions(subscriptionRequestResponse.getSubscriptions());
+					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+
+					// Successful subscription request, update discovery state subscription request timestamp.
+					discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+					discoveryStateRepository.save(discoveryState);
+
+					logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
+
+				} catch (SubscriptionRequestException e) {
+					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
+					neighbour.setBackoffAttempts(0);
+					neighbour.setBackoffStart(LocalDateTime.now());
+
+					logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
+
+				} finally {
+					neighbour = neighbourRepository.save(neighbour);
+					logger.info("Saving updated neighbour: {}", neighbour.toString());
+					MDCUtil.removeLogVariables();
 				}
-
-				// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
-				discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, calculatedSubscriptionForNeighbour));
-				logger.info("The calculated subscription request is not empty. Posting subscription request: {}", neighbour.getName(), discoveringNeighbour.toString());
-			}
-
-			try {
-				// Throws SubscriptionRequestException if unsuccessful
-				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
-				neighbour.getFedIn().setSubscriptions(subscriptionRequestResponse.getSubscriptions());
-				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
-
-				// Successful subscription request, update discovery state subscription request timestamp.
-				discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
-				discoveryStateRepository.save(discoveryState);
-
-				logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
-
-			} catch (SubscriptionRequestException e) {
-				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
-				neighbour.setBackoffAttempts(0);
-				neighbour.setBackoffStart(LocalDateTime.now());
-
-				logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
-
-			} finally {
-				neighbour = neighbourRepository.save(neighbour);
-				logger.info("Saving updated neighbour: {}", neighbour.toString());
-				MDCUtil.removeLogVariables();
 			}
 		}
 	}

@@ -221,4 +221,13 @@ public class Neighbour implements Subscriber {
 			throw new DiscoveryException(e);
 		}
 	}
+
+	public boolean hasEstablishedSubscriptions() {
+		return getSubscriptionRequest() != null && getSubscriptionRequest().getStatus() == SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED;
+	}
+
+	public boolean hasCapabilities() {
+		return getCapabilities() != null && getCapabilities().getStatus() != Capabilities.CapabilitiesStatus.UNREACHABLE;
+	}
+
 }
