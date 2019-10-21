@@ -228,7 +228,6 @@ public class NeighbourDiscovererTest {
 		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.setBackoffStart(futureTime);
-		//doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
@@ -241,7 +240,6 @@ public class NeighbourDiscovererTest {
 		when(neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.setBackoffStart(futureTime);
-		//doReturn(futureTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
@@ -314,7 +312,6 @@ public class NeighbourDiscovererTest {
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
-		//doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 		neighbourDiscoverer.gracefulBackoffPollSubscriptions();
@@ -329,7 +326,6 @@ public class NeighbourDiscovererTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(1);
 
 		ericsson.setBackoffStart(pastTime);
-		//doReturn(pastTime).when(neighbourDiscoverer).getNextPostAttemptTime(ericsson);
 		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 
