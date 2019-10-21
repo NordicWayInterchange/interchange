@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation.model;
 
 
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
+import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
 import org.apache.qpid.server.filter.selector.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +96,7 @@ public class Self {
 			for (DataType neighbourDataType : neighbour.getCapabilities().getDataTypes()) {
 				for (Subscription localSubscription : getLocalSubscriptions()) {
 
-					// Trows ParseException if selector is invalid or IllegalArgumentException if selector is always true
+					// Trows InvalidSelectorException if selector is invalid or SelectorAlwaysTrueException if selector is always true
 					if (CapabilityMatcher.matches(neighbourDataType, localSubscription.getSelector())) {
 
 						// Subscription to be returned only has selector set.
@@ -105,7 +107,7 @@ public class Self {
 					}
 				}
 			}
-		} catch (ParseException | IllegalArgumentException e) {
+		} catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
 			logger.error("Error matching neighbour data type with local subscription. Returning empty set of subscriptions.", e);
 			return new HashSet<>();
 		}
