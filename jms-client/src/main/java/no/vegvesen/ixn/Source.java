@@ -8,6 +8,7 @@ import org.apache.qpid.jms.message.JmsTextMessage;
 import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
@@ -21,20 +22,12 @@ public class Source implements AutoCloseable {
      * Note that the main file does not make use of any Spring Boot stuff.
      * However, an instance of the class could easilly be used from Spring Boot, as all
      * dependent settings are handled in the main method, and passed as parameters to the instance.
-     * @param args no args processed
+     * @param args
      */
-    public static void main(String[] args) throws NamingException, JMSException {
+    public static void main(String[] args) throws NamingException, JMSException, IOException {
+		Properties props = getProperties(args, "/source.properties");
 
-        String propertiesFile = "/source.properties";
-        Properties props = new Properties();
-        try (InputStream in = Source.class.getResourceAsStream(propertiesFile)) {
-            props.load(in);
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("The file %s could not be read",propertiesFile));
-        }
-
-
-        String url = props.getProperty("source.url");
+		String url = props.getProperty("source.url");
         String sendQueue = props.getProperty("source.sendQueue");
         String keystorePath = props.getProperty("source.keyStorepath") ;
         String keystorePassword = props.getProperty("source.keyStorepass");
@@ -55,6 +48,18 @@ public class Source implements AutoCloseable {
 
         }
     }
+
+	static Properties getProperties(String[] args, String propertiesFile) throws IOException {
+		InputStream in;
+		if (args.length == 1) {
+			in = new FileInputStream(args[0]);
+		} else {
+			in = Source.class.getResourceAsStream(propertiesFile);
+		}
+		Properties props = new Properties();
+		props.load(in);
+		return props;
+	}
 
 	private final String url;
     private final String sendQueue;
