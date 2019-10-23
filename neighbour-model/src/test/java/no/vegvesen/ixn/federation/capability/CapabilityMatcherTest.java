@@ -8,6 +8,7 @@ import org.apache.qpid.server.filter.selector.ParseException;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class CapabilityMatcherTest {
 
@@ -30,27 +31,34 @@ public class CapabilityMatcherTest {
 	}
 
 	@Test(expected = HeaderNotFoundException.class)
-	public void unknownHeaderAttributeNotAccepted() throws ParseException {
+	public void unknownHeaderAttributeNotAccepted() {
 		DataType dataType = new DataType("spat", null, null);
 		CapabilityMatcher.matches(dataType, "region like 'some region%'");
 	}
 
 	@Test(expected = SelectorAlwaysTrueException.class)
 	public void alwaysTrueIsNotAccepted() {
-		DataType dataType = new DataType("spat",null, null);
-		CapabilityMatcher.matches(dataType, "how like 'spat%' or 1=1");
+		CapabilityMatcher.validateSelector("how like 'spat%' or 1=1");
+	}
+
+	@Test(expected = SelectorAlwaysTrueException.class)
+	public void likeAnyStringIsAlwaysTrueHenceNotAccepted() {
+	    CapabilityMatcher.validateSelector("where like '%'");
 	}
 
 	@Test(expected = InvalidSelectorException.class)
 	public void invalidSyntaxIsNotAccepted() {
-		DataType dataType = new DataType("spat",null, null);
-		CapabilityMatcher.matches(dataType, "how flike 'spat%' or 1=1");
+		CapabilityMatcher.validateSelector("how flike 'spat%' or 1=1");
 	}
 
 	@Test(expected = InvalidSelectorException.class)
 	public void filterWithDoubleQuotedStringValueIsNotAllowed() {
-		DataType dataType = new DataType("spat", "NO", null);
-		CapabilityMatcher.matches(dataType, "where = \"NO\"");
+		CapabilityMatcher.validateSelector("where = \"NO\"");
+	}
+
+	@Test(expected = SelectorAlwaysTrueException.class)
+	public void testMinusOneFiter() {
+		CapabilityMatcher.validateSelector("where like '-1%'");
 	}
 
 }

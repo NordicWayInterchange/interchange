@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
+import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.LocalDateTime;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ControllerAdvice
@@ -33,6 +35,11 @@ public class OnboardServerErrorAdvice {
 	@ExceptionHandler({RuntimeException.class})
 	public ResponseEntity<ErrorDetails> handleRunTimeException(RuntimeException e) {
 		return error(INTERNAL_SERVER_ERROR, e);
+	}
+
+	@ExceptionHandler({CNAndApiObjectMismatchException.class})
+	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e){
+		return error(FORBIDDEN, e);
 	}
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
