@@ -32,14 +32,11 @@ testing, and so the container ports will already be in use.
   is localhost).
 
 ### Federation docker images
-The docker images for federation shares the module "neighbour-model", so we choose to build all of the jars with 
-maven before creating the docker images for them.
+All the docker images specified in the github https://github.com/NordicWayInterchange/interchange/ 
+is automatically built by CircleCI and published to the container registry eu.gcr.io/nordic-way-aad182cc/ on 
+each commit. Each component in the system has its own registry.
 
-To build all federation docker images run these commands from the top folder of the project:
-* `docker build -t federation_build -f federation-docker-files/Federation_build .`
-* `docker build -t neigbour_server -f neighbour-server/Dockerfile .`
-* `docker build -t neigbour_discoverer -f neighbour-discoverer/Dockerfile .`
-* `docker build -t onboard_server -f onboard-server/Dockerfile .`
+All the images are tagged with git commit hash, and branch name. Branch "federation-master" is considered to be the stable branch.
 
 The module "federation-it" is created to demonstrate how to start a set of containers for test using docker-compose.  
 
@@ -54,6 +51,22 @@ To start the docker containers for integration tests from maven so you can run t
 
 To stop the docker containers for integration tests from maven: 
 `mvn docker:stop -PIT`
+
+### Deploy to kubernetes 
+#### Helm
+Helm uses Charts to pack all the Kubernetes components for an application to deploy, run and scale. This is also where the configuration of the application can be updated and maintained.
+
+The helm templates is provided under helm/interchange/templates. 
+See the example values file helm/interchange/example_values.yml
+
+### Connect to the server
+We provide two clients to demonstrate how to publish messages to the interchange node.
+
+1) no.vegvesen.interchange.DebugClient
+2) no.vegvesen.ixn.Sink and Source
+
+DebugClient must be run with -D parameters to point to keystore and truststore.
+Source and Sink reads keystore and truststore instructions from property files.  
 
 ### Resources
 [Trello](https://trello.com/b/MXlcCmye/interchange)
