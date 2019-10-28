@@ -4,7 +4,6 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
-import org.apache.qpid.server.filter.selector.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,6 @@ import java.util.Set;
 @Table(name="self", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_self_name"))
 public class Self {
 
-	@Transient //To make sure it's not attempted to save this to the database
 	private static Logger logger = LoggerFactory.getLogger(Self.class);
 
 	@Id
