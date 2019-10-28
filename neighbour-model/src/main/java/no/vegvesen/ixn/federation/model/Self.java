@@ -95,11 +95,13 @@ public class Self {
 				for (Subscription localSubscription : getLocalSubscriptions()) {
 
 					// Trows InvalidSelectorException if selector is invalid or SelectorAlwaysTrueException if selector is always true
-					if (CapabilityMatcher.matches(neighbourDataType, localSubscription.getSelector())) {
+					String selector = localSubscription.getSelector();
+					logger.info("Matching local subscription {}",selector);
+					if (CapabilityMatcher.matches(neighbourDataType, selector)) {
 
 						// Subscription to be returned only has selector set.
 						Subscription matchingSubscription = new Subscription();
-						matchingSubscription.setSelector(localSubscription.getSelector());
+						matchingSubscription.setSelector(selector);
 
 						calculatedSubscriptions.add(matchingSubscription);
 					}

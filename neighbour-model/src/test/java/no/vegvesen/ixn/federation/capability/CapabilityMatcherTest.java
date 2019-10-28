@@ -61,4 +61,9 @@ public class CapabilityMatcherTest {
 		CapabilityMatcher.validateSelector("where like '-1%'");
 	}
 
+	@Test(expected = InvalidSelectorException.class)
+	public void testSelectorWithBackTick() {
+		CapabilityMatcher.validateSelector("where like `NO`");
+	}
+
 }
