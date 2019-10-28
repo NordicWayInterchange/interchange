@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -15,10 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,7 +49,6 @@ public class NeighbourDiscovererTest {
 			discovererProperties);
 
 
-	private List<Neighbour> neighbours = new ArrayList<>();
 
 	// Objects used in testing
 	private Neighbour ericsson;
@@ -83,6 +80,7 @@ public class NeighbourDiscovererTest {
 		ericsson = new Neighbour();
 		ericsson.setName("ericsson.itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
+		List<Neighbour> neighbours = new ArrayList<>();
 		neighbours.add(ericsson);
 
 		// Service provider set up: two identical service providers with different names.
@@ -179,17 +177,12 @@ public class NeighbourDiscovererTest {
 
 	@Test
     @Ignore
-	public void successfulSubscriptionRequestCallsSaveOnRepository() throws Exception{
-
-		Method subscriptionRequest = NeighbourDiscoverer.class.getDeclaredMethod("subscriptionRequest", List.class);
-		subscriptionRequest.setAccessible(true);
-
-		//doReturn(Collections.singleton(firstSubscription)).when(neighbourDiscoverer).calculateCustomSubscriptionForNeighbour(ericsson);
+	public void successfulSubscriptionRequestCallsSaveOnRepository(){
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		doReturn(subscriptionRequestResponse).when(neighbourRESTFacade).postSubscriptionRequest(any(Neighbour.class), any(Neighbour.class));
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
-		subscriptionRequest.invoke(neighbourDiscoverer, Collections.singletonList(ericsson));
+		neighbourDiscoverer.subscriptionRequest(Collections.singletonList(ericsson), self);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -434,5 +427,45 @@ public class NeighbourDiscovererTest {
 		Assert.assertEquals(spyNeighbour.getFedIn().getStatus(), SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 	}
 
+	@Test
+	public void subscriptionRequestProcessesAllNeighboursDespiteNetworkError() {
+		Set<Subscription> subscription = new HashSet<>();
+		SubscriptionRequest emptySR = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, subscription);
 
+		HashSet<DataType> dtNO = new HashSet<>();
+		dtNO.add(new DataType("datex2;1.0", "NO", "Obstruction"));
+		Capabilities capabilitiesNO = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, dtNO);
+		Neighbour neighbourA = new Neighbour("a", capabilitiesNO, emptySR,  emptySR);
+		Neighbour neighbourB = new Neighbour("b", capabilitiesNO, emptySR,  emptySR);
+		Neighbour neighbourC = new Neighbour("c", capabilitiesNO, emptySR,  emptySR);
+
+		List<Neighbour> neighbours = new LinkedList<>();
+		neighbours.add(neighbourA);
+		neighbours.add(neighbourB);
+		neighbours.add(neighbourC);
+
+		HashSet<Subscription> returnedSubscriptionsFromNeighbour = new HashSet<>();
+		returnedSubscriptionsFromNeighbour.add(new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.ACCEPTED));
+
+		SubscriptionRequest srCreated = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, returnedSubscriptionsFromNeighbour);
+
+		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
+
+		when(neighbourRESTFacade.postSubscriptionRequest(any(Neighbour.class), eq(neighbourA))).thenReturn(srCreated);
+		when(neighbourRESTFacade.postSubscriptionRequest(any(Neighbour.class), eq(neighbourB))).thenThrow(new SubscriptionRequestException("time-out"));
+		when(neighbourRESTFacade.postSubscriptionRequest(any(Neighbour.class), eq(neighbourC))).thenReturn(srCreated);
+
+		// Self setup
+		Self discoveringNode = new Self("d");
+		Set<DataType> selfCapabilities = new HashSet<>();
+		selfCapabilities.add(new DataType("datex2;1.0", "NO", "Obstruction"));
+		discoveringNode.setLocalCapabilities(selfCapabilities);
+
+		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("where = 'NO'", Subscription.SubscriptionStatus.REQUESTED));
+		discoveringNode.setLocalSubscriptions(selfSubscriptions);
+
+		neighbourDiscoverer.subscriptionRequest(neighbours, discoveringNode);
+
+		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Neighbour.class), any(Neighbour.class));
+	}
 }

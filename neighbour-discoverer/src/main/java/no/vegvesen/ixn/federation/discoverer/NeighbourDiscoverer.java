@@ -1,14 +1,13 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.repository.*;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.utils.MDCUtil;
-import org.apache.qpid.server.filter.selector.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +16,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoField;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 /***
  * Functionality:
@@ -359,7 +360,7 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	private void subscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest,Self self) {
+	void subscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self) {
 
 		DiscoveryState discoveryState = getDiscoveryState();
 
