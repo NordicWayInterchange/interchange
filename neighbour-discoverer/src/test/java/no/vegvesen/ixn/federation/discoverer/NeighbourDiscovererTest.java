@@ -14,7 +14,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -158,10 +157,7 @@ public class NeighbourDiscovererTest {
 	 */
 
 	@Test
-	public void successfulCapabilitiesPostCallsSaveOnRepository() throws Exception{
-
-		Method capabilityExchange = NeighbourDiscoverer.class.getDeclaredMethod("capabilityExchange", List.class);
-		capabilityExchange.setAccessible(true);
+	public void successfulCapabilitiesPostCallsSaveOnRepository(){
 
 		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
@@ -169,7 +165,7 @@ public class NeighbourDiscovererTest {
 
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 
-		capabilityExchange.invoke(neighbourDiscoverer, Collections.singletonList(ericsson));
+		neighbourDiscoverer.capabilityExchange(Collections.singletonList(ericsson));
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}

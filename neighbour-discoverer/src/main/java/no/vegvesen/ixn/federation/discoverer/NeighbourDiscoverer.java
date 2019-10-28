@@ -476,7 +476,7 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	private void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
+	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
 
 		DiscoveryState discoveryState = getDiscoveryState();
 
