@@ -4,11 +4,9 @@ import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
 import no.vegvesen.ixn.federation.model.DataType;
-import org.apache.qpid.server.filter.selector.ParseException;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class CapabilityMatcherTest {
 
@@ -48,7 +46,7 @@ public class CapabilityMatcherTest {
 
 	@Test(expected = InvalidSelectorException.class)
 	public void invalidSyntaxIsNotAccepted() {
-		CapabilityMatcher.validateSelector("how flike 'spat%' or 1=1");
+		CapabilityMatcher.validateSelector("how flike 'spat%'");
 	}
 
 	@Test(expected = InvalidSelectorException.class)
