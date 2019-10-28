@@ -90,27 +90,26 @@ public class Self {
 	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<Subscription> calculatedSubscriptions = new HashSet<>();
-		try {
 			for (DataType neighbourDataType : neighbour.getCapabilities().getDataTypes()) {
 				for (Subscription localSubscription : getLocalSubscriptions()) {
 
-					// Trows InvalidSelectorException if selector is invalid or SelectorAlwaysTrueException if selector is always true
-					String selector = localSubscription.getSelector();
-					logger.info("Matching local subscription {}",selector);
-					if (CapabilityMatcher.matches(neighbourDataType, selector)) {
+                    try {
+						// Trows InvalidSelectorException if selector is invalid or SelectorAlwaysTrueException if selector is always true
+						String selector = localSubscription.getSelector();
+						logger.info("Matching local subscription {}",selector);
+						if (CapabilityMatcher.matches(neighbourDataType, selector)) {
 
-						// Subscription to be returned only has selector set.
-						Subscription matchingSubscription = new Subscription();
-						matchingSubscription.setSelector(selector);
+							// Subscription to be returned only has selector set.
+							Subscription matchingSubscription = new Subscription();
+							matchingSubscription.setSelector(selector);
 
-						calculatedSubscriptions.add(matchingSubscription);
-					}
+							calculatedSubscriptions.add(matchingSubscription);
+						}
+                    } catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
+                        logger.error("Error matching neighbour data type with local subscription. Returning empty set of subscriptions.", e);
+                    }
 				}
 			}
-		} catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
-			logger.error("Error matching neighbour data type with local subscription. Returning empty set of subscriptions.", e);
-			return new HashSet<>();
-		}
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;
 
