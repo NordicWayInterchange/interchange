@@ -64,7 +64,7 @@ public class NeighbourDiscoverer {
 		this.neighbourRESTFacade = neighbourRESTFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
-		MDCUtil.setDiscoveringInterchangeVariable(myName);
+		MDCUtil.setLogVariables(myName, null);
 	}
 
 	Neighbour getDiscoveringNeighbourWithCapabilities() {
@@ -525,7 +525,7 @@ public class NeighbourDiscoverer {
 		logger.debug("Got neighbours from DNS {}.", neighbours);
 
 		for (Neighbour neighbour : neighbours) {
-		    MDCUtil.setNeigbourVariable(neighbour.getName());
+		    MDCUtil.setLogVariables(myName, neighbour.getName());
 			if (neighbourRepository.findByName(neighbour.getName()) == null && !neighbour.getName().equals(myName)) {
 
 				// Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
@@ -533,7 +533,7 @@ public class NeighbourDiscoverer {
 				logger.info("Found a new neighbour. Saving in database");
 				neighbourRepository.save(neighbour);
 			}
-			MDCUtil.removeNeighbourVariable();
+			MDCUtil.removeLogVariables();
 		}
 	}
 

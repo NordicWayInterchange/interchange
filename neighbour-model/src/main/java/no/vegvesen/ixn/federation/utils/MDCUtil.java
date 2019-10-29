@@ -19,26 +19,6 @@ public class MDCUtil {
 		}
 	}
 
-	public static void setDiscoveringInterchangeVariable(String discoveringInterchange){
-		try {
-			MDC.put(DISCOVERING_INTERCHANGE, discoveringInterchange);
-		} catch (RuntimeException e) {
-			logger.error("Could not set log variables", e);
-		}
-	}
-
-	public static void setNeigbourVariable(String neighbour) {
-		try {
-			MDC.put(NEIGHBOUR, neighbour);
-		} catch (RuntimeException e) {
-			logger.error("Could not set log variables", e);
-		}
-	}
-
-	public static void removeNeighbourVariable() {
-		MDC.remove(NEIGHBOUR);
-	}
-
 	public static void removeLogVariables() {
 		MDC.remove(DISCOVERING_INTERCHANGE);
 		MDC.remove(NEIGHBOUR);
