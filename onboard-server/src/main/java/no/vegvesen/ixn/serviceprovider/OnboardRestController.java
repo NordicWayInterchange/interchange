@@ -1,9 +1,8 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.Self;
@@ -263,6 +262,17 @@ public class OnboardRestController {
 			self = new Self(nodeProviderName);
 		}
 
+
+
+		Set<Subscription> incomingSubscriptions = incomingPost.getSubscriptionRequest().getSubscriptions();
+		for (Subscription subscription : incomingSubscriptions) {
+			String selector = subscription.getSelector();
+			try {
+				CapabilityMatcher.validateSelector(selector);
+			} catch (SelectorAlwaysTrueException | InvalidSelectorException e) {
+				throw new SubscriptionRequestException("Error validating incoming subscription",e);
+			}
+		}
 		Set<Subscription> previousSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
 		selfRepository.save(self);
 

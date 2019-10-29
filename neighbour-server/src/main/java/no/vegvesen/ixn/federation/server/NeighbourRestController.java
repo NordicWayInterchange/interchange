@@ -7,9 +7,7 @@ import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
-import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
-import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
@@ -94,13 +92,13 @@ public class NeighbourRestController {
 						// Subscription matches local data type - update status to ACCEPTED
 						neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
 					}
-				} catch (IllegalArgumentException e) {
+				} catch (SelectorAlwaysTrueException e) {
 					// The subscription has an illegal selector - selector always true
 					logger.error("Subscription had illegal selectors.", e);
 					logger.warn("Setting status of subscription to ILLEGAL");
 					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ILLEGAL);
 
-				} catch (ParseException e) {
+				} catch (InvalidSelectorException e) {
 					// The subscription has an invalid selector
 					logger.error("Subscription has invalid selector.", e);
 					logger.warn("Setting status of subscription to NOT_VALID");

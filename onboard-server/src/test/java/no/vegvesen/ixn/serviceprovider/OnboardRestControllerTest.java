@@ -2,11 +2,9 @@ package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,7 +24,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.CoreMatchers.isA;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -60,7 +59,7 @@ public class OnboardRestControllerTest {
 
 	@Before
 	public void setUp() {
-		mockMvc = MockMvcBuilders.standaloneSetup(onboardRestController).build();
+		mockMvc = MockMvcBuilders.standaloneSetup(onboardRestController).setControllerAdvice(OnboardServerErrorAdvice.class).build();
 	}
 
 	private void mockCertificate(String commonName) {
@@ -128,7 +127,6 @@ public class OnboardRestControllerTest {
 	public void commonNameAndApiNameMismatchReturnsStatusForbiddenInCapabilities() throws Exception {
 
 		mockCertificate("First Service Provider");
-		expectedException.expectCause(isA(CNAndApiObjectMismatchException.class));
 
 		CapabilityApi capabilityApi = new CapabilityApi();
 		DataType a = new DataType("datex2;1.0", "FI", "Conditions");
@@ -143,7 +141,7 @@ public class OnboardRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(capabilityApiToServerJson))
 				.andDo(print())
-				.andExpect(status().isOk());
+				.andExpect(status().isForbidden());
 	}
 
 
@@ -168,6 +166,54 @@ public class OnboardRestControllerTest {
 						.content(subscriptionRequestApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
+
+	}
+
+	@Test
+	public void postingUnparsableSubscriptionReturnsBadRequest() throws Exception {
+
+		mockCertificate("First Service Provider");
+
+		SubscriptionApi subscriptionApi = new SubscriptionApi();
+		subscriptionApi.setSelector("where LIKE `SE`");
+
+		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
+		subscriptionRequestApi.setName("First Service Provider");
+		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
+
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+
+		mockMvc.perform(
+				post(subscriptionPath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(subscriptionRequestApiToServerJson))
+				.andDo(print())
+				.andExpect(status().isBadRequest());
+
+	}
+
+	@Test
+	public void postingInvalidSubscriptionReturnsStatusBadRequest() throws Exception {
+		mockCertificate("First Service Provider");
+
+		SubscriptionApi subscriptionApi = new SubscriptionApi();
+		subscriptionApi.setSelector("where LIKE '%'");
+
+		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
+		subscriptionRequestApi.setName("First Service Provider");
+		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
+
+		String postJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+
+		mockMvc.perform(
+				post(subscriptionPath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(postJson))
+				.andDo(print())
+				.andExpect(status().isBadRequest());
+
 
 	}
 
@@ -210,7 +256,6 @@ public class OnboardRestControllerTest {
 	public void commonNameAndApiNameMismatchReturnsStatusForbiddenInSubscription() throws Exception {
 
 		mockCertificate("First Service Provider");
-		expectedException.expectCause(isA(CNAndApiObjectMismatchException.class));
 
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
 		subscriptionRequestApi.setName("Second Service Provider");
@@ -226,7 +271,7 @@ public class OnboardRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(subscriptionRequestApiToServerJson))
 				.andDo(print())
-				.andExpect(status().isOk());
+				.andExpect(status().isForbidden());
 	}
 
 	@Test
@@ -250,8 +295,8 @@ public class OnboardRestControllerTest {
 
 		Set<DataType> selfCapabilities = onboardRestController.calculateSelfCapabilities();
 
-		Assert.assertTrue(selfCapabilities.size()==3);
-		Assert.assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
+		assertEquals(selfCapabilities.size(), 3);
+		assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
 	}
 
 	@Test
@@ -279,8 +324,8 @@ public class OnboardRestControllerTest {
 
 		Set<Subscription> selfSubscriptions = onboardRestController.calculateSelfSubscriptions();
 
-		Assert.assertTrue(selfSubscriptions.size() == 3);
-		Assert.assertTrue(selfSubscriptions.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
+		assertEquals(selfSubscriptions.size(), 3);
+		assertTrue(selfSubscriptions.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
 	}
 
 }

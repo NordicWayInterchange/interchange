@@ -10,6 +10,7 @@ import javax.persistence.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -137,6 +138,7 @@ public class Neighbour implements Subscriber {
 		this.controlChannelPort = controlChannelPort;
 	}
 
+
 	public LocalDateTime getBackoffStartTime() {
 		return backoffStart;
 	}
@@ -151,6 +153,11 @@ public class Neighbour implements Subscriber {
 
 	public void setBackoffAttempts(int backoffAttempts) {
 		this.backoffAttempts = backoffAttempts;
+	}
+
+	public LocalDateTime getNextPostAttempt(int startIntervalLength,int randomShift) {
+		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, getBackoffAttempts()) * startIntervalLength) + randomShift;
+		return getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
 	}
 
 	public Set<Subscription> getSubscriptionsForPolling() {
@@ -221,4 +228,13 @@ public class Neighbour implements Subscriber {
 			throw new DiscoveryException(e);
 		}
 	}
+
+	public boolean hasEstablishedSubscriptions() {
+		return getSubscriptionRequest() != null && getSubscriptionRequest().getStatus() == SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED;
+	}
+
+	public boolean hasCapabilities() {
+		return getCapabilities() != null && getCapabilities().getStatus() != Capabilities.CapabilitiesStatus.UNREACHABLE;
+	}
+
 }
