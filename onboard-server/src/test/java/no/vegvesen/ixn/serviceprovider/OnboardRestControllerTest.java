@@ -1,14 +1,10 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,7 +24,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.CoreMatchers.isA;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -174,6 +170,30 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
+	public void postingUnparsableSubscriptionReturnsBadRequest() throws Exception {
+
+		mockCertificate("First Service Provider");
+
+		SubscriptionApi subscriptionApi = new SubscriptionApi();
+		subscriptionApi.setSelector("where LIKE `SE`");
+
+		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
+		subscriptionRequestApi.setName("First Service Provider");
+		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
+
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+
+		mockMvc.perform(
+				post(subscriptionPath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(subscriptionRequestApiToServerJson))
+				.andDo(print())
+				.andExpect(status().isBadRequest());
+
+	}
+
+	@Test
 	public void postingInvalidSubscriptionReturnsStatusBadRequest() throws Exception {
 		mockCertificate("First Service Provider");
 
@@ -275,8 +295,8 @@ public class OnboardRestControllerTest {
 
 		Set<DataType> selfCapabilities = onboardRestController.calculateSelfCapabilities();
 
-		Assert.assertTrue(selfCapabilities.size()==3);
-		Assert.assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
+		assertEquals(selfCapabilities.size(), 3);
+		assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
 	}
 
 	@Test
@@ -304,8 +324,8 @@ public class OnboardRestControllerTest {
 
 		Set<Subscription> selfSubscriptions = onboardRestController.calculateSelfSubscriptions();
 
-		Assert.assertTrue(selfSubscriptions.size() == 3);
-		Assert.assertTrue(selfSubscriptions.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
+		assertEquals(selfSubscriptions.size(), 3);
+		assertTrue(selfSubscriptions.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
 	}
 
 }
