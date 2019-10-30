@@ -5,13 +5,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: run integration tests
+          name: run integration tests and package
           command: |
-            mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
-      - run:
-          name: Package artifacts with dependencies
-          command: |
-            mvn package -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            mvn install -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - run:
           name: Push containers
           command: |
