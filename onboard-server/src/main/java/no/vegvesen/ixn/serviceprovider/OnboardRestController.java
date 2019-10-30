@@ -67,6 +67,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.POST, path = CAPABILITIES_PATH , produces = MediaType.APPLICATION_JSON_VALUE)
 	public CapabilityApi addCapabilities(@RequestBody CapabilityApi capabilityApi) {
+		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
 		logger.info("Capabilities - Received POST from Service Provider: {}", capabilityApi.getName());
 
@@ -74,7 +75,6 @@ public class OnboardRestController {
 			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to add.");
 		}
 
-		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
 		// Get the self representation from the database. If it doesn't exist, create it.
 		Self selfBeforeUpdate = selfRepository.findByName(nodeProviderName);
@@ -122,6 +122,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = CAPABILITIES_PATH)
 	public CapabilityApi deleteCapability(@RequestBody CapabilityApi capabilityApi) {
+		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
 		logger.info("Capabilities - Received DELETE from Service Provider: {}", capabilityApi.getName());
 
@@ -129,7 +130,6 @@ public class OnboardRestController {
 			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to delete.");
 		}
 
-		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
 		Self previousSelfRepresentation = selfRepository.findByName(nodeProviderName);
@@ -189,7 +189,6 @@ public class OnboardRestController {
 			self.setLocalCapabilities(updatedCapabilities);
 			selfRepository.save(self);
 			logger.info("Updated Self: {}", self.toString());
-			selfRepository.save(self);
 			return;
 		}
 		logger.info("Capabilities have not changed. Keeping the current representation of self.");
@@ -244,6 +243,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH)
 	public SubscriptionRequestApi addSubscriptions(@RequestBody SubscriptionRequestApi subscriptionRequestApi) {
+		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
 
 		logger.info("Subscription - Received POST from Service Provider: {}", subscriptionRequestApi.getName());
 
@@ -254,13 +254,7 @@ public class OnboardRestController {
 		ServiceProvider incomingPost = subscriptionRequestTransformer.subscriptionRequestApiToServiceProvider(subscriptionRequestApi);
 		logger.info("Incoming service provider post: {}", incomingPost.toString());
 
-		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
 
-		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
-		Self self = selfRepository.findByName(nodeProviderName);
-		if (self == null) {
-			self = new Self(nodeProviderName);
-		}
 
 
 
@@ -273,8 +267,13 @@ public class OnboardRestController {
 				throw new SubscriptionRequestException("Error validating incoming subscription",e);
 			}
 		}
-		Set<Subscription> previousSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
+		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
+		Self self = selfRepository.findByName(nodeProviderName);
+		if (self == null) {
+			self = new Self(nodeProviderName);
+		}
 		selfRepository.save(self);
+		Set<Subscription> previousSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(subscriptionRequestApi.getName());
 		if (serviceProviderToUpdate == null) {
@@ -315,6 +314,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = SUBSCRIPTION_PATH)
 	public SubscriptionRequestApi deleteSubscription(@RequestBody SubscriptionRequestApi subscriptionRequestApi){
+		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
 
 		logger.info("Subscription - Received DELETE from Service Provider");
 
@@ -325,7 +325,6 @@ public class OnboardRestController {
 		ServiceProvider incomingPost = subscriptionRequestTransformer.subscriptionRequestApiToServiceProvider(subscriptionRequestApi);
 		logger.info("Incoming service provider post: {}", incomingPost.toString());
 
-		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
 		Self self = selfRepository.findByName(nodeProviderName);
