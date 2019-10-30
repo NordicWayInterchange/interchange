@@ -76,13 +76,8 @@ public class OnboardRestController {
 		}
 
 
-		// Get the self representation from the database. If it doesn't exist, create it.
-		Self selfBeforeUpdate = selfRepository.findByName(nodeProviderName);
-		if (selfBeforeUpdate == null) {
-			selfBeforeUpdate = new Self(nodeProviderName);
-		}
+		Self selfBeforeUpdate = fetchSelf();
 		Set<DataType> currentSelfCapabilities = selfBeforeUpdate.getLocalCapabilities();
-		selfRepository.save(selfBeforeUpdate);
 
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(capabilityApi.getName());
@@ -132,13 +127,9 @@ public class OnboardRestController {
 
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
-		Self previousSelfRepresentation = selfRepository.findByName(nodeProviderName);
-		if (previousSelfRepresentation == null) {
-			previousSelfRepresentation = new Self(nodeProviderName);
-		}
+		Self previousSelfRepresentation = fetchSelf();
 		// Get previous Self capabilities to compare with the updated capabilities.
 		Set<DataType> previousSelfCapabilities = new HashSet<>(previousSelfRepresentation.getLocalCapabilities());
-		selfRepository.save(previousSelfRepresentation);
 
 
 		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
@@ -254,10 +245,6 @@ public class OnboardRestController {
 		ServiceProvider incomingPost = subscriptionRequestTransformer.subscriptionRequestApiToServiceProvider(subscriptionRequestApi);
 		logger.info("Incoming service provider post: {}", incomingPost.toString());
 
-
-
-
-
 		Set<Subscription> incomingSubscriptions = incomingPost.getSubscriptionRequest().getSubscriptions();
 		for (Subscription subscription : incomingSubscriptions) {
 			String selector = subscription.getSelector();
@@ -268,11 +255,7 @@ public class OnboardRestController {
 			}
 		}
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
-		Self self = selfRepository.findByName(nodeProviderName);
-		if (self == null) {
-			self = new Self(nodeProviderName);
-		}
-		selfRepository.save(self);
+		Self self = fetchSelf();
 		Set<Subscription> previousSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(subscriptionRequestApi.getName());
@@ -312,6 +295,16 @@ public class OnboardRestController {
 		return returnSubscriptionRequest;
 	}
 
+	// Get the self representation from the database. If it doesn't exist, create it.
+	private Self fetchSelf() {
+		Self self = selfRepository.findByName(nodeProviderName);
+		if (self == null) {
+			self = new Self(nodeProviderName);
+			selfRepository.save(self);
+		}
+		return self;
+	}
+
 	@RequestMapping(method = RequestMethod.DELETE, path = SUBSCRIPTION_PATH)
 	public SubscriptionRequestApi deleteSubscription(@RequestBody SubscriptionRequestApi subscriptionRequestApi){
 		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
@@ -327,13 +320,9 @@ public class OnboardRestController {
 
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
-		Self self = selfRepository.findByName(nodeProviderName);
-		if (self == null) {
-			self = new Self(nodeProviderName);
-		}
+		Self self = fetchSelf();
 
 		Set<Subscription> currentSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
-		selfRepository.save(self);
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(subscriptionRequestApi.getName());
 		if(serviceProviderToUpdate == null){
