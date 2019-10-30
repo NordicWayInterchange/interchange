@@ -11,7 +11,7 @@ jobs:
       - run:
           name: Package artifacts with dependencies
           command: |
-            mvn package -PPKG -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            mvn package -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - run:
           name: Push containers
           command: |
