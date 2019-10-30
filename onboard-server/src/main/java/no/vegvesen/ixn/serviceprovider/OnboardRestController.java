@@ -99,7 +99,8 @@ public class OnboardRestController {
 
 		logger.info("Service provider to update: {}", serviceProviderToUpdate.toString());
 
-		if(serviceProviderToUpdate.getCapabilities().getDataTypes().size() > 0){
+		//TODO this could be done in one method in Capabilities.
+		if(serviceProviderToUpdate.getCapabilities().hasDataTypes()) {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		}
 		// Save the Service Provider representation in the database.
