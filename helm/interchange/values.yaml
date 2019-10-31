@@ -25,7 +25,7 @@ qpid:
   # tls_secret_name: qpid-certs
   server_private_key_file: server.key
   server_certificate_file: server.crt
-  ca_certificate_file: ca.crt
+  ca_certificate_file: server.crt
 
   ## credentials used by the interchange server(s)
   interchange_user: interchange
