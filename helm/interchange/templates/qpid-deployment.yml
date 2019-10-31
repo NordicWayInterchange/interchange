@@ -34,10 +34,12 @@ spec:
         - name: http
           containerPort: 8080
         env:
-        - name: CERTIFICATE_FILE
-          value: /secure/{{ .Values.qpid.certificate_file }}
-        - name: PRIVATE_KEY_FILE
-          value: /secure/{{ .Values.qpid.private_key_file }}
+        - name: SERVER_CERTIFICATE_FILE
+          value: /secure/{{ .Values.qpid.server_certificate_file }}
+        - name: SERVER_PRIVATE_KEY_FILE
+          value: /secure/{{ .Values.qpid.server_private_key_file }}
+        - name: CA_CERTIFICATE_FILE
+          value: /secure/{{ .Values.qpid.ca_certificate_file }}
         - name: VHOST_FILE
           value: /config/default.json
         - name: GROUPS_FILE
