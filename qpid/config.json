@@ -29,8 +29,8 @@
     {
     "name" : "default",
     "type" : "NonJavaKeyStore",
-    "certificateUrl" : "${CERTIFICATE_FILE}",
-    "privateKeyUrl" : "${PRIVATE_KEY_FILE}"
+    "certificateUrl" : "${SERVER_CERTIFICATE_FILE}",
+    "privateKeyUrl" : "${SERVER_PRIVATE_KEY_FILE}"
     }
   ],
   "plugins": [
@@ -104,7 +104,7 @@
       "type": "NonJavaTrustStore",
       "exposedAsMessageSource": false,
       "trustAnchorValidityEnforced": false,
-      "certificatesUrl": "${CERTIFICATE_FILE}"
+      "certificatesUrl": "${CA_CERTIFICATE_FILE}"
     }
   ],
   "virtualhostnodes": [

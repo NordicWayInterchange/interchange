@@ -1,6 +1,6 @@
 FROM java:8-alpine
 
-RUN apk update && apk add bash openssl jq
+RUN apk add --no-cache bash openssl jq
 
 ENV QPID_VERSION=7.0.6
 
@@ -14,7 +14,6 @@ ENV QPID_WORK=/work
 
 ADD config.json /work/
 ADD entrypoint.sh /
-ADD generate-keys.sh /scripts/
 
 RUN chmod +x /entrypoint.sh
 
