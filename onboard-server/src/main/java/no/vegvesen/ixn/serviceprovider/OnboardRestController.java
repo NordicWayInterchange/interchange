@@ -108,7 +108,8 @@ public class OnboardRestController {
 
 		// Recalculate Self capabilities now that we updated a Service Provider.
 		Self selfAfterUpdate = selfRepository.findByName(nodeProviderName);
-		Set<DataType> updatedSelfCapabilities = calculateSelfCapabilities();
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+		Set<DataType> updatedSelfCapabilities = calculateSelfCapabilities(serviceProviders);
 
 		updateSelfCapabilities(selfAfterUpdate, currentSelfCapabilities, updatedSelfCapabilities);
 
@@ -162,7 +163,8 @@ public class OnboardRestController {
 
 		// Recalculate Self representation now that a Service Provider has been updated.
 		Self updatedSelfRepresentation = selfRepository.findByName(nodeProviderName);
-		Set<DataType> updatedSelfCapabilities = calculateSelfCapabilities();
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+		Set<DataType> updatedSelfCapabilities = calculateSelfCapabilities(serviceProviders);
 
 		updateSelfCapabilities(updatedSelfRepresentation, previousSelfCapabilities, updatedSelfCapabilities);
 
@@ -186,10 +188,9 @@ public class OnboardRestController {
 		}
 	}
 
-	Set<DataType> calculateSelfCapabilities() {
+	Set<DataType> calculateSelfCapabilities(Iterable<ServiceProvider> serviceProviders) {
 		logger.info("Calculating Self capabilities...");
 		Set<DataType> localCapabilities = new HashSet<>();
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
 			logger.info("Service provider name: {}", serviceProvider.getName());
