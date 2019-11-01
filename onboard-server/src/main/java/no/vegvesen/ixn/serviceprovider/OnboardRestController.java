@@ -181,9 +181,9 @@ public class OnboardRestController {
 			self.setLocalCapabilities(updatedCapabilities);
 			selfRepository.save(self);
 			logger.info("Updated Self: {}", self.toString());
-			return;
+		} else {
+			logger.info("Capabilities have not changed. Keeping the current representation of self.");
 		}
-		logger.info("Capabilities have not changed. Keeping the current representation of self.");
 	}
 
 	Set<DataType> calculateSelfCapabilities() {
@@ -213,15 +213,14 @@ public class OnboardRestController {
 			self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 			selfRepository.save(self);
 			logger.info("Updated Self: {}", self.toString());
-			return;
+		} else {
+			logger.info("Subscriptions have not changed. Keeping the current representation of self.");
 		}
-		logger.info("Subscriptions have not changed. Keeping the current representation of self.");
 	}
 
-	Set<Subscription> calculateSelfSubscriptions(){
+	Set<Subscription> calculateSelfSubscriptions(Iterable<ServiceProvider> serviceProviders){
 		logger.info("Calculating Self subscriptions...");
 		Set<Subscription> localSubscriptions = new HashSet<>();
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
 			logger.info("Service provider name: {}", serviceProvider.getName());
@@ -283,7 +282,8 @@ public class OnboardRestController {
 
 		// Get the current Self subscriptions. Recalculate the Self subscriptions now that a Service Provider has been updated.
 		Self  updatedSelf = selfRepository.findByName(nodeProviderName);
-		Set<Subscription> updatedSelfSubscriptions = calculateSelfSubscriptions();
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+		Set<Subscription> updatedSelfSubscriptions = calculateSelfSubscriptions(serviceProviders);
 
 		// Update representation of Self if it has changed.
 		updateSelfSubscriptions(updatedSelf, previousSelfSubscriptions, updatedSelfSubscriptions);
@@ -355,7 +355,8 @@ public class OnboardRestController {
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		Self updatedSelfRepresentation = selfRepository.findByName(nodeProviderName);
-		Set<Subscription> updatedSelfSubscriptions = calculateSelfSubscriptions();
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+		Set<Subscription> updatedSelfSubscriptions = calculateSelfSubscriptions(serviceProviders);
 
 		updateSelfSubscriptions(updatedSelfRepresentation, currentSelfSubscriptions, updatedSelfSubscriptions);
 
