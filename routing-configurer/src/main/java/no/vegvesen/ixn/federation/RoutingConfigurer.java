@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;

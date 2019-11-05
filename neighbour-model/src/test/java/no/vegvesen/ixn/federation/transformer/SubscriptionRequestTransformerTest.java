@@ -1,5 +1,7 @@
-package no.vegvesen.ixn.federation.api.v1_0;
+package no.vegvesen.ixn.federation.transformer;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.Subscription;
 import org.junit.Test;

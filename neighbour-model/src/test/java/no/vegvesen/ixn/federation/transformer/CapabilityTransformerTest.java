@@ -1,5 +1,7 @@
-package no.vegvesen.ixn.federation.api.v1_0;
+package no.vegvesen.ixn.federation.transformer;
 
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.Neighbour;

@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.repository;
 
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

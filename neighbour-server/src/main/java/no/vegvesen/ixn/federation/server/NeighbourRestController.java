@@ -11,6 +11,9 @@ import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
+import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
+import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,8 +113,8 @@ public class NeighbourRestController {
 
 	private void checkIfCommonNameMatchesNameInApiObject(String apiName) {
 
-		Object principal = SecurityContextHolder.getContext().getAuthentication();
-		String commonName = ((Authentication) principal).getName();
+		Authentication principal = SecurityContextHolder.getContext().getAuthentication();
+		String commonName = principal.getName();
 
 		if (!commonName.equals(apiName)) {
 			logger.error("Received capability post from neighbour {}, but CN on certificate was {}. Rejecting...", apiName, commonName);

@@ -1,5 +1,7 @@
-package no.vegvesen.ixn.federation.api.v1_0;
+package no.vegvesen.ixn.federation.transformer;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
@@ -22,7 +24,7 @@ public class SubscriptionRequestTransformer {
 	}
 
 
-	Set<Subscription> convertAllSubscriptionApisToSubscriptions(Set<SubscriptionApi> subscriptionApis){
+	private Set<Subscription> convertAllSubscriptionApisToSubscriptions(Set<SubscriptionApi> subscriptionApis){
 		Set<Subscription> neighbourSubscriptions = new HashSet<>();
 
 		for(SubscriptionApi api : subscriptionApis){
@@ -33,7 +35,7 @@ public class SubscriptionRequestTransformer {
 		return neighbourSubscriptions;
 	}
 
-	Set<SubscriptionApi> convertAllSubscriptionsToSubscriptionApis(Set<Subscription> subscriptions){
+	private Set<SubscriptionApi> convertAllSubscriptionsToSubscriptionApis(Set<Subscription> subscriptions){
 
 		Set<SubscriptionApi> subscriptionApis = new HashSet<>();
 

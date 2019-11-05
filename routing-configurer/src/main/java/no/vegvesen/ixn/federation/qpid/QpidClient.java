@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import org.json.JSONArray;
 import org.json.JSONObject;

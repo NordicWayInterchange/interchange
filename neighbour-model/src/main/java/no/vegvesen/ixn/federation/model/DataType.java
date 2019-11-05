@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.api.v1_0.DataTypeI;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
