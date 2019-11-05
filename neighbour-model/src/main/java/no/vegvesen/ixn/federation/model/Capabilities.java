@@ -60,6 +60,10 @@ public class Capabilities {
 		}
 	}
 
+	public boolean hasDataTypes() {
+		return dataTypes.size() > 0;
+	}
+
 	@Override
 	public String toString() {
 		return "Capabilities{" +

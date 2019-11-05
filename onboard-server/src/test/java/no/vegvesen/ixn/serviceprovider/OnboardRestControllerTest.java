@@ -291,9 +291,9 @@ public class OnboardRestControllerTest {
 		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(b, c).collect(Collectors.toSet()));
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
 
-		doReturn(Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet())).when(serviceProviderRepository).findAll();
+		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 
-		Set<DataType> selfCapabilities = onboardRestController.calculateSelfCapabilities();
+		Set<DataType> selfCapabilities = onboardRestController.calculateSelfCapabilities(serviceProviders);
 
 		assertEquals(selfCapabilities.size(), 3);
 		assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
@@ -320,9 +320,9 @@ public class OnboardRestControllerTest {
 		secondServiceProviderSubscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		secondServiceProvider.setSubscriptionRequest(secondServiceProviderSubscriptionRequest);
 
-		doReturn(Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet())).when(serviceProviderRepository).findAll();
+		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 
-		Set<Subscription> selfSubscriptions = onboardRestController.calculateSelfSubscriptions();
+		Set<Subscription> selfSubscriptions = onboardRestController.calculateSelfSubscriptions(serviceProviders);
 
 		assertEquals(selfSubscriptions.size(), 3);
 		assertTrue(selfSubscriptions.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
