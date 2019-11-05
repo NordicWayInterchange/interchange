@@ -2,8 +2,8 @@
 *.cer
 *.iml
 .DS_Store
-interchangenode/target/
-debugclient/target/
 esdata/
 tmp/
 qpid/messages/
+target/
+jks/node/ca/*
