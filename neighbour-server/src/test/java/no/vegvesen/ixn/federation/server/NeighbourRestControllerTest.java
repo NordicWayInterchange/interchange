@@ -8,13 +8,11 @@ import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 @RunWith(MockitoJUnitRunner.class)
 @WebMvcTest(controllers = NeighbourRestController.class)
 public class NeighbourRestControllerTest {
@@ -90,7 +89,7 @@ public class NeighbourRestControllerTest {
 		// Mock incoming capabiity API
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		DataType ericssonDataType = new DataType("datex2;1.0", "NO", "Obstruction");
+		DataType ericssonDataType = new DataType("datex2;1.0", "NO");
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
@@ -122,7 +121,7 @@ public class NeighbourRestControllerTest {
 		// Mock the incoming API object.
 		CapabilityApi unknownNeighbour = new CapabilityApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new DataType("datex2;1.0", "NO", "Obstruction")));
+		unknownNeighbour.setCapabilities(Collections.singleton(new DataType("datex2;1.0", "NO")));
 
 		// Mock response from DNS facade on Server
 		doReturn(Collections.emptyList()).when(dnsFacade).getNeighbours();
@@ -189,7 +188,7 @@ public class NeighbourRestControllerTest {
 		// Create incoming capability api object.
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		ericsson.setCapabilities(Collections.singleton(new DataType("datex2;1.0", "NO", "Obstruction")));
+		ericsson.setCapabilities(Collections.singleton(new DataType("datex2;1.0", "NO")));
 
 		// Convert to JSON
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);

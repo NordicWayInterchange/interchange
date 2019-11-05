@@ -31,7 +31,7 @@ public class SubscribingInterchangeDbFiller implements DatabaseHelperInterface{
 
 		ServiceProvider volvoCloud = new ServiceProvider();
 		volvoCloud.setName("Volvo Cloud");
-		DataType volvoDataTypeOne = new DataType("datex2;1.0", "FI", "Obstruction" );
+		DataType volvoDataTypeOne = new DataType("datex2;1.0", "FI");
 		Capabilities volvoCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(volvoDataTypeOne));
 		volvoCloud.setCapabilities(volvoCapabilities);
 
