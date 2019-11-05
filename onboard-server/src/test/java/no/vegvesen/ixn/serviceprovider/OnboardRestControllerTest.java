@@ -223,8 +223,8 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		// The existing subscriptions of the Service Provider
-		Subscription a = new Subscription("where LIKE 'SE'", Subscription.SubscriptionStatus.REQUESTED);
-		Subscription b = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription a = new Subscription("where LIKE 'SE'", SubscriptionStatus.REQUESTED);
+		Subscription b = new Subscription("where LIKE 'FI'", SubscriptionStatus.REQUESTED);
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
@@ -302,9 +302,9 @@ public class OnboardRestControllerTest {
 	@Test
 	public void calculateSelfSubscriptionsTest() {
 
-		Subscription a = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
-		Subscription b = new Subscription("where LIKE 'SE'", Subscription.SubscriptionStatus.REQUESTED);
-		Subscription c = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription a = new Subscription("where LIKE 'FI'", SubscriptionStatus.REQUESTED);
+		Subscription b = new Subscription("where LIKE 'SE'", SubscriptionStatus.REQUESTED);
+		Subscription c = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");

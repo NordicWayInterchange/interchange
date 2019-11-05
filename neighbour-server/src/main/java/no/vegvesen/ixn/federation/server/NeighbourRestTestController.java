@@ -67,7 +67,7 @@ public abstract class NeighbourRestTestController {
 		if(Neighbour != null){
 			try {
 				Subscription updateSubscription = Neighbour.getSubscriptionById(subscriptionId);
-				updateSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
+				updateSubscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 				neighbourRepository.save(Neighbour);
 				return updateSubscription;
 
@@ -119,7 +119,7 @@ public abstract class NeighbourRestTestController {
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
 		subscriptionApi.setSelector("where LIKE 'NO'");
 		subscriptionApi.setPath(ixnName + "/subscription/"+subscriptionId);
-		subscriptionApi.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
 
 		if(pollingCounter <= 2){
 			logger.info(" - Returning subscription");

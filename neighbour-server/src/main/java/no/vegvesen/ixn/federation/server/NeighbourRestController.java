@@ -83,25 +83,25 @@ public class NeighbourRestController {
 
 			// The initial status of a subscription is NO_OVERLAP.
 			// This status is updated if the selector matches a local data type or is illegal or not valid.
-			neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NO_OVERLAP);
+			neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
 
 			for (DataType localDataType : localCapabilities) {
 				try {
 					if (DataTypeSelectorMatcher.matches(localDataType, neighbourSubscription.getSelector())) {
 						// Subscription matches local data type - update status to ACCEPTED
-						neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
+						neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
 					}
 				} catch (SelectorAlwaysTrueException e) {
 					// The subscription has an illegal selector - selector always true
 					logger.error("Subscription had illegal selectors.", e);
 					logger.warn("Setting status of subscription to ILLEGAL");
-					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ILLEGAL);
+					neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
 
 				} catch (InvalidSelectorException e) {
 					// The subscription has an invalid selector
 					logger.error("Subscription has invalid selector.", e);
 					logger.warn("Setting status of subscription to NOT_VALID");
-					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NOT_VALID);
+					neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.NOT_VALID);
 				}
 			}
 		}

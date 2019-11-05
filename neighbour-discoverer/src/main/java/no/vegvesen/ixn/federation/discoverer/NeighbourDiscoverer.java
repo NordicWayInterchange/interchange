@@ -102,7 +102,7 @@ public class NeighbourDiscoverer {
 	public void gracefulBackoffPollSubscriptions() {
 
 		// All neighbours with a failed subscription in fedIn
-		List<Neighbour> NeighboursWithFailedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED);
+		List<Neighbour> NeighboursWithFailedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
 
 		for (Neighbour neighbour : NeighboursWithFailedSubscriptionsInFedIn) {
 			for (Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()) {
@@ -130,7 +130,7 @@ public class NeighbourDiscoverer {
 
 						if (neighbour.getBackoffAttempts() > backoffProperties.getNumberOfAttempts()) {
 							// We have exceeded allowed  number of tries
-							failedSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.UNREACHABLE);
+							failedSubscription.setSubscriptionStatus(SubscriptionStatus.UNREACHABLE);
 							logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
 						}
 					} finally {
@@ -146,7 +146,7 @@ public class NeighbourDiscoverer {
 	public void pollSubscriptions() {
 		// All Neighbours with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
 		List<Neighbour> NeighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
-				Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
+				SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
 
 		for (Neighbour neighbour : NeighboursToPoll) {
 			for (Subscription subscription : neighbour.getSubscriptionsForPolling()) {
@@ -169,12 +169,12 @@ public class NeighbourDiscoverer {
 
 					} else {
 						// Number of poll attempts exceeds allowed number of poll attempts.
-						subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.GIVE_UP);
+						subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
 						logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
 					}
 				} catch (SubscriptionPollException e) {
 
-					subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.FAILED);
+					subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
 					neighbour.setBackoffAttempts(0);
 					neighbour.setBackoffStart(LocalDateTime.now());
 

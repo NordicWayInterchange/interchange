@@ -97,9 +97,8 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPostOfSubscriptionRequestReturnsSubscriptionRequest() throws Exception{
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		String selector = "where LIKE 'NO'";
-		subscriptionApi.setSelector(selector);
-		subscriptionApi.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscriptionApi.setSelector("where LIKE 'NO'");
+		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("remote server", Collections.singleton(subscriptionApi) );
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionRequestApi);
@@ -126,7 +125,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPollOfSubscriptionReturnsSubscription()throws Exception{
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setPath("bouvet/subscription/1");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
@@ -228,7 +227,7 @@ public class NeighbourRESTFacadeTest {
 	@Test(expected = SubscriptionPollException.class)
 	public void test() throws IOException {
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setPath("bouvet/subscription/1");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
