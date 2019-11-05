@@ -33,7 +33,7 @@ public class MessageForwarder {
     }
 
     @Scheduled(fixedRate = 30000)
-    public void runSchedule() throws NamingException, JMSException {
+    public void runSchedule() throws NamingException {
         checkListenerList();
         setupConnectionsToNewNeighbours();
     }
@@ -51,7 +51,7 @@ public class MessageForwarder {
 
     }
 
-    public void setupConnectionsToNewNeighbours() throws NamingException, JMSException {
+    public void setupConnectionsToNewNeighbours() throws NamingException {
         List<Neighbour> interchanges = neighbourFetcher.listNeighbourCandidates();
         List<String> interchangeNames = new ArrayList<>();
         for (Neighbour ixn : interchanges) {
