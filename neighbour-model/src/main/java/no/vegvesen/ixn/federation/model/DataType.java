@@ -10,7 +10,7 @@ import java.util.Set;
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "data_types")
-public class DataType {
+public class DataType implements DataTypeApi {
 
 	@JsonIgnore
 	@Id
@@ -34,18 +34,22 @@ public class DataType {
 		this.where = where;
 	}
 
+	@Override
 	public String getWhere() {
 		return where;
 	}
 
+	@Override
 	public void setWhere(String where) {
 		this.where = where;
 	}
 
+	@Override
 	public String getHow() {
 		return how;
 	}
 
+	@Override
 	public void setHow(String how) {
 		this.how = how;
 	}
