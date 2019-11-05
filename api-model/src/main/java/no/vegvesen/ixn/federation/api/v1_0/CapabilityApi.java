@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import no.vegvesen.ixn.federation.model.DataType;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,12 +8,12 @@ public class CapabilityApi{
 
 	private static final String version = "1.0";
 	private String name;
-	private Set<DataType> capabilities = new HashSet<>();
+	private Set<DataTypeApi> capabilities = new HashSet<>();
 
 	public CapabilityApi() {
 	}
 
-	public CapabilityApi(String name, Set<DataType> capabilities) {
+	public CapabilityApi(String name, Set<DataTypeApi> capabilities) {
 		this.name = name;
 		this.capabilities = capabilities;
 	}
@@ -32,11 +30,11 @@ public class CapabilityApi{
 		this.name = name;
 	}
 
-	public Set<DataType> getCapabilities() {
+	public Set<DataTypeApi> getCapabilities() {
 		return capabilities;
 	}
 
-	public void setCapabilities(Set<DataType> capabilities) {
+	public void setCapabilities(Set<DataTypeApi> capabilities) {
 		this.capabilities = capabilities;
 	}
 

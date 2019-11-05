@@ -88,13 +88,13 @@ public class OnboardRestController {
 		} else {
 			// Add the incoming capabilities to the capabilities of the Service Provider.
 			Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
-			Set<DataType> capabilitiesToAdd = capabilityApi.getCapabilities();
+			Set<DataTypeApi> capabilitiesToAdd = capabilityApi.getCapabilities();
 
-			if(currentServiceProviderCapabilities.containsAll(capabilitiesToAdd)){
+			if(currentServiceProviderCapabilities.containsAll(capabilityTransformer.dataTypeApiToDataType(capabilitiesToAdd))){
 				throw new CapabilityPostException("The posted capabilities already exist in the Service Provider capabilities. Nothing to add.");
 			}
 
-			currentServiceProviderCapabilities.addAll(capabilitiesToAdd);
+			currentServiceProviderCapabilities.addAll(capabilityTransformer.dataTypeApiToDataType(capabilitiesToAdd));
 		}
 
 		logger.info("Service provider to update: {}", serviceProviderToUpdate.toString());
@@ -143,14 +143,14 @@ public class OnboardRestController {
 
 		// Service provider already exists. Remove the incoming capabilities from the Service Provider capabilities.
 		Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
-		Set<DataType> capabilitiesToDelete = capabilityApi.getCapabilities();
+		Set<DataTypeApi> capabilitiesToDelete = capabilityApi.getCapabilities();
 
-		if(!currentServiceProviderCapabilities.containsAll(capabilitiesToDelete)){
+		if(!currentServiceProviderCapabilities.containsAll(capabilityTransformer.dataTypeApiToDataType(capabilitiesToDelete))){
 			throw new CapabilityPostException("The incoming capabilities to delete are not all in the Service Provider capabilities. Cannot delete capabilities that don't exist.");
 
 		}
 
-		currentServiceProviderCapabilities.removeAll(capabilitiesToDelete);
+		currentServiceProviderCapabilities.removeAll(capabilityTransformer.dataTypeApiToDataType(capabilitiesToDelete));
 
 		if(currentServiceProviderCapabilities.size() == 0){
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
@@ -366,7 +366,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = SP_CAPS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-	public CapabilityApi getServiceProviderCapabilities(@PathVariable String serviceProviderName)throws Exception{
+	public CapabilityApi getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
 
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -411,10 +411,7 @@ public class OnboardRestController {
 	// TODO: Remove
 	@RequestMapping(method = RequestMethod.GET, path = "/getSelfRepresentation", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Self getSelfRepresentation(){
-
-		Self self = fetchSelf();
-
-		return self;
+		return fetchSelf();
 	}
 
 }

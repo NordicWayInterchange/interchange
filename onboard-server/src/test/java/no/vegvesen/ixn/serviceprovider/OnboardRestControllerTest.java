@@ -78,9 +78,9 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DataType a = new DataType("datex2;1.0", "NO");
-		DataType b = new DataType("datex2;1.0", "SE");
-		Set<DataType> capabilities = Stream.of(a, b).collect(Collectors.toSet());
+		DataTypeApi a = new DataTypeApi("datex2;1.0", "NO");
+		DataTypeApi b = new DataTypeApi("datex2;1.0", "SE");
+		Set<DataTypeApi> capabilities = Stream.of(a, b).collect(Collectors.toSet());
 		CapabilityApi capabilityApi = new CapabilityApi("First Service Provider", capabilities);
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApi);
 
@@ -98,8 +98,8 @@ public class OnboardRestControllerTest {
 		mockCertificate("Second Service Provider");
 
 		// The existing data types of the positng Service Provider
-		DataType a = new DataType("datex2;1.0", "NO");
-		DataType b = new DataType("datex2;1.0", "SE");
+		DataTypeApi a = new DataTypeApi("datex2;1.0", "NO");
+		DataTypeApi b = new DataTypeApi("datex2;1.0", "SE");
 
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
@@ -108,7 +108,7 @@ public class OnboardRestControllerTest {
 
 		// Mock existing service provider with two capabilities in database
 		ServiceProvider secondServiceProvider = new ServiceProvider("Second Service Provider");
-		Set<DataType> capabilities = Stream.of(a, b).collect(Collectors.toSet());
+		Set<DataType> capabilities = capabilityTransformer.dataTypeApiToDataType(Stream.of(a, b).collect(Collectors.toSet()));
 		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
 
@@ -129,7 +129,7 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		CapabilityApi capabilityApi = new CapabilityApi();
-		DataType a = new DataType("datex2;1.0", "FI");
+		DataTypeApi a = new DataTypeApi("datex2;1.0", "FI");
 		capabilityApi.setCapabilities(Collections.singleton(a));
 		capabilityApi.setName("Second Service Provider");
 

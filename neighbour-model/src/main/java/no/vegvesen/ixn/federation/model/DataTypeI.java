@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
-public interface DataTypeApi {
+public interface DataTypeI {
 	String getWhere();
 
 	void setWhere(String where);
