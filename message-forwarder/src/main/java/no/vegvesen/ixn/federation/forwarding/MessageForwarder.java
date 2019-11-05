@@ -58,18 +58,22 @@ public class MessageForwarder {
             String name = ixn.getName();
             interchangeNames.add(name);
             if (! listeners.containsKey(name)) {
-                logger.info("Setting up ixn with name {}, port {}",ixn.getName(),ixn.getMessageChannelPort());
-                MessageProducer producer = createProducerToRemote(ixn);
+                try {
+                    logger.info("Setting up ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
+                    MessageProducer producer = createProducerToRemote(ixn);
 
-                IxnContext context = createContext(ixn);
-                Connection connection = createConnection(context);
-                MessageConsumer messageConsumer = createDestination(context, connection);
+                    IxnContext context = createContext(ixn);
+                    Connection connection = createConnection(context);
+                    MessageConsumer messageConsumer = createDestination(context, connection);
 
-                MessageForwardListener messageListener = new MessageForwardListener(messageConsumer, producer);
-                messageConsumer.setMessageListener(messageListener);
-                connection.setExceptionListener(messageListener);
-                
-                listeners.put(name,messageListener);
+                    MessageForwardListener messageListener = new MessageForwardListener(messageConsumer, producer);
+                    messageConsumer.setMessageListener(messageListener);
+                    connection.setExceptionListener(messageListener);
+
+                    listeners.put(name, messageListener);
+                } catch (JMSException e) {
+                    logger.warn("Tried to create connection to {}, but failed with exception.",name,e);
+                }
             } else {
                 if (listeners.get(name).isRunning()) {
                     logger.debug("Listener for {} is still running with no changes", name);
