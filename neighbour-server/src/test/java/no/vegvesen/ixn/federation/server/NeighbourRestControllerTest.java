@@ -89,7 +89,7 @@ public class NeighbourRestControllerTest {
 		// Mock incoming capabiity API
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		DataType ericssonDataType = new DataType("datex2;1.0", "NO");
+		DataTypeApi ericssonDataType = new DataTypeApi("datex2;1.0", "NO");
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
@@ -121,7 +121,7 @@ public class NeighbourRestControllerTest {
 		// Mock the incoming API object.
 		CapabilityApi unknownNeighbour = new CapabilityApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new DataType("datex2;1.0", "NO")));
+		unknownNeighbour.setCapabilities(Collections.singleton(new DataTypeApi("datex2;1.0", "NO")));
 
 		// Mock response from DNS facade on Server
 		doReturn(Collections.emptyList()).when(dnsFacade).getNeighbours();
@@ -188,7 +188,7 @@ public class NeighbourRestControllerTest {
 		// Create incoming capability api object.
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		ericsson.setCapabilities(Collections.singleton(new DataType("datex2;1.0", "NO")));
+		ericsson.setCapabilities(Collections.singleton(new DataTypeApi("datex2;1.0", "NO")));
 
 		// Convert to JSON
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);

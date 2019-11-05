@@ -19,7 +19,7 @@ public class CapabilityTransformerTest {
 	public void capabilitiyApiIsConvertedToInterchangeAndBack(){
 		CapabilityApi capabilityApi = new CapabilityApi();
 		capabilityApi.setName("Test 2");
-		DataType capabilities = new DataType("datex2;1.0", "NO");
+		DataTypeApi capabilities = new DataTypeApi("datex2;1.0", "NO");
 		capabilityApi.setCapabilities(Collections.singleton(capabilities));
 
 		Neighbour interchange = capabilityTransformer.capabilityApiToNeighbour(capabilityApi);

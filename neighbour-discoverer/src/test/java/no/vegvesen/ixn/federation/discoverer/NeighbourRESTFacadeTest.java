@@ -70,9 +70,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchange()throws Exception{
 
-		DataType dataType = new DataType();
-		dataType.setHow("datex2.0;1");
-		dataType.setWhere("NO");
+		DataTypeApi dataType = new DataTypeApi("datex2.0;1", "NO");
 		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);

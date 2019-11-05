@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
@@ -98,8 +99,8 @@ public abstract class NeighbourRestTestController {
 	@Secured("ROLE_USER")
 	public CapabilityApi updateCapabilities(@RequestBody CapabilityApi neighbourCapabilities) {
 
-		DataType volvoDataTypeOne = new DataType("datex2;1.0", "NO");
-		DataType volvoDataTypeTwo = new DataType("datex2;1.0", "NO");
+		DataTypeApi volvoDataTypeOne = new DataTypeApi("datex2;1.0", "NO");
+		DataTypeApi volvoDataTypeTwo = new DataTypeApi("datex2;1.0", "NO");
 
 		CapabilityApi capabilityApi = new CapabilityApi();
 		capabilityApi.setCapabilities(Stream.of(volvoDataTypeOne, volvoDataTypeTwo).collect(Collectors.toSet()));
