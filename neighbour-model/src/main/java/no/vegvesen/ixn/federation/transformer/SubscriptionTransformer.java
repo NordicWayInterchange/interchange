@@ -1,5 +1,6 @@
-package no.vegvesen.ixn.federation.api.v1_0;
+package no.vegvesen.ixn.federation.transformer;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
 import no.vegvesen.ixn.federation.model.Subscription;
 import org.springframework.stereotype.Component;
 

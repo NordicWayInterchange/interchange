@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,5 +1,4 @@
 package no.vegvesen.ixn.federation.api.v1_0;
-import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 
 public class SubscriptionApi{
 
@@ -24,7 +23,6 @@ public class SubscriptionApi{
 		this.selector = selector;
 	}
 
-	@SuppressWarnings("WeakerAccess")
 	public String getPath() {
 		return path;
 	}

@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import no.vegvesen.ixn.federation.model.DataTypeI;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataTypeApi implements DataTypeI {

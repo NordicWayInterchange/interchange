@@ -1,5 +1,7 @@
-package no.vegvesen.ixn.federation.api.v1_0;
+package no.vegvesen.ixn.federation.transformer;
 
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +54,7 @@ public class CapabilityTransformer {
 		return capabilityApi;
 	}
 
-	public Set<DataTypeApi> dataTypeToDataTypeApi(Set<DataType> dataTypes) {
+	private Set<DataTypeApi> dataTypeToDataTypeApi(Set<DataType> dataTypes) {
 		Set<DataTypeApi> apis = new HashSet<>();
 		for (DataType dataType : dataTypes) {
 			apis.add(new DataTypeApi(dataType.getHow(), dataType.getWhere()));
