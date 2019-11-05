@@ -33,7 +33,7 @@ public class NeighbourDiscovererTest {
 	private NeighbourDiscoverer neighbourDiscoverer;
 
 	// Objects used in testing
-	private DataType noObstruction = new DataType("datex2;1.0", "NO", "Obstruction");
+	private DataType noObstruction = new DataType("datex2;1.0", "NO");
 	private Self self;
 
 	@Before
@@ -63,8 +63,9 @@ public class NeighbourDiscovererTest {
 	}
 
 	private Self createSelf() {
-		Self self = new Self(myName);
-		Set<DataType> selfCapabilities = Collections.singleton(new DataType("datex2;1.0", "NO", "Obstruction"));
+		// Self setup
+		self = new Self("Bouvet");
+		Set<DataType> selfCapabilities = Collections.singleton(new DataType("datex2;1.0", "NO"));
 		self.setLocalCapabilities(selfCapabilities);
 		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED));
 		self.setLocalSubscriptions(selfSubscriptions);
@@ -393,7 +394,7 @@ public class NeighbourDiscovererTest {
 		SubscriptionRequest emptySR = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, subscription);
 
 		HashSet<DataType> dtNO = new HashSet<>();
-		dtNO.add(new DataType("datex2;1.0", "NO", "Obstruction"));
+		dtNO.add(new DataType("datex2;1.0", "NO"));
 		Capabilities capabilitiesNO = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, dtNO);
 		Neighbour neighbourA = new Neighbour("a", capabilitiesNO, emptySR,  emptySR);
 		Neighbour neighbourB = new Neighbour("b", capabilitiesNO, emptySR,  emptySR);
@@ -418,7 +419,7 @@ public class NeighbourDiscovererTest {
 		// Self setup
 		Self discoveringNode = new Self("d");
 		Set<DataType> selfCapabilities = new HashSet<>();
-		selfCapabilities.add(new DataType("datex2;1.0", "NO", "Obstruction"));
+		selfCapabilities.add(new DataType("datex2;1.0", "NO"));
 		discoveringNode.setLocalCapabilities(selfCapabilities);
 
 		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("where = 'NO'", Subscription.SubscriptionStatus.REQUESTED));
@@ -459,7 +460,7 @@ public class NeighbourDiscovererTest {
 		self.setLocalSubscriptions(selfLocalSubscriptions);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
-		DataType neighbourDataType = new DataType("datex","NO","Conditions");
+		DataType neighbourDataType = new DataType("datex","NO");
 		Set<DataType> dataTypeSet = new HashSet<>();
 		dataTypeSet.add(neighbourDataType);
 		Capabilities neighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,dataTypeSet);

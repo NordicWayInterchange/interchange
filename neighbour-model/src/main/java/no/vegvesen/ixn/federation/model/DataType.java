@@ -22,8 +22,6 @@ public class DataType {
 	@Column(name = "header_where")
 	private String where;
 	private String how;
-	@JsonIgnore
-	private String what;
 
 	@Column
 	@UpdateTimestamp
@@ -31,9 +29,8 @@ public class DataType {
 
 	public DataType(){}
 
-	public DataType(String how, String where, String what) {
+	public DataType(String how, String where) {
 		this.how = how;
-		this.what = what;
 		this.where = where;
 	}
 
@@ -51,14 +48,6 @@ public class DataType {
 
 	public void setHow(String how) {
 		this.how = how;
-	}
-
-	public String getWhat() {
-		return what;
-	}
-
-	public void setWhat(String what) {
-		this.what = what;
 	}
 
 	public boolean isContainedInSet(Set<DataType> capabilities){
@@ -95,7 +84,6 @@ public class DataType {
 				"data_id=" + data_id +
 				", where='" + where + '\'' +
 				", how='" + how + '\'' +
-				", what='" + what + '\'' +
 				", lastUpdated=" + lastUpdated +
 				'}';
 	}

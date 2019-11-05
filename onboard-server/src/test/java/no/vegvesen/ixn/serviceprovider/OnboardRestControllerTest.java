@@ -78,8 +78,8 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DataType a = new DataType("datex2;1.0", "NO", "Obstruction");
-		DataType b = new DataType("datex2;1.0", "SE", "Works");
+		DataType a = new DataType("datex2;1.0", "NO");
+		DataType b = new DataType("datex2;1.0", "SE");
 		Set<DataType> capabilities = Stream.of(a, b).collect(Collectors.toSet());
 		CapabilityApi capabilityApi = new CapabilityApi("First Service Provider", capabilities);
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApi);
@@ -98,8 +98,8 @@ public class OnboardRestControllerTest {
 		mockCertificate("Second Service Provider");
 
 		// The existing data types of the positng Service Provider
-		DataType a = new DataType("datex2;1.0", "NO", "Obstruction");
-		DataType b = new DataType("datex2;1.0", "SE", "Works");
+		DataType a = new DataType("datex2;1.0", "NO");
+		DataType b = new DataType("datex2;1.0", "SE");
 
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
@@ -129,7 +129,7 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		CapabilityApi capabilityApi = new CapabilityApi();
-		DataType a = new DataType("datex2;1.0", "FI", "Conditions");
+		DataType a = new DataType("datex2;1.0", "FI");
 		capabilityApi.setCapabilities(Collections.singleton(a));
 		capabilityApi.setName("Second Service Provider");
 
@@ -277,9 +277,9 @@ public class OnboardRestControllerTest {
 	@Test
 	public void calculateSelfCapabilitiesTest() {
 
-		DataType a = new DataType("datex2;1.0", "SE", "Obstruction");
-		DataType b = new DataType("datex2;1.0", "FI", "Works");
-		DataType c = new DataType("datex2;1.0", "NO", "Obtruction");
+		DataType a = new DataType("datex2;1.0", "SE");
+		DataType b = new DataType("datex2;1.0", "FI");
+		DataType c = new DataType("datex2;1.0", "NO");
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");

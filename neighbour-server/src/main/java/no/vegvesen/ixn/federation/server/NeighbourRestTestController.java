@@ -98,8 +98,8 @@ public abstract class NeighbourRestTestController {
 	@Secured("ROLE_USER")
 	public CapabilityApi updateCapabilities(@RequestBody CapabilityApi neighbourCapabilities) {
 
-		DataType volvoDataTypeOne = new DataType("datex2;1.0", "NO", "Works" );
-		DataType volvoDataTypeTwo = new DataType("datex2;1.0", "NO", "Conditions");
+		DataType volvoDataTypeOne = new DataType("datex2;1.0", "NO");
+		DataType volvoDataTypeTwo = new DataType("datex2;1.0", "NO");
 
 		CapabilityApi capabilityApi = new CapabilityApi();
 		capabilityApi.setCapabilities(Stream.of(volvoDataTypeOne, volvoDataTypeTwo).collect(Collectors.toSet()));
@@ -124,13 +124,13 @@ public abstract class NeighbourRestTestController {
 		if(pollingCounter <= 2){
 			logger.info(" - Returning subscription");
 			return subscriptionApi;
-		}else if( pollingCounter >= 3 && pollingCounter <=4){
+		}else if(pollingCounter <= 4){
 			logger.error(" - Throwing error!!!");
 			throw new RuntimeException("Error error ");
-		}else if(pollingCounter >= 5 && pollingCounter <= 6){
+		}else if(pollingCounter <= 6){
 			logger.info(" - Returning subscription");
 			return subscriptionApi;
-		}else if(pollingCounter >= 7 && pollingCounter <= 9){
+		}else if(pollingCounter <= 9){
 			logger.info(" - Throwing error!!!!");
 			throw new RuntimeException("Error error again");
 		}else{

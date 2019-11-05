@@ -74,7 +74,7 @@ public class NeighbourRepositoryIT {
 		repository.save(thirdInterchange);
 
 		Neighbour update = repository.findByName("Third Neighbour");
-		DataType aDataType = new DataType("datex2;1.0", "NO", "Obstruction");
+		DataType aDataType = new DataType("datex2;1.0", "NO");
 		Capabilities firstCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(aDataType));
 		update.setCapabilities(firstCapabilities);
 		repository.save(update);

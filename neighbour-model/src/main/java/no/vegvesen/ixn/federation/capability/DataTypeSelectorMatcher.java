@@ -118,7 +118,7 @@ public class DataTypeSelectorMatcher {
 		if (selector.contains("\"") || selector.contains("`")) {
 			throw new InvalidSelectorException("String values in selectors must be quoted with single quoutes: " + selector);
 		}
-		JMSSelectorFilter filter = null;
+		JMSSelectorFilter filter;
 		try {
 			filter = new JMSSelectorFilter(selector);
 		} catch (ParseException | TokenMgrError | SelectorParsingException e) {
@@ -129,7 +129,7 @@ public class DataTypeSelectorMatcher {
 	}
 
 	private static void notAlwaysTrue(JMSSelectorFilter filter) {
-		DataTypeFilter neverTrue = new DataTypeFilter(new DataType("-1", "-1", "-1"));
+		DataTypeFilter neverTrue = new DataTypeFilter(new DataType("-1", "-1"));
 		if (filter.matches(neverTrue)){
 			throw new SelectorAlwaysTrueException("Cannot subscribe to a filter that is always true: " + filter.getSelector());
 		}

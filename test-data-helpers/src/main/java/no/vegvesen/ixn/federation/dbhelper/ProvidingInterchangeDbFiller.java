@@ -34,8 +34,8 @@ public class ProvidingInterchangeDbFiller implements DatabaseHelperInterface{
 
 		ServiceProvider teslaCloud = new ServiceProvider();
 		teslaCloud.setName("Tesla Cloud");
-		DataType teslaDataTypeOne = new DataType("datex2;1.0", "NO", "Obstruction" );
-		DataType teslaDataTypeTwo = new DataType("datex2;1.0", "SE", "Conditions");
+		DataType teslaDataTypeOne = new DataType("datex2;1.0", "NO");
+		DataType teslaDataTypeTwo = new DataType("datex2;1.0", "SE");
 		Capabilities teslaCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(teslaDataTypeOne, teslaDataTypeTwo).collect(Collectors.toSet()));
 		teslaCloud.setCapabilities(teslaCapabilities);
 
