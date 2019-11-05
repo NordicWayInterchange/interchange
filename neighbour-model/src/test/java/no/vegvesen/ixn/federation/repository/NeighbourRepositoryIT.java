@@ -43,12 +43,12 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void storedSubscriptionsInAndOutAreSeparated() {
 		Set<Subscription> outbound = new HashSet<>();
-		outbound.add(new Subscription("outbound is true", Subscription.SubscriptionStatus.CREATED));
+		outbound.add(new Subscription("outbound is true", SubscriptionStatus.CREATED));
 		SubscriptionRequest outSubReq = new SubscriptionRequest();
 		outSubReq.setSubscriptions(outbound);
 
 		Set<Subscription> inbound = new HashSet<>();
-		inbound.add(new Subscription("inbound is true", Subscription.SubscriptionStatus.CREATED));
+		inbound.add(new Subscription("inbound is true", SubscriptionStatus.CREATED));
 		SubscriptionRequest inSubReq = new SubscriptionRequest();
 		inSubReq.setSubscriptions(inbound);
 
@@ -87,14 +87,14 @@ public class NeighbourRepositoryIT {
 	public void interchangeReadyToSetupRouting() {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Set<Subscription> requestedSubscriptions = new HashSet<>();
-		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'fish'", Subscription.SubscriptionStatus.ACCEPTED));
-		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", Subscription.SubscriptionStatus.ACCEPTED));
+		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED));
+		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", SubscriptionStatus.ACCEPTED));
 		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour readyToSetup = new Neighbour("freddy", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(readyToSetup);
 
-		List<Neighbour> forSetupFromRepo = repository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED);
+		List<Neighbour> forSetupFromRepo = repository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
 
 		assertThat(forSetupFromRepo).hasSize(1);
 		assertThat(forSetupFromRepo.iterator().next().getName()).isEqualTo("freddy");
@@ -118,8 +118,8 @@ public class NeighbourRepositoryIT {
 	public void interchangeCanUpdateSubscriptionsSet() {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Set<Subscription> requestedSubscriptions = new HashSet<>();
-		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'fish'", Subscription.SubscriptionStatus.ACCEPTED));
-		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", Subscription.SubscriptionStatus.REQUESTED));
+		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED));
+		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", SubscriptionStatus.REQUESTED));
 		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour ixnForUpdate = new Neighbour("4update", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
@@ -137,7 +137,7 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void interchangeReadyForForwarding() {
 		Set<Subscription> subscriptions = new HashSet<>();
-		subscriptions.add(new Subscription("where = 'NO' and what = 'fish'", Subscription.SubscriptionStatus.CREATED));
+		subscriptions.add(new Subscription("where = 'NO' and what = 'fish'", SubscriptionStatus.CREATED));
 		SubscriptionRequest outgoing = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, subscriptions);
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Neighbour ixnForwards = new Neighbour("norwegian-fish", capabilities, outgoing, null);

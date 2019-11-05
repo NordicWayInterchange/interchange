@@ -61,9 +61,9 @@ public class SubscriptionRequest {
 
 	public boolean subscriptionRequestRejected(){
 		for(Subscription s : subscription){
-			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.CREATED
-				|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.ACCEPTED
-				|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.REQUESTED){
+			if(s.getSubscriptionStatus() == SubscriptionStatus.CREATED
+				|| s.getSubscriptionStatus() == SubscriptionStatus.ACCEPTED
+				|| s.getSubscriptionStatus() == SubscriptionStatus.REQUESTED){
 				return false;
 			}
 		}
@@ -72,7 +72,7 @@ public class SubscriptionRequest {
 
 	public boolean subscriptionRequestEstablished(){
 		for(Subscription s : subscription){
-			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.CREATED){
+			if(s.getSubscriptionStatus() == SubscriptionStatus.CREATED){
 				return true;
 			}
 		}

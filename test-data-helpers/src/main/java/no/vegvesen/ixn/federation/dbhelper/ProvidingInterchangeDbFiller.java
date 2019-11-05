@@ -42,7 +42,7 @@ public class ProvidingInterchangeDbFiller implements DatabaseHelperInterface{
 
 		Subscription teslaSubscription = new Subscription();
 		teslaSubscription.setSelector("where LIKE 'DK'");
-		teslaSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+		teslaSubscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 		SubscriptionRequest teslaSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED,Collections.singleton(teslaSubscription) );
 		teslaCloud.setSubscriptionRequest(teslaSubscriptionRequest);
 		serviceProviderRepository.save(teslaCloud);

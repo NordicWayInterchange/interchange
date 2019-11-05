@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
 import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -18,7 +19,7 @@ public class SubscriptionTransformerTest {
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
 		subscriptionApi.setPath("bouvet/subscription/1");
 		subscriptionApi.setSelector("where LIKE 'NO'");
-		subscriptionApi.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
 
 		Subscription subscription = subscriptionTransformer.subscriptionApiToSubscription(subscriptionApi);
 
@@ -33,7 +34,7 @@ public class SubscriptionTransformerTest {
 		Subscription subscription = new Subscription();
 		subscription.setPath("bouvet/subscription/1");
 		subscription.setSelector("where LIKE 'NO'");
-		subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 

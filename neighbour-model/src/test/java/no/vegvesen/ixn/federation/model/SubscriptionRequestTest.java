@@ -23,8 +23,8 @@ public class SubscriptionRequestTest {
 
 	@Test
 	public void subscriptionRequestWithOneCreatedSubscriptionNotRejected(){
-		norway.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
-		sweden.setSubscriptionStatus(Subscription.SubscriptionStatus.REJECTED);
+		norway.setSubscriptionStatus(SubscriptionStatus.CREATED);
+		sweden.setSubscriptionStatus(SubscriptionStatus.REJECTED);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Stream.of(norway, sweden).collect(Collectors.toSet()));
 
@@ -33,8 +33,8 @@ public class SubscriptionRequestTest {
 
 	@Test
 	public void subscriptionRequestWithOneCreatedSubscriptionIsEstablished(){
-		sweden.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
-		norway.setSubscriptionStatus(Subscription.SubscriptionStatus.REJECTED);
+		sweden.setSubscriptionStatus(SubscriptionStatus.CREATED);
+		norway.setSubscriptionStatus(SubscriptionStatus.REJECTED);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Stream.of(norway, sweden).collect(Collectors.toSet()));
 
@@ -43,8 +43,8 @@ public class SubscriptionRequestTest {
 
 	@Test
 	public void subscriptionRequestWithStatusRejectedIsRejected(){
-		sweden.setSubscriptionStatus(Subscription.SubscriptionStatus.NO_OVERLAP);
-		norway.setSubscriptionStatus(Subscription.SubscriptionStatus.ILLEGAL);
+		sweden.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
+		norway.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Stream.of(norway, sweden).collect(Collectors.toSet()));
 

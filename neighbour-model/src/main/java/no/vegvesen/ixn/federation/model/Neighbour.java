@@ -139,6 +139,7 @@ public class Neighbour implements Subscriber {
 	}
 
 
+	@SuppressWarnings("WeakerAccess")
 	public LocalDateTime getBackoffStartTime() {
 		return backoffStart;
 	}
@@ -164,7 +165,7 @@ public class Neighbour implements Subscriber {
 		Set<Subscription> subscriptionsForPolling = new HashSet<>();
 
 		for (Subscription subscription : this.getFedIn().getSubscriptions()) {
-			if (subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.REQUESTED) || subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.ACCEPTED)) {
+			if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED) || subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED)) {
 				subscriptionsForPolling.add(subscription);
 			}
 		}
@@ -176,7 +177,7 @@ public class Neighbour implements Subscriber {
 		Set<Subscription> subscriptionsWithStatusFailed = new HashSet<>();
 
 		for (Subscription subscription : this.getFedIn().getSubscriptions()) {
-			if (subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.FAILED)) {
+			if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.FAILED)) {
 				subscriptionsWithStatusFailed.add(subscription);
 			}
 		}

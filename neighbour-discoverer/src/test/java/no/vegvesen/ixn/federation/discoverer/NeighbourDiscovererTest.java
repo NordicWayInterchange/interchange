@@ -67,7 +67,7 @@ public class NeighbourDiscovererTest {
 		self = new Self("Bouvet");
 		Set<DataType> selfCapabilities = Collections.singleton(new DataType("datex2;1.0", "NO"));
 		self.setLocalCapabilities(selfCapabilities);
-		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED));
+		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("where LIKE 'FI'", SubscriptionStatus.REQUESTED));
 		self.setLocalSubscriptions(selfSubscriptions);
 		return self;
 	}
@@ -142,7 +142,7 @@ public class NeighbourDiscovererTest {
 	}
 
 	private SubscriptionRequest createFirstSubscriptionRequestResponse() {
-		Subscription firstSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription firstSubscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
 		return new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 	}
 
@@ -203,9 +203,9 @@ public class NeighbourDiscovererTest {
 	public void gracefulBackoffPollOfSubscriptionDoesNotHappenBeforeAllowedTime(){
 		Neighbour ericsson = createNeighbour();
 		// Neighbour ericsson has subscription to poll
-		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		// Setting up Ericsson's failed subscriptions
-		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.FAILED);
+		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.FAILED);
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
 		ericsson.setBackoffStart(LocalDateTime.now().plusSeconds(10));
@@ -252,10 +252,10 @@ public class NeighbourDiscovererTest {
 	public void gracefulBackoffPollOfSubscriptionHappensIfAllowedPostTimeHasPassed(){
 		Neighbour ericsson = createNeighbour();
 		// Return an Neighbour with a subscription to poll.
-		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 
 		// Mock result of polling in backoff.
-		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.FAILED);
+		Subscription ericssonSubscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.FAILED);
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
 		doReturn(ericssonSubscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
@@ -314,12 +314,12 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void successfulPollOfSubscriptionCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		ericsson.setFedIn(ericssonSubscription);
-		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(ericsson));
 
-		Subscription polledSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.ACCEPTED);
+		Subscription polledSubscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.ACCEPTED);
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
@@ -333,13 +333,13 @@ public class NeighbourDiscovererTest {
 
 		Neighbour spyNeighbour = spy(Neighbour.class);
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setNumberOfPolls(0);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		spyNeighbour.setFedIn(subscriptionRequest);
-		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
 
-		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.CREATED);
+		Subscription createdSubscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.CREATED);
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
@@ -353,13 +353,13 @@ public class NeighbourDiscovererTest {
 	public void allSubscriptionsRejectedFlipsFedInStatusToRejected(){
 		Neighbour spyNeighbour = spy(Neighbour.class);
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setNumberOfPolls(0);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		spyNeighbour.setFedIn(subscriptionRequest);
-		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
 
-		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REJECTED);
+		Subscription createdSubscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REJECTED);
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
@@ -372,14 +372,14 @@ public class NeighbourDiscovererTest {
 	public void subscriptionStatusAcceptedKeepsFedInStatusRequested(){
 		Neighbour spyNeighbour = spy(Neighbour.class);
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setNumberOfPolls(0);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		spyNeighbour.setFedIn(subscriptionRequest);
 
-		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus.REQUESTED, Subscription.SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
 
-		Subscription createdSubscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.ACCEPTED);
+		Subscription createdSubscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.ACCEPTED);
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
@@ -406,7 +406,7 @@ public class NeighbourDiscovererTest {
 		neighbours.add(neighbourC);
 
 		HashSet<Subscription> returnedSubscriptionsFromNeighbour = new HashSet<>();
-		returnedSubscriptionsFromNeighbour.add(new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.ACCEPTED));
+		returnedSubscriptionsFromNeighbour.add(new Subscription("where LIKE 'NO'", SubscriptionStatus.ACCEPTED));
 
 		SubscriptionRequest srCreated = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, returnedSubscriptionsFromNeighbour);
 
@@ -422,7 +422,7 @@ public class NeighbourDiscovererTest {
 		selfCapabilities.add(new DataType("datex2;1.0", "NO"));
 		discoveringNode.setLocalCapabilities(selfCapabilities);
 
-		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("where = 'NO'", Subscription.SubscriptionStatus.REQUESTED));
+		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("where = 'NO'", SubscriptionStatus.REQUESTED));
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
 
 		neighbourDiscoverer.subscriptionRequest(neighbours, discoveringNode);

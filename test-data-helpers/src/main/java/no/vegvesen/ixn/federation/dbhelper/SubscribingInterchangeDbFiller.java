@@ -37,7 +37,7 @@ public class SubscribingInterchangeDbFiller implements DatabaseHelperInterface{
 
 		Subscription volvoSubscriptions = new Subscription();
 		volvoSubscriptions.setSelector("where LIKE 'SE'");
-		volvoSubscriptions.setSubscriptionStatus(Subscription.SubscriptionStatus.REQUESTED);
+		volvoSubscriptions.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 		SubscriptionRequest volvoSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(volvoSubscriptions));
 		volvoCloud.setSubscriptionRequest(volvoSubscriptionRequest);
 		serviceProviderRepository.save(volvoCloud);
