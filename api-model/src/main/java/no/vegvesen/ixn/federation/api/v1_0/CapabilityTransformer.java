@@ -10,14 +10,9 @@ import java.util.Set;
 public class CapabilityTransformer {
 
 	public Neighbour capabilityApiToNeighbour(CapabilityApi capabilityApi){
-
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName(capabilityApi.getName());
-
-		Capabilities capabilitiesObject = new Capabilities();
-		capabilitiesObject.setDataTypes(dataTypeApiToDataType(capabilityApi.getCapabilities()));
-		neighbour.setCapabilities(capabilitiesObject);
-
+		neighbour.setCapabilities(toCapabilities(capabilityApi));
 		return neighbour;
 	}
 
@@ -28,16 +23,18 @@ public class CapabilityTransformer {
 	}
 
 	public ServiceProvider capabilityApiToServiceProvider(CapabilityApi capabilityApi){
-
 		ServiceProvider serviceProvider = new ServiceProvider();
 		serviceProvider.setName(capabilityApi.getName());
-
-		Capabilities serviceProviderCapabilities = new Capabilities();
-		serviceProviderCapabilities.setDataTypes(dataTypeApiToDataType(capabilityApi.getCapabilities()));
-		serviceProvider.setCapabilities(serviceProviderCapabilities);
-
+		serviceProvider.setCapabilities(toCapabilities(capabilityApi));
 		return serviceProvider;
 	}
+
+	private Capabilities toCapabilities(CapabilityApi capabilityApi) {
+		Capabilities capabilitiesObject = new Capabilities();
+		capabilitiesObject.setDataTypes(dataTypeApiToDataType(capabilityApi.getCapabilities()));
+		return capabilitiesObject;
+	}
+
 	public CapabilityApi serviceProviderToCapabilityApi(ServiceProvider serviceProvider){
 
 		CapabilityApi capabilityApi = new CapabilityApi();
