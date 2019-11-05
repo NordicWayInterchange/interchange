@@ -412,7 +412,7 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.GET, path = "/getSelfRepresentation", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Self getSelfRepresentation(){
 
-		Self self = selfRepository.findByName(nodeProviderName);
+		Self self = fetchSelf();
 
 		return self;
 	}
