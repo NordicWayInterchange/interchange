@@ -9,7 +9,10 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   strategy:
-    type: Recreate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
   replicas: 1
   selector:
     matchLabels:
