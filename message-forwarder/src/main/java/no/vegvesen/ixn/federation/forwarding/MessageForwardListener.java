@@ -3,7 +3,13 @@ package no.vegvesen.ixn.federation.forwarding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.*;
+import javax.jms.DeliveryMode;
+import javax.jms.ExceptionListener;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MessageForwardListener implements MessageListener, ExceptionListener {

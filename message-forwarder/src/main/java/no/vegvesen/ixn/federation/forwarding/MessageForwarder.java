@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.forwarding;
 
-import no.vegvesen.ixn.IxnContext;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,28 +7,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.jms.*;
+import javax.jms.JMSException;
 import javax.naming.NamingException;
-import javax.net.ssl.SSLContext;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 @Service
 public class MessageForwarder {
 
     private NeighbourFetcher neighbourFetcher;
-    private ForwarderProperties properties;
-    private final SSLContext sslContext;
+    private final ForwardingCreator forwardingCreator;
     private Map<String,MessageForwardListener> listeners;
     private Logger logger = LoggerFactory.getLogger(MessageForwarder.class);
 
 
     @Autowired
-    public MessageForwarder(NeighbourFetcher fetcher, SSLContext sslContext, ForwarderProperties properties) {
+    public MessageForwarder(NeighbourFetcher fetcher, ForwardingCreator forwardingCreator) {
         this.neighbourFetcher = fetcher;
-        this.properties = properties;
+        this.forwardingCreator = forwardingCreator;
         this.listeners = new HashMap<>();
-        this.sslContext = sslContext;
+
     }
 
     @Scheduled(fixedRate = 30000)
@@ -60,16 +61,7 @@ public class MessageForwarder {
             if (! listeners.containsKey(name)) {
                 try {
                     logger.info("Setting up ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
-                    MessageProducer producer = createProducerToRemote(ixn);
-
-                    IxnContext context = createContext(ixn);
-                    Connection connection = createConnection(context);
-                    MessageConsumer messageConsumer = createDestination(context, connection);
-
-                    MessageForwardListener messageListener = new MessageForwardListener(messageConsumer, producer);
-                    messageConsumer.setMessageListener(messageListener);
-                    connection.setExceptionListener(messageListener);
-
+                    MessageForwardListener messageListener = forwardingCreator.setupForwarding(ixn);
                     listeners.put(name, messageListener);
                 } catch (JMSException e) {
                     logger.warn("Tried to create connection to {}, but failed with exception.",name,e);
@@ -91,36 +83,7 @@ public class MessageForwarder {
         }
     }
 
-    public IxnContext createContext(Neighbour ixn) throws NamingException {
-        String readUrl = String.format("amqps://%s:%s",properties.getLocalIxnDomainName(),properties.getLocalIxnFederationPort());
-        String readQueue = ixn.getName();
-        logger.debug("Creating destination for messages on queue [{}] from [{}]", readQueue, readUrl);
-        return new IxnContext(readUrl, null, readQueue);
+    Map<String, MessageForwardListener> getListeners() {
+        return listeners;
     }
-
-    public Connection createConnection(IxnContext context) throws NamingException, JMSException {
-        Connection connection = context.createConnection(sslContext);
-        connection.start();
-        return connection;
-    }
-
-    public MessageConsumer createDestination(IxnContext context, Connection connection) throws JMSException, NamingException {
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        Destination queueR = context.getReceiveQueue();
-        return session.createConsumer(queueR);
-    }
-
-    public MessageProducer createProducerToRemote(Neighbour ixn) throws NamingException, JMSException {
-        logger.info("Connecting to {}", ixn.getName());
-        String writeUrl = ixn.getMessageChannelUrl();
-        logger.debug("Creating producer on url [{}]", writeUrl);
-        IxnContext writeContext = new IxnContext(writeUrl, properties.getRemoteWritequeue(), null);
-
-        Destination queueS = writeContext.getSendQueue();
-        Connection writeConnection = writeContext.createConnection(sslContext);
-        writeConnection.start();
-        Session writeSession = writeConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        return writeSession.createProducer(queueS);
-    }
-
 }

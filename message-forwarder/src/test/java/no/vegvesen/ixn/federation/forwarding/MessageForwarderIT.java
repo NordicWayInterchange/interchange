@@ -101,7 +101,8 @@ public class MessageForwarderIT extends QpidDockerBaseIT {
 		properties.setLocalIxnFederationPort("" + localMessagePort);
 		properties.setLocalIxnDomainName("localhost");
 		properties.setRemoteWritequeue("fedEx");
-		MessageForwarder messageForwarder = new MessageForwarder(fetcher, localSslContext(), properties);
+		ForwardingCreator forwardingCreator = new ForwardingCreator(properties,localSslContext());
+		MessageForwarder messageForwarder = new MessageForwarder(fetcher, forwardingCreator);
 		messageForwarder.runSchedule();
 
 		String sendUrl = String.format("amqps://localhost:%s", localMessagePort);
@@ -148,7 +149,8 @@ public class MessageForwarderIT extends QpidDockerBaseIT {
 		properties.setLocalIxnFederationPort("" + localMessagePort);
 		properties.setLocalIxnDomainName("localhost");
 		properties.setRemoteWritequeue("fedEx");
-		MessageForwarder messageForwarder = new MessageForwarder(fetcher, localSslContext(), properties);
+		ForwardingCreator forwardingCreator = new ForwardingCreator(properties,localSslContext());
+		MessageForwarder messageForwarder = new MessageForwarder(fetcher,forwardingCreator);
 		messageForwarder.runSchedule();
 
 		String localMessagingUrl = String.format("amqps://localhost:%s", localMessagePort);
