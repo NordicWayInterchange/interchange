@@ -23,6 +23,8 @@ spec:
         component: qpid
         release: {{ .Release.Name }}
     spec:
+      strategy:
+        type: Recreate
       containers:
       - name: qpid
         image: {{ .Values.qpid.image | quote }}
