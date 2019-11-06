@@ -8,6 +8,8 @@ metadata:
     component: qpid
     release: {{ .Release.Name }}
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -23,8 +25,6 @@ spec:
         component: qpid
         release: {{ .Release.Name }}
     spec:
-      strategy:
-        type: Recreate
       containers:
       - name: qpid
         image: {{ .Values.qpid.image | quote }}
