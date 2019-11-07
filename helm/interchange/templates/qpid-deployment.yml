@@ -9,10 +9,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -46,8 +43,12 @@ spec:
         - name: CA_CERTIFICATE_FILE
           value: /secure/{{ .Values.qpid.ca_certificate_file }}
         - name: VHOST_FILE
+          value: /work/default/config/default.json
+        - name: STATIC_VHOST_FILE
           value: /config/default.json
         - name: GROUPS_FILE
+          value: /work/default/config/groups
+        - name: STATIC_GROUPS_FILE
           value: /config/groups
         - name: PASSWD_FILE
           value: /config/passwd
@@ -57,7 +58,11 @@ spec:
         - name: secure
           mountPath: /secure
         - name: storage
+          mountPath: /work/default
+          subPath: default
+        - name: storage
           mountPath: /work/{{ required "must provide .Values.external_name" .Values.external_name }}
+          subPath: {{ required "must provide .Values.external_name" .Values.external_name }}
         readinessProbe:
           initialDelaySeconds: 5
           tcpSocket:
