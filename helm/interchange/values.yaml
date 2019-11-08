@@ -1,6 +1,9 @@
 ## the name which will be used to address the QPID server externally
 # external_name: test.nordic-way.io
 
+self:
+  static_external_ip: false # supply an IP address here, not a boolean
+
 interchange:
   image: eu.gcr.io/nordic-way-aad182cc/interchangenode:latest
 
