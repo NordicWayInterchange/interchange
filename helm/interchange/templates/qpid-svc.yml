@@ -43,6 +43,6 @@ spec:
   - name: amqps
     port: 5671
     targetPort: amqps
-  {{- if .Values.self.static_external_ip }}
+  {{- if and .Values.self (.Values.self.static_external_ip) }}
   loadBalancerIP: {{ .Values.self.static_external_ip }}
   {{- end -}}
