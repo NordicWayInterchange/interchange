@@ -1,14 +1,27 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import org.apache.qpid.jms.message.JmsTextMessage;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import javax.jms.*;
 
 /**
  * Verifies access control lists where username comes from the common name (CN) of the user certificate.
  */
-public class AccessControlIT {
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@ContextConfiguration(initializers = {AccessControlIT.Initializer.class})
+public class AccessControlIT extends DockerBaseIT {
 
 	// Keystore and trust store files for integration testing.
 	private static final String JKS_KING_HARALD_P_12 = "jks/king_harald.p12";
@@ -19,7 +32,31 @@ public class AccessControlIT {
 	private static final String SE_OUT = "SE-out";
 	private static final String NO_OUT = "NO-out";
 
-	private static final String URI = "amqps://localhost:62671";
+	private static String URI;
+
+	@ClassRule
+	public static GenericContainer localContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+
+	@ClassRule
+	public static GenericContainer postgisContainer = getPostgisContainer("interchangenode/src/test/docker/postgis");
+
+
+	static class Initializer
+			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+			Integer amqpsPort = localContainer.getMappedPort(AMQPS_PORT);
+			URI = "amqps://localhost:" + amqpsPort;
+			TestPropertyValues.of(
+					"amqphub.amqp10jms.remote-url=" + URI,
+					"amqphub.amqp10jms.username=interchange",
+					"amqphub.amqp10jms.password=12345678",
+					"spring.datasource.url: jdbc:postgresql://localhost:" + postgisContainer.getMappedPort(JDBC_PORT) + "/geolookup",
+					"spring.datasource.username: geolookup",
+					"spring.datasource.password: geolookup",
+					"spring.datasource.driver-class-name: org.postgresql.Driver"
+			).applyTo(configurableApplicationContext.getEnvironment());
+		}
+	}
 
 
 	@Test(expected = JMSSecurityException.class)
