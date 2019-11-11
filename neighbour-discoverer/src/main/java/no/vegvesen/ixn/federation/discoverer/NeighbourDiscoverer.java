@@ -400,7 +400,8 @@ public class NeighbourDiscoverer {
 
 					if (calculatedSubscriptionForNeighbour.equals(neighbour.getFedIn().getSubscriptions())) {
 						// The subscription request we want to post is the same as what we already subscribe to. Skip.
-						return;
+                        logger.info("The calculated subscription requests are the same as neighbour {}'s subscriptiona. Skipping",neighbour.getName());
+						continue;
 					}
 
 					// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
