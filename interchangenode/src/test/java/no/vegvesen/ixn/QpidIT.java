@@ -1,13 +1,20 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.messaging.CountIxnMessageConsumer;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,21 +22,42 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Verifies that the InterchangeApp routes messages from the onramp via the exchange and further to the out-queues.
  * This test is run in a separate qpid-server in order to count received messages from one set of tests.
  * It reuses the spring wiring of jms resources from the interchange app to send and receive messages in the tests.
- * The amqp-url, username and password is specified in the application-63.properties.
  *
- * @See AccessControlIT uses separate user client connections.
+ * @see no.vegvesen.ixn.AccessControlIT uses separate user client connections.
  */
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("63")
-public class QpidIT {
+@ContextConfiguration(initializers = {QpidIT.Initializer.class})
+public class QpidIT extends DockerBaseIT {
 
     private static final long RECEIVE_TIMEOUT = 2000;
     private static final String NO_OUT = "NO-out";
     private static final String SE_OUT = "SE-out";
     private static final String DLQUEUE = "dlqueue";
     private static final String NO_OBSTRUCTION = "NO-Obstruction";
+
+	@ClassRule
+	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+
+	@ClassRule
+	public static GenericContainer postgisContainer = getPostgisContainer("interchangenode/src/test/docker/postgis");
+
+	static class Initializer
+			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+			TestPropertyValues.of(
+					"amqphub.amqp10jms.remote-url=amqp://localhost:" + qpidContainer.getMappedPort(AMQP_PORT),
+					"amqphub.amqp10jms.username=interchange",
+					"amqphub.amqp10jms.password=12345678",
+					"spring.datasource.url: jdbc:postgresql://localhost:" + postgisContainer.getMappedPort(JDBC_PORT) + "/geolookup",
+					"spring.datasource.username: geolookup",
+					"spring.datasource.password: geolookup",
+					"spring.datasource.driver-class-name: org.postgresql.Driver"
+			).applyTo(configurableApplicationContext.getEnvironment());
+		}
+	}
+
 
     @Autowired
     TestOnrampMessageProducer producer;

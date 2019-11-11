@@ -15,7 +15,7 @@ import javax.net.ssl.SSLContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-public class MessageForwardListenerIT extends QpidDockerBaseIT {
+public class MessageForwardListenerIT extends DockerBaseIT {
 
 	private static final SSLContext SSL_CONTEXT = TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks");
 	private static Logger logger = LoggerFactory.getLogger(MessageForwardListenerIT.class);

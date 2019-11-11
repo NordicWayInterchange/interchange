@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.messaging;
 
-import no.vegvesen.ixn.federation.forwarding.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.model.IxnMessage;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -25,7 +25,7 @@ import java.util.Collections;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {InterchangeAppIT.Initializer.class})
-public class InterchangeAppIT extends QpidDockerBaseIT {
+public class InterchangeAppIT extends DockerBaseIT {
 
 	@ClassRule
 	public static GenericContainer localContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");

@@ -9,15 +9,15 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class QpidDockerBaseIT {
-	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
+public class DockerBaseIT {
+	private static Logger logger = LoggerFactory.getLogger(DockerBaseIT.class);
 	protected static final int HTTPS_PORT = 443;
 	protected static final int AMQPS_PORT = 5671;
 	protected static final int AMQP_PORT = 5672;
+	protected static final int JDBC_PORT = 5432;
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";
-	private static final Path QPID_DOCKER_PATH = getQpidDockerPath();
 
-	private static Path getQpidDockerPath() {
+	private static Path getFolderPath(String dockerFolderName) {
 		String projectFolder = "interchange";
 
 		String ciWorkdir = System.getenv(CI_WORKDIR);
@@ -29,7 +29,7 @@ public class QpidDockerBaseIT {
 		}
 
 		Path run = Paths.get(".").toAbsolutePath();
-		logger.debug("Resolving qpid path from run path: [{}]", run.toAbsolutePath().toString());
+		logger.debug("Resolving path to docker image folder [{}] from run path: [{}]", dockerFolderName, run.toAbsolutePath().toString());
 		Path projectRoot = null;
 		while (projectRoot == null && run.getParent() != null) {
 			if (run.endsWith(projectFolder)) {
@@ -38,16 +38,16 @@ public class QpidDockerBaseIT {
 			run = run.getParent();
 		}
 		if (projectRoot != null) {
-			Path qpid = projectRoot.resolve("qpid");
-			logger.debug("Resolved qpid path [{}]", qpid.toAbsolutePath().toString());
-			return qpid;
+			Path dockerFilePath = projectRoot.resolve(dockerFolderName);
+			logger.debug("Resolved docker image folder [{}] to path [{}]", dockerFolderName, dockerFilePath.toAbsolutePath().toString());
+			return dockerFilePath;
 		}
-		throw new RuntimeException("Could not resolve path to qpid docker folder in parent folder of " + run.toString());
+		throw new RuntimeException("Could not resolve path to docker folder " + dockerFolderName + " in parent folder of " + run.toString());
 	}
 
 	protected static GenericContainer getQpidContainer(String configPathFromClasspath, String jksPathFromClasspath, final String caCertFile, final String serverCertFile, final String serverKeyFile) {
 		return new GenericContainer(
-				new ImageFromDockerfile().withFileFromPath(".", QPID_DOCKER_PATH))
+				new ImageFromDockerfile().withFileFromPath(".", getFolderPath("qpid")))
 				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
 				.withClasspathResourceMapping(jksPathFromClasspath, "/jks", BindMode.READ_ONLY)
 				.withEnv("PASSWD_FILE", "/config/passwd")
@@ -60,4 +60,14 @@ public class QpidDockerBaseIT {
 				.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/" + serverKeyFile)
 				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT);
 	}
+
+	protected static GenericContainer getPostgisContainer(String dockerFile) {
+		return new GenericContainer(
+				new ImageFromDockerfile().withFileFromPath(".", getFolderPath(dockerFile)))
+				.withEnv("POSTGRES_USER", "geolookup")
+				.withEnv("POSTGRES_PASSWORD", "geolookup")
+				.withEnv("POSTGRES_DB", "geolookup")
+				.withExposedPorts(JDBC_PORT);
+	}
+
 }
