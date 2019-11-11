@@ -30,13 +30,20 @@ public class InterchangeAppIT extends DockerBaseIT {
 	@ClassRule
 	public static GenericContainer localContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 
+	@ClassRule
+	public static GenericContainer postgisContainer = getPostgisContainer("interchangenode/src/test/docker/postgis");
+
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 			TestPropertyValues.of(
 					"amqphub.amqp10jms.remote-url=amqp://localhost:" + localContainer.getMappedPort(AMQP_PORT),
 					"amqphub.amqp10jms.username=interchange",
-					"amqphub.amqp10jms.password=12345678"
+					"amqphub.amqp10jms.password=12345678",
+					"spring.datasource.url: jdbc:postgresql://localhost:" + postgisContainer.getMappedPort(JDBC_PORT) + "/geolookup",
+					"spring.datasource.username: geolookup",
+					"spring.datasource.password: geolookup",
+					"spring.datasource.driver-class-name: org.postgresql.Driver"
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
