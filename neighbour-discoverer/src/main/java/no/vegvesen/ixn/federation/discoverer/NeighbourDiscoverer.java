@@ -293,9 +293,6 @@ public class NeighbourDiscoverer {
 					neighbour.setFedIn(postResponseSubscriptionRequest);
 					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
-					// Update discovery state
-					discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
-					discoveryStateRepository.save(discoveryState);
 
 					logger.info("Successfully posted subscription request to neighbour in graceful backoff.");
 
@@ -316,6 +313,9 @@ public class NeighbourDiscoverer {
 				}
 			}
 		}
+		// Update discovery state
+		discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+		discoveryStateRepository.save(discoveryState);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
@@ -346,9 +346,9 @@ public class NeighbourDiscoverer {
 			return; // We have nothing to post to our neighbour
 		}
 
-		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
+		DiscoveryState discoveryState = getDiscoveryState();
 
-		if(discoveryState == null || discoveryState.getLastSubscriptionRequest() == null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest()))){
+		if(discoveryState.getLastSubscriptionRequest() == null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest()))){
 			// Either first post or an update.
 			// Local Subscriptions have been updated since last time performed the subscription request.
 			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
@@ -389,7 +389,7 @@ public class NeighbourDiscoverer {
 						neighbourRepository.save(neighbour);
 						logger.info("Subscription to neighbour is empty. Nothing to tear down.");
 						MDCUtil.removeLogVariables();
-						return;
+						continue;
 					} else {
 						// We have an existing subscription to the neighbour, tear it down
 						discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
@@ -414,10 +414,6 @@ public class NeighbourDiscoverer {
 					neighbour.getFedIn().setSubscriptions(subscriptionRequestResponse.getSubscriptions());
 					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
-					// Successful subscription request, update discovery state subscription request timestamp.
-					discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
-					discoveryStateRepository.save(discoveryState);
-
 					logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
 
 				} catch (SubscriptionRequestException e) {
@@ -434,6 +430,10 @@ public class NeighbourDiscoverer {
 				}
 			}
 		}
+		// Successful subscription request, update discovery state subscription request timestamp.
+		discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+		discoveryStateRepository.save(discoveryState);
+
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
