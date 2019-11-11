@@ -6,9 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import javax.jms.*;
 import javax.naming.NamingException;
@@ -20,22 +18,10 @@ import static org.mockito.Mockito.mock;
 public class MessageForwardListenerIT extends QpidDockerBaseIT {
 
 	private static final SSLContext SSL_CONTEXT = TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks");
-	static Logger logger = LoggerFactory.getLogger(MessageForwardListenerIT.class);
+	private static Logger logger = LoggerFactory.getLogger(MessageForwardListenerIT.class);
 
 	@Rule
-	public GenericContainer localContainer = new GenericContainer(
-			new ImageFromDockerfile().withFileFromPath(".", QPID_DOCKER_PATH))
-			.withClasspathResourceMapping("docker/localhost", "/config", BindMode.READ_ONLY)
-			.withClasspathResourceMapping("jks", "/jks", BindMode.READ_ONLY)
-			.withEnv("PASSWD_FILE", "/config/passwd")
-			.withEnv("STATIC_GROUPS_FILE", "/config/groups")
-			.withEnv("STATIC_VHOST_FILE", "/config/vhost.json")
-			.withEnv("VHOST_FILE", "/work/default/config/default.json")
-			.withEnv("GROUPS_FILE", "/work/default/config/groups")
-			.withEnv("CA_CERTIFICATE_FILE", "/jks/my_ca.crt")
-			.withEnv("SERVER_CERTIFICATE_FILE", "/jks/localhost.crt")
-			.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/localhost.key")
-			.withExposedPorts(AMQPS_PORT, HTTPS_PORT);
+	public GenericContainer localContainer = getQpidContainer("docker/localhost", "jks");
 
 	@Test
 	public void testStopContainerTriggersConnectionExceptionListener() throws JMSException, NamingException {
