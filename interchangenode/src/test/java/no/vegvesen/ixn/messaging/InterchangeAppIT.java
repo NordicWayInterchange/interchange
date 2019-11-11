@@ -1,27 +1,45 @@
 package no.vegvesen.ixn.messaging;
 
+import no.vegvesen.ixn.federation.forwarding.QpidDockerBaseIT;
 import no.vegvesen.ixn.model.IxnMessage;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.util.Collections;
 
 /**
  * Verifies that it is possible to send messages to the amqp-server.
  * It reuses the spring wiring of jms resources from the interchange app to send and receive messages in the tests.
- * This test is run with profile "62" and uses ports in the 62...-series.
- * The amqp-url, username and password is specified in the application-62.properties.
  *
- * @See AccessControlIT uses separate user client connections.
+ * @see no.vegvesen.ixn.AccessControlIT uses separate user client connections.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("62")
-public class InterchangeAppIT {
+@ContextConfiguration(initializers = {InterchangeAppIT.Initializer.class})
+public class InterchangeAppIT extends QpidDockerBaseIT {
+
+	@ClassRule
+	public static GenericContainer localContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+
+	static class Initializer
+			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+			TestPropertyValues.of(
+					"amqphub.amqp10jms.remote-url=amqp://localhost:" + localContainer.getMappedPort(AMQP_PORT),
+					"amqphub.amqp10jms.username=interchange",
+					"amqphub.amqp10jms.password=12345678"
+			).applyTo(configurableApplicationContext.getEnvironment());
+		}
+	}
 
 	@Autowired
 	TestIxnMessageConsumer consumer;

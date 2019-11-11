@@ -11,8 +11,9 @@ import java.nio.file.Paths;
 
 public class QpidDockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
-	static final int HTTPS_PORT = 443;
-	static final int AMQPS_PORT = 5671;
+	protected static final int HTTPS_PORT = 443;
+	protected static final int AMQPS_PORT = 5671;
+	protected static final int AMQP_PORT = 5672;
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";
 	private static final Path QPID_DOCKER_PATH = getQpidDockerPath();
 
@@ -44,7 +45,7 @@ public class QpidDockerBaseIT {
 		throw new RuntimeException("Could not resolve path to qpid docker folder in parent folder of " + run.toString());
 	}
 
-	protected GenericContainer getQpidContainer(String configPathFromClasspath, String jksPathFromClasspath) {
+	protected static GenericContainer getQpidContainer(String configPathFromClasspath, String jksPathFromClasspath, final String caCertFile, final String serverCertFile, final String serverKeyFile) {
 		return new GenericContainer(
 				new ImageFromDockerfile().withFileFromPath(".", QPID_DOCKER_PATH))
 				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
@@ -54,9 +55,9 @@ public class QpidDockerBaseIT {
 				.withEnv("STATIC_VHOST_FILE", "/config/vhost.json")
 				.withEnv("VHOST_FILE", "/work/default/config/default.json")
 				.withEnv("GROUPS_FILE", "/work/default/config/groups")
-				.withEnv("CA_CERTIFICATE_FILE", "/jks/my_ca.crt")
-				.withEnv("SERVER_CERTIFICATE_FILE", "/jks/localhost.crt")
-				.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/localhost.key")
-				.withExposedPorts(AMQPS_PORT, HTTPS_PORT);
+				.withEnv("CA_CERTIFICATE_FILE", "/jks/" + caCertFile)
+				.withEnv("SERVER_CERTIFICATE_FILE", "/jks/" + serverCertFile)
+				.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/" + serverKeyFile)
+				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT);
 	}
 }

@@ -21,7 +21,7 @@ public class MessageForwardListenerIT extends QpidDockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(MessageForwardListenerIT.class);
 
 	@Rule
-	public GenericContainer localContainer = getQpidContainer("docker/localhost", "jks");
+	public GenericContainer localContainer = getQpidContainer("docker/localhost", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	@Test
 	public void testStopContainerTriggersConnectionExceptionListener() throws JMSException, NamingException {

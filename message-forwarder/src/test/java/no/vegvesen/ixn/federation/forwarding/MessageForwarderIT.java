@@ -38,13 +38,13 @@ public class MessageForwarderIT extends QpidDockerBaseIT {
 	}
 
 	@Rule
-	public GenericContainer localContainer = getQpidContainer("docker/localhost", "jks");
+	public GenericContainer localContainer = getQpidContainer("docker/localhost", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	@Rule
-	public GenericContainer remoteContainer = getQpidContainer("docker/remote", "jks");
+	public GenericContainer remoteContainer = getQpidContainer("docker/remote", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	@Rule
-	public GenericContainer remoteContainerTwo = getQpidContainer("docker/remote", "jks");
+	public GenericContainer remoteContainerTwo = getQpidContainer("docker/remote", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	private SSLContext localSslContext() {
 		return TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks");
