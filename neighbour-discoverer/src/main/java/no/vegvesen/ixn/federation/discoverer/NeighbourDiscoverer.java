@@ -375,16 +375,18 @@ public class NeighbourDiscoverer {
 
 				Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
 
+				SubscriptionRequest fedIn = neighbour.getFedIn();
+				Set<Subscription> fedInSubscriptions = fedIn.getSubscriptions();
 				if (calculatedSubscriptionForNeighbour.isEmpty()) {
 
 					// No overlap between neighbour capabilities and local service provider subscriptions.
 					// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
-					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
+					fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
 
 					logger.info("The calculated subscription request for neighbour {} was empty. Setting Subscription status in fedIn to NO_OVERLAP", neighbour.getName());
 
 					// Decide if we should post empty subscription request or not.
-					if (neighbour.getFedIn().getSubscriptions().isEmpty()) {
+					if (fedInSubscriptions.isEmpty()) {
 						// No existing subscription to this neighbour, nothing to tear down
 						neighbourRepository.save(neighbour);
 						logger.info("Subscription to neighbour is empty. Nothing to tear down.");
@@ -392,15 +394,15 @@ public class NeighbourDiscoverer {
 						continue;
 					} else {
 						// We have an existing subscription to the neighbour, tear it down
-						discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
+						discoveringNeighbour.setSubscriptionRequest(emptySubscriptionRequest());
 						logger.info("The calculated subscription request is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.", neighbour.getName());
 					}
 				} else {
 					// Calculated subscription is not empty, post as normal
 
-					if (calculatedSubscriptionForNeighbour.equals(neighbour.getFedIn().getSubscriptions())) {
+					if (calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 						// The subscription request we want to post is the same as what we already subscribe to. Skip.
-                        logger.info("The calculated subscription requests are the same as neighbour {}'s subscriptiona. Skipping",neighbour.getName());
+                        logger.info("The calculated subscription requests are the same as neighbour {}'s subscription. Skipping",neighbour.getName());
 						continue;
 					}
 
@@ -412,13 +414,13 @@ public class NeighbourDiscoverer {
 				try {
 					// Throws SubscriptionRequestException if unsuccessful
 					SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
-					neighbour.getFedIn().setSubscriptions(subscriptionRequestResponse.getSubscriptions());
-					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+					fedIn.setSubscriptions(subscriptionRequestResponse.getSubscriptions());
+					fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
 					logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
 
 				} catch (SubscriptionRequestException e) {
-					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
+					fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
 					neighbour.setBackoffAttempts(0);
 					neighbour.setBackoffStart(LocalDateTime.now());
 
@@ -435,6 +437,10 @@ public class NeighbourDiscoverer {
 		discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
 		discoveryStateRepository.save(discoveryState);
 
+	}
+
+	private static SubscriptionRequest emptySubscriptionRequest() {
+		return new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")

@@ -11,6 +11,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name="self", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_self_name"))
@@ -89,31 +90,61 @@ public class Self {
 
 	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
-		Set<Subscription> calculatedSubscriptions = new HashSet<>();
-			for (DataType neighbourDataType : neighbour.getCapabilities().getDataTypes()) {
-				for (Subscription localSubscription : getLocalSubscriptions()) {
-
-                    try {
-						// Trows InvalidSelectorException if selector is invalid or SelectorAlwaysTrueException if selector is always true
-						String selector = localSubscription.getSelector();
-						logger.info("Matching local subscription {}",selector);
-						if (CapabilityMatcher.matches(neighbourDataType, selector)) {
-
-							// Subscription to be returned only has selector set.
-							Subscription matchingSubscription = new Subscription();
-							matchingSubscription.setSelector(selector);
-
-							calculatedSubscriptions.add(matchingSubscription);
-						}
-                    } catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
-                        logger.error("Error matching neighbour data type with local subscription. Returning empty set of subscriptions.", e);
-                    }
-				}
-			}
+		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
+		Set<Subscription> localSubscriptions = getLocalSubscriptions();
+		Set<Subscription> calculatedSubscriptions = calculateCommonInterest(neighbourCapsDataTypes, localSubscriptions);
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;
 
 	}
+
+	public Set<Subscription> calculateCommonInterest(Set<DataType> neighbourCapsDataTypes, Set<Subscription> localSubscriptions) {
+		Set<Subscription> calculatedSubscriptions = new HashSet<>();
+		for (DataType neighbourDataType : neighbourCapsDataTypes) {
+			for (Subscription localSubscription : localSubscriptions) {
+				try {
+					// Trows InvalidSelectorException if selector is invalid or SelectorAlwaysTrueException if selector is always true
+					String selector = localSubscription.getSelector();
+					logger.info("Matching local subscription {}",selector);
+					if (CapabilityMatcher.matches(neighbourDataType, selector)) {
+
+						// Subscription to be returned only has selector set.
+						Subscription matchingSubscription = new Subscription();
+						matchingSubscription.setSelector(selector);
+
+						calculatedSubscriptions.add(matchingSubscription);
+					}
+                } catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
+					logger.error("Error matching neighbour data type with local subscription. Returning empty set of subscriptions.", e);
+                }
+			}
+		}
+		return calculatedSubscriptions;
+	}
+
+	public static Set<Subscription> calculateCommonInterestSubscriptions(Set<DataType> neighbourCapsDataTypes, Set<String> localSelectors) {
+		Set<Subscription> calculatedSubscriptions = new HashSet<>();
+		for (DataType neighbourDataType : neighbourCapsDataTypes) {
+			for (String selector : localSelectors) {
+				try {
+					// Trows InvalidSelectorException if selector is invalid or SelectorAlwaysTrueException if selector is always true
+					logger.info("Matching local subscription {}",selector);
+					if (CapabilityMatcher.matches(neighbourDataType, selector)) {
+
+						// Subscription to be returned only has selector set.
+						Subscription matchingSubscription = new Subscription();
+						matchingSubscription.setSelector(selector);
+
+						calculatedSubscriptions.add(matchingSubscription);
+					}
+                } catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
+					logger.error("Error matching neighbour data type with local subscription. Skipping selector {}",selector, e);
+                }
+			}
+		}
+		return calculatedSubscriptions;
+	}
+
 
 	@Override
 	public String toString() {
