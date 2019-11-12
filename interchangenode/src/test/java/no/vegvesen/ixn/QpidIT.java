@@ -1,9 +1,7 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
-import no.vegvesen.ixn.messaging.CountIxnMessageConsumer;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +14,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.naming.NamingException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -23,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * This test is run in a separate qpid-server in order to count received messages from one set of tests.
  * It reuses the spring wiring of jms resources from the interchange app to send and receive messages in the tests.
  *
- * @see no.vegvesen.ixn.AccessControlIT uses separate user client connections.
  */
 
 @RunWith(SpringRunner.class)
@@ -36,6 +37,7 @@ public class QpidIT extends DockerBaseIT {
     private static final String SE_OUT = "SE-out";
     private static final String DLQUEUE = "dlqueue";
     private static final String NO_OBSTRUCTION = "NO-Obstruction";
+	private static String AMQP_URL;
 
 	@ClassRule
 	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
@@ -46,8 +48,9 @@ public class QpidIT extends DockerBaseIT {
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+			AMQP_URL = "amqp://localhost:" + qpidContainer.getMappedPort(AMQP_PORT);
 			TestPropertyValues.of(
-					"amqphub.amqp10jms.remote-url=amqp://localhost:" + qpidContainer.getMappedPort(AMQP_PORT),
+					"amqphub.amqp10jms.remote-url=" + AMQP_URL,
 					"amqphub.amqp10jms.username=interchange",
 					"amqphub.amqp10jms.password=12345678",
 					"spring.datasource.url: jdbc:postgresql://localhost:" + postgisContainer.getMappedPort(JDBC_PORT) + "/geolookup",
@@ -61,18 +64,6 @@ public class QpidIT extends DockerBaseIT {
 
     @Autowired
     TestOnrampMessageProducer producer;
-
-    @Autowired
-    CountIxnMessageConsumer consumer;
-
-    @Before
-    public void before()throws Exception{
-        Thread.sleep(RECEIVE_TIMEOUT);
-        consumer.emptyQueue(NO_OUT);
-        consumer.emptyQueue(NO_OBSTRUCTION);
-        consumer.emptyQueue(SE_OUT);
-        consumer.emptyQueue(DLQUEUE);
-    }
 
     public void sendMessageOneCountry(String messageId){
         long systemTime = System.currentTimeMillis();
@@ -120,33 +111,42 @@ public class QpidIT extends DockerBaseIT {
     @Test
     public void messageToNorwayGoesToNorwayQueue() throws Exception{
         sendMessageOneCountry("1"); // NO
-        Thread.sleep(RECEIVE_TIMEOUT);
+		MessageConsumer consumer = createConsumer(NO_OUT);
         // The queue should have one message
-        assertThat(consumer.numberOfMessages(NO_OUT)).isEqualTo(1);
+        assertThat(consumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		consumer.close();
     }
-
 
     @Test
     public void messageWithTwoCountriesGoesToTwoQueues() throws Exception{
         sendMessageTwoCountries("3"); // NO and SE
-        Thread.sleep(RECEIVE_TIMEOUT);
-        // Each queue should have one message
-        assertThat(consumer.numberOfMessages(SE_OUT)).isEqualTo(1);
-        assertThat(consumer.numberOfMessages(NO_OUT)).isEqualTo(1);
+		MessageConsumer seConsumer = createConsumer(SE_OUT);
+		MessageConsumer noConsumer = createConsumer(NO_OUT);
+		// Each queue should have one message
+		assertThat(noConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		assertThat(seConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		noConsumer.close();
+		seConsumer.close();
     }
 
-    @Test
+	private MessageConsumer createConsumer(String queueName) throws NamingException, JMSException {
+		return new BasicAuthSink(AMQP_URL, queueName, "interchange", "12345678").createConsumer();
+	}
+
+	@Test
     public void messageWithCountryAndSituationGoesToRightQueue() throws Exception{
         sendMessageOneCountry("2"); // NO and Obstruction
-        Thread.sleep(RECEIVE_TIMEOUT);
-        assertThat(consumer.numberOfMessages(NO_OUT)).isEqualTo(1);
+		MessageConsumer noConsumer = createConsumer(NO_OBSTRUCTION);
+		assertThat(noConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		noConsumer.close();
     }
 
     @Test
     public void badMessageGoesDoDeadLetterQueue() throws Exception{
         sendBadMessage("4");
-        Thread.sleep(RECEIVE_TIMEOUT);
         // Expecting one message on dlqueue because message is invalid.
-        assertThat(consumer.numberOfMessages(DLQUEUE)).isEqualTo(1);
+		MessageConsumer dlConsumer = createConsumer(DLQUEUE);
+		assertThat(dlConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		dlConsumer.close();
     }
 }

@@ -16,8 +16,7 @@ import java.util.Properties;
 
 public class Sink implements MessageListener, AutoCloseable {
 
-
-    public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 
         String propertiesFile = "/sink.properties";
         Properties props = new Properties();
@@ -47,10 +46,10 @@ public class Sink implements MessageListener, AutoCloseable {
         sink.start();
     }
 
-    private final String url;
+    protected final String url;
     private final String queueName;
     private final SSLContext sslContext;
-    private Connection connection;
+    protected Connection connection;
 
     public Sink(String url, String queueName, SSLContext sslContext) {
         this.url = url;
@@ -65,12 +64,20 @@ public class Sink implements MessageListener, AutoCloseable {
     }
 
 	public MessageConsumer createConsumer() throws NamingException, JMSException {
-		IxnContext ixnContext = new IxnContext(url,null,queueName);
-		connection = ixnContext.createConnection(sslContext);
+		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName);
+		createConnection(ixnContext);
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		return session.createConsumer(destination);
+	}
+
+	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
+		if (sslContext == null) {
+			ixnContext.createConnection();
+		} else {
+			connection = ixnContext.createConnection(sslContext);
+		}
 	}
 
 	@Override
@@ -86,10 +93,10 @@ public class Sink implements MessageListener, AutoCloseable {
 				}
 			}
 			System.out.println("** Message received **");
-			Enumeration<String> messageNames =  message.getPropertyNames();
+			Enumeration messageNames =  message.getPropertyNames();
 
 			while (messageNames.hasMoreElements()) {
-				String messageName = messageNames.nextElement();
+				String messageName = (String) messageNames.nextElement();
 				String value = message.getStringProperty(messageName);
 				System.out.println(String.format("%s:%s",messageName,value));
 			}
