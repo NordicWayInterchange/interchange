@@ -4,6 +4,8 @@ import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 
 import javax.jms.*;
@@ -12,6 +14,8 @@ import javax.jms.*;
  * Verifies access control lists where username comes from the common name (CN) of the user certificate.
  */
 public class AccessControlIT extends DockerBaseIT {
+
+	private static Logger logger = LoggerFactory.getLogger(AccessControlIT.class);
 
 	// Keystore and trust store files for integration testing.
 	private static final String JKS_KING_HARALD_P_12 = "jks/king_harald.p12";
@@ -26,7 +30,9 @@ public class AccessControlIT extends DockerBaseIT {
 	public static GenericContainer localContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 
 	private String getQpidURI() {
-		return "amqps://localhost:" + localContainer.getMappedPort(AMQPS_PORT);
+		String url = "amqps://localhost:" + localContainer.getMappedPort(AMQPS_PORT);
+		logger.info("connection string to local message broker {}", url);
+		return url;
 	}
 
 	@Test(expected = JMSSecurityException.class)
@@ -105,6 +111,7 @@ public class AccessControlIT extends DockerBaseIT {
 
 		Connection connection = context.createConnection(TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		connection.start();
+		connection.close();
 	}
 
 }
