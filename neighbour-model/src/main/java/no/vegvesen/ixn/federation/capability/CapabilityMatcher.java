@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class CapabilityMatcher {
@@ -132,4 +134,24 @@ public class CapabilityMatcher {
 			throw new SelectorAlwaysTrueException("Cannot subscribe to a filter that is always true: " + filter.getSelector());
 		}
 	}
+
+	public static Set<String> calculateCommonInterestSelectors(Set<DataType> dataTypes, Set<String> selectors) {
+		Set<String> calculatedSelectors = new HashSet<>();
+		for (DataType neighbourDataType : dataTypes) {
+			for (String selector : selectors) {
+				try {
+					// Trows InvalidSelectorException if selector is invalid or SelectorAlwaysTrueException if selector is always true
+					logger.info("Matching local subscription {}",selector);
+					if (matches(neighbourDataType, selector)) {
+					    calculatedSelectors.add(selector);
+
+					}
+                } catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
+					logger.error("Error matching neighbour data type with local subscription. Skipping selector {}",selector, e);
+                }
+			}
+		}
+		return calculatedSelectors;
+	}
+
 }
