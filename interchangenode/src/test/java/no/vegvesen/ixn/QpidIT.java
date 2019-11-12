@@ -1,7 +1,9 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
+import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
+import no.vegvesen.ixn.model.IxnMessage;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,16 +17,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Verifies that the InterchangeApp routes messages from the onramp via the exchange and further to the out-queues.
- * This test is run in a separate qpid-server in order to count received messages from one set of tests.
- * It reuses the spring wiring of jms resources from the interchange app to send and receive messages in the tests.
- *
+ * The tests must receive messages from all the queues messages gets routed to in order to avoid bleeding between tests.
  */
 
 @RunWith(SpringRunner.class)
@@ -64,6 +66,10 @@ public class QpidIT extends DockerBaseIT {
 
     @Autowired
     TestOnrampMessageProducer producer;
+
+	@Autowired
+	IxnMessageProducer ixnMessageProducer;
+
 
     public void sendMessageOneCountry(String messageId){
         long systemTime = System.currentTimeMillis();
@@ -136,7 +142,9 @@ public class QpidIT extends DockerBaseIT {
 	@Test
     public void messageWithCountryAndSituationGoesToRightQueue() throws Exception{
         sendMessageOneCountry("2"); // NO and Obstruction
-		MessageConsumer noConsumer = createConsumer(NO_OBSTRUCTION);
+		MessageConsumer noObstrConsumer = createConsumer(NO_OBSTRUCTION);
+		assertThat(noObstrConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		MessageConsumer noConsumer = createConsumer(NO_OUT);
 		assertThat(noConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
 		noConsumer.close();
     }
@@ -149,4 +157,28 @@ public class QpidIT extends DockerBaseIT {
 		assertThat(dlConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
 		dlConsumer.close();
     }
+
+	@Test
+	public void sendInvalidMessageBecauseItHasNoMessageBody() throws JMSException, NamingException {
+		long currentTimeMillis = System.currentTimeMillis();
+		long expiration = currentTimeMillis + 60000;
+		IxnMessage message = new IxnMessage(
+				"The great traffic testers",
+				"quest",
+				expiration,
+				63.0f,
+				10.0f,
+				Collections.singletonList("traffic jam"),
+				null);
+		message.setCountries(Collections.singletonList("no"));
+		ixnMessageProducer.sendMessage("onramp", message);
+		MessageConsumer consumer = createConsumer(NO_OUT);
+		Message noOutMessage = consumer.receive(2000);
+		if (noOutMessage!= null) {
+			System.out.println("received message " + noOutMessage.getBody(String.class));
+		}
+		consumer.close();
+		assertThat(noOutMessage).isNull();
+	}
+
 }
