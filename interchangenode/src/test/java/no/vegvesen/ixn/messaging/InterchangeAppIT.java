@@ -20,7 +20,6 @@ import java.util.Collections;
  * Verifies that it is possible to send messages to the amqp-server.
  * It reuses the spring wiring of jms resources from the interchange app to send and receive messages in the tests.
  *
- * @see no.vegvesen.ixn.AccessControlIT uses separate user client connections.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -47,9 +46,6 @@ public class InterchangeAppIT extends DockerBaseIT {
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
-
-	@Autowired
-	TestIxnMessageConsumer consumer;
 
 	@Autowired
 	IxnMessageProducer producer;
