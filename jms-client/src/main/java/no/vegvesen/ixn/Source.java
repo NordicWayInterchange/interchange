@@ -15,7 +15,7 @@ import java.util.Properties;
 
 public class Source implements AutoCloseable {
 
-    /**
+	/**
      * A message source. Sends a single message, and exits.
      * Note that the main file does not make use of any Spring Boot stuff.
      * However, an instance of the class could easilly be used from Spring Boot, as all
@@ -55,7 +55,7 @@ public class Source implements AutoCloseable {
         }
     }
 
-    private final String url;
+	private final String url;
     private final String sendQueue;
     private final SSLContext sslContext;
     protected Connection connection;
@@ -81,21 +81,22 @@ public class Source implements AutoCloseable {
 	}
 
     public void send(String messageText) throws JMSException {
-        MessageProducer producer = session.createProducer(queueS);
+        TextMessage message = createTextMessage(messageText);
+		message.setStringProperty("who", "Norwegian Public Roads Administration");
+		message.setStringProperty("how", "datex2");
+		message.setStringProperty("what", "Obstruction");
+		message.setStringProperty("version", "1.0");
+		message.setStringProperty("lat", "60.352374");
+		message.setStringProperty("lon", "13.334253");
+		message.setStringProperty("where", "SE");
+		message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+		sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
+	}
 
-        TextMessage message = session.createTextMessage(messageText);
-        message.setStringProperty("who", "Norwegian Public Roads Administration");
-        message.setStringProperty("how", "datex2");
-        message.setStringProperty("what", "Obstruction");
-        message.setStringProperty("version", "1.0");
-        message.setStringProperty("lat", "60.352374");
-        message.setStringProperty("lon", "13.334253");
-        message.setStringProperty("where", "SE");
-        message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-
-        producer.send(message);
-
-    }
+	public void sendTextMessage(TextMessage message, long timeToLive) throws JMSException {
+		MessageProducer producer = session.createProducer(queueS);
+		producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+	}
 
     @Override
     public void close() {

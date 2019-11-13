@@ -1,11 +1,12 @@
 package no.vegvesen.interchange;
 
-import no.vegvesen.ixn.IxnContext;
+import no.vegvesen.ixn.*;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 
 import javax.jms.*;
+import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,37 +26,30 @@ public class DebugClient implements MessageListener {
 
 	private static final String USER = System.getProperty("USER");
 	private static final String PASSWORD = System.getProperty("PASSWORD");
-	private static final int TIME_TO_LIVE_THIRTY_SECONDS = 30000;
+	private static final long TIME_TO_LIVE_THIRTY_SECONDS = 30000L;
 
-	private Connection connection;
-	private Session session;
-	private MessageProducer messageProducer;
+	private Source send;
 
 	private DebugClient(String url, String sendQueue, String receiveQueue) {
 		try {
-			IxnContext context = new IxnContext(url, sendQueue, receiveQueue);
-
 			printWithColor(TURQUOISE, "Connecting to: " + url);
+			printWithColor(TURQUOISE, " rece queue: " + receiveQueue);
+			printWithColor(TURQUOISE, " send queue: " + sendQueue);
 
-			Destination queueR = context.getReceiveQueue();
-			Destination queueS = context.getSendQueue();
-			printWithColor(TURQUOISE, " rece queue: " + queueR.toString());
-			printWithColor(TURQUOISE, " send queue: " + queueS.toString());
-
+			Sink receive;
 			if (USER != null && USER.length() > 0) {
 				printWithColor(TURQUOISE, String.format("Basic auth %s/%s ", USER, PASSWORD));
-				connection = context.createConnection(USER, PASSWORD);
+				receive = new BasicAuthSink(url, receiveQueue, USER, PASSWORD);
+				send = new BasicAuthSource(url, sendQueue, USER, PASSWORD);
 			} else {
-				connection = context.createConnection();
+				receive = new Sink(url, receiveQueue, SSLContext.getDefault());
+				send = new Source(url, sendQueue, SSLContext.getDefault());
 			}
-			connection.start();
+			MessageConsumer receiveConsumer = receive.createConsumer();
+			receiveConsumer.setMessageListener(this);
+			send.start();
 
-			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-			MessageConsumer messageConsumer = session.createConsumer(queueR);
-			messageProducer = session.createProducer(queueS);
 			printWithColor(YELLOW, " Waiting for messages..");
-			messageConsumer.setMessageListener(this);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -87,18 +81,18 @@ public class DebugClient implements MessageListener {
 			printWithColor(GREEN, " how: " + msg.getStringProperty("how"));
 			printWithColor(GREEN, " what: " + msg.getStringProperty("what"));
 			try {
-				printWithColor(GREEN, " lat: " + msg.getStringProperty("lat"));
-				printWithColor(GREEN, " lon: " + msg.getStringProperty("lon"));
+				printWithColor(GREEN, " lat (String): " + msg.getStringProperty("lat"));
+				printWithColor(GREEN, " lon (String): " + msg.getStringProperty("lon"));
 			} catch (Exception ignored) {
 			}
 			try {
-				printWithColor(GREEN, " lat: " + msg.getDoubleProperty("lat"));
-				printWithColor(GREEN, " lon: " + msg.getDoubleProperty("lon"));
+				printWithColor(GREEN, " lat (double): " + msg.getDoubleProperty("lat"));
+				printWithColor(GREEN, " lon (double): " + msg.getDoubleProperty("lon"));
 			} catch (Exception ignored) {
 			}
 			try {
-				printWithColor(GREEN, " lat: " + msg.getFloatProperty("lat"));
-				printWithColor(GREEN, " lon: " + msg.getFloatProperty("lon"));
+				printWithColor(GREEN, " lat (float): " + msg.getFloatProperty("lat"));
+				printWithColor(GREEN, " lon (float): " + msg.getFloatProperty("lon"));
 			} catch (Exception ignored) {
 			}
 			printWithColor(GREEN, " where: " + msg.getStringProperty("where"));
@@ -135,8 +129,7 @@ public class DebugClient implements MessageListener {
 
 	private void sendMessage(String where, String msg) {
 		try {
-			JmsTextMessage message = (JmsTextMessage) session.createTextMessage(msg);
-			message.getFacade().setUserId(USER);
+			TextMessage message = send.createTextMessage(msg);
 			message.setStringProperty("who", "Norwegian Public Roads Administration");
 			message.setStringProperty("how", "Datex2");
 			message.setStringProperty("what", "Conditions");
@@ -146,20 +139,16 @@ public class DebugClient implements MessageListener {
 			message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 			printWithColor(BROWN, " sending message");
 			printWithColor(BLACK, " ");
-			messageProducer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, TIME_TO_LIVE_THIRTY_SECONDS);
+			send.sendTextMessage(message, TIME_TO_LIVE_THIRTY_SECONDS);
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void close() {
-		try {
-			System.out.println("closing");
-			printWithColor(BLACK, " ");
-			connection.close();
-		} catch (JMSException e) {
-			e.printStackTrace();
-		}
+		System.out.println("closing");
+		printWithColor(BLACK, " ");
+		send.close();
 	}
 
 	public static void main(String[] args) {
