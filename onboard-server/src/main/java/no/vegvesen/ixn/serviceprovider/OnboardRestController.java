@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.capability.DataTypeSelectorMatcher;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.DataType;
@@ -250,7 +250,7 @@ public class OnboardRestController {
 		for (Subscription subscription : incomingSubscriptions) {
 			String selector = subscription.getSelector();
 			try {
-				CapabilityMatcher.validateSelector(selector);
+				DataTypeSelectorMatcher.validateSelector(selector);
 			} catch (SelectorAlwaysTrueException | InvalidSelectorException e) {
 				throw new SubscriptionRequestException("Error validating incoming subscription",e);
 			}

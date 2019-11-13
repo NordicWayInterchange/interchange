@@ -15,11 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
-public class CapabilityMatcher {
+public class DataTypeSelectorMatcher {
 
-	private static Logger logger = LoggerFactory.getLogger(CapabilityMatcher.class);
+	private static Logger logger = LoggerFactory.getLogger(DataTypeSelectorMatcher.class);
 
 	private static class DataTypeFilter implements Filterable {
 
@@ -120,7 +122,7 @@ public class CapabilityMatcher {
 		try {
 			filter = new JMSSelectorFilter(selector);
 		} catch (ParseException | TokenMgrError | SelectorParsingException e) {
-			throw new InvalidSelectorException("Could not parse selector " + selector);
+			throw new InvalidSelectorException(String.format("Could not parse selector \"%s\"",selector));
 		}
 		notAlwaysTrue(filter);
 		return filter;
@@ -132,4 +134,24 @@ public class CapabilityMatcher {
 			throw new SelectorAlwaysTrueException("Cannot subscribe to a filter that is always true: " + filter.getSelector());
 		}
 	}
+
+	public static Set<String> calculateCommonInterestSelectors(Set<DataType> dataTypes, Set<String> selectors) {
+		Set<String> calculatedSelectors = new HashSet<>();
+		for (DataType neighbourDataType : dataTypes) {
+			for (String selector : selectors) {
+				try {
+					// Trows InvalidSelectorException if selector is invalid or SelectorAlwaysTrueException if selector is always true
+					logger.info("Matching local subscription {}",selector);
+					if (matches(neighbourDataType, selector)) {
+					    calculatedSelectors.add(selector);
+
+					}
+                } catch (InvalidSelectorException | SelectorAlwaysTrueException | HeaderNotFoundException e) {
+					logger.error("Error matching neighbour data type with local subscription. Skipping selector {}",selector, e);
+                }
+			}
+		}
+		return calculatedSelectors;
+	}
+
 }

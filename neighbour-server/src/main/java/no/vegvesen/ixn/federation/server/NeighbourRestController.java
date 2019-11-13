@@ -5,13 +5,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.capability.DataTypeSelectorMatcher;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
-import org.apache.qpid.server.filter.selector.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +87,7 @@ public class NeighbourRestController {
 
 			for (DataType localDataType : localCapabilities) {
 				try {
-					if (CapabilityMatcher.matches(localDataType, neighbourSubscription.getSelector())) {
+					if (DataTypeSelectorMatcher.matches(localDataType, neighbourSubscription.getSelector())) {
 						// Subscription matches local data type - update status to ACCEPTED
 						neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
 					}
