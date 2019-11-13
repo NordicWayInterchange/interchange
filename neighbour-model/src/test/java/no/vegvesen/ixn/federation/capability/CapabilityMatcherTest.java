@@ -30,13 +30,13 @@ public class CapabilityMatcherTest {
 	@Test
 	public void datexWildcard() {
 		DataType norwayObstruction = new DataType("datex2;1.0", "NO", "Obstruction");
-		assertThat(CapabilityMatcher.matches(norwayObstruction,"how like 'datex%'"));
+		assertThat(CapabilityMatcher.matches(norwayObstruction,"how like 'datex%'")).isTrue();
 	}
 
 	@Test
 	public void whereAndHow() {
-		DataType norwayObstruction = new DataType("datex2;1.0", "NO", "Obstruction");
-		assertThat(CapabilityMatcher.matches(norwayObstruction,"where = 'NO' and how = 'datex'"));
+		DataType norwayObstruction = new DataType("datex", "NO", "Obstruction");
+		assertThat(CapabilityMatcher.matches(norwayObstruction,"where = 'NO' and how = 'datex'")).isTrue();
 
 	}
 
@@ -44,14 +44,14 @@ public class CapabilityMatcherTest {
 	@Test(expected = HeaderNotFoundException.class)
 	public void mathcingWithoutSingleQuotes() {
 		DataType dataType = new DataType("datex","NO","Stuff");
-		assertThat(CapabilityMatcher.matches(dataType,"where = NO"));
+		assertThat(CapabilityMatcher.matches(dataType,"where = NO")).isTrue();
 	}
 
 
 	@Test(expected = InvalidSelectorException.class)
 	public void mathingWildcardWithoutSingleQuotes() {
 		DataType dataType = new DataType("datex;1.0","NO","Stuff");
-		assertThat(CapabilityMatcher.matches(dataType,"how like datex%"));
+		assertThat(CapabilityMatcher.matches(dataType,"how like datex%")).isTrue();
 
 	}
 
