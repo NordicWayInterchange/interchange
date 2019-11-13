@@ -1,9 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
-import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
-import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
+import no.vegvesen.ixn.federation.capability.DataTypeSelectorMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +102,7 @@ public class Self {
 	}
 
 	public static Set<Subscription> calculateCommonInterestSubscriptions(Set<DataType> neighbourCapsDataTypes, Set<String> localSelectors) {
-		Set<Subscription> calculatedSubscriptions = CapabilityMatcher.calculateCommonInterestSelectors(neighbourCapsDataTypes,localSelectors).stream().map(selector -> {
+		Set<Subscription> calculatedSubscriptions = DataTypeSelectorMatcher.calculateCommonInterestSelectors(neighbourCapsDataTypes,localSelectors).stream().map(selector -> {
 			Subscription subscription = new Subscription();
 			subscription.setSelector(selector);
 			return subscription;

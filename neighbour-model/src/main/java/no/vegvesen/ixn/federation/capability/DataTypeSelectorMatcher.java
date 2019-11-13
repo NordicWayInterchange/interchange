@@ -19,9 +19,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-public class CapabilityMatcher {
+public class DataTypeSelectorMatcher {
 
-	private static Logger logger = LoggerFactory.getLogger(CapabilityMatcher.class);
+	private static Logger logger = LoggerFactory.getLogger(DataTypeSelectorMatcher.class);
 
 	private static class DataTypeFilter implements Filterable {
 
@@ -122,7 +122,7 @@ public class CapabilityMatcher {
 		try {
 			filter = new JMSSelectorFilter(selector);
 		} catch (ParseException | TokenMgrError | SelectorParsingException e) {
-			throw new InvalidSelectorException("Could not parse selector " + selector);
+			throw new InvalidSelectorException(String.format("Could not parse selector \"%s\"",selector));
 		}
 		notAlwaysTrue(filter);
 		return filter;
@@ -146,7 +146,7 @@ public class CapabilityMatcher {
 					    calculatedSelectors.add(selector);
 
 					}
-                } catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
+                } catch (InvalidSelectorException | SelectorAlwaysTrueException | HeaderNotFoundException e) {
 					logger.error("Error matching neighbour data type with local subscription. Skipping selector {}",selector, e);
                 }
 			}
