@@ -40,6 +40,13 @@ public class CapabilityMatcherTest {
 
 	}
 
+	@Test
+    public void whereAnHowWithWildcard() {
+		DataType norwayObstruction = new DataType("datex2;1.0", "NO", "Obstruction");
+		assertThat(CapabilityMatcher.matches(norwayObstruction,"where = 'NO' and how like 'datex%'")).isTrue();
+
+    }
+
 	//equals without quote seems to be matching one header against another
 	@Test(expected = HeaderNotFoundException.class)
 	public void mathcingWithoutSingleQuotes() {
