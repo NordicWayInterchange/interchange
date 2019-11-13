@@ -3,7 +3,6 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.apache.qpid.jms.message.JmsTextMessage;
 
 import javax.jms.*;
 import javax.naming.NamingException;
@@ -21,7 +20,7 @@ public class Source implements AutoCloseable {
      * Note that the main file does not make use of any Spring Boot stuff.
      * However, an instance of the class could easilly be used from Spring Boot, as all
      * dependent settings are handled in the main method, and passed as parameters to the instance.
-     * @param args
+     * @param args no args processed
      */
     public static void main(String[] args) throws NamingException, JMSException {
 
@@ -59,7 +58,7 @@ public class Source implements AutoCloseable {
     private final String url;
     private final String sendQueue;
     private final SSLContext sslContext;
-    private Connection connection;
+    protected Connection connection;
     private Session session;
     private Destination queueS;
 
@@ -71,18 +70,20 @@ public class Source implements AutoCloseable {
 
     public void start() throws NamingException, JMSException {
         IxnContext context = new IxnContext(url, sendQueue, null);
-        connection = context.createConnection(sslContext);
+        createConnection(context);
         queueS = context.getSendQueue();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
+	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
+		connection = ixnContext.createConnection(sslContext);
+	}
 
     public void send(String messageText) throws JMSException {
         MessageProducer producer = session.createProducer(queueS);
 
-        JmsTextMessage message = (JmsTextMessage) session.createTextMessage(messageText);
-        message.getFacade().setUserId("localhost");
+        TextMessage message = session.createTextMessage(messageText);
         message.setStringProperty("who", "Norwegian Public Roads Administration");
         message.setStringProperty("how", "datex2");
         message.setStringProperty("what", "Obstruction");
@@ -106,4 +107,9 @@ public class Source implements AutoCloseable {
             }
         }
     }
+
+	public TextMessage createTextMessage(String msg) throws JMSException {
+		return session.createTextMessage(msg);
+	}
+
 }
