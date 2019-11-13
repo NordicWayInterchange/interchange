@@ -129,7 +129,7 @@ public class DebugClient implements MessageListener {
 
 	private void sendMessage(String where, String msg) {
 		try {
-			TextMessage message = send.createTextMessage(msg);
+			JmsTextMessage message = send.createTextMessage(msg);
 			message.setStringProperty("who", "Norwegian Public Roads Administration");
 			message.setStringProperty("how", "Datex2");
 			message.setStringProperty("what", "Conditions");

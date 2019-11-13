@@ -3,6 +3,7 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.qpid.jms.message.JmsTextMessage;
 
 import javax.jms.*;
 import javax.naming.NamingException;
@@ -81,21 +82,23 @@ public class Source implements AutoCloseable {
 	}
 
     public void send(String messageText) throws JMSException {
-        TextMessage message = createTextMessage(messageText);
-		message.setStringProperty("who", "Norwegian Public Roads Administration");
-		message.setStringProperty("how", "datex2");
-		message.setStringProperty("what", "Obstruction");
-		message.setStringProperty("version", "1.0");
-		message.setStringProperty("lat", "60.352374");
-		message.setStringProperty("lon", "13.334253");
-		message.setStringProperty("where", "SE");
-		message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-		sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
-	}
+        MessageProducer producer = session.createProducer(queueS);
+        JmsTextMessage message = (JmsTextMessage) session.createTextMessage(messageText);
+        message.getFacade().setUserId("localhost");
+        message.setStringProperty("who", "Norwegian Public Roads Administration");
+        message.setStringProperty("how", "datex2");
+        message.setStringProperty("what", "Obstruction");
+        message.setStringProperty("version", "1.0");
+        message.setStringProperty("lat", "60.352374");
+        message.setStringProperty("lon", "13.334253");
+        message.setStringProperty("where", "SE");
+        message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        producer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+    }
 
-	public void sendTextMessage(TextMessage message, long timeToLive) throws JMSException {
+	public void sendTextMessage(JmsTextMessage message, long timeToLive) throws JMSException {
 		MessageProducer producer = session.createProducer(queueS);
-		producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
+		producer.send(message,  DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
 	}
 
     @Override
@@ -109,8 +112,8 @@ public class Source implements AutoCloseable {
         }
     }
 
-	public TextMessage createTextMessage(String msg) throws JMSException {
-		return session.createTextMessage(msg);
+	public JmsTextMessage createTextMessage(String msg) throws JMSException {
+		return (JmsTextMessage) session.createTextMessage(msg);
 	}
 
 }
