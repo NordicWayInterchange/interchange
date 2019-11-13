@@ -9,6 +9,9 @@ import org.testcontainers.containers.GenericContainer;
 
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
+import javax.jms.MessageConsumer;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Verifies access control lists where username comes from the common name (CN) of the user certificate.
@@ -57,7 +60,6 @@ public class AccessControlIT extends DockerBaseIT {
 		onramp.start();
 	}
 
-
 	@Test(expected = JMSException.class)
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
 		Source nwEx = new Source(getQpidURI(), NW_EX, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
@@ -75,6 +77,7 @@ public class AccessControlIT extends DockerBaseIT {
 	public void userWithValidCertificateCanConnect() throws Exception {
 		Sink noOut = new Sink(getQpidURI(), NO_OUT, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		noOut.start();
-		noOut.createConsumer();
+		MessageConsumer consumer = noOut.createConsumer();
+		assertThat(consumer).isNotNull();
 	}
 }
