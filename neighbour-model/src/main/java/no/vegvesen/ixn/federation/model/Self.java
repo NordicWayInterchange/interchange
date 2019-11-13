@@ -95,18 +95,12 @@ public class Self {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
 		Set<String> localSelectors = getLocalSubscriptionSelectors();
-		Set<Subscription> calculatedSubscriptions = calculateCommonInterestSubscriptions(neighbourCapsDataTypes, localSelectors);
-		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
-		return calculatedSubscriptions;
-
-	}
-
-	public static Set<Subscription> calculateCommonInterestSubscriptions(Set<DataType> neighbourCapsDataTypes, Set<String> localSelectors) {
-		Set<Subscription> calculatedSubscriptions = DataTypeSelectorMatcher.calculateCommonInterestSelectors(neighbourCapsDataTypes,localSelectors).stream().map(selector -> {
+		Set<Subscription> calculatedSubscriptions = DataTypeSelectorMatcher.calculateCommonInterestSelectors(neighbourCapsDataTypes, localSelectors).stream().map(selector -> {
 			Subscription subscription = new Subscription();
 			subscription.setSelector(selector);
 			return subscription;
 		}).collect(Collectors.toSet());
+		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;
 	}
 
