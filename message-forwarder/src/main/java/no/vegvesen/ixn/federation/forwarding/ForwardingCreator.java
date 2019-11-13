@@ -25,7 +25,7 @@ public class ForwardingCreator {
         this.sslContext = sslContext;
     }
 
-    public MessageForwardListener setupForwarding(Neighbour ixn) throws JMSException, NamingException {
+    MessageForwardListener setupForwarding(Neighbour ixn) throws JMSException, NamingException {
         MessageProducer producer = createProducerToRemote(ixn);
         IxnContext context = createContext(ixn);
         Connection connection = createConnection(context);
@@ -36,10 +36,9 @@ public class ForwardingCreator {
         return messageListener;
     }
 
-    public MessageProducer createProducerToRemote(Neighbour ixn) throws NamingException, JMSException {
-        logger.info("Connecting to {}", ixn.getName());
+    MessageProducer createProducerToRemote(Neighbour ixn) throws NamingException, JMSException {
         String writeUrl = ixn.getMessageChannelUrl();
-        logger.debug("Creating producer on url [{}]", writeUrl);
+        logger.debug("Creating producer for neighbour [{}] on url [{}] and destination [{}]", ixn.getName(), writeUrl, properties.getRemoteWritequeue());
         IxnContext writeContext = new IxnContext(writeUrl, properties.getRemoteWritequeue(), null);
 
         Destination queueS = writeContext.getSendQueue();
@@ -49,20 +48,20 @@ public class ForwardingCreator {
         return writeSession.createProducer(queueS);
     }
 
-    public IxnContext createContext(Neighbour ixn) throws NamingException {
+    private IxnContext createContext(Neighbour ixn) throws NamingException {
         String readUrl = String.format("amqps://%s:%s",properties.getLocalIxnDomainName(),properties.getLocalIxnFederationPort());
         String readQueue = ixn.getName();
         logger.debug("Creating destination for messages on queue [{}] from [{}]", readQueue, readUrl);
         return new IxnContext(readUrl, null, readQueue);
     }
 
-    public Connection createConnection(IxnContext context) throws NamingException, JMSException {
+    private Connection createConnection(IxnContext context) throws NamingException, JMSException {
         Connection connection = context.createConnection(sslContext);
         connection.start();
         return connection;
     }
 
-    public MessageConsumer createDestination(IxnContext context, Connection connection) throws JMSException, NamingException {
+    private MessageConsumer createDestination(IxnContext context, Connection connection) throws JMSException, NamingException {
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         Destination queueR = context.getReceiveQueue();
         return session.createConsumer(queueR);
