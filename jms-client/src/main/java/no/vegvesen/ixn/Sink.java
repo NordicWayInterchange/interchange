@@ -73,11 +73,7 @@ public class Sink implements MessageListener, AutoCloseable {
 	}
 
 	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
-		if (sslContext == null) {
-			ixnContext.createConnection();
-		} else {
-			connection = ixnContext.createConnection(sslContext);
-		}
+		connection = ixnContext.createConnection(sslContext);
 	}
 
 	@Override
