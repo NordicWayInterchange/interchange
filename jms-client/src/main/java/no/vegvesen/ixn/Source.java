@@ -95,7 +95,7 @@ public class Source implements AutoCloseable {
 
 	public void sendTextMessage(TextMessage message, long timeToLive) throws JMSException {
 		MessageProducer producer = session.createProducer(queueS);
-		producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+		producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
 	}
 
     @Override
