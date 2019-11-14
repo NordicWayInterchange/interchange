@@ -12,7 +12,12 @@ import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -47,26 +52,11 @@ public class NeighbourRESTFacade {
 		this.mapper = mapper;
 	}
 
-	Neighbour postCapabilities(Neighbour discoveringNeighbour, Neighbour neighbour) {
-
-		String url = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
-		String neighbourName = neighbour.getName();
-		return doPostCapabilities(discoveringNeighbour, url, neighbourName);
-	}
-
 	Neighbour postCapabilities(Self self, Neighbour neighbour) {
-		return innerDoPostCapabilities(neighbour.getControlChannelUrl(CAPABILITIES_PATH),neighbour.getName(),capabilityTransformer.selfToCapabilityApi(self));
-	}
-
-	private Neighbour doPostCapabilities(Neighbour discoveringNeighbour, String url, String neighbourName) {
-		logger.debug("Posting capabilities to {} on URL: {}", neighbourName, url);
-		logger.debug("Representation of discovering Neighbour: {}", discoveringNeighbour.toString());
-		CapabilityApi discoveringNeighbourCapabilityApi = capabilityTransformer.neighbourToCapabilityApi(discoveringNeighbour);
-
-		return innerDoPostCapabilities(url, neighbourName, discoveringNeighbourCapabilityApi);
-	}
-
-	private Neighbour innerDoPostCapabilities(String url, String neighbourName, CapabilityApi discoveringNeighbourToCapabilityApi) {
+		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
+		String name = neighbour.getName();
+		logger.debug("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
+		CapabilityApi discoveringNeighbourToCapabilityApi = capabilityTransformer.selfToCapabilityApi(self);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -77,7 +67,7 @@ public class NeighbourRESTFacade {
 		logger.debug("Posting Headers: {}", headers.toString());
 
 		try {
-			ResponseEntity<CapabilityApi> response = restTemplate.exchange(url, HttpMethod.POST, entity, CapabilityApi.class);
+			ResponseEntity<CapabilityApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, CapabilityApi.class);
 			logger.debug("Received capability api: {}", response.getBody());
 			logger.debug("Received response entity: {}", response.toString());
 			logger.debug("Received headers: {}", response.getHeaders().toString());
@@ -100,14 +90,14 @@ public class NeighbourRESTFacade {
 			try {
 				ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
 				logger.error("Received error object from server: {}", errorDetails.toString());
-				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbourName +". Received error response: " + errorDetails.toString());
+				throw new CapabilityPostException("Error in posting capabilities to neighbour " + name +". Received error response: " + errorDetails.toString());
 			} catch (IOException ioe) {
 				logger.error("Unable to cast error response as ErrorDetails object.", ioe);
-				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbourName +". Could not map server response to ErrorDetailsobject.");
+				throw new CapabilityPostException("Error in posting capabilities to neighbour " + name +". Could not map server response to ErrorDetailsobject.");
 			}
 		} catch (RestClientException e) {
 			logger.error("Failed post of capabilities to neighbour, network layer error",e);
-			throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbourName + " due to exception",e);
+			throw new CapabilityPostException("Error in posting capabilities to neighbour " + name + " due to exception",e);
 
 		}
 	}

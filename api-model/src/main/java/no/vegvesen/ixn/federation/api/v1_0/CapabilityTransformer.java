@@ -9,15 +9,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CapabilityTransformer {
 
-	public CapabilityApi neighbourToCapabilityApi(Neighbour neighbour){
-
-		CapabilityApi capabilityApi = new CapabilityApi();
-		capabilityApi.setName(neighbour.getName());
-		capabilityApi.setCapabilities(neighbour.getCapabilities().getDataTypes());
-
-		return capabilityApi;
-	}
-
 	public Neighbour capabilityApiToNeighbour(CapabilityApi capabilityApi){
 
 		Neighbour neighbour = new Neighbour();

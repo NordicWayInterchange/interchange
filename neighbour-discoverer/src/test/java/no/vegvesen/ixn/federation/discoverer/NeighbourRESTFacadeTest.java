@@ -5,10 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +46,7 @@ public class NeighbourRESTFacadeTest {
 			mapper);
 
 	private Neighbour ericsson;
+	private Self self;
 
 	private MockRestServiceServer server;
 
@@ -57,6 +55,8 @@ public class NeighbourRESTFacadeTest {
 		ericsson = new Neighbour();
 		ericsson.setName("ericsson.itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
+
+		self = new Self();
 
 		this.server = MockRestServiceServer.createServer(restTemplate);
 	}
@@ -84,7 +84,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Neighbour response = neighbourRESTFacade.postCapabilities(ericsson, ericsson);
+		Neighbour response = neighbourRESTFacade.postCapabilities(self, ericsson);
 
 		assertThat(response.getName()).isEqualTo(capabilityApi.getName());
 		assertThat(response.getCapabilities().getDataTypes()).hasSize(1);
@@ -152,7 +152,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		neighbourRESTFacade.postCapabilities(ericsson, ericsson);
+		neighbourRESTFacade.postCapabilities(self, ericsson);
 	}
 
 	@Test(expected = SubscriptionRequestException.class)
@@ -227,7 +227,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
-		neighbourRESTFacade.postCapabilities(ericsson, ericsson);
+		neighbourRESTFacade.postCapabilities(self, ericsson);
 	}
 
 	@Test(expected = SubscriptionPollException.class)

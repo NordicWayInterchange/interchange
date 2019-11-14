@@ -120,13 +120,13 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void successfulCapabilitiesPostCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
-		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Self.class), any(Neighbour.class));
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 
-		neighbourDiscoverer.capabilityExchange(Collections.singletonList(ericsson));
+		neighbourDiscoverer.capabilityExchange(Collections.singletonList(ericsson), self);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -197,7 +197,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Self.class), any(Neighbour.class));
 	}
 
 	@Test

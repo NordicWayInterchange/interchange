@@ -3,7 +3,12 @@ package no.vegvesen.ixn.federation.discoverer;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.DiscoveryState;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Self;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
@@ -454,17 +459,24 @@ public class NeighbourDiscoverer {
 		return new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 	}
 
+	//TODO this method is not tested!
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void performCapabilityExchangeWithUnknownNeighbours(){
 		// Perform capability exchange with all neighbours with capabilities status UNKNOWN that we have found through the DNS.
 		logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
+		Self self = selfRepository.findByName(myName);
+		if (self == null) {
+			logger.info("No representation of self. Skipping.");
+			return;
+		}
 		List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 
 		if(!neighboursForCapabilityExchange.isEmpty()){
-			capabilityExchange(neighboursForCapabilityExchange);
+			capabilityExchange(neighboursForCapabilityExchange,self);
 		}
 	}
 
+	//TODO this method is not tested!
 	@Scheduled(fixedRateString = "${discoverer.updated-service-provider-check-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void checkForUpdatedServiceProviderCapabilities(){
 		// Check if representation of Self has been updated by local Service Providers.
@@ -489,12 +501,12 @@ public class NeighbourDiscoverer {
 			List<Neighbour> allNeighbours = neighbourRepository.findAll();
 			if(!allNeighbours.isEmpty()) {
 				logger.info("Performing new capability exchange with all neighbours");
-				capabilityExchange(allNeighbours);
+				capabilityExchange(allNeighbours, self);
 			}
 		}
 	}
 
-	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
+	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self) {
 
 		DiscoveryState discoveryState = getDiscoveryState();
 
@@ -502,12 +514,12 @@ public class NeighbourDiscoverer {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 
-			Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
+			//Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
 			Neighbour neighbourResponse;
 
 			try {
 				// Throws CapabilityPostException if unsuccessful.
-				neighbourResponse = neighbourRESTFacade.postCapabilities(discoveringNeighbour, neighbour);
+				neighbourResponse = neighbourRESTFacade.postCapabilities(self, neighbour);
 
 				neighbour.setCapabilities(neighbourResponse.getCapabilities());
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
