@@ -17,32 +17,32 @@ public class DataTypeSelectorMatcherTest {
 
 	@Test
 	public void datexIsNotDenm() {
-		DataType datex = new DataType("datex", null, null);
+		DataType datex = new DataType("datex", null);
 		assertThat(DataTypeSelectorMatcher.matches(datex, "how like 'denm%'")).isFalse();
 	}
 
 	@Test
 	public void datexIsDatex() {
-		DataType datex = new DataType("datex", null, null);
+		DataType datex = new DataType("datex", null);
 		assertThat(DataTypeSelectorMatcher.matches(datex, "how like 'datex%'")).isTrue();
 	}
 
 	@Test
 	public void datexWildcard() {
-		DataType norwayObstruction = new DataType("datex2;1.0", "NO", "Obstruction");
+		DataType norwayObstruction = new DataType("datex2;1.0", "NO");
 		assertThat(DataTypeSelectorMatcher.matches(norwayObstruction,"how like 'datex%'")).isTrue();
 	}
 
 	@Test
 	public void whereAndHow() {
-		DataType norwayObstruction = new DataType("datex", "NO", "Obstruction");
+		DataType norwayObstruction = new DataType("datex", "NO");
 		assertThat(DataTypeSelectorMatcher.matches(norwayObstruction,"where = 'NO' and how = 'datex'")).isTrue();
 
 	}
 
 	@Test
     public void whereAnHowWithWildcard() {
-		DataType norwayObstruction = new DataType("datex2;1.0", "NO", "Obstruction");
+		DataType norwayObstruction = new DataType("datex2;1.0", "NO");
 		assertThat(DataTypeSelectorMatcher.matches(norwayObstruction,"where = 'NO' and how like 'datex%'")).isTrue();
 
     }
@@ -50,27 +50,27 @@ public class DataTypeSelectorMatcherTest {
 	//equals without quote seems to be matching one header against another
 	@Test(expected = HeaderNotFoundException.class)
 	public void mathcingWithoutSingleQuotes() {
-		DataType dataType = new DataType("datex","NO","Stuff");
+		DataType dataType = new DataType("datex","NO");
 		assertThat(DataTypeSelectorMatcher.matches(dataType,"where = NO")).isTrue();
 	}
 
 
 	@Test(expected = InvalidSelectorException.class)
 	public void mathingWildcardWithoutSingleQuotes() {
-		DataType dataType = new DataType("datex;1.0","NO","Stuff");
+		DataType dataType = new DataType("datex;1.0","NO");
 		assertThat(DataTypeSelectorMatcher.matches(dataType,"how like datex%")).isTrue();
 
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void expirationFilteringIsNotSupported() {
-		DataType datex = new DataType("datex", null, null);
+		DataType datex = new DataType("datex", null);
 		DataTypeSelectorMatcher.matches(datex, "JMSExpiration > 3");
 	}
 
 	@Test(expected = HeaderNotFoundException.class)
 	public void unknownHeaderAttributeNotAccepted() {
-		DataType dataType = new DataType("spat", null, null);
+		DataType dataType = new DataType("spat", null);
 		DataTypeSelectorMatcher.matches(dataType, "region like 'some region%'");
 	}
 
@@ -107,8 +107,8 @@ public class DataTypeSelectorMatcherTest {
 	@Test
 	public void testCalculateCommonInterestForCountry() {
 		Set<DataType> dataTypes = new HashSet<>(Arrays.asList(
-				new DataType("datex","NO",""),
-				new DataType("datex","SE","")));
+				new DataType("datex","NO"),
+				new DataType("datex","SE")));
 		String noSelector = "where like 'NO'";
 		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,Collections.singleton(noSelector))).
 				containsExactly(noSelector);
@@ -117,8 +117,8 @@ public class DataTypeSelectorMatcherTest {
 	@Test
 	public void testCalculateCommonInterestForCountryAndHow() {
 		Set<DataType> dataTypes = new HashSet<>(Arrays.asList(
-				new DataType("datex","NO",""),
-				new DataType("denm","NO","")));
+				new DataType("datex","NO"),
+				new DataType("denm","NO")));
 		String selector = "where = 'NO' and how = 'datex'";
 		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,Collections.singleton(selector))).
 				containsExactly(selector);
@@ -136,9 +136,9 @@ public class DataTypeSelectorMatcherTest {
 	@Test
 	public void calculateCommonInterestEmptySelectorsGivesEmptyResult() {
 		Set<DataType> dataTypes = new HashSet<>(Arrays.asList(
-				new DataType("datex","NO",""),
-				new DataType("datex","SE","what"),
-				new DataType("datex","FI","")
+				new DataType("datex","NO"),
+				new DataType("datex","SE"),
+				new DataType("datex","FI")
 		));
 		Set<String> selectors = Collections.emptySet();
 		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isEmpty();
@@ -146,14 +146,14 @@ public class DataTypeSelectorMatcherTest {
 
 	@Test
     public void calculateCommonInterestWithIllegalSelectorGivesEmptyResult() {
-	    Set<DataType> dataTypes = Collections.singleton(new DataType("datex","NO",""));
+	    Set<DataType> dataTypes = Collections.singleton(new DataType("datex","NO"));
 	    Set<String> selectors = Collections.singleton("this is an illegal selector");
 	    assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isEmpty();
     }
 
     @Test
 	public void calculateCommonInterestAlsoSkipsWhenHeaderNotFound() {
-		Set<DataType> dataTypes = Collections.singleton(new DataType("datex","NO",""));
+		Set<DataType> dataTypes = Collections.singleton(new DataType("datex","NO"));
 		Set<String> selectors = Collections.singleton("foo = 'bar'");
 		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isEmpty();
 
