@@ -8,7 +8,7 @@ public class DnsClient {
 
     public static void main(String[] args) {
 
-        DNSProperties properties = new DNSProperties("prod","443","itsinterchange.eu");
+        DNSProperties properties = new DNSProperties("443","itsinterchange.eu");
         DNSFacade facade = new DNSFacade(properties);
 
         System.out.println(facade.getDnsServerName());
