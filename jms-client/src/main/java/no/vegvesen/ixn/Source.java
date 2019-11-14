@@ -82,8 +82,7 @@ public class Source implements AutoCloseable {
 	}
 
     public void send(String messageText) throws JMSException {
-        MessageProducer producer = session.createProducer(queueS);
-        JmsTextMessage message = (JmsTextMessage) session.createTextMessage(messageText);
+        JmsTextMessage message = createTextMessage(messageText);
         message.getFacade().setUserId("localhost");
         message.setStringProperty("who", "Norwegian Public Roads Administration");
         message.setStringProperty("how", "datex2");
@@ -93,7 +92,7 @@ public class Source implements AutoCloseable {
         message.setStringProperty("lon", "13.334253");
         message.setStringProperty("where", "SE");
         message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-        producer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+        sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
     }
 
 	public void sendTextMessage(JmsTextMessage message, long timeToLive) throws JMSException {
