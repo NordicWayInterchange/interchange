@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Self;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.slf4j.Logger;
@@ -49,14 +50,27 @@ public class NeighbourRESTFacade {
 	Neighbour postCapabilities(Neighbour discoveringNeighbour, Neighbour neighbour) {
 
 		String url = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
-		logger.debug("Posting capabilities to {} on URL: {}", neighbour.getName(), url);
-		logger.debug("Representation of discovering Neighbour: {}", discoveringNeighbour.toString());
+		String neighbourName = neighbour.getName();
+		return doPostCapabilities(discoveringNeighbour, url, neighbourName);
+	}
 
+	Neighbour postCapabilities(Self self, Neighbour neighbour) {
+		return innerDoPostCapabilities(neighbour.getControlChannelUrl(CAPABILITIES_PATH),neighbour.getName(),capabilityTransformer.selfToCapabilityApi(self));
+	}
+
+	private Neighbour doPostCapabilities(Neighbour discoveringNeighbour, String url, String neighbourName) {
+		logger.debug("Posting capabilities to {} on URL: {}", neighbourName, url);
+		logger.debug("Representation of discovering Neighbour: {}", discoveringNeighbour.toString());
+		CapabilityApi discoveringNeighbourCapabilityApi = capabilityTransformer.neighbourToCapabilityApi(discoveringNeighbour);
+
+		return innerDoPostCapabilities(url, neighbourName, discoveringNeighbourCapabilityApi);
+	}
+
+	private Neighbour innerDoPostCapabilities(String url, String neighbourName, CapabilityApi discoveringNeighbourToCapabilityApi) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		// Convert discovering Neighbour to CapabilityApi object and post to neighbour
-		CapabilityApi discoveringNeighbourToCapabilityApi = capabilityTransformer.neighbourToCapabilityApi(discoveringNeighbour);
 		HttpEntity<CapabilityApi> entity = new HttpEntity<>(discoveringNeighbourToCapabilityApi, headers);
 		logger.debug("Posting capability api object: {}", discoveringNeighbourToCapabilityApi.toString());
 		logger.debug("Posting HttpEntity: {}", entity.toString());
@@ -86,14 +100,14 @@ public class NeighbourRESTFacade {
 			try {
 				ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
 				logger.error("Received error object from server: {}", errorDetails.toString());
-				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Received error response: " + errorDetails.toString());
+				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbourName +". Received error response: " + errorDetails.toString());
 			} catch (IOException ioe) {
 				logger.error("Unable to cast error response as ErrorDetails object.", ioe);
-				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() +". Could not map server response to ErrorDetailsobject.");
+				throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbourName +". Could not map server response to ErrorDetailsobject.");
 			}
 		} catch (RestClientException e) {
 			logger.error("Failed post of capabilities to neighbour, network layer error",e);
-			throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbour.getName() + " due to exception",e);
+			throw new CapabilityPostException("Error in posting capabilities to neighbour " + neighbourName + " due to exception",e);
 
 		}
 	}

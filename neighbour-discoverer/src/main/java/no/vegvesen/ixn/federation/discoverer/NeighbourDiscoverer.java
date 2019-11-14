@@ -216,6 +216,10 @@ public class NeighbourDiscoverer {
 	public void gracefulBackoffPostCapabilities() {
 
 		DiscoveryState discoveryState = getDiscoveryState();
+		Self self = selfRepository.findByName(myName);
+		if (self == null) {
+			return;
+		}
 
 		List<Neighbour> neighboursWithFailedCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
 
@@ -226,10 +230,11 @@ public class NeighbourDiscoverer {
 				logger.warn("Posting capabilities to neighbour {} in graceful backoff.", neighbour.getName());
 
 				try {
-					Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
+					//Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
 
 					// Throws CapabilityPostException if unsuccessful.
-					Neighbour neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringNeighbour, neighbour);
+					//Neighbour neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringNeighbour, neighbour);
+					Neighbour neighbourRepresentation = neighbourRESTFacade.postCapabilities(self,neighbour);
 
 					neighbour.setCapabilities(neighbourRepresentation.getCapabilities());
 					neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
@@ -348,7 +353,7 @@ public class NeighbourDiscoverer {
 
 		DiscoveryState discoveryState = getDiscoveryState();
 
-		if(discoveryState.getLastSubscriptionRequest() == null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest()))){
+		if(self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest())){
 			// Either first post or an update.
 			// Local Subscriptions have been updated since last time performed the subscription request.
 			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
@@ -411,32 +416,38 @@ public class NeighbourDiscoverer {
 					logger.info("The calculated subscription request is not empty. Posting subscription request: {}", neighbour.getName(), discoveringNeighbour.toString());
 				}
 
-				try {
-					// Throws SubscriptionRequestException if unsuccessful
-					SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
-					fedIn.setSubscriptions(subscriptionRequestResponse.getSubscriptions());
-					fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+				postSubscriptionRequest(neighbour, discoveringNeighbour, fedIn);
 
-					logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
-
-				} catch (SubscriptionRequestException e) {
-					fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
-					neighbour.setBackoffAttempts(0);
-					neighbour.setBackoffStart(LocalDateTime.now());
-
-					logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
-
-				} finally {
-					neighbour = neighbourRepository.save(neighbour);
-					logger.info("Saving updated neighbour: {}", neighbour.toString());
-					MDCUtil.removeLogVariables();
-				}
+				//finally {
+				neighbour = neighbourRepository.save(neighbour);
+				logger.info("Saving updated neighbour: {}", neighbour.toString());
+				//}
+				MDCUtil.removeLogVariables();
 			}
 		}
 		// Successful subscription request, update discovery state subscription request timestamp.
 		discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
 		discoveryStateRepository.save(discoveryState);
 
+	}
+
+	private void postSubscriptionRequest(Neighbour neighbour, Neighbour discoveringNeighbour, SubscriptionRequest fedIn) {
+		try {
+			// Throws SubscriptionRequestException if unsuccessful
+			SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
+			fedIn.setSubscriptions(subscriptionRequestResponse.getSubscriptions());
+			fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+
+			logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
+
+		} catch (SubscriptionRequestException e) {
+			fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
+			neighbour.setBackoffAttempts(0);
+			neighbour.setBackoffStart(LocalDateTime.now());
+
+			logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
+
+		}
 	}
 
 	private static SubscriptionRequest emptySubscriptionRequest() {
@@ -513,7 +524,7 @@ public class NeighbourDiscoverer {
 				neighbour.setBackoffAttempts(0);
 				neighbour.setBackoffStart(LocalDateTime.now());
 
-				logger.error("Unable to post capabilities to neighbour. Setting status of neighbour capabilities to FAILED.\n", e);
+				logger.error("Unable to post capabilities to neighbour. Setting status of neighbour capabilities to FAILED.", e);
 
 			} finally {
 				neighbour = neighbourRepository.save(neighbour);

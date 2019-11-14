@@ -11,15 +11,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
 public class NeighbourDiscovererTest {
 
 	// Mocks
@@ -33,7 +30,6 @@ public class NeighbourDiscovererTest {
 
 	private String myName = "bouvet.itsinterchange.eu";
 
-	@Spy
 	private NeighbourDiscoverer neighbourDiscoverer = new NeighbourDiscoverer(dnsFacade,
 			neighbourRepository,
 			selfRepository,
@@ -189,7 +185,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Self.class), any(Neighbour.class));
 	}
 
 	@Test
@@ -229,7 +225,7 @@ public class NeighbourDiscovererTest {
 		ericssonResponse.setCapabilities(ericssonCapabilities);
 		ericssonResponse.setSubscriptionRequest(createFirstSubscriptionRequestResponse());
 
-		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(Self.class), any(Neighbour.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
@@ -237,7 +233,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(1)).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+		verify(neighbourRESTFacade, times(1)).postCapabilities(any(Self.class), any(Neighbour.class));
 	}
 
 	@Test
@@ -284,7 +280,7 @@ public class NeighbourDiscovererTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(1);
 
 		ericsson.setBackoffStart(pastTime);
-		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Self.class), any(Neighbour.class));
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
@@ -303,7 +299,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Neighbour.class), any(Neighbour.class));
+		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Self.class), any(Neighbour.class));
 
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 
@@ -434,4 +430,60 @@ public class NeighbourDiscovererTest {
 
 		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Neighbour.class), any(Neighbour.class));
 	}
+
+	//TODO expand this into a more complete test, one that goes all the way from the outer methods. (so two tests, really).
+	@Test
+	public void twoNeighboursWhereOneHasNoOverlapBeforeAndAfterNewSubscriptionCalculationLetsSecondOneBeCalculated() {
+		Self self = new Self("self");
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
+		Neighbour neighbour = new Neighbour("neighbour",new Capabilities(),subscriptionRequest,new SubscriptionRequest());
+
+		//just to test that I have set up the neighbour and self correctly for the actual test.
+		Assert.assertTrue(neighbour.hasEstablishedSubscriptions());
+		Assert.assertTrue(self.calculateCustomSubscriptionForNeighbour(neighbour).isEmpty());
+		Assert.assertTrue(neighbour.getFedIn().getSubscriptions().isEmpty());
+
+		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
+				new Capabilities(),
+				new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
+				new SubscriptionRequest());
+
+
+	    neighbourDiscoverer.subscriptionRequest(Arrays.asList(neighbour,otherNeighbour),self);
+	    verify(neighbourRepository,times(2)).save(any(Neighbour.class));
+    }
+
+	@Test
+	public void calculatedSubscriptionRequestSameAsNeighbourSubscriptionsAllowsNextNeighbourToBeSaved() {
+		Self self = new Self("self");
+		Set<Subscription> selfLocalSubscriptions = new HashSet<>();
+		selfLocalSubscriptions.add(new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.CREATED));
+		self.setLocalSubscriptions(selfLocalSubscriptions);
+
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
+		DataType neighbourDataType = new DataType("datex","NO","Conditions");
+		Set<DataType> dataTypeSet = new HashSet<>();
+		dataTypeSet.add(neighbourDataType);
+		Capabilities neighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,dataTypeSet);
+		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilities,subscriptionRequest,new SubscriptionRequest());
+		Set<Subscription> neighbourFedInSubscription = new HashSet<>();
+		neighbourFedInSubscription.add(new Subscription("where LIKE 'NO'",Subscription.SubscriptionStatus.ACCEPTED));
+		neighbour.setFedIn(new SubscriptionRequest(null,neighbourFedInSubscription));
+
+		Assert.assertTrue(neighbour.hasEstablishedSubscriptions());
+		Set<Subscription> subscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour);
+		Assert.assertFalse(subscriptions.isEmpty());
+		Assert.assertEquals(subscriptions,neighbour.getFedIn().getSubscriptions());
+
+		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
+				new Capabilities(),
+				new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
+				new SubscriptionRequest());
+
+		neighbourDiscoverer.subscriptionRequest(Arrays.asList(neighbour,otherNeighbour),self);
+		verify(neighbourRepository).save(otherNeighbour);
+
+    }
+
+
 }
