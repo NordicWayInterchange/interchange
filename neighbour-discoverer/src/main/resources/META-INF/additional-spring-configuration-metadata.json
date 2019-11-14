@@ -155,6 +155,11 @@
       "type": "java.lang.String",
       "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties",
       "defaultValue": "JKS"
+    },
+    {
+      "name": "interchange.node-provider.name",
+      "type": "java.lang.String",
+      "description": "Provide the name of the running interchange node as registered in the DNS server."
     }
   ],
   "hints": []

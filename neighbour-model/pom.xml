@@ -45,40 +45,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.12.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>IT</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>io.fabric8</groupId>
-                        <artifactId>docker-maven-plugin</artifactId>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <alias>postgres</alias>
-                                    <name>postgres:9.6</name>
-                                    <run>
-                                        <ports>
-                                            <port>7080:5432</port>
-                                        </ports>
-                                        <env>
-                                            <POSTGRES_USER>federation</POSTGRES_USER>
-                                            <POSTGRES_PASSWORD>federation</POSTGRES_PASSWORD>
-                                            <POSTGRES_DB>federation</POSTGRES_DB>
-                                        </env>
-                                        <wait>
-                                            <time>5000</time>
-                                        </wait>
-                                    </run>
-                                </image>
-                            </images>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

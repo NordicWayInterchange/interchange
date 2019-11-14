@@ -1,50 +1,75 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.messaging.CountIxnMessageConsumer;
+import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
+import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
-import org.junit.*;
+import no.vegvesen.ixn.model.IxnMessage;
+import org.junit.ClassRule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.naming.NamingException;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Verifies that the InterchangeApp routes messages from the onramp via the exchange and further to the out-queues.
- * This test is run in a separate qpid-server in order to count received messages from one set of tests.
- * It reuses the spring wiring of jms resources from the interchange app to send and receive messages in the tests.
- * The amqp-url, username and password is specified in the application-63.properties.
- *
- * @See AccessControlIT uses separate user client connections.
+ * The tests must receive messages from all the queues messages gets routed to in order to avoid bleeding between tests.
  */
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("63")
-public class QpidIT {
+@ContextConfiguration(initializers = {QpidIT.Initializer.class})
+public class QpidIT extends DockerBaseIT {
 
     private static final long RECEIVE_TIMEOUT = 2000;
     private static final String NO_OUT = "NO-out";
     private static final String SE_OUT = "SE-out";
     private static final String DLQUEUE = "dlqueue";
     private static final String NO_OBSTRUCTION = "NO-Obstruction";
+	private static String AMQP_URL;
+
+	@ClassRule
+	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+
+	@ClassRule
+	public static GenericContainer postgisContainer = getPostgisContainer("interchangenode/src/test/docker/postgis");
+
+	static class Initializer
+			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+			AMQP_URL = "amqp://localhost:" + qpidContainer.getMappedPort(AMQP_PORT);
+			TestPropertyValues.of(
+					"amqphub.amqp10jms.remote-url=" + AMQP_URL,
+					"amqphub.amqp10jms.username=interchange",
+					"amqphub.amqp10jms.password=12345678",
+					"spring.datasource.url: jdbc:postgresql://localhost:" + postgisContainer.getMappedPort(JDBC_PORT) + "/geolookup",
+					"spring.datasource.username: geolookup",
+					"spring.datasource.password: geolookup",
+					"spring.datasource.driver-class-name: org.postgresql.Driver"
+			).applyTo(configurableApplicationContext.getEnvironment());
+		}
+	}
+
 
     @Autowired
     TestOnrampMessageProducer producer;
 
-    @Autowired
-    CountIxnMessageConsumer consumer;
+	@Autowired
+	IxnMessageProducer ixnMessageProducer;
 
-    @Before
-    public void before()throws Exception{
-        Thread.sleep(RECEIVE_TIMEOUT);
-        consumer.emptyQueue(NO_OUT);
-        consumer.emptyQueue(NO_OBSTRUCTION);
-        consumer.emptyQueue(SE_OUT);
-        consumer.emptyQueue(DLQUEUE);
-    }
 
     public void sendMessageOneCountry(String messageId){
         long systemTime = System.currentTimeMillis();
@@ -92,33 +117,68 @@ public class QpidIT {
     @Test
     public void messageToNorwayGoesToNorwayQueue() throws Exception{
         sendMessageOneCountry("1"); // NO
-        Thread.sleep(RECEIVE_TIMEOUT);
+		MessageConsumer consumer = createConsumer(NO_OUT);
         // The queue should have one message
-        assertThat(consumer.numberOfMessages(NO_OUT)).isEqualTo(1);
+        assertThat(consumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		consumer.close();
     }
-
 
     @Test
     public void messageWithTwoCountriesGoesToTwoQueues() throws Exception{
         sendMessageTwoCountries("3"); // NO and SE
-        Thread.sleep(RECEIVE_TIMEOUT);
-        // Each queue should have one message
-        assertThat(consumer.numberOfMessages(SE_OUT)).isEqualTo(1);
-        assertThat(consumer.numberOfMessages(NO_OUT)).isEqualTo(1);
+		MessageConsumer seConsumer = createConsumer(SE_OUT);
+		MessageConsumer noConsumer = createConsumer(NO_OUT);
+		// Each queue should have one message
+		assertThat(noConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		assertThat(seConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		noConsumer.close();
+		seConsumer.close();
     }
 
-    @Test
+	private MessageConsumer createConsumer(String queueName) throws NamingException, JMSException {
+		return new BasicAuthSink(AMQP_URL, queueName, "interchange", "12345678").createConsumer();
+	}
+
+	@Test
     public void messageWithCountryAndSituationGoesToRightQueue() throws Exception{
         sendMessageOneCountry("2"); // NO and Obstruction
-        Thread.sleep(RECEIVE_TIMEOUT);
-        assertThat(consumer.numberOfMessages(NO_OUT)).isEqualTo(1);
+		MessageConsumer noObstrConsumer = createConsumer(NO_OBSTRUCTION);
+		assertThat(noObstrConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		MessageConsumer noConsumer = createConsumer(NO_OUT);
+		assertThat(noConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		noConsumer.close();
     }
 
     @Test
     public void badMessageGoesDoDeadLetterQueue() throws Exception{
         sendBadMessage("4");
-        Thread.sleep(RECEIVE_TIMEOUT);
         // Expecting one message on dlqueue because message is invalid.
-        assertThat(consumer.numberOfMessages(DLQUEUE)).isEqualTo(1);
+		MessageConsumer dlConsumer = createConsumer(DLQUEUE);
+		assertThat(dlConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
+		dlConsumer.close();
     }
+
+	@Test
+	public void sendInvalidMessageBecauseItHasNoMessageBody() throws JMSException, NamingException {
+		long currentTimeMillis = System.currentTimeMillis();
+		long expiration = currentTimeMillis + 60000;
+		IxnMessage message = new IxnMessage(
+				"The great traffic testers",
+				"quest",
+				expiration,
+				63.0f,
+				10.0f,
+				Collections.singletonList("traffic jam"),
+				null);
+		message.setCountries(Collections.singletonList("no"));
+		ixnMessageProducer.sendMessage("onramp", message);
+		MessageConsumer consumer = createConsumer(NO_OUT);
+		Message noOutMessage = consumer.receive(2000);
+		if (noOutMessage!= null) {
+			System.out.println("received message " + noOutMessage.getBody(String.class));
+		}
+		consumer.close();
+		assertThat(noOutMessage).isNull();
+	}
+
 }

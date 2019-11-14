@@ -2,15 +2,24 @@ package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
@@ -26,12 +35,35 @@ import static org.junit.Assert.fail;
 
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
 @RunWith(SpringRunner.class)
-public class QpidClientIT {
+@ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
+public class QpidClientIT extends DockerBaseIT {
 
+
+	@ClassRule
+	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+
+	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 	private static final String NW_EX = "nwEx";
 	private static final String FED_EX = "fedEx";
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
+	private static String AMQPS_URL;
+
+	static class Initializer
+			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+			String httpsUrl = "https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT);
+			String httpUrl = "http://localhost:" + qpidContainer.getMappedPort(8080);
+			logger.info("server url: " + httpsUrl);
+			logger.info("server url: " + httpUrl);
+			AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+			TestPropertyValues.of(
+					"qpid.rest.api.baseUrl=" + httpsUrl,
+					"qpid.rest.api.vhost=localhost"
+			).applyTo(configurableApplicationContext.getEnvironment());
+		}
+	}
 
 	@Autowired
 	QpidClient client;
@@ -159,12 +191,12 @@ public class QpidClientIT {
 		client.setupRouting(king_gustaf, FED_EX);
 		client.addInterchangeUserToGroups(king_gustaf.getName(), SERVICE_PROVIDERS_GROUP_NAME);
 		SSLContext kingGustafSslContext = setUpTestSslContext("jks/king_gustaf.p12");
-		Sink readKingGustafQueue = new Sink("amqps://localhost:62671", "king_gustaf", kingGustafSslContext);
+		Sink readKingGustafQueue = new Sink(AMQPS_URL, "king_gustaf", kingGustafSslContext);
 		readKingGustafQueue.start();
-		Source writeOnrampQueue = new Source("amqps://localhost:62671", "onramp", kingGustafSslContext);
+		Source writeOnrampQueue = new Source(AMQPS_URL, "onramp", kingGustafSslContext);
 		writeOnrampQueue.start();
 		try {
-			Sink readDlqueue = new Sink("amqps://localhost:62671", "onramp", kingGustafSslContext);
+			Sink readDlqueue = new Sink(AMQPS_URL, "onramp", kingGustafSslContext);
 			readDlqueue.start();
 			fail("Should not allow king_gustaf to read from queue not granted access on (onramp)");
 		} catch (Exception ignore) { }
@@ -210,27 +242,28 @@ public class QpidClientIT {
 		client.setupRouting(nordea, NW_EX);
 		client.addInterchangeUserToGroups(nordea.getName(), FEDERATED_GROUP_NAME);
 		SSLContext nordeaSslContext = setUpTestSslContext("jks/nordea.p12");
-		Source writeFedExExchange = new Source("amqps://localhost:62671", "fedEx", nordeaSslContext);
+		Source writeFedExExchange = new Source(AMQPS_URL, "fedEx", nordeaSslContext);
 		writeFedExExchange.start();
 		writeFedExExchange.send("Ordinary business at the Nordea office.");
 		try {
-			Source writeOnramp = new Source("amqps://localhost:62671", "onramp", nordeaSslContext);
+			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
 			writeOnramp.start();
 			writeOnramp.send("Make Nordea great again!");
+
 			fail("Should not allow nordea to write on (onramp)");
-		} catch (Exception ignore) { }
+		} catch (JMSException ignore) { }
 		theNodeItselfCanReadFromAnyNeighbourQueue("nordea");
 	}
 
 
 	/**
 	 * Called from newNeighbourCanWriteToFedExButNotOnramp to avoid setting up more neighbour nodes in the test
-	 * @param queue name of the queue to be read by the node itself
+	 * @param neighbourQueue name of the queue to be read by the node itself
 	 */
-	public void theNodeItselfCanReadFromAnyNeighbourQueue(String queue) throws NamingException, JMSException {
+	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("jks/localhost.p12");
-		Sink nordea = new Sink("amqps://localhost:62671", queue, localhostSslContext);
-		nordea.start();
+		Sink neighbourSink = new Sink(AMQPS_URL, neighbourQueue, localhostSslContext);
+		neighbourSink.start();
 	}
 
 	public SSLContext setUpTestSslContext(String s) {
@@ -238,4 +271,5 @@ public class QpidClientIT {
 				new KeystoreDetails(getFilePathFromClasspathResource(s), "password", KeystoreType.PKCS12, "password"),
 				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
 	}
+
 }

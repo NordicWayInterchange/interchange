@@ -71,7 +71,12 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>testcontainers-base</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -118,135 +123,6 @@
                                 <goals>
                                     <goal>integration-test</goal>
                                     <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>io.fabric8</groupId>
-                        <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.27.2</version>
-
-
-                        <configuration>
-                            <images>
-                                <image>
-                                    <alias>postgis</alias>
-                                    <name>postgis</name>
-                                    <build>
-                                        <dockerFileDir>${project.basedir}/src/test/docker/postgis</dockerFileDir>
-                                    </build>
-
-                                    <run>
-                                        <ports>
-                                            <port>63432:5432</port>
-                                        </ports>
-                                        <env>
-                                            <POSTGRES_USER>geolookup</POSTGRES_USER>
-                                            <POSTGRES_PASSWORD>geolookup</POSTGRES_PASSWORD>
-                                            <POSTGRES_DB>geolookup</POSTGRES_DB>
-                                        </env>
-                                        <wait>
-                                            <time>15000</time>
-                                        </wait>
-                                    </run>
-                                </image>
-                                <image>
-                                    <alias>qpid</alias>
-                                    <name>qpid</name>
-                                    <build>
-                                        <dockerFileDir>${project.basedir}/../qpid/</dockerFileDir>
-                                    </build>
-                                    <run>
-                                        <ports>
-                                            <port>62671:5671</port>
-                                            <port>62672:5672</port>
-                                            <port>62080:8080</port>
-                                        </ports>
-                                        <volumes>
-                                            <bind>
-                                                <volume>
-                                                    ${project.basedir}/src/test/resources/qpid:/config
-                                                </volume>
-                                                <volume>
-                                                    ${project.basedir}/src/test/resources/jks:/jks
-                                                </volume>
-                                            </bind>
-                                        </volumes>
-                                        <env>
-                                            <CA_CERTIFICATE_FILE>/jks/localhost.crt</CA_CERTIFICATE_FILE>
-                                            <SERVER_CERTIFICATE_FILE>/jks/localhost.crt</SERVER_CERTIFICATE_FILE>
-                                            <SERVER_PRIVATE_KEY_FILE>/jks/localhost.key</SERVER_PRIVATE_KEY_FILE>
-                                            <VHOST_FILE>/work/default/config/default.json</VHOST_FILE>
-                                            <STATIC_VHOST_FILE>/config/localhost.json</STATIC_VHOST_FILE>
-                                            <GROUPS_FILE>/work/default/config/groups</GROUPS_FILE>
-                                            <STATIC_GROUPS_FILE>/config/groups</STATIC_GROUPS_FILE>
-                                            <PASSWD_FILE>/config/passwd</PASSWD_FILE>
-                                        </env>
-                                        <wait>
-                                            <healthy>true</healthy>
-                                            <time>60000</time>
-                                        </wait>
-                                    </run>
-                                </image>
-                                <image>
-                                    <alias>qpid</alias>
-                                    <name>qpid</name>
-                                    <run>
-                                        <ports>
-                                            <port>63671:5671</port>
-                                            <port>63672:5672</port>
-                                            <port>63080:8080</port>
-                                        </ports>
-                                        <volumes>
-                                            <bind>
-                                                <volume>
-                                                    ${project.basedir}/src/test/resources/qpid:/config
-                                                </volume>
-                                                <volume>
-                                                    ${project.basedir}/src/test/resources/jks:/jks
-                                                </volume>
-                                            </bind>
-                                        </volumes>
-                                        <env>
-                                            <CA_CERTIFICATE_FILE>/jks/localhost.crt</CA_CERTIFICATE_FILE>
-                                            <SERVER_CERTIFICATE_FILE>/jks/localhost.crt</SERVER_CERTIFICATE_FILE>
-                                            <SERVER_PRIVATE_KEY_FILE>/jks/localhost.key</SERVER_PRIVATE_KEY_FILE>
-                                            <VHOST_FILE>/work/default/config/default.json</VHOST_FILE>
-                                            <STATIC_VHOST_FILE>/config/localhost.json</STATIC_VHOST_FILE>
-                                            <GROUPS_FILE>/work/default/config/groups</GROUPS_FILE>
-                                            <STATIC_GROUPS_FILE>/config/groups</STATIC_GROUPS_FILE>
-                                            <PASSWD_FILE>/config/passwd</PASSWD_FILE>
-                                        </env>
-                                        <wait>
-                                            <healthy>true</healthy>
-                                            <time>60000</time>
-                                        </wait>
-
-                                    </run>
-                                </image>
-
-                            </images>
-
-                        </configuration>
-
-
-                        <executions>
-                            <execution>
-                                <id>start</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>build</goal>
-                                    <goal>start</goal>
-                                </goals>
-                            </execution>
-
-                            <execution>
-                                <id>stop</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
                                 </goals>
                             </execution>
                         </executions>

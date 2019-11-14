@@ -53,27 +53,6 @@
                     <version>${spring-boot-dependencies.version}</version>
                 </plugin>
 
-                <plugin>
-                    <groupId>io.fabric8</groupId>
-                    <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.27.2</version>
-                    <executions>
-                        <execution>
-                            <id>start</id>
-                            <phase>pre-integration-test</phase>
-                            <goals>
-                                <goal>start</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>stop</id>
-                            <phase>post-integration-test</phase>
-                            <goals>
-                                <goal>stop</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -210,6 +189,7 @@
 
     <modules>
         <module>ssl-utils</module>
+        <module>testcontainers-base</module>
         <module>jms-client</module>
         <module>test-ssl-utils</module>
         <module>api-model</module>

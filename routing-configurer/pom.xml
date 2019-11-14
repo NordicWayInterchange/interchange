@@ -62,6 +62,12 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>testcontainers-base</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -82,72 +88,6 @@
                         <configuration>
                             <classifier>exec</classifier>
                         </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>IT</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>io.fabric8</groupId>
-                        <artifactId>docker-maven-plugin</artifactId>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <alias>qpid</alias>
-                                    <name>qpid</name>
-                                    <build>
-                                        <dockerFileDir>${project.basedir}/../qpid/</dockerFileDir>
-                                    </build>
-                                    <run>
-                                        <ports>
-                                            <port>62671:5671</port>
-                                            <port>62672:5672</port>
-                                            <port>62080:8080</port>
-                                            <port>62443:443</port>
-                                        </ports>
-                                        <volumes>
-                                            <bind>
-                                                <volume>
-                                                    ${project.basedir}/target/test-classes/qpid:/config
-                                                </volume>
-                                                <volume>
-                                                    ${project.basedir}/src/test/resources/jks:/jks
-                                                </volume>
-                                            </bind>
-                                        </volumes>
-                                        <env>
-                                            <CA_CERTIFICATE_FILE>/jks/localhost.crt</CA_CERTIFICATE_FILE>
-                                            <SERVER_CERTIFICATE_FILE>/jks/localhost.crt</SERVER_CERTIFICATE_FILE>
-                                            <SERVER_PRIVATE_KEY_FILE>/jks/localhost.key</SERVER_PRIVATE_KEY_FILE>
-                                            <VHOST_FILE>/work/default/config/default.json</VHOST_FILE>
-                                            <STATIC_VHOST_FILE>/config/localhost.json</STATIC_VHOST_FILE>
-                                            <GROUPS_FILE>/work/default/config/groups</GROUPS_FILE>
-                                            <STATIC_GROUPS_FILE>/config/groups</STATIC_GROUPS_FILE>
-                                            <PASSWD_FILE>/config/passwd</PASSWD_FILE>
-                                        </env>
-                                        <wait>
-                                            <healthy>true</healthy>
-                                            <time>60000</time>
-                                        </wait>
-                                    </run>
-                                </image>
-                            </images>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>start</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>build</goal>
-                                    <goal>start</goal>
-                                </goals>
-                            </execution>
-                            <!-- stop is handled in parent pom config -->
-                        </executions>
                     </plugin>
                 </plugins>
             </build>

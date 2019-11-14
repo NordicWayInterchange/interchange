@@ -1,31 +1,34 @@
 package no.vegvesen.ixn.geo;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
-import javax.sql.DataSource;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+public class GeoLookupIT extends DockerBaseIT {
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class GeoLookupIT {
-
-	@Autowired
-	DataSource dataSource;
+	@ClassRule
+	public static GenericContainer postgisContainer = getPostgisContainer("interchangenode/src/test/docker/postgis");
 
 	private GeoLookup geoLookup;
 
 	@Before
 	public void setup() {
-		geoLookup = new GeoLookup(new JdbcTemplate(dataSource));
+		HikariConfig config = new HikariConfig();
+		config.setJdbcUrl("jdbc:postgresql://localhost:" + postgisContainer.getMappedPort(JDBC_PORT) + "/geolookup");
+		config.setUsername("geolookup");
+		config.setPassword("geolookup");
+		config.setDriverClassName("org.postgresql.Driver");
+		HikariDataSource ds = new HikariDataSource(config);
+		geoLookup = new GeoLookup(new JdbcTemplate(ds));
 	}
 
 	@Test
@@ -39,4 +42,5 @@ public class GeoLookupIT {
 		List<String> countries = geoLookup.getCountries(60d, 4.0d);
 		assertThat(countries).hasSize(0);
 	}
+
 }

@@ -16,12 +16,12 @@ import java.util.Properties;
 
 public class Source implements AutoCloseable {
 
-    /**
+	/**
      * A message source. Sends a single message, and exits.
      * Note that the main file does not make use of any Spring Boot stuff.
      * However, an instance of the class could easilly be used from Spring Boot, as all
      * dependent settings are handled in the main method, and passed as parameters to the instance.
-     * @param args
+     * @param args no args processed
      */
     public static void main(String[] args) throws NamingException, JMSException {
 
@@ -56,10 +56,10 @@ public class Source implements AutoCloseable {
         }
     }
 
-    private final String url;
+	private final String url;
     private final String sendQueue;
     private final SSLContext sslContext;
-    private Connection connection;
+    protected Connection connection;
     private Session session;
     private Destination queueS;
 
@@ -71,17 +71,18 @@ public class Source implements AutoCloseable {
 
     public void start() throws NamingException, JMSException {
         IxnContext context = new IxnContext(url, sendQueue, null);
-        connection = context.createConnection(sslContext);
+        createConnection(context);
         queueS = context.getSendQueue();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
+	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
+		connection = ixnContext.createConnection(sslContext);
+	}
 
     public void send(String messageText) throws JMSException {
-        MessageProducer producer = session.createProducer(queueS);
-
-        JmsTextMessage message = (JmsTextMessage) session.createTextMessage(messageText);
+        JmsTextMessage message = createTextMessage(messageText);
         message.getFacade().setUserId("localhost");
         message.setStringProperty("who", "Norwegian Public Roads Administration");
         message.setStringProperty("how", "datex2");
@@ -91,10 +92,13 @@ public class Source implements AutoCloseable {
         message.setStringProperty("lon", "13.334253");
         message.setStringProperty("where", "SE");
         message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-
-        producer.send(message);
-
+        sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
     }
+
+	public void sendTextMessage(JmsTextMessage message, long timeToLive) throws JMSException {
+		MessageProducer producer = session.createProducer(queueS);
+		producer.send(message,  DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
+	}
 
     @Override
     public void close() {
@@ -106,4 +110,9 @@ public class Source implements AutoCloseable {
             }
         }
     }
+
+	public JmsTextMessage createTextMessage(String msg) throws JMSException {
+		return (JmsTextMessage) session.createTextMessage(msg);
+	}
+
 }

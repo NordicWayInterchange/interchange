@@ -9,16 +9,13 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -32,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MessageForwarderIT extends QpidDockerBaseIT {
+public class MessageForwarderIT extends DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(MessageForwarderIT.class);
 
 	private RestTemplate restTemplate() {
@@ -41,49 +38,13 @@ public class MessageForwarderIT extends QpidDockerBaseIT {
 	}
 
 	@Rule
-	public GenericContainer localContainer = new GenericContainer(
-			new ImageFromDockerfile().withFileFromPath(".", QPID_DOCKER_PATH))
-			.withClasspathResourceMapping("docker/localhost", "/config", BindMode.READ_ONLY)
-			.withClasspathResourceMapping("jks", "/jks", BindMode.READ_ONLY)
-			.withEnv("PASSWD_FILE", "/config/passwd")
-			.withEnv("STATIC_GROUPS_FILE", "/config/groups")
-			.withEnv("STATIC_VHOST_FILE", "/config/vhost.json")
-			.withEnv("VHOST_FILE", "/work/default/config/default.json")
-			.withEnv("GROUPS_FILE", "/work/default/config/groups")
-			.withEnv("CA_CERTIFICATE_FILE", "/jks/my_ca.crt")
-			.withEnv("SERVER_CERTIFICATE_FILE", "/jks/localhost.crt")
-			.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/localhost.key")
-			.withExposedPorts(AMQPS_PORT, HTTPS_PORT);
+	public GenericContainer localContainer = getQpidContainer("docker/localhost", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	@Rule
-	public GenericContainer remoteContainer = new GenericContainer(
-			new ImageFromDockerfile().withFileFromPath(".", QPID_DOCKER_PATH))
-			.withClasspathResourceMapping("docker/remote", "/config", BindMode.READ_ONLY)
-			.withClasspathResourceMapping("jks", "/jks", BindMode.READ_ONLY)
-			.withEnv("PASSWD_FILE", "/config/passwd")
-			.withEnv("STATIC_GROUPS_FILE", "/config/groups")
-			.withEnv("STATIC_VHOST_FILE", "/config/vhost.json")
-			.withEnv("VHOST_FILE", "/work/default/config/default.json")
-			.withEnv("GROUPS_FILE", "/work/default/config/groups")
-			.withEnv("CA_CERTIFICATE_FILE", "/jks/my_ca.crt")
-			.withEnv("SERVER_CERTIFICATE_FILE", "/jks/localhost.crt")
-			.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/localhost.key")
-			.withExposedPorts(AMQPS_PORT, HTTPS_PORT);
+	public GenericContainer remoteContainer = getQpidContainer("docker/remote", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	@Rule
-	public GenericContainer remoteContainerTwo = new GenericContainer(
-			new ImageFromDockerfile().withFileFromPath(".", QPID_DOCKER_PATH))
-			.withClasspathResourceMapping("docker/remote", "/config", BindMode.READ_ONLY)
-			.withClasspathResourceMapping("jks", "/jks", BindMode.READ_ONLY)
-			.withEnv("PASSWD_FILE", "/config/passwd")
-			.withEnv("STATIC_GROUPS_FILE", "/config/groups")
-			.withEnv("STATIC_VHOST_FILE", "/config/vhost.json")
-			.withEnv("VHOST_FILE", "/work/default/config/default.json")
-			.withEnv("GROUPS_FILE", "/work/default/config/groups")
-			.withEnv("CA_CERTIFICATE_FILE", "/jks/my_ca.crt")
-			.withEnv("SERVER_CERTIFICATE_FILE", "/jks/localhost.crt")
-			.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/localhost.key")
-			.withExposedPorts(AMQPS_PORT, HTTPS_PORT);
+	public GenericContainer remoteContainerTwo = getQpidContainer("docker/remote", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	private SSLContext localSslContext() {
 		return TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks");

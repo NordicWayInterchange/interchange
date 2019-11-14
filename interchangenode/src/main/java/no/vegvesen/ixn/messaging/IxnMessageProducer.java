@@ -81,6 +81,5 @@ public class IxnMessageProducer {
 	public void sendMessage(String destination, final TextMessage textMessage) {
 		this.jmsTemplate.send(destination, session -> textMessage);
 	}
-
 }
 
