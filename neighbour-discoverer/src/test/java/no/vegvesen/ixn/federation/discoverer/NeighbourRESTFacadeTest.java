@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 public class NeighbourRESTFacadeTest {
 
 
@@ -111,6 +110,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
+		Self self = new Self("myName");
 		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
 
 		assertThat(response.getSubscriptions()).hasSize(1);

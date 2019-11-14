@@ -25,6 +25,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.Set;
 
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.SUBSCRIPTION_PATH;
@@ -102,17 +103,28 @@ public class NeighbourRESTFacade {
 		}
 	}
 
-
 	SubscriptionRequest postSubscriptionRequest(Neighbour discoveringNeighbour, Neighbour neighbour) {
 
 		String url = neighbour.getControlChannelUrl(SUBSCRIPTION_PATH);
 		logger.debug("Posting subscription request to {} on URL: {}", neighbour.getName(), url);
+		String neighbourName = neighbour.getName();
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(discoveringNeighbour);
+		return doPostSubscriptionRequest(url, neighbourName, subscriptionRequestApi);
 
+	}
+	SubscriptionRequest postSubscriptionRequest(Self self, Neighbour neighbour,Set<Subscription> subscriptions) {
+		return doPostSubscriptionRequest(
+				neighbour.getControlChannelUrl(SUBSCRIPTION_PATH),
+				neighbour.getName(),
+				subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(self.getName(),subscriptions)
+		);
+	}
+
+	private SubscriptionRequest doPostSubscriptionRequest(String url, String neighbourName, SubscriptionRequestApi subscriptionRequestApi) {
 		// Post representation to neighbour
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(discoveringNeighbour);
 		HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
 		logger.debug("Posting Subscription request api object: {}", subscriptionRequestApi.toString());
 		logger.debug("Posting HttpEntity: {}", entity.toString());
@@ -133,7 +145,8 @@ public class NeighbourRESTFacade {
 			logger.debug("Received response object: {}", responseApi.toString());
 			Neighbour responseNeighbour = subscriptionRequestTransformer.subscriptionRequestApiToNeighbour(responseApi);
 
-			if (!discoveringNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty() && responseNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+			if (!subscriptionRequestApi.getSubscriptions().isEmpty() && responseNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+			//if (!selfSubscriptions.isEmpty() && responseNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
 				// we posted a non empty subscription request, but received an empty subscription request.
 				logger.error("Posted non empty subscription request to neighbour but received empty subscription request.");
 				throw new SubscriptionRequestException("Subscription request failed. Posted non-empty subscription request, but received response with empty subscription request from neighbour.");
@@ -162,7 +175,7 @@ public class NeighbourRESTFacade {
 			}
 		} catch (RestClientException e) {
 			logger.error("Received network layer error",e);
-			throw new SubscriptionRequestException("Error in posting capabilities to neighbour " + neighbour.getName() + " due to exception",e);
+			throw new SubscriptionRequestException("Error in posting capabilities to neighbour " + neighbourName + " due to exception",e);
 		}
 	}
 

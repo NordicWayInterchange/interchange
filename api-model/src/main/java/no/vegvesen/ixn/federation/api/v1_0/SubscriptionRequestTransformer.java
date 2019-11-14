@@ -45,7 +45,11 @@ public class SubscriptionRequestTransformer {
 	}
 
 	public SubscriptionRequestApi neighbourToSubscriptionRequestApi(Neighbour neighbour){
-		return new SubscriptionRequestApi(neighbour.getName(), convertAllSubscriptionsToSubscriptionApis(neighbour.getSubscriptionRequest().getSubscriptions()));
+		return subscriptionRequestToSubscriptionRequestApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
+	}
+
+	public SubscriptionRequestApi subscriptionRequestToSubscriptionRequestApi(String name, Set<Subscription> subscriptions) {
+		return new SubscriptionRequestApi(name,convertAllSubscriptionsToSubscriptionApis(subscriptions));
 	}
 
 	public Neighbour subscriptionRequestApiToNeighbour(SubscriptionRequestApi subscriptionRequestApi){
