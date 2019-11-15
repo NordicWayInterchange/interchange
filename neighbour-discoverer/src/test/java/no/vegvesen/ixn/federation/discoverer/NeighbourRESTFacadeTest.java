@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
@@ -99,7 +100,8 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPostOfSubscriptionRequestReturnsSubscriptionRequest() throws Exception{
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE 'NO'");
+		String selector = "where LIKE 'NO'";
+		subscriptionApi.setSelector(selector);
 		subscriptionApi.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("remote server", Collections.singleton(subscriptionApi) );
 
@@ -110,8 +112,10 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Self self = new Self("myName");
-		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+		self.setName("ericsson.itsinterchange.eu");
+		Set<Subscription> subscriptionSet = Collections.emptySet();
+
+		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
 
 		assertThat(response.getSubscriptions()).hasSize(1);
 
@@ -166,7 +170,8 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+		Set<Subscription> subscriptionSet = Collections.emptySet();
+		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
 	}
 
 	@Test(expected = SubscriptionRequestException.class)
@@ -175,9 +180,7 @@ public class NeighbourRESTFacadeTest {
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
-		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
-		ericsson.setSubscriptionRequest(subscriptionRequest);
+		Set<Subscription> subscriptionSet = Collections.singleton(subscription);
 
 		// Subscription request received from the neighbour has empty set of subscription
 		SubscriptionRequestApi serverResponse = new SubscriptionRequestApi("remote server", new HashSet<>());
@@ -188,7 +191,8 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.OK).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+
+		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
 	}
 
 	@Test(expected = SubscriptionRequestException.class)
@@ -196,13 +200,7 @@ public class NeighbourRESTFacadeTest {
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
-		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
-		ericsson.setSubscriptionRequest(subscriptionRequest);
-
-		// Subscription request received from the neighbour has empty set of subscription
-		SubscriptionRequestApi serverResponse = new SubscriptionRequestApi("remote server", new HashSet<>());
-		String errorDetailsJson = new ObjectMapper().writeValueAsString(serverResponse);
+		Set<Subscription> subscriptions = Collections.singleton(subscription);
 
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
 		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
@@ -214,7 +212,7 @@ public class NeighbourRESTFacadeTest {
 
 
 
-		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptions);
 	}
 
 	@Test(expected = CapabilityPostException.class)

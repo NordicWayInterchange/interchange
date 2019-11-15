@@ -97,13 +97,13 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void testNeighbourWithSameNameAsUsIsNotSaved(){
 		// Mocking finding ourselves in the DNS lookup.
-		doReturn(self).when(selfRepository).findByName(any(String.class));
-
-		Neighbour discoveringNode = neighbourDiscoverer.getDiscoveringNeighbourWithCapabilities();
+		Neighbour discoveringNode = new Neighbour();
+		discoveringNode.setName(self.getName());
 		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(discoveringNode));
 
 		neighbourDiscoverer.checkForNewNeighbours();
 
+		verify(neighbourRepository,times(1)).findByName(myName);
 		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
 	}
 

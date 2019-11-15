@@ -57,13 +57,13 @@ public class NeighbourRESTFacade {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.debug("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
-		CapabilityApi discoveringNeighbourToCapabilityApi = capabilityTransformer.selfToCapabilityApi(self);
+		CapabilityApi selfCapability = capabilityTransformer.selfToCapabilityApi(self);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		// Convert discovering Neighbour to CapabilityApi object and post to neighbour
-		HttpEntity<CapabilityApi> entity = new HttpEntity<>(discoveringNeighbourToCapabilityApi, headers);
-		logger.debug("Posting capability api object: {}", discoveringNeighbourToCapabilityApi.toString());
+		HttpEntity<CapabilityApi> entity = new HttpEntity<>(selfCapability, headers);
+		logger.debug("Posting capability api object: {}", selfCapability.toString());
 		logger.debug("Posting HttpEntity: {}", entity.toString());
 		logger.debug("Posting Headers: {}", headers.toString());
 
@@ -103,24 +103,8 @@ public class NeighbourRESTFacade {
 		}
 	}
 
-	SubscriptionRequest postSubscriptionRequest(Neighbour discoveringNeighbour, Neighbour neighbour) {
-
-		String url = neighbour.getControlChannelUrl(SUBSCRIPTION_PATH);
-		logger.debug("Posting subscription request to {} on URL: {}", neighbour.getName(), url);
-		String neighbourName = neighbour.getName();
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(discoveringNeighbour);
-		return doPostSubscriptionRequest(url, neighbourName, subscriptionRequestApi);
-
-	}
 	SubscriptionRequest postSubscriptionRequest(Self self, Neighbour neighbour,Set<Subscription> subscriptions) {
-		return doPostSubscriptionRequest(
-				neighbour.getControlChannelUrl(SUBSCRIPTION_PATH),
-				neighbour.getName(),
-				subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(self.getName(),subscriptions)
-		);
-	}
-
-	private SubscriptionRequest doPostSubscriptionRequest(String url, String neighbourName, SubscriptionRequestApi subscriptionRequestApi) {
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(self.getName(),subscriptions);
 		// Post representation to neighbour
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -133,7 +117,7 @@ public class NeighbourRESTFacade {
 		// Posting and receiving response
 
 		try {
-			ResponseEntity<SubscriptionRequestApi> response = restTemplate.exchange(url, HttpMethod.POST, entity, SubscriptionRequestApi.class);
+			ResponseEntity<SubscriptionRequestApi> response = restTemplate.exchange(neighbour.getControlChannelUrl(SUBSCRIPTION_PATH), HttpMethod.POST, entity, SubscriptionRequestApi.class);
 			logger.debug("Received subscription request api: {}", response.getBody());
 			logger.debug("Received response entity: {}", response.toString());
 			logger.debug("Received headers: {}", response.getHeaders().toString());
@@ -175,7 +159,7 @@ public class NeighbourRESTFacade {
 			}
 		} catch (RestClientException e) {
 			logger.error("Received network layer error",e);
-			throw new SubscriptionRequestException("Error in posting capabilities to neighbour " + neighbourName + " due to exception",e);
+			throw new SubscriptionRequestException("Error in posting capabilities to neighbour " + neighbour.getName() + " due to exception",e);
 		}
 	}
 

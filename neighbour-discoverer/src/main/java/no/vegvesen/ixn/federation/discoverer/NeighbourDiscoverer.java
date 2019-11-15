@@ -21,7 +21,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -70,22 +69,6 @@ public class NeighbourDiscoverer {
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
 		MDCUtil.setLogVariables(myName, null);
-	}
-
-	Neighbour getDiscoveringNeighbourWithCapabilities() {
-
-		Neighbour selfRepresentation = new Neighbour();
-		selfRepresentation.setName(myName);
-
-		Self self = selfRepository.findByName(myName);
-		if(self != null) {
-			Capabilities discoveringNeighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, self.getLocalCapabilities());
-			selfRepresentation.setCapabilities(discoveringNeighbourCapabilities);
-		}
-
-		logger.info("Representation of discovering Neighbour with capabilities: {}", selfRepresentation.toString());
-
-		return selfRepresentation;
 	}
 
 
@@ -235,7 +218,6 @@ public class NeighbourDiscoverer {
 				logger.warn("Posting capabilities to neighbour {} in graceful backoff.", neighbour.getName());
 
 				try {
-					//Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
 
 					// Throws CapabilityPostException if unsuccessful.
 					//Neighbour neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringNeighbour, neighbour);
@@ -293,12 +275,9 @@ public class NeighbourDiscoverer {
 
 				try {
 					// Create representation of discovering Neighbour and calculate custom subscription for neighbour.
-					//Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
 					Set<Subscription> newSubscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour);
-                    //discoveringNeighbour.getSubscriptionRequest().setSubscriptions(newSubscriptions);
 
 					// Throws SubscriptionRequestException if unsuccessful.
-					//SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
 					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(self,neighbour,newSubscriptions);
 
 					neighbour.setBackoffAttempts(0);
@@ -485,7 +464,6 @@ public class NeighbourDiscoverer {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 
-			//Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
 			Neighbour neighbourResponse;
 
 			try {
