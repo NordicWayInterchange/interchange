@@ -5,10 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Self;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +50,21 @@ public class NeighbourRESTFacade {
 		this.mapper = mapper;
 	}
 
-	Neighbour postCapabilities(Self self, Neighbour neighbour) {
+
+	Capabilities postCapabilitiesToCapabilities(Self self, Neighbour neighbour) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.debug("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
 		CapabilityApi selfCapability = capabilityTransformer.selfToCapabilityApi(self);
+		CapabilityApi result = doPostCapabilities(controlChannelUrl, name, selfCapability);
+		return capabilityTransformer.capabilityApiToCapabilities(result);
+
+
+	}
+
+	private CapabilityApi doPostCapabilities(String controlChannelUrl, String name, CapabilityApi selfCapability) {
+		CapabilityApi result;
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -74,9 +81,8 @@ public class NeighbourRESTFacade {
 			logger.debug("Received headers: {}", response.getHeaders().toString());
 
 			if (response.getBody() != null) {
-				CapabilityApi capabilityApi = response.getBody();
-				logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", capabilityApi == null ? "null" : capabilityApi.toString());
-				return capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
+				result = response.getBody();
+				logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", result == null ? "null" : result.toString());
 			} else {
 				throw new CapabilityPostException(String.format("Server returned http code %s with null capability response", response.getStatusCodeValue()));
 			}
@@ -101,10 +107,19 @@ public class NeighbourRESTFacade {
 			throw new CapabilityPostException("Error in posting capabilities to neighbour " + name + " due to exception",e);
 
 		}
+		return result;
 	}
 
 	SubscriptionRequest postSubscriptionRequest(Self self, Neighbour neighbour,Set<Subscription> subscriptions) {
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(self.getName(),subscriptions);
+		String controlChannelUrl = neighbour.getControlChannelUrl(SUBSCRIPTION_PATH);
+		String name = neighbour.getName();
+		SubscriptionRequestApi responseApi = doPostSubscriptionRequest(subscriptionRequestApi, controlChannelUrl, name);
+
+		return subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(responseApi, SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+	}
+
+	private SubscriptionRequestApi doPostSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, String controlChannelUrl, String neighbourName) {
 		// Post representation to neighbour
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -116,8 +131,9 @@ public class NeighbourRESTFacade {
 
 		// Posting and receiving response
 
+		SubscriptionRequestApi responseApi;
 		try {
-			ResponseEntity<SubscriptionRequestApi> response = restTemplate.exchange(neighbour.getControlChannelUrl(SUBSCRIPTION_PATH), HttpMethod.POST, entity, SubscriptionRequestApi.class);
+			ResponseEntity<SubscriptionRequestApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, SubscriptionRequestApi.class);
 			logger.debug("Received subscription request api: {}", response.getBody());
 			logger.debug("Received response entity: {}", response.toString());
 			logger.debug("Received headers: {}", response.getHeaders().toString());
@@ -125,22 +141,16 @@ public class NeighbourRESTFacade {
 			if (response.getBody() == null) {
 				throw new SubscriptionRequestException("Returned empty response from subscription request");
 			}
-			SubscriptionRequestApi responseApi = response.getBody();
+			responseApi = response.getBody();
 			logger.debug("Received response object: {}", responseApi.toString());
-			Neighbour responseNeighbour = subscriptionRequestTransformer.subscriptionRequestApiToNeighbour(responseApi);
+			logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
 
-			if (!subscriptionRequestApi.getSubscriptions().isEmpty() && responseNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
-			//if (!selfSubscriptions.isEmpty() && responseNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+			if (!subscriptionRequestApi.getSubscriptions().isEmpty() && responseApi.getSubscriptions().isEmpty()) {
 				// we posted a non empty subscription request, but received an empty subscription request.
 				logger.error("Posted non empty subscription request to neighbour but received empty subscription request.");
 				throw new SubscriptionRequestException("Subscription request failed. Posted non-empty subscription request, but received response with empty subscription request from neighbour.");
 			}
 
-			responseNeighbour.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
-
-			logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
-
-			return responseNeighbour.getSubscriptionRequest();
 
 		}catch(HttpClientErrorException | HttpServerErrorException e){
 
@@ -159,25 +169,30 @@ public class NeighbourRESTFacade {
 			}
 		} catch (RestClientException e) {
 			logger.error("Received network layer error",e);
-			throw new SubscriptionRequestException("Error in posting capabilities to neighbour " + neighbour.getName() + " due to exception",e);
+			throw new SubscriptionRequestException("Error in posting capabilities to neighbour " + neighbourName + " due to exception",e);
 		}
+		return responseApi;
 	}
 
 	Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour) {
-
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
+		String name = neighbour.getName();
+		logger.debug("Polling subscription to {} with URL: {}", name, url);
 
-		logger.debug("Polling subscription to {} with URL: {}", neighbour.getName(), url);
+		SubscriptionApi subscriptionApi = doPollSubscriptionStatus(url, name);
+		Subscription returnSubscription = subscriptionTransformer.subscriptionApiToSubscription(subscriptionApi);
+		logger.debug("Received response object: {}", returnSubscription.toString());
+		return returnSubscription;
+	}
 
+	private SubscriptionApi doPollSubscriptionStatus(String url, String name) {
+		SubscriptionApi subscriptionApi;
 		try {
 			ResponseEntity<SubscriptionApi> response = restTemplate.getForEntity(url, SubscriptionApi.class);
-			SubscriptionApi subscriptionApi = response.getBody();
-			Subscription returnSubscription = subscriptionTransformer.subscriptionApiToSubscription(subscriptionApi);
+			subscriptionApi = response.getBody();
 
 			logger.debug("Successfully polled subscription. Response code: {}", response.getStatusCodeValue());
-			logger.debug("Received response object: {}", returnSubscription.toString());
 
-			return returnSubscription;
 
 		} catch (HttpClientErrorException | HttpServerErrorException e) {
 
@@ -197,7 +212,8 @@ public class NeighbourRESTFacade {
 			}
 		} catch (RestClientException e) {
 			logger.error("Received network layer error",e);
-			throw new SubscriptionPollException("Error in posting capabilities to neighbour " + neighbour.getName() + " due to exception",e);
+			throw new SubscriptionPollException("Error in posting capabilities to neighbour " + name + " due to exception",e);
 		}
+		return subscriptionApi;
 	}
 }

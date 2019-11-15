@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,6 +59,10 @@ public class SubscriptionRequestTransformer {
 		neighbour.getSubscriptionRequest().setSubscriptions(convertAllSubscriptionApisToSubscriptions(subscriptionRequestApi.getSubscriptions()));
 
 		return neighbour;
+	}
+
+	public SubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, SubscriptionRequest.SubscriptionRequestStatus status) {
+		return new SubscriptionRequest(status,convertAllSubscriptionApisToSubscriptions(subscriptionRequestApi.getSubscriptions()));
 	}
 
 	public SubscriptionRequestApi serviceProviderToSubscriptionRequestApi(ServiceProvider serviceProvider){

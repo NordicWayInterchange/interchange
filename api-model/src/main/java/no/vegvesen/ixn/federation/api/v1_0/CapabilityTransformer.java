@@ -21,6 +21,12 @@ public class CapabilityTransformer {
 		return neighbour;
 	}
 
+	public Capabilities capabilityApiToCapabilities(CapabilityApi capabilityApi) {
+		Capabilities capabilities = new Capabilities();
+		capabilities.setDataTypes(capabilityApi.getCapabilities());
+		return capabilities;
+	}
+
 	public ServiceProvider capabilityApiToServiceProvider(CapabilityApi capabilityApi){
 
 		ServiceProvider serviceProvider = new ServiceProvider();

@@ -127,7 +127,10 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void successfulCapabilitiesPostCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
-		doReturn(ericsson).when(neighbourRESTFacade).postCapabilities(any(Self.class), any(Neighbour.class));
+		Capabilities capabilities = new Capabilities();
+		Assert.assertTrue(capabilities.getDataTypes().isEmpty());
+
+		doReturn(capabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 
@@ -192,7 +195,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Self.class), any(Neighbour.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 	}
 
 	@Test
@@ -204,7 +207,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilities(any(Self.class), any(Neighbour.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 	}
 
 	@Test
@@ -227,12 +230,9 @@ public class NeighbourDiscovererTest {
 		Neighbour ericsson = createNeighbour();
 		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 
-		Neighbour ericssonResponse = new Neighbour();
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
-		ericssonResponse.setCapabilities(ericssonCapabilities);
-		ericssonResponse.setSubscriptionRequest(createFirstSubscriptionRequestResponse());
 
-		doReturn(ericssonResponse).when(neighbourRESTFacade).postCapabilities(any(Self.class), any(Neighbour.class));
+		doReturn(ericssonCapabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
@@ -240,7 +240,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
-		verify(neighbourRESTFacade, times(1)).postCapabilities(any(Self.class), any(Neighbour.class));
+		verify(neighbourRESTFacade, times(1)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 	}
 
 	@Test
@@ -287,7 +287,7 @@ public class NeighbourDiscovererTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(1);
 
 		ericsson.setBackoffStart(pastTime);
-		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Self.class), any(Neighbour.class));
+		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
@@ -306,13 +306,15 @@ public class NeighbourDiscovererTest {
 		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilities(any(Self.class), any(Neighbour.class));
+		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 
 		neighbourDiscoverer.gracefulBackoffPostCapabilities();
 
 		Assert.assertEquals(ericsson.getCapabilities().getStatus(), Capabilities.CapabilitiesStatus.UNREACHABLE);
+		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
+
 	}
 
 	/*

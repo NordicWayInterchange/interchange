@@ -84,12 +84,11 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Neighbour response = neighbourRESTFacade.postCapabilities(self, ericsson);
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
 
-		assertThat(response.getName()).isEqualTo(capabilityApi.getName());
-		assertThat(response.getCapabilities().getDataTypes()).hasSize(1);
+		assertThat(res.getDataTypes()).hasSize(1);
 
-		Iterator<DataType> dataTypes = response.getCapabilities().getDataTypes().iterator();
+		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType dataTypeInCapabilities = dataTypes.next();
 
 		assertThat(dataTypeInCapabilities.getHow()).isEqualTo(dataType.getHow());
@@ -156,7 +155,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		neighbourRESTFacade.postCapabilities(self, ericsson);
+		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
 	}
 
 	@Test(expected = SubscriptionRequestException.class)
@@ -225,7 +224,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
-		neighbourRESTFacade.postCapabilities(self, ericsson);
+		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
 	}
 
 	@Test(expected = SubscriptionPollException.class)

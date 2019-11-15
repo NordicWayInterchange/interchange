@@ -220,10 +220,8 @@ public class NeighbourDiscoverer {
 				try {
 
 					// Throws CapabilityPostException if unsuccessful.
-					//Neighbour neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringNeighbour, neighbour);
-					Neighbour neighbourRepresentation = neighbourRESTFacade.postCapabilities(self,neighbour);
-
-					neighbour.setCapabilities(neighbourRepresentation.getCapabilities());
+					Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self,neighbour);
+					neighbour.setCapabilities(capabilities);
 					neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY); // Updated capabilities means we need to recalculate our subscription to the neighbour.
 					neighbour.setBackoffAttempts(0);
@@ -348,23 +346,19 @@ public class NeighbourDiscoverer {
 			if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 				logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 				Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
-				SubscriptionRequest fedIn = neighbour.getFedIn();
-				Set<Subscription> fedInSubscriptions = fedIn.getSubscriptions();
+				Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
 				if (calculatedSubscriptionForNeighbour.isEmpty()) {
 					// No overlap between neighbour capabilities and local service provider subscriptions.
 					// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
-					fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
+					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
 					logger.info("The calculated subscription request for neighbour {} was empty. Setting Subscription status in fedIn to NO_OVERLAP", neighbour.getName());
 					if (fedInSubscriptions.isEmpty()) {
 						// No existing subscription to this neighbour, nothing to tear down
-						//neighbourRepository.save(neighbour);
 						logger.info("Subscription to neighbour is empty. Nothing to tear down.");
-						//MDCUtil.removeLogVariables();
-						//continue;
 					} else {
 						// We have an existing subscription to the neighbour, tear it down. At this point, we already know that the calculated set of neighbours is empty!
 						logger.info("The calculated subscription request is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.", neighbour.getName());
-						postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour, fedIn);
+						postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
 					}
 				} else {
 					// Calculated subscription is not empty, post as normal
@@ -373,16 +367,15 @@ public class NeighbourDiscoverer {
                         logger.info("The calculated subscription requests are the same as neighbour {}'s subscription. Skipping",neighbour.getName());
 						continue;
 					} else {
-
 						// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
 						logger.info("The calculated subscription request for {} is not empty. Posting subscription request: {}", neighbour.getName(), calculatedSubscriptionForNeighbour);
-						postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour, fedIn);
+						postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
 					}
 				}
 				neighbour = neighbourRepository.save(neighbour);
 				logger.info("Saving updated neighbour: {}", neighbour.toString());
-				MDCUtil.removeLogVariables();
 			}
+			MDCUtil.removeLogVariables();
 		}
 		// Successful subscription request, update discovery state subscription request timestamp.
 		discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
@@ -390,7 +383,8 @@ public class NeighbourDiscoverer {
 
 	}
 
-	private void postUpdatedSubscriptions(Self self, Neighbour neighbour, Set<Subscription> calculatedSubscriptionForNeighbour, SubscriptionRequest fedIn) {
+	private void postUpdatedSubscriptions(Self self, Neighbour neighbour, Set<Subscription> calculatedSubscriptionForNeighbour)  {
+		SubscriptionRequest fedIn = neighbour.getFedIn();
 		try {
 			// Throws SubscriptionRequestException if unsuccessful
 			SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self,neighbour,calculatedSubscriptionForNeighbour);
@@ -409,7 +403,7 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	//TODO this method is not tested!
+	//TODO this method is not directly tested!
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void performCapabilityExchangeWithUnknownNeighbours(){
 		// Perform capability exchange with all neighbours with capabilities status UNKNOWN that we have found through the DNS.
@@ -426,7 +420,7 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	//TODO this method is not tested!
+	//TODO this method is not directly tested!
 	@Scheduled(fixedRateString = "${discoverer.updated-service-provider-check-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void checkForUpdatedServiceProviderCapabilities(){
 		// Check if representation of Self has been updated by local Service Providers.
@@ -468,9 +462,8 @@ public class NeighbourDiscoverer {
 
 			try {
 				// Throws CapabilityPostException if unsuccessful.
-				neighbourResponse = neighbourRESTFacade.postCapabilities(self, neighbour);
-
-				neighbour.setCapabilities(neighbourResponse.getCapabilities());
+				Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self,neighbour);
+				neighbour.setCapabilities(capabilities);
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 
 				// Successful capability post, update discovery state capability post timestamp
