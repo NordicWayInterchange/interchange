@@ -38,12 +38,10 @@ public class NeighbourRESTFacadeTest {
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
-	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(
-			restTemplate,
+	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(new NeighbourRESTClient(restTemplate,mapper),
 			capabilityTransformer,
 			subscriptionTransformer,
-			subscriptionRequestTransformer,
-			mapper);
+			subscriptionRequestTransformer);
 
 	private Neighbour ericsson;
 	private Self self;
