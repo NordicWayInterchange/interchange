@@ -434,9 +434,9 @@ public class NeighbourDiscoverer {
 			return; // We have nothing to post to our neighbours.
 		}
 
-		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
+		DiscoveryState discoveryState = getDiscoveryState();
 
-		if(discoveryState == null || discoveryState.getLastCapabilityExchange()==null || (self.getLastUpdatedLocalCapabilities() != null && self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange()))){
+		if(discoveryState.getLastCapabilityExchange()==null || (self.getLastUpdatedLocalCapabilities() != null && self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange()))){
 			// Capability post either not performed before, or Service Providers have been updated.
 			// Last updated capabilities is after last capability exchange - perform new capability exchange with all neighbours
 
@@ -451,32 +451,22 @@ public class NeighbourDiscoverer {
 	}
 
 	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self) {
-
 		DiscoveryState discoveryState = getDiscoveryState();
-
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
-
-			Neighbour neighbourResponse;
-
 			try {
 				// Throws CapabilityPostException if unsuccessful.
 				Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self,neighbour);
 				neighbour.setCapabilities(capabilities);
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-
-
 				logger.info("Successfully completed capability exchange.");
 				logger.debug("Updated neighbour: {}", neighbour.toString());
-
 			} catch (CapabilityPostException e) {
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
 				neighbour.setBackoffAttempts(0);
 				neighbour.setBackoffStart(LocalDateTime.now());
-
 				logger.error("Unable to post capabilities to neighbour. Setting status of neighbour capabilities to FAILED.", e);
-
 			} finally {
 				neighbour = neighbourRepository.save(neighbour);
 				logger.info("Saving updated neighbour: {}", neighbour.toString());
