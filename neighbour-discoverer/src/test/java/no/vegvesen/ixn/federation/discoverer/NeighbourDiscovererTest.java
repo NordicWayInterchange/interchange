@@ -33,8 +33,7 @@ public class NeighbourDiscovererTest {
 	private NeighbourDiscoverer neighbourDiscoverer;
 
 	// Objects used in testing
-	private DataType firstDataType = new DataType("datex2;1.0", "NO", "Obstruction");
-	private DataType secondDataType = new DataType("datex2;1.0", "SE", "Works");
+	private DataType noObstruction = new DataType("datex2;1.0", "NO", "Obstruction");
 	private Self self;
 
 	@Before
@@ -107,18 +106,7 @@ public class NeighbourDiscovererTest {
 		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
 	}
 
-
-	@Test
-	public void dataTypeInCapabilitiesReturnsTrue(){
-		Set<DataType> testCapabilities = Collections.singleton(firstDataType);
-		Assert.assertTrue(firstDataType.isContainedInSet(testCapabilities));
-	}
-
-	@Test
-	public void dataTypeNotInCapabilitiesReturnsFalse(){
-		Set<DataType> testCapabilities = Collections.singleton(secondDataType);
-		Assert.assertFalse(firstDataType.isContainedInSet(testCapabilities));
-	}
+	//TODO Make a test for having a Neighbour that is in the database, but not in DNS (in other words, removed).
 
 	/**
 	 * Capabilities exchange and subscription request
@@ -230,6 +218,7 @@ public class NeighbourDiscovererTest {
 		Neighbour ericsson = createNeighbour();
 		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 
+		DataType firstDataType = this.noObstruction;
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
 
 		doReturn(ericssonCapabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
@@ -284,7 +273,7 @@ public class NeighbourDiscovererTest {
 		Neighbour ericsson = createNeighbour();
 		ericsson.setBackoffAttempts(0);
 		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
-		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(1);
+		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(5);
 
 		ericsson.setBackoffStart(pastTime);
 		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
@@ -300,7 +289,7 @@ public class NeighbourDiscovererTest {
 		Neighbour ericsson = createNeighbour();
 		ericsson.setBackoffAttempts(4);
 
-		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(firstDataType));
+		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(noObstruction));
 		ericsson.setCapabilities(ericssonCapabilities);
 
 		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
@@ -497,5 +486,18 @@ public class NeighbourDiscovererTest {
 
     }
 
+    @Test
+	public void capabilityExchangeExceptionThrownAllowsDiscoveryStateToBeSaved() {
+		Neighbour neighbour = createNeighbour();
+		Self self = createSelf();
+
+		when(discoveryStateRepository.findByName(anyString())).thenReturn(new DiscoveryState(neighbour.getName()));
+		when(neighbourRepository.save(any(Neighbour.class))).thenReturn(neighbour);
+		when(neighbourRESTFacade.postCapabilitiesToCapabilities(self,neighbour)).thenThrow(CapabilityPostException.class);
+
+		neighbourDiscoverer.capabilityExchange(Collections.singletonList(neighbour), self);
+
+		verify(discoveryStateRepository,times(1)).save(any(DiscoveryState.class));
+	}
 
 }

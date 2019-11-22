@@ -466,9 +466,6 @@ public class NeighbourDiscoverer {
 				neighbour.setCapabilities(capabilities);
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 
-				// Successful capability post, update discovery state capability post timestamp
-				discoveryState.setLastCapabilityExchange(LocalDateTime.now());
-				discoveryStateRepository.save(discoveryState);
 
 				logger.info("Successfully completed capability exchange.");
 				logger.debug("Updated neighbour: {}", neighbour.toString());
@@ -486,6 +483,9 @@ public class NeighbourDiscoverer {
 				MDCUtil.removeLogVariables();
 			}
 		}
+		// update discovery state capability post timestamp
+		discoveryState.setLastCapabilityExchange(LocalDateTime.now());
+		discoveryStateRepository.save(discoveryState);
 	}
 
 
