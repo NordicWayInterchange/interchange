@@ -284,6 +284,9 @@ public class NeighbourDiscoverer {
 
 
 					logger.info("Successfully posted subscription request to neighbour in graceful backoff.");
+					// Update discovery state
+					discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+					discoveryStateRepository.save(discoveryState);
 
 				} catch (SubscriptionRequestException e) {
 					neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
@@ -302,9 +305,6 @@ public class NeighbourDiscoverer {
 				}
 			}
 		}
-		// Update discovery state
-		discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
-		discoveryStateRepository.save(discoveryState);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
@@ -343,6 +343,7 @@ public class NeighbourDiscoverer {
 		DiscoveryState discoveryState = getDiscoveryState();
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
+			//TODO remove hasEstablishedSubscriptions.
 			if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 				logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 				Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
@@ -374,12 +375,12 @@ public class NeighbourDiscoverer {
 				}
 				neighbour = neighbourRepository.save(neighbour);
 				logger.info("Saving updated neighbour: {}", neighbour.toString());
+				// Successful subscription request, update discovery state subscription request timestamp.
+				discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+				discoveryStateRepository.save(discoveryState);
 			}
 			MDCUtil.removeLogVariables();
 		}
-		// Successful subscription request, update discovery state subscription request timestamp.
-		discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
-		discoveryStateRepository.save(discoveryState);
 
 	}
 
@@ -442,6 +443,7 @@ public class NeighbourDiscoverer {
 
 			logger.info("Local Service Providers have updated their subscriptions.");
 
+			//TODO this also finds neighbours with capability status FAILED. This makes
 			List<Neighbour> allNeighbours = neighbourRepository.findAll();
 			if(!allNeighbours.isEmpty()) {
 				logger.info("Performing new capability exchange with all neighbours");
