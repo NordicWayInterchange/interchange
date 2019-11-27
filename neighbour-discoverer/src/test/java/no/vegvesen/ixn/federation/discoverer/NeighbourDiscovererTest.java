@@ -486,18 +486,4 @@ public class NeighbourDiscovererTest {
 
     }
 
-    @Test
-	public void capabilityExchangeExceptionThrownAllowsDiscoveryStateToBeSaved() {
-		Neighbour neighbour = createNeighbour();
-		Self self = createSelf();
-
-		when(discoveryStateRepository.findByName(anyString())).thenReturn(new DiscoveryState(neighbour.getName()));
-		when(neighbourRepository.save(any(Neighbour.class))).thenReturn(neighbour);
-		when(neighbourRESTFacade.postCapabilitiesToCapabilities(self,neighbour)).thenThrow(CapabilityPostException.class);
-
-		neighbourDiscoverer.capabilityExchange(Collections.singletonList(neighbour), self);
-
-		verify(discoveryStateRepository,times(1)).save(any(DiscoveryState.class));
-	}
-
 }

@@ -343,7 +343,6 @@ public class NeighbourDiscoverer {
 		DiscoveryState discoveryState = getDiscoveryState();
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
-			//TODO remove hasEstablishedSubscriptions.
 			if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 				logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 				Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
@@ -425,7 +424,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.updated-service-provider-check-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void checkForUpdatedServiceProviderCapabilities(){
 		// Check if representation of Self has been updated by local Service Providers.
-		// If Self has updated Capabilities since last time we posted our capabilities, we need to post our capabilities to all neighbours.
+		// If Self has updated Capabilities since last time we posted our capabilities, we need to post our capabilities to all known neighbours.
 
 		logger.info("Checking if any Service Providers have updated their capabilities...");
 
@@ -443,11 +442,10 @@ public class NeighbourDiscoverer {
 
 			logger.info("Local Service Providers have updated their subscriptions.");
 
-			//TODO this also finds neighbours with capability status FAILED. This makes
-			List<Neighbour> allNeighbours = neighbourRepository.findAll();
-			if(!allNeighbours.isEmpty()) {
-				logger.info("Performing new capability exchange with all neighbours");
-				capabilityExchange(allNeighbours, self);
+			List<Neighbour> knownNeighbours = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+			if(!knownNeighbours.isEmpty()) {
+				logger.info("Performing new capability exchange with known neighbours");
+				capabilityExchange(knownNeighbours, self);
 			}
 		}
 	}
@@ -464,6 +462,9 @@ public class NeighbourDiscoverer {
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 				logger.info("Successfully completed capability exchange.");
 				logger.debug("Updated neighbour: {}", neighbour.toString());
+				// update discovery state capability post timestamp
+				discoveryState.setLastCapabilityExchange(LocalDateTime.now());
+				discoveryStateRepository.save(discoveryState);
 			} catch (CapabilityPostException e) {
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
 				neighbour.setBackoffAttempts(0);
@@ -475,9 +476,6 @@ public class NeighbourDiscoverer {
 				MDCUtil.removeLogVariables();
 			}
 		}
-		// update discovery state capability post timestamp
-		discoveryState.setLastCapabilityExchange(LocalDateTime.now());
-		discoveryStateRepository.save(discoveryState);
 	}
 
 
