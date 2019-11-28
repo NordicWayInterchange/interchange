@@ -330,7 +330,8 @@ public class NeighbourDiscoverer {
 		}
 		DiscoveryState discoveryState = getDiscoveryState();
 		LocalDateTime lastSubscriptionRequest = discoveryState.getLastSubscriptionRequest();
-		if(lastSubscriptionRequest == null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(lastSubscriptionRequest))) {
+		//TODO this really should be done on a per-neighbour basis
+		if(lastSubscriptionRequest != null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(lastSubscriptionRequest))) {
 		//if(self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(lastSubscriptionRequest)){
 			// Either first post or an update.
 			// Local Subscriptions have been updated since last time performed the subscription request.
