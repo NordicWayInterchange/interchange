@@ -329,7 +329,9 @@ public class NeighbourDiscoverer {
 			return; // We have nothing to post to our neighbour
 		}
 		DiscoveryState discoveryState = getDiscoveryState();
-		if(self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest())){
+		LocalDateTime lastSubscriptionRequest = discoveryState.getLastSubscriptionRequest();
+		if(lastSubscriptionRequest == null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(lastSubscriptionRequest))) {
+		//if(self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(lastSubscriptionRequest)){
 			// Either first post or an update.
 			// Local Subscriptions have been updated since last time performed the subscription request.
 			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
