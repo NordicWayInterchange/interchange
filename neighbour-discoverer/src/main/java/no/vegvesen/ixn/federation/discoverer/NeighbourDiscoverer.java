@@ -331,7 +331,8 @@ public class NeighbourDiscoverer {
 		DiscoveryState discoveryState = getDiscoveryState();
 		LocalDateTime lastSubscriptionRequest = discoveryState.getLastSubscriptionRequest();
 		//TODO this really should be done on a per-neighbour basis
-		if(lastSubscriptionRequest != null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(lastSubscriptionRequest))) {
+		LocalDateTime lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
+		if(shouldCheckSubsctiptionRequestsForUpdates(lastSubscriptionRequest, lastUpdatedLocalSubscriptions)) {
 		//if(self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(lastSubscriptionRequest)){
 			// Either first post or an update.
 			// Local Subscriptions have been updated since last time performed the subscription request.
@@ -407,6 +408,7 @@ public class NeighbourDiscoverer {
 	}
 
 	//TODO this method is not directly tested!
+
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void performCapabilityExchangeWithUnknownNeighbours(){
 		// Perform capability exchange with all neighbours with capabilities status UNKNOWN that we have found through the DNS.
@@ -422,8 +424,8 @@ public class NeighbourDiscoverer {
 			capabilityExchange(neighboursForCapabilityExchange,self);
 		}
 	}
-
 	//TODO this method is not directly tested!
+
 	@Scheduled(fixedRateString = "${discoverer.updated-service-provider-check-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void checkForUpdatedServiceProviderCapabilities(){
 		// Check if representation of Self has been updated by local Service Providers.
@@ -439,7 +441,9 @@ public class NeighbourDiscoverer {
 
 		DiscoveryState discoveryState = getDiscoveryState();
 
-		if(discoveryState.getLastCapabilityExchange()==null || (self.getLastUpdatedLocalCapabilities() != null && self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange()))){
+		LocalDateTime lastCapabilityExchange = discoveryState.getLastCapabilityExchange();
+		LocalDateTime lastUpdatedLocalCapabilities = self.getLastUpdatedLocalCapabilities();
+		if(shouldCheckCapabilitiesForUpdates(lastCapabilityExchange, lastUpdatedLocalCapabilities)){
 			// Capability post either not performed before, or Service Providers have been updated.
 			// Last updated capabilities is after last capability exchange - perform new capability exchange with all neighbours
 
@@ -452,7 +456,6 @@ public class NeighbourDiscoverer {
 			}
 		}
 	}
-
 	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self) {
 		DiscoveryState discoveryState = getDiscoveryState();
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
@@ -481,8 +484,6 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-
-
 	@Scheduled(fixedRateString = "${discoverer.dns-lookup-interval}", initialDelayString = "${discoverer.dns-initial-start-delay}")
 	public void checkForNewNeighbours() {
 		logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
@@ -500,6 +501,15 @@ public class NeighbourDiscoverer {
 			}
 			MDCUtil.removeLogVariables();
 		}
+	}
+
+	//TODO sohuld this change in the same way as for the subscription requests?
+	public boolean shouldCheckCapabilitiesForUpdates(LocalDateTime lastCapabilityExchange, LocalDateTime lastUpdatedLocalCapabilities) {
+		return lastCapabilityExchange ==null || (lastUpdatedLocalCapabilities != null && lastUpdatedLocalCapabilities.isAfter(lastCapabilityExchange));
+	}
+
+	public boolean shouldCheckSubsctiptionRequestsForUpdates(LocalDateTime lastSubscriptionRequest, LocalDateTime lastUpdatedLocalSubscriptions) {
+		return lastSubscriptionRequest != null && (lastUpdatedLocalSubscriptions != null && lastUpdatedLocalSubscriptions.isAfter(lastSubscriptionRequest));
 	}
 
 }

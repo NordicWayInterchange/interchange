@@ -150,6 +150,7 @@ public class NeighbourDiscovererTest {
 	 * Tests for graceful backoff algorithm
 	 */
 
+	//TODO move this test to Neighbour, and use constants to make sure this works as it should (itseems it doesn't right now).
 	@Test
 	public void calculatedNextPostAttemptTimeIsInCorrectInterval(){
 		Neighbour ericsson = createNeighbour();
@@ -485,5 +486,13 @@ public class NeighbourDiscovererTest {
 		verify(neighbourRepository).save(otherNeighbour);
 
     }
+
+    @Test
+	public void shouldUpdateSubscriptionsWitLastSubscriptionRequestNull() {
+		LocalDateTime lastSubscriptionRequest = null;
+		LocalDateTime lastUpdated = LocalDateTime.now().minusMinutes(10);
+		boolean checkSubsctiptionRequestsForUpdates = neighbourDiscoverer.shouldCheckSubsctiptionRequestsForUpdates(lastSubscriptionRequest, lastUpdated);
+		Assert.assertFalse(checkSubsctiptionRequestsForUpdates);
+	}
 
 }
