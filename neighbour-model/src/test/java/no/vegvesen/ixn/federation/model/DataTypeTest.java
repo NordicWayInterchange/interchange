@@ -8,8 +8,8 @@ import java.util.Set;
 
 public class DataTypeTest {
 
-    private DataType firstDataType = new DataType("datex2;1.0", "NO", "Obstruction");
-    private DataType secondDataType = new DataType("datex2;1.0", "SE", "Works");
+    private DataType firstDataType = new DataType("datex2;1.0", "NO");
+    private DataType secondDataType = new DataType("datex2;1.0", "SE");
 
 	@Test
 	public void dataTypeInCapabilitiesReturnsTrue(){

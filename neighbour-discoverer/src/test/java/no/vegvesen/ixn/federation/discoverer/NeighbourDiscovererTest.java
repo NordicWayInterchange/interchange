@@ -64,7 +64,7 @@ public class NeighbourDiscovererTest {
 
 	private Self createSelf() {
 		// Self setup
-		self = new Self("Bouvet");
+		self = new Self(myName);
 		Set<DataType> selfCapabilities = Collections.singleton(new DataType("datex2;1.0", "NO"));
 		self.setLocalCapabilities(selfCapabilities);
 		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("where LIKE 'FI'", SubscriptionStatus.REQUESTED));

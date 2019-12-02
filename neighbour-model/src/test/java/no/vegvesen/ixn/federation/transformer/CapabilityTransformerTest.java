@@ -21,11 +21,14 @@ public class CapabilityTransformerTest {
 	public void capabilitiyApiIsConvertedToInterchangeAndBack(){
 		CapabilityApi capabilityApi = new CapabilityApi();
 		capabilityApi.setName("Test 2");
-		DataTypeApi capabilities = new DataTypeApi("datex2;1.0", "NO");
+		final String how = "datex2;1.0";
+		final String where = "NO";
+		DataTypeApi capabilities = new DataTypeApi(how, where);
 		capabilityApi.setCapabilities(Collections.singleton(capabilities));
 
 		Neighbour interchange = capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
 
-		assertThat(interchange.getCapabilities().getDataTypes()).hasSize(1).contains(capabilities);
+		assertThat(interchange.getCapabilities().getDataTypes()).hasSize(1);
+		assertThat(interchange.getCapabilities().getDataTypes()).containsExactly(new DataType(how,where));
 	}
 }
