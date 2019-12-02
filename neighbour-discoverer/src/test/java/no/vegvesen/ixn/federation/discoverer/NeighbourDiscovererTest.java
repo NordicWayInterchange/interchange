@@ -150,7 +150,6 @@ public class NeighbourDiscovererTest {
 	 * Tests for graceful backoff algorithm
 	 */
 
-	//TODO move this test to Neighbour, and use constants to make sure this works as it should (itseems it doesn't right now).
 	@Test
 	public void calculatedNextPostAttemptTimeIsInCorrectInterval(){
 		Neighbour ericsson = createNeighbour();
@@ -430,7 +429,6 @@ public class NeighbourDiscovererTest {
 		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 	}
 
-	//TODO expand this into a more complete test, one that goes all the way from the outer methods. (so two tests, really).
 	@Test
 	public void twoNeighboursWhereOneHasNoOverlapBeforeAndAfterNewSubscriptionCalculationLetsSecondOneBeCalculated() {
 		Self self = new Self("self");
