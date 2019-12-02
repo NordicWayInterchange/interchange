@@ -456,7 +456,7 @@ public class NeighbourDiscovererTest {
 	public void calculatedSubscriptionRequestSameAsNeighbourSubscriptionsAllowsNextNeighbourToBeSaved() {
 		Self self = new Self("self");
 		Set<Subscription> selfLocalSubscriptions = new HashSet<>();
-		selfLocalSubscriptions.add(new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.CREATED));
+		selfLocalSubscriptions.add(new Subscription("where LIKE 'NO'", SubscriptionStatus.CREATED));
 		self.setLocalSubscriptions(selfLocalSubscriptions);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
@@ -466,7 +466,7 @@ public class NeighbourDiscovererTest {
 		Capabilities neighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,dataTypeSet);
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilities,subscriptionRequest,new SubscriptionRequest());
 		Set<Subscription> neighbourFedInSubscription = new HashSet<>();
-		neighbourFedInSubscription.add(new Subscription("where LIKE 'NO'",Subscription.SubscriptionStatus.ACCEPTED));
+		neighbourFedInSubscription.add(new Subscription("where LIKE 'NO'",SubscriptionStatus.ACCEPTED));
 		neighbour.setFedIn(new SubscriptionRequest(null,neighbourFedInSubscription));
 
 		Assert.assertTrue(neighbour.hasEstablishedSubscriptions());
