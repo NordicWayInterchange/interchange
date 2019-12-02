@@ -52,7 +52,7 @@ public class NeighbourRestControllerTest {
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
-	@Spy
+	//@Spy
 	private NeighbourRestController neighbourRestController = new NeighbourRestController(
 			neighbourRepository,
 			selfRepository,
@@ -109,6 +109,7 @@ public class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
+		verify(dnsFacade,times(1)).getNeighbours();
 	}
 
 	@Test
@@ -135,6 +136,7 @@ public class NeighbourRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(capabilityApiToServerJson))
 				.andDo(print());
+		verify(dnsFacade,times(1)).getNeighbours();
 	}
 
 	@Test
@@ -173,6 +175,9 @@ public class NeighbourRestControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(subscriptionRequestApiToServerJson))
 				.andExpect(status().isAccepted());
+		//TODO do we really need to save the Neighbour twice here?
+		verify(neighbourRepository,times(2)).save(any(Neighbour.class));
+		verify(dnsFacade).getNeighbours();
 
 	}
 
@@ -194,6 +199,7 @@ public class NeighbourRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(capabilityApiToServerJson))
-				.andDo(print());
+				.andDo(print())
+				.andExpect(status().is5xxServerError());
 	}
 }

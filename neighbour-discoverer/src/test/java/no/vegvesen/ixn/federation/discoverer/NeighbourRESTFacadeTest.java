@@ -5,10 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,12 +23,12 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 public class NeighbourRESTFacadeTest {
 
 
@@ -41,14 +38,13 @@ public class NeighbourRESTFacadeTest {
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
-	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(
-			restTemplate,
+	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(new NeighbourRESTClient(restTemplate,mapper),
 			capabilityTransformer,
 			subscriptionTransformer,
-			subscriptionRequestTransformer,
-			mapper);
+			subscriptionRequestTransformer);
 
 	private Neighbour ericsson;
+	private Self self;
 
 	private MockRestServiceServer server;
 
@@ -57,6 +53,8 @@ public class NeighbourRESTFacadeTest {
 		ericsson = new Neighbour();
 		ericsson.setName("ericsson.itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
+
+		self = new Self();
 
 		this.server = MockRestServiceServer.createServer(restTemplate);
 	}
@@ -84,12 +82,11 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Neighbour response = neighbourRESTFacade.postCapabilities(ericsson, ericsson);
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
 
-		assertThat(response.getName()).isEqualTo(capabilityApi.getName());
-		assertThat(response.getCapabilities().getDataTypes()).hasSize(1);
+		assertThat(res.getDataTypes()).hasSize(1);
 
-		Iterator<DataType> dataTypes = response.getCapabilities().getDataTypes().iterator();
+		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType dataTypeInCapabilities = dataTypes.next();
 
 		assertThat(dataTypeInCapabilities.getHow()).isEqualTo(dataType.getHow());
@@ -100,7 +97,8 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPostOfSubscriptionRequestReturnsSubscriptionRequest() throws Exception{
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE 'NO'");
+		String selector = "where LIKE 'NO'";
+		subscriptionApi.setSelector(selector);
 		subscriptionApi.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("remote server", Collections.singleton(subscriptionApi) );
 
@@ -111,7 +109,10 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+		self.setName("ericsson.itsinterchange.eu");
+		Set<Subscription> subscriptionSet = Collections.emptySet();
+
+		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
 
 		assertThat(response.getSubscriptions()).hasSize(1);
 
@@ -152,7 +153,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		neighbourRESTFacade.postCapabilities(ericsson, ericsson);
+		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
 	}
 
 	@Test(expected = SubscriptionRequestException.class)
@@ -166,7 +167,8 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+		Set<Subscription> subscriptionSet = Collections.emptySet();
+		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
 	}
 
 	@Test(expected = SubscriptionRequestException.class)
@@ -175,9 +177,7 @@ public class NeighbourRESTFacadeTest {
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
-		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
-		ericsson.setSubscriptionRequest(subscriptionRequest);
+		Set<Subscription> subscriptionSet = Collections.singleton(subscription);
 
 		// Subscription request received from the neighbour has empty set of subscription
 		SubscriptionRequestApi serverResponse = new SubscriptionRequestApi("remote server", new HashSet<>());
@@ -188,7 +188,8 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withStatus(HttpStatus.OK).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+
+		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
 	}
 
 	@Test(expected = SubscriptionRequestException.class)
@@ -196,13 +197,7 @@ public class NeighbourRESTFacadeTest {
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
 		subscription.setSelector("where LIKE 'NO'");
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
-		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
-		ericsson.setSubscriptionRequest(subscriptionRequest);
-
-		// Subscription request received from the neighbour has empty set of subscription
-		SubscriptionRequestApi serverResponse = new SubscriptionRequestApi("remote server", new HashSet<>());
-		String errorDetailsJson = new ObjectMapper().writeValueAsString(serverResponse);
+		Set<Subscription> subscriptions = Collections.singleton(subscription);
 
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
 		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
@@ -214,7 +209,7 @@ public class NeighbourRESTFacadeTest {
 
 
 
-		neighbourRESTFacade.postSubscriptionRequest(ericsson, ericsson);
+		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptions);
 	}
 
 	@Test(expected = CapabilityPostException.class)
@@ -227,7 +222,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
-		neighbourRESTFacade.postCapabilities(ericsson, ericsson);
+		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
 	}
 
 	@Test(expected = SubscriptionPollException.class)

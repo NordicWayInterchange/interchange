@@ -3,7 +3,12 @@ package no.vegvesen.ixn.federation.discoverer;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.DiscoveryState;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Self;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
@@ -16,7 +21,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -65,22 +69,6 @@ public class NeighbourDiscoverer {
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
 		MDCUtil.setLogVariables(myName, null);
-	}
-
-	Neighbour getDiscoveringNeighbourWithCapabilities() {
-
-		Neighbour selfRepresentation = new Neighbour();
-		selfRepresentation.setName(myName);
-
-		Self self = selfRepository.findByName(myName);
-		if(self != null) {
-			Capabilities discoveringNeighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, self.getLocalCapabilities());
-			selfRepresentation.setCapabilities(discoveringNeighbourCapabilities);
-		}
-
-		logger.info("Representation of discovering Neighbour with capabilities: {}", selfRepresentation.toString());
-
-		return selfRepresentation;
 	}
 
 
@@ -216,6 +204,10 @@ public class NeighbourDiscoverer {
 	public void gracefulBackoffPostCapabilities() {
 
 		DiscoveryState discoveryState = getDiscoveryState();
+		Self self = selfRepository.findByName(myName);
+		if (self == null) {
+			return;
+		}
 
 		List<Neighbour> neighboursWithFailedCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
 
@@ -226,12 +218,10 @@ public class NeighbourDiscoverer {
 				logger.warn("Posting capabilities to neighbour {} in graceful backoff.", neighbour.getName());
 
 				try {
-					Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
 
 					// Throws CapabilityPostException if unsuccessful.
-					Neighbour neighbourRepresentation = neighbourRESTFacade.postCapabilities(discoveringNeighbour, neighbour);
-
-					neighbour.setCapabilities(neighbourRepresentation.getCapabilities());
+					Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self,neighbour);
+					neighbour.setCapabilities(capabilities);
 					neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY); // Updated capabilities means we need to recalculate our subscription to the neighbour.
 					neighbour.setBackoffAttempts(0);
@@ -283,11 +273,10 @@ public class NeighbourDiscoverer {
 
 				try {
 					// Create representation of discovering Neighbour and calculate custom subscription for neighbour.
-					Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
-					discoveringNeighbour.getSubscriptionRequest().setSubscriptions(self.calculateCustomSubscriptionForNeighbour(neighbour));
+					Set<Subscription> newSubscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour);
 
 					// Throws SubscriptionRequestException if unsuccessful.
-					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
+					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(self,neighbour,newSubscriptions);
 
 					neighbour.setBackoffAttempts(0);
 					neighbour.setFedIn(postResponseSubscriptionRequest);
@@ -295,6 +284,9 @@ public class NeighbourDiscoverer {
 
 
 					logger.info("Successfully posted subscription request to neighbour in graceful backoff.");
+					// Update discovery state
+					discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+					discoveryStateRepository.save(discoveryState);
 
 				} catch (SubscriptionRequestException e) {
 					neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
@@ -313,9 +305,6 @@ public class NeighbourDiscoverer {
 				}
 			}
 		}
-		// Update discovery state
-		discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
-		discoveryStateRepository.save(discoveryState);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
@@ -323,141 +312,122 @@ public class NeighbourDiscoverer {
 		// Perform subscription request with all neighbours with capabilities KNOWN and fedIn EMPTY
 		logger.info("Checking for any Neighbours with KNOWN capabilities and EMPTY fedIn for subscription request");
 		List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
-
 		Self self = selfRepository.findByName(myName);
 		if(self == null){
 			return; // We have nothing to post to our neighbour
 		}
-
-		if(!neighboursForSubscriptionRequest.isEmpty()){
-			subscriptionRequest(neighboursForSubscriptionRequest,self);
-		}
+		subscriptionRequest(neighboursForSubscriptionRequest,self);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.updated-service-provider-check-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void checkForUpdatedServiceProviderSubscriptionRequests() {
 		// Check if representation of Self has been updated by local Service Providers.
 		// If Self has updated Subscriptions since last time we posted a subscription request, we need to recalculate the subscription request for all neighbours.
-
 		logger.info("Checking if any Service Providers have updated their subscriptions...");
-
 		Self self = selfRepository.findByName(myName);
 		if(self == null){
 			return; // We have nothing to post to our neighbour
 		}
-
 		DiscoveryState discoveryState = getDiscoveryState();
-
-		if(discoveryState.getLastSubscriptionRequest() == null || (self.getLastUpdatedLocalSubscriptions() != null && self.getLastUpdatedLocalSubscriptions().isAfter(discoveryState.getLastSubscriptionRequest()))){
+		LocalDateTime lastSubscriptionRequest = discoveryState.getLastSubscriptionRequest();
+		//TODO this really should be done on a per-neighbour basis
+		LocalDateTime lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
+		if(shouldCheckSubsctiptionRequestsForUpdates(lastSubscriptionRequest, lastUpdatedLocalSubscriptions)) {
 			// Either first post or an update.
 			// Local Subscriptions have been updated since last time performed the subscription request.
 			// Recalculate subscriptions to all neighbours - if any of them have changed, post a new subscription request.
-
 			logger.info("Local subscriptions have changed. Recalculating subscriptions to all neighbours...");
-
 			List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
 			subscriptionRequest(neighboursForSubscriptionRequest,self);
 		}
 	}
 
 	void subscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self) {
-
 		DiscoveryState discoveryState = getDiscoveryState();
-
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
 			if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 				logger.info("Found neighbour for subscription request: {}", neighbour.getName());
-
-				// Create the representation of the discovering Neighbour and calculate the custom subscription for the neighbour.
-				Neighbour discoveringNeighbour = new Neighbour();
-				discoveringNeighbour.setName(myName);
-
 				Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
-
-				SubscriptionRequest fedIn = neighbour.getFedIn();
-				Set<Subscription> fedInSubscriptions = fedIn.getSubscriptions();
+				Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
 				if (calculatedSubscriptionForNeighbour.isEmpty()) {
-
 					// No overlap between neighbour capabilities and local service provider subscriptions.
 					// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
-					fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
-
+					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
 					logger.info("The calculated subscription request for neighbour {} was empty. Setting Subscription status in fedIn to NO_OVERLAP", neighbour.getName());
-
-					// Decide if we should post empty subscription request or not.
 					if (fedInSubscriptions.isEmpty()) {
 						// No existing subscription to this neighbour, nothing to tear down
-						neighbourRepository.save(neighbour);
 						logger.info("Subscription to neighbour is empty. Nothing to tear down.");
-						MDCUtil.removeLogVariables();
-						continue;
 					} else {
-						// We have an existing subscription to the neighbour, tear it down
-						discoveringNeighbour.setSubscriptionRequest(emptySubscriptionRequest());
+						// We have an existing subscription to the neighbour, tear it down. At this point, we already know that the calculated set of neighbours is empty!
 						logger.info("The calculated subscription request is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.", neighbour.getName());
+						postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
 					}
 				} else {
 					// Calculated subscription is not empty, post as normal
-
 					if (calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 						// The subscription request we want to post is the same as what we already subscribe to. Skip.
                         logger.info("The calculated subscription requests are the same as neighbour {}'s subscription. Skipping",neighbour.getName());
 						continue;
+					} else {
+						// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
+						logger.info("The calculated subscription request for {} is not empty. Posting subscription request: {}", neighbour.getName(), calculatedSubscriptionForNeighbour);
+						postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
 					}
-
-					// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
-					discoveringNeighbour.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, calculatedSubscriptionForNeighbour));
-					logger.info("The calculated subscription request is not empty. Posting subscription request: {}", neighbour.getName(), discoveringNeighbour.toString());
 				}
-
-				try {
-					// Throws SubscriptionRequestException if unsuccessful
-					SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(discoveringNeighbour, neighbour);
-					fedIn.setSubscriptions(subscriptionRequestResponse.getSubscriptions());
-					fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
-
-					logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
-
-				} catch (SubscriptionRequestException e) {
-					fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
-					neighbour.setBackoffAttempts(0);
-					neighbour.setBackoffStart(LocalDateTime.now());
-
-					logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
-
-				} finally {
-					neighbour = neighbourRepository.save(neighbour);
-					logger.info("Saving updated neighbour: {}", neighbour.toString());
-					MDCUtil.removeLogVariables();
-				}
+				neighbour = neighbourRepository.save(neighbour);
+				logger.info("Saving updated neighbour: {}", neighbour.toString());
+				// Successful subscription request, update discovery state subscription request timestamp.
+				discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+				discoveryStateRepository.save(discoveryState);
 			}
+			MDCUtil.removeLogVariables();
 		}
-		// Successful subscription request, update discovery state subscription request timestamp.
-		discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
-		discoveryStateRepository.save(discoveryState);
 
 	}
 
-	private static SubscriptionRequest emptySubscriptionRequest() {
-		return new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
+	private void postUpdatedSubscriptions(Self self, Neighbour neighbour, Set<Subscription> calculatedSubscriptionForNeighbour)  {
+		SubscriptionRequest fedIn = neighbour.getFedIn();
+		try {
+			// Throws SubscriptionRequestException if unsuccessful
+			SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self,neighbour,calculatedSubscriptionForNeighbour);
+			fedIn.setSubscriptions(subscriptionRequestResponse.getSubscriptions());
+			fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+
+			logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
+
+		} catch (SubscriptionRequestException e) {
+			fedIn.setStatus(SubscriptionRequest.SubscriptionRequestStatus.FAILED);
+			neighbour.setBackoffAttempts(0);
+			neighbour.setBackoffStart(LocalDateTime.now());
+
+			logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
+
+		}
 	}
 
+	//TODO this method is not directly tested!
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void performCapabilityExchangeWithUnknownNeighbours(){
 		// Perform capability exchange with all neighbours with capabilities status UNKNOWN that we have found through the DNS.
 		logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
+		Self self = selfRepository.findByName(myName);
+		if (self == null) {
+			logger.info("No representation of self. Skipping.");
+			return;
+		}
 		List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 
 		if(!neighboursForCapabilityExchange.isEmpty()){
-			capabilityExchange(neighboursForCapabilityExchange);
+			capabilityExchange(neighboursForCapabilityExchange,self);
 		}
 	}
 
+	//TODO this method is not directly tested!
 	@Scheduled(fixedRateString = "${discoverer.updated-service-provider-check-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void checkForUpdatedServiceProviderCapabilities(){
 		// Check if representation of Self has been updated by local Service Providers.
-		// If Self has updated Capabilities since last time we posted our capabilities, we need to post our capabilities to all neighbours.
+		// If Self has updated Capabilities since last time we posted our capabilities, we need to post our capabilities to all known neighbours.
 
 		logger.info("Checking if any Service Providers have updated their capabilities...");
 
@@ -467,54 +437,44 @@ public class NeighbourDiscoverer {
 			return; // We have nothing to post to our neighbours.
 		}
 
-		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
+		DiscoveryState discoveryState = getDiscoveryState();
 
-		if(discoveryState == null || discoveryState.getLastCapabilityExchange()==null || (self.getLastUpdatedLocalCapabilities() != null && self.getLastUpdatedLocalCapabilities().isAfter(discoveryState.getLastCapabilityExchange()))){
+		LocalDateTime lastCapabilityExchange = discoveryState.getLastCapabilityExchange();
+		LocalDateTime lastUpdatedLocalCapabilities = self.getLastUpdatedLocalCapabilities();
+		if(shouldCheckCapabilitiesForUpdates(lastCapabilityExchange, lastUpdatedLocalCapabilities)){
 			// Capability post either not performed before, or Service Providers have been updated.
 			// Last updated capabilities is after last capability exchange - perform new capability exchange with all neighbours
 
 			logger.info("Local Service Providers have updated their subscriptions.");
 
-			List<Neighbour> allNeighbours = neighbourRepository.findAll();
-			if(!allNeighbours.isEmpty()) {
-				logger.info("Performing new capability exchange with all neighbours");
-				capabilityExchange(allNeighbours);
+			List<Neighbour> knownNeighbours = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+			if(!knownNeighbours.isEmpty()) {
+				logger.info("Performing new capability exchange with known neighbours");
+				capabilityExchange(knownNeighbours, self);
 			}
 		}
 	}
 
-	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
-
+	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self) {
 		DiscoveryState discoveryState = getDiscoveryState();
-
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
-
-			Neighbour discoveringNeighbour = getDiscoveringNeighbourWithCapabilities();
-			Neighbour neighbourResponse;
-
 			try {
 				// Throws CapabilityPostException if unsuccessful.
-				neighbourResponse = neighbourRESTFacade.postCapabilities(discoveringNeighbour, neighbour);
-
-				neighbour.setCapabilities(neighbourResponse.getCapabilities());
+				Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self,neighbour);
+				neighbour.setCapabilities(capabilities);
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-
-				// Successful capability post, update discovery state capability post timestamp
-				discoveryState.setLastCapabilityExchange(LocalDateTime.now());
-				discoveryStateRepository.save(discoveryState);
-
 				logger.info("Successfully completed capability exchange.");
 				logger.debug("Updated neighbour: {}", neighbour.toString());
-
+				// update discovery state capability post timestamp
+				discoveryState.setLastCapabilityExchange(LocalDateTime.now());
+				discoveryStateRepository.save(discoveryState);
 			} catch (CapabilityPostException e) {
 				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
 				neighbour.setBackoffAttempts(0);
 				neighbour.setBackoffStart(LocalDateTime.now());
-
-				logger.error("Unable to post capabilities to neighbour. Setting status of neighbour capabilities to FAILED.\n", e);
-
+				logger.error("Unable to post capabilities to neighbour. Setting status of neighbour capabilities to FAILED.", e);
 			} finally {
 				neighbour = neighbourRepository.save(neighbour);
 				logger.info("Saving updated neighbour: {}", neighbour.toString());
@@ -522,8 +482,6 @@ public class NeighbourDiscoverer {
 			}
 		}
 	}
-
-
 
 	@Scheduled(fixedRateString = "${discoverer.dns-lookup-interval}", initialDelayString = "${discoverer.dns-initial-start-delay}")
 	public void checkForNewNeighbours() {
@@ -542,6 +500,14 @@ public class NeighbourDiscoverer {
 			}
 			MDCUtil.removeLogVariables();
 		}
+	}
+
+	public boolean shouldCheckCapabilitiesForUpdates(LocalDateTime lastCapabilityExchange, LocalDateTime lastUpdatedLocalCapabilities) {
+		return lastCapabilityExchange ==null || (lastUpdatedLocalCapabilities != null && lastUpdatedLocalCapabilities.isAfter(lastCapabilityExchange));
+	}
+
+	public boolean shouldCheckSubsctiptionRequestsForUpdates(LocalDateTime lastSubscriptionRequest, LocalDateTime lastUpdatedLocalSubscriptions) {
+		return lastSubscriptionRequest != null && (lastUpdatedLocalSubscriptions != null && lastUpdatedLocalSubscriptions.isAfter(lastSubscriptionRequest));
 	}
 
 }
