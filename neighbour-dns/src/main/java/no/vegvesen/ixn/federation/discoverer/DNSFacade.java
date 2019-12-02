@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +56,6 @@ public class DNSFacade {
 							neighbour.getName());
 				}
 				neighbours.add(neighbour);
-				//ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-				//String json = ow.writeValueAsString(neighbour);
-				//logger.debug("DNS lookup in {} gave Neighbour {}", getDnsServerName(), json);
 			}
 			return neighbours;
 
