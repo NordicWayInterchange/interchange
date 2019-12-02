@@ -502,7 +502,6 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	//TODO sohuld this change in the same way as for the subscription requests?
 	public boolean shouldCheckCapabilitiesForUpdates(LocalDateTime lastCapabilityExchange, LocalDateTime lastUpdatedLocalCapabilities) {
 		return lastCapabilityExchange ==null || (lastUpdatedLocalCapabilities != null && lastUpdatedLocalCapabilities.isAfter(lastCapabilityExchange));
 	}
