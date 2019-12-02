@@ -7,26 +7,20 @@ import no.vegvesen.ixn.ssl.SSLContextFactory;
 import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import static no.vegvesen.ixn.Source.getProperties;
+
 public class Sink implements MessageListener, AutoCloseable {
 
-	public static void main(String[] args) throws Exception {
 
-        String propertiesFile = "/sink.properties";
-        Properties props = new Properties();
-        try (InputStream in = Source.class.getResourceAsStream(propertiesFile)) {
-            props.load(in);
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("The file %s could not be read",propertiesFile));
-        }
+    public static void main(String[] args) throws Exception {
+		Properties props = getProperties(args, "/sink.properties");
 
-        String url = props.getProperty("sink.url");
+		String url = props.getProperty("sink.url");
         String receiveQueue = props.getProperty("sink.receiveQueue");
         String keystorePath = props.getProperty("sink.keyStorepath");
         String keystorePassword = props.getProperty("sink.keyStorepass");
@@ -43,6 +37,7 @@ public class Sink implements MessageListener, AutoCloseable {
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
 
         Sink sink = new Sink(url,receiveQueue,sslContext);
+		System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
         sink.start();
     }
 
