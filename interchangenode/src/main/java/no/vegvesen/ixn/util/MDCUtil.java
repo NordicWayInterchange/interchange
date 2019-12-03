@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.TextMessage;
 
 public class MDCUtil {
@@ -12,7 +13,8 @@ public class MDCUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(MDCUtil.class);
 
-	public static void setLogVariables(TextMessage message) {
+	//TODO this should work on our internal message type
+	public static void setLogVariables(Message message) {
 		try {
 			MDC.put(MSGGUID, message.getJMSMessageID());
 		} catch (JMSException e) {

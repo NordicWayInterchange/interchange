@@ -16,6 +16,7 @@
  */
 package no.vegvesen.ixn.messaging;
 
+import no.vegvesen.ixn.model.IxnBaseMessage;
 import no.vegvesen.ixn.model.IxnMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.jms.Message;
 import javax.jms.TextMessage;
 
 import static no.vegvesen.ixn.MessageProperties.*;
@@ -39,6 +41,7 @@ public class IxnMessageProducer {
 		this.jmsTemplate = jmsTemplate;
 	}
 
+	//TODO should we still duplicate the messages? Test with a message that contains two sinks, where both should match the filters. Make sure each get the message.
 	// Duplicates message for each country and situation record type.
 	public void sendMessage(String destination, final IxnMessage message) {
 
@@ -78,8 +81,14 @@ public class IxnMessageProducer {
 		}
 	}
 
-	public void sendMessage(String destination, final TextMessage textMessage) {
+	public void sendMessage(String destination, final IxnBaseMessage message) {
+		logger.debug("*** Sending message ***");
+		this.jmsTemplate.send(destination, session -> message.getMessage());
+	}
+
+	public void sendMessage(String destination, final Message textMessage) {
 		this.jmsTemplate.send(destination, session -> textMessage);
 	}
+
 }
 
