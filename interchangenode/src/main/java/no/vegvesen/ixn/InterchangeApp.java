@@ -2,7 +2,9 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.geo.GeoLookup;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
+import no.vegvesen.ixn.model.IxnBaseMessage;
 import no.vegvesen.ixn.model.IxnMessage;
+import no.vegvesen.ixn.model.IxnMessageFactory;
 import no.vegvesen.ixn.util.MDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.TextMessage;
 import java.util.List;
 
@@ -37,6 +40,7 @@ public class InterchangeApp{
 		this.geoLookup = geoLookup;
 	}
 
+	//TODO isValid should be a part of the actual Message class
 	public boolean isValid(TextMessage textMessage){
 		logger.info("Validating message.");
 
@@ -99,6 +103,10 @@ public class InterchangeApp{
 			logger.info("Sending valid message to {}.", NWEXCHANGE);
 			producer.sendMessage(NWEXCHANGE, message);
 		}
+	}
+
+	void handleOneMessage(IxnBaseMessage message) {
+		producer.sendMessage(NWEXCHANGE,message);
 	}
 
 	public static void main(String[] args) {
