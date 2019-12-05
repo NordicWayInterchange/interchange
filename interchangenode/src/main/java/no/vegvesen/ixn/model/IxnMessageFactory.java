@@ -10,7 +10,6 @@ import javax.jms.Message;
 public class IxnMessageFactory {
     private IxnMessageFactory() {}
 
-    //TODO this could probably be static...
     public static IxnBaseMessage createIxnMessage(Message message) throws JMSException {
         String messageType = message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.name());
         if (messageType == null) {
