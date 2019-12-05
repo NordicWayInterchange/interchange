@@ -71,7 +71,7 @@ public class IxnBaseMessageTest {
 
     }
 
-    //Just to get the exception class when trying to parse a null value as long.
+    //Just to get the exception class when trying to parse a null value as double.
     //This the exception thrown when calling Message#getDoubleProperty on an undefined property
     //see https://docs.oracle.com/javaee/6/api/javax/jms/Message.html
     @Test(expected = NullPointerException.class)
