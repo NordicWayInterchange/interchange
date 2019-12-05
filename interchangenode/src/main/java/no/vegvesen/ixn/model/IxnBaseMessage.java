@@ -48,23 +48,27 @@ public class IxnBaseMessage {
                 getOriginatingCountry() != null &&
                 getProtocolVersion() != null &&
                 getMessageType() != null &&
-                hasDoubleProperty(CommonApplicationProperties.LATITUDE) &&
-                hasDoubleProperty(CommonApplicationProperties.LONGITUDE);
+                hasDoubleProperty(CommonApplicationProperties.LATITUDE.name()) &&
+                hasDoubleProperty(CommonApplicationProperties.LONGITUDE.name());
     }
 
-    private String getStringProperty(CommonApplicationProperties property) throws JMSException {
-        return message.getStringProperty(property.name());
+    protected String getStringProperty(CommonApplicationProperties property) throws JMSException {
+        return getStringProperty(property.name());
     }
 
-    private double getDoubleProperty(CommonApplicationProperties property) throws JMSException {
-        return message.getDoubleProperty(property.name());
+    protected String getStringProperty(String property) throws JMSException {
+        return message.getStringProperty(property);
+    }
+
+    protected double getDoubleProperty(String property) throws JMSException {
+        return message.getDoubleProperty(property);
     }
 
     /*
-        NumberFormatException is thrown when the header does not exist.
-        see https://docs.oracle.com/javaee/6/api/javax/jms/Message.html
+        NullPointer is thrown when the header does not exist, as this is what is thrown by Double.valueOf(null)
+        see https://docs.oracle.com/javaee/6/api/javax/jms/Message.html and IxnBaseMessageTest#testParseNullValueForDouble
      */
-    private boolean hasDoubleProperty(CommonApplicationProperties property) throws JMSException {
+    protected boolean hasDoubleProperty(String property) throws JMSException {
         try {
             getDoubleProperty(property);
             return true; //No exception thrown
