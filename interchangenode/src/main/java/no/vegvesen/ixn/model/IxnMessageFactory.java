@@ -11,7 +11,7 @@ public class IxnMessageFactory {
     private IxnMessageFactory() {}
 
     public static IxnBaseMessage createIxnMessage(Message message) throws JMSException {
-        String messageType = message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.name());
+        String messageType = message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName());
         if (messageType == null) {
             throw new MessageFactoryException("MessageType cannot be null");
         }

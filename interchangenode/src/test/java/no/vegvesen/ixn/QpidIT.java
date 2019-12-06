@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
 import no.vegvesen.ixn.model.IxnMessage;
+import no.vegvesen.ixn.model.KeyValue;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,9 +45,6 @@ public class QpidIT extends DockerBaseIT {
 	@ClassRule
 	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 
-	@ClassRule
-	public static GenericContainer postgisContainer = getPostgisContainer("interchangenode/src/test/docker/postgis");
-
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
@@ -54,11 +52,7 @@ public class QpidIT extends DockerBaseIT {
 			TestPropertyValues.of(
 					"amqphub.amqp10jms.remote-url=" + AMQP_URL,
 					"amqphub.amqp10jms.username=interchange",
-					"amqphub.amqp10jms.password=12345678",
-					"spring.datasource.url: jdbc:postgresql://localhost:" + postgisContainer.getMappedPort(JDBC_PORT) + "/geolookup",
-					"spring.datasource.username: geolookup",
-					"spring.datasource.password: geolookup",
-					"spring.datasource.driver-class-name: org.postgresql.Driver"
+					"amqphub.amqp10jms.password=12345678"
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -67,56 +61,43 @@ public class QpidIT extends DockerBaseIT {
     @Autowired
     TestOnrampMessageProducer producer;
 
-	@Autowired
-	IxnMessageProducer ixnMessageProducer;
-
-
-    public void sendMessageOneCountry(String messageId){
+    public void sendMessageOneCountry(String messageId,String country,float lat, float lon,String publicationType){
         long systemTime = System.currentTimeMillis();
         long timeToLive = 3_600_000; // 5 hrs
         long expiration = systemTime+timeToLive;
 
-        producer.sendMessage(63.0f,
-                10.0f,
-                "Statens Vegvesen",
-                "1234",
-                "Obstruction",
-                "Message with one country - " + messageId ,
-                expiration);
+        producer.sendMessage("bouvet",
+				"NO00001",
+				country,
+				"DATEX:1.0",
+				"DATEX2",
+				lat,
+				lon,
+				String.format("This is a datex2 message - %s",messageId),
+				expiration,
+				new KeyValue("publicationType",publicationType));
     }
 
-    public void sendMessageTwoCountries(String s){
+	public void sendBadMessage(String messageId, String country, float lat, float lon){
         long systemTime = System.currentTimeMillis();
         long timeToLive = 3_600_000;
         long expiration = systemTime+timeToLive;
 
-        producer.sendMessage(59.09f,
-                11.25f,
-                "Statens Vegvesen",
-                "1234",
-                "Obstruction",
-                "Message with two countries - " + s,
-                expiration);
-    }
-
-    public void sendBadMessage(String s){
-        long systemTime = System.currentTimeMillis();
-        long timeToLive = 3_600_000;
-        long expiration = systemTime+timeToLive;
-
-        // Missing 'who' gives invalid message.
-        producer.sendMessage(58f,
-                11f,
-                null,
-                "1234",
-                "Obstruction",
-                "Message with two countries - " + s,
-                expiration);
+		// Missing pusblisher gives invalid message.
+        producer.sendMessage("bouvet",
+				null,
+				country,
+				"DATEX:1.0",
+				"DATEX2",
+				lat,
+				lon,
+				String.format("This is a datex2 message - %s",messageId),
+				expiration);
     }
 
     @Test
     public void messageToNorwayGoesToNorwayQueue() throws Exception{
-        sendMessageOneCountry("1"); // NO
+        sendMessageOneCountry("1","NO",59.0f,10.0f,"Obstruction");
 		MessageConsumer consumer = createConsumer(NO_OUT);
         // The queue should have one message
         assertThat(consumer.receive(RECEIVE_TIMEOUT)).isNotNull();
@@ -125,7 +106,8 @@ public class QpidIT extends DockerBaseIT {
 
     @Test
     public void messageWithTwoCountriesGoesToTwoQueues() throws Exception{
-        sendMessageTwoCountries("3"); // NO and SE
+		sendMessageOneCountry("2","SE",58.0f,11.0f,"RoadWorks");
+		sendMessageOneCountry("3","NO",59.0f,10.0f,"Obstruction");
 		MessageConsumer seConsumer = createConsumer(SE_OUT);
 		MessageConsumer noConsumer = createConsumer(NO_OUT);
 		// Each queue should have one message
@@ -139,46 +121,13 @@ public class QpidIT extends DockerBaseIT {
 		return new BasicAuthSink(AMQP_URL, queueName, "interchange", "12345678").createConsumer();
 	}
 
-	@Test
-    public void messageWithCountryAndSituationGoesToRightQueue() throws Exception{
-        sendMessageOneCountry("2"); // NO and Obstruction
-		MessageConsumer noObstrConsumer = createConsumer(NO_OBSTRUCTION);
-		assertThat(noObstrConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
-		MessageConsumer noConsumer = createConsumer(NO_OUT);
-		assertThat(noConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
-		noConsumer.close();
-    }
-
     @Test
     public void badMessageGoesDoDeadLetterQueue() throws Exception{
-        sendBadMessage("4");
+        sendBadMessage("4","NO",10.0f,63.0f);
         // Expecting one message on dlqueue because message is invalid.
 		MessageConsumer dlConsumer = createConsumer(DLQUEUE);
 		assertThat(dlConsumer.receive(RECEIVE_TIMEOUT)).isNotNull();
 		dlConsumer.close();
     }
-
-	@Test
-	public void sendInvalidMessageBecauseItHasNoMessageBody() throws JMSException, NamingException {
-		long currentTimeMillis = System.currentTimeMillis();
-		long expiration = currentTimeMillis + 60000;
-		IxnMessage message = new IxnMessage(
-				"The great traffic testers",
-				"quest",
-				expiration,
-				63.0f,
-				10.0f,
-				Collections.singletonList("traffic jam"),
-				null);
-		message.setCountries(Collections.singletonList("no"));
-		ixnMessageProducer.sendMessage("onramp", message);
-		MessageConsumer consumer = createConsumer(NO_OUT);
-		Message noOutMessage = consumer.receive(2000);
-		if (noOutMessage!= null) {
-			System.out.println("received message " + noOutMessage.getBody(String.class));
-		}
-		consumer.close();
-		assertThat(noOutMessage).isNull();
-	}
 
 }

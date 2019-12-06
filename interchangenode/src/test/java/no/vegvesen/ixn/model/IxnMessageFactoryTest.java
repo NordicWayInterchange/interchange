@@ -15,35 +15,35 @@ public class IxnMessageFactoryTest {
     @Test
     public void datex2MessageTypeReturnsDatex2Message() throws JMSException {
         Message message = mock(Message.class);
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.name())).thenReturn("DATEX2");
+        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn("DATEX2");
         assertThat(IxnMessageFactory.createIxnMessage(message)).isOfAnyClassIn(Datex2Message.class);
     }
 
     @Test
     public void denmMessageTypeReturnsDenmMessage() throws JMSException {
         Message message = mock(Message.class);
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.name())).thenReturn("DENM");
+        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn("DENM");
         assertThat(IxnMessageFactory.createIxnMessage(message)).isOfAnyClassIn(DenmMessage.class);
     }
 
     @Test
     public void iviMessageTypeReturnsIviMessage() throws JMSException {
         Message message = mock(Message.class);
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.name())).thenReturn("IVI");
+        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn("IVI");
         assertThat(IxnMessageFactory.createIxnMessage(message)).isOfAnyClassIn(IviMessage.class);
     }
 
     @Test(expected = MessageFactoryException.class)
     public void unknownMessageTypeThrowsException() throws JMSException {
         Message message = mock(Message.class);
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.name())).thenReturn("UNKNOWN");
+        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn("UNKNOWN");
         IxnMessageFactory.createIxnMessage(message);
     }
 
     @Test(expected = MessageFactoryException.class)
     public void nullMessageTypeThrowsException() throws JMSException {
         Message message = mock(Message.class);
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.name())).thenReturn(null);
+        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn(null);
         IxnMessageFactory.createIxnMessage(message);
 
     }
