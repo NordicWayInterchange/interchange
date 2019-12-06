@@ -83,7 +83,9 @@ public class IxnMessageProducer {
 
 	public void sendMessage(String destination, final IxnBaseMessage message) {
 		logger.debug("*** Sending message ***");
-		this.jmsTemplate.send(destination, session -> message.getMessage());
+		this.jmsTemplate.send(destination, session -> {
+			return message.getMessage();
+		});
 	}
 
 	public void sendMessage(String destination, final Message textMessage) {

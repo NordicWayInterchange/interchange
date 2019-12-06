@@ -13,7 +13,7 @@ public enum  CommonApplicationProperties {
     //publisherId - Optional
     PUBLISHER_ID("publisherId",false),
     //publisherName - Mandatory
-    PUBLISHER_NAME("publisherName ",true),
+    PUBLISHER_NAME("publisherName",true),
     //originatingCountry  - Mandatory
     ORIGINATING_COUNTRY("originatingCountry",true),
     //protocolVersion - Mandatory
@@ -41,5 +41,9 @@ public enum  CommonApplicationProperties {
     CommonApplicationProperties(String propertyName, boolean mandatory) {
         this.propertyName = propertyName;
         this.mandatory = mandatory;
+    }
+
+    public String getPropertyName() {
+        return propertyName;
     }
 }
