@@ -4,11 +4,9 @@ import org.apache.qpid.jms.JmsClientProperties;
 
 /**
  * Class that encapsulates the common application properties in NW2, after the C-ROADS harmonisation
- * TODO Enum?
  */
 public enum  CommonApplicationProperties {
 
-    //TODO expiration
     USER_ID(JmsClientProperties.JMSXUSERID,true),
     //publisherId - Optional
     PUBLISHER_ID("publisherId",false),
@@ -46,4 +44,6 @@ public enum  CommonApplicationProperties {
     public String getPropertyName() {
         return propertyName;
     }
+
+
 }

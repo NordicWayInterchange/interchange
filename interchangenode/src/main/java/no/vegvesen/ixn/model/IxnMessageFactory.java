@@ -8,6 +8,11 @@ import javax.jms.Message;
 
 @Component
 public class IxnMessageFactory {
+
+    public static final String DATEX_2 = "DATEX2";
+    public static final String DENM = "DENM";
+    public static final String IVI = "IVI";
+
     private IxnMessageFactory() {}
 
     public static IxnBaseMessage createIxnMessage(Message message) throws JMSException {
@@ -16,11 +21,11 @@ public class IxnMessageFactory {
             throw new MessageFactoryException("MessageType cannot be null");
         }
         switch (messageType) {
-            case "DATEX2":
+            case DATEX_2:
                 return new Datex2Message(message);
-            case "DENM":
+            case DENM:
                 return new DenmMessage(message);
-            case "IVI":
+            case IVI:
                 return new IviMessage(message);
             default:
                 throw new MessageFactoryException(String.format("Unknown message type %s",messageType));
