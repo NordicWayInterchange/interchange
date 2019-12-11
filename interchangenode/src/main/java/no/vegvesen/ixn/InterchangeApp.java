@@ -43,7 +43,6 @@ public class InterchangeApp{
 				producer.sendMessage(NWEXCHANGE, ixnMessage);
 			} else {
 				logger.error("Sending bad message to dead letter queue. Invalid message.");
-				//producer.sendMessage(DLQUEUE, textMessage);
 				producer.sendMessage(DLQUEUE, ixnMessage);
 			}
 		}  catch (JMSException jmse){

@@ -2,10 +2,8 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import no.vegvesen.ixn.model.Datex2Message;
-import no.vegvesen.ixn.model.IxnMessage;
-import no.vegvesen.ixn.model.KeyValue;
-import no.vegvesen.ixn.model.MessageTestDouble;
-import org.junit.Assert;
+import no.vegvesen.ixn.util.KeyValue;
+import no.vegvesen.ixn.util.MessageTestDouble;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,9 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.TextMessage;
 
-import static no.vegvesen.ixn.MessageProperties.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,23 +45,6 @@ public class InterchangeAppTest {
         verify(producer, times(1)).sendMessage(eq("nwEx"), any(Datex2Message.class));
     }
 
-
-    @Test
-    public void  messageWithoutCountryIsDropped() throws JMSException {
-
-        Message message = MessageTestDouble.createMessage(
-                "bouvet",
-                "NO00001",
-                null,
-                "DATEX2:1.0",
-                "DATEX2",
-                "10.0",
-                "63.0",
-                new KeyValue("publicationType","SituationPublication")
-        );
-        app.receiveMessage(message);
-        verify(producer, times(0)).sendMessage(eq("nwEx"), any(IxnMessage.class));
-    }
 
     @Test
     public void receivedMessageToThrowExceptionSendsToDlQueue() throws JMSException{

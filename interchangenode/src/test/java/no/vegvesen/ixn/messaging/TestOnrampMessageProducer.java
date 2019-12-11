@@ -1,14 +1,12 @@
 package no.vegvesen.ixn.messaging;
 
 import no.vegvesen.ixn.CommonApplicationProperties;
-import no.vegvesen.ixn.model.KeyValue;
+import no.vegvesen.ixn.util.KeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.jms.TextMessage;
-
-import static no.vegvesen.ixn.MessageProperties.*;
 
 @Component
 public class TestOnrampMessageProducer {

@@ -8,7 +8,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 
 //TODO abstract?
-//TODO have userId, but how do I solve TTL?
 public class IxnBaseMessage {
 
     private static Logger logger = LoggerFactory.getLogger(IxnBaseMessage.class);
