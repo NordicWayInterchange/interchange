@@ -148,7 +148,7 @@ public class MessageTestDouble implements Message {
 
     @Override
     public boolean propertyExists(String name) throws JMSException {
-        throw new IllegalStateException("Method not implemented");
+        return properties.get(name) != null;
     }
 
     @Override
