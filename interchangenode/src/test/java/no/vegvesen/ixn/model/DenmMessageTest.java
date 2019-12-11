@@ -14,16 +14,16 @@ public class DenmMessageTest {
 
 
     @Test
-    public void testPublicationTypeNotSetIsInvalid() throws JMSException {
+    public void testCauseCodeNotSetIsInvalid() throws JMSException {
         Message message = mock(Message.class);
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn("USER");
-        when(message.getStringProperty(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn("NPRA");
-        when(message.getStringProperty(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn("NO");
-        when(message.getStringProperty(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn("DATEX2:1.0");
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn("DATEX2");
-        when(message.getDoubleProperty(CommonApplicationProperties.LATITUDE.getPropertyName())).thenReturn(10.71163d);
-        when(message.getDoubleProperty(CommonApplicationProperties.LONGITUDE.getPropertyName())).thenReturn(59.93043);
-        when(message.getStringProperty("causeCode")).thenReturn(null);
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.LATITUDE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.LONGITUDE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists("causeCode")).thenReturn(false);
 
         DenmMessage datex2Message = new DenmMessage(message);
         assertThat(datex2Message.isValid()).isFalse();
@@ -34,14 +34,14 @@ public class DenmMessageTest {
         Message message = mock(Message.class);
         DenmMessage ixnMessage = new DenmMessage(message);
 
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn("USER");
-        when(message.getStringProperty(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn("NPRA");
-        when(message.getStringProperty(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn("NO");
-        when(message.getStringProperty(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn("DATEX2:1.0");
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn("DATEX2");
-        when(message.getDoubleProperty(CommonApplicationProperties.LATITUDE.getPropertyName())).thenReturn(10.71163d);
-        when(message.getDoubleProperty(CommonApplicationProperties.LONGITUDE.getPropertyName())).thenReturn(59.93043);
-        when(message.getStringProperty("causeCode")).thenReturn("trafficCondition");
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.LATITUDE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.LONGITUDE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists("causeCode")).thenReturn(true);
         assertThat(ixnMessage.isValid()).isTrue();
     }
 

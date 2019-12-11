@@ -7,6 +7,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 
 public class DenmMessage extends IxnBaseMessage {
+    public static final String CAUSE_CODE = "causeCode";
     private static Logger logger = LoggerFactory.getLogger(DenmMessage.class);
 
     public DenmMessage(Message message) throws JMSException {
@@ -16,14 +17,11 @@ public class DenmMessage extends IxnBaseMessage {
     @Override
     public boolean isValid() {
         try {
-            return getCauseCode() != null && super.isValid();
+            return propertyExist(CAUSE_CODE) && super.isValid();
         } catch (JMSException e) {
             logger.error("Failed to get message property from Message.", e);
             return false;
         }
     }
 
-    public String getCauseCode() throws JMSException {
-        return getStringProperty("causeCode");
-    }
 }

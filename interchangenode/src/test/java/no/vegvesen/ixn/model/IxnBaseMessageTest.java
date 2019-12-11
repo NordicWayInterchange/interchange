@@ -18,7 +18,7 @@ public class IxnBaseMessageTest {
         Message message = mock(Message.class);
         IxnBaseMessage ixnMessage = new IxnBaseMessage(message);
 
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(null);
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(false);
         assertThat(ixnMessage.isValid()).isFalse();
     }
 
@@ -27,8 +27,8 @@ public class IxnBaseMessageTest {
         Message message = mock(Message.class);
         IxnBaseMessage ixnMessage = new IxnBaseMessage(message);
 
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn("USER");
-        when(message.getStringProperty(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(null);
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(false);
         assertThat(ixnMessage.isValid()).isFalse();
 
     }
@@ -38,9 +38,9 @@ public class IxnBaseMessageTest {
         Message message = mock(Message.class);
         IxnBaseMessage ixnMessage = new IxnBaseMessage(message);
 
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn("USER");
-        when(message.getStringProperty(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn("NPRA");
-        when(message.getStringProperty(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn(null);
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn(false);
         assertThat(ixnMessage.isValid()).isFalse();
 
     }
@@ -50,10 +50,10 @@ public class IxnBaseMessageTest {
         Message message = mock(Message.class);
         IxnBaseMessage ixnMessage = new IxnBaseMessage(message);
 
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn("USER");
-        when(message.getStringProperty(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn("NPRA");
-        when(message.getStringProperty(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn("NO");
-        when(message.getStringProperty(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn(null);
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn(false);
         assertThat(ixnMessage.isValid()).isFalse();
 
     }
@@ -63,26 +63,13 @@ public class IxnBaseMessageTest {
         Message message = mock(Message.class);
         IxnBaseMessage ixnMessage = new IxnBaseMessage(message);
 
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn("USER");
-        when(message.getStringProperty(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn("NPRA");
-        when(message.getStringProperty(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn("NO");
-        when(message.getStringProperty(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn("DATEX2:1.0");
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn(null);
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn(false);
         assertThat(ixnMessage.isValid()).isFalse();
 
-    }
-
-    //Just to get the exception class when trying to parse a null value as double.
-    //This the exception thrown when calling Message#getDoubleProperty on an undefined property
-    //see https://docs.oracle.com/javaee/6/api/javax/jms/Message.html
-    @Test(expected = NullPointerException.class)
-    public void testParseNullValueForDouble() {
-        Double.valueOf(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testParseNullValueForFloat() {
-        Float.valueOf(null);
     }
 
     @Test
@@ -90,12 +77,12 @@ public class IxnBaseMessageTest {
         Message message = mock(Message.class);
         IxnBaseMessage ixnMessage = new IxnBaseMessage(message);
 
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn("USER");
-        when(message.getStringProperty(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn("NPRA");
-        when(message.getStringProperty(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn("NO");
-        when(message.getStringProperty(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn("DATEX2:1.0");
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn("DATEX2");
-        when(message.getDoubleProperty(CommonApplicationProperties.LATITUDE.getPropertyName())).thenThrow(NullPointerException.class);
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.LATITUDE.getPropertyName())).thenReturn(false);
         assertThat(ixnMessage.isValid()).isFalse();
     }
 
@@ -104,13 +91,13 @@ public class IxnBaseMessageTest {
         Message message = mock(Message.class);
         IxnBaseMessage ixnMessage = new IxnBaseMessage(message);
 
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn("USER");
-        when(message.getStringProperty(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn("NPRA");
-        when(message.getStringProperty(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn("NO");
-        when(message.getStringProperty(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn("DATEX2:1.0");
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn("DATEX2");
-        when(message.getDoubleProperty(CommonApplicationProperties.LATITUDE.getPropertyName())).thenReturn(10.71163d);
-        when(message.getDoubleProperty(CommonApplicationProperties.LONGITUDE.getPropertyName())).thenThrow(NullPointerException.class);
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.LATITUDE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.LONGITUDE.getPropertyName())).thenReturn(false);
         assertThat(ixnMessage.isValid()).isFalse();
     }
 
@@ -119,13 +106,13 @@ public class IxnBaseMessageTest {
         Message message = mock(Message.class);
         IxnBaseMessage ixnMessage = new IxnBaseMessage(message);
 
-        when(message.getStringProperty(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn("USER");
-        when(message.getStringProperty(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn("NPRA");
-        when(message.getStringProperty(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn("NO");
-        when(message.getStringProperty(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn("DATEX2:1.0");
-        when(message.getStringProperty(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn("DATEX2");
-        when(message.getDoubleProperty(CommonApplicationProperties.LATITUDE.getPropertyName())).thenReturn(10.71163d);
-        when(message.getDoubleProperty(CommonApplicationProperties.LONGITUDE.getPropertyName())).thenReturn(59.93043);
+        when(message.propertyExists(CommonApplicationProperties.USER_ID.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.LATITUDE.getPropertyName())).thenReturn(true);
+        when(message.propertyExists(CommonApplicationProperties.LONGITUDE.getPropertyName())).thenReturn(true);
         assertThat(ixnMessage.isValid()).isTrue();
     }
 

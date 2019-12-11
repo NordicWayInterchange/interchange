@@ -15,14 +15,10 @@ public class Datex2Message extends IxnBaseMessage {
         super(message);
     }
 
-    public String getPublicationType() throws JMSException {
-        return getStringProperty(PUBLICATION_TYPE);
-    }
-
     @Override
     public boolean isValid() {
         try {
-            return getPublicationType() != null && super.isValid();
+            return propertyExist(PUBLICATION_TYPE) && super.isValid();
         } catch (JMSException e) {
             logger.error("Failed to get message property from Message.", e);
             return false;

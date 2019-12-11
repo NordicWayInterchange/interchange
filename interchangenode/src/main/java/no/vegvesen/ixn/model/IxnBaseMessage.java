@@ -22,27 +22,6 @@ public class IxnBaseMessage {
         message.setJMSExpiration(checkExpiration(message.getJMSExpiration(),System.currentTimeMillis()));
     }
 
-    //TODO should we use runtimeExceptions instead?
-    public String getUserId() throws JMSException {
-        return getStringProperty(CommonApplicationProperties.USER_ID);
-    }
-
-    public String getPublisherName() throws JMSException {
-        return getStringProperty(CommonApplicationProperties.PUBLISHER_NAME);
-    }
-
-    public String getOriginatingCountry() throws JMSException {
-        return getStringProperty(CommonApplicationProperties.ORIGINATING_COUNTRY);
-    }
-
-    public String getProtocolVersion() throws JMSException {
-        return getStringProperty(CommonApplicationProperties.PROTOCOL_VERSION);
-    }
-
-    public String getMessageType() throws JMSException {
-        return getStringProperty(CommonApplicationProperties.MESSAGE_TYPE);
-    }
-
     public Message getMessage() {
         return message;
     }
@@ -51,15 +30,15 @@ public class IxnBaseMessage {
     //TODO could use the mandatory field in CommonApplicationProperties.
     public boolean isValid() {
         try {
-            boolean valid = getUserId() != null &&
-                    getPublisherName() != null &&
-                    getOriginatingCountry() != null &&
-                    getProtocolVersion() != null &&
-                    getMessageType() != null &&
-                    hasDoubleProperty(CommonApplicationProperties.LATITUDE.getPropertyName()) &&
-                    hasDoubleProperty(CommonApplicationProperties.LONGITUDE.getPropertyName());
-            logger.debug("valid: {}",valid);
+            boolean valid = propertyExist(CommonApplicationProperties.USER_ID) &&
+                    propertyExist(CommonApplicationProperties.PUBLISHER_NAME) &&
+                    propertyExist(CommonApplicationProperties.ORIGINATING_COUNTRY) &&
+                    propertyExist(CommonApplicationProperties.PROTOCOL_VERSION) &&
+                    propertyExist(CommonApplicationProperties.MESSAGE_TYPE) &&
+                    propertyExist(CommonApplicationProperties.LATITUDE) &&
+                    propertyExist(CommonApplicationProperties.LONGITUDE);
             return valid;
+
         } catch (JMSException e) {
             logger.error("Failed to get message property from Message.", e);
             return false;
@@ -67,32 +46,12 @@ public class IxnBaseMessage {
         }
     }
 
-    protected String getStringProperty(CommonApplicationProperties property) throws JMSException {
-        return getStringProperty(property.getPropertyName());
-    }
-
-    protected String getStringProperty(String property) throws JMSException {
-        return message.getStringProperty(property);
-    }
-
-    protected double getDoubleProperty(String property) throws JMSException {
-        return message.getDoubleProperty(property);
+    protected boolean propertyExist(CommonApplicationProperties property) throws JMSException {
+        return propertyExist(property.getPropertyName());
     }
 
     protected boolean propertyExist(String property) throws JMSException {
         return message.propertyExists(property);
-    }
-    /*
-        NullPointer is thrown when the header does not exist, as this is what is thrown by Double.valueOf(null)
-        see https://docs.oracle.com/javaee/6/api/javax/jms/Message.html and IxnBaseMessageTest#testParseNullValueForDouble
-     */
-    protected boolean hasDoubleProperty(String property) throws JMSException {
-        try {
-            getDoubleProperty(property);
-            return true; //No exception thrown
-        } catch (NullPointerException e) {
-            return false;
-        }
     }
 
     static long checkExpiration(long expiration, long currentTime){
