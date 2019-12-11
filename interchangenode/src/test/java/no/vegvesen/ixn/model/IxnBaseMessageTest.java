@@ -142,18 +142,18 @@ public class IxnBaseMessageTest {
     @Test
     public void negativeExpirationTimeIsSetToDefaultExpiration(){
         long currentTime = System.currentTimeMillis();
-        assertThat((currentTime + IxnMessage.DEFAULT_TTL)).isEqualTo(IxnBaseMessage.checkExpiration(-1, currentTime));
+        assertThat((currentTime + IxnBaseMessage.DEFAULT_TTL)).isEqualTo(IxnBaseMessage.checkExpiration(-1, currentTime));
     }
 
     @Test
     public void tooBigExpirationTimeIsSetToMaxExpiration(){
         long currentTime = System.currentTimeMillis();
-        assertThat((currentTime + IxnMessage.MAX_TTL)).isEqualTo(IxnBaseMessage.checkExpiration(IxnMessage.MAX_TTL + 100  + currentTime, currentTime));
+        assertThat((currentTime + IxnBaseMessage.MAX_TTL)).isEqualTo(IxnBaseMessage.checkExpiration(IxnBaseMessage.MAX_TTL + 100  + currentTime, currentTime));
     }
 
     @Test
     public void validExpirationTimeIsKept(){
         long currentTime = System.currentTimeMillis();
-        assertThat(((IxnMessage.MAX_TTL-100) + currentTime)).isEqualTo(IxnBaseMessage.checkExpiration(IxnMessage.MAX_TTL - 100 + currentTime, currentTime));
+        assertThat(((IxnBaseMessage.MAX_TTL-100) + currentTime)).isEqualTo(IxnBaseMessage.checkExpiration(IxnBaseMessage.MAX_TTL - 100 + currentTime, currentTime));
     }
 }

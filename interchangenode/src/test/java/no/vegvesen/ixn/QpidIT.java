@@ -1,10 +1,8 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
-import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
-import no.vegvesen.ixn.model.IxnMessage;
-import no.vegvesen.ixn.model.KeyValue;
+import no.vegvesen.ixn.util.KeyValue;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,10 +16,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
-import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

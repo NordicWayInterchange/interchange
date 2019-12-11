@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.model;
+package no.vegvesen.ixn.util;
 
 public class KeyValue {
     private final String key;

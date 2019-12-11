@@ -76,7 +76,7 @@ public class BaseDataTypeSelectorMatcherTest {
 
 
     /*
-    TODO this really doesn't work.
+    TODO this really doesn't work. We need to have long and hard look at using the selectors as a part of the external interface at all!
     @Test(expected = SelectorAlwaysTrueException.class)
     public void alwaysTrueNotAccepted() {
         BaseDataType dataType = new BaseDataType(Arrays.asList(datex,norway));

@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.model;
+package no.vegvesen.ixn.util;
 
 import no.vegvesen.ixn.CommonApplicationProperties;
 
@@ -296,7 +296,7 @@ public class MessageTestDouble implements Message {
         String messageType,
         String latitude,
         String longitude,
-        KeyValue ... aditionalProperties) {
+        KeyValue... aditionalProperties) {
 
         Map<String, String> properties = new HashMap<>();
         properties.put(CommonApplicationProperties.USER_ID.getPropertyName(),userId);
