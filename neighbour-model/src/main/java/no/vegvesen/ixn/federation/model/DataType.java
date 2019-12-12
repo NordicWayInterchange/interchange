@@ -100,6 +100,7 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 				"data_id=" + data_id +
 				", originatingCountry='" + originatingCountry + '\'' +
 				", messageType='" + messageType + '\'' +
+				", publicationType='" + publicationType + '\'' +
 				", lastUpdated=" + lastUpdated +
 				'}';
 	}
