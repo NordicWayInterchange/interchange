@@ -62,7 +62,7 @@ public class CapabilityTransformer {
 		return apis;
 	}
 
-	public Set<DataType> dataTypeApiToDataType(Set<DataTypeApi> capabilities) {
+	public Set<DataType> dataTypeApiToDataType(Set<? extends DataTypeApi> capabilities) {
 		Set<DataType> dataTypes = new HashSet<>();
 		for (DataTypeApi capability : capabilities) {
 			dataTypes.add(new DataType(capability.getHow(), capability.getWhere()));

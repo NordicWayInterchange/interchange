@@ -6,16 +6,16 @@ import java.util.Set;
 
 public class CapabilityApi{
 
-	private static final String version = "1.0";
+	private String version = "1.0";
 	private String name;
 	private Set<DataTypeApi> capabilities = new HashSet<>();
 
 	public CapabilityApi() {
 	}
 
-	public CapabilityApi(String name, Set<DataTypeApi> capabilities) {
+	public CapabilityApi(String name, Set<? extends DataTypeApi> capabilities) {
 		this.name = name;
-		this.capabilities = capabilities;
+		this.capabilities.addAll(capabilities);
 	}
 
 	public String getVersion() {
@@ -34,8 +34,16 @@ public class CapabilityApi{
 		return capabilities;
 	}
 
-	public void setCapabilities(Set<DataTypeApi> capabilities) {
-		this.capabilities = capabilities;
+	public void setCapabilities(Set<? extends DataTypeApi> capabilities) {
+		if (this.capabilities == null) {
+			this.capabilities = new HashSet<>();
+		}
+		this.capabilities.clear();
+		this.capabilities.addAll(capabilities);
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
 	@Override

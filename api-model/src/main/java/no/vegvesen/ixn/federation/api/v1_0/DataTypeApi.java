@@ -1,7 +1,17 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+@JsonTypeInfo(
+		use = JsonTypeInfo.Id.NAME,
+		include = JsonTypeInfo.As.EXISTING_PROPERTY,
+		visible = true,
+		property = "how")
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = Datex2DataTypeApi.class, name = Datex2DataTypeApi.DATEX_2),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataTypeApi implements DataTypeI {
 

@@ -5,7 +5,10 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
@@ -16,7 +19,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -92,7 +94,7 @@ public class NeighbourRestControllerTest {
 		// Mock incoming capabiity API
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		DataTypeApi ericssonDataType = new DataTypeApi("datex2;1.0", "NO");
+		DataTypeApi ericssonDataType = new Datex2DataTypeApi("NO");
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
@@ -124,7 +126,7 @@ public class NeighbourRestControllerTest {
 		// Mock the incoming API object.
 		CapabilityApi unknownNeighbour = new CapabilityApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new DataTypeApi("datex2;1.0", "NO")));
+		unknownNeighbour.setCapabilities(Collections.singleton(new Datex2DataTypeApi("NO")));
 
 		// Mock response from DNS facade on Server
 		doReturn(Collections.emptyList()).when(dnsFacade).getNeighbours();
@@ -191,7 +193,7 @@ public class NeighbourRestControllerTest {
 		// Create incoming capability api object.
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		ericsson.setCapabilities(Collections.singleton(new DataTypeApi("datex2;1.0", "NO")));
+		ericsson.setCapabilities(Collections.singleton(new Datex2DataTypeApi("NO")));
 
 		// Convert to JSON
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
@@ -202,6 +204,35 @@ public class NeighbourRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(capabilityApiToServerJson))
 				.andDo(print())
-				.andExpect(status().is5xxServerError());
+				.andExpect(status().is4xxClientError());
+	}
+
+	@Test
+	public void postDatexDataTypeCapability() throws Exception {
+		mockCertificate("ericsson");
+
+		// Mock incoming capabiity API
+		CapabilityApi ericsson = new CapabilityApi();
+		ericsson.setName("ericsson");
+		DataTypeApi ericssonDataType = new Datex2DataTypeApi("NO", "myPublicationType");
+		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
+
+		// Create JSON string of capability api object to send to the server
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
+
+		// Mock dns lookup
+		Neighbour ericssonNeighbour = new Neighbour();
+		ericssonNeighbour.setName("ericsson");
+		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
+		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
+
+		mockMvc.perform(
+				post(capabilityExchangePath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().isOk());
+		verify(dnsFacade,times(1)).getNeighbours();
 	}
 }

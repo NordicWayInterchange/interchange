@@ -96,8 +96,8 @@ public abstract class NeighbourRestTestController {
 	@Secured("ROLE_USER")
 	public CapabilityApi updateCapabilities(@RequestBody CapabilityApi neighbourCapabilities) {
 
-		DataTypeApi volvoDataTypeOne = new DataTypeApi("datex2;1.0", "NO");
-		DataTypeApi volvoDataTypeTwo = new DataTypeApi("datex2;1.0", "NO");
+		DataTypeApi volvoDataTypeOne = new Datex2DataTypeApi("NO");
+		DataTypeApi volvoDataTypeTwo = new Datex2DataTypeApi("NO");
 
 		CapabilityApi capabilityApi = new CapabilityApi();
 		capabilityApi.setCapabilities(Stream.of(volvoDataTypeOne, volvoDataTypeTwo).collect(Collectors.toSet()));
