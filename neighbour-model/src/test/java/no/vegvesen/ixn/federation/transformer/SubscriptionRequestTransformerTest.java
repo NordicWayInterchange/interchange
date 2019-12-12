@@ -26,7 +26,7 @@ public class SubscriptionRequestTransformerTest {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("Test");
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		neighbour.getSubscriptionRequest().setSubscriptions(Collections.singleton(subscription));
 
 		// transform to subscriptionRequestApi object and back to neighbour
@@ -46,7 +46,7 @@ public class SubscriptionRequestTransformerTest {
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
 		subscriptionRequestApi.setName("Test 2");
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		Set<SubscriptionApi> subscriptionApiSet = new HashSet<>();
 		subscriptionApiSet.add(subscriptionApi);

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public class NeighbourRepositoryIT {
 		repository.save(thirdInterchange);
 
 		Neighbour update = repository.findByName("Third Neighbour");
-		DataType aDataType = new DataType("datex2;1.0", "NO");
+		DataType aDataType = new DataType(Datex2DataTypeApi.DATEX_2, "NO");
 		Capabilities firstCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(aDataType));
 		update.setCapabilities(firstCapabilities);
 		repository.save(update);
@@ -88,8 +89,8 @@ public class NeighbourRepositoryIT {
 	public void interchangeReadyToSetupRouting() {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Set<Subscription> requestedSubscriptions = new HashSet<>();
-		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED));
-		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", SubscriptionStatus.ACCEPTED));
+		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED));
+		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.ACCEPTED));
 		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour readyToSetup = new Neighbour("freddy", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
@@ -119,8 +120,8 @@ public class NeighbourRepositoryIT {
 	public void interchangeCanUpdateSubscriptionsSet() {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Set<Subscription> requestedSubscriptions = new HashSet<>();
-		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED));
-		requestedSubscriptions.add(new Subscription("where = 'NO' and what = 'bird'", SubscriptionStatus.REQUESTED));
+		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED));
+		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.REQUESTED));
 		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour ixnForUpdate = new Neighbour("4update", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
@@ -138,7 +139,7 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void interchangeReadyForForwarding() {
 		Set<Subscription> subscriptions = new HashSet<>();
-		subscriptions.add(new Subscription("where = 'NO' and what = 'fish'", SubscriptionStatus.CREATED));
+		subscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.CREATED));
 		SubscriptionRequest outgoing = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, subscriptions);
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Neighbour ixnForwards = new Neighbour("norwegian-fish", capabilities, outgoing, null);

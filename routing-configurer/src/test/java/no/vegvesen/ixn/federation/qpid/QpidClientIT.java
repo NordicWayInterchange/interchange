@@ -238,7 +238,7 @@ public class QpidClientIT extends DockerBaseIT {
 	@Test
 	public void newNeighbourCanWriteToFedExButNotOnramp() throws JMSException, NamingException {
 		HashSet<Subscription> subscriptions = new HashSet<>();
-		subscriptions.add(new Subscription("where = 'SE'", SubscriptionStatus.REQUESTED));
+		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED));
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions), null);
 		client.setupRouting(nordea, NW_EX);
 		client.addInterchangeUserToGroups(nordea.getName(), FEDERATED_GROUP_NAME);

@@ -18,7 +18,7 @@ public class DataType implements DataTypeI {
 	private Integer data_id;
 
 	private String originatingCountry;
-	private String how;
+	private String messageType;
 
 	@Column
 	@UpdateTimestamp
@@ -26,8 +26,8 @@ public class DataType implements DataTypeI {
 
 	public DataType(){}
 
-	public DataType(String how, String originatingCountry) {
-		this.how = how;
+	public DataType(String messageType, String originatingCountry) {
+		this.messageType = messageType;
 		this.originatingCountry = originatingCountry;
 	}
 
@@ -42,13 +42,13 @@ public class DataType implements DataTypeI {
 	}
 
 	@Override
-	public String getHow() {
-		return how;
+	public String getMessageType() {
+		return messageType;
 	}
 
 	@Override
-	public void setHow(String how) {
-		this.how = how;
+	public void setMessageType(String messageType) {
+		this.messageType = messageType;
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -70,13 +70,13 @@ public class DataType implements DataTypeI {
 		DataType dataType = (DataType) o;
 
 		if (!originatingCountry.equals(dataType.originatingCountry)) return false;
-		return how.equals(dataType.how);
+		return messageType.equals(dataType.messageType);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = originatingCountry.hashCode();
-		result = 31 * result + how.hashCode();
+		result = 31 * result + messageType.hashCode();
 		return result;
 	}
 
@@ -85,7 +85,7 @@ public class DataType implements DataTypeI {
 		return "DataType{" +
 				"data_id=" + data_id +
 				", originatingCountry='" + originatingCountry + '\'' +
-				", how='" + how + '\'' +
+				", messageType='" + messageType + '\'' +
 				", lastUpdated=" + lastUpdated +
 				'}';
 	}

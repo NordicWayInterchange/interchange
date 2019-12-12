@@ -28,8 +28,8 @@ public class DataTypeSelectorMatcher {
 		private final HashMap<String, Object> headers = new HashMap<>();
 
 		DataTypeFilter(DataType dataType) {
-			headers.put("how", dataType.getHow());
-			headers.put("where", dataType.getOriginatingCountry());
+			headers.put("messageType", dataType.getMessageType());
+			headers.put("originatingCountry", dataType.getOriginatingCountry());
 		}
 
 		@Override

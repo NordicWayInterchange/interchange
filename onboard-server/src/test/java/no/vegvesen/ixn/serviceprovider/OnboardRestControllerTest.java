@@ -154,7 +154,7 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE 'SE'");
+		subscriptionApi.setSelector("originatingCountry LIKE 'SE'");
 
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
 		subscriptionRequestApi.setName("First Service Provider");
@@ -178,7 +178,7 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE `SE`");
+		subscriptionApi.setSelector("originatingCountry = `SE`");
 
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
 		subscriptionRequestApi.setName("First Service Provider");
@@ -201,7 +201,7 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE '%'");
+		subscriptionApi.setSelector("originatingCountry LIKE '%'");
 
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
 		subscriptionRequestApi.setName("First Service Provider");
@@ -226,8 +226,8 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		// The existing subscriptions of the Service Provider
-		Subscription a = new Subscription("where LIKE 'SE'", SubscriptionStatus.REQUESTED);
-		Subscription b = new Subscription("where LIKE 'FI'", SubscriptionStatus.REQUESTED);
+		Subscription a = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED);
+		Subscription b = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
@@ -263,7 +263,7 @@ public class OnboardRestControllerTest {
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
 		subscriptionRequestApi.setName("Second Service Provider");
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE 'NO'");
+		subscriptionApi.setSelector("originatingCountry = 'NO'");
 		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
@@ -305,9 +305,9 @@ public class OnboardRestControllerTest {
 	@Test
 	public void calculateSelfSubscriptionsTest() {
 
-		Subscription a = new Subscription("where LIKE 'FI'", SubscriptionStatus.REQUESTED);
-		Subscription b = new Subscription("where LIKE 'SE'", SubscriptionStatus.REQUESTED);
-		Subscription c = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
+		Subscription a = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
+		Subscription b = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED);
+		Subscription c = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");

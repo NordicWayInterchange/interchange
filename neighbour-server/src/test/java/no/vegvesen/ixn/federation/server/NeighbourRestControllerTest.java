@@ -151,7 +151,7 @@ public class NeighbourRestControllerTest {
 		// Create incoming subscription request api objcet
 		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
 		ericsson.setName("ericsson");
-		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("where LIKE 'FI'", "", SubscriptionStatus.REQUESTED)));
+		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", SubscriptionStatus.REQUESTED)));
 
 		// Convert to JSON
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
@@ -161,7 +161,7 @@ public class NeighbourRestControllerTest {
 		updatedNeighbour.setName("ericsson");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		updatedNeighbour.setCapabilities(capabilities);
-		Subscription firstSubscription = new Subscription("where LIKE 'FI'", SubscriptionStatus.REQUESTED);
+		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
 		firstSubscription.setPath("/ericsson/subscription/1");
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		updatedNeighbour.setSubscriptionRequest(returnedSubscriptionRequest);

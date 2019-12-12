@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -8,8 +9,8 @@ import java.util.Set;
 
 public class DataTypeTest {
 
-    private DataType firstDataType = new DataType("datex2;1.0", "NO");
-    private DataType secondDataType = new DataType("datex2;1.0", "SE");
+    private DataType firstDataType = new DataType(Datex2DataTypeApi.DATEX_2, "NO");
+    private DataType secondDataType = new DataType(Datex2DataTypeApi.DATEX_2, "SE");
 
 	@Test
 	public void dataTypeInCapabilitiesReturnsTrue(){
