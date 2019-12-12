@@ -235,4 +235,33 @@ public class NeighbourRestControllerTest {
 				.andExpect(status().isOk());
 		verify(dnsFacade,times(1)).getNeighbours();
 	}
+
+	@Test
+	public void postUnknownMessageTypeThrowsBadRequestException() throws Exception {
+		mockCertificate("ericsson");
+
+		// Mock incoming capabiity API
+		CapabilityApi ericsson = new CapabilityApi();
+		ericsson.setName("ericsson");
+		DataTypeApi ericssonDataType = new DataTypeApi("unknown", "NO");
+		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
+
+		// Create JSON string of capability api object to send to the server
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
+
+		// Mock dns lookup
+		Neighbour ericssonNeighbour = new Neighbour();
+		ericssonNeighbour.setName("ericsson");
+		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
+		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
+
+		mockMvc.perform(
+				post(capabilityExchangePath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().is4xxClientError());
+	}
+
 }
