@@ -37,8 +37,8 @@ public class DataType implements DataTypeI {
 	}
 
 	@Override
-	public void setOriginatingCountry(String where) {
-		this.originatingCountry = where;
+	public void setOriginatingCountry(String originatingCountry) {
+		this.originatingCountry = originatingCountry;
 	}
 
 	@Override
