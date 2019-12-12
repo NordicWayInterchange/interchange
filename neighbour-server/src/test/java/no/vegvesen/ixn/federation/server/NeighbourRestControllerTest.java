@@ -249,12 +249,6 @@ public class NeighbourRestControllerTest {
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		// Mock dns lookup
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
-		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
-		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
-
 		mockMvc.perform(
 				post(capabilityExchangePath)
 						.accept(MediaType.APPLICATION_JSON)
