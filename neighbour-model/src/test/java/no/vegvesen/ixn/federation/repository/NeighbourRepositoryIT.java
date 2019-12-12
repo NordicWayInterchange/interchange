@@ -155,4 +155,20 @@ public class NeighbourRepositoryIT {
 		assertThat(establishedOutgoingSubscriptions).hasSize(1);
 		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
 	}
+
+	@Test
+	public void neighbourWithDatex2SpecificCapabilitiesCanBeStoredAndRetrieved() {
+		HashSet<DataType> capabilities = new HashSet<>();
+		capabilities.add(new DataType(Datex2DataTypeApi.DATEX_2, "NO", "SituationPublication"));
+		capabilities.add(new DataType(Datex2DataTypeApi.DATEX_2, "NO", "MeasuredDataPublication"));
+		Neighbour anyNeighbour = new Neighbour("any", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities), new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()),  new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()));
+
+		Neighbour savedNeighbour = repository.save(anyNeighbour);
+		assertThat(savedNeighbour.getName()).isEqualTo("any");
+		assertThat(savedNeighbour.getCapabilities().getDataTypes()).hasSize(2);
+
+		Neighbour foundNeighbour = repository.findByName("any");
+		assertThat(foundNeighbour.getName()).isEqualTo("any");
+		assertThat(foundNeighbour.getCapabilities().getDataTypes()).hasSize(2);
+	}
 }
