@@ -87,15 +87,16 @@ public class Source implements AutoCloseable {
 	}
 
     public void send(String messageText) throws JMSException {
+
         JmsTextMessage message = createTextMessage(messageText);
         message.getFacade().setUserId("localhost");
         message.setStringProperty("who", "Norwegian Public Roads Administration");
-        message.setStringProperty("how", "datex2");
+        message.setStringProperty("messageType", "datex2");
         message.setStringProperty("what", "Obstruction");
         message.setStringProperty("version", "1.0");
         message.setStringProperty("lat", "60.352374");
         message.setStringProperty("lon", "13.334253");
-        message.setStringProperty("where", "SE");
+        message.setStringProperty("originatingCountry", "SE");
         message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
     }
