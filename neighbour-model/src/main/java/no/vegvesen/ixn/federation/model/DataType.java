@@ -17,8 +17,7 @@ public class DataType implements DataTypeI {
 	@Column(name="dat_id")
 	private Integer data_id;
 
-	@Column(name = "header_where")
-	private String where;
+	private String originatingCountry;
 	private String how;
 
 	@Column
@@ -27,19 +26,19 @@ public class DataType implements DataTypeI {
 
 	public DataType(){}
 
-	public DataType(String how, String where) {
+	public DataType(String how, String originatingCountry) {
 		this.how = how;
-		this.where = where;
+		this.originatingCountry = originatingCountry;
 	}
 
 	@Override
-	public String getWhere() {
-		return where;
+	public String getOriginatingCountry() {
+		return originatingCountry;
 	}
 
 	@Override
-	public void setWhere(String where) {
-		this.where = where;
+	public void setOriginatingCountry(String where) {
+		this.originatingCountry = where;
 	}
 
 	@Override
@@ -52,6 +51,7 @@ public class DataType implements DataTypeI {
 		this.how = how;
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	public boolean isContainedInSet(Set<DataType> capabilities){
 		for (DataType other : capabilities) {
 			if (this.equals(other)) {
@@ -69,13 +69,13 @@ public class DataType implements DataTypeI {
 
 		DataType dataType = (DataType) o;
 
-		if (!where.equals(dataType.where)) return false;
+		if (!originatingCountry.equals(dataType.originatingCountry)) return false;
 		return how.equals(dataType.how);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = where.hashCode();
+		int result = originatingCountry.hashCode();
 		result = 31 * result + how.hashCode();
 		return result;
 	}
@@ -84,7 +84,7 @@ public class DataType implements DataTypeI {
 	public String toString() {
 		return "DataType{" +
 				"data_id=" + data_id +
-				", where='" + where + '\'' +
+				", originatingCountry='" + originatingCountry + '\'' +
 				", how='" + how + '\'' +
 				", lastUpdated=" + lastUpdated +
 				'}';

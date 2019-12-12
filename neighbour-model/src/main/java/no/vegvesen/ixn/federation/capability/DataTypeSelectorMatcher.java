@@ -29,7 +29,7 @@ public class DataTypeSelectorMatcher {
 
 		DataTypeFilter(DataType dataType) {
 			headers.put("how", dataType.getHow());
-			headers.put("where", dataType.getWhere());
+			headers.put("where", dataType.getOriginatingCountry());
 		}
 
 		@Override
