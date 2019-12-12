@@ -17,9 +17,9 @@
       "durableBindings": [
         {
           "arguments": {
-            "x-filter-jms-selector": "where='SE'"
+            "x-filter-jms-selector": "originatingCountry='SE'"
           },
-          "bindingKey": "where",
+          "bindingKey": "originatingCountry",
           "destination": "se-out"
         }
       ]
