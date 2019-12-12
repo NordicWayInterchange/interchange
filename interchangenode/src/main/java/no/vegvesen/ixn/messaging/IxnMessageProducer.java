@@ -16,7 +16,6 @@
  */
 package no.vegvesen.ixn.messaging;
 
-import no.vegvesen.ixn.model.IxnBaseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +34,6 @@ public class IxnMessageProducer {
 	@Autowired
 	public IxnMessageProducer(JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
-	}
-
-	public void sendMessage(String destination, final IxnBaseMessage message) {
-		logger.debug("*** Sending message ***");
-		this.jmsTemplate.send(destination, session -> {
-			return message.getMessage();
-		});
 	}
 
 	public void sendMessage(String destination, final Message textMessage) {

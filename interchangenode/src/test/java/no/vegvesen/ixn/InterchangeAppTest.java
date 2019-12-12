@@ -1,7 +1,7 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
-import no.vegvesen.ixn.model.Datex2Message;
+import no.vegvesen.ixn.model.MessageValidator;
 import no.vegvesen.ixn.util.KeyValue;
 import no.vegvesen.ixn.util.MessageTestDouble;
 import org.junit.Before;
@@ -10,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.jms.JMSException;
 import javax.jms.Message;
 
 import static org.mockito.Mockito.*;
@@ -25,11 +24,11 @@ public class InterchangeAppTest {
 
     @Before
     public void setUp() {
-        app = new InterchangeApp(producer);
+        app = new InterchangeApp(producer, new MessageValidator());
     }
 
     @Test
-    public void validMessageIsSent() throws JMSException {
+    public void validMessageIsSent() {
 
         Message message = MessageTestDouble.createMessage(
                 "bouvet",
@@ -42,12 +41,12 @@ public class InterchangeAppTest {
                 new KeyValue("publicationType","SituationPublication")
         );
         app.receiveMessage(message);
-        verify(producer, times(1)).sendMessage(eq("nwEx"), any(Datex2Message.class));
+        verify(producer, times(1)).sendMessage(eq("nwEx"), any(Message.class));
     }
 
 
     @Test
-    public void receivedMessageToThrowExceptionSendsToDlQueue() throws JMSException{
+    public void receivedMessageWithoutOriginatingCountrySendsToDlQueue() {
 
         Message message = MessageTestDouble.createMessage(
                 "bouvet",
@@ -60,7 +59,7 @@ public class InterchangeAppTest {
                 new KeyValue("publicationType","SituationPublication")
         );
         app.receiveMessage(message);
-        verify(producer, times(1)).sendMessage(eq(InterchangeApp.DLQUEUE), any(Datex2Message.class));
+        verify(producer, times(1)).sendMessage(eq(InterchangeApp.DLQUEUE), any(Message.class));
     }
 
 
