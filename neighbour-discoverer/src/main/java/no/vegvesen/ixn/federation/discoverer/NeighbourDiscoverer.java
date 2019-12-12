@@ -240,9 +240,9 @@ public class NeighbourDiscoverer {
 
 					if (neighbour.getBackoffAttempts() > backoffProperties.getNumberOfAttempts()) {
 						neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNREACHABLE);
-						logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Exceeded number of allowed post attempts.");
+						logger.warn("Unsuccessful in reestablishing contact with neighbour. Exceeded number of allowed post attempts.");
 						logger.warn("Number of allowed post attempts: {} Number of actual post attempts: {}", backoffProperties.getNumberOfAttempts(), neighbour.getBackoffAttempts());
-						logger.warn("Setting status of neighbour to UNREACHABLE.", neighbour.getName());
+						logger.warn("Setting status of neighbour to UNREACHABLE.");
 					}
 				} finally {
 					neighbourRepository.save(neighbour);
@@ -295,7 +295,7 @@ public class NeighbourDiscoverer {
 
 					if (neighbour.getBackoffAttempts() > backoffProperties.getNumberOfAttempts()) {
 						neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.UNREACHABLE);
-						logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Exceeded number of allowed post attempts.");
+						logger.warn("Unsuccessful in reestablishing contact with neighbour. Exceeded number of allowed post attempts.");
 						logger.warn("Number of allowed post attempts: {} Number of actual post attempts: {}", backoffProperties.getNumberOfAttempts(), neighbour.getBackoffAttempts());
 						logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
 					}
@@ -347,40 +347,45 @@ public class NeighbourDiscoverer {
 		DiscoveryState discoveryState = getDiscoveryState();
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
 			MDCUtil.setLogVariables(myName, neighbour.getName());
-			if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
-				logger.info("Found neighbour for subscription request: {}", neighbour.getName());
-				Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
-				Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
-				if (calculatedSubscriptionForNeighbour.isEmpty()) {
-					// No overlap between neighbour capabilities and local service provider subscriptions.
-					// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
-					neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
-					logger.info("The calculated subscription request for neighbour {} was empty. Setting Subscription status in fedIn to NO_OVERLAP", neighbour.getName());
-					if (fedInSubscriptions.isEmpty()) {
-						// No existing subscription to this neighbour, nothing to tear down
-						logger.info("Subscription to neighbour is empty. Nothing to tear down.");
+
+			try {
+				if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
+					logger.info("Found neighbour for subscription request: {}", neighbour.getName());
+					Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
+					Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
+					if (calculatedSubscriptionForNeighbour.isEmpty()) {
+						// No overlap between neighbour capabilities and local service provider subscriptions.
+						// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
+						neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.NO_OVERLAP);
+						logger.info("The calculated subscription request for neighbour {} was empty. Setting Subscription status in fedIn to NO_OVERLAP", neighbour.getName());
+						if (fedInSubscriptions.isEmpty()) {
+							// No existing subscription to this neighbour, nothing to tear down
+							logger.info("Subscription to neighbour is empty. Nothing to tear down.");
+						} else {
+							// We have an existing subscription to the neighbour, tear it down. At this point, we already know that the calculated set of neighbours is empty!
+							logger.info("The calculated subscription request is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.");
+							postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
+						}
 					} else {
-						// We have an existing subscription to the neighbour, tear it down. At this point, we already know that the calculated set of neighbours is empty!
-						logger.info("The calculated subscription request is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.", neighbour.getName());
-						postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
+						// Calculated subscription is not empty, post as normal
+						if (calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
+							// The subscription request we want to post is the same as what we already subscribe to. Skip.
+							logger.info("The calculated subscription requests are the same as neighbour {}'s subscription. Skipping",neighbour.getName());
+							continue;
+						} else {
+							// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
+							logger.info("The calculated subscription request for {} is not empty. Posting subscription request: {}", neighbour.getName(), calculatedSubscriptionForNeighbour);
+							postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
+						}
 					}
-				} else {
-					// Calculated subscription is not empty, post as normal
-					if (calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
-						// The subscription request we want to post is the same as what we already subscribe to. Skip.
-                        logger.info("The calculated subscription requests are the same as neighbour {}'s subscription. Skipping",neighbour.getName());
-						continue;
-					} else {
-						// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
-						logger.info("The calculated subscription request for {} is not empty. Posting subscription request: {}", neighbour.getName(), calculatedSubscriptionForNeighbour);
-						postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
-					}
+					neighbour = neighbourRepository.save(neighbour);
+					logger.info("Saving updated neighbour: {}", neighbour.toString());
+					// Successful subscription request, update discovery state subscription request timestamp.
+					discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
+					discoveryStateRepository.save(discoveryState);
 				}
-				neighbour = neighbourRepository.save(neighbour);
-				logger.info("Saving updated neighbour: {}", neighbour.toString());
-				// Successful subscription request, update discovery state subscription request timestamp.
-				discoveryState.setLastSubscriptionRequest(LocalDateTime.now());
-				discoveryStateRepository.save(discoveryState);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			MDCUtil.removeLogVariables();
 		}
@@ -503,11 +508,11 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	public boolean shouldCheckCapabilitiesForUpdates(LocalDateTime lastCapabilityExchange, LocalDateTime lastUpdatedLocalCapabilities) {
+	private boolean shouldCheckCapabilitiesForUpdates(LocalDateTime lastCapabilityExchange, LocalDateTime lastUpdatedLocalCapabilities) {
 		return lastCapabilityExchange ==null || (lastUpdatedLocalCapabilities != null && lastUpdatedLocalCapabilities.isAfter(lastCapabilityExchange));
 	}
 
-	public boolean shouldCheckSubsctiptionRequestsForUpdates(LocalDateTime lastSubscriptionRequest, LocalDateTime lastUpdatedLocalSubscriptions) {
+	boolean shouldCheckSubsctiptionRequestsForUpdates(LocalDateTime lastSubscriptionRequest, LocalDateTime lastUpdatedLocalSubscriptions) {
 		return lastSubscriptionRequest != null && (lastUpdatedLocalSubscriptions != null && lastUpdatedLocalSubscriptions.isAfter(lastSubscriptionRequest));
 	}
 

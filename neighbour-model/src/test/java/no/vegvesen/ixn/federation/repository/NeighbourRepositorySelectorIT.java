@@ -118,14 +118,14 @@ public class NeighbourRepositorySelectorIT {
 		ericsson.setName("ericsson-5-R");
 
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 		ericsson.getFedIn().setSubscriptions(Collections.singleton(subscription));
 		ericsson.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		neighbourRepository.save(ericsson);
 
 		Subscription subscriptionA = new Subscription();
-		subscriptionA.setSelector("where LIKE 'OM'");
+		subscriptionA.setSelector("originatingCountry = 'OM'");
 		subscriptionA.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
 		SubscriptionRequest fedin = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Sets.newSet(subscriptionA));
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
@@ -144,7 +144,7 @@ public class NeighbourRepositorySelectorIT {
 		ericsson.setName("ericsson-6");
 
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
 		Set<Subscription> subscriptionSet = new HashSet<>();
 		subscriptionSet.add(subscription);
@@ -162,7 +162,7 @@ public class NeighbourRepositorySelectorIT {
 
 		ericsson.setName("ericsson-7");
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
@@ -179,7 +179,7 @@ public class NeighbourRepositorySelectorIT {
 	public void neigbourWithFedInEstablishedIsSelectedForGroups(){
 		ericsson.setName("ericsson-8");
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
@@ -196,7 +196,7 @@ public class NeighbourRepositorySelectorIT {
 	public void neighbourWithFedInRejectedIsSelectedForRemovalFromGroups(){
 		ericsson.setName("ericsson-9");
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REJECTED);

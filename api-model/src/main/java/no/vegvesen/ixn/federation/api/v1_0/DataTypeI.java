@@ -5,7 +5,7 @@ public interface DataTypeI {
 
 	void setOriginatingCountry(String originatingCountry);
 
-	String getHow();
+	String getMessageType();
 
-	void setHow(String how);
+	void setMessageType(String messageType);
 }

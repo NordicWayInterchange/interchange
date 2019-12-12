@@ -25,7 +25,7 @@ public class CapabilityApiJsonTest {
 		CapabilityApi fromString = objectMapper.readValue(capabilityApiJson.getBytes(), CapabilityApi.class);
 		assertThat(fromString.getCapabilities()).hasSize(1);
 		DataTypeApi dataTypeFromJson = fromString.getCapabilities().iterator().next();
-		assertThat(dataTypeFromJson.getHow()).isEqualTo("DATEX2");
+		assertThat(dataTypeFromJson.getMessageType()).isEqualTo("DATEX2");
 		assertThat(dataTypeFromJson).isInstanceOf(Datex2DataTypeApi.class);
 		Datex2DataTypeApi datex2DataTypeFromJson = (Datex2DataTypeApi) dataTypeFromJson;
 		assertThat(datex2DataTypeFromJson.getPublicationType()).isEqualTo("myPublicationType");

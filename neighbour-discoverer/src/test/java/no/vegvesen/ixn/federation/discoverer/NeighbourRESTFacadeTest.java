@@ -88,7 +88,7 @@ public class NeighbourRESTFacadeTest {
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType dataTypeInCapabilities = dataTypes.next();
 
-		assertThat(dataTypeInCapabilities.getHow()).isEqualTo(dataType.getHow());
+		assertThat(dataTypeInCapabilities.getMessageType()).isEqualTo(dataType.getMessageType());
 		assertThat(dataTypeInCapabilities.getOriginatingCountry()).isEqualTo(dataType.getOriginatingCountry());
 	}
 
@@ -96,7 +96,7 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPostOfSubscriptionRequestReturnsSubscriptionRequest() throws Exception{
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE 'NO'");
+		subscriptionApi.setSelector("originatingCountry = 'NO'");
 		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("remote server", Collections.singleton(subscriptionApi) );
 
@@ -124,7 +124,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPollOfSubscriptionReturnsSubscription()throws Exception{
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setPath("bouvet/subscription/1");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
@@ -174,7 +174,7 @@ public class NeighbourRESTFacadeTest {
 
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		Set<Subscription> subscriptionSet = Collections.singleton(subscription);
 
 		// Subscription request received from the neighbour has empty set of subscription
@@ -194,7 +194,7 @@ public class NeighbourRESTFacadeTest {
 	public void serverClosesConnectionUnexpectedlyOnSubscriptionRequestPost() throws Exception {
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		Set<Subscription> subscriptions = Collections.singleton(subscription);
 
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
@@ -226,7 +226,7 @@ public class NeighbourRESTFacadeTest {
 	@Test(expected = SubscriptionPollException.class)
 	public void test() throws IOException {
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setPath("bouvet/subscription/1");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);

@@ -20,14 +20,14 @@ public class CapabilityTransformerTest {
 	public void capabilitiyApiIsConvertedToInterchangeAndBack(){
 		CapabilityApi capabilityApi = new CapabilityApi();
 		capabilityApi.setName("Test 2");
-		final String how = "DATEX2";
-		final String where = "NO";
-		DataTypeApi capabilities = new Datex2DataTypeApi(where);
+		final String messageType = "DATEX2";
+		final String originatingCountry = "NO";
+		DataTypeApi capabilities = new Datex2DataTypeApi(originatingCountry);
 		capabilityApi.setCapabilities(Collections.singleton(capabilities));
 
 		Neighbour interchange = capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
 
 		assertThat(interchange.getCapabilities().getDataTypes()).hasSize(1);
-		assertThat(interchange.getCapabilities().getDataTypes()).containsExactly(new DataType(how,where));
+		assertThat(interchange.getCapabilities().getDataTypes()).containsExactly(new DataType(messageType,originatingCountry));
 	}
 }

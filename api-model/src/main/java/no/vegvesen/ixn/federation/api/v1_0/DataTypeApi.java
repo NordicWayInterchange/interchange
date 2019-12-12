@@ -8,22 +8,22 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 		use = JsonTypeInfo.Id.NAME,
 		include = JsonTypeInfo.As.EXISTING_PROPERTY,
 		visible = true,
-		property = "how")
+		property = "messageType")
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = Datex2DataTypeApi.class, name = Datex2DataTypeApi.DATEX_2),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataTypeApi implements DataTypeI {
 
-	private String how;
+	private String messageType;
 	private String originatingCountry;
 
 	public DataTypeApi() {
 	}
 
-	public DataTypeApi(String how, String originatingCountry) {
+	public DataTypeApi(String messageType, String originatingCountry) {
 		this.originatingCountry = originatingCountry;
-		this.how = how;
+		this.messageType = messageType;
 	}
 
 	@Override
@@ -37,13 +37,13 @@ public class DataTypeApi implements DataTypeI {
 	}
 
 	@Override
-	public String getHow() {
-		return this.how;
+	public String getMessageType() {
+		return this.messageType;
 	}
 
 	@Override
-	public void setHow(String how) {
-		this.how = how;
+	public void setMessageType(String messageType) {
+		this.messageType = messageType;
 	}
 
 	@Override
@@ -53,13 +53,13 @@ public class DataTypeApi implements DataTypeI {
 
 		DataTypeApi that = (DataTypeApi) o;
 
-		if (how != null ? !how.equals(that.how) : that.how != null) return false;
+		if (messageType != null ? !messageType.equals(that.messageType) : that.messageType != null) return false;
 		return originatingCountry != null ? originatingCountry.equals(that.originatingCountry) : that.originatingCountry == null;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = how != null ? how.hashCode() : 0;
+		int result = messageType != null ? messageType.hashCode() : 0;
 		result = 31 * result + (originatingCountry != null ? originatingCountry.hashCode() : 0);
 		return result;
 	}
