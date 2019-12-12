@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.dbhelper;
 
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -32,12 +33,12 @@ public class SubscribingInterchangeDbFiller implements DatabaseHelperInterface{
 
 		ServiceProvider volvoCloud = new ServiceProvider();
 		volvoCloud.setName("Volvo Cloud");
-		DataType volvoDataTypeOne = new DataType("datex2;1.0", "FI");
+		DataType volvoDataTypeOne = new DataType(Datex2DataTypeApi.DATEX_2, "FI");
 		Capabilities volvoCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(volvoDataTypeOne));
 		volvoCloud.setCapabilities(volvoCapabilities);
 
 		Subscription volvoSubscriptions = new Subscription();
-		volvoSubscriptions.setSelector("where LIKE 'SE'");
+		volvoSubscriptions.setSelector("originatingCountry = 'SE'");
 		volvoSubscriptions.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 		SubscriptionRequest volvoSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Collections.singleton(volvoSubscriptions));
 		volvoCloud.setSubscriptionRequest(volvoSubscriptionRequest);

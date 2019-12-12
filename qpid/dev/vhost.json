@@ -10,28 +10,28 @@
       "durableBindings": [
         {
           "arguments": {
-            "x-filter-jms-selector": "where='NO'"
+            "x-filter-jms-selector": "originatingCountry='NO'"
           },
-          "bindingKey": "where",
+          "bindingKey": "originatingCountry",
           "destination": "NO-out"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where='NO'"
+            "x-filter-jms-selector": "originatingCountry='NO'"
           },
-          "bindingKey": "where",
+          "bindingKey": "originatingCountry",
           "destination": "king_harald"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where='SE'"
+            "x-filter-jms-selector": "originatingCountry='SE'"
           },
-          "bindingKey": "where",
+          "bindingKey": "originatingCountry ",
           "destination": "king_gustaf"
         },
         {
           "arguments": {
-            "x-filter-jms-selector": "where LIKE '%'"
+            "x-filter-jms-selector": "originatingCountry LIKE '%'"
           },
           "bindingKey": "where",
           "destination": "test-out"

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.dbhelper;
 
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -35,14 +36,14 @@ public class ProvidingInterchangeDbFiller implements DatabaseHelperInterface{
 
 		ServiceProvider teslaCloud = new ServiceProvider();
 		teslaCloud.setName("Tesla Cloud");
-		DataType teslaDataTypeOne = new DataType("datex2;1.0", "NO");
-		DataType teslaDataTypeTwo = new DataType("datex2;1.0", "SE");
+		DataType teslaDataTypeOne = new DataType(Datex2DataTypeApi.DATEX_2, "NO");
+		DataType teslaDataTypeTwo = new DataType(Datex2DataTypeApi.DATEX_2, "SE");
 		Capabilities teslaCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(teslaDataTypeOne, teslaDataTypeTwo).collect(Collectors.toSet()));
 		teslaCloud.setCapabilities(teslaCapabilities);
 
 
 		Subscription teslaSubscription = new Subscription();
-		teslaSubscription.setSelector("where LIKE 'DK'");
+		teslaSubscription.setSelector("originatingCountry = 'DK'");
 		teslaSubscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 		SubscriptionRequest teslaSubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED,Collections.singleton(teslaSubscription) );
 		teslaCloud.setSubscriptionRequest(teslaSubscriptionRequest);
