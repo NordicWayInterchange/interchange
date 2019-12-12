@@ -81,8 +81,8 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DataTypeApi a = new DataTypeApi("datex2;1.0", "NO");
-		DataTypeApi b = new DataTypeApi("datex2;1.0", "SE");
+		DataTypeApi a = new Datex2DataTypeApi( "NO");
+		DataTypeApi b = new Datex2DataTypeApi("SE");
 		Set<DataTypeApi> capabilities = Stream.of(a, b).collect(Collectors.toSet());
 		CapabilityApi capabilityApi = new CapabilityApi("First Service Provider", capabilities);
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApi);
@@ -101,8 +101,8 @@ public class OnboardRestControllerTest {
 		mockCertificate("Second Service Provider");
 
 		// The existing data types of the positng Service Provider
-		DataTypeApi a = new DataTypeApi("datex2;1.0", "NO");
-		DataTypeApi b = new DataTypeApi("datex2;1.0", "SE");
+		DataTypeApi a = new Datex2DataTypeApi("NO");
+		DataTypeApi b = new Datex2DataTypeApi("SE");
 
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
@@ -132,7 +132,7 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		CapabilityApi capabilityApi = new CapabilityApi();
-		DataTypeApi a = new DataTypeApi("datex2;1.0", "FI");
+		DataTypeApi a = new Datex2DataTypeApi("FI");
 		capabilityApi.setCapabilities(Collections.singleton(a));
 		capabilityApi.setName("Second Service Provider");
 
@@ -280,9 +280,9 @@ public class OnboardRestControllerTest {
 	@Test
 	public void calculateSelfCapabilitiesTest() {
 
-		DataType a = new DataType("datex2;1.0", "SE");
-		DataType b = new DataType("datex2;1.0", "FI");
-		DataType c = new DataType("datex2;1.0", "NO");
+		DataType a = new DataType("DATEX2", "SE");
+		DataType b = new DataType("DATEX2", "FI");
+		DataType c = new DataType("DATEX2", "NO");
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
