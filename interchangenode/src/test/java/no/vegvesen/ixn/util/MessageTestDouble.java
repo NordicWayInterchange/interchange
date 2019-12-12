@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.util;
 
-import no.vegvesen.ixn.CommonApplicationProperties;
+import no.vegvesen.ixn.MessageProperty;
 
 import javax.jms.Destination;
 import javax.jms.IllegalStateException;
@@ -296,21 +296,48 @@ public class MessageTestDouble implements Message {
         String messageType,
         String latitude,
         String longitude,
-        KeyValue... aditionalProperties) {
+        KeyValue... additionalProperties) {
 
         Map<String, String> properties = new HashMap<>();
-        properties.put(CommonApplicationProperties.USER_ID.getPropertyName(),userId);
-        properties.put(CommonApplicationProperties.PUBLISHER_NAME.getPropertyName(),publisher);
-        properties.put(CommonApplicationProperties.ORIGINATING_COUNTRY.getPropertyName(),originatingCountry);
-        properties.put(CommonApplicationProperties.PROTOCOL_VERSION.getPropertyName(),protocolVersion);
-        properties.put(CommonApplicationProperties.MESSAGE_TYPE.getPropertyName(),messageType);
-        properties.put(CommonApplicationProperties.LATITUDE.getPropertyName(),latitude);
-        properties.put(CommonApplicationProperties.LONGITUDE.getPropertyName(),longitude);
-        for (KeyValue kv : aditionalProperties) {
+        properties.put(MessageProperty.USER_ID.getName(),userId);
+        properties.put("publisherName",publisher);
+        properties.put("originatingCountry",originatingCountry);
+        properties.put("protocolVersion",protocolVersion);
+        properties.put(MessageProperty.MESSAGE_TYPE.getName(),messageType);
+        properties.put("latitude",latitude);
+        properties.put("longitude",longitude);
+        for (KeyValue kv : additionalProperties) {
             properties.put(kv.getKey(),kv.getValue());
         }
         return new MessageTestDouble(properties);
     }
 
+    public static Message createDatexMessage(String userId,
+        String publisher,
+        String originatingCountry,
+        String protocolVersion,
+        String latitude,
+        String longitude,
+        KeyValue... additionalProperties) {
+        return createMessage(userId,
+                publisher,
+                originatingCountry,
+                protocolVersion,
+                "DATEX2",
+                latitude,
+                longitude,
+                additionalProperties);
+    }
+/*
+    public static Message createDenmMessage(String userId,
+        String publisher,
+        String originatingCountry,
+        String protocolVersion,
+        String latitude,
+        String longitude,
+        KeyValue... additionalProperties) {
+
+    }
+*/
 
 }
