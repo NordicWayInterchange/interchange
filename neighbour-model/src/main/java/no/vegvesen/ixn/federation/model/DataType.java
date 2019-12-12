@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeI;
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeI;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
@@ -9,7 +10,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "data_types")
-public class DataType implements DataTypeI {
+public class DataType implements DataTypeI, Datex2DataTypeI{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_generator")
@@ -19,6 +20,9 @@ public class DataType implements DataTypeI {
 
 	private String originatingCountry;
 	private String messageType;
+	//Datex2
+	private String publicationType;
+
 
 	@Column
 	@UpdateTimestamp
@@ -30,6 +34,14 @@ public class DataType implements DataTypeI {
 		this.messageType = messageType;
 		this.originatingCountry = originatingCountry;
 	}
+
+	//Datex2
+	public DataType(String messageType, String originatingCountry, String publicationType) {
+		this.messageType = messageType;
+		this.originatingCountry = originatingCountry;
+		this.publicationType = publicationType;
+	}
+
 
 	@Override
 	public String getOriginatingCountry() {
@@ -63,20 +75,22 @@ public class DataType implements DataTypeI {
 
 	@Override
 	public boolean equals(Object o) {
-		if(o == null) return false;
 		if (this == o) return true;
-		if (!(o instanceof DataType)) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 
 		DataType dataType = (DataType) o;
 
-		if (!originatingCountry.equals(dataType.originatingCountry)) return false;
-		return messageType.equals(dataType.messageType);
+		if (originatingCountry != null ? !originatingCountry.equals(dataType.originatingCountry) : dataType.originatingCountry != null)
+			return false;
+		if (!messageType.equals(dataType.messageType)) return false;
+		return publicationType != null ? publicationType.equals(dataType.publicationType) : dataType.publicationType == null;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = originatingCountry.hashCode();
+		int result = originatingCountry != null ? originatingCountry.hashCode() : 0;
 		result = 31 * result + messageType.hashCode();
+		result = 31 * result + (publicationType != null ? publicationType.hashCode() : 0);
 		return result;
 	}
 
@@ -88,5 +102,16 @@ public class DataType implements DataTypeI {
 				", messageType='" + messageType + '\'' +
 				", lastUpdated=" + lastUpdated +
 				'}';
+	}
+
+	@Override
+	public String getPublicationType() {
+		return this.publicationType;
+
+	}
+
+	@Override
+	public void setPublicationType(String publicationType) {
+		this.publicationType = publicationType;
 	}
 }
