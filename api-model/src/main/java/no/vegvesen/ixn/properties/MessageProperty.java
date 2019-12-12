@@ -1,6 +1,4 @@
-package no.vegvesen.ixn;
-
-import org.apache.qpid.jms.JmsClientProperties;
+package no.vegvesen.ixn.properties;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +11,7 @@ public class MessageProperty {
 
     public static final MessageProperty MESSAGE_TYPE = new MessageProperty("messageType", true);
     public static final MessageProperty QUAD_TREE = new MessageProperty("quadTree", false);
-    public static final MessageProperty USER_ID = new MessageProperty(JmsClientProperties.JMSXUSERID, true);
+    public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true);
 
     public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
             MESSAGE_TYPE,

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.util;
 
-import no.vegvesen.ixn.MessageProperty;
+import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.jms.Destination;
 import javax.jms.IllegalStateException;

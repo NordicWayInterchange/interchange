@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.messaging;
 
-import no.vegvesen.ixn.MessageProperty;
+import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.util.KeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
