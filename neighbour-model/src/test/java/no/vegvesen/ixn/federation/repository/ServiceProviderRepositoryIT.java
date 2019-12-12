@@ -57,7 +57,7 @@ public class ServiceProviderRepositoryIT {
 		ServiceProvider volvo = new ServiceProvider("Volvo");
 
 		Subscription volvoSubscription = new Subscription();
-		volvoSubscription.setSelector("where LIKE 'FI'");
+		volvoSubscription.setSelector("originatingCountry = 'FI'");
 		volvo.getSubscriptionRequest().setSubscriptions(Collections.singleton(volvoSubscription));
 
 		repository.save(volvo);
@@ -71,14 +71,14 @@ public class ServiceProviderRepositoryIT {
 		ServiceProvider audi = new ServiceProvider("audi");
 		audi.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		Subscription audiSubscription = new Subscription();
-		audiSubscription.setSelector("where LIKE 'DE'");
+		audiSubscription.setSelector("originatingCountry = 'DE'");
 		audi.getSubscriptionRequest().setSubscriptions(Collections.singleton(audiSubscription));
 		repository.save(audi);
 
 		ServiceProvider ford = new ServiceProvider("Ford");
 		ford.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
 		Subscription fordSubscription = new Subscription();
-		fordSubscription.setSelector("where LIKE 'FI'");
+		fordSubscription.setSelector("originatingCountry = 'FI'");
 		ford.getSubscriptionRequest().setSubscriptions(Collections.singleton(fordSubscription));
 		repository.save(ford);
 
@@ -91,7 +91,7 @@ public class ServiceProviderRepositoryIT {
 		ServiceProvider fiat = new ServiceProvider("fiat");
 		fiat.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		Subscription fiatSubscription = new Subscription();
-		fiatSubscription.setSelector("where LIKE 'DE'");
+		fiatSubscription.setSelector("originatingCountry = 'DE'");
 		fiat.getSubscriptionRequest().setSubscriptions(Collections.singleton(fiatSubscription));
 		repository.save(fiat);
 

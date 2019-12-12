@@ -16,10 +16,10 @@ public class SubscriptionRequestTest {
 	@Before
 	public void setUp(){
 		norway = new Subscription();
-		norway.setSelector("where='NO'");
+		norway.setSelector("originatingCountry='NO'");
 
 		sweden = new Subscription();
-		sweden.setSelector("where='SE'");
+		sweden.setSelector("originatingCountry='SE'");
 	}
 
 	@Test

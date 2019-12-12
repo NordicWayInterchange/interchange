@@ -115,7 +115,7 @@ public abstract class NeighbourRestTestController {
 		logger.info("Poll nr: {}", pollingCounter);
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE 'NO'");
+		subscriptionApi.setSelector("originatingCountry = 'NO'");
 		subscriptionApi.setPath(ixnName + "/subscription/"+subscriptionId);
 		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
 

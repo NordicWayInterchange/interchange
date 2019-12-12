@@ -19,7 +19,7 @@ public class SubscriptionTransformerTest {
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
 		subscriptionApi.setPath("bouvet/subscription/1");
-		subscriptionApi.setSelector("where LIKE 'NO'");
+		subscriptionApi.setSelector("originatingCountry = 'NO'");
 		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
 
 		Subscription subscription = subscriptionTransformer.subscriptionApiToSubscription(subscriptionApi);
@@ -34,7 +34,7 @@ public class SubscriptionTransformerTest {
 
 		Subscription subscription = new Subscription();
 		subscription.setPath("bouvet/subscription/1");
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
