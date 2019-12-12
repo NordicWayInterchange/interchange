@@ -16,24 +16,24 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public class DataTypeApi implements DataTypeI {
 
 	private String how;
-	private String where;
+	private String originatingCountry;
 
 	public DataTypeApi() {
 	}
 
-	public DataTypeApi(String how, String where) {
-		this.where = where;
+	public DataTypeApi(String how, String originatingCountry) {
+		this.originatingCountry = originatingCountry;
 		this.how = how;
 	}
 
 	@Override
-	public String getWhere() {
-		return this.where;
+	public String getOriginatingCountry() {
+		return this.originatingCountry;
 	}
 
 	@Override
-	public void setWhere(String where) {
-		this.where = where;
+	public void setOriginatingCountry(String originatingCountry) {
+		this.originatingCountry = originatingCountry;
 	}
 
 	@Override
@@ -54,13 +54,13 @@ public class DataTypeApi implements DataTypeI {
 		DataTypeApi that = (DataTypeApi) o;
 
 		if (how != null ? !how.equals(that.how) : that.how != null) return false;
-		return where != null ? where.equals(that.where) : that.where == null;
+		return originatingCountry != null ? originatingCountry.equals(that.originatingCountry) : that.originatingCountry == null;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = how != null ? how.hashCode() : 0;
-		result = 31 * result + (where != null ? where.hashCode() : 0);
+		result = 31 * result + (originatingCountry != null ? originatingCountry.hashCode() : 0);
 		return result;
 	}
 }

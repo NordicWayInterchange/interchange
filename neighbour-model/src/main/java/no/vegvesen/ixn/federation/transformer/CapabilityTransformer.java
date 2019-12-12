@@ -57,7 +57,7 @@ public class CapabilityTransformer {
 	private Set<DataTypeApi> dataTypeToDataTypeApi(Set<DataType> dataTypes) {
 		Set<DataTypeApi> apis = new HashSet<>();
 		for (DataType dataType : dataTypes) {
-			apis.add(new DataTypeApi(dataType.getHow(), dataType.getWhere()));
+			apis.add(new DataTypeApi(dataType.getHow(), dataType.getOriginatingCountry()));
 		}
 		return apis;
 	}
@@ -65,7 +65,7 @@ public class CapabilityTransformer {
 	public Set<DataType> dataTypeApiToDataType(Set<? extends DataTypeApi> capabilities) {
 		Set<DataType> dataTypes = new HashSet<>();
 		for (DataTypeApi capability : capabilities) {
-			dataTypes.add(new DataType(capability.getHow(), capability.getWhere()));
+			dataTypes.add(new DataType(capability.getHow(), capability.getOriginatingCountry()));
 		}
 		return dataTypes;
 	}
