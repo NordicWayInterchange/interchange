@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
 public interface DataTypeI {
-	String getWhere();
+	String getOriginatingCountry();
 
-	void setWhere(String where);
+	void setOriginatingCountry(String where);
 
 	String getHow();
 

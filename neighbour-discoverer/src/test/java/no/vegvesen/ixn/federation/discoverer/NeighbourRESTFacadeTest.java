@@ -89,7 +89,7 @@ public class NeighbourRESTFacadeTest {
 		DataType dataTypeInCapabilities = dataTypes.next();
 
 		assertThat(dataTypeInCapabilities.getHow()).isEqualTo(dataType.getHow());
-		assertThat(dataTypeInCapabilities.getWhere()).isEqualTo(dataType.getWhere());
+		assertThat(dataTypeInCapabilities.getOriginatingCountry()).isEqualTo(dataType.getOriginatingCountry());
 	}
 
 	@Test
