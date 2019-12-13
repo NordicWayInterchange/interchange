@@ -30,15 +30,18 @@ public class DataTypeSelectorMatcher {
 		DataTypeFilter(DataType dataType) {
 			headers.put("messageType", dataType.getMessageType());
 			headers.put("originatingCountry", dataType.getOriginatingCountry());
+			headers.put("publicationType", dataType.getPublicationType());
+			headers.put("publicationSubType", dataType.getPublicationSubTypes());
 		}
 
 		@Override
 		public Object getHeader(String messageHeaderName) {
-			Object headerValue = this.headers.get(messageHeaderName);
-			if (headerValue == null) {
+			if (!this.headers.containsKey(messageHeaderName)) {
 				throw new HeaderNotFoundException(String.format("Message header [%s] not a known capability attribute", messageHeaderName));
 			}
-			return headerValue;
+			Object value = this.headers.get(messageHeaderName);
+			logger.debug("Getting header [{}] with value [{}] of type {}", messageHeaderName, value, value == null ? null : value.getClass().getSimpleName());
+			return value;
 		}
 
 		@Override

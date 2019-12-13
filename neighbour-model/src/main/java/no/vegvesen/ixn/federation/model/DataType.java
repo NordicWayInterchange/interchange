@@ -22,6 +22,7 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 	private String messageType;
 	//Datex2
 	private String publicationType;
+	private String publicationSubTypes;
 
 
 	@Column
@@ -36,12 +37,12 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 	}
 
 	//Datex2
-	public DataType(String messageType, String originatingCountry, String publicationType) {
+	public DataType(String messageType, String originatingCountry, String publicationType, String publicationSubTypes) {
 		this.messageType = messageType;
 		this.originatingCountry = originatingCountry;
 		this.publicationType = publicationType;
+		this.publicationSubTypes = publicationSubTypes;
 	}
-
 
 	@Override
 	public String getOriginatingCountry() {
@@ -83,7 +84,9 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 		if (originatingCountry != null ? !originatingCountry.equals(dataType.originatingCountry) : dataType.originatingCountry != null)
 			return false;
 		if (!messageType.equals(dataType.messageType)) return false;
-		return publicationType != null ? publicationType.equals(dataType.publicationType) : dataType.publicationType == null;
+		if (publicationType != null ? !publicationType.equals(dataType.publicationType) : dataType.publicationType != null)
+			return false;
+		return publicationSubTypes != null ? publicationSubTypes.equals(dataType.publicationSubTypes) : dataType.publicationSubTypes == null;
 	}
 
 	@Override
@@ -91,6 +94,7 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 		int result = originatingCountry != null ? originatingCountry.hashCode() : 0;
 		result = 31 * result + messageType.hashCode();
 		result = 31 * result + (publicationType != null ? publicationType.hashCode() : 0);
+		result = 31 * result + (publicationSubTypes != null ? publicationSubTypes.hashCode() : 0);
 		return result;
 	}
 
@@ -101,6 +105,7 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 				", originatingCountry='" + originatingCountry + '\'' +
 				", messageType='" + messageType + '\'' +
 				", publicationType='" + publicationType + '\'' +
+				", publicationSubType='" + publicationSubTypes + '\'' +
 				", lastUpdated=" + lastUpdated +
 				'}';
 	}
@@ -114,5 +119,13 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 	@Override
 	public void setPublicationType(String publicationType) {
 		this.publicationType = publicationType;
+	}
+
+	public String getPublicationSubTypes() {
+		return publicationSubTypes;
+	}
+
+	public void setPublicationSubTypes(String publicationSubTypes) {
+		this.publicationSubTypes = publicationSubTypes;
 	}
 }
