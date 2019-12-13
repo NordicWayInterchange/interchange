@@ -16,7 +16,7 @@ public class CapabilityTransformer {
 
 	private static Logger logger = LoggerFactory.getLogger(CapabilityTransformer.class);
 
-	public Neighbour capabilityApiToNeighbour(CapabilityApi capabilityApi){
+	public Neighbour capabilityApiToNeighbour(CapabilityApi capabilityApi) {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName(capabilityApi.getName());
 		neighbour.setCapabilities(toCapabilities(capabilityApi));
@@ -29,7 +29,7 @@ public class CapabilityTransformer {
 		return capabilities;
 	}
 
-	public ServiceProvider capabilityApiToServiceProvider(CapabilityApi capabilityApi){
+	public ServiceProvider capabilityApiToServiceProvider(CapabilityApi capabilityApi) {
 		ServiceProvider serviceProvider = new ServiceProvider();
 		serviceProvider.setName(capabilityApi.getName());
 		serviceProvider.setCapabilities(toCapabilities(capabilityApi));
@@ -42,7 +42,7 @@ public class CapabilityTransformer {
 		return capabilitiesObject;
 	}
 
-	public CapabilityApi serviceProviderToCapabilityApi(ServiceProvider serviceProvider){
+	public CapabilityApi serviceProviderToCapabilityApi(ServiceProvider serviceProvider) {
 
 		CapabilityApi capabilityApi = new CapabilityApi();
 		capabilityApi.setName(serviceProvider.getName());
@@ -51,7 +51,7 @@ public class CapabilityTransformer {
 		return capabilityApi;
 	}
 
-	public CapabilityApi selfToCapabilityApi(Self self){
+	public CapabilityApi selfToCapabilityApi(Self self) {
 
 		CapabilityApi capabilityApi = new CapabilityApi();
 		capabilityApi.setName(self.getName());
@@ -64,9 +64,8 @@ public class CapabilityTransformer {
 		for (DataType dataType : dataTypes) {
 			DataTypeApi dataTypeApi;
 			if (dataType.getMessageType().equals(Datex2DataTypeApi.DATEX_2)) {
-				dataTypeApi = new Datex2DataTypeApi(dataType.getOriginatingCountry(), dataType.getPublicationType());
-			}
-			else {
+				dataTypeApi = new Datex2DataTypeApi(dataType.getOriginatingCountry(), dataType.getPublicationType(), toArray(dataType.getPublicationSubTypes()));
+			} else {
 				logger.warn("Unknown message type to be converted to API data type: {}", dataType);
 				dataTypeApi = new DataTypeApi(dataType.getMessageType(), dataType.getOriginatingCountry());
 			}
@@ -75,15 +74,21 @@ public class CapabilityTransformer {
 		return apis;
 	}
 
+	private String[] toArray(String commaSeparatedString) {
+		return commaSeparatedString == null ? null : commaSeparatedString
+				.replaceAll("\\A,", "")
+				.replaceAll(",\\z", "")
+				.split(",");
+	}
+
 	public Set<DataType> dataTypeApiToDataType(Set<? extends DataTypeApi> capabilities) {
 		Set<DataType> dataTypes = new HashSet<>();
 		for (DataTypeApi capability : capabilities) {
 			DataType dataType;
-			if (capability.getMessageType().equals(Datex2DataTypeApi.DATEX_2)){
+			if (capability.getMessageType().equals(Datex2DataTypeApi.DATEX_2)) {
 				Datex2DataTypeApi datexApi = (Datex2DataTypeApi) capability;
-				dataType = new DataType(datexApi.getMessageType(), datexApi.getOriginatingCountry(), datexApi.getPublicationType());
-			}
-			else {
+				dataType = new DataType(datexApi.getMessageType(), datexApi.getOriginatingCountry(), datexApi.getPublicationType(), toDelimitedString(datexApi.getPublicationSubType()));
+			} else {
 				logger.warn("Unknown message type {}", capability.getMessageType());
 				dataType = new DataType(capability.getMessageType(), capability.getOriginatingCountry());
 			}
@@ -91,4 +96,9 @@ public class CapabilityTransformer {
 		}
 		return dataTypes;
 	}
+
+	private String toDelimitedString(String[] publicationSubType) {
+		return publicationSubType == null || publicationSubType.length == 0 ? "" : "," + String.join(",", publicationSubType) + ",";
+	}
+
 }

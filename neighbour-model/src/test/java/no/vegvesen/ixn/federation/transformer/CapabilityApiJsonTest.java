@@ -15,7 +15,7 @@ public class CapabilityApiJsonTest {
 	@Test
 	public void capabilitiesDatexTransformedToJsonAndBack() throws IOException {
 		HashSet<Datex2DataTypeApi> capabilities = new HashSet<>();
-		capabilities.add(new Datex2DataTypeApi("NO", "myPublicationType"));
+		capabilities.add(new Datex2DataTypeApi("NO", "myPublicationType", new String[] {"aa", "bb"}));
 		CapabilityApi capabilityApi = new CapabilityApi("norway", capabilities);
 
 		ObjectMapper objectMapper = new ObjectMapper();
