@@ -1,10 +1,8 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Neighbour;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -18,19 +16,19 @@ public class CapabilityTransformerTest {
 	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 
 	@Test
-	public void capabilityApiIsConvertedToInterchange(){
-		CapabilityApi capabilityApi = new CapabilityApi();
-		capabilityApi.setName("Test 2");
+	public void capabilityApiIsConvertedToDataTypes(){
 		final String messageType = "DATEX2";
 		final String originatingCountry = "NO";
 		final String publicationType = "MeasuredDataPublication";
-		DataTypeApi capabilities = new Datex2DataTypeApi(originatingCountry, publicationType);
-		capabilityApi.setCapabilities(Collections.singleton(capabilities));
+		final String [] publicationSubType = new String[] {"SiteMeasurements", "TravelTimeData"};
+		final String publicationSubTypeString = ",SiteMeasurements,TravelTimeData,";
+		DataTypeApi capability = new Datex2DataTypeApi(originatingCountry, publicationType, publicationSubType);
+		Set<DataTypeApi> capabilities = Collections.singleton(capability);
 
-		Neighbour interchange = capabilityTransformer.capabilityApiToNeighbour(capabilityApi);
+		Set<DataType> dataTypes = capabilityTransformer.dataTypeApiToDataType(capabilities);
 
-		assertThat(interchange.getCapabilities().getDataTypes()).hasSize(1);
-		assertThat(interchange.getCapabilities().getDataTypes()).containsExactly(new DataType(messageType,originatingCountry, publicationType));
+		assertThat(dataTypes).hasSize(1);
+		assertThat(dataTypes).containsExactly(new DataType(messageType,originatingCountry, publicationType, publicationSubTypeString));
 	}
 
 	@Test
@@ -38,7 +36,8 @@ public class CapabilityTransformerTest {
 		final String messageType = "DATEX2";
 		final String originatingCountry = "NO";
 		final String publicationType = "MeasuredDataPublication";
-		DataType dataType = new DataType(messageType, originatingCountry, publicationType);
+		final String publicationSubType = ",SiteMeasurements,TravelTimeData,";
+		DataType dataType = new DataType(messageType, originatingCountry, publicationType, publicationSubType);
 
 		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Collections.singleton(dataType));
 
@@ -46,13 +45,14 @@ public class CapabilityTransformerTest {
 		DataTypeApi dataTypeApi = dataTypeApis.iterator().next();
 		assertThat(dataTypeApi).isInstanceOf(Datex2DataTypeApi.class);
 		assertThat(((Datex2DataTypeApi)dataTypeApi).getPublicationType()).isEqualTo(publicationType);
+		assertThat(((Datex2DataTypeApi)dataTypeApi).getPublicationSubType()).hasSize(2);
 	}
 
 	@Test
 	public void unknownDataTypeIsConvertedToApi() {
 		final String messageType = "myfantasticmessagetype";
 		final String originatingCountry = "ON";
-		DataType dataType = new DataType(messageType, originatingCountry);
+		DataType dataType = new DataType(Datex2DataTypeApi.DATEX_2, messageType, originatingCountry, null);
 
 		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Collections.singleton(dataType));
 

@@ -155,7 +155,29 @@ public class DataTypeSelectorMatcherTest {
 		Set<DataType> dataTypes = Collections.singleton(new DataType(Datex2DataTypeApi.DATEX_2,"NO"));
 		Set<String> selectors = Collections.singleton("foo = 'bar'");
 		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isEmpty();
-
 	}
+
+	@Test
+	public void arrayValuesWillMatchFilter() {
+		Set<DataType> dataTypes = Collections.singleton(new DataType(Datex2DataTypeApi.DATEX_2,"NO", "anyPublicationType", ",foo,bar,baz,"));
+		Set<String> selectors = Collections.singleton("publicationSubType like '%,bar,%'");
+		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isNotEmpty();
+	}
+
+	@Test
+	public void arrayValuesWillMatchFilterValueFromFirstArrayValue() {
+		Set<DataType> dataTypes = Collections.singleton(new DataType(Datex2DataTypeApi.DATEX_2,"NO", "anyPublicationType", ",foo,bar,baz,"));
+		Set<String> selectors = Collections.singleton("publicationSubType  like '%,foo,%'");
+		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isNotEmpty();
+	}
+
+	@Test
+	public void arrayValuesWillMatchFilterValueFromLastArrayValue() {
+		Set<DataType> dataTypes = Collections.singleton(new DataType(Datex2DataTypeApi.DATEX_2,"NO", "anyPublicationType", ",foo,bar,baz,"));
+		Set<String> selectors = Collections.singleton("publicationSubType  like '%,foo,%'");
+		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isNotEmpty();
+	}
+
+
 
 }

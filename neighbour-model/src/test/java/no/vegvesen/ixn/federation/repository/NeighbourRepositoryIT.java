@@ -83,6 +83,7 @@ public class NeighbourRepositoryIT {
 		Neighbour updatedInterchange = repository.findByName("Third Neighbour");
 
 		assertNotNull(thirdInterchange.getCapabilities());
+		assertNotNull(updatedInterchange.getCapabilities());
 	}
 
 	@Test
@@ -159,8 +160,8 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void neighbourWithDatex2SpecificCapabilitiesCanBeStoredAndRetrieved() {
 		HashSet<DataType> capabilities = new HashSet<>();
-		capabilities.add(new DataType(Datex2DataTypeApi.DATEX_2, "NO", "SituationPublication"));
-		capabilities.add(new DataType(Datex2DataTypeApi.DATEX_2, "NO", "MeasuredDataPublication"));
+		capabilities.add(new DataType(Datex2DataTypeApi.DATEX_2, "NO", "SituationPublication", ",aa,"));
+		capabilities.add(new DataType(Datex2DataTypeApi.DATEX_2, "NO", "MeasuredDataPublication", ",aa,bb,"));
 		Neighbour anyNeighbour = new Neighbour("any", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities), new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()),  new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>()));
 
 		Neighbour savedNeighbour = repository.save(anyNeighbour);
