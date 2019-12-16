@@ -76,13 +76,6 @@
             <artifactId>httpclient</artifactId>
             <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>test-data-helpers</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <profiles>
