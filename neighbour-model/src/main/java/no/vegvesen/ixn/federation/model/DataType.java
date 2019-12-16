@@ -1,16 +1,17 @@
 package no.vegvesen.ixn.federation.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeI;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeI;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
 @Table(name = "data_types")
-public class DataType implements DataTypeI, Datex2DataTypeI{
+public class DataType{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_generator")
@@ -18,12 +19,8 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 	@Column(name="dat_id")
 	private Integer data_id;
 
-	private String originatingCountry;
-	private String messageType;
-	//Datex2
-	private String publicationType;
-	private String publicationSubTypes;
-
+	@ElementCollection
+	private Map<String, String> values;
 
 	@Column
 	@UpdateTimestamp
@@ -31,37 +28,8 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 
 	public DataType(){}
 
-	public DataType(String messageType, String originatingCountry) {
-		this.messageType = messageType;
-		this.originatingCountry = originatingCountry;
-	}
-
-	//Datex2
-	public DataType(String messageType, String originatingCountry, String publicationType, String publicationSubTypes) {
-		this.messageType = messageType;
-		this.originatingCountry = originatingCountry;
-		this.publicationType = publicationType;
-		this.publicationSubTypes = publicationSubTypes;
-	}
-
-	@Override
-	public String getOriginatingCountry() {
-		return originatingCountry;
-	}
-
-	@Override
-	public void setOriginatingCountry(String originatingCountry) {
-		this.originatingCountry = originatingCountry;
-	}
-
-	@Override
-	public String getMessageType() {
-		return messageType;
-	}
-
-	@Override
-	public void setMessageType(String messageType) {
-		this.messageType = messageType;
+	public DataType(Map<String, String> values) {
+		this.values = new HashMap<>(values);
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -81,51 +49,23 @@ public class DataType implements DataTypeI, Datex2DataTypeI{
 
 		DataType dataType = (DataType) o;
 
-		if (originatingCountry != null ? !originatingCountry.equals(dataType.originatingCountry) : dataType.originatingCountry != null)
-			return false;
-		if (!messageType.equals(dataType.messageType)) return false;
-		if (publicationType != null ? !publicationType.equals(dataType.publicationType) : dataType.publicationType != null)
-			return false;
-		return publicationSubTypes != null ? publicationSubTypes.equals(dataType.publicationSubTypes) : dataType.publicationSubTypes == null;
+		return values != null ? values.equals(dataType.values) : dataType.values == null;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = originatingCountry != null ? originatingCountry.hashCode() : 0;
-		result = 31 * result + messageType.hashCode();
-		result = 31 * result + (publicationType != null ? publicationType.hashCode() : 0);
-		result = 31 * result + (publicationSubTypes != null ? publicationSubTypes.hashCode() : 0);
-		return result;
+		return values != null ? values.hashCode() : 0;
 	}
 
-	@Override
-	public String toString() {
-		return "DataType{" +
-				"data_id=" + data_id +
-				", originatingCountry='" + originatingCountry + '\'' +
-				", messageType='" + messageType + '\'' +
-				", publicationType='" + publicationType + '\'' +
-				", publicationSubType='" + publicationSubTypes + '\'' +
-				", lastUpdated=" + lastUpdated +
-				'}';
+	public Map<String, String> getValues() {
+		return values;
 	}
 
-	@Override
-	public String getPublicationType() {
-		return this.publicationType;
-
+	public void setValues(Map<String, String> values) {
+		this.values = values;
 	}
 
-	@Override
-	public void setPublicationType(String publicationType) {
-		this.publicationType = publicationType;
-	}
-
-	public String getPublicationSubTypes() {
-		return publicationSubTypes;
-	}
-
-	public void setPublicationSubTypes(String publicationSubTypes) {
-		this.publicationSubTypes = publicationSubTypes;
+	public String getPropertyValue(MessageProperty property) {
+		return this.values.get(property.getName());
 	}
 }

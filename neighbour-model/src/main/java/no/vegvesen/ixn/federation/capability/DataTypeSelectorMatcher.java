@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
 import no.vegvesen.ixn.federation.model.DataType;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.server.filter.Filterable;
 import org.apache.qpid.server.filter.JMSSelectorFilter;
 import org.apache.qpid.server.filter.SelectorParsingException;
@@ -28,10 +29,10 @@ public class DataTypeSelectorMatcher {
 		private final HashMap<String, Object> headers = new HashMap<>();
 
 		DataTypeFilter(DataType dataType) {
-			headers.put("messageType", dataType.getMessageType());
-			headers.put("originatingCountry", dataType.getOriginatingCountry());
-			headers.put("publicationType", dataType.getPublicationType());
-			headers.put("publicationSubType", dataType.getPublicationSubTypes());
+			Set<String> allPropertyNames = MessageProperty.allPropertyNames;
+			for (String propertyName: allPropertyNames) {
+				headers.put(propertyName, dataType.getValues().get(propertyName));
+			}
 		}
 
 		@Override
@@ -132,7 +133,9 @@ public class DataTypeSelectorMatcher {
 	}
 
 	private static void notAlwaysTrue(JMSSelectorFilter filter) {
-		DataTypeFilter neverTrue = new DataTypeFilter(new DataType("-1", "-1"));
+		HashMap<String, String> neverTrueValues = new HashMap<>();
+		neverTrueValues.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "-1");
+		DataTypeFilter neverTrue = new DataTypeFilter(new DataType(neverTrueValues));
 		if (filter.matches(neverTrue)){
 			throw new SelectorAlwaysTrueException("Cannot subscribe to a filter that is always true: " + filter.getSelector());
 		}
