@@ -1,0 +1,83 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-qpid
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: qpid
+    release: {{ .Release.Name }}
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: qpid
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/qpid-config.yml") . | sha256sum }}
+      labels:
+        app: {{ .Chart.Name }}
+        component: qpid
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: qpid
+        image: {{ .Values.qpid.image | quote }}
+        ports:
+        - name: amqp
+          containerPort: 5672
+        - name: amqps
+          containerPort: 5671
+        - name: http
+          containerPort: 8080
+        env:
+        - name: SERVER_CERTIFICATE_FILE
+          value: /secure/{{ .Values.qpid.server_certificate_file }}
+        - name: SERVER_PRIVATE_KEY_FILE
+          value: /secure/{{ .Values.qpid.server_private_key_file }}
+        - name: CA_CERTIFICATE_FILE
+          value: /secure/{{ .Values.qpid.ca_certificate_file }}
+        - name: VHOST_FILE
+          value: /work/default/config/default.json
+        - name: STATIC_VHOST_FILE
+          value: /config/default.json
+        - name: GROUPS_FILE
+          value: /work/default/config/groups
+        - name: STATIC_GROUPS_FILE
+          value: /config/groups
+        - name: PASSWD_FILE
+          value: /config/passwd
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: secure
+          mountPath: /secure
+        - name: storage
+          mountPath: /work/default
+          subPath: default
+        - name: storage
+          mountPath: /work/{{ required "must provide .Values.external_name" .Values.external_name }}
+          subPath: {{ required "must provide .Values.external_name" .Values.external_name }}
+        readinessProbe:
+          initialDelaySeconds: 5
+          tcpSocket:
+            port: amqps
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-qpid
+      - name: secure
+        secret:
+          secretName: {{ required "must provide .Values.qpid.tls_secret_name" .Values.qpid.tls_secret_name }}
+      - name: storage
+      {{- if .Values.qpid.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-qpid
+      {{- else }}
+        emptyDir: {}
+      {{- end -}}
