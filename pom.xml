@@ -197,7 +197,6 @@
         <module>neighbour-dns</module>
         <module>neighbour-model</module>
         <module>neighbour-server</module>
-        <module>test-data-helpers</module>
         <module>neighbour-discoverer</module>
         <module>onboard-server</module>
         <module>routing-configurer</module>
