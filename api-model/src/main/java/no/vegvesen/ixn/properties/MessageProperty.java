@@ -7,19 +7,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings({"WeakerAccess", "ArraysAsListWithZeroOrOneArgument"})
 public class MessageProperty {
 
-    public static final MessageProperty MESSAGE_TYPE = new MessageProperty("messageType", true);
+	public static final MessageProperty MESSAGE_TYPE = new MessageProperty("messageType", true);
     public static final MessageProperty QUAD_TREE = new MessageProperty("quadTree", false);
     public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true);
+	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true);
 
-    public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
+	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
             MESSAGE_TYPE,
             QUAD_TREE,
             USER_ID,
             new MessageProperty("publisherId", false),
             new MessageProperty("publisherName", true),
-            new MessageProperty("originatingCountry", true),
+			ORIGINATING_COUNTRY,
             new MessageProperty("protocolVersion", true),
             new MessageProperty("contentType", false),
             new MessageProperty("latitude", true),
@@ -29,9 +31,11 @@ public class MessageProperty {
     );
 
 
-    public static final List<MessageProperty> datex2ApplicationProperties = Arrays.asList(
-            new MessageProperty("publicationType",true),
-            new MessageProperty("publicationSubType",false)
+	public static final MessageProperty PUBLICATION_TYPE = new MessageProperty("publicationType", true);
+	public static final MessageProperty PUBLICATION_SUB_TYPE = new MessageProperty("publicationSubType", false);
+	public static final List<MessageProperty> datex2ApplicationProperties = Arrays.asList(
+            PUBLICATION_TYPE,
+			PUBLICATION_SUB_TYPE
     );
 
     public static final List<MessageProperty> itsG5ApplicationProperties = Arrays.asList(
@@ -49,7 +53,7 @@ public class MessageProperty {
             new MessageProperty("iviContainer",false)
     );
 
-    public static Set<String> mandatoryDatex2PropertyNames = Stream.of(commonApplicationProperties,datex2ApplicationProperties)
+	public static Set<String> mandatoryDatex2PropertyNames = Stream.of(commonApplicationProperties,datex2ApplicationProperties)
             .flatMap(messageProperties -> messageProperties.stream())
             .filter(MessageProperty::isMandatory)
             .map(MessageProperty::getName)

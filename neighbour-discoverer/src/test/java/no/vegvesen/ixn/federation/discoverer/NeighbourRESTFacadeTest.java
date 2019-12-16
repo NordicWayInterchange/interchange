@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -88,8 +89,8 @@ public class NeighbourRESTFacadeTest {
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType dataTypeInCapabilities = dataTypes.next();
 
-		assertThat(dataTypeInCapabilities.getMessageType()).isEqualTo(dataType.getMessageType());
-		assertThat(dataTypeInCapabilities.getOriginatingCountry()).isEqualTo(dataType.getOriginatingCountry());
+		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
 	}
 
 	@Test

@@ -3,6 +3,10 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import no.vegvesen.ixn.properties.MessageProperty;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.NAME,
@@ -62,5 +66,22 @@ public class DataTypeApi implements DataTypeI {
 		int result = messageType != null ? messageType.hashCode() : 0;
 		result = 31 * result + (originatingCountry != null ? originatingCountry.hashCode() : 0);
 		return result;
+	}
+
+	public Map<String, String> getValues() {
+		Map<String, String> values = new HashMap<>();
+		putValue(values, MessageProperty.MESSAGE_TYPE, this.getMessageType());
+		putValue(values, MessageProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
+		return values;
+	}
+
+	void putValue(Map<String, String> values, MessageProperty messageProperty, String value) {
+		if (value != null) {
+			values.put(messageProperty.getName(), value);
+		}
+	}
+
+	String arrayToDelimitedString(String[] values) {
+		return values == null || values.length == 0 ? "" : "," + String.join(",", values) + ",";
 	}
 }

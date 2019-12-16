@@ -8,6 +8,8 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
+import no.vegvesen.ixn.properties.MessageProperty;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -280,9 +283,9 @@ public class OnboardRestControllerTest {
 	@Test
 	public void calculateSelfCapabilitiesTest() {
 
-		DataType a = new DataType("DATEX2", "SE");
-		DataType b = new DataType("DATEX2", "FI");
-		DataType c = new DataType("DATEX2", "NO");
+		DataType a = getDatex("SE");
+		DataType b = getDatex("FI");
+		DataType c = getDatex("NO");
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
@@ -300,6 +303,14 @@ public class OnboardRestControllerTest {
 
 		assertEquals(selfCapabilities.size(), 3);
 		assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
+	}
+
+	@NotNull
+	private DataType getDatex(String se) {
+		HashMap<String, String> datexHeaders = new HashMap<>();
+		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		datexHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), se);
+		return new DataType(datexHeaders);
 	}
 
 	@Test

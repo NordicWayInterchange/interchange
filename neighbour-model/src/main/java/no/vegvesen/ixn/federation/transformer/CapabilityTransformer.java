@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -63,11 +64,15 @@ public class CapabilityTransformer {
 		Set<DataTypeApi> apis = new HashSet<>();
 		for (DataType dataType : dataTypes) {
 			DataTypeApi dataTypeApi;
-			if (dataType.getMessageType().equals(Datex2DataTypeApi.DATEX_2)) {
-				dataTypeApi = new Datex2DataTypeApi(dataType.getOriginatingCountry(), dataType.getPublicationType(), toArray(dataType.getPublicationSubTypes()));
+			String messageType = dataType.getPropertyValue(MessageProperty.MESSAGE_TYPE);
+			if (messageType.equals(Datex2DataTypeApi.DATEX_2)) {
+				dataTypeApi = new Datex2DataTypeApi(
+						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
+						dataType.getPropertyValue(MessageProperty.PUBLICATION_TYPE),
+						toArray(dataType.getPropertyValue(MessageProperty.PUBLICATION_SUB_TYPE)));
 			} else {
 				logger.warn("Unknown message type to be converted to API data type: {}", dataType);
-				dataTypeApi = new DataTypeApi(dataType.getMessageType(), dataType.getOriginatingCountry());
+				dataTypeApi = new DataTypeApi(messageType, dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY));
 			}
 			apis.add(dataTypeApi);
 		}
@@ -87,18 +92,14 @@ public class CapabilityTransformer {
 			DataType dataType;
 			if (capability.getMessageType().equals(Datex2DataTypeApi.DATEX_2)) {
 				Datex2DataTypeApi datexApi = (Datex2DataTypeApi) capability;
-				dataType = new DataType(datexApi.getMessageType(), datexApi.getOriginatingCountry(), datexApi.getPublicationType(), toDelimitedString(datexApi.getPublicationSubType()));
+				dataType = new DataType(datexApi.getValues());
 			} else {
 				logger.warn("Unknown message type {}", capability.getMessageType());
-				dataType = new DataType(capability.getMessageType(), capability.getOriginatingCountry());
+				dataType = new DataType(capability.getValues());
 			}
 			dataTypes.add(dataType);
 		}
 		return dataTypes;
-	}
-
-	private String toDelimitedString(String[] publicationSubType) {
-		return publicationSubType == null || publicationSubType.length == 0 ? "" : "," + String.join(",", publicationSubType) + ",";
 	}
 
 }

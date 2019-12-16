@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,8 +35,16 @@ public class NeighbourDiscovererTest {
 	private NeighbourDiscoverer neighbourDiscoverer;
 
 	// Objects used in testing
-	private DataType noObstruction = new DataType(Datex2DataTypeApi.DATEX_2, "NO");
+	private DataType datexNo = getDatexNoDataType();
 	private Self self;
+
+	private DataType getDatexNoDataType() {
+		Map<String, String> datexDataTypeHeaders = new HashMap<>();
+		datexDataTypeHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		datexDataTypeHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		return new DataType(datexDataTypeHeaders);
+	}
+
 
 	@Before
 	public void before(){
@@ -66,7 +75,7 @@ public class NeighbourDiscovererTest {
 	private Self createSelf() {
 		// Self setup
 		self = new Self(myName);
-		Set<DataType> selfCapabilities = Collections.singleton(new DataType(Datex2DataTypeApi.DATEX_2, "NO"));
+		Set<DataType> selfCapabilities = Collections.singleton(getDatexNoDataType());
 		self.setLocalCapabilities(selfCapabilities);
 		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED));
 		self.setLocalSubscriptions(selfSubscriptions);
@@ -220,7 +229,7 @@ public class NeighbourDiscovererTest {
 		Neighbour ericsson = createNeighbour();
 		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 
-		DataType firstDataType = this.noObstruction;
+		DataType firstDataType = this.datexNo;
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
 
 		doReturn(ericssonCapabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
@@ -291,7 +300,7 @@ public class NeighbourDiscovererTest {
 		Neighbour ericsson = createNeighbour();
 		ericsson.setBackoffAttempts(4);
 
-		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(noObstruction));
+		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(datexNo));
 		ericsson.setCapabilities(ericssonCapabilities);
 
 		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
@@ -398,7 +407,7 @@ public class NeighbourDiscovererTest {
 		SubscriptionRequest emptySR = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, subscription);
 
 		HashSet<DataType> dtNO = new HashSet<>();
-		dtNO.add(new DataType(Datex2DataTypeApi.DATEX_2, "NO"));
+		dtNO.add(getDatexNoDataType());
 		Capabilities capabilitiesNO = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, dtNO);
 		Neighbour neighbourA = new Neighbour("a", capabilitiesNO, emptySR,  emptySR);
 		Neighbour neighbourB = new Neighbour("b", capabilitiesNO, emptySR,  emptySR);
@@ -423,7 +432,7 @@ public class NeighbourDiscovererTest {
 		// Self setup
 		Self discoveringNode = new Self("d");
 		Set<DataType> selfCapabilities = new HashSet<>();
-		selfCapabilities.add(new DataType(Datex2DataTypeApi.DATEX_2, "NO"));
+		selfCapabilities.add(getDatexNoDataType());
 		discoveringNode.setLocalCapabilities(selfCapabilities);
 
 		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("originatingCountry like 'NO'", SubscriptionStatus.REQUESTED)); //TODO: part 2
@@ -464,7 +473,7 @@ public class NeighbourDiscovererTest {
 		self.setLocalSubscriptions(selfLocalSubscriptions);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
-		DataType neighbourDataType = new DataType(Datex2DataTypeApi.DATEX_2,"NO");
+		DataType neighbourDataType = getDatexNoDataType();
 		Set<DataType> dataTypeSet = new HashSet<>();
 		dataTypeSet.add(neighbourDataType);
 		Capabilities neighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,dataTypeSet);
