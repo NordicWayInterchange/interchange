@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: qpid
-        image: {{ .Values.qpid.image | quote }}
+        image: "{{ .Values.qpid.image.repository }}:{{ .Values.qpid.image.tag }}"
         ports:
         - name: amqp
           containerPort: 5672

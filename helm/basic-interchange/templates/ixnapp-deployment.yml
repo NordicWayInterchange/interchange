@@ -1,0 +1,37 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-interchange
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: interchange
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: interchange
+      release: {{ .Release.Name }}
+  template:
+    spec:
+      containers:
+      - name: interchange
+        image: "{{ .Values.interchange.image.repository }}:{{ .Values.interchange.image.tag }}"
+        env:
+        - name: AMQP_URI
+          value: amqp://{{ .Release.Name }}-qpid?amqp.vhost={{ .Values.external_name }}
+        - name: AMQP_USER
+          value: {{ .Values.qpid.interchange_user }}
+        - name: AMQP_PASSWORD
+          value: {{ .Values.qpid.interchange_password }}
+        - name: LOG_LEVELS
+          value: "{{- range .Values.interchange.logging -}}
+                     -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
+                 {{- end }}"
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: interchange
+        release: {{ .Release.Name }}

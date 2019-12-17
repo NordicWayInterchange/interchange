@@ -1,0 +1,44 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-qpid
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: qpid
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    component: qpid
+    release: {{ .Release.Name }}
+  type: ClusterIP
+  ports:
+  - name: amqp
+    port: 5672
+    targetPort: amqp
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-qpid-secure
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: qpid
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    component: qpid
+    release: {{ .Release.Name }}
+  type: LoadBalancer
+  ports:
+  - name: amqps
+    port: 5671
+    targetPort: amqps
+  {{- if .Values.static_external_ip }}
+  loadBalancerIP: {{ .Values.static_external_ip }}
+  {{- end -}}
