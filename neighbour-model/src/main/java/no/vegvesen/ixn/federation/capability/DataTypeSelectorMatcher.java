@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
+import no.vegvesen.ixn.federation.exceptions.HeaderNotFilterable;
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
@@ -38,6 +39,12 @@ public class DataTypeSelectorMatcher {
 		@Override
 		public Object getHeader(String messageHeaderName) {
 			if (!this.headers.containsKey(messageHeaderName)) {
+				if (messageHeaderName.equals(MessageProperty.QUAD_TREE.getName())){
+					throw new HeaderNotFilterable(String.format("Message header [%s] must be specified in separate attribute outside selector filter", messageHeaderName));
+				}
+				if (MessageProperty.nonFilterablePropertyNames.contains(messageHeaderName)) {
+					throw new HeaderNotFilterable(String.format("Message header [%s] not possible to use in selector filter", messageHeaderName));
+				}
 				throw new HeaderNotFoundException(String.format("Message header [%s] not a known capability attribute", messageHeaderName));
 			}
 			Object value = this.headers.get(messageHeaderName);
@@ -118,11 +125,12 @@ public class DataTypeSelectorMatcher {
 		return filter.matches(capabilityFilter);
 	}
 
-	static boolean matches(DataType capability, Set<String> quadTreeTiles, String selector) {
-	    JMSSelectorFilter selectorFilter = validateSelector(selector);
+	static boolean matches(DataType capability, Set<String> quadTreeFilter, String jmsSelectorFilter) {
+	    JMSSelectorFilter selectorFilter = validateSelector(jmsSelectorFilter);
 		DataTypeFilter capabilityFilter = new DataTypeFilter(capability);
-		QuadTreeFilter quadTree = new QuadTreeFilter(quadTreeTiles);
+		QuadTreeFilter quadTree = new QuadTreeFilter(quadTreeFilter);
 		return selectorFilter.matches(capabilityFilter) && quadTree.matches(capability);
+
 	}
 
 	public static JMSSelectorFilter validateSelector(String selector) {
