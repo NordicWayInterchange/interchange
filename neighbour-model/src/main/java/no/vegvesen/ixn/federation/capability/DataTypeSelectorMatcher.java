@@ -29,9 +29,9 @@ public class DataTypeSelectorMatcher {
 		private final HashMap<String, Object> headers = new HashMap<>();
 
 		DataTypeFilter(DataType dataType) {
-			Set<String> allPropertyNames = MessageProperty.allPropertyNames;
-			for (String propertyName: allPropertyNames) {
-				headers.put(propertyName, dataType.getValues().get(propertyName));
+			Set<MessageProperty> allPropertyNames = MessageProperty.filterableProperties;
+			for (MessageProperty property: allPropertyNames) {
+				headers.put(property.getName(), dataType.getPropertyValue(property));
 			}
 		}
 
