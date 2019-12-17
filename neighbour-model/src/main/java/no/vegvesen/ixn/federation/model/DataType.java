@@ -68,4 +68,12 @@ public class DataType{
 	public String getPropertyValue(MessageProperty property) {
 		return this.values.get(property.getName());
 	}
+
+	public String[] getPropertyValueAsArray(MessageProperty property) {
+		String commaSeparatedString = getPropertyValue(property);
+		return commaSeparatedString == null ? null : commaSeparatedString
+				.replaceAll("\\A,", "")
+				.replaceAll(",\\z", "")
+				.split(",");
+	}
 }
