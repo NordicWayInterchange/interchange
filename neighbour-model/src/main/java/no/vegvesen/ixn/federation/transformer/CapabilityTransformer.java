@@ -69,7 +69,7 @@ public class CapabilityTransformer {
 				dataTypeApi = new Datex2DataTypeApi(
 						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
 						dataType.getPropertyValue(MessageProperty.PUBLICATION_TYPE),
-						toArray(dataType.getPropertyValue(MessageProperty.PUBLICATION_SUB_TYPE)));
+						dataType.getPropertyValueAsArray(MessageProperty.PUBLICATION_SUB_TYPE));
 			} else {
 				logger.warn("Unknown message type to be converted to API data type: {}", dataType);
 				dataTypeApi = new DataTypeApi(messageType, dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY));
@@ -77,13 +77,6 @@ public class CapabilityTransformer {
 			apis.add(dataTypeApi);
 		}
 		return apis;
-	}
-
-	private String[] toArray(String commaSeparatedString) {
-		return commaSeparatedString == null ? null : commaSeparatedString
-				.replaceAll("\\A,", "")
-				.replaceAll(",\\z", "")
-				.split(",");
 	}
 
 	public Set<DataType> dataTypeApiToDataType(Set<? extends DataTypeApi> capabilities) {

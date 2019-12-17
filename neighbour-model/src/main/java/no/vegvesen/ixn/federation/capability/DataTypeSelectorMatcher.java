@@ -118,6 +118,13 @@ public class DataTypeSelectorMatcher {
 		return filter.matches(capabilityFilter);
 	}
 
+	static boolean matches(DataType capability, Set<String> quadTreeTiles, String selector) {
+	    JMSSelectorFilter selectorFilter = validateSelector(selector);
+		DataTypeFilter capabilityFilter = new DataTypeFilter(capability);
+		QuadTreeFilter quadTree = new QuadTreeFilter(quadTreeTiles);
+		return selectorFilter.matches(capabilityFilter) && quadTree.matches(capability);
+	}
+
 	public static JMSSelectorFilter validateSelector(String selector) {
 		if (selector.contains("\"") || selector.contains("`")) {
 			throw new InvalidSelectorException("String values in selectors must be quoted with single quoutes: " + selector);
@@ -160,4 +167,23 @@ public class DataTypeSelectorMatcher {
 		return calculatedSelectors;
 	}
 
+	private static class QuadTreeFilter {
+		private final Set<String> quadTreeTiles;
+
+		QuadTreeFilter(Set<String> quadTreeTiles) {
+			this.quadTreeTiles = quadTreeTiles;
+		}
+
+		boolean matches(DataType dataType) {
+			String [] quadTree = dataType.getPropertyValueAsArray(MessageProperty.QUAD_TREE);
+			for (String filterTile : quadTreeTiles) {
+				for (String capabilityTile : quadTree) {
+					if (filterTile.startsWith(capabilityTile) || capabilityTile.startsWith(filterTile)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
 }

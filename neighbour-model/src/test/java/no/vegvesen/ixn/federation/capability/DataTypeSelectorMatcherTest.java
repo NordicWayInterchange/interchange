@@ -179,6 +179,53 @@ public class DataTypeSelectorMatcherTest {
 		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isNotEmpty();
 	}
 
+	@Test(expected = HeaderNotFoundException.class)
+	public void quadTreeInSelectorIsNotAllowed() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		values.put(MessageProperty.QUAD_TREE.getName(), ",ABCDE,BCDEF,");
+		DataType dataType = new DataType(values);
+		assertThat(DataTypeSelectorMatcher.matches(dataType, "quadTree like '%,CDE%'")).isFalse();
+	}
+
+	@Test
+	public void quadTreeSubscriptionMatchesShorterCapability() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		values.put(MessageProperty.QUAD_TREE.getName(), "ABCDE,BCDEF,CDEFG");
+		DataType dataType = new DataType(values);
+		Set<String> quadTreeFilter = new HashSet<>();
+		quadTreeFilter.add("BCD");
+		assertThat(DataTypeSelectorMatcher.matches(dataType, quadTreeFilter, "messageType = 'DATEX2'")).isTrue();
+	}
+
+
+	@Test
+	public void quadTreeSubscriptionMatchesLongerCapability() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		values.put(MessageProperty.QUAD_TREE.getName(), "ABCDE,BCDEF,CDEFG");
+		DataType dataType = new DataType(values);
+		Set<String> quadTreeFilter = new HashSet<>();
+		quadTreeFilter.add("BCDEFG");
+		assertThat(DataTypeSelectorMatcher.matches(dataType, quadTreeFilter, "messageType = 'DATEX2'")).isTrue();
+	}
+
+	@Test
+	public void quadTreeSubscriptionMatchesNot() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		values.put(MessageProperty.QUAD_TREE.getName(), "ABCDE,BCDEF,CDEFG");
+		DataType dataType = new DataType(values);
+		Set<String> quadTreeFilter = new HashSet<>();
+		quadTreeFilter.add("DEFG");
+		assertThat(DataTypeSelectorMatcher.matches(dataType, quadTreeFilter, "messageType = 'DATEX2'")).isFalse();
+	}
+
 	@NotNull
 	private DataType getDatex(String originatingCountry) {
 		HashMap<String, String> values = new HashMap<>();
