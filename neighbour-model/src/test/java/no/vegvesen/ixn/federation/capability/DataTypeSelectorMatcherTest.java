@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.exceptions.HeaderNotFilterable;
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
@@ -179,7 +180,7 @@ public class DataTypeSelectorMatcherTest {
 		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isNotEmpty();
 	}
 
-	@Test(expected = HeaderNotFoundException.class)
+	@Test(expected = HeaderNotFilterable.class)
 	public void quadTreeInSelectorIsNotAllowed() {
 		HashMap<String, String> values = new HashMap<>();
 		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
@@ -226,6 +227,24 @@ public class DataTypeSelectorMatcherTest {
 		assertThat(DataTypeSelectorMatcher.matches(dataType, quadTreeFilter, "messageType = 'DATEX2'")).isFalse();
 	}
 
+	@Test(expected = HeaderNotFilterable.class)
+	public void latitudeIsNotPossibleToFilterOn() {
+		DataType no = getDatex("NO");
+		DataTypeSelectorMatcher.matches(no, "latitude > 1");
+	}
+
+	@Test(expected = HeaderNotFilterable.class)
+	public void longitudeIsNotPossibleToFilterOn() {
+		DataType no = getDatex("NO");
+		DataTypeSelectorMatcher.matches(no, "longitude > 1");
+	}
+
+	@Test(expected = HeaderNotFilterable.class)
+	public void timestampIsNotPossibleToFilterOn() {
+		DataType no = getDatex("NO");
+		DataTypeSelectorMatcher.matches(no, "timestamp > 1");
+	}
+
 	@NotNull
 	private DataType getDatex(String originatingCountry) {
 		HashMap<String, String> values = new HashMap<>();
@@ -242,5 +261,4 @@ public class DataTypeSelectorMatcherTest {
 		values.put(MessageProperty.PUBLICATION_SUB_TYPE.getName(), publicationSubType);
 		return Collections.singleton(new DataType(values));
 	}
-
 }

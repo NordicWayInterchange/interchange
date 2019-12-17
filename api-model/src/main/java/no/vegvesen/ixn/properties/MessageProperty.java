@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.properties;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,9 +20,9 @@ public class MessageProperty {
 			ORIGINATING_COUNTRY,
             new MessageProperty("protocolVersion", true, true),
             new MessageProperty("contentType", false, true),
-            new MessageProperty("latitude", true, true),
-            new MessageProperty("longitude", true, true),
-            new MessageProperty("timestamp", false, true),
+            new MessageProperty("latitude", true, false),
+            new MessageProperty("longitude", true, false),
+            new MessageProperty("timestamp", false, false),
             new MessageProperty("relation", false, true)
     );
 
@@ -52,39 +49,49 @@ public class MessageProperty {
             new MessageProperty("iviContainer",false, true)
     );
 
-	public static Set<String> mandatoryDatex2PropertyNames = Stream.of(commonApplicationProperties,datex2ApplicationProperties)
-            .flatMap(messageProperties -> messageProperties.stream())
+	public static Set<String> mandatoryDatex2PropertyNames = Stream.of(
+			commonApplicationProperties,
+			datex2ApplicationProperties).flatMap(Collection::stream)
             .filter(MessageProperty::isMandatory)
             .map(MessageProperty::getName)
             .collect(Collectors.toSet());
 
-    public static Set<String> mandatoryDenmPropertyNames = Stream.of(commonApplicationProperties,itsG5ApplicationProperties,denmApplicationProperties)
-            .flatMap(messageProperties -> messageProperties.stream())
+    public static Set<String> mandatoryDenmPropertyNames = Stream.of(
+    		commonApplicationProperties,
+			itsG5ApplicationProperties,
+			denmApplicationProperties).flatMap(Collection::stream)
             .filter(MessageProperty::isMandatory)
             .map(MessageProperty::getName)
             .collect(Collectors.toSet());
 
-    public static Set<String> mandatoryIviPropertyNames = Stream.of(commonApplicationProperties,itsG5ApplicationProperties,iviApplicationProperties)
-            .flatMap(messageProperties -> messageProperties.stream())
+    public static Set<String> mandatoryIviPropertyNames = Stream.of(
+    		commonApplicationProperties,
+			itsG5ApplicationProperties,
+			iviApplicationProperties).flatMap(Collection::stream)
             .filter(MessageProperty::isMandatory)
             .map(MessageProperty::getName)
             .collect(Collectors.toSet());
-
 
     public static Set<MessageProperty> allProperties = Stream.of(
             commonApplicationProperties,
             datex2ApplicationProperties,
             itsG5ApplicationProperties,
             denmApplicationProperties,
-            iviApplicationProperties).flatMap(messageProperties -> messageProperties.stream())
+            iviApplicationProperties).flatMap(Collection::stream)
             .collect(Collectors.toSet());
 
 	public static Set<MessageProperty> filterableProperties = Stream.of(
-			allProperties).flatMap(messageProperties -> messageProperties.stream())
+			allProperties).flatMap(Collection::stream)
 			.filter(MessageProperty::isFilterable)
 			.collect(Collectors.toSet());
 
-    private String name;
+	public static Set<String> nonFilterablePropertyNames = Stream.of(
+			allProperties).flatMap(Collection::stream)
+			.filter(messageProperty -> !messageProperty.isFilterable())
+			.map(MessageProperty::getName)
+			.collect(Collectors.toSet());
+
+	private String name;
     private boolean mandatory;
     private boolean filterable;
 
