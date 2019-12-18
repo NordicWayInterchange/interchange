@@ -216,7 +216,7 @@ public class NeighbourRestControllerTest {
 		// Mock incoming capabiity API
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		DataTypeApi ericssonDataType = new Datex2DataTypeApi("NO", quadTree, "myPublicationType", null);
+		DataTypeApi ericssonDataType = new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", quadTree, "myPublicationType", null);
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
@@ -245,7 +245,7 @@ public class NeighbourRestControllerTest {
 		// Mock incoming capabiity API
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		DataTypeApi ericssonDataType = new DataTypeApi("unknown", "NO", quadTree);
+		DataTypeApi ericssonDataType = new DataTypeApi("unknown", "myPublisherId", "myPublisherName", "NO", quadTree);
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
