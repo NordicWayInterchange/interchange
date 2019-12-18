@@ -67,6 +67,8 @@ public class CapabilityTransformer {
 			String messageType = dataType.getPropertyValue(MessageProperty.MESSAGE_TYPE);
 			if (messageType.equals(Datex2DataTypeApi.DATEX_2)) {
 				dataTypeApi = new Datex2DataTypeApi(
+						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
+						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
 						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
 						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
 						dataType.getPropertyValue(MessageProperty.PUBLICATION_TYPE),
@@ -75,6 +77,8 @@ public class CapabilityTransformer {
 				logger.warn("Unknown message type to be converted to API data type: {}", dataType);
 				dataTypeApi = new DataTypeApi(
 						messageType,
+						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
+						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
 						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
 						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE));
 			}

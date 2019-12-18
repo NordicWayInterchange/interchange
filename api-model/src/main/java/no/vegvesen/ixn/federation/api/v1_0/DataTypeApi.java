@@ -27,9 +27,11 @@ public class DataTypeApi implements DataTypeI {
 	public DataTypeApi() {
 	}
 
-	public DataTypeApi(String messageType, String originatingCountry, Set<String> quadTree) {
-		this.originatingCountry = originatingCountry;
+	public DataTypeApi(String messageType, String publisherId, String publisherName, String originatingCountry, Set<String> quadTree) {
 		this.messageType = messageType;
+		this.publisherId = publisherId;
+		this.publisherName = publisherName;
+		this.originatingCountry = originatingCountry;
 		if (quadTree != null) {
 			this.quadTree.addAll(quadTree);
 		}
