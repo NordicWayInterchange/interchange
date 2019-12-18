@@ -12,11 +12,13 @@ public class MessageProperty {
     public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true, true);
 	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true, true);
 
+	public static final MessageProperty PUBLISHER_ID = new MessageProperty("publisherId", false, true);
+	public static final MessageProperty PUBLISHER_NAME = new MessageProperty("publisherName", true, true);
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
             MESSAGE_TYPE,
             QUAD_TREE,
-            new MessageProperty("publisherId", false, true),
-            new MessageProperty("publisherName", true, true),
+			PUBLISHER_ID,
+			PUBLISHER_NAME,
 			ORIGINATING_COUNTRY,
             new MessageProperty("protocolVersion", true, true),
             new MessageProperty("contentType", false, true),
