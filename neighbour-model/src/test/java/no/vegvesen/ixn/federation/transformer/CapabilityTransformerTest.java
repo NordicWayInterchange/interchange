@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.transformer;
 
+import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.DataType;
@@ -21,15 +22,19 @@ public class CapabilityTransformerTest {
 	public void capabilityApiIsConvertedToDataTypes(){
 		final String originatingCountry = "NO";
 		final String publicationType = "MeasuredDataPublication";
-		final String [] publicationSubType = new String[] {"SiteMeasurements", "TravelTimeData"};
-		final String publicationSubTypeString = ",SiteMeasurements,TravelTimeData,";
-		DataTypeApi capability = new Datex2DataTypeApi(originatingCountry, publicationType, publicationSubType);
+		String travelTimeData = "TravelTimeData";
+		String siteMeasurements = "SiteMeasurements";
+		DataTypeApi capability = new Datex2DataTypeApi(originatingCountry, Collections.emptySet(), publicationType, Sets.newHashSet(siteMeasurements, travelTimeData));
 		Set<DataTypeApi> capabilities = Collections.singleton(capability);
 
 		Set<DataType> dataTypes = capabilityTransformer.dataTypeApiToDataType(capabilities);
 
 		assertThat(dataTypes).hasSize(1);
-		assertThat(dataTypes).containsExactly(getDatexHeaders(originatingCountry, publicationType, publicationSubTypeString));
+		DataType dataType = dataTypes.iterator().next();
+		assertThat(dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(originatingCountry);
+		assertThat(dataType.getPropertyValue(MessageProperty.PUBLICATION_TYPE)).isEqualTo(publicationType);
+		assertThat(dataType.getPropertyValueAsSet(MessageProperty.PUBLICATION_SUB_TYPE)).hasSize(2).contains(siteMeasurements).contains(travelTimeData);
+		assertThat(dataType.getValues().containsKey(MessageProperty.QUAD_TREE.getName())).isFalse();
 	}
 
 	@Test
@@ -65,6 +70,33 @@ public class CapabilityTransformerTest {
 		assertThat(dataTypeApi).isInstanceOf(DataTypeApi.class);
 		assertThat(dataTypeApi.getMessageType()).isEqualTo(messageType);
 		assertThat(dataTypeApi.getOriginatingCountry()).isEqualTo(originatingCountry);
+	}
+
+	@Test
+	public void dataTypeWithQuadTreeIsConvertedToDatex() {
+		HashMap<String, String> datexHeaders = new HashMap<>();
+		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		datexHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), null);
+		datexHeaders.put(MessageProperty.QUAD_TREE.getName(), "abc,bcd");
+		datexHeaders.put(MessageProperty.PUBLICATION_TYPE.getName(), "myPublication");
+		DataType datexWithQuad = new DataType(datexHeaders);
+		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Sets.newHashSet(datexWithQuad));
+		assertThat(dataTypeApis).hasSize(1);
+		assertThat(dataTypeApis.iterator().next().getQuadTree()).hasSize(2).contains("abc").contains("bcd");
+	}
+
+	@Test
+	public void dataTypeApiWithQuadIsConvertedToDataType() {
+		DataTypeApi dataTypeApi = new DataTypeApi("myQuadMessageType", "no", Sets.newHashSet("aaa", "bbb"));
+		Set<DataType> dataTypes = capabilityTransformer.dataTypeApiToDataType(Sets.newHashSet(dataTypeApi));
+		assertThat(dataTypes).hasSize(1);
+		assertThat(dataTypes.iterator().next().getPropertyValueAsSet(MessageProperty.QUAD_TREE)).hasSize(2);
+	}
+
+	@Test
+	public void datexDataTypeApiWithoutPulicationSubTypeReturnsNoPropertyForPublicationSubType() {
+		Datex2DataTypeApi datex2DataTypeApi = new Datex2DataTypeApi("NO", Collections.emptySet(), "myPublication", Collections.emptySet());
+		assertThat(datex2DataTypeApi.getValues().containsKey(MessageProperty.PUBLICATION_SUB_TYPE.getName())).isFalse();
 	}
 
 	private DataType getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType) {

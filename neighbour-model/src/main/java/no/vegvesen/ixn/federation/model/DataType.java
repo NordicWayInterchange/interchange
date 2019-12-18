@@ -1,13 +1,15 @@
 package no.vegvesen.ixn.federation.model;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Table(name = "data_types")
@@ -20,7 +22,7 @@ public class DataType{
 	private Integer data_id;
 
 	@ElementCollection
-	private Map<String, String> values;
+	private Map<String, String> values = new HashMap<>();
 
 	@Column
 	@UpdateTimestamp
@@ -69,11 +71,21 @@ public class DataType{
 		return this.values.get(property.getName());
 	}
 
-	public String[] getPropertyValueAsArray(MessageProperty property) {
+	private List<String> getPropertyValueAsList(MessageProperty property) {
 		String commaSeparatedString = getPropertyValue(property);
-		return commaSeparatedString == null ? null : commaSeparatedString
-				.replaceAll("\\A,", "")
-				.replaceAll(",\\z", "")
-				.split(",");
+		if (commaSeparatedString == null) {
+			return Collections.emptyList();
+		}
+		return Stream.of(Lists.newArrayList(commaSeparatedString.split(","))).flatMap(Collection::stream)
+				.filter(s -> s.length() > 0)
+				.collect(Collectors.toList());
+	}
+
+	public Set<String> getPropertyValueAsSet(MessageProperty messageProperty) {
+		List<String> propertyValueAsList = getPropertyValueAsList(messageProperty);
+		if (propertyValueAsList.isEmpty()) {
+			return Collections.emptySet();
+		}
+		return Sets.newHashSet(propertyValueAsList);
 	}
 }

@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.isA;
 import static org.mockito.ArgumentMatchers.any;
@@ -71,6 +72,7 @@ public class NeighbourRestControllerTest {
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
+	private Set<String> quadTree = Collections.emptySet();
 
 	@Before
 	public void setUp() {
@@ -214,7 +216,7 @@ public class NeighbourRestControllerTest {
 		// Mock incoming capabiity API
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		DataTypeApi ericssonDataType = new Datex2DataTypeApi("NO", "myPublicationType", null);
+		DataTypeApi ericssonDataType = new Datex2DataTypeApi("NO", quadTree, "myPublicationType", null);
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
@@ -243,7 +245,7 @@ public class NeighbourRestControllerTest {
 		// Mock incoming capabiity API
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
-		DataTypeApi ericssonDataType = new DataTypeApi("unknown", "NO");
+		DataTypeApi ericssonDataType = new DataTypeApi("unknown", "NO", quadTree);
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server

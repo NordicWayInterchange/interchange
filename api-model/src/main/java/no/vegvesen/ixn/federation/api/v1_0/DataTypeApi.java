@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.vegvesen.ixn.properties.MessageProperty;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.NAME,
@@ -21,13 +20,17 @@ public class DataTypeApi implements DataTypeI {
 
 	private String messageType;
 	private String originatingCountry;
+	private Set<String> quadTree = new HashSet<>();
 
 	public DataTypeApi() {
 	}
 
-	public DataTypeApi(String messageType, String originatingCountry) {
+	public DataTypeApi(String messageType, String originatingCountry, Set<String> quadTree) {
 		this.originatingCountry = originatingCountry;
 		this.messageType = messageType;
+		if (quadTree != null) {
+			this.quadTree.addAll(quadTree);
+		}
 	}
 
 	@Override
@@ -48,6 +51,17 @@ public class DataTypeApi implements DataTypeI {
 	@Override
 	public void setMessageType(String messageType) {
 		this.messageType = messageType;
+	}
+
+	public Set<String> getQuadTree() {
+		return quadTree;
+	}
+
+	public void setQuadTree(Collection<String> quadTree) {
+		this.quadTree.clear();
+		if (quadTree != null) {
+			this.quadTree.addAll(quadTree);
+		}
 	}
 
 	@Override
@@ -72,16 +86,20 @@ public class DataTypeApi implements DataTypeI {
 		Map<String, String> values = new HashMap<>();
 		putValue(values, MessageProperty.MESSAGE_TYPE, this.getMessageType());
 		putValue(values, MessageProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
+		putValue(values, MessageProperty.QUAD_TREE, this.getQuadTree());
 		return values;
 	}
 
-	void putValue(Map<String, String> values, MessageProperty messageProperty, String value) {
-		if (value != null) {
-			values.put(messageProperty.getName(), value);
+	void putValue(Map<String, String> values, MessageProperty messageProperty, Set<String> value) {
+		if (value != null && value.size() > 0) {
+			String join = String.join(",", value);
+			values.put(messageProperty.getName(), join);
 		}
 	}
 
-	String arrayToDelimitedString(String[] values) {
-		return values == null || values.length == 0 ? "" : "," + String.join(",", values) + ",";
+	void putValue(Map<String, String> values, MessageProperty messageProperty, String value) {
+		if (value != null && value.length() > 0) {
+			values.put(messageProperty.getName(), value);
+		}
 	}
 }

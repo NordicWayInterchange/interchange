@@ -68,11 +68,15 @@ public class CapabilityTransformer {
 			if (messageType.equals(Datex2DataTypeApi.DATEX_2)) {
 				dataTypeApi = new Datex2DataTypeApi(
 						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
+						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
 						dataType.getPropertyValue(MessageProperty.PUBLICATION_TYPE),
-						dataType.getPropertyValueAsArray(MessageProperty.PUBLICATION_SUB_TYPE));
+						dataType.getPropertyValueAsSet(MessageProperty.PUBLICATION_SUB_TYPE));
 			} else {
 				logger.warn("Unknown message type to be converted to API data type: {}", dataType);
-				dataTypeApi = new DataTypeApi(messageType, dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY));
+				dataTypeApi = new DataTypeApi(
+						messageType,
+						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
+						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE));
 			}
 			apis.add(dataTypeApi);
 		}

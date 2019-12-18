@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -182,10 +183,10 @@ public class DataTypeSelectorMatcher {
 			this.quadTreeTiles = quadTreeTiles;
 		}
 
-		boolean matches(DataType dataType) {
-			String [] quadTree = dataType.getPropertyValueAsArray(MessageProperty.QUAD_TREE);
+		boolean matches(DataType capabilityDataType) {
+			Collection<String> capabilitiesQuadTree = capabilityDataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE);
 			for (String filterTile : quadTreeTiles) {
-				for (String capabilityTile : quadTree) {
+				for (String capabilityTile : capabilitiesQuadTree) {
 					if (filterTile.startsWith(capabilityTile) || capabilityTile.startsWith(filterTile)) {
 						return true;
 					}
