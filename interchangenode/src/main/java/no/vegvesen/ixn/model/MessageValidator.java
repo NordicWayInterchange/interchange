@@ -51,6 +51,7 @@ public class MessageValidator {
     private boolean validateProperties(Message message, Set<String> propertyNames) {
 		for (String propertyName : propertyNames) {
 			if (!propertyExistsValidator.validateProperty(message, propertyName)) {
+				logger.warn("propertyName '{}' does not exist on message",propertyName);
 				return false;
 			}
 		}
