@@ -1,5 +1,5 @@
 ## the name which will be used to address the QPID server externally
-external_name: test.nordic-way.io
+# external_name: test.nordic-way.io
 
 interchange:
   image:
