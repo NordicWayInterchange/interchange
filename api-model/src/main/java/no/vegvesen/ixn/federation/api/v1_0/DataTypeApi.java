@@ -19,6 +19,8 @@ import java.util.*;
 public class DataTypeApi implements DataTypeI {
 
 	private String messageType;
+	private String publisherId;
+	private String publisherName;
 	private String originatingCountry;
 	private Set<String> quadTree = new HashSet<>();
 
@@ -53,10 +55,12 @@ public class DataTypeApi implements DataTypeI {
 		this.messageType = messageType;
 	}
 
+	@Override
 	public Set<String> getQuadTree() {
 		return quadTree;
 	}
 
+	@Override
 	public void setQuadTree(Collection<String> quadTree) {
 		this.quadTree.clear();
 		if (quadTree != null) {
@@ -65,26 +69,56 @@ public class DataTypeApi implements DataTypeI {
 	}
 
 	@Override
+	public String getPublisherId() {
+		return publisherId;
+	}
+
+	@Override
+	public void setPublisherId(String publisherId) {
+		this.publisherId = publisherId;
+	}
+
+	@Override
+	public String getPublisherName() {
+		return publisherName;
+	}
+
+	@Override
+	public void setPublisherName(String publisherName) {
+		this.publisherName = publisherName;
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (!(o instanceof DataTypeApi)) return false;
 
 		DataTypeApi that = (DataTypeApi) o;
 
-		if (messageType != null ? !messageType.equals(that.messageType) : that.messageType != null) return false;
-		return originatingCountry != null ? originatingCountry.equals(that.originatingCountry) : that.originatingCountry == null;
+		if (!messageType.equals(that.messageType)) return false;
+		if (publisherId != null ? !publisherId.equals(that.publisherId) : that.publisherId != null) return false;
+		if (publisherName != null ? !publisherName.equals(that.publisherName) : that.publisherName != null)
+			return false;
+		if (originatingCountry != null ? !originatingCountry.equals(that.originatingCountry) : that.originatingCountry != null)
+			return false;
+		return quadTree != null ? quadTree.equals(that.quadTree) : that.quadTree == null;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = messageType != null ? messageType.hashCode() : 0;
+		int result = messageType.hashCode();
+		result = 31 * result + (publisherId != null ? publisherId.hashCode() : 0);
+		result = 31 * result + (publisherName != null ? publisherName.hashCode() : 0);
 		result = 31 * result + (originatingCountry != null ? originatingCountry.hashCode() : 0);
+		result = 31 * result + (quadTree != null ? quadTree.hashCode() : 0);
 		return result;
 	}
 
 	public Map<String, String> getValues() {
 		Map<String, String> values = new HashMap<>();
 		putValue(values, MessageProperty.MESSAGE_TYPE, this.getMessageType());
+		putValue(values, MessageProperty.PUBLISHER_ID, this.getPublisherId());
+		putValue(values, MessageProperty.PUBLISHER_NAME, this.getPublisherName());
 		putValue(values, MessageProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
 		putValue(values, MessageProperty.QUAD_TREE, this.getQuadTree());
 		return values;
