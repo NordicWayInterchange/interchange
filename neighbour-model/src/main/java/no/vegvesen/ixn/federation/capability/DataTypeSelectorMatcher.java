@@ -185,6 +185,9 @@ public class DataTypeSelectorMatcher {
 
 		boolean matches(DataType capabilityDataType) {
 			Collection<String> capabilitiesQuadTree = capabilityDataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE);
+			if (capabilitiesQuadTree.isEmpty() || quadTreeTiles.isEmpty()) {
+				return true;
+			}
 			for (String filterTile : quadTreeTiles) {
 				for (String capabilityTile : capabilitiesQuadTree) {
 					if (filterTile.startsWith(capabilityTile) || capabilityTile.startsWith(filterTile)) {

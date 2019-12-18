@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
+import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFilterable;
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
@@ -205,13 +206,8 @@ public class DataTypeSelectorMatcherTest {
 
 	@Test
 	public void quadTreeSubscriptionMatchesLongerCapability() {
-		HashMap<String, String> values = new HashMap<>();
-		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
-		values.put(MessageProperty.QUAD_TREE.getName(), "ABCDE,BCDEF,CDEFG");
-		DataType dataType = new DataType(values);
-		Set<String> quadTreeFilter = new HashSet<>();
-		quadTreeFilter.add("BCDEFG");
+		DataType dataType = getDatexWithQuadTree("NO", Sets.newHashSet("ABCDE", "BCDEF", "CDEFG"));
+		Set<String> quadTreeFilter = Sets.newHashSet("BCDEFG");
 		assertThat(DataTypeSelectorMatcher.matches(dataType, quadTreeFilter, "messageType = 'DATEX2'")).isTrue();
 	}
 
@@ -245,11 +241,38 @@ public class DataTypeSelectorMatcherTest {
 		DataTypeSelectorMatcher.matches(no, "timestamp > 1");
 	}
 
+	@Test
+	public void filterAloneMatchesWithoutQuadTree() {
+		DataType no = getDatex("NO");
+		assertThat(DataTypeSelectorMatcher.matches(no, Collections.emptySet(), "originatingCountry = 'NO'")).isTrue();
+	}
+
+	@Test
+	public void filterCapabilitiesWithoutQuadTreeMatchesFilterWithQuadTree() {
+		DataType noCapabilityWithoutQuadTree = getDatex("NO");
+		assertThat(DataTypeSelectorMatcher.matches(noCapabilityWithoutQuadTree, Sets.newHashSet("anyquadtile"), "originatingCountry = 'NO'")).isTrue();
+	}
+
+	@Test
+	public void filterCapabilitiesWithQuadTreeMatchesFilterWithoutQuadTree() {
+		DataType noCapabilityWithQuad = getDatexWithQuadTree("NO", Sets.newHashSet("anyquadtile"));
+		assertThat(DataTypeSelectorMatcher.matches(noCapabilityWithQuad, Collections.emptySet(), "originatingCountry = 'NO'")).isTrue();
+	}
+
 	@NotNull
 	private DataType getDatex(String originatingCountry) {
 		HashMap<String, String> values = new HashMap<>();
 		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+		return new DataType(values);
+	}
+
+	@NotNull
+	private DataType getDatexWithQuadTree(String originatingCountry, Set<String> quadTreeTiles) {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+		values.put(MessageProperty.QUAD_TREE.getName(), String.join(",", quadTreeTiles));
 		return new DataType(values);
 	}
 
