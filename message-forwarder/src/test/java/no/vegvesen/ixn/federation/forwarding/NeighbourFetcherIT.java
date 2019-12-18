@@ -29,13 +29,12 @@ public class NeighbourFetcherIT {
     public void setUp() {
         repository.save(new Neighbour("interchangeA",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.EMPTY_SET),
-                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.EMPTY_SET)));
+                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
+                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet())));
         repository.save(new Neighbour("interchangeB",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED,Collections.EMPTY_SET),
-                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.EMPTY_SET)));
-
+                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED,Collections.emptySet()),
+                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet())));
     }
 
     @Test
@@ -43,7 +42,5 @@ public class NeighbourFetcherIT {
         NeighbourFetcher fetcher = new NeighbourFetcher(repository);
         List<Neighbour> interchanges = fetcher.listNeighbourCandidates();
         assertThat(interchanges).size().isEqualTo(1);
-
-
     }
 }
