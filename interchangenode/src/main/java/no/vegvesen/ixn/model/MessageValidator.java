@@ -23,6 +23,12 @@ public class MessageValidator {
 		if (messageType == null) {
 			return false;
 		}
+		try {
+			String jmsXUserId = message.getStringProperty("JMSXUserID");
+			logger.debug("JMSXUserID is {}",jmsXUserId);
+		} catch (JMSException e) {
+			logger.error("Could not get userId from message");
+		}
 		if (message instanceof JmsMessage) {
 			JmsMessage jmsMessage = (JmsMessage)message;
 			String userId = jmsMessage.getFacade().getUserId();
