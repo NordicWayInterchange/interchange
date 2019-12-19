@@ -74,21 +74,37 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 	public void matchingFilterAndQuadTreeGetsRouted() throws Exception {
 		HashSet<String> subscriptionQuadTreeTiles = Sets.newHashSet("abcdefgh");
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
-		Message message = sendReceiveMessage(subscriptionQuadTreeTiles, messageQuadTreeTiles);
+		Message message = sendReceiveMessage(subscriptionQuadTreeTiles, messageQuadTreeTiles, "originatingCountry = 'NO'");
 		assertThat(message).isNotNull();
 	}
 
 	@Test
-	public void nonMatchingFilterAndQuadTreeDoesNotGetRouted() throws Exception {
+	public void matchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
 		HashSet<String> subscriptionQuadTreeTiles = Sets.newHashSet("cdefghij");
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
-		Message message = sendReceiveMessage(subscriptionQuadTreeTiles, messageQuadTreeTiles);
+		Message message = sendReceiveMessage(subscriptionQuadTreeTiles, messageQuadTreeTiles, "originatingCountry = 'NO'");
 		assertThat(message).isNull();
 	}
 
-	private Message sendReceiveMessage(HashSet<String> subscriptionQuadTreeTiles, String messageQuadTreeTiles) throws Exception {
+	@Test
+	public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
+		HashSet<String> subscriptionQuadTreeTiles = Sets.newHashSet("abcdefgh");
+		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
+		Message message = sendReceiveMessage(subscriptionQuadTreeTiles, messageQuadTreeTiles, "originatingCountry = 'SE'");
+		assertThat(message).isNull();
+	}
+
+	@Test
+	public void nonMatchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
+		HashSet<String> subscriptionQuadTreeTiles = Sets.newHashSet("cdefghij");
+		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
+		Message message = sendReceiveMessage(subscriptionQuadTreeTiles, messageQuadTreeTiles, "originatingCountry = 'SE'");
+		assertThat(message).isNull();
+	}
+
+	private Message sendReceiveMessage(HashSet<String> subscriptionQuadTreeTiles, String messageQuadTreeTiles, String selector) throws Exception {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
 		subscription.setQuadTreeTiles(subscriptionQuadTreeTiles);
 		king_gustaf.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Sets.newHashSet(subscription)));
 		qpidClient.setupRouting(king_gustaf, "nwEx");
