@@ -14,6 +14,8 @@ public class MessageProperty {
 
 	public static final MessageProperty PUBLISHER_ID = new MessageProperty("publisherId", false, true);
 	public static final MessageProperty PUBLISHER_NAME = new MessageProperty("publisherName", true, true);
+	public static final MessageProperty LATITUDE = new MessageProperty("latitude", true, false);
+	public static final MessageProperty LONGITUDE = new MessageProperty("longitude", true, false);
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
             MESSAGE_TYPE,
             QUAD_TREE,
@@ -22,8 +24,8 @@ public class MessageProperty {
 			ORIGINATING_COUNTRY,
             new MessageProperty("protocolVersion", true, true),
             new MessageProperty("contentType", false, true),
-            new MessageProperty("latitude", true, false),
-            new MessageProperty("longitude", true, false),
+			LATITUDE,
+			LONGITUDE,
             new MessageProperty("timestamp", false, false),
             new MessageProperty("relation", false, true)
     );

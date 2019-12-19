@@ -1,5 +1,7 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -20,9 +22,9 @@ public class Source implements AutoCloseable {
 	/**
      * A message source. Sends a single message, and exits.
      * Note that the main file does not make use of any Spring Boot stuff.
-     * However, an instance of the class could easilly be used from Spring Boot, as all
+     * However, an instance of the class could easily be used from Spring Boot, as all
      * dependent settings are handled in the main method, and passed as parameters to the instance.
-     * @param args
+     * @param args name-of-properties-file (optional)
      */
     public static void main(String[] args) throws NamingException, JMSException, IOException {
 		Properties props = getProperties(args, "/source.properties");
@@ -86,17 +88,23 @@ public class Source implements AutoCloseable {
 		connection = ixnContext.createConnection(sslContext);
 	}
 
-    public void send(String messageText) throws JMSException {
+	public void send(String messageText) throws JMSException {
+		this.send(messageText, "SE", null);
+	}
+
+
+    public void send(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
 
         JmsTextMessage message = createTextMessage(messageText);
         message.getFacade().setUserId("localhost");
         message.setStringProperty("who", "Norwegian Public Roads Administration");
-        message.setStringProperty("messageType", "datex2");
+        message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
         message.setStringProperty("what", "Obstruction");
         message.setStringProperty("version", "1.0");
-        message.setStringProperty("lat", "60.352374");
-        message.setStringProperty("lon", "13.334253");
-        message.setStringProperty("originatingCountry", "SE");
+        message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
+        message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
+        message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+        message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
         message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
     }
