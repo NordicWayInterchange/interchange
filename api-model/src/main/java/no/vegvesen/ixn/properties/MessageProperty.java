@@ -16,14 +16,16 @@ public class MessageProperty {
 	public static final MessageProperty PUBLISHER_NAME = new MessageProperty("publisherName", true, true);
 	public static final MessageProperty LATITUDE = new MessageProperty("latitude", true, false);
 	public static final MessageProperty LONGITUDE = new MessageProperty("longitude", true, false);
+	public static final MessageProperty PROTOCOL_VERSION = new MessageProperty("protocolVersion", true, true);
+	public static final MessageProperty CONTENT_TYPE = new MessageProperty("contentType", false, true);
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
             MESSAGE_TYPE,
             QUAD_TREE,
 			PUBLISHER_ID,
 			PUBLISHER_NAME,
 			ORIGINATING_COUNTRY,
-            new MessageProperty("protocolVersion", true, true),
-            new MessageProperty("contentType", false, true),
+			PROTOCOL_VERSION,
+			CONTENT_TYPE,
 			LATITUDE,
 			LONGITUDE,
             new MessageProperty("timestamp", false, false),

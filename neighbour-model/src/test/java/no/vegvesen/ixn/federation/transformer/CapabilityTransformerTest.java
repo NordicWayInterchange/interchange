@@ -26,7 +26,9 @@ public class CapabilityTransformerTest {
 		String siteMeasurements = "SiteMeasurements";
 		String publisherId = "NO-91247";
 		String publisherName = "Some norwegian publisher name";
-		DataTypeApi capability = new Datex2DataTypeApi(publisherId, publisherName, originatingCountry, Collections.emptySet(), publicationType, Sets.newHashSet(siteMeasurements, travelTimeData));
+		String protocolVersion = "pv2";
+		String contentType = "ct-3";
+		DataTypeApi capability = new Datex2DataTypeApi(publisherId, publisherName, originatingCountry, protocolVersion, contentType, Collections.emptySet(), publicationType, Sets.newHashSet(siteMeasurements, travelTimeData));
 		Set<DataTypeApi> capabilities = Collections.singleton(capability);
 
 		Set<DataType> dataTypes = capabilityTransformer.dataTypeApiToDataType(capabilities);
@@ -39,6 +41,7 @@ public class CapabilityTransformerTest {
 		assertThat(dataType.getValues().containsKey(MessageProperty.QUAD_TREE.getName())).isFalse();
 		assertThat(dataType.getPropertyValue(MessageProperty.PUBLISHER_ID)).isEqualTo(publisherId);
 		assertThat(dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME)).isEqualTo(publisherName);
+		assertThat(dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION)).isEqualTo(protocolVersion);
 	}
 
 	@Test
@@ -91,7 +94,7 @@ public class CapabilityTransformerTest {
 
 	@Test
 	public void dataTypeApiWithQuadIsConvertedToDataType() {
-		DataTypeApi dataTypeApi = new DataTypeApi("myQuadMessageType", "myPublisherId", "myPublisherName", "no", Sets.newHashSet("aaa", "bbb"));
+		DataTypeApi dataTypeApi = new DataTypeApi("myQuadMessageType", "myPublisherId", "myPublisherName", "no", Sets.newHashSet("aaa", "bbb"), "pv3", "ct3");
 		Set<DataType> dataTypes = capabilityTransformer.dataTypeApiToDataType(Sets.newHashSet(dataTypeApi));
 		assertThat(dataTypes).hasSize(1);
 		assertThat(dataTypes.iterator().next().getPropertyValueAsSet(MessageProperty.QUAD_TREE)).hasSize(2);
@@ -99,7 +102,7 @@ public class CapabilityTransformerTest {
 
 	@Test
 	public void datexDataTypeApiWithoutPulicationSubTypeReturnsNoPropertyForPublicationSubType() {
-		Datex2DataTypeApi datex2DataTypeApi = new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", Collections.emptySet(), "myPublication", Collections.emptySet());
+		Datex2DataTypeApi datex2DataTypeApi = new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", "pv3", "ct3", Collections.emptySet(), "myPublication", Collections.emptySet());
 		assertThat(datex2DataTypeApi.getValues().containsKey(MessageProperty.PUBLICATION_SUB_TYPE.getName())).isFalse();
 	}
 
