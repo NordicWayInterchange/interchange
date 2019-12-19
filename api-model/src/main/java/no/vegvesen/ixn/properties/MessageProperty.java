@@ -16,7 +16,7 @@ public class MessageProperty {
     public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
             MESSAGE_TYPE,
             QUAD_TREE,
-            USER_ID,
+            //USER_ID,
             new MessageProperty("publisherId", false),
             new MessageProperty("publisherName", true),
             new MessageProperty("originatingCountry", true),
