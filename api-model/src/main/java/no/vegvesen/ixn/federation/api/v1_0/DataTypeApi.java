@@ -29,7 +29,7 @@ public class DataTypeApi {
 	public DataTypeApi() {
 	}
 
-	public DataTypeApi(String messageType, String publisherId, String publisherName, String originatingCountry, Set<String> quadTree, String protocolVersion, String contentType) {
+	public DataTypeApi(String messageType, String publisherId, String publisherName, String originatingCountry, String protocolVersion, String contentType, Set<String> quadTree) {
 		this.messageType = messageType;
 		this.publisherId = publisherId;
 		this.publisherName = publisherName;

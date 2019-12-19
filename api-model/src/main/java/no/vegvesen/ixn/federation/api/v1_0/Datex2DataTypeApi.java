@@ -14,7 +14,7 @@ public class Datex2DataTypeApi extends DataTypeApi{
 	}
 
 	public Datex2DataTypeApi(String publisherId, String publisherName, String originatingCountry, String protocolVersion, String contentType, Set<String> quadTree, String publicationType, Set<String> publicationSubType) {
-		super(DATEX_2, publisherId, publisherName, originatingCountry, quadTree, protocolVersion, contentType);
+		super(DATEX_2, publisherId, publisherName, originatingCountry, protocolVersion, contentType, quadTree);
 		this.publicationType = publicationType;
 		if (publicationSubType != null) {
 			this.publicationSubType.addAll(publicationSubType);
@@ -22,7 +22,7 @@ public class Datex2DataTypeApi extends DataTypeApi{
 	}
 
 	public Datex2DataTypeApi(String originatingCountry) {
-		super(DATEX_2, null, null, originatingCountry, Collections.emptySet(), null, null);
+		super(DATEX_2, null, null, originatingCountry, null, null, Collections.emptySet());
 	}
 
 	public String getPublicationType() {

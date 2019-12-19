@@ -40,13 +40,16 @@ public class MessageProperty {
 			PUBLICATION_SUB_TYPE
     );
 
-    public static final List<MessageProperty> itsG5ApplicationProperties = Arrays.asList(
-            new MessageProperty("serviceType",false, true)
+	public static final MessageProperty SERVICE_TYPE = new MessageProperty("serviceType", false, true);
+	public static final List<MessageProperty> itsG5ApplicationProperties = Arrays.asList(
+			SERVICE_TYPE
     );
 
-    public static final List<MessageProperty> denmApplicationProperties = Arrays.asList(
-            new MessageProperty("causeCode",true, true),
-            new MessageProperty("subCauseCode",false, true)
+	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true);
+	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", false, true);
+	public static final List<MessageProperty> denmApplicationProperties = Arrays.asList(
+			CAUSE_CODE,
+			SUB_CAUSE_CODE
     );
 
     public static final List<MessageProperty> iviApplicationProperties = Arrays.asList(

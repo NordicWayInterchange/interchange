@@ -82,9 +82,10 @@ public class CapabilityTransformer {
 						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
 						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
 						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
-						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
 						dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
-						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE));
+						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
+						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE)
+				);
 			}
 			apis.add(dataTypeApi);
 		}

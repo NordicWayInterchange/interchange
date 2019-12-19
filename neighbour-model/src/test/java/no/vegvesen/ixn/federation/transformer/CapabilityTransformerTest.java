@@ -94,7 +94,7 @@ public class CapabilityTransformerTest {
 
 	@Test
 	public void dataTypeApiWithQuadIsConvertedToDataType() {
-		DataTypeApi dataTypeApi = new DataTypeApi("myQuadMessageType", "myPublisherId", "myPublisherName", "no", Sets.newHashSet("aaa", "bbb"), "pv3", "ct3");
+		DataTypeApi dataTypeApi = new DataTypeApi("myQuadMessageType", "myPublisherId", "myPublisherName", "no", "pv3", "ct3", Sets.newHashSet("aaa", "bbb"));
 		Set<DataType> dataTypes = capabilityTransformer.dataTypeApiToDataType(Sets.newHashSet(dataTypeApi));
 		assertThat(dataTypes).hasSize(1);
 		assertThat(dataTypes.iterator().next().getPropertyValueAsSet(MessageProperty.QUAD_TREE)).hasSize(2);
