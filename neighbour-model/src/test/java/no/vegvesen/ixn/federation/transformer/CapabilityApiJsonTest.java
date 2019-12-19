@@ -17,7 +17,7 @@ public class CapabilityApiJsonTest {
 	@Test
 	public void capabilitiesApiDatexTransformedToJsonAndBackToCapabilitiesApi() throws IOException {
 		HashSet<Datex2DataTypeApi> capabilities = new HashSet<>();
-		capabilities.add(new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", Collections.emptySet(), "myPublicationType", Sets.newHashSet("aa", "bb")));
+		capabilities.add(new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", "pv1", "ct3", Collections.emptySet(), "myPublicationType", Sets.newHashSet("aa", "bb")));
 		CapabilityApi capabilityApi = new CapabilityApi("norway", capabilities);
 
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -33,5 +33,7 @@ public class CapabilityApiJsonTest {
 		assertThat(datex2DataTypeFromJson.getPublicationType()).isEqualTo("myPublicationType");
 		assertThat(datex2DataTypeFromJson.getPublisherId()).isEqualTo("myPublisherId");
 		assertThat(datex2DataTypeFromJson.getPublisherName()).isEqualTo("myPublisherName");
+		assertThat(datex2DataTypeFromJson.getProtocolVersion()).isEqualTo("pv1");
+		assertThat(datex2DataTypeFromJson.getContentType()).isEqualTo("ct3");
 	}
 }

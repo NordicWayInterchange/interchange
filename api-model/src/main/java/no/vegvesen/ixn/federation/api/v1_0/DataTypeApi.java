@@ -16,53 +16,51 @@ import java.util.*;
 		@JsonSubTypes.Type(value = Datex2DataTypeApi.class, name = Datex2DataTypeApi.DATEX_2),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DataTypeApi implements DataTypeI {
+public class DataTypeApi {
 
 	private String messageType;
 	private String publisherId;
 	private String publisherName;
 	private String originatingCountry;
+	private String protocolVersion;
+	private String contentType;
 	private Set<String> quadTree = new HashSet<>();
 
 	public DataTypeApi() {
 	}
 
-	public DataTypeApi(String messageType, String publisherId, String publisherName, String originatingCountry, Set<String> quadTree) {
+	public DataTypeApi(String messageType, String publisherId, String publisherName, String originatingCountry, Set<String> quadTree, String protocolVersion, String contentType) {
 		this.messageType = messageType;
 		this.publisherId = publisherId;
 		this.publisherName = publisherName;
 		this.originatingCountry = originatingCountry;
+		this.protocolVersion = protocolVersion;
+		this.contentType = contentType;
 		if (quadTree != null) {
 			this.quadTree.addAll(quadTree);
 		}
 	}
 
-	@Override
 	public String getOriginatingCountry() {
 		return this.originatingCountry;
 	}
 
-	@Override
 	public void setOriginatingCountry(String originatingCountry) {
 		this.originatingCountry = originatingCountry;
 	}
 
-	@Override
 	public String getMessageType() {
 		return this.messageType;
 	}
 
-	@Override
 	public void setMessageType(String messageType) {
 		this.messageType = messageType;
 	}
 
-	@Override
 	public Set<String> getQuadTree() {
 		return quadTree;
 	}
 
-	@Override
 	public void setQuadTree(Collection<String> quadTree) {
 		this.quadTree.clear();
 		if (quadTree != null) {
@@ -70,24 +68,37 @@ public class DataTypeApi implements DataTypeI {
 		}
 	}
 
-	@Override
 	public String getPublisherId() {
 		return publisherId;
 	}
 
-	@Override
 	public void setPublisherId(String publisherId) {
 		this.publisherId = publisherId;
 	}
 
-	@Override
 	public String getPublisherName() {
 		return publisherName;
 	}
 
-	@Override
 	public void setPublisherName(String publisherName) {
 		this.publisherName = publisherName;
+	}
+
+
+	public String getProtocolVersion() {
+		return protocolVersion;
+	}
+
+	public void setProtocolVersion(String protocolVersion) {
+		this.protocolVersion = protocolVersion;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 
 	@Override
@@ -103,6 +114,9 @@ public class DataTypeApi implements DataTypeI {
 			return false;
 		if (originatingCountry != null ? !originatingCountry.equals(that.originatingCountry) : that.originatingCountry != null)
 			return false;
+		if (protocolVersion != null ? !protocolVersion.equals(that.protocolVersion) : that.protocolVersion != null)
+			return false;
+		if (contentType != null ? !contentType.equals(that.contentType) : that.contentType != null) return false;
 		return quadTree != null ? quadTree.equals(that.quadTree) : that.quadTree == null;
 	}
 
@@ -112,6 +126,8 @@ public class DataTypeApi implements DataTypeI {
 		result = 31 * result + (publisherId != null ? publisherId.hashCode() : 0);
 		result = 31 * result + (publisherName != null ? publisherName.hashCode() : 0);
 		result = 31 * result + (originatingCountry != null ? originatingCountry.hashCode() : 0);
+		result = 31 * result + (protocolVersion != null ? protocolVersion.hashCode() : 0);
+		result = 31 * result + (contentType != null ? contentType.hashCode() : 0);
 		result = 31 * result + (quadTree != null ? quadTree.hashCode() : 0);
 		return result;
 	}
@@ -122,6 +138,8 @@ public class DataTypeApi implements DataTypeI {
 		putValue(values, MessageProperty.PUBLISHER_ID, this.getPublisherId());
 		putValue(values, MessageProperty.PUBLISHER_NAME, this.getPublisherName());
 		putValue(values, MessageProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
+		putValue(values, MessageProperty.PROTOCOL_VERSION, this.getProtocolVersion());
+		putValue(values, MessageProperty.CONTENT_TYPE, this.getContentType());
 		putValue(values, MessageProperty.QUAD_TREE, this.getQuadTree());
 		return values;
 	}
