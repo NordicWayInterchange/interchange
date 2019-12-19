@@ -11,6 +11,7 @@ public class Datex2DataTypeApi extends DataTypeApi{
 	private Set<String> publicationSubType = new HashSet<>();
 
 	public Datex2DataTypeApi() {
+		this.setMessageType(DATEX_2);
 	}
 
 	public Datex2DataTypeApi(String publisherId, String publisherName, String originatingCountry, String protocolVersion, String contentType, Set<String> quadTree, String publicationType, Set<String> publicationSubType) {

@@ -14,6 +14,7 @@ import java.util.*;
 		property = "messageType")
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = Datex2DataTypeApi.class, name = Datex2DataTypeApi.DATEX_2),
+		@JsonSubTypes.Type(value = DenmDataTypeApi.class, name = DenmDataTypeApi.DENM),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataTypeApi {

@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.transformer;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.slf4j.Logger;
@@ -75,6 +76,17 @@ public class CapabilityTransformer {
 						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
 						dataType.getPropertyValue(MessageProperty.PUBLICATION_TYPE),
 						dataType.getPropertyValueAsSet(MessageProperty.PUBLICATION_SUB_TYPE));
+			} else if (messageType.equals(DenmDataTypeApi.DENM)) {
+				dataTypeApi = new DenmDataTypeApi(
+						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
+						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
+						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
+						dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
+						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
+						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
+						dataType.getPropertyValue(MessageProperty.SERVICE_TYPE),
+						dataType.getPropertyValue(MessageProperty.CAUSE_CODE),
+						dataType.getPropertyValue(MessageProperty.SUB_CAUSE_CODE));
 			} else {
 				logger.warn("Unknown message type to be converted to API data type: {}", dataType);
 				dataTypeApi = new DataTypeApi(
@@ -99,6 +111,9 @@ public class CapabilityTransformer {
 			if (capability.getMessageType().equals(Datex2DataTypeApi.DATEX_2)) {
 				Datex2DataTypeApi datexApi = (Datex2DataTypeApi) capability;
 				dataType = new DataType(datexApi.getValues());
+			} else if (capability.getMessageType().equals(DenmDataTypeApi.DENM)) {
+				DenmDataTypeApi denmDataTypeApi = (DenmDataTypeApi) capability;
+				dataType = new DataType(denmDataTypeApi.getValues());
 			} else {
 				logger.warn("Unknown message type {}", capability.getMessageType());
 				dataType = new DataType(capability.getValues());

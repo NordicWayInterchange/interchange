@@ -90,13 +90,44 @@ public class NeighbourRestControllerTest {
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
-	public void postingCapabilitiesReturnsStatusCreated() throws Exception {
+	public void postingDatexCapabilitiesReturnsStatusCreated() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
 		DataTypeApi ericssonDataType = new Datex2DataTypeApi("NO");
+		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
+
+		// Create JSON string of capability api object to send to the server
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
+
+		// Mock dns lookup
+		Neighbour ericssonNeighbour = new Neighbour();
+		ericssonNeighbour.setName("ericsson");
+		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
+		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
+
+		mockMvc.perform(
+				post(capabilityExchangePath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().isOk());
+		verify(dnsFacade,times(1)).getNeighbours();
+	}
+
+	@Test
+	public void postingDenmCapabilitiesReturnsStatusCreated() throws Exception {
+		mockCertificate("ericsson");
+
+		// Mock incoming capabiity API
+		CapabilityApi ericsson = new CapabilityApi();
+		ericsson.setName("ericsson");
+		DenmDataTypeApi ericssonDataType = new DenmDataTypeApi();
+		ericssonDataType.setCauseCode("cc3");
+		ericssonDataType.setSubCauseCode("scc34");
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
