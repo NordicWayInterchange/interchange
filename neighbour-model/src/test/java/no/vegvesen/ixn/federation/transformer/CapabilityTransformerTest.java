@@ -3,12 +3,14 @@ package no.vegvesen.ixn.federation.transformer;
 import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -104,6 +106,33 @@ public class CapabilityTransformerTest {
 	public void datexDataTypeApiWithoutPulicationSubTypeReturnsNoPropertyForPublicationSubType() {
 		Datex2DataTypeApi datex2DataTypeApi = new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", "pv3", "ct3", Collections.emptySet(), "myPublication", Collections.emptySet());
 		assertThat(datex2DataTypeApi.getValues().containsKey(MessageProperty.PUBLICATION_SUB_TYPE.getName())).isFalse();
+	}
+
+
+	@Test
+	public void denmDataTypeApiIsConvertedToDataTypeAndBack() {
+		HashSet<String> quads = Sets.newHashSet("qt1", "qt2");
+		DenmDataTypeApi denmDataTypeApi = new DenmDataTypeApi("NO-393783", "No such publisher",
+				"NO", "pv3", "ct4", quads,
+				"st5", "cc3", "scc55");
+		Set<DataType> converted = capabilityTransformer.dataTypeApiToDataType(Collections.singleton(denmDataTypeApi));
+		assertThat(converted).isNotNull().hasSize(1);
+		DataType convertedDataType = converted.iterator().next();
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(DenmDataTypeApi.DENM);
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.PUBLISHER_ID)).isEqualTo("NO-393783");
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.PUBLISHER_NAME)).isEqualTo("No such publisher");
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo("NO");
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION)).isEqualTo("pv3");
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.CONTENT_TYPE)).isEqualTo("ct4");
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo("st5");
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.CAUSE_CODE)).isEqualTo("cc3");
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.SUB_CAUSE_CODE)).isEqualTo("scc55");
+
+		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Collections.singleton(convertedDataType));
+		assertThat(dataTypeApis).isNotNull().hasSize(1);
+		DataTypeApi convertedBack = dataTypeApis.iterator().next();
+		assertThat(convertedBack).isInstanceOf(DenmDataTypeApi.class);
+		assertThat(convertedBack).isEqualTo(denmDataTypeApi);
 	}
 
 	private DataType getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType) {
