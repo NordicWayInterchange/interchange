@@ -77,18 +77,20 @@ public class Subscription {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null) return false;
 		if (this == o) return true;
 		if (!(o instanceof Subscription)) return false;
 
 		Subscription that = (Subscription) o;
 
-		return selector.equals(that.selector);
+		if (selector != null ? !selector.equals(that.selector) : that.selector != null) return false;
+		return quadTreeTiles != null ? quadTreeTiles.equals(that.quadTreeTiles) : that.quadTreeTiles == null;
 	}
 
 	@Override
 	public int hashCode() {
-		return selector.hashCode();
+		int result = selector != null ? selector.hashCode() : 0;
+		result = 31 * result + (quadTreeTiles != null ? quadTreeTiles.hashCode() : 0);
+		return result;
 	}
 
 	@Override
