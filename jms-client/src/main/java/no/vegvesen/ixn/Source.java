@@ -13,8 +13,6 @@ import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 public class Source implements AutoCloseable {
@@ -46,8 +44,7 @@ public class Source implements AutoCloseable {
 
         try( Source s = new Source(url,sendQueue,sslContext)) {
             s.start();
-            s.send("Yo!");
-
+            s.send("Yo!", "NO", "someukquadtile");
         }
     }
 
@@ -97,15 +94,15 @@ public class Source implements AutoCloseable {
 
         JmsTextMessage message = createTextMessage(messageText);
         message.getFacade().setUserId("localhost");
-        message.setStringProperty("who", "Norwegian Public Roads Administration");
+        message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
         message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-        message.setStringProperty("what", "Obstruction");
-        message.setStringProperty("version", "1.0");
+        message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
+        message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
         message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
         message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
         message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
         message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
-        message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
         sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
     }
 
