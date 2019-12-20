@@ -8,6 +8,5 @@ java \
     -Damqphub.amqp10jms.remote-url=${AMQP_URI} \
     -Damqphub.amqp10jms.username=${AMQP_USER} \
     -Damqphub.amqp10jms.password=${AMQP_PASSWORD} \
-    -Dspring.datasource.url=${POSTGIS_URI} \
     ${LOG_LEVELS} \
     -jar /interchange-node.jar
