@@ -88,4 +88,20 @@ public class DataType{
 		}
 		return Sets.newHashSet(propertyValueAsList);
 	}
+
+	public Integer getPropertyValueAsInteger(MessageProperty messageProperty) {
+		String stringIntegerValue = getPropertyValue(messageProperty);
+		if (stringIntegerValue != null) {
+			return Integer.parseInt(stringIntegerValue);
+		}
+		return null;
+	}
+
+	public Set<Integer> getPropertyValueAsIntegerSet(MessageProperty messageProperty) {
+		String intArrayValues = getPropertyValue(messageProperty);
+		return Stream.of(Lists.newArrayList(intArrayValues.split(","))).flatMap(Collection::stream)
+				.filter(s -> s.length() > 0)
+				.map(Integer::parseInt)
+				.collect(Collectors.toSet());
+	}
 }
