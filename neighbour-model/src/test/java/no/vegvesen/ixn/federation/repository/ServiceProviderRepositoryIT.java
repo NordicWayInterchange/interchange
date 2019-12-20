@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
+import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
@@ -83,7 +84,7 @@ public class ServiceProviderRepositoryIT {
 		repository.save(ford);
 
 		List<ServiceProvider> spListRequested = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
-		assertThat(spListRequested).hasSize(1).contains(audi);
+		assertThat(spListRequested).contains(audi);
 	}
 
 	@Test
@@ -105,5 +106,21 @@ public class ServiceProviderRepositoryIT {
 		List<ServiceProvider> spListRequested2 = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 		assertThat(spListRequested2).isEmpty();
 	}
-	
+
+	@Test
+	public void storeQuadTreeForServiceProviderCanBeRetrieved() {
+		ServiceProvider morris = new ServiceProvider("morris");
+		morris.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		Subscription morrisUKSubscription = new Subscription();
+		morrisUKSubscription.setSelector("originatingCountry = 'UK'");
+		morrisUKSubscription.setQuadTreeTiles(Sets.newHashSet("someukquadtreetile"));
+		morris.getSubscriptionRequest().setSubscriptions(Collections.singleton(morrisUKSubscription));
+		repository.save(morris);
+
+		ServiceProvider foundMorris = repository.findByName(morris.getName());
+		assertThat(foundMorris).isNotNull();
+		assertThat(foundMorris.getSubscriptionRequest().getSubscriptions()).isNotNull().hasSize(1);
+		Subscription subscription = foundMorris.getSubscriptionRequest().getSubscriptions().iterator().next();
+		assertThat(subscription.getSelectorWithQuadTree()).isNotNull();
+	}
 }
