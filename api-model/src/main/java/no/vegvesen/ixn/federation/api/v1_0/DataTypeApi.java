@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.vegvesen.ixn.properties.MessageProperty;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.NAME,
@@ -15,6 +17,7 @@ import java.util.*;
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = Datex2DataTypeApi.class, name = Datex2DataTypeApi.DATEX_2),
 		@JsonSubTypes.Type(value = DenmDataTypeApi.class, name = DenmDataTypeApi.DENM),
+		@JsonSubTypes.Type(value = IvyDataTypeApi.class, name = IvyDataTypeApi.IVY),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataTypeApi {
@@ -152,9 +155,23 @@ public class DataTypeApi {
 		}
 	}
 
+	void putIntegerValue(Map<String, String> values, MessageProperty messageProperty, Set<Integer> value) {
+		if (value != null && value.size() > 0) {
+			Set<String> stringIntegers = Stream.of(value).flatMap(Collection::stream).map(Object::toString).collect(Collectors.toSet());
+			String join = String.join(",", stringIntegers);
+			values.put(messageProperty.getName(), join);
+		}
+	}
+
 	void putValue(Map<String, String> values, MessageProperty messageProperty, String value) {
 		if (value != null && value.length() > 0) {
 			values.put(messageProperty.getName(), value);
+		}
+	}
+
+	void putValue(Map<String, String> values, MessageProperty messageProperty, Integer value) {
+		if (value != null) {
+			values.put(messageProperty.getName(), value.toString());
 		}
 	}
 }

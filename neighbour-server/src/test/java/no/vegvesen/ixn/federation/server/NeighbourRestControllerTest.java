@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
@@ -128,6 +129,36 @@ public class NeighbourRestControllerTest {
 		DenmDataTypeApi ericssonDataType = new DenmDataTypeApi();
 		ericssonDataType.setCauseCode("cc3");
 		ericssonDataType.setSubCauseCode("scc34");
+		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
+
+		// Create JSON string of capability api object to send to the server
+		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
+
+		// Mock dns lookup
+		Neighbour ericssonNeighbour = new Neighbour();
+		ericssonNeighbour.setName("ericsson");
+		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
+		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
+
+		mockMvc.perform(
+				post(capabilityExchangePath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().isOk());
+		verify(dnsFacade,times(1)).getNeighbours();
+	}
+
+	@Test
+	public void postingIvyCapabilitiesReturnsStatusCreated() throws Exception {
+		mockCertificate("ericsson");
+
+		// Mock incoming capabiity API
+		CapabilityApi ericsson = new CapabilityApi();
+		ericsson.setName("ericsson");
+		IvyDataTypeApi ericssonDataType = new IvyDataTypeApi();
+		ericssonDataType.setPictogramCategoryCodes(Sets.newHashSet(3993));
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server

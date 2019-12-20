@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.slf4j.Logger;
@@ -66,38 +63,54 @@ public class CapabilityTransformer {
 		for (DataType dataType : dataTypes) {
 			DataTypeApi dataTypeApi;
 			String messageType = dataType.getPropertyValue(MessageProperty.MESSAGE_TYPE);
-			if (messageType.equals(Datex2DataTypeApi.DATEX_2)) {
-				dataTypeApi = new Datex2DataTypeApi(
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
-						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
-						dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
-						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
-						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
-						dataType.getPropertyValue(MessageProperty.PUBLICATION_TYPE),
-						dataType.getPropertyValueAsSet(MessageProperty.PUBLICATION_SUB_TYPE));
-			} else if (messageType.equals(DenmDataTypeApi.DENM)) {
-				dataTypeApi = new DenmDataTypeApi(
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
-						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
-						dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
-						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
-						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
-						dataType.getPropertyValue(MessageProperty.SERVICE_TYPE),
-						dataType.getPropertyValue(MessageProperty.CAUSE_CODE),
-						dataType.getPropertyValue(MessageProperty.SUB_CAUSE_CODE));
-			} else {
-				logger.warn("Unknown message type to be converted to API data type: {}", dataType);
-				dataTypeApi = new DataTypeApi(
-						messageType,
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
-						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
-						dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
-						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
-						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE)
-				);
+			switch (messageType) {
+				case Datex2DataTypeApi.DATEX_2:
+					dataTypeApi = new Datex2DataTypeApi(
+							dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
+							dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
+							dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
+							dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
+							dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
+							dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
+							dataType.getPropertyValue(MessageProperty.PUBLICATION_TYPE),
+							dataType.getPropertyValueAsSet(MessageProperty.PUBLICATION_SUB_TYPE));
+					break;
+				case DenmDataTypeApi.DENM:
+					dataTypeApi = new DenmDataTypeApi(
+							dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
+							dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
+							dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
+							dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
+							dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
+							dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
+							dataType.getPropertyValue(MessageProperty.SERVICE_TYPE),
+							dataType.getPropertyValue(MessageProperty.CAUSE_CODE),
+							dataType.getPropertyValue(MessageProperty.SUB_CAUSE_CODE));
+					break;
+				case IvyDataTypeApi.IVY:
+					dataTypeApi = new IvyDataTypeApi(
+							dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
+							dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
+							dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
+							dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
+							dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
+							dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
+							dataType.getPropertyValue(MessageProperty.SERVICE_TYPE),
+							dataType.getPropertyValueAsInteger(MessageProperty.IVI_TYPE),
+							dataType.getPropertyValueAsIntegerSet(MessageProperty.PICTOGRAM_CATEGORY_CODE));
+					break;
+				default:
+					logger.warn("Unknown message type to be converted to API data type: {}", messageType);
+					dataTypeApi = new DataTypeApi(
+							messageType,
+							dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
+							dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
+							dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
+							dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
+							dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
+							dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE)
+					);
+					break;
 			}
 			apis.add(dataTypeApi);
 		}
@@ -107,18 +120,8 @@ public class CapabilityTransformer {
 	public Set<DataType> dataTypeApiToDataType(Set<? extends DataTypeApi> capabilities) {
 		Set<DataType> dataTypes = new HashSet<>();
 		for (DataTypeApi capability : capabilities) {
-			DataType dataType;
-			if (capability.getMessageType().equals(Datex2DataTypeApi.DATEX_2)) {
-				Datex2DataTypeApi datexApi = (Datex2DataTypeApi) capability;
-				dataType = new DataType(datexApi.getValues());
-			} else if (capability.getMessageType().equals(DenmDataTypeApi.DENM)) {
-				DenmDataTypeApi denmDataTypeApi = (DenmDataTypeApi) capability;
-				dataType = new DataType(denmDataTypeApi.getValues());
-			} else {
-				logger.warn("Unknown message type {}", capability.getMessageType());
-				dataType = new DataType(capability.getValues());
-			}
-			dataTypes.add(dataType);
+			logger.debug("Converting message type {}", capability.getMessageType());
+			dataTypes.add(new DataType(capability.getValues()));
 		}
 		return dataTypes;
 	}

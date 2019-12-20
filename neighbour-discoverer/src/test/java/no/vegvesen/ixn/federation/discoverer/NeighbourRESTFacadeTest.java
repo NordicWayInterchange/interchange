@@ -71,7 +71,7 @@ public class NeighbourRESTFacadeTest {
 	}
 
 	@Test
-	public void successfulPostOfCapabilitiesReturnsInterchange()throws Exception{
+	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
 		DataTypeApi dataType = new Datex2DataTypeApi("NO");
 		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
@@ -95,7 +95,7 @@ public class NeighbourRESTFacadeTest {
 	}
 
 	@Test
-	public void successfulPostOfDenmCapabilitiesReturnsInterchange() throws Exception {
+	public void successfulPostOfCapabilitiesReturnsInterchangeWithDenmCapabilities() throws Exception {
 		DenmDataTypeApi dataType = new DenmDataTypeApi("NO-123123", "Norwegian Road Broadcasting", "NO", "P1", "application/base64", Sets.newSet("aaa"), "road", "cc1", "scc2");
 		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
 
@@ -116,6 +116,29 @@ public class NeighbourRESTFacadeTest {
 		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
 		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
 		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo(dataType.getServiceType());
+	}
+
+	@Test
+	public void successfulPostOfCapabilitiesReturnsInterchangeWithIvyCapabilities() throws Exception {
+		IvyDataTypeApi dataType = new IvyDataTypeApi("NO-123123", "Norwegian Road Broadcasting", "NO", "P1", "application/base64", Sets.newSet("aaa"), "road", 12321, Sets.newSet(92827));
+		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
+
+		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
+
+		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
+
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
+
+		assertThat(res.getDataTypes()).hasSize(1);
+
+		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
+		DataType remoteServerResponse = dataTypes.next();
+
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		assertThat(remoteServerResponse.getPropertyValueAsInteger(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIvyType());
 	}
 
 	@Test

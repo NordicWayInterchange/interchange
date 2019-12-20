@@ -53,9 +53,11 @@ public class MessageProperty {
 			SUB_CAUSE_CODE
     );
 
-    public static final List<MessageProperty> iviApplicationProperties = Arrays.asList(
-            new MessageProperty("IviType",false, true),
-            new MessageProperty("pictogramCategoryCode",false, true),
+	public static final MessageProperty IVI_TYPE = new MessageProperty("IviType", false, true);
+	public static final MessageProperty PICTOGRAM_CATEGORY_CODE = new MessageProperty("pictogramCategoryCode", false, true);
+	public static final List<MessageProperty> iviApplicationProperties = Arrays.asList(
+			IVI_TYPE,
+			PICTOGRAM_CATEGORY_CODE,
             new MessageProperty("iviContainer",false, true)
     );
 
