@@ -101,6 +101,7 @@ public class DebugClient implements MessageListener {
 			} catch (Exception ignored) {
 			}
 			printWithColor(GREEN, " where: " + msg.getStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName()));
+			printWithColor(GREEN, " quadTree: " + msg.getStringProperty(MessageProperty.QUAD_TREE.getName()));
 			printWithColor(GREEN, " when: " + msg.getLongProperty(MessageProperty.TIMESTAMP.getName()) + "\n");
 
 			try {
