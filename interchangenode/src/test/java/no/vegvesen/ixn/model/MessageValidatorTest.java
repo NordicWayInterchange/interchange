@@ -15,7 +15,6 @@ public class MessageValidatorTest {
     @Test
     public void testWrongMessageTypeIsNotValid() {
         Message message = MessageTestDouble.createMessage(
-                "user1",
                 "SVV",
                 "NO",
                 "DATEX2:1.0",
@@ -30,7 +29,6 @@ public class MessageValidatorTest {
     @Test
     public void testDatex2WithoutPublicationTypeIsNotValid() {
         Message message = MessageTestDouble.createMessage(
-                "user1",
                 "SVV",
                 "NO",
                 "DATEX2:1.0",
@@ -45,7 +43,6 @@ public class MessageValidatorTest {
     @Test
     public void testDatex2WithAllPropertiesSetIsValid() {
         Message message = MessageTestDouble.createDatexMessage(
-                "user1",
                 "SVV",
                 "NO",
                 "DATEX2:1.0",
@@ -59,7 +56,6 @@ public class MessageValidatorTest {
     @Test
     public void testDatexMessageWithExtraHeadersIsStillValid() {
         Message message = MessageTestDouble.createDatexMessage(
-                "user1",
                 "SVV",
                 "NO",
                 "DATEX2:1.0",
@@ -74,7 +70,6 @@ public class MessageValidatorTest {
     @Test
     public void testDenmWithoutCauseCodeIsInvalid() {
         Message message = MessageTestDouble.createMessage(
-                "user1",
                 "SVV",
                 "NO",
                 "DENM:1.0",
@@ -89,7 +84,6 @@ public class MessageValidatorTest {
     @Test
     public void testDemnWithAllPropertiesIsValid() {
         Message message = MessageTestDouble.createMessage(
-                "user1",
                 "SVV",
                 "NO",
                 "DENM:1.0",
@@ -104,7 +98,6 @@ public class MessageValidatorTest {
     @Test
     public void testDenmWithExtraHeadersIsValid() {
         Message message = MessageTestDouble.createMessage(
-                "user1",
                 "SVV",
                 "NO",
                 "DENM:1.0",
@@ -120,7 +113,6 @@ public class MessageValidatorTest {
     @Test
     public void testIviWithOnlyCommonPropertiesIsValid() {
         Message message = MessageTestDouble.createMessage(
-                "user1",
                 "SVV",
                 "NO",
                 "IVI:1.0",
@@ -134,7 +126,6 @@ public class MessageValidatorTest {
     @Test
     public void testIviWithExtraHeadersIsValid() {
         Message message = MessageTestDouble.createMessage(
-                "user1",
                 "SVV",
                 "NO",
                 "IVI:1.0",

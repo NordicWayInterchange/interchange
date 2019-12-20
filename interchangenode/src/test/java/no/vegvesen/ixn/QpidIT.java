@@ -62,8 +62,7 @@ public class QpidIT extends DockerBaseIT {
         long timeToLive = 3_600_000; // 5 hrs
         long expiration = systemTime+timeToLive;
 
-        producer.sendMessage("bouvet",
-				"NO00001",
+        producer.sendMessage("NO00001",
 				country,
 				"DATEX:1.0",
 				"DATEX2",
@@ -80,8 +79,7 @@ public class QpidIT extends DockerBaseIT {
         long expiration = systemTime+timeToLive;
 
 		// Missing pusblisher gives invalid message.
-        producer.sendMessage("bouvet",
-				null,
+        producer.sendMessage(null,
 				country,
 				"DATEX:1.0",
 				"DATEX2",

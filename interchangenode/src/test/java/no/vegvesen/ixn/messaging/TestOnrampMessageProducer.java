@@ -14,8 +14,7 @@ public class TestOnrampMessageProducer {
     @Autowired
     JmsTemplate jmsTemplate;
 
-    public void sendMessage(String userId,
-                            String publisher,
+    public void sendMessage(String publisher,
                             String originatingCountry,
                             String protocolVersion,
                             String messageType,
@@ -29,7 +28,6 @@ public class TestOnrampMessageProducer {
             TextMessage outgoingMessage = session.createTextMessage();
             outgoingMessage.setFloatProperty("latitude",latitude);
             outgoingMessage.setFloatProperty("longitude",longitude);
-            outgoingMessage.setStringProperty(MessageProperty.USER_ID.getName(),userId);
             outgoingMessage.setStringProperty("publisherName",publisher);
             outgoingMessage.setStringProperty("originatingCountry",originatingCountry);
             outgoingMessage.setStringProperty("protocolVersion",protocolVersion);
