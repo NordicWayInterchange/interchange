@@ -18,6 +18,7 @@ public class MessageProperty {
 	public static final MessageProperty LONGITUDE = new MessageProperty("longitude", true, false);
 	public static final MessageProperty PROTOCOL_VERSION = new MessageProperty("protocolVersion", true, true);
 	public static final MessageProperty CONTENT_TYPE = new MessageProperty("contentType", false, true);
+	public static final MessageProperty TIMESTAMP = new MessageProperty("timestamp", false, false);
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
             MESSAGE_TYPE,
             QUAD_TREE,
@@ -28,7 +29,7 @@ public class MessageProperty {
 			CONTENT_TYPE,
 			LATITUDE,
 			LONGITUDE,
-            new MessageProperty("timestamp", false, false),
+			TIMESTAMP,
             new MessageProperty("relation", false, true)
     );
 

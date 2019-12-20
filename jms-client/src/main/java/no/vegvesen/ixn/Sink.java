@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -7,8 +8,6 @@ import no.vegvesen.ixn.ssl.SSLContextFactory;
 import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -75,13 +74,12 @@ public class Sink implements MessageListener, AutoCloseable {
     public void onMessage(Message message) {
         try {
             message.acknowledge();
-			int delay = -1;
-			if (message.getStringProperty("when") != null) {
-				try {
-					delay = (int) ZonedDateTime.parse(message.getStringProperty("when")).until(ZonedDateTime.now(), ChronoUnit.MILLIS);
-				} catch (Exception e) {
-					System.err.println("Could not parse \"when\"-field to calculate delay; " + message.getStringProperty("when"));
-				}
+			long delay = -1;
+			try {
+				long  timestamp = message.getLongProperty(MessageProperty.TIMESTAMP.getName());
+				delay = System.currentTimeMillis() - timestamp;
+			} catch (Exception e) {
+				System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
 			}
 			System.out.println("** Message received **");
 			Enumeration messageNames =  message.getPropertyNames();
