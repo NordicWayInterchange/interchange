@@ -44,7 +44,7 @@ public class InterchangeApp{
 			if (messageValidator.isValid(message)) {
 				producer.sendMessage(NWEXCHANGE, message);
 			} else {
-				logger.error("Sending bad message to dead letter queue. Invalid message.");
+				logger.warn("Sending bad message to dead letter queue. Invalid message.");
 				producer.sendMessage(DLQUEUE, message);
 			}
 		} catch (Exception e) {

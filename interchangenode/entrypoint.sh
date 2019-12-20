@@ -1,8 +1,6 @@
 #!/bin/bash -eu
 
-POSTGIS_URI=${POSTGIS_URI:-jdbc:postgresql://postgis:5432/geolookup}
-
-echo "ENTRYPOINT - connecting to ${AMQP_URI} as ${AMQP_USER} and to PGSQL server ${POSTGIS_URI}"
+echo "ENTRYPOINT - connecting to ${AMQP_URI} as ${AMQP_USER}"
 
 LOG_LEVELS=${LOG_LEVELS:-" "}
 

@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.model;
 
 import no.vegvesen.ixn.properties.MessageProperty;
-import org.apache.qpid.jms.message.JmsMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,20 +20,8 @@ public class MessageValidator {
     public boolean isValid(Message message) {
 		String messageType = getMessageType(message);
 		if (messageType == null) {
+			logger.error("Could not get messageType from message");
 			return false;
-		}
-		try {
-			String jmsXUserId = message.getStringProperty("JMSXUserID");
-			logger.debug("JMSXUserID is {}",jmsXUserId);
-		} catch (JMSException e) {
-			logger.error("Could not get userId from message");
-		}
-		if (message instanceof JmsMessage) {
-			JmsMessage jmsMessage = (JmsMessage)message;
-			String userId = jmsMessage.getFacade().getUserId();
-			logger.debug("userId is '{}'",userId);
-		} else {
-			logger.debug("Message is not an instance of jmsMessage, but {}", message.getClass().getName());
 		}
 		switch (messageType) {
 			case "DATEX2":

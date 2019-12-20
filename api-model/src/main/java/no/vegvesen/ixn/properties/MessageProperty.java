@@ -11,12 +11,10 @@ public class MessageProperty {
 
     public static final MessageProperty MESSAGE_TYPE = new MessageProperty("messageType", true);
     public static final MessageProperty QUAD_TREE = new MessageProperty("quadTree", false);
-    public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true);
 
     public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
             MESSAGE_TYPE,
             QUAD_TREE,
-            //USER_ID,
             new MessageProperty("publisherId", false),
             new MessageProperty("publisherName", true),
             new MessageProperty("originatingCountry", true),

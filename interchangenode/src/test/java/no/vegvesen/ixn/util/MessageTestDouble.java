@@ -289,8 +289,7 @@ public class MessageTestDouble implements Message {
     }
 
    //All the properties are defined as String, just for ease.
-    public static Message createMessage(String userId,
-        String publisher,
+    public static Message createMessage(String publisher,
         String originatingCountry,
         String protocolVersion,
         String messageType,
@@ -299,7 +298,6 @@ public class MessageTestDouble implements Message {
         KeyValue... additionalProperties) {
 
         Map<String, String> properties = new HashMap<>();
-        properties.put(MessageProperty.USER_ID.getName(),userId);
         properties.put("publisherName",publisher);
         properties.put("originatingCountry",originatingCountry);
         properties.put("protocolVersion",protocolVersion);
@@ -312,15 +310,13 @@ public class MessageTestDouble implements Message {
         return new MessageTestDouble(properties);
     }
 
-    public static Message createDatexMessage(String userId,
-        String publisher,
+    public static Message createDatexMessage(String publisher,
         String originatingCountry,
         String protocolVersion,
         String latitude,
         String longitude,
         KeyValue... additionalProperties) {
-        return createMessage(userId,
-                publisher,
+        return createMessage(publisher,
                 originatingCountry,
                 protocolVersion,
                 "DATEX2",
@@ -328,16 +324,5 @@ public class MessageTestDouble implements Message {
                 longitude,
                 additionalProperties);
     }
-/*
-    public static Message createDenmMessage(String userId,
-        String publisher,
-        String originatingCountry,
-        String protocolVersion,
-        String latitude,
-        String longitude,
-        KeyValue... additionalProperties) {
-
-    }
-*/
 
 }

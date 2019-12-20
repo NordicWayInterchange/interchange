@@ -31,7 +31,6 @@ public class InterchangeAppTest {
     public void validMessageIsSent() {
 
         Message message = MessageTestDouble.createMessage(
-                "bouvet",
                 "NO00001",
                 "NO",
                 "DATEX2:1.0",
@@ -49,7 +48,6 @@ public class InterchangeAppTest {
     public void receivedMessageWithoutOriginatingCountrySendsToDlQueue() {
 
         Message message = MessageTestDouble.createMessage(
-                "bouvet",
                 "NO00001",
                 null,
                 "DATEX2:1.0",
