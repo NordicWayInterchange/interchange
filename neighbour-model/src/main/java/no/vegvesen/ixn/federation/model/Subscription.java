@@ -24,7 +24,7 @@ public class Subscription {
 
 	private String selector;
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	private Set<String> quadTreeTiles = new HashSet<>();
 
 	private String path;

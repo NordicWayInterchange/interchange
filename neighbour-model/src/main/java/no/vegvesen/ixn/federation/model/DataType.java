@@ -21,7 +21,7 @@ public class DataType{
 	@Column(name="dat_id")
 	private Integer data_id;
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	private Map<String, String> values = new HashMap<>();
 
 	@Column
