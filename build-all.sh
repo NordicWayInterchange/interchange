@@ -2,7 +2,7 @@
 
 TAG="$(git rev-parse --short HEAD)"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-IMAGES="interchangenode qpid postgis message-forwarder neighbour-discoverer neighbour-server routing-configurer onboard-server"
+IMAGES="interchangenode qpid message-forwarder neighbour-discoverer neighbour-server routing-configurer onboard-server"
 
 mvn clean install -PPKG
 
