@@ -80,12 +80,6 @@
             </dependency>
 
             <dependency>
-                <groupId>net.postgis</groupId>
-                <artifactId>postgis-jdbc</artifactId>
-                <version>2.2.1</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-jms-client</artifactId>
                 <version>0.40.0</version>

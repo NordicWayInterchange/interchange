@@ -27,10 +27,6 @@ qpid:                                                               # Apache Qpi
     enabled: true
     storageClassName: standard
     size: 3Gi
-postgis:                                                            # Database for lookup of lat/lon to country code (soon deprecated)
-  image:
-    repository: eu.gcr.io/nordic-way-aad182cc/postgis
-    tag: "161216d"
 interchange:                                                        # Java application that validates incoming messages to Qpid
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/interchangenode

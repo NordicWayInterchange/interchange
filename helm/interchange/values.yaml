@@ -4,9 +4,6 @@
 interchange:
   image: eu.gcr.io/nordic-way-aad182cc/interchangenode:latest
 
-postgis:
-  image: eu.gcr.io/nordic-way-aad182cc/postgis:latest
-
 qpid:
   persistence:
     enabled: false

@@ -26,8 +26,6 @@ spec:
           value: {{ .Values.qpid.interchange_user }}
         - name: AMQP_PASSWORD
           value: {{ .Values.qpid.interchange_password }}
-        - name: POSTGIS_URI
-          value: jdbc:postgresql://{{ .Release.Name }}-postgis:5432/geolookup
         - name: LOG_LEVELS
           value: "{{- range .Values.interchange.logging -}}
                      -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}

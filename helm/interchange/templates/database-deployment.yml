@@ -22,7 +22,7 @@ spec:
         release: {{ .Release.Name }}
     spec:
       containers:
-      - name: postgis
+      - name: postgres
         image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag}}"
         env:
         - name: POSTGRES_USER
