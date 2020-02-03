@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -136,6 +137,7 @@ public class DataTypeApi {
 		return result;
 	}
 
+	@JsonIgnore
 	public Map<String, String> getValues() {
 		Map<String, String> values = new HashMap<>();
 		putValue(values, MessageProperty.MESSAGE_TYPE, this.getMessageType());
