@@ -62,6 +62,9 @@ public class DataTypeApi {
 	}
 
 	public void setMessageType(String messageType) {
+		if (messageType == null) {
+			throw new IllegalArgumentException("messageType can not be null");
+		}
 		this.messageType = messageType;
 	}
 
