@@ -172,4 +172,23 @@ public class CapabilityTransformerTest {
 		}
 		return new DataType(datexHeaders);
 	}
+
+	@Test
+	public void dataTypeWithoutMessageTypeIsNotConvertedToDataTypeApi() {
+		Set<DataType> dataTypesToBeConverted = new HashSet<>();
+
+		HashMap<String, String> dtWithMessageTypeValues = new HashMap<>();
+		dtWithMessageTypeValues.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		DataType dataTypeWithMessageType = new DataType(dtWithMessageTypeValues);
+		dataTypesToBeConverted.add(dataTypeWithMessageType);
+
+		HashMap<String, String> dtWithoutMessageTypeValues = new HashMap<>();
+		dtWithoutMessageTypeValues.put(MessageProperty.PROTOCOL_VERSION.getName(), "9.99");
+		dtWithoutMessageTypeValues.put(MessageProperty.PUBLISHER_ID.getName(), "publisherId-77");
+		DataType dataTypeWithoutMessageType = new DataType(dtWithoutMessageTypeValues);
+		dataTypesToBeConverted.add(dataTypeWithoutMessageType);
+
+		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(dataTypesToBeConverted);
+		assertThat(dataTypeApis).hasSize(1);
+	}
 }

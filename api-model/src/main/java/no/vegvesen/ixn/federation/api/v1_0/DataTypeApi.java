@@ -35,6 +35,9 @@ public class DataTypeApi {
 	}
 
 	public DataTypeApi(String messageType, String publisherId, String publisherName, String originatingCountry, String protocolVersion, String contentType, Set<String> quadTree) {
+		if (messageType == null) {
+			throw new IllegalArgumentException("messageType can not be null");
+		}
 		this.messageType = messageType;
 		this.publisherId = publisherId;
 		this.publisherName = publisherName;

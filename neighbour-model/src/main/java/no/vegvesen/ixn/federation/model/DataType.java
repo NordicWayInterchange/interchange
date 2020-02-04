@@ -104,4 +104,8 @@ public class DataType{
 				.map(Integer::parseInt)
 				.collect(Collectors.toSet());
 	}
+
+	public Integer getData_id() {
+		return data_id;
+	}
 }
