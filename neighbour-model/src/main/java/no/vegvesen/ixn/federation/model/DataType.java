@@ -22,6 +22,9 @@ public class DataType{
 	private Integer data_id;
 
 	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name="data_type_values", joinColumns=@JoinColumn(name="dat_id"))
+	@MapKeyColumn(name="property")
+	@Column(name="value")
 	private Map<String, String> values = new HashMap<>();
 
 	@Column
