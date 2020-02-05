@@ -259,6 +259,24 @@ public class DataTypeSelectorMatcherTest {
 		assertThat(DataTypeSelectorMatcher.matches(noCapabilityWithQuad, Collections.emptySet(), "originatingCountry = 'NO'")).isTrue();
 	}
 
+	@Test
+	public void calculateCommonInterestWithValidAndInvalidSelectorMatchesValidSelector() {
+		HashSet<DataType> dataTypes = Sets.newHashSet(getDatex("NO"));
+		LinkedHashSet<String> selectors = Sets.newLinkedHashSet();
+		selectors.add("originatingCountry = 'NO'");
+		selectors.add("invalidSelector = 'SOMEVALUE'");
+		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes, selectors)).hasSize(1);
+	}
+
+	@Test
+	public void calculateCommonInterestWithValidAndInvalidSelectorMatchesValidSelectorReverseOrder() {
+		HashSet<DataType> dataTypes = Sets.newHashSet(getDatex("NO"));
+		LinkedHashSet<String> selectors = Sets.newLinkedHashSet();
+		selectors.add("invalidSelector = 'SOMEVALUE'");
+		selectors.add("originatingCountry = 'NO'");
+		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes, selectors)).hasSize(1);
+	}
+
 	@NotNull
 	private DataType getDatex(String originatingCountry) {
 		HashMap<String, String> values = new HashMap<>();
