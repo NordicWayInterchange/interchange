@@ -199,5 +199,6 @@
         <module>debugclient</module>
         <module>message-forwarder</module>
         <module>dns-client</module>
+        <module>onboard-rest-client</module>
     </modules>
 </project>
