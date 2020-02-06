@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +25,6 @@ public class QpidClientConfig {
 	private HttpClient httpsClient() {
 		return HttpClients.custom()
 				.setSSLContext(sslContext)
-				.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE) //TODO: Use basic auth for qpid client
 				.build();
 	}
 
