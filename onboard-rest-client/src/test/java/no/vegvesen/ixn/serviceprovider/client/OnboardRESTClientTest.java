@@ -9,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 
@@ -21,22 +20,20 @@ public class OnboardRESTClientTest {
     TODO
     This is an ad-hoc implementation of the client and test. This will be refactored into something a bit more
     usable when we have more experience in the usage of the client.
-    Also, the actual test code should probablywork against testcontainers...
+    Also, the actual test code should probably work against testcontainers...
      */
-
-    @Autowired
-    RestTemplate restTemplate;
 
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    OnboardRESTClient restClient;
 
     @Ignore
     @Test
     public void testGetSubscriptions() throws JsonProcessingException {
-        OnboardRESTClient restClient = new OnboardRESTClient(restTemplate);
-
-        SubscriptionRequestApi subscriptionRequest = restClient.getServiceProviderSubscriptionRequest("https://bouvet-one.bouvetinterchange.no:4141/subscription/sp-one.bouvetinterchange.no");
+        String uri = "https://bouvet-one.bouvetinterchange.no:4141/subscription/sp-one.bouvetinterchange.no";
+        SubscriptionRequestApi subscriptionRequest = restClient.getServiceProviderSubscriptionRequest(uri);
         System.out.println(objectMapper.writeValueAsString(subscriptionRequest));
         /*
         {"name":"sp-one.bouvetinterchange.no","subscriptions":[{"selector":"messageType = 'DATEX2'","path":null,"quadTreeTiles":["123122"],"status":"CREATED"},{"selector":"messageType = 'DATEX2' and originatingCountry = 'NO'","path":null,"quadTreeTiles":[],"status":"CREATED"}]}
@@ -58,8 +55,8 @@ public class OnboardRESTClientTest {
         subscriptionRequestApi.setName("sp-one.bouvetinterchange.no");
         subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
 
-        OnboardRESTClient client = new OnboardRESTClient(restTemplate);
-        SubscriptionRequestApi result = client.addSubscriptions("https://bouvet-one.bouvetinterchange.no:4141/subscription",subscriptionRequestApi);
+        String uri = "https://bouvet-one.bouvetinterchange.no:4141/subscription";
+        SubscriptionRequestApi result = restClient.addSubscriptions(uri,subscriptionRequestApi);
         System.out.println(objectMapper.writeValueAsString(result));
     }
 
@@ -75,7 +72,6 @@ public class OnboardRESTClientTest {
         subscriptionRequest.setName("sp-one.bouvetinterchange.no");
         subscriptionRequest.setSubscriptions(Collections.singleton(subscriptionApi));
 
-        OnboardRESTClient restClient = new OnboardRESTClient(restTemplate);
         SubscriptionRequestApi updated = restClient.deleteSubscriptions("https://bouvet-one.bouvetinterchange.no:4141/subscription",subscriptionRequest);
         System.out.println(objectMapper.writeValueAsString(updated));
         /*
@@ -86,8 +82,6 @@ public class OnboardRESTClientTest {
     @Ignore
     @Test
     public void testGetCapabilities() throws JsonProcessingException {
-        OnboardRESTClient restClient = new OnboardRESTClient(restTemplate);
-
         CapabilityApi capabilities = restClient.getServiceProviderCapabilities("https://bouvet-one.bouvetinterchange.no:4141/capabilities/sp-one.bouvetinterchange.no");
         System.out.println(objectMapper.writeValueAsString(capabilities));
         /*
@@ -99,8 +93,6 @@ public class OnboardRESTClientTest {
     @Ignore
     @Test
     public void testDeleteCapability() throws JsonProcessingException {
-        OnboardRESTClient restClient = new OnboardRESTClient(restTemplate);
-
         DataTypeApi dataTypeApi = new Datex2DataTypeApi();
         dataTypeApi.setOriginatingCountry("NO");
 
@@ -118,7 +110,6 @@ public class OnboardRESTClientTest {
     @Ignore
     @Test
     public void testPostCapabilities() throws JsonProcessingException {
-        OnboardRESTClient restClient = new OnboardRESTClient(restTemplate);
 
         DataTypeApi dataTypeApi = new Datex2DataTypeApi();
         dataTypeApi.setOriginatingCountry("NO");

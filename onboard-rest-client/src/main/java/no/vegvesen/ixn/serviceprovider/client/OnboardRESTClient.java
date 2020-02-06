@@ -2,19 +2,34 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import org.apache.http.impl.client.HttpClients;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
+
+@Component
 public class OnboardRESTClient {
 
 
     private RestTemplate restTemplate;
 
-    public OnboardRESTClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    @Autowired
+    public OnboardRESTClient(SSLContext sslContext) {
+        this.restTemplate = new RestTemplate(
+                new HttpComponentsClientHttpRequestFactory(
+                        HttpClients
+                                .custom()
+                                .setSSLContext(sslContext)
+                                .build()
+                )
+        );
     }
 
     public CapabilityApi postCapabilities(String url,CapabilityApi capabilities) {
