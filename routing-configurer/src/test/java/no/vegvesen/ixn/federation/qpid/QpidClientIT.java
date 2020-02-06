@@ -2,8 +2,8 @@ package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 
 import javax.jms.JMSException;
@@ -49,6 +50,7 @@ public class QpidClientIT extends DockerBaseIT {
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
 	private static String AMQPS_URL;
+	private static Integer MAPPED_HTTPS_PORT;
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -63,11 +65,15 @@ public class QpidClientIT extends DockerBaseIT {
 					"qpid.rest.api.baseUrl=" + httpsUrl,
 					"qpid.rest.api.vhost=localhost"
 			).applyTo(configurableApplicationContext.getEnvironment());
+			MAPPED_HTTPS_PORT = qpidContainer.getMappedPort(HTTPS_PORT);
 		}
 	}
 
 	@Autowired
 	QpidClient client;
+
+	@Autowired
+	RestTemplate restTemplate;
 
 	@Test
 	public void pingQpid() {
@@ -273,4 +279,9 @@ public class QpidClientIT extends DockerBaseIT {
 				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
 	}
 
+	@Test
+	public void httpsConnectionToQpidRestServerInsideTheClusterDoesNotVerifyServerName() {
+		QpidClient localhostAddressedWithIpAddress = new QpidClient("https://127.0.0.1:" + MAPPED_HTTPS_PORT, "localhost", restTemplate);
+		localhostAddressedWithIpAddress.ping();
+	}
 }
