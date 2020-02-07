@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,6 +16,8 @@ import java.util.stream.Stream;
 @Entity
 @Table(name = "data_types")
 public class DataType{
+
+	private static Logger logger = LoggerFactory.getLogger(DataType.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_generator")
@@ -101,10 +105,16 @@ public class DataType{
 	}
 
 	public Set<Integer> getPropertyValueAsIntegerSet(MessageProperty messageProperty) {
-		String intArrayValues = getPropertyValue(messageProperty);
-		return Stream.of(Lists.newArrayList(intArrayValues.split(","))).flatMap(Collection::stream)
-				.filter(s -> s.length() > 0)
-				.map(Integer::parseInt)
+		List<String> intArrayValues = getPropertyValueAsList(messageProperty);
+		return Stream.of(intArrayValues).flatMap(Collection::stream)
+				.map(n -> {
+					try {
+						return Integer.parseInt(n);
+					} catch (NumberFormatException e) {
+						logger.error("Cannot parse messageProperty [{}] value as integer [{}]", messageProperty.getName(), n );
+						return null;
+					}
+				}).filter(Objects::nonNull)
 				.collect(Collectors.toSet());
 	}
 
