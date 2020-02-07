@@ -5,31 +5,31 @@ import no.vegvesen.ixn.properties.MessageProperty;
 import java.util.Map;
 import java.util.Set;
 
-public class IvyDataTypeApi extends EtsiDataTypeApi{
-	public static final String IVY = "IVY";
+public class IviDataTypeApi extends EtsiDataTypeApi{
+	public static final String IVI = "IVI";
 
-	private Integer ivyType;
+	private Integer iviType;
 	private Set<Integer> pictogramCategoryCodes;
 
-	public IvyDataTypeApi() {
-		this.setMessageType(IVY);
+	public IviDataTypeApi() {
+		this.setMessageType(IVI);
 	}
 
-	public IvyDataTypeApi(String publisherId, String publisherName, String originatingCountry,
+	public IviDataTypeApi(String publisherId, String publisherName, String originatingCountry,
 						  String protocolVersion, String contentType, Set<String> quadTree,
-						  String serviceType, Integer ivyType, Set<Integer> pictogramCategoryCodes) {
-		super(IVY, publisherId, publisherName, originatingCountry, protocolVersion, contentType, quadTree, serviceType);
-		this.ivyType = ivyType;
+						  String serviceType, Integer iviType, Set<Integer> pictogramCategoryCodes) {
+		super(IVI, publisherId, publisherName, originatingCountry, protocolVersion, contentType, quadTree, serviceType);
+		this.iviType = iviType;
 		this.pictogramCategoryCodes = pictogramCategoryCodes;
 	}
 
 
-	public Integer getIvyType() {
-		return ivyType;
+	public Integer getIviType() {
+		return iviType;
 	}
 
-	public void setIvyType(Integer ivyType) {
-		this.ivyType = ivyType;
+	public void setIviType(Integer iviType) {
+		this.iviType = iviType;
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -44,7 +44,7 @@ public class IvyDataTypeApi extends EtsiDataTypeApi{
 	@Override
 	public Map<String, String> getValues() {
 		Map<String, String> values = super.getValues();
-		putValue(values, MessageProperty.IVI_TYPE, this.getIvyType());
+		putValue(values, MessageProperty.IVI_TYPE, this.getIviType());
 		putIntegerValue(values, MessageProperty.PICTOGRAM_CATEGORY_CODE, this.getPictogramCategoryCodes());
 		return values;
 	}
@@ -53,19 +53,19 @@ public class IvyDataTypeApi extends EtsiDataTypeApi{
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof IvyDataTypeApi)) return false;
+		if (!(o instanceof IviDataTypeApi)) return false;
 		if (!super.equals(o)) return false;
 
-		IvyDataTypeApi that = (IvyDataTypeApi) o;
+		IviDataTypeApi that = (IviDataTypeApi) o;
 
-		if (ivyType != null ? !ivyType.equals(that.ivyType) : that.ivyType != null) return false;
+		if (iviType != null ? !iviType.equals(that.iviType) : that.iviType != null) return false;
 		return pictogramCategoryCodes != null ? pictogramCategoryCodes.equals(that.pictogramCategoryCodes) : that.pictogramCategoryCodes == null;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = 31 * result + (ivyType != null ? ivyType.hashCode() : 0);
+		result = 31 * result + (iviType != null ? iviType.hashCode() : 0);
 		result = 31 * result + (pictogramCategoryCodes != null ? pictogramCategoryCodes.hashCode() : 0);
 		return result;
 	}

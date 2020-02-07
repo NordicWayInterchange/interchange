@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.IvyDataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.Test;
@@ -135,15 +135,15 @@ public class CapabilityTransformerTest {
 	}
 
 	@Test
-	public void ivyDataTypeApiIsConvertedToDataTypeAndBack() {
+	public void iviDataTypeApiIsConvertedToDataTypeAndBack() {
 		HashSet<String> quads = Sets.newHashSet("qt1", "qt2");
-		IvyDataTypeApi ivyDataTypeApi = new IvyDataTypeApi("NO-38367", "No such publisher",
+		IviDataTypeApi iviDataTypeApi = new IviDataTypeApi("NO-38367", "No such publisher",
 				"NO", "pv7", "ct6", quads,
 				"st8", 12134, Sets.newHashSet(9876, 7654));
-		Set<DataType> converted = capabilityTransformer.dataTypeApiToDataType(Collections.singleton(ivyDataTypeApi));
+		Set<DataType> converted = capabilityTransformer.dataTypeApiToDataType(Collections.singleton(iviDataTypeApi));
 		assertThat(converted).isNotNull().hasSize(1);
 		DataType convertedDataType = converted.iterator().next();
-		assertThat(convertedDataType.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(IvyDataTypeApi.IVY);
+		assertThat(convertedDataType.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(IviDataTypeApi.IVI);
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.PUBLISHER_ID)).isEqualTo("NO-38367");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.PUBLISHER_NAME)).isEqualTo("No such publisher");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo("NO");
@@ -156,8 +156,8 @@ public class CapabilityTransformerTest {
 		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Collections.singleton(convertedDataType));
 		assertThat(dataTypeApis).isNotNull().hasSize(1);
 		DataTypeApi convertedBack = dataTypeApis.iterator().next();
-		assertThat(convertedBack).isInstanceOf(IvyDataTypeApi.class);
-		assertThat(convertedBack).isEqualTo(ivyDataTypeApi);
+		assertThat(convertedBack).isInstanceOf(IviDataTypeApi.class);
+		assertThat(convertedBack).isEqualTo(iviDataTypeApi);
 	}
 
 	private DataType getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType) {
