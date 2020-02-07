@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = Datex2DataTypeApi.class, name = Datex2DataTypeApi.DATEX_2),
 		@JsonSubTypes.Type(value = DenmDataTypeApi.class, name = DenmDataTypeApi.DENM),
-		@JsonSubTypes.Type(value = IvyDataTypeApi.class, name = IvyDataTypeApi.IVY),
+		@JsonSubTypes.Type(value = IviDataTypeApi.class, name = IviDataTypeApi.IVI),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataTypeApi {

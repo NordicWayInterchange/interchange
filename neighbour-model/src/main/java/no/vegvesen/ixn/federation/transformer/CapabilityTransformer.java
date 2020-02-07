@@ -88,8 +88,8 @@ public class CapabilityTransformer {
 								dataType.getPropertyValue(MessageProperty.CAUSE_CODE),
 								dataType.getPropertyValue(MessageProperty.SUB_CAUSE_CODE));
 						break;
-					case IvyDataTypeApi.IVY:
-						dataTypeApi = new IvyDataTypeApi(
+					case IviDataTypeApi.IVI:
+						dataTypeApi = new IviDataTypeApi(
 								dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
 								dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
 								dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
