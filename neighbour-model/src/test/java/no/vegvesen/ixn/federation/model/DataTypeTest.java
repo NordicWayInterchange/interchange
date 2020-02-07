@@ -43,15 +43,15 @@ public class DataTypeTest {
 
 	@Test
 	public void getValuesAsSetToleratesOneValue() {
-		DataType emptyDataType = new DataType(Maps.newHashMap(MessageProperty.QUAD_TREE.getName(), ",,,aaa"));
-		Collection<String> oneValue = emptyDataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE);
+		DataType dataType = new DataType(Maps.newHashMap(MessageProperty.QUAD_TREE.getName(), ",,,aaa"));
+		Collection<String> oneValue = dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE);
 		assertThat(oneValue).hasSize(1).contains("aaa");
 	}
 
 	@Test
 	public void getValuesAsSetToleratesTwoValues() {
-		DataType emptyDataType = new DataType(Maps.newHashMap(MessageProperty.QUAD_TREE.getName(), ",aaa,bbb,"));
-		Collection<String> twoValues = emptyDataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE);
+		DataType dataType = new DataType(Maps.newHashMap(MessageProperty.QUAD_TREE.getName(), ",aaa,bbb,"));
+		Collection<String> twoValues = dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE);
 		assertThat(twoValues).hasSize(2).contains("aaa").contains("bbb");
 	}
 
@@ -64,8 +64,30 @@ public class DataTypeTest {
 
 	@Test
 	public void getValuesAsArrayToleratesTwoValues() {
-		DataType emptyDataType = new DataType(Maps.newHashMap(MessageProperty.QUAD_TREE.getName(), ",aaa,bbb,"));
-		Collection<String> twoValues = emptyDataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE);
+		DataType dataType = new DataType(Maps.newHashMap(MessageProperty.QUAD_TREE.getName(), ",aaa,bbb,"));
+		Collection<String> twoValues = dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE);
 		assertThat(twoValues).hasSize(2).contains("aaa").contains("bbb");
 	}
+
+	@Test
+	public void integerAsSetWhenUndefinedReturnsEmptySet() {
+		DataType dataTypeWithNoPictogramProperty = new DataType(Maps.newHashMap(MessageProperty.QUAD_TREE.getName(), "aaa"));
+		Set<Integer> emptySet = dataTypeWithNoPictogramProperty.getPropertyValueAsIntegerSet(MessageProperty.PICTOGRAM_CATEGORY_CODE);
+		assertThat(emptySet).hasSize(0);
+	}
+
+	@Test
+	public void integerSetReturnsCorrectIntegers() {
+		DataType dataType = new DataType(Maps.newHashMap(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), ",4,6,7,,"));
+		Set<Integer> emptySet = dataType.getPropertyValueAsIntegerSet(MessageProperty.PICTOGRAM_CATEGORY_CODE);
+		assertThat(emptySet).hasSize(3).contains(4).contains(6).contains(7);
+	}
+
+	@Test
+	public void integerSetParseBadValuesReturnsCorrectIntegers() {
+		DataType dataType = new DataType(Maps.newHashMap(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), ",4,6,BB,,"));
+		Set<Integer> emptySet = dataType.getPropertyValueAsIntegerSet(MessageProperty.PICTOGRAM_CATEGORY_CODE);
+		assertThat(emptySet).hasSize(2).contains(4).contains(6);
+	}
+
 }
