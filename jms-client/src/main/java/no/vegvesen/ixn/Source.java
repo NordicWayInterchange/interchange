@@ -91,6 +91,9 @@ public class Source implements AutoCloseable {
 
 
     public void send(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
+    	if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
+    		throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
+		}
 
         JmsTextMessage message = createTextMessage(messageText);
         message.getFacade().setUserId("localhost");
