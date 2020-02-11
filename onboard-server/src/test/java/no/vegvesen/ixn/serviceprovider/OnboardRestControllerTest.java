@@ -74,7 +74,7 @@ public class OnboardRestControllerTest {
 	void setUp() {
 		mockMvc = MockMvcBuilders
 				.standaloneSetup(onboardRestController)
-				.setMessageConverters(RestWebConfig.strictJsonMessageConverter())
+				.setMessageConverters(OnboardStrictWebConfig.strictJsonMessageConverter())
 				.setControllerAdvice(OnboardServerErrorAdvice.class)
 				.build();
 	}
