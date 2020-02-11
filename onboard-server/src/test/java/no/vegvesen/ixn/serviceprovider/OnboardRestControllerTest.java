@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.model.*;
@@ -20,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,7 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(OnboardRestController.class)
+@WebMvcTest(controllers = OnboardRestController.class)
 public class OnboardRestControllerTest {
 
 	@Rule
@@ -74,15 +72,9 @@ public class OnboardRestControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		ObjectMapper strictPropertiesMapper = new ObjectMapper();
-		strictPropertiesMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
-		MappingJackson2HttpMessageConverter strictJacksonMessageConverter = new
-				MappingJackson2HttpMessageConverter();
-		strictJacksonMessageConverter.setObjectMapper(strictPropertiesMapper);
-
 		mockMvc = MockMvcBuilders
 				.standaloneSetup(onboardRestController)
-				.setMessageConverters(strictJacksonMessageConverter)
+				.setMessageConverters(RestWebConfig.strictJsonMessageConverter())
 				.setControllerAdvice(OnboardServerErrorAdvice.class)
 				.build();
 	}
