@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.model.*;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -72,7 +74,17 @@ public class OnboardRestControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		mockMvc = MockMvcBuilders.standaloneSetup(onboardRestController).setControllerAdvice(OnboardServerErrorAdvice.class).build();
+		ObjectMapper strictPropertiesMapper = new ObjectMapper();
+		strictPropertiesMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+		MappingJackson2HttpMessageConverter strictJacksonMessageConverter = new
+				MappingJackson2HttpMessageConverter();
+		strictJacksonMessageConverter.setObjectMapper(strictPropertiesMapper);
+
+		mockMvc = MockMvcBuilders
+				.standaloneSetup(onboardRestController)
+				.setMessageConverters(strictJacksonMessageConverter)
+				.setControllerAdvice(OnboardServerErrorAdvice.class)
+				.build();
 	}
 
 	private void mockCertificate(String commonName) {
@@ -349,4 +361,16 @@ public class OnboardRestControllerTest {
 		assertTrue(selfSubscriptions.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
 	}
 
+	@Test
+	void postUnknownPropertyNameThrowsBadRequestException() throws Exception {
+		mockCertificate("best service provider");
+		String capabilityApiToServerJson = "{\"version\":\"1.0\",\"name\":\"best service provider\",\"capabilities\":[{\"messageType\":\"DENM\",\"noSuchProperty\":\"pubid\",\"publisherName\":\"pubname\",\"originatingCountry\":\"NO\",\"protocolVersion\":\"1.0\",\"contentType\":\"application/base64\",\"quadTree\":[],\"serviceType\":\"serviceType\",\"causeCode\":\"1\",\"subCauseCode\":\"1\"}]}";
+		mockMvc.perform(
+				post(capabilitiesPath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().is4xxClientError());
+	}
 }
