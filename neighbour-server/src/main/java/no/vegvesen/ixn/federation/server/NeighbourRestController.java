@@ -39,9 +39,9 @@ public class NeighbourRestController {
 	private String myName;
 	private NeighbourRepository neighbourRepository;
 	private SelfRepository selfRepository;
-	private CapabilityTransformer capabilityTransformer;
-	private SubscriptionTransformer subscriptionTransformer;
-	private SubscriptionRequestTransformer subscriptionRequestTransformer;
+	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
+	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 	private DNSFacade dnsFacade;
@@ -49,16 +49,10 @@ public class NeighbourRestController {
 	@Autowired
 	public NeighbourRestController(NeighbourRepository neighbourRepository,
 								   SelfRepository selfRepository,
-								   CapabilityTransformer capabilityTransformer,
-								   SubscriptionTransformer subscriptionTransformer,
-								   SubscriptionRequestTransformer subscriptionRequestTransformer,
 								   DNSFacade dnsFacade) {
 
 		this.neighbourRepository = neighbourRepository;
 		this.selfRepository = selfRepository;
-		this.capabilityTransformer = capabilityTransformer;
-		this.subscriptionTransformer = subscriptionTransformer;
-		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
 		this.dnsFacade = dnsFacade;
 	}
 
