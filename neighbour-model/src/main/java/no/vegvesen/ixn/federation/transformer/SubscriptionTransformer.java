@@ -12,7 +12,6 @@ public class SubscriptionTransformer {
 		subscriptionApi.setSelector(subscription.getSelector());
 		subscriptionApi.setPath(subscription.getPath());
 		subscriptionApi.setStatus(subscription.getSubscriptionStatus());
-		subscriptionApi.setQuadTreeTiles(subscription.getQuadTreeTiles());
 
 		return subscriptionApi;
 	}
@@ -22,7 +21,6 @@ public class SubscriptionTransformer {
 		subscription.setSelector(subscriptionApi.getSelector());
 		subscription.setPath(subscriptionApi.getPath());
 		subscription.setSubscriptionStatus(subscriptionApi.getStatus());
-		subscription.setQuadTreeTiles(subscriptionApi.getQuadTreeTiles());
 
 		return subscription;
 	}

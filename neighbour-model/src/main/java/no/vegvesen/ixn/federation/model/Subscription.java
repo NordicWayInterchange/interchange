@@ -2,12 +2,8 @@ package no.vegvesen.ixn.federation.model;
 
 
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 @Entity
 @Table(name = "subscriptions")
@@ -23,9 +19,6 @@ public class Subscription {
 	private SubscriptionStatus subscriptionStatus;
 
 	private String selector;
-
-	@ElementCollection(fetch = FetchType.EAGER)
-	private Set<String> quadTreeTiles = new HashSet<>();
 
 	private String path;
 
@@ -77,20 +70,18 @@ public class Subscription {
 
 	@Override
 	public boolean equals(Object o) {
+		if (o == null) return false;
 		if (this == o) return true;
 		if (!(o instanceof Subscription)) return false;
 
 		Subscription that = (Subscription) o;
 
-		if (selector != null ? !selector.equals(that.selector) : that.selector != null) return false;
-		return quadTreeTiles != null ? quadTreeTiles.equals(that.quadTreeTiles) : that.quadTreeTiles == null;
+		return selector.equals(that.selector);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = selector != null ? selector.hashCode() : 0;
-		result = 31 * result + (quadTreeTiles != null ? quadTreeTiles.hashCode() : 0);
-		return result;
+		return selector.hashCode();
 	}
 
 	@Override
@@ -101,44 +92,5 @@ public class Subscription {
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +
 				'}';
-	}
-
-	public Set<String> getQuadTreeTiles() {
-		return quadTreeTiles;
-	}
-
-	public void setQuadTreeTiles(Set<String> quadTreeTiles) {
-		this.quadTreeTiles = quadTreeTiles;
-	}
-
-	public String getSelectorWithQuadTree() {
-		String quadTreeSelector = this.quadTreeTilesSelector();
-		if (quadTreeSelector != null) {
-			if (selector == null) {
-				return quadTreeSelector;
-			}
-			return String.format("(%s) and (%s)", this.getSelector(), quadTreeSelector);
-		}
-		return selector;
-	}
-
-	String quadTreeTilesSelector() {
-		if (this.quadTreeTiles.isEmpty()) {
-			return null;
-		} else {
-			StringBuilder quadTreeSelector = new StringBuilder();
-			Iterator<String> quadIterator = quadTreeTiles.iterator();
-			while (quadIterator.hasNext()) {
-				String quadTreeTile = quadIterator.next();
-				quadTreeSelector.append(MessageProperty.QUAD_TREE.getName());
-				quadTreeSelector.append(" like '%,");
-				quadTreeSelector.append(quadTreeTile);
-				quadTreeSelector.append("%'");
-				if (quadIterator.hasNext()) {
-					quadTreeSelector.append(" or ");
-				}
-			}
-			return quadTreeSelector.toString();
-		}
 	}
 }

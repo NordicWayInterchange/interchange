@@ -1,21 +1,17 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import java.util.Set;
-
 public class SubscriptionApi{
 
 	private String selector;
 	private String path;
-	private Set<String> quadTreeTiles;
 	private SubscriptionStatus status;
 
 	public SubscriptionApi(){
 	}
 
-	public SubscriptionApi(String selector, String path, Set<String> quadTreeTiles, SubscriptionStatus status) {
+	public SubscriptionApi(String selector, String path, SubscriptionStatus status) {
 		this.selector = selector;
 		this.path = path;
-		this.quadTreeTiles = quadTreeTiles;
 		this.status = status;
 	}
 
@@ -52,11 +48,4 @@ public class SubscriptionApi{
 				'}';
 	}
 
-	public Set<String> getQuadTreeTiles() {
-		return quadTreeTiles;
-	}
-
-	public void setQuadTreeTiles(Set<String> quadTreeTiles) {
-		this.quadTreeTiles = quadTreeTiles;
-	}
 }

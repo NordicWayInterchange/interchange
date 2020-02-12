@@ -131,7 +131,7 @@ public class QpidClient {
 		}
 		SubscriptionRequest subscriptionRequest = toSetUp.getSubscriptionRequest();
 		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
-			updateBinding(subscription.getSelectorWithQuadTree(), toSetUp.getName(), bindKey(toSetUp, subscription), exchangeName);
+			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription), exchangeName);
 			subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 		}
 		if (toSetUp instanceof ServiceProvider) {
@@ -174,7 +174,7 @@ public class QpidClient {
 	}
 
 	private String bindKey(Subscriber interchange, Subscription subscription) {
-		return interchange.getName() + "-" + subscription.getSelectorWithQuadTree().hashCode();
+		return interchange.getName() + "-" + subscription.getSelector().hashCode();
 	}
 
 	Set<String> getQueueBindKeys(String queueName) {

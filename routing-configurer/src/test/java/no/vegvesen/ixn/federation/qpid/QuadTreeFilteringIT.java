@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -28,7 +29,9 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.net.ssl.SSLContext;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -104,8 +107,8 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 
 	private Message sendReceiveMessage(HashSet<String> subscriptionQuadTreeTiles, String messageQuadTreeTiles, String selector) throws Exception {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
-		subscription.setQuadTreeTiles(subscriptionQuadTreeTiles);
+		String selectorWithQuadTree = getSelectorWithQuadTree(selector, subscriptionQuadTreeTiles);
+		Subscription subscription = new Subscription(selectorWithQuadTree, SubscriptionStatus.REQUESTED);
 		king_gustaf.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Sets.newHashSet(subscription)));
 		qpidClient.setupRouting(king_gustaf, "nwEx");
 
@@ -123,4 +126,37 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 		source.close();
 		return receivedMessage;
 	}
+
+
+	public String getSelectorWithQuadTree(String selector, Set<String> quadTreeTiles) {
+		String quadTreeSelector = this.quadTreeTilesSelector(quadTreeTiles);
+		if (quadTreeSelector != null) {
+			if (selector == null) {
+				return quadTreeSelector;
+			}
+			return String.format("(%s) and (%s)", selector, quadTreeSelector);
+		}
+		return selector;
+	}
+
+	private String quadTreeTilesSelector(Set<String> quadTreeTiles) {
+		if (quadTreeTiles.isEmpty()) {
+			return null;
+		} else {
+			StringBuilder quadTreeSelector = new StringBuilder();
+			Iterator<String> quadIterator = quadTreeTiles.iterator();
+			while (quadIterator.hasNext()) {
+				String quadTreeTile = quadIterator.next();
+				quadTreeSelector.append(MessageProperty.QUAD_TREE.getName());
+				quadTreeSelector.append(" like '%,");
+				quadTreeSelector.append(quadTreeTile);
+				quadTreeSelector.append("%'");
+				if (quadIterator.hasNext()) {
+					quadTreeSelector.append(" or ");
+				}
+			}
+			return quadTreeSelector.toString();
+		}
+	}
+
 }

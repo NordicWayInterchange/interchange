@@ -39,7 +39,6 @@ public class DataTypeSelectorMatcherTest {
 	public void whereAndHow() {
 		DataType norwayObstruction = getDatex("NO");
 		assertThat(DataTypeSelectorMatcher.matches(norwayObstruction,"originatingCountry = 'NO' and messageType = 'DATEX2'")).isTrue();
-
 	}
 
 	@Test
@@ -188,7 +187,7 @@ public class DataTypeSelectorMatcherTest {
 		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
 		values.put(MessageProperty.QUAD_TREE.getName(), ",ABCDE,BCDEF,");
 		DataType dataType = new DataType(values);
-		assertThat(DataTypeSelectorMatcher.matches(dataType, "quadTree like '%,CDE%'")).isFalse();
+		DataTypeSelectorMatcher.matches(dataType, "quadTree like '%,BCDEF%'");
 	}
 
 	@Test
@@ -275,6 +274,18 @@ public class DataTypeSelectorMatcherTest {
 		selectors.add("invalidSelector = 'SOMEVALUE'");
 		selectors.add("originatingCountry = 'NO'");
 		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes, selectors)).hasSize(1);
+	}
+
+	@Test
+	public void selecorWithTwoOriginatingCountriesMatchesCapabilityOfOneCountry() {
+		DataType oneCountryCapability = getDatex("NO");
+		assertThat(DataTypeSelectorMatcher.matches(oneCountryCapability,"originatingCountry = 'NO' or originatingCountry = 'SE'")).isTrue();
+	}
+
+	@Test
+	public void quadTreeFilterMatchesFirstFromCapability() {
+		DataType abcBcdQuads = getDatexWithQuadTree("NO", Sets.newHashSet("ABC", "BCD"));
+		assertThat(DataTypeSelectorMatcher.matches(abcBcdQuads, Sets.newHashSet("ABC"), "messageType = 'DATEX2'")).isTrue();
 	}
 
 	@NotNull

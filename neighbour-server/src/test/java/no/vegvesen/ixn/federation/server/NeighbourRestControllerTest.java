@@ -207,7 +207,7 @@ class NeighbourRestControllerTest {
 		// Create incoming subscription request api objcet
 		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
 		ericsson.setName("ericsson");
-		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", Collections.emptySet(), SubscriptionStatus.REQUESTED)));
+		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", SubscriptionStatus.REQUESTED)));
 
 		// Convert to JSON
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
