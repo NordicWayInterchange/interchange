@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>onboard-rest-client</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -31,6 +32,25 @@
         </dependency>
 
         <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>testcontainers-base</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.12.1</version>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>test-ssl-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <scope>compile</scope>
@@ -44,7 +64,7 @@
 
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>ssl-utils</artifactId>
+            <artifactId>test-ssl-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
 

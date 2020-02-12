@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.net.ssl.SSLContext;
 
-@Configuration
+//@Configuration
 public class OnboardRESTClientConfig {
 
 

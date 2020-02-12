@@ -235,6 +235,7 @@ public class OnboardRestController {
 		return localSubscriptions;
 	}
 
+	//TODO this method does not set subscription status if not already set. Is that correct? Probably need to have a default status in Subscription class.
 	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH)
 	public SubscriptionRequestApi addSubscriptions(@RequestBody SubscriptionRequestApi subscriptionRequestApi) {
 		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
@@ -250,7 +251,7 @@ public class OnboardRestController {
 
 		Set<Subscription> incomingSubscriptions = incomingPost.getSubscriptionRequest().getSubscriptions();
 		for (Subscription subscription : incomingSubscriptions) {
-			String selector = subscription.getSelector();
+			String selector = subscription.getSelector(); //TODO check that selector is not null, if so, throw Illegal Request.
 			try {
 				DataTypeSelectorMatcher.validateSelector(selector);
 			} catch (SelectorAlwaysTrueException | InvalidSelectorException e) {

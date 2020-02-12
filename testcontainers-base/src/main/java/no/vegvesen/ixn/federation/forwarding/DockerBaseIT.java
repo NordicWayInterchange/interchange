@@ -16,7 +16,7 @@ public class DockerBaseIT {
 	protected static final int AMQP_PORT = 5672;
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";
 
-	private static Path getFolderPath(String dockerFolderName) {
+	protected static Path getFolderPath(String dockerFolderName) {
 		String projectFolder = "interchange";
 
 		String ciWorkdir = System.getenv(CI_WORKDIR);
