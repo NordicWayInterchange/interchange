@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 public class MessageProperty {
 
 	public static final MessageProperty MESSAGE_TYPE = new MessageProperty("messageType", true, true);
-    public static final MessageProperty QUAD_TREE = new MessageProperty("quadTree", false, false);
+    public static final MessageProperty QUAD_TREE = new MessageProperty("quadTree", false, true);
     public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true, true);
 	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true, true);
 

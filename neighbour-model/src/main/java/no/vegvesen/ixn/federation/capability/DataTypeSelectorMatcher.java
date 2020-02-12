@@ -40,9 +40,6 @@ public class DataTypeSelectorMatcher {
 		@Override
 		public Object getHeader(String messageHeaderName) {
 			if (!this.headers.containsKey(messageHeaderName)) {
-				if (messageHeaderName.equals(MessageProperty.QUAD_TREE.getName())){
-					throw new HeaderNotFilterable(String.format("Message header [%s] must be specified in separate attribute outside selector filter", messageHeaderName));
-				}
 				if (MessageProperty.nonFilterablePropertyNames.contains(messageHeaderName)) {
 					throw new HeaderNotFilterable(String.format("Message header [%s] not possible to use in selector filter", messageHeaderName));
 				}
@@ -124,14 +121,6 @@ public class DataTypeSelectorMatcher {
 	    JMSSelectorFilter filter = validateSelector(selector);
 		DataTypeFilter capabilityFilter = new DataTypeFilter(capability);
 		return filter.matches(capabilityFilter);
-	}
-
-	static boolean matches(DataType capability, Set<String> quadTreeFilter, String jmsSelectorFilter) {
-	    JMSSelectorFilter selectorFilter = validateSelector(jmsSelectorFilter);
-		DataTypeFilter capabilityFilter = new DataTypeFilter(capability);
-		QuadTreeFilter quadTree = new QuadTreeFilter(quadTreeFilter);
-		return selectorFilter.matches(capabilityFilter) && quadTree.matches(capability);
-
 	}
 
 	public static JMSSelectorFilter validateSelector(String selector) {

@@ -180,16 +180,6 @@ public class DataTypeSelectorMatcherTest {
 		assertThat(DataTypeSelectorMatcher.calculateCommonInterestSelectors(dataTypes,selectors)).isNotEmpty();
 	}
 
-	@Test(expected = HeaderNotFilterable.class)
-	public void quadTreeInSelectorIsNotAllowed() {
-		HashMap<String, String> values = new HashMap<>();
-		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
-		values.put(MessageProperty.QUAD_TREE.getName(), ",ABCDE,BCDEF,");
-		DataType dataType = new DataType(values);
-		DataTypeSelectorMatcher.matches(dataType, "quadTree like '%,BCDEF%'");
-	}
-
 	@Test
 	public void quadTreeSubscriptionMatchesShorterCapability() {
 		HashMap<String, String> values = new HashMap<>();
@@ -197,17 +187,14 @@ public class DataTypeSelectorMatcherTest {
 		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
 		values.put(MessageProperty.QUAD_TREE.getName(), "ABCDE,BCDEF,CDEFG");
 		DataType dataType = new DataType(values);
-		Set<String> quadTreeFilter = new HashSet<>();
-		quadTreeFilter.add("BCD");
-		assertThat(DataTypeSelectorMatcher.matches(dataType, quadTreeFilter, "messageType = 'DATEX2'")).isTrue();
+		assertThat(DataTypeSelectorMatcher.matches(dataType, "quadTree like '%,BCD%' AND messageType = 'DATEX2'")).isTrue();
 	}
 
 
 	@Test
 	public void quadTreeSubscriptionMatchesLongerCapability() {
 		DataType dataType = getDatexWithQuadTree("NO", Sets.newHashSet("ABCDE", "BCDEF", "CDEFG"));
-		Set<String> quadTreeFilter = Sets.newHashSet("BCDEFG");
-		assertThat(DataTypeSelectorMatcher.matches(dataType, quadTreeFilter, "messageType = 'DATEX2'")).isTrue();
+		assertThat(DataTypeSelectorMatcher.matches(dataType, "quadTree like '%,BCDEFG%' AND messageType = 'DATEX2'")).isTrue();
 	}
 
 	@Test
@@ -219,7 +206,7 @@ public class DataTypeSelectorMatcherTest {
 		DataType dataType = new DataType(values);
 		Set<String> quadTreeFilter = new HashSet<>();
 		quadTreeFilter.add("DEFG");
-		assertThat(DataTypeSelectorMatcher.matches(dataType, quadTreeFilter, "messageType = 'DATEX2'")).isFalse();
+		assertThat(DataTypeSelectorMatcher.matches(dataType, "quadTree like '%,DEFG%' AND messageType = 'DATEX2'")).isFalse();
 	}
 
 	@Test(expected = HeaderNotFilterable.class)
@@ -243,19 +230,19 @@ public class DataTypeSelectorMatcherTest {
 	@Test
 	public void filterAloneMatchesWithoutQuadTree() {
 		DataType no = getDatex("NO");
-		assertThat(DataTypeSelectorMatcher.matches(no, Collections.emptySet(), "originatingCountry = 'NO'")).isTrue();
+		assertThat(DataTypeSelectorMatcher.matches(no, "originatingCountry = 'NO'")).isTrue();
 	}
 
 	@Test
 	public void filterCapabilitiesWithoutQuadTreeMatchesFilterWithQuadTree() {
 		DataType noCapabilityWithoutQuadTree = getDatex("NO");
-		assertThat(DataTypeSelectorMatcher.matches(noCapabilityWithoutQuadTree, Sets.newHashSet("anyquadtile"), "originatingCountry = 'NO'")).isTrue();
+		assertThat(DataTypeSelectorMatcher.matches(noCapabilityWithoutQuadTree, "quadTree like '%,anyquadtile%' AND originatingCountry = 'NO'")).isTrue();
 	}
 
 	@Test
 	public void filterCapabilitiesWithQuadTreeMatchesFilterWithoutQuadTree() {
 		DataType noCapabilityWithQuad = getDatexWithQuadTree("NO", Sets.newHashSet("anyquadtile"));
-		assertThat(DataTypeSelectorMatcher.matches(noCapabilityWithQuad, Collections.emptySet(), "originatingCountry = 'NO'")).isTrue();
+		assertThat(DataTypeSelectorMatcher.matches(noCapabilityWithQuad, "originatingCountry = 'NO'")).isTrue();
 	}
 
 	@Test
@@ -285,7 +272,13 @@ public class DataTypeSelectorMatcherTest {
 	@Test
 	public void quadTreeFilterMatchesFirstFromCapability() {
 		DataType abcBcdQuads = getDatexWithQuadTree("NO", Sets.newHashSet("ABC", "BCD"));
-		assertThat(DataTypeSelectorMatcher.matches(abcBcdQuads, Sets.newHashSet("ABC"), "messageType = 'DATEX2'")).isTrue();
+		assertThat(DataTypeSelectorMatcher.matches(abcBcdQuads, "quadTree like '%,ABC%' and messageType = 'DATEX2'")).isTrue();
+	}
+
+	@Test
+	public void selectorRefersToHeaderNotSpecifiedAsCapabilityMatches() {
+		DataType datexNO = getDatex("NO");
+		assertThat(DataTypeSelectorMatcher.matches(datexNO, "messageType = 'DATEX2' and publicationType = 'SOME-TYPE'")).isTrue();
 	}
 
 	@NotNull
@@ -301,8 +294,13 @@ public class DataTypeSelectorMatcherTest {
 		HashMap<String, String> values = new HashMap<>();
 		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-		values.put(MessageProperty.QUAD_TREE.getName(), String.join(",", quadTreeTiles));
+		values.put(MessageProperty.QUAD_TREE.getName(), toQuadTreeStringWithInitialDelimiter(quadTreeTiles));
 		return new DataType(values);
+	}
+
+	@NotNull
+	private String toQuadTreeStringWithInitialDelimiter(Set<String> quadTreeTiles) {
+		return quadTreeTiles.isEmpty() ? "" : "," + String.join(",", quadTreeTiles);
 	}
 
 	private Set<DataType> datexDataTypes(String originatingCountry, String publicationType, String publicationSubType) {
