@@ -16,8 +16,10 @@ public class OnboardRESTClient {
 
 
     private RestTemplate restTemplate;
+    private final String server;
+    private final String user;
 
-    public OnboardRESTClient(SSLContext sslContext) {
+    public OnboardRESTClient(SSLContext sslContext, String server, String user) {
         this.restTemplate = new RestTemplate(
                 new HttpComponentsClientHttpRequestFactory(
                         HttpClients
@@ -26,39 +28,41 @@ public class OnboardRESTClient {
                                 .build()
                 )
         );
+        this.server = server;
+        this.user = user;
     }
 
-    public CapabilityApi addCapabilities(String url, CapabilityApi capabilities) {
+    public CapabilityApi addCapabilities(CapabilityApi capabilities) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<CapabilityApi> entity = new HttpEntity<>(capabilities,headers);
-        return restTemplate.exchange(url, HttpMethod.POST, entity, CapabilityApi.class).getBody();
+        return restTemplate.exchange(server + "/capabilities", HttpMethod.POST, entity, CapabilityApi.class).getBody();
     }
 
-    public CapabilityApi getServiceProviderCapabilities(String uri) {
-        return restTemplate.getForEntity(uri, CapabilityApi.class).getBody();
+    public CapabilityApi getServiceProviderCapabilities() {
+        return restTemplate.getForEntity(server + "/capabilities/" + user, CapabilityApi.class).getBody();
     }
 
 
-    public SubscriptionRequestApi getServiceProviderSubscriptionRequest(String uri) {
-        return restTemplate.getForEntity(uri,SubscriptionRequestApi.class).getBody();
+    public SubscriptionRequestApi getServiceProviderSubscriptionRequest() {
+        return restTemplate.getForEntity(server + "/subscription/" + user,SubscriptionRequestApi.class).getBody();
     }
 
-    public SubscriptionRequestApi deleteSubscriptions(String uri, SubscriptionRequestApi subscriptionRequest) {
+    public SubscriptionRequestApi deleteSubscriptions(SubscriptionRequestApi subscriptionRequest) {
         HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequest);
-        return restTemplate.exchange(uri, HttpMethod.DELETE, entity, SubscriptionRequestApi.class).getBody();
+        return restTemplate.exchange(server + "/subscription", HttpMethod.DELETE, entity, SubscriptionRequestApi.class).getBody();
     }
 
-    public SubscriptionRequestApi addSubscriptions(String uri, SubscriptionRequestApi subscriptionRequestApi) {
+    public SubscriptionRequestApi addSubscriptions(SubscriptionRequestApi subscriptionRequestApi) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi,headers);
-        return restTemplate.exchange(uri, HttpMethod.POST, entity, SubscriptionRequestApi.class).getBody();
+        return restTemplate.exchange(server + "/subscription", HttpMethod.POST, entity, SubscriptionRequestApi.class).getBody();
     }
 
-    public CapabilityApi deleteCapability(String uri, CapabilityApi capabilityApi) {
+    public CapabilityApi deleteCapability(CapabilityApi capabilityApi) {
         HttpEntity<CapabilityApi> entity = new HttpEntity<>(capabilityApi);
-        return restTemplate.exchange(uri ,HttpMethod.DELETE ,entity, CapabilityApi.class).getBody();
+        return restTemplate.exchange(server + "/capabilities" ,HttpMethod.DELETE ,entity, CapabilityApi.class).getBody();
     }
 }
 

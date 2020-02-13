@@ -9,11 +9,8 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import org.junit.*;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -21,10 +18,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
+import javax.net.ssl.SSLContext;
 import java.util.Collections;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
 public class OnboardRestClientIT extends DockerBaseIT {
 
     private static Logger log = LoggerFactory.getLogger(OnboardRestClientIT.class);
@@ -39,7 +35,6 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     public static GenericContainer onboardServer;
 
-
     @BeforeClass
     public static void startUp() {
         Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
@@ -52,7 +47,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
                             .withFileFromPath(".",
                                     getFolderPath("onboard-server")
                             )
-        )
+                    )
                     .withNetwork(network)
                     .withClasspathResourceMapping("jks/server","/jks", BindMode.READ_ONLY)
                     .withEnv("KEY_STORE","/jks/localhost.p12")
@@ -67,6 +62,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
                 .start();
         onboardServer.followOutput(logConsumer);
     }
+
     @AfterClass
     public static void shutdown() {
         onboardServer.stop();
@@ -74,11 +70,12 @@ public class OnboardRestClientIT extends DockerBaseIT {
     }
 
     private OnboardRESTClient client;
+    private final SSLContext sslContext = TestKeystoreHelper.sslContext("jks/client/onboard.p12", "jks/client/truststore.jks");
 
 
     @Before
     public void setUp() {
-        client = new OnboardRESTClient(TestKeystoreHelper.sslContext("jks/client/onboard.p12","jks/client/truststore.jks"));
+        client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"onboard");
     }
 
 
@@ -94,14 +91,14 @@ public class OnboardRestClientIT extends DockerBaseIT {
         Datex2DataTypeApi datexNO = new Datex2DataTypeApi();
         datexNO.setOriginatingCountry("NO");
         capabilities.setCapabilities(Collections.singleton(datexNO));
-        client.addCapabilities(getServerUri() + "/capabilities", capabilities);
+        client.addCapabilities(capabilities);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        CapabilityApi newCapabilities = client.getServiceProviderCapabilities(getServerUri() + "/capabilities/onboard");
+        CapabilityApi newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
 
-        client.deleteCapability(getServerUri() + "/capabilities",newCapabilities);
-        newCapabilities = client.getServiceProviderCapabilities(getServerUri() + "/capabilities/onboard");
+        client.deleteCapability(newCapabilities);
+        newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
 
     }
@@ -113,13 +110,13 @@ public class OnboardRestClientIT extends DockerBaseIT {
         SubscriptionApi subscription = new SubscriptionApi();
         subscription.setSelector("originatingCountry = 'NO'");
         subscriptionRequestApi.setSubscriptions(Collections.singleton(subscription));
-        client.addSubscriptions(getServerUri() + "/subscription",subscriptionRequestApi);
+        client.addSubscriptions(subscriptionRequestApi);
 
-        SubscriptionRequestApi newSubscriptionRequest = client.getServiceProviderSubscriptionRequest(getServerUri() + "/subscription/onboard");
+        SubscriptionRequestApi newSubscriptionRequest = client.getServiceProviderSubscriptionRequest();
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(newSubscriptionRequest));
 
-        newSubscriptionRequest = client.deleteSubscriptions(getServerUri() + "/subscription",newSubscriptionRequest);
+        newSubscriptionRequest = client.deleteSubscriptions(newSubscriptionRequest);
         System.out.println(objectMapper.writeValueAsString(newSubscriptionRequest));
 
     }
@@ -133,13 +130,13 @@ public class OnboardRestClientIT extends DockerBaseIT {
         SubscriptionApi subscription = new SubscriptionApi();
         subscription.setSelector("originatingCountry = 'NO'");
         subscriptionRequestApi.setSubscriptions(Collections.singleton(subscription));
-        SubscriptionRequestApi subscriptions = client.addSubscriptions(getServerUri() + "/subscription", subscriptionRequestApi);
+        SubscriptionRequestApi subscriptions = client.addSubscriptions(subscriptionRequestApi);
         System.out.println(objectMapper.writeValueAsString(subscriptions));
 
-        CapabilityApi capabilities = client.getServiceProviderCapabilities(getServerUri() + "/capabilities/onboard");
+        CapabilityApi capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
-        client.deleteSubscriptions(getServerUri() + "/subscription",subscriptions);
+        client.deleteSubscriptions(subscriptions);
     }
 
     @Test
@@ -150,14 +147,14 @@ public class OnboardRestClientIT extends DockerBaseIT {
         SubscriptionApi subscription = new SubscriptionApi();
         subscription.setSelector("originatingCountry = 'NO'");
         subscriptionRequestApi.setSubscriptions(Collections.singleton(subscription));
-        SubscriptionRequestApi subscriptions = client.addSubscriptions(getServerUri() + "/subscription", subscriptionRequestApi);
+        SubscriptionRequestApi subscriptions = client.addSubscriptions(subscriptionRequestApi);
         System.out.println(objectMapper.writeValueAsString(subscriptions));
 
-        CapabilityApi capabilities = client.getServiceProviderCapabilities(getServerUri() + "/capabilities/onboard");
+        CapabilityApi capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
-        subscriptions = client.getServiceProviderSubscriptionRequest(getServerUri() + "/subscription/onboard");
-        client.deleteSubscriptions(getServerUri() + "/subscription",subscriptions);
+        subscriptions = client.getServiceProviderSubscriptionRequest();
+        client.deleteSubscriptions(subscriptions);
     }
 
 }
