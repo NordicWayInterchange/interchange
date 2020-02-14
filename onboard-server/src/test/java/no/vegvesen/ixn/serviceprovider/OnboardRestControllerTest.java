@@ -3,19 +3,21 @@ package no.vegvesen.ixn.serviceprovider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
-import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -38,7 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(MockitoJUnitRunner.class)
+@WebMvcTest(controllers = OnboardRestController.class)
 public class OnboardRestControllerTest {
 
 	@Rule
@@ -46,24 +48,35 @@ public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;
 
-	private ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
-	private SelfRepository selfRepository = mock(SelfRepository.class);
+	@MockBean
+	private ServiceProviderRepository serviceProviderRepository;
+	@MockBean
+	private SelfRepository selfRepository;
+
+	//Unfortunately we have to mock beans not used in the class under test
+	//because the spring test wires up all jpa repositories not mocked
+	@MockBean
+	private DiscoveryStateRepository discoveryStateRepository;
+	@MockBean
+	private NeighbourRepository neighbourRepository;
 
 	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
-
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
-	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
-
-	private OnboardRestController onboardRestController = new OnboardRestController(serviceProviderRepository, selfRepository, capabilityTransformer, subscriptionRequestTransformer);
+	@Autowired
+	private OnboardRestController onboardRestController;
 
 	private String capabilitiesPath = "/capabilities";
 	private String subscriptionPath = "/subscription";
 
 
-	@Before
-	public void setUp() {
-		mockMvc = MockMvcBuilders.standaloneSetup(onboardRestController).setControllerAdvice(OnboardServerErrorAdvice.class).build();
+	@BeforeEach
+	void setUp() {
+		mockMvc = MockMvcBuilders
+				.standaloneSetup(onboardRestController)
+				.setMessageConverters(OnboardStrictWebConfig.strictJsonMessageConverter())
+				.setControllerAdvice(OnboardServerErrorAdvice.class)
+				.build();
 	}
 
 	private void mockCertificate(String commonName) {
@@ -77,7 +90,7 @@ public class OnboardRestControllerTest {
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
-	public void postingCapabilitiesReturnsStatusOk() throws Exception {
+	void postingCapabilitiesReturnsStatusOk() throws Exception {
 
 		mockCertificate("First Service Provider");
 
@@ -98,7 +111,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void deletingExistingCapabilitiesReturnsStatusOk() throws Exception {
+	void deletingExistingCapabilitiesReturnsStatusOk() throws Exception {
 		mockCertificate("Second Service Provider");
 
 		// The existing data types of the positng Service Provider
@@ -128,7 +141,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void commonNameAndApiNameMismatchReturnsStatusForbiddenInCapabilities() throws Exception {
+	void commonNameAndApiNameMismatchReturnsStatusForbiddenInCapabilities() throws Exception {
 
 		mockCertificate("First Service Provider");
 
@@ -150,7 +163,7 @@ public class OnboardRestControllerTest {
 
 
 	@Test
-	public void postingSubscriptionReturnsStatusOk() throws Exception {
+	void postingSubscriptionReturnsStatusOk() throws Exception {
 
 		mockCertificate("First Service Provider");
 
@@ -174,7 +187,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void postingUnparsableSubscriptionReturnsBadRequest() throws Exception {
+	void postingUnparsableSubscriptionReturnsBadRequest() throws Exception {
 
 		mockCertificate("First Service Provider");
 
@@ -198,7 +211,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void postingInvalidSubscriptionReturnsStatusBadRequest() throws Exception {
+	void postingInvalidSubscriptionReturnsStatusBadRequest() throws Exception {
 		mockCertificate("First Service Provider");
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
@@ -222,7 +235,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void deletingSubscriptionReturnsStatusOk() throws Exception {
+	void deletingSubscriptionReturnsStatusOk() throws Exception {
 
 		mockCertificate("First Service Provider");
 
@@ -257,7 +270,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void commonNameAndApiNameMismatchReturnsStatusForbiddenInSubscription() throws Exception {
+	void commonNameAndApiNameMismatchReturnsStatusForbiddenInSubscription() throws Exception {
 
 		mockCertificate("First Service Provider");
 
@@ -279,7 +292,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void calculateSelfCapabilitiesTest() {
+	void calculateSelfCapabilitiesTest() {
 
 		DataType a = getDatex("SE");
 		DataType b = getDatex("FI");
@@ -312,7 +325,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void calculateSelfSubscriptionsTest() {
+	void calculateSelfSubscriptionsTest() {
 
 		Subscription a = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
 		Subscription b = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED);
@@ -340,4 +353,16 @@ public class OnboardRestControllerTest {
 		assertTrue(selfSubscriptions.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
 	}
 
+	@Test
+	void postUnknownPropertyNameThrowsBadRequestException() throws Exception {
+		mockCertificate("best service provider");
+		String capabilityApiToServerJson = "{\"version\":\"1.0\",\"name\":\"best service provider\",\"capabilities\":[{\"messageType\":\"DENM\",\"noSuchProperty\":\"pubid\",\"publisherName\":\"pubname\",\"originatingCountry\":\"NO\",\"protocolVersion\":\"1.0\",\"contentType\":\"application/base64\",\"quadTree\":[],\"serviceType\":\"serviceType\",\"causeCode\":\"1\",\"subCauseCode\":\"1\"}]}";
+		mockMvc.perform(
+				post(capabilitiesPath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().is4xxClientError());
+	}
 }

@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
+import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +29,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.SP_CAPS_PATH;
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.SP_SUBREQ_PATH;
 
+@SuppressWarnings("MVCPathVariableInspection")
 @RestController
 public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final SelfRepository selfRepository;
-	private CapabilityTransformer capabilityTransformer;
-	private SubscriptionRequestTransformer subscriptionRequestTransformer;
+	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(new SubscriptionTransformer());
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 
 	@Value("${interchange.node-provider.name}")
@@ -44,14 +47,9 @@ public class OnboardRestController {
 
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
-								 SelfRepository selfRepository,
-								 CapabilityTransformer capabilityTransformer,
-								 SubscriptionRequestTransformer subscriptionRequestTransformer) {
+								 SelfRepository selfRepository) {
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.selfRepository = selfRepository;
-		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
-		this.capabilityTransformer = capabilityTransformer;
-
 	}
 
 
@@ -67,7 +65,7 @@ public class OnboardRestController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = CAPABILITIES_PATH , produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, path = RESTEndpointPaths.CAPABILITIES_PATH , produces = MediaType.APPLICATION_JSON_VALUE)
 	public CapabilityApi addCapabilities(@RequestBody CapabilityApi capabilityApi) {
 		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
@@ -119,7 +117,7 @@ public class OnboardRestController {
 		return capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = CAPABILITIES_PATH)
+	@RequestMapping(method = RequestMethod.DELETE, path = RESTEndpointPaths.CAPABILITIES_PATH)
 	public CapabilityApi deleteCapability(@RequestBody CapabilityApi capabilityApi) {
 		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
@@ -236,7 +234,7 @@ public class OnboardRestController {
 	}
 
 	//TODO this method does not set subscription status if not already set. Is that correct? Probably need to have a default status in Subscription class.
-	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH)
+	@RequestMapping(method = RequestMethod.POST, path = RESTEndpointPaths.SUBSCRIPTION_PATH)
 	public SubscriptionRequestApi addSubscriptions(@RequestBody SubscriptionRequestApi subscriptionRequestApi) {
 		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
 
@@ -310,7 +308,7 @@ public class OnboardRestController {
 		return self;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = SUBSCRIPTION_PATH)
+	@RequestMapping(method = RequestMethod.DELETE, path = RESTEndpointPaths.SUBSCRIPTION_PATH)
 	public SubscriptionRequestApi deleteSubscription(@RequestBody SubscriptionRequestApi subscriptionRequestApi){
 		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
 

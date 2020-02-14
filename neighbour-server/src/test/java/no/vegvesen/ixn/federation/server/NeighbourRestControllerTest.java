@@ -4,23 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
-import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
-import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
-import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -33,7 +29,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.isA;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,41 +36,41 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-@RunWith(MockitoJUnitRunner.class)
-public class NeighbourRestControllerTest {
+@WebMvcTest
+class NeighbourRestControllerTest {
 
 
 	private MockMvc mockMvc;
 
 	// Mocks
-	private NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
-	private SelfRepository selfRepository = mock(SelfRepository.class);
-	private DNSFacade dnsFacade = mock(DNSFacade.class);
+	@MockBean
+	private NeighbourRepository neighbourRepository;
+	@MockBean
+	private SelfRepository selfRepository;
+	@MockBean
+	private DNSFacade dnsFacade;
 
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
-	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
-	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
+	@MockBean
+	ServiceProviderRepository serviceProviderRepository;
 
-	//@Spy
+	@MockBean
+	DiscoveryStateRepository discoveryStateRepository;
+
+	@Autowired
 	private NeighbourRestController neighbourRestController = new NeighbourRestController(
 			neighbourRepository,
 			selfRepository,
-			capabilityTransformer,
-			subscriptionTransformer,
-			subscriptionRequestTransformer,
 			dnsFacade );
 
 	private String subscriptionRequestPath = "/subscription";
 	private String capabilityExchangePath = "/capabilities";
 
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 	private Set<String> quadTree = Collections.emptySet();
 
-	@Before
-	public void setUp() {
-		mockMvc = MockMvcBuilders.standaloneSetup(neighbourRestController).build();
+	@BeforeEach
+	void setUp() {
+		mockMvc = MockMvcBuilders.standaloneSetup(neighbourRestController).setControllerAdvice(NeighbourServiceErrorAdvice.class).build();
 	}
 
 	private void mockCertificate(String commonName) {
@@ -89,7 +84,7 @@ public class NeighbourRestControllerTest {
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
-	public void postingDatexCapabilitiesReturnsStatusCreated() throws Exception {
+	void postingDatexCapabilitiesReturnsStatusCreated() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
@@ -118,7 +113,7 @@ public class NeighbourRestControllerTest {
 	}
 
 	@Test
-	public void postingDenmCapabilitiesReturnsStatusCreated() throws Exception {
+	void postingDenmCapabilitiesReturnsStatusCreated() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
@@ -149,7 +144,7 @@ public class NeighbourRestControllerTest {
 	}
 
 	@Test
-	public void postingIviCapabilitiesReturnsStatusCreated() throws Exception {
+	void postingIviCapabilitiesReturnsStatusCreated() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
@@ -179,8 +174,7 @@ public class NeighbourRestControllerTest {
 	}
 
 	@Test
-	public void postingCapabilitiesUnknownInDNSReturnsError() throws Exception {
-		expectedException.expectCause(isA(DiscoveryException.class));
+	void postingCapabilitiesUnknownInDNSReturnsError() throws Exception {
 
 		// Mocking the incoming certificate
 		mockCertificate("unknownNeighbour");
@@ -206,7 +200,7 @@ public class NeighbourRestControllerTest {
 	}
 
 	@Test
-	public void postingSubscriptionRequestReturnsStatusAccepted() throws Exception {
+	void postingSubscriptionRequestReturnsStatusAccepted() throws Exception {
 		mockCertificate("ericsson");
 
 
@@ -248,9 +242,8 @@ public class NeighbourRestControllerTest {
 	}
 
 	@Test
-	public void postThrowsExceptionIfCommonNameOfCertificateIsNotTheSameAsNameInApiObject() throws Exception {
+	void postThrowsExceptionIfCommonNameOfCertificateIsNotTheSameAsNameInApiObject() throws Exception {
 		mockCertificate("bouvet");
-		expectedException.expectCause(isA(CNAndApiObjectMismatchException.class));
 
 		// Create incoming capability api object.
 		CapabilityApi ericsson = new CapabilityApi();
@@ -270,7 +263,7 @@ public class NeighbourRestControllerTest {
 	}
 
 	@Test
-	public void postDatexDataTypeCapability() throws Exception {
+	void postDatexDataTypeCapability() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
@@ -299,7 +292,7 @@ public class NeighbourRestControllerTest {
 	}
 
 	@Test
-	public void postUnknownMessageTypeThrowsBadRequestException() throws Exception {
+	void postUnknownMessageTypeThrowsBadRequestException() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API

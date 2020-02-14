@@ -8,14 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 public class OnboardServerErrorAdvice {
@@ -41,6 +40,12 @@ public class OnboardServerErrorAdvice {
 	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e){
 		return error(FORBIDDEN, e);
 	}
+
+	@ExceptionHandler({HttpMessageNotReadableException.class})
+	public ResponseEntity<ErrorDetails> unknownProperty(HttpMessageNotReadableException e){
+		return error(BAD_REQUEST, e);
+	}
+
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
