@@ -86,4 +86,9 @@ public class JMSSelectorFilterFactoryTest {
 	public void timestampIsNotPossibleToFilterOn() {
 		JMSSelectorFilterFactory.get("timestamp > 1");
 	}
+
+	@Test
+	public void emptySelectorWillMatchEverythingAndThereforeNotAllowed() {
+		assertThat(JMSSelectorFilterFactory.isValidSelector("")).isFalse();
+	}
 }

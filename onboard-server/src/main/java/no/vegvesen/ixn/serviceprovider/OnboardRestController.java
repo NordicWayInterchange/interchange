@@ -249,8 +249,7 @@ public class OnboardRestController {
 
 		Set<Subscription> incomingSubscriptions = incomingPost.getSubscriptionRequest().getSubscriptions();
 		for (Subscription subscription : incomingSubscriptions) {
-			String selector = subscription.getSelector(); //TODO check that selector is not null, if so, throw Illegal Request.
-			if (!JMSSelectorFilterFactory.isValidSelector(selector)) {
+			if (!JMSSelectorFilterFactory.isValidSelector(subscription.getSelector())) {
 				throw new SubscriptionRequestException("Error validating incoming subscription");
 			}
 		}
