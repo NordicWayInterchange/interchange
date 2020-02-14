@@ -8,12 +8,15 @@ import org.apache.qpid.server.filter.JMSSelectorFilter;
 import org.apache.qpid.server.filter.SelectorParsingException;
 import org.apache.qpid.server.filter.selector.ParseException;
 import org.apache.qpid.server.filter.selector.TokenMgrError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
-public class SelectorValidator {
-	public static JMSSelectorFilter validate(String selector) {
+public class JMSSelectorFilterFactory {
+	private static Logger logger = LoggerFactory.getLogger(JMSSelectorFilterFactory.class);
 
+	public static JMSSelectorFilter get(String selector) {
 		if (selector.contains("\"") || selector.contains("`")) {
 			throw new InvalidSelectorException("String values in selectors must be quoted with single quoutes: " + selector);
 		}
@@ -25,6 +28,16 @@ public class SelectorValidator {
 		}
 		notAlwaysTrue(filter);
 		return filter;
+	}
+
+	public static boolean isValidSelector(String selector) {
+		try {
+			JMSSelectorFilterFactory.get(selector);
+			return true;
+		} catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
+			logger.error("Invalid selector {}", selector, e);
+			return false;
+		}
 	}
 
 	private static void notAlwaysTrue(JMSSelectorFilter filter) {

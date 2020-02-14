@@ -20,7 +20,7 @@ public class DataTypeSelectorMatcher {
 	private static Logger logger = LoggerFactory.getLogger(DataTypeSelectorMatcher.class);
 
 	public static boolean matches(DataType capability, String selector) {
-	    JMSSelectorFilter filter = SelectorValidator.validate(selector);
+	    JMSSelectorFilter filter = JMSSelectorFilterFactory.get(selector);
 		DataTypeFilter capabilityFilter = new DataTypeFilter(capability);
 		return filter.matches(capabilityFilter);
 	}

@@ -8,77 +8,82 @@ import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class SelectorValidatorTest {
+public class JMSSelectorFilterFactoryTest {
 
 	//equals without quote seems to be matching one header against another
 	@Test(expected = HeaderNotFoundException.class)
 	public void mathcingWithoutSingleQuotes() {
-		SelectorValidator.validate("originatingCountry = NO");
+		JMSSelectorFilterFactory.get("originatingCountry = NO");
 	}
 
 	@Test
 	public void mathcingOriginatingCountry() {
-		assertThat(SelectorValidator.validate("originatingCountry = 'NO'"));
+		assertThat(JMSSelectorFilterFactory.isValidSelector("originatingCountry = 'NO'")).isTrue();
+	}
+
+	@Test
+	public void mathcingUnknownAttributeIsNotValid() {
+		assertThat(JMSSelectorFilterFactory.isValidSelector("illegalAttribute = 'NO'")).isFalse();
 	}
 
 	@Test(expected = InvalidSelectorException.class)
 	public void mathingWildcardWithoutSingleQuotes() {
-		SelectorValidator.validate("messageType like datex%");
+		JMSSelectorFilterFactory.get("messageType like datex%");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void expirationFilteringIsNotSupported() {
-		SelectorValidator.validate("JMSExpiration > 3");
+		JMSSelectorFilterFactory.get("JMSExpiration > 3");
 	}
 
 	@Test(expected = HeaderNotFoundException.class)
 	public void unknownHeaderAttributeNotAccepted() {
-		SelectorValidator.validate("region like 'some region%'");
+		JMSSelectorFilterFactory.get("region like 'some region%'");
 	}
 
 	@Test(expected = SelectorAlwaysTrueException.class)
 	public void alwaysTrueIsNotAccepted() {
-		SelectorValidator.validate("messageType like 'spat%' or 1=1");
+		JMSSelectorFilterFactory.get("messageType like 'spat%' or 1=1");
 	}
 
 	@Test(expected = SelectorAlwaysTrueException.class)
 	public void likeAnyStringIsAlwaysTrueHenceNotAccepted() {
-	    SelectorValidator.validate("originatingCountry like '%'");
+	    JMSSelectorFilterFactory.get("originatingCountry like '%'");
 	}
 
 	@Test(expected = InvalidSelectorException.class)
 	public void invalidSyntaxIsNotAccepted() {
-		SelectorValidator.validate("messageType flike 'spat%'");
+		JMSSelectorFilterFactory.get("messageType flike 'spat%'");
 	}
 
 	@Test(expected = InvalidSelectorException.class)
 	public void filterWithDoubleQuotedStringValueIsNotAllowed() {
-		SelectorValidator.validate("originatingCountry = \"NO\"");
+		JMSSelectorFilterFactory.get("originatingCountry = \"NO\"");
 	}
 
 	@Test(expected = SelectorAlwaysTrueException.class)
 	public void testMinusOneFiter() {
-		SelectorValidator.validate("originatingCountry like '-1%'");
+		JMSSelectorFilterFactory.get("originatingCountry like '-1%'");
 	}
 
 	@Test(expected = InvalidSelectorException.class)
 	public void testSelectorWithBackTick() {
-		SelectorValidator.validate("originatingCountry like `NO`");
+		JMSSelectorFilterFactory.get("originatingCountry like `NO`");
 	}
 
 
 	@Test(expected = HeaderNotFilterable.class)
 	public void latitudeIsNotPossibleToFilterOn() {
-		SelectorValidator.validate("latitude > 1");
+		JMSSelectorFilterFactory.get("latitude > 1");
 	}
 
 	@Test(expected = HeaderNotFilterable.class)
 	public void longitudeIsNotPossibleToFilterOn() {
-		SelectorValidator.validate("longitude > 1");
+		JMSSelectorFilterFactory.get("longitude > 1");
 	}
 
 	@Test(expected = HeaderNotFilterable.class)
 	public void timestampIsNotPossibleToFilterOn() {
-		SelectorValidator.validate("timestamp > 1");
+		JMSSelectorFilterFactory.get("timestamp > 1");
 	}
 }
