@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
+import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
 import no.vegvesen.ixn.federation.model.DataType;
@@ -34,7 +35,7 @@ public class JMSSelectorFilterFactory {
 		try {
 			JMSSelectorFilterFactory.get(selector);
 			return true;
-		} catch (InvalidSelectorException | SelectorAlwaysTrueException e) {
+		} catch (InvalidSelectorException | SelectorAlwaysTrueException | HeaderNotFoundException e) {
 			logger.error("Invalid selector {}", selector, e);
 			return false;
 		}
