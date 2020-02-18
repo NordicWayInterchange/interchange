@@ -15,34 +15,35 @@ import java.util.stream.Stream;
 
 @Entity
 @Table(name = "data_types")
-public class DataType{
+public class DataType {
 
 	private static Logger logger = LoggerFactory.getLogger(DataType.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_generator")
-	@SequenceGenerator(name="dat_generator", sequenceName = "dat_seq")
-	@Column(name="dat_id")
+	@SequenceGenerator(name = "dat_generator", sequenceName = "dat_seq")
+	@Column(name = "dat_id")
 	private Integer data_id;
 
 	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name="data_type_values", joinColumns=@JoinColumn(name="dat_id"))
-	@MapKeyColumn(name="property")
-	@Column(name="value")
+	@CollectionTable(name = "data_type_values", joinColumns = @JoinColumn(name = "dat_id"))
+	@MapKeyColumn(name = "property")
+	@Column(name = "value")
 	private Map<String, String> values = new HashMap<>();
 
 	@Column
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
 
-	public DataType(){}
+	public DataType() {
+	}
 
 	public DataType(Map<String, String> values) {
 		this.values = new HashMap<>(values);
 	}
 
 	@SuppressWarnings("WeakerAccess")
-	public boolean isContainedInSet(Set<DataType> capabilities){
+	public boolean isContainedInSet(Set<DataType> capabilities) {
 		for (DataType other : capabilities) {
 			if (this.equals(other)) {
 				return true;
@@ -58,7 +59,7 @@ public class DataType{
 
 		DataType dataType = (DataType) o;
 
-		return values != null ? values.equals(dataType.values) : dataType.values == null;
+		return Objects.equals(values, dataType.values);
 	}
 
 	@Override
@@ -80,6 +81,10 @@ public class DataType{
 
 	private List<String> getPropertyValueAsList(MessageProperty property) {
 		String commaSeparatedString = getPropertyValue(property);
+		return getListElements(commaSeparatedString);
+	}
+
+	private static List<String> getListElements(String commaSeparatedString) {
 		if (commaSeparatedString == null) {
 			return Collections.emptyList();
 		}
@@ -111,7 +116,7 @@ public class DataType{
 					try {
 						return Integer.parseInt(n);
 					} catch (NumberFormatException e) {
-						logger.error("Cannot parse messageProperty [{}] value as integer [{}]", messageProperty.getName(), n );
+						logger.error("Cannot parse messageProperty [{}] value as integer [{}]", messageProperty.getName(), n);
 						return null;
 					}
 				}).filter(Objects::nonNull)
@@ -121,4 +126,65 @@ public class DataType{
 	public Integer getData_id() {
 		return data_id;
 	}
+
+	public boolean matches(DataType other) {
+		Set<String> thisKeys = values.keySet();
+		Set<String> otherKeys = other.values.keySet();
+		Sets.SetView<String> commonKeys = Sets.intersection(thisKeys, otherKeys);
+		for (String key : commonKeys) {
+			boolean match = matches(key, this.getValues().get(key), other.getValues().get(key));
+			if (!match) {
+				return false;
+			}
+		}
+		return !commonKeys.isEmpty();
+	}
+
+	private static boolean matches(String key, String v1, String v2) {
+		if (MessageProperty.QUAD_TREE.getName().equals(key)) {
+			return matchesQuadTree(v1, v2);
+		}
+		MessageProperty messageProperty = MessageProperty.getProperty(key);
+		if (messageProperty == null) {
+			logger.error("No such property found when matching DataType {}", key);
+			throw new RuntimeException("No such property " + key);
+		}
+		boolean matches;
+		if (messageProperty.isArray()) {
+			matches = matchesArray(v1, v2);
+		}
+		else {
+			matches = matchesSingleValue(v1, v2);
+		}
+		logger.debug("Matching property {} values {} / {} - matches {}", key, v1, v2, matches);
+		return matches;
+	}
+
+	static boolean matchesArray(String v1, String v2) {
+		Set<String> v1values = new HashSet<>(getListElements(v1));
+		Set<String> v2values = new HashSet<>(getListElements(v2));
+		return !Sets.intersection(v1values, v2values).isEmpty();
+	}
+
+	static boolean matchesSingleValue(String v1, String v2) {
+		return (v1 == null && v2 == null) || v1 != null && v1.equals(v2);
+	}
+
+	static boolean matchesQuadTree(String v1, String v2) {
+		Set<String> v1values = new HashSet<>(getListElements(v1));
+		Set<String> v2values = new HashSet<>(getListElements(v2));
+		if (v1values.isEmpty() || v2values.isEmpty()) {
+			return true;
+		}
+		for (String v1Value : v1values) {
+			for (String v2Value : v2values) {
+				if (v1Value.startsWith(v2Value) || v2Value.startsWith(v1Value)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }
+
+

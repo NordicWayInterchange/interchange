@@ -7,18 +7,18 @@ import java.util.stream.Stream;
 @SuppressWarnings({"WeakerAccess", "ArraysAsListWithZeroOrOneArgument"})
 public class MessageProperty {
 
-	public static final MessageProperty MESSAGE_TYPE = new MessageProperty("messageType", true, true);
-    public static final MessageProperty QUAD_TREE = new MessageProperty("quadTree", false, true);
-    public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true, true);
-	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true, true);
+	public static final MessageProperty MESSAGE_TYPE = new MessageProperty("messageType", true, true, false);
+    public static final MessageProperty QUAD_TREE = new MessageProperty("quadTree", false, true, true);
+    public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true, true, false);
+	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true, true, false);
 
-	public static final MessageProperty PUBLISHER_ID = new MessageProperty("publisherId", false, true);
-	public static final MessageProperty PUBLISHER_NAME = new MessageProperty("publisherName", true, true);
-	public static final MessageProperty LATITUDE = new MessageProperty("latitude", true, false);
-	public static final MessageProperty LONGITUDE = new MessageProperty("longitude", true, false);
-	public static final MessageProperty PROTOCOL_VERSION = new MessageProperty("protocolVersion", true, true);
-	public static final MessageProperty CONTENT_TYPE = new MessageProperty("contentType", false, true);
-	public static final MessageProperty TIMESTAMP = new MessageProperty("timestamp", false, false);
+	public static final MessageProperty PUBLISHER_ID = new MessageProperty("publisherId", false, true, false);
+	public static final MessageProperty PUBLISHER_NAME = new MessageProperty("publisherName", true, true, false);
+	public static final MessageProperty LATITUDE = new MessageProperty("latitude", true, false, false);
+	public static final MessageProperty LONGITUDE = new MessageProperty("longitude", true, false, false);
+	public static final MessageProperty PROTOCOL_VERSION = new MessageProperty("protocolVersion", true, true, false);
+	public static final MessageProperty CONTENT_TYPE = new MessageProperty("contentType", false, true, false);
+	public static final MessageProperty TIMESTAMP = new MessageProperty("timestamp", false, false, false);
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
             MESSAGE_TYPE,
             QUAD_TREE,
@@ -30,35 +30,35 @@ public class MessageProperty {
 			LATITUDE,
 			LONGITUDE,
 			TIMESTAMP,
-            new MessageProperty("relation", false, true)
+            new MessageProperty("relation", false, true, false)
     );
 
 
-	public static final MessageProperty PUBLICATION_TYPE = new MessageProperty("publicationType", true, true);
-	public static final MessageProperty PUBLICATION_SUB_TYPE = new MessageProperty("publicationSubType", false, true);
+	public static final MessageProperty PUBLICATION_TYPE = new MessageProperty("publicationType", true, true, false);
+	public static final MessageProperty PUBLICATION_SUB_TYPE = new MessageProperty("publicationSubType", false, true, true);
 	public static final List<MessageProperty> datex2ApplicationProperties = Arrays.asList(
             PUBLICATION_TYPE,
 			PUBLICATION_SUB_TYPE
     );
 
-	public static final MessageProperty SERVICE_TYPE = new MessageProperty("serviceType", false, true);
+	public static final MessageProperty SERVICE_TYPE = new MessageProperty("serviceType", false, true, false);
 	public static final List<MessageProperty> itsG5ApplicationProperties = Arrays.asList(
 			SERVICE_TYPE
     );
 
-	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true);
-	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", false, true);
+	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, false);
+	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", false, true, false);
 	public static final List<MessageProperty> denmApplicationProperties = Arrays.asList(
 			CAUSE_CODE,
 			SUB_CAUSE_CODE
     );
 
-	public static final MessageProperty IVI_TYPE = new MessageProperty("IviType", false, true);
-	public static final MessageProperty PICTOGRAM_CATEGORY_CODE = new MessageProperty("pictogramCategoryCode", false, true);
+	public static final MessageProperty IVI_TYPE = new MessageProperty("IviType", false, true, false);
+	public static final MessageProperty PICTOGRAM_CATEGORY_CODE = new MessageProperty("pictogramCategoryCode", false, true, true);
 	public static final List<MessageProperty> iviApplicationProperties = Arrays.asList(
 			IVI_TYPE,
 			PICTOGRAM_CATEGORY_CODE,
-            new MessageProperty("iviContainer",false, true)
+            new MessageProperty("iviContainer",false, true, false)
     );
 
 	public static Set<String> mandatoryDatex2PropertyNames = Stream.of(
@@ -106,14 +106,25 @@ public class MessageProperty {
 	private String name;
     private boolean mandatory;
     private boolean filterable;
-
-    private MessageProperty(String name, boolean mandatory, boolean filterable) {
+	private final boolean array;
+	
+	private MessageProperty(String name, boolean mandatory, boolean filterable, boolean array) {
         this.name = name;
         this.mandatory = mandatory;
 		this.filterable = filterable;
+		this.array = array;
 	}
 
-    public String getName() {
+	public static MessageProperty getProperty(String key) {
+		for (MessageProperty property : allProperties) {
+			if (property.name.equals(key)) {
+				return property;
+			}
+		}
+		return null;
+	}
+
+	public String getName() {
         return name;
     }
 
@@ -138,4 +149,8 @@ public class MessageProperty {
     public int hashCode() {
         return Objects.hash(name, mandatory);
     }
+
+	public boolean isArray() {
+		return array;
+	}
 }
