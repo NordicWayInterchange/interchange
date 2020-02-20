@@ -24,7 +24,7 @@ public class ServiceProvider implements Subscriber {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "spr_id_sub", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_spr"))
-	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	public ServiceProvider() { }
 

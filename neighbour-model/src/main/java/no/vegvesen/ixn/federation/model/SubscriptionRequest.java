@@ -18,8 +18,6 @@ public class SubscriptionRequest {
 	@Column(name="subreq_id")
 	private Integer subreq_id;
 
-	public enum SubscriptionRequestStatus{REQUESTED, ESTABLISHED, NO_OVERLAP, TEAR_DOWN, EMPTY, FAILED, UNREACHABLE, REJECTED, FEDERATED_ACCESS_GRANTED}
-
 	@Enumerated(EnumType.STRING)
 	private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
 

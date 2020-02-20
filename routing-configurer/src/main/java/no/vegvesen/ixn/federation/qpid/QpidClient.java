@@ -137,7 +137,7 @@ public class QpidClient {
 		if (toSetUp instanceof ServiceProvider) {
 			addReadAccess(toSetUp, toSetUp.getName());
 		}
-		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		subscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		return subscriptionRequest;
 	}
 

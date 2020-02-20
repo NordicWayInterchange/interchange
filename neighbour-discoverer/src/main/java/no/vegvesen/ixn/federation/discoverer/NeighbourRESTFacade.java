@@ -51,7 +51,7 @@ public class NeighbourRESTFacade {
 		String controlChannelUrl = neighbour.getControlChannelUrl(SUBSCRIPTION_PATH);
 		String name = neighbour.getName();
 		SubscriptionRequestApi responseApi = neighbourRESTClient.doPostSubscriptionRequest(subscriptionRequestApi, controlChannelUrl, name);
-		return subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(responseApi, SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		return subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(responseApi, SubscriptionRequestStatus.REQUESTED);
 	}
 
 	Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour) {

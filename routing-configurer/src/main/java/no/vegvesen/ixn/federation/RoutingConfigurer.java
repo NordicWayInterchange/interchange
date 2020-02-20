@@ -36,12 +36,12 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForNeighboursToSetupRoutingFor() {
 		logger.debug("Checking for new neighbours to setup routing");
-		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
+		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequestStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
 		logger.debug("Found {} neighbours to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
 		setupRouting(readyToSetupRouting);
 
 		logger.debug("Checking for neighbours to tear down routing");
-		List<Neighbour> readyToTearDownRouting = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
+		List<Neighbour> readyToTearDownRouting = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
 		tearDownRouting(readyToTearDownRouting);
 	}
 
@@ -54,7 +54,7 @@ public class RoutingConfigurer {
 					removeUserFromGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
 				}
 				logger.info("Removed routing for subscriber {}", subscriber.getName());
-				subscriber.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+				subscriber.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.EMPTY);
 				saveSubscriber(subscriber);
 				logger.debug("Saved subscriber {} with subscription request status EMPTY", subscriber.getName());
 			} catch (Exception e) {
@@ -66,12 +66,12 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForServiceProvidersToSetupRoutingFor() {
 		logger.debug("Checking for new service providers to setup routing");
-		List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.REQUESTED);
 		logger.debug("Found {} service providers to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
 		setupRouting(readyToSetupRouting);
 
 		logger.debug("Checking for service providers to tear down routing");
-		List<ServiceProvider> readyToTearDownRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
+		List<ServiceProvider> readyToTearDownRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
 		tearDownRouting(readyToTearDownRouting);
 	}
 
@@ -99,12 +99,12 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.add}")
 	private void setupUserInFederationGroup() {
 		logger.debug("Looking for users with fedIn ESTABLISHED to add to Qpid groups.");
-		List<Neighbour> neighboursToAddToGroups = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		List<Neighbour> neighboursToAddToGroups = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.ESTABLISHED);
 		logger.debug("Found {} users to add to Qpid group {}", neighboursToAddToGroups, FEDERATED_GROUP_NAME);
 
 		for (Neighbour neighbour : neighboursToAddToGroups) {
 			addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour);
-			neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.FEDERATED_ACCESS_GRANTED);
+			neighbour.getFedIn().setStatus(SubscriptionRequestStatus.FEDERATED_ACCESS_GRANTED);
 			neighbourRepository.save(neighbour);
 		}
 	}
@@ -127,12 +127,12 @@ public class RoutingConfigurer {
 		logger.debug("Looking for neighbours with rejected fedIn to remove from Qpid groups.");
 		String groupName = "federated-interchanges";
 		List<Neighbour> neighboursToRemoveFromGroups = neighbourRepository.findByFedIn_StatusIn(
-				SubscriptionRequest.SubscriptionRequestStatus.REJECTED);
+				SubscriptionRequestStatus.REJECTED);
 
 		if (!neighboursToRemoveFromGroups.isEmpty()) {
 			for (Neighbour neighbour : neighboursToRemoveFromGroups) {
 				removeUserFromGroup(groupName, neighbour);
-				neighbour.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+				neighbour.getFedIn().setStatus(SubscriptionRequestStatus.EMPTY);
 			}
 		}
 	}

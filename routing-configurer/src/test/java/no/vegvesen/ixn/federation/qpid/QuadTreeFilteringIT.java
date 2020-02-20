@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -109,7 +110,7 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		String selectorWithQuadTree = getSelectorWithQuadTree(selector, subscriptionQuadTreeTiles);
 		Subscription subscription = new Subscription(selectorWithQuadTree, SubscriptionStatus.REQUESTED);
-		king_gustaf.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, Sets.newHashSet(subscription)));
+		king_gustaf.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newHashSet(subscription)));
 		qpidClient.setupRouting(king_gustaf, "nwEx");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext("jks/king_gustaf.p12", "jks/truststore.jks");

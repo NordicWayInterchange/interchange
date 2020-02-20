@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,40 +69,40 @@ public class ServiceProviderRepositoryIT {
 	@Test
 	public void findBySubscriptionStatusRequestedCanBeRetrieved() {
 		ServiceProvider audi = new ServiceProvider("audi");
-		audi.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		audi.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.REQUESTED);
 		Subscription audiSubscription = new Subscription();
 		audiSubscription.setSelector("originatingCountry = 'DE'");
 		audi.getSubscriptionRequest().setSubscriptions(Collections.singleton(audiSubscription));
 		repository.save(audi);
 
 		ServiceProvider ford = new ServiceProvider("Ford");
-		ford.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		ford.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.EMPTY);
 		Subscription fordSubscription = new Subscription();
 		fordSubscription.setSelector("originatingCountry = 'FI'");
 		ford.getSubscriptionRequest().setSubscriptions(Collections.singleton(fordSubscription));
 		repository.save(ford);
 
-		List<ServiceProvider> spListRequested = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		List<ServiceProvider> spListRequested = repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.REQUESTED);
 		assertThat(spListRequested).contains(audi);
 	}
 
 	@Test
 	public void findBySubscriptionStatusRequestedCanBeRetrievedSavedWithNewStatusAndNotFound() {
 		ServiceProvider fiat = new ServiceProvider("fiat");
-		fiat.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		fiat.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.REQUESTED);
 		Subscription fiatSubscription = new Subscription();
 		fiatSubscription.setSelector("originatingCountry = 'DE'");
 		fiat.getSubscriptionRequest().setSubscriptions(Collections.singleton(fiatSubscription));
 		repository.save(fiat);
 
-		List<ServiceProvider> spListRequested = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		List<ServiceProvider> spListRequested = repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.REQUESTED);
 		assertThat(spListRequested).hasSize(1).contains(fiat);
 
 		fiat = spListRequested.get(0);
-		fiat.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		fiat.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		repository.save(fiat);
 
-		List<ServiceProvider> spListRequested2 = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		List<ServiceProvider> spListRequested2 = repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.REQUESTED);
 		assertThat(spListRequested2).isEmpty();
 	}
 

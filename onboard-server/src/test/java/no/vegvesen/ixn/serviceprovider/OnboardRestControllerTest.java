@@ -247,7 +247,7 @@ public class OnboardRestControllerTest {
 		firstServiceProvider.setName("First Service Provider");
 		SubscriptionRequest serviceProviderSubscriptionRequest = new SubscriptionRequest();
 		serviceProviderSubscriptionRequest.setSubscriptions(Stream.of(a, b).collect(Collectors.toSet()));
-		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		firstServiceProvider.setSubscriptionRequest(serviceProviderSubscriptionRequest);
 
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
@@ -335,14 +335,14 @@ public class OnboardRestControllerTest {
 		firstServiceProvider.setName("First Service Provider");
 		SubscriptionRequest firstServiceProviderSubscriptionRequest = new SubscriptionRequest();
 		firstServiceProviderSubscriptionRequest.setSubscriptions(Stream.of(a, b).collect(Collectors.toSet()));
-		firstServiceProviderSubscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		firstServiceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
 		firstServiceProvider.setSubscriptionRequest(firstServiceProviderSubscriptionRequest);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider();
 		secondServiceProvider.setName("Second Service Provider");
 		SubscriptionRequest secondServiceProviderSubscriptionRequest = new SubscriptionRequest();
 		secondServiceProviderSubscriptionRequest.setSubscriptions(Stream.of(b, c).collect(Collectors.toSet()));
-		secondServiceProviderSubscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		secondServiceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
 		secondServiceProvider.setSubscriptionRequest(secondServiceProviderSubscriptionRequest);
 
 		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());

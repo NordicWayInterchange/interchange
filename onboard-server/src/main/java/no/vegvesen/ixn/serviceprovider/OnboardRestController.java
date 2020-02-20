@@ -3,12 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Self;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
@@ -274,7 +269,7 @@ public class OnboardRestController {
 		}
 
 		// Flip Service Provider Subscription request to REQUESTED so it will be picked up the the routing configurer.
-		serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+		serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.REQUESTED);
 
 		// Save updated Service Provider in the database.
 		serviceProviderRepository.save(serviceProviderToUpdate);
@@ -343,11 +338,11 @@ public class OnboardRestController {
 		if(currentServiceProviderSubscriptions.isEmpty()){
 			// Subscription is now empty, notify Routing Configurer to tear down the queue.
 			logger.info("Service Provider subscriptions are now empty. Setting status to TEAR_DOWN.");
-			serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
+			serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.TEAR_DOWN);
 		}else{
 			// Flip status to REQUESTED to notify Routing Configurer to change the queue filter.
 			logger.info("Service Provider subscriptions were updated, but are not empty. Setting status to REQUESTED");
-			serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+			serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.REQUESTED);
 		}
 
 		// Save updated Service Provider

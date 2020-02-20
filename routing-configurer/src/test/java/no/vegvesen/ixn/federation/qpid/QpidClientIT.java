@@ -47,7 +47,7 @@ public class QpidClientIT extends DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 	private static final String NW_EX = "nwEx";
 	private static final String FED_EX = "fedEx";
-	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, emptySet());
+	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
 	private static String AMQPS_URL;
 	private static Integer MAPPED_HTTPS_PORT;
@@ -110,7 +110,7 @@ public class QpidClientIT extends DockerBaseIT {
 	@Test
 	public void interchangeWithOneBindingIsCreated() {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", SubscriptionStatus.REQUESTED)));
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(flounder, NW_EX);
 		assertThat(client.queueExists(flounder.getName())).isTrue();
@@ -121,7 +121,7 @@ public class QpidClientIT extends DockerBaseIT {
 		Subscription s1 = new Subscription("a = b", SubscriptionStatus.REQUESTED);
 		Subscription s2 = new Subscription("b = c", SubscriptionStatus.REQUESTED);
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(halibut, NW_EX);
 		assertThat(client.queueExists(halibut.getName())).isTrue();
@@ -130,7 +130,7 @@ public class QpidClientIT extends DockerBaseIT {
 	@Test
 	public void interchangeIsBothCreatedAndUpdated() {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", SubscriptionStatus.REQUESTED)));
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(seabass, NW_EX);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
@@ -143,13 +143,13 @@ public class QpidClientIT extends DockerBaseIT {
 		Subscription s1 = new Subscription("a = b", SubscriptionStatus.REQUESTED);
 		Subscription s2 = new Subscription("b = c", SubscriptionStatus.REQUESTED);
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		client.setupRouting(trout, NW_EX);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
 		subscriptions = new HashSet<>(Collections.singletonList(s1));
-		subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions);
+		subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		client.setupRouting(trout, NW_EX);
@@ -245,7 +245,7 @@ public class QpidClientIT extends DockerBaseIT {
 	public void newNeighbourCanWriteToFedExButNotOnramp() throws JMSException, NamingException {
 		HashSet<Subscription> subscriptions = new HashSet<>();
 		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED));
-		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED, subscriptions), null);
+		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions), null);
 		client.setupRouting(nordea, NW_EX);
 		client.addInterchangeUserToGroups(nordea.getName(), FEDERATED_GROUP_NAME);
 		SSLContext nordeaSslContext = setUpTestSslContext("jks/nordea.p12");

@@ -40,11 +40,11 @@ public class Neighbour implements Subscriber {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "neighbour_id_sub_out", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_neighbour_sub_out"))
-	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "neighbour_id_fed_in", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_neighbour_fed_in"))
-	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
@@ -232,7 +232,7 @@ public class Neighbour implements Subscriber {
 	}
 
 	public boolean hasEstablishedSubscriptions() {
-		return getSubscriptionRequest() != null && getSubscriptionRequest().getStatus() == SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED;
+		return getSubscriptionRequest() != null && getSubscriptionRequest().getStatus() == SubscriptionRequestStatus.ESTABLISHED;
 	}
 
 	public boolean hasCapabilities() {

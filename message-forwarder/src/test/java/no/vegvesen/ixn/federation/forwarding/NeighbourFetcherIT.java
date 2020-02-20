@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.forwarding;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,12 +30,12 @@ public class NeighbourFetcherIT {
     public void setUp() {
         repository.save(new Neighbour("interchangeA",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
-                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet())));
+                new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
+                new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet())));
         repository.save(new Neighbour("interchangeB",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED,Collections.emptySet()),
-                new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet())));
+                new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED,Collections.emptySet()),
+                new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet())));
     }
 
     @Test

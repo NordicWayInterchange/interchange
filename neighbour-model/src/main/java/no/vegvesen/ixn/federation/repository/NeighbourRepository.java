@@ -19,17 +19,17 @@ public interface NeighbourRepository extends CrudRepository<Neighbour, Integer> 
 
 	List<Neighbour> findByCapabilities_Status(Capabilities.CapabilitiesStatus capabilitiesStatus);
 
-	List<Neighbour> findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus status);
+	List<Neighbour> findBySubscriptionRequest_Status(SubscriptionRequestStatus status);
 
-	List<Neighbour> findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus... statuses);
+	List<Neighbour> findByFedIn_StatusIn(SubscriptionRequestStatus... statuses);
 
 	List<Neighbour> findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus... subscriptionStatus);
 
-	List<Neighbour> findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus capabilitiesStatus, SubscriptionRequest.SubscriptionRequestStatus requestStatus);
+	List<Neighbour> findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus capabilitiesStatus, SubscriptionRequestStatus requestStatus);
 
 	@Query(value = "select distinct i from Neighbour i join i.subscriptionRequest sr join sr.subscription s where sr.status = :subscriptionRequestStatus and s.subscriptionStatus = :subscriptionStatus")
 	List<Neighbour> findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(
-			@Param("subscriptionRequestStatus") SubscriptionRequest.SubscriptionRequestStatus subscriptionRequestStatus,
+			@Param("subscriptionRequestStatus") SubscriptionRequestStatus subscriptionRequestStatus,
 			@Param("subscriptionStatus") SubscriptionStatus subscriptionStatus
 	);
 

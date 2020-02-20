@@ -31,7 +31,7 @@ import java.util.Set;
 
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
 
-@Api(value = "/", description = "Nordic Way Federation API", produces = "application/json")
+@Api(value = "/", produces = "application/json")
 @RestController("/")
 public class NeighbourRestController {
 
@@ -160,7 +160,7 @@ public class NeighbourRestController {
 			logger.info("Received empty subscription request.");
 			logger.info("Neighbour has existing subscription: {}", neighbourToUpdate.getSubscriptionRequest().getSubscriptions().toString());
 			logger.info("Setting status of subscription request to TEAR_DOWN.");
-			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
+			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.TEAR_DOWN);
 			neighbourToUpdate.getSubscriptionRequest().setSubscriptions(Collections.emptySet());
 		} else {
 			// Subscription request is not empty
@@ -170,7 +170,7 @@ public class NeighbourRestController {
 			logger.info("Processing subscription request...");
 			Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(incomingSubscriptionRequestNeighbour.getSubscriptionRequest().getSubscriptions());
 			neighbourToUpdate.getSubscriptionRequest().setSubscriptions(processedSubscriptionRequest);
-			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.REQUESTED);
 
 			logger.info("Processed subscription request: {}", neighbourToUpdate.getSubscriptionRequest().toString());
 
@@ -200,7 +200,7 @@ public class NeighbourRestController {
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = SUBSCRIPTION_POLLING_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	public SubscriptionApi pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId) {
+	public SubscriptionApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 
 		logger.info("Received poll of subscription from neighbour {}.", ixnName);
 
@@ -254,7 +254,7 @@ public class NeighbourRestController {
 		// Update status of capabilities to KNOWN, and set status of fedIn to EMPTY
 		// to trigger subscription request from client side.
 		neighbourToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		neighbourToUpdate.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		neighbourToUpdate.getFedIn().setStatus(SubscriptionRequestStatus.EMPTY);
 
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
