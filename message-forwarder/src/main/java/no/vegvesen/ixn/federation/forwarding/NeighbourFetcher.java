@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@SuppressWarnings("WeakerAccess")
 @Component
 public class NeighbourFetcher {
     private NeighbourRepository repository;
@@ -19,8 +20,7 @@ public class NeighbourFetcher {
     }
 
     public List<Neighbour> listNeighbourCandidates() {
-        List<Neighbour> interchanges = repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.ESTABLISHED);
-        return interchanges;
+		return repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.ESTABLISHED);
     }
 
 }
