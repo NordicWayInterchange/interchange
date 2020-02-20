@@ -1,8 +1,9 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
+import com.google.common.collect.Sets;
+import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.properties.MessageProperty;
+import org.assertj.core.util.Maps;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,4 +108,17 @@ public class ServiceProviderRepositoryIT {
 		assertThat(spListRequested2).isEmpty();
 	}
 
+	@Test
+	public void newServiceProviderWithLocalSubscriptionCanBeStoredAndRetrieved() {
+		ServiceProvider bentley = new ServiceProvider("bentley");
+		HashSet<DataType> datex2 = Sets.newHashSet(new DataType(Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2")));
+		bentley.setLocalSubscriptionRequest(new LocalSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, datex2));
+
+		repository.save(bentley);
+
+		ServiceProvider retrieved = repository.findByName("bentley");
+		assertThat(retrieved).isNotNull();
+		assertThat(retrieved.getLocalSubscriptionRequest()).isNotNull();
+		assertThat(retrieved.getLocalSubscriptionRequest().getSubscriptions()).isNotEmpty();
+	}
 }

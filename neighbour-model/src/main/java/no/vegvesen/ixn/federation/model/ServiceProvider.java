@@ -26,6 +26,10 @@ public class ServiceProvider implements Subscriber {
 	@JoinColumn(name = "spr_id_sub", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_spr"))
 	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "local_sub_id", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_spr"))
+	private LocalSubscriptionRequest localSubscriptionRequest = new LocalSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+
 	public ServiceProvider() { }
 
 	@JsonCreator
@@ -91,5 +95,13 @@ public class ServiceProvider implements Subscriber {
 				", capabilities=" + capabilities +
 				", subscriptionRequest=" + subscriptionRequest +
 				'}';
+	}
+
+	public LocalSubscriptionRequest getLocalSubscriptionRequest() {
+		return localSubscriptionRequest;
+	}
+
+	public void setLocalSubscriptionRequest(LocalSubscriptionRequest localSubscriptionRequest) {
+		this.localSubscriptionRequest = localSubscriptionRequest;
 	}
 }
