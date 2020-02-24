@@ -49,17 +49,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-handler</artifactId>
-            <version>4.1.45.Final</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>ssl-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>test-ssl-utils</artifactId>
             <version>${project.version}</version>
