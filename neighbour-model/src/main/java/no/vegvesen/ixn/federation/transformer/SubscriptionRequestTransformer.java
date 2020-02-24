@@ -64,15 +64,4 @@ public class SubscriptionRequestTransformer {
 		return new SubscriptionRequest(status,convertAllSubscriptionApisToSubscriptions(subscriptionRequestApi.getSubscriptions()));
 	}
 
-	public SubscriptionRequestApi serviceProviderToSubscriptionRequestApi(ServiceProvider serviceProvider){
-		return new SubscriptionRequestApi(serviceProvider.getName(), convertAllSubscriptionsToSubscriptionApis(serviceProvider.getSubscriptionRequest().getSubscriptions()));
-	}
-
-	public ServiceProvider subscriptionRequestApiToServiceProvider(SubscriptionRequestApi subscriptionRequestApi){
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setName(subscriptionRequestApi.getName());
-		serviceProvider.getSubscriptionRequest().setSubscriptions(convertAllSubscriptionApisToSubscriptions(subscriptionRequestApi.getSubscriptions()));
-
-		return serviceProvider;
-	}
 }

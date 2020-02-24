@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.SUBSCRIPTION_PATH;
 
 @Component
 public class NeighbourRESTFacade {
@@ -46,9 +45,9 @@ public class NeighbourRESTFacade {
 		return capabilityTransformer.capabilityApiToCapabilities(result);
 	}
 
-	SubscriptionRequest postSubscriptionRequest(Self self, Neighbour neighbour,Set<Subscription> subscriptions) {
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(self.getName(),subscriptions);
-		String controlChannelUrl = neighbour.getControlChannelUrl(SUBSCRIPTION_PATH);
+	SubscriptionRequest postSubscriptionRequest(Self self, Neighbour neighbour, Set<Subscription> subscriptions) {
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(self.getName(), subscriptions);
+		String controlChannelUrl = neighbour.getControlChannelUrl("/subscription");
 		String name = neighbour.getName();
 		SubscriptionRequestApi responseApi = neighbourRESTClient.doPostSubscriptionRequest(subscriptionRequestApi, controlChannelUrl, name);
 		return subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(responseApi, SubscriptionRequestStatus.REQUESTED);

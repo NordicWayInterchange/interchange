@@ -67,7 +67,6 @@ public class OnboardRestControllerTest {
 	private OnboardRestController onboardRestController;
 
 	private String capabilitiesPath = "/capabilities";
-	private String subscriptionPath = "/subscription";
 
 
 	@BeforeEach
@@ -164,126 +163,95 @@ public class OnboardRestControllerTest {
 
 	@Test
 	void postingSubscriptionReturnsStatusOk() throws Exception {
+		String firstServiceProvider = "FirstServiceProvider";
+		mockCertificate(firstServiceProvider);
 
-		mockCertificate("First Service Provider");
+		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
 
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("originatingCountry LIKE 'SE'");
-
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName("First Service Provider");
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
-
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 
 		mockMvc.perform(
-				post(subscriptionPath)
+				post(String.format("/%s/subscription", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(subscriptionRequestApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-
 	}
 
 	@Test
 	void postingUnparsableSubscriptionReturnsBadRequest() throws Exception {
+		String firstServiceProvider = "FirstServiceProvider";
+		mockCertificate(firstServiceProvider);
 
-		mockCertificate("First Service Provider");
+		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
 
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("originatingCountry = `SE`");
-
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName("First Service Provider");
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
-
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+		String validJson = objectMapper.writeValueAsString(subscriptionApi);
+		String invalidJson = validJson.replaceAll("messageType", "someMessyType");
 
 		mockMvc.perform(
-				post(subscriptionPath)
+				post(String.format("/%s/subscription", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(subscriptionRequestApiToServerJson))
+						.content(invalidJson))
 				.andDo(print())
 				.andExpect(status().isBadRequest());
-
 	}
 
 	@Test
 	void postingInvalidSubscriptionReturnsStatusBadRequest() throws Exception {
-		mockCertificate("First Service Provider");
+		String firstServiceProvider = "FirstServiceProvider";
+		mockCertificate(firstServiceProvider);
 
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("originatingCountry LIKE '%'");
-
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName("First Service Provider");
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
-
-		String postJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+		DataTypeApi subscriptionApi = new DataTypeApi();
+		String emptySubscription = objectMapper.writeValueAsString(subscriptionApi);
 
 		mockMvc.perform(
-				post(subscriptionPath)
+				post(String.format("/%s/subscription", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(postJson))
+						.content(emptySubscription))
 				.andDo(print())
 				.andExpect(status().isBadRequest());
-
-
 	}
 
 	@Test
 	void deletingSubscriptionReturnsStatusOk() throws Exception {
-
-		mockCertificate("First Service Provider");
+		String firstServiceProviderName = "FirstServiceProvider";
+		mockCertificate(firstServiceProviderName);
 
 		// The existing subscriptions of the Service Provider
-		Subscription a = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED);
-		Subscription b = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
-
-		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setName("First Service Provider");
-		SubscriptionRequest serviceProviderSubscriptionRequest = new SubscriptionRequest();
-		serviceProviderSubscriptionRequest.setSubscriptions(Stream.of(a, b).collect(Collectors.toSet()));
+		LocalSubscriptionRequest serviceProviderSubscriptionRequest = new LocalSubscriptionRequest();
+		serviceProviderSubscriptionRequest.addLocalSubscription(new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE"));
+		serviceProviderSubscriptionRequest.addLocalSubscription(new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI"));
 		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
-		firstServiceProvider.setSubscriptionRequest(serviceProviderSubscriptionRequest);
-
+		ServiceProvider firstServiceProvider = new ServiceProvider();
+		firstServiceProvider.setName(firstServiceProviderName);
+		firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		// Subscription request api posted to the server
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName(firstServiceProvider.getName());
-		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(a);
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
 
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
-
+		String deleteUrl = String.format("/%s/subscription/%s", firstServiceProviderName, "1");
 		mockMvc.perform(
-				delete(subscriptionPath)
+				delete(deleteUrl)
 						.accept(MediaType.APPLICATION_JSON)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(subscriptionRequestApiToServerJson))
+						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	void commonNameAndApiNameMismatchReturnsStatusForbiddenInSubscription() throws Exception {
+		String firstServiceProviderName = "FirstServiceProvider";
+		String secondServiceProviderName = "SecondServiceProvider";
+		mockCertificate(secondServiceProviderName);
 
-		mockCertificate("First Service Provider");
-
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName("Second Service Provider");
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("originatingCountry = 'NO'");
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
-
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 
 		mockMvc.perform(
-				post(subscriptionPath)
+				post(String.format("/%s/subscription", firstServiceProviderName))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(subscriptionRequestApiToServerJson))
@@ -327,30 +295,26 @@ public class OnboardRestControllerTest {
 	@Test
 	void calculateSelfSubscriptionsTest() {
 
-		Subscription a = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
-		Subscription b = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED);
-		Subscription c = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
+		DataType localSubA = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
+		DataType localSubB = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
+		DataType localSubC = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
-		SubscriptionRequest firstServiceProviderSubscriptionRequest = new SubscriptionRequest();
-		firstServiceProviderSubscriptionRequest.setSubscriptions(Stream.of(a, b).collect(Collectors.toSet()));
-		firstServiceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
-		firstServiceProvider.setSubscriptionRequest(firstServiceProviderSubscriptionRequest);
+		firstServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubA);
+		firstServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubB);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider();
 		secondServiceProvider.setName("Second Service Provider");
-		SubscriptionRequest secondServiceProviderSubscriptionRequest = new SubscriptionRequest();
-		secondServiceProviderSubscriptionRequest.setSubscriptions(Stream.of(b, c).collect(Collectors.toSet()));
-		secondServiceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
-		secondServiceProvider.setSubscriptionRequest(secondServiceProviderSubscriptionRequest);
+		secondServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubB);
+		secondServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubC);
 
 		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 
-		Set<Subscription> selfSubscriptions = onboardRestController.calculateSelfSubscriptions(serviceProviders);
+		Set<DataType> selfSubscriptions = onboardRestController.calculateSelfSubscriptions(serviceProviders);
 
 		assertEquals(selfSubscriptions.size(), 3);
-		assertTrue(selfSubscriptions.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
+		assertTrue(selfSubscriptions.containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet())));
 	}
 
 	@Test

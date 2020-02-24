@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
@@ -38,6 +39,12 @@ public class LocalSubscriptionRequest {
 		this.subscription = subscription;
 	}
 
+	public LocalSubscriptionRequest(SubscriptionRequestStatus status, DataType firstSubscription) {
+		this.status = status;
+		this.subscription = new HashSet<>();
+		this.subscription.add(firstSubscription);
+	}
+
 	public SubscriptionRequestStatus getStatus() {
 		return status;
 	}
@@ -65,5 +72,13 @@ public class LocalSubscriptionRequest {
 				", status=" + status +
 				", subscription=" + subscription +
 				'}';
+	}
+
+	public void addLocalSubscription(DataType newLocalSubscription) {
+		if(subscription.contains(newLocalSubscription)){
+			throw new SubscriptionRequestException("The Service Provider subscription already exist. Nothing to add.");
+		}
+		subscription.add(newLocalSubscription);
+
 	}
 }

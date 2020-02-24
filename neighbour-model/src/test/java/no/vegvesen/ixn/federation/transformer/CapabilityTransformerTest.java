@@ -52,7 +52,7 @@ public class CapabilityTransformerTest {
 		final String publicationSubType = ",SiteMeasurements,TravelTimeData,";
 		DataType dataType = getDatexHeaders(originatingCountry, publicationType, publicationSubType);
 
-		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Collections.singleton(dataType));
+		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypesToDataTypeApis(Collections.singleton(dataType));
 
 		assertThat(dataTypeApis).hasSize(1);
 		DataTypeApi dataTypeApi = dataTypeApis.iterator().next();
@@ -71,7 +71,7 @@ public class CapabilityTransformerTest {
 
 		DataType dataType = new DataType(dataTypeHeaders);
 
-		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Collections.singleton(dataType));
+		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypesToDataTypeApis(Collections.singleton(dataType));
 
 		assertThat(dataTypeApis).hasSize(1);
 		DataTypeApi dataTypeApi = dataTypeApis.iterator().next();
@@ -88,7 +88,7 @@ public class CapabilityTransformerTest {
 		datexHeaders.put(MessageProperty.QUAD_TREE.getName(), "abc,bcd");
 		datexHeaders.put(MessageProperty.PUBLICATION_TYPE.getName(), "myPublication");
 		DataType datexWithQuad = new DataType(datexHeaders);
-		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Sets.newHashSet(datexWithQuad));
+		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypesToDataTypeApis(Sets.newHashSet(datexWithQuad));
 		assertThat(dataTypeApis).hasSize(1);
 		assertThat(dataTypeApis.iterator().next().getQuadTree()).hasSize(2).contains("abc").contains("bcd");
 	}
@@ -127,7 +127,7 @@ public class CapabilityTransformerTest {
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.CAUSE_CODE)).isEqualTo("cc3");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.SUB_CAUSE_CODE)).isEqualTo("scc55");
 
-		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Collections.singleton(convertedDataType));
+		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypesToDataTypeApis(Collections.singleton(convertedDataType));
 		assertThat(dataTypeApis).isNotNull().hasSize(1);
 		DataTypeApi convertedBack = dataTypeApis.iterator().next();
 		assertThat(convertedBack).isInstanceOf(DenmDataTypeApi.class);
@@ -153,7 +153,7 @@ public class CapabilityTransformerTest {
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.IVI_TYPE)).isEqualTo("12134");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.PICTOGRAM_CATEGORY_CODE)).isEqualTo("9876,7654");
 
-		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(Collections.singleton(convertedDataType));
+		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypesToDataTypeApis(Collections.singleton(convertedDataType));
 		assertThat(dataTypeApis).isNotNull().hasSize(1);
 		DataTypeApi convertedBack = dataTypeApis.iterator().next();
 		assertThat(convertedBack).isInstanceOf(IviDataTypeApi.class);
@@ -188,7 +188,7 @@ public class CapabilityTransformerTest {
 		DataType dataTypeWithoutMessageType = new DataType(dtWithoutMessageTypeValues);
 		dataTypesToBeConverted.add(dataTypeWithoutMessageType);
 
-		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypeToDataTypeApi(dataTypesToBeConverted);
+		Set<DataTypeApi> dataTypeApis = capabilityTransformer.dataTypesToDataTypeApis(dataTypesToBeConverted);
 		assertThat(dataTypeApis).hasSize(1);
 	}
 }

@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
@@ -37,6 +38,12 @@ public class DataType {
 
 	public DataType() {
 	}
+
+	public DataType(Integer id, String key, String value) {
+		this.data_id = id;
+		this.values.put(key, value);
+	}
+
 
 	public DataType(Map<String, String> values) {
 		this.values = new HashMap<>(values);
@@ -152,8 +159,7 @@ public class DataType {
 		boolean matches;
 		if (messageProperty.isArray()) {
 			matches = matchesArray(v1, v2);
-		}
-		else {
+		} else {
 			matches = matchesSingleValue(v1, v2);
 		}
 		logger.debug("Matching property {} values {} / {} - matches {}", key, v1, v2, matches);
@@ -184,6 +190,23 @@ public class DataType {
 			}
 		}
 		return false;
+	}
+
+	public String toSelector() {
+		StringBuilder selector = new StringBuilder();
+		Iterator<String> iterator = values.keySet().iterator();
+		while (iterator.hasNext()) {
+			String key = iterator.next();
+			selector.append(String.format("%s = '%s'", key, values.get(key)));
+			if (iterator.hasNext()) {
+				selector.append(" AND ");
+			}
+		}
+		return selector.toString();
+	}
+
+	public static Subscription toSubscription(DataType dataType) {
+		return new Subscription(dataType.toSelector(), SubscriptionStatus.REQUESTED);
 	}
 }
 

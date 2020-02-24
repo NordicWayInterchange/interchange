@@ -281,4 +281,12 @@ public class DataTypeTest {
 		return quadTreeTiles.isEmpty() ? "" : "," + String.join(",", quadTreeTiles);
 	}
 
+	@Test
+	public void toSelectorJoinsWithAnd() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		DataType dataType = new DataType(values);
+		assertThat(dataType.toSelector()).contains("messageType = 'DATEX2'").contains(" AND ").contains("originatingCountry = 'NO'");
+	}
 }

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
@@ -9,6 +10,7 @@ import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.assertj.core.util.Maps;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,9 +79,13 @@ public class NeighbourDiscovererTest {
 		self = new Self(myName);
 		Set<DataType> selfCapabilities = Collections.singleton(getDatexNoDataType());
 		self.setLocalCapabilities(selfCapabilities);
-		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED));
+		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("FI");
 		self.setLocalSubscriptions(selfSubscriptions);
 		return self;
+	}
+
+	private Set<DataType> getDataTypeSetOriginatingCountry(String country) {
+		return Sets.newHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
 	}
 
 	@Test
@@ -403,31 +409,24 @@ public class NeighbourDiscovererTest {
 	// To introduce error make sure part 1 and part 2 below has same selector filter
 	@Test
 	public void subscriptionRequestProcessesAllNeighboursDespiteNetworkError() {
-		Set<Subscription> subscription = new HashSet<>();
-		SubscriptionRequest emptySR = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, subscription);
-
 		HashSet<DataType> dtNO = new HashSet<>();
 		dtNO.add(getDatexNoDataType());
 		Capabilities capabilitiesNO = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, dtNO);
-		Neighbour neighbourA = new Neighbour("a", capabilitiesNO, emptySR,  emptySR);
-		Neighbour neighbourB = new Neighbour("b", capabilitiesNO, emptySR,  emptySR);
-		Neighbour neighbourC = new Neighbour("c", capabilitiesNO, emptySR,  emptySR);
+		Neighbour neighbourA = new Neighbour("a", capabilitiesNO, getEmptySR(), getEmptySR());
+		Neighbour neighbourB = new Neighbour("b", capabilitiesNO, getEmptySR(), getEmptySR());
+		Neighbour neighbourC = new Neighbour("c", capabilitiesNO, getEmptySR(), getEmptySR());
 
 		List<Neighbour> neighbours = new LinkedList<>();
 		neighbours.add(neighbourA);
 		neighbours.add(neighbourB);
 		neighbours.add(neighbourC);
 
-		HashSet<Subscription> returnedSubscriptionsFromNeighbour = new HashSet<>();
-		returnedSubscriptionsFromNeighbour.add(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED)); //TODO: part 1
-
-		SubscriptionRequest srCreated = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, returnedSubscriptionsFromNeighbour);
 
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
-		when(neighbourRESTFacade.postSubscriptionRequest(any(Self.class), eq(neighbourA),anySet())).thenReturn(srCreated);
+		when(neighbourRESTFacade.postSubscriptionRequest(any(Self.class), eq(neighbourA),anySet())).thenReturn(getReturnedSubscriptionRequest());
 		when(neighbourRESTFacade.postSubscriptionRequest(any(Self.class), eq(neighbourB),anySet())).thenThrow(new SubscriptionRequestException("time-out"));
-		when(neighbourRESTFacade.postSubscriptionRequest(any(Self.class), eq(neighbourC),anySet())).thenReturn(srCreated);
+		when(neighbourRESTFacade.postSubscriptionRequest(any(Self.class), eq(neighbourC),anySet())).thenReturn(getReturnedSubscriptionRequest());
 
 		// Self setup
 		Self discoveringNode = new Self("d");
@@ -435,12 +434,25 @@ public class NeighbourDiscovererTest {
 		selfCapabilities.add(getDatexNoDataType());
 		discoveringNode.setLocalCapabilities(selfCapabilities);
 
-		Set<Subscription> selfSubscriptions = Collections.singleton(new Subscription("originatingCountry like 'NO'", SubscriptionStatus.REQUESTED)); //TODO: part 2
+		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("NO");
+
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
 
 		neighbourDiscoverer.subscriptionRequest(neighbours, discoveringNode);
 
 		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
+	}
+
+	private SubscriptionRequest getEmptySR() {
+		Set<Subscription> subscription = new HashSet<>();
+		return new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, subscription);
+	}
+
+	private SubscriptionRequest getReturnedSubscriptionRequest() {
+		HashSet<Subscription> returnedSubscriptionsFromNeighbour = new HashSet<>();
+		returnedSubscriptionsFromNeighbour.add(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED));
+
+		return new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, returnedSubscriptionsFromNeighbour);
 	}
 
 	@Test
@@ -468,8 +480,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void calculatedSubscriptionRequestSameAsNeighbourSubscriptionsAllowsNextNeighbourToBeSaved() {
 		Self self = new Self("self");
-		Set<Subscription> selfLocalSubscriptions = new HashSet<>();
-		selfLocalSubscriptions.add(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED));
+		Set<DataType> selfLocalSubscriptions = getDataTypeSetOriginatingCountry("NO");
 		self.setLocalSubscriptions(selfLocalSubscriptions);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
@@ -485,7 +496,7 @@ public class NeighbourDiscovererTest {
 		Assert.assertTrue(neighbour.hasEstablishedSubscriptions());
 		Set<Subscription> subscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour);
 		Assert.assertFalse(subscriptions.isEmpty());
-		Assert.assertEquals(subscriptions,neighbour.getFedIn().getSubscriptions());
+		Assert.assertEquals(neighbour.getFedIn().getSubscriptions(), subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
 		Neighbour otherNeighbour = new Neighbour("otherNeighbour",

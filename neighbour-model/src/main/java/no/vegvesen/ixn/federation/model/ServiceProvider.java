@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "service_providers", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_spr_name"))
@@ -12,8 +13,8 @@ public class ServiceProvider implements Subscriber {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sp_generator")
-	@SequenceGenerator(name="spr_generator", sequenceName = "spr_seq")
-	@Column(name="spr_id")
+	@SequenceGenerator(name = "spr_generator", sequenceName = "spr_seq")
+	@Column(name = "spr_id")
 	private Integer id;
 
 	private String name;
@@ -23,14 +24,11 @@ public class ServiceProvider implements Subscriber {
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "spr_id_sub", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_spr"))
-	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
-
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "local_sub_id", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_spr"))
-	private LocalSubscriptionRequest localSubscriptionRequest = new LocalSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	private LocalSubscriptionRequest subscriptionRequest = new LocalSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
-	public ServiceProvider() { }
+	public ServiceProvider() {
+	}
 
 	@JsonCreator
 	public ServiceProvider(@JsonProperty("name") String name) {
@@ -40,6 +38,18 @@ public class ServiceProvider implements Subscriber {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public SubscriptionRequest getSubscriptionRequest() {
+		return new SubscriptionRequest(getLocalSubscriptionRequest().getStatus(), getLocalSubscriptionRequest().getSubscriptions().stream().map(DataType::toSubscription).collect(Collectors.toSet()));
+	}
+
+	@Override
+	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
+		//TODO: change Subscriber::setSubscriptionRequest to only set status on subscription request,
+		// can not match the selector against the data type on local subscription
+		getLocalSubscriptionRequest().setStatus(subscriptionRequest.getStatus());
 	}
 
 	public void setName(String name) {
@@ -62,13 +72,11 @@ public class ServiceProvider implements Subscriber {
 		this.capabilities = capabilities;
 	}
 
-	@Override
-	public SubscriptionRequest getSubscriptionRequest() {
+	public LocalSubscriptionRequest getLocalSubscriptionRequest() {
 		return subscriptionRequest;
 	}
 
-	@Override
-	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
+	public void setLocalSubscriptionRequest(LocalSubscriptionRequest subscriptionRequest) {
 		this.subscriptionRequest = subscriptionRequest;
 	}
 
@@ -97,11 +105,4 @@ public class ServiceProvider implements Subscriber {
 				'}';
 	}
 
-	public LocalSubscriptionRequest getLocalSubscriptionRequest() {
-		return localSubscriptionRequest;
-	}
-
-	public void setLocalSubscriptionRequest(LocalSubscriptionRequest localSubscriptionRequest) {
-		this.localSubscriptionRequest = localSubscriptionRequest;
-	}
 }
