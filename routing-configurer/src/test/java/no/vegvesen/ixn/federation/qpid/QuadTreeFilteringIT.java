@@ -6,10 +6,7 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -107,10 +104,9 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 	}
 
 	private Message sendReceiveMessage(HashSet<String> subscriptionQuadTreeTiles, String messageQuadTreeTiles, String selector) throws Exception {
-		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		String selectorWithQuadTree = getSelectorWithQuadTree(selector, subscriptionQuadTreeTiles);
 		Subscription subscription = new Subscription(selectorWithQuadTree, SubscriptionStatus.REQUESTED);
-		king_gustaf.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newHashSet(subscription)));
+		Neighbour king_gustaf = new Neighbour("king_gustaf", null, new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newHashSet(subscription)), null);
 		qpidClient.setupRouting(king_gustaf, "nwEx");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext("jks/king_gustaf.p12", "jks/truststore.jks");
