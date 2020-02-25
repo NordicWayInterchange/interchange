@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.repository;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.internal.util.collections.Sets;
@@ -22,19 +21,17 @@ import java.util.Set;
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class NeighbourRepositorySelectorIT {
 
-	private Neighbour ericsson;
 
 	@Autowired
 	private NeighbourRepository neighbourRepository;
 
-	@Before
-	public void before(){
-		ericsson = new Neighbour();
-		ericsson.setName("ericsson.itsinterchange.eu");
-		ericsson.setControlChannelPort("8080");
-		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()));
-		ericsson.setSubscriptionRequest(new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()));
-		ericsson.setFedIn(new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()));
+	private Neighbour createNeighbourObject(String name, Capabilities.CapabilitiesStatus capStatus, SubscriptionRequestStatus subscriptionRequestStatus, SubscriptionRequestStatus fedInStatus){
+		Neighbour neighbour = new Neighbour(name,
+				new Capabilities(capStatus, Collections.emptySet()),
+				new SubscriptionRequest(subscriptionRequestStatus, new HashSet<>()),
+				new SubscriptionRequest(fedInStatus, new HashSet<>()));
+		neighbour.setControlChannelPort("8080");
+		return neighbour;
 	}
 
 	public boolean interchangeInList(String interchangeName, List<Neighbour> listOfInterchanges){
@@ -69,9 +66,8 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithKnownCapabilitiesAndEmptySubscriptionIsSelectedForSubscriptionRequest(){
-		ericsson.setName("ericsson-1");
-		ericsson.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		ericsson.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.EMPTY);
+		Neighbour ericsson = createNeighbourObject("ericsson-1", Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
+
 		neighbourRepository.save(ericsson);
 
 		List<Neighbour> getInterchangeForSubscriptionRequest = neighbourRepository.findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequestStatus.EMPTY);
@@ -81,8 +77,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithUnknownCapabilitiesIsSelectedForCapabilityExchange(){
-		ericsson.setName("ericsson-2");
-		ericsson.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
+		Neighbour ericsson = createNeighbourObject("ericsson-2", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
 		neighbourRepository.save(ericsson);
 
 		List<Neighbour> getInterchangesForCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
@@ -92,8 +87,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithFailedInIsSelectedForGracefulBackoff(){
-		ericsson.setName("ericsson-3");
-		ericsson.getFedIn().setStatus(SubscriptionRequestStatus.FAILED);
+		Neighbour ericsson = createNeighbourObject("ericsson-3", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.FAILED);
 		neighbourRepository.save(ericsson);
 
 		List<Neighbour> getInterchangesWithFailedFedIn = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED);
@@ -103,8 +97,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithFailedCapabilityExchangeIsSelectedForGracefulBackoff(){
-		ericsson.setName("ericsson-4");
-		ericsson.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
+		Neighbour ericsson = createNeighbourObject("ericsson-4", Capabilities.CapabilitiesStatus.FAILED, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
 		neighbourRepository.save(ericsson);
 
 		List<Neighbour> getInterchangesWithFailedCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
@@ -115,13 +108,12 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithRequestedSubscriptionsInFedInIsSelectedForPolling(){
-		ericsson.setName("ericsson-5-R");
+		Neighbour ericsson = createNeighbourObject("ericsson-5-R", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.REQUESTED, SubscriptionRequestStatus.REQUESTED);
 
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 		ericsson.getFedIn().setSubscriptions(Collections.singleton(subscription));
-		ericsson.getFedIn().setStatus(SubscriptionRequestStatus.REQUESTED);
 		neighbourRepository.save(ericsson);
 
 		Subscription subscriptionA = new Subscription();
@@ -141,7 +133,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithFailedSubscriptionInFedInIsSelectedForBackoff(){
-		ericsson.setName("ericsson-6");
+		Neighbour ericsson = createNeighbourObject("ericsson-6", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.FAILED);
 
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
@@ -149,7 +141,6 @@ public class NeighbourRepositorySelectorIT {
 		Set<Subscription> subscriptionSet = new HashSet<>();
 		subscriptionSet.add(subscription);
 		ericsson.getFedIn().setSubscriptions(subscriptionSet);
-		ericsson.getFedIn().setStatus(SubscriptionRequestStatus.REQUESTED);
 		neighbourRepository.save(ericsson);
 
 		List<Neighbour> getInterchangesWithFailedSubscriptionInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
@@ -159,8 +150,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void neighbourWithFedInRequestedIsSelectedForGroups(){
-
-		ericsson.setName("ericsson-7");
+		Neighbour ericsson = createNeighbourObject("ericsson-7", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.REQUESTED);
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
@@ -177,7 +167,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void neigbourWithFedInEstablishedIsSelectedForGroups(){
-		ericsson.setName("ericsson-8");
+		Neighbour ericsson = createNeighbourObject("ericsson-8", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.ESTABLISHED);
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
@@ -194,7 +184,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void neighbourWithFedInRejectedIsSelectedForRemovalFromGroups(){
-		ericsson.setName("ericsson-9");
+		Neighbour ericsson = createNeighbourObject("ericsson-9", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();

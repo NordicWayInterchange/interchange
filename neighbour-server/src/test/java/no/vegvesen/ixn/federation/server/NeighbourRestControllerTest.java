@@ -210,14 +210,12 @@ class NeighbourRestControllerTest {
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		// Mock saving Neighbour to Neighbour repository
-		Neighbour updatedNeighbour = new Neighbour();
-		updatedNeighbour.setName("ericsson");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
-		updatedNeighbour.setCapabilities(capabilities);
 		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
 		firstSubscription.setPath("/ericsson/subscription/1");
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
-		updatedNeighbour.setSubscriptionRequest(returnedSubscriptionRequest);
+		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
+
 		doReturn(updatedNeighbour).when(neighbourRepository).save(any(Neighbour.class));
 
 
