@@ -89,9 +89,13 @@ public class Neighbour implements Subscriber {
 		return subscriptionRequest;
 	}
 
-	@Override
 	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
 		this.subscriptionRequest = subscriptionRequest;
+	}
+
+	@Override
+	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
+		this.subscriptionRequest.setStatus(subscriptionRequestStatus);
 	}
 
 	public SubscriptionRequest getFedIn() {

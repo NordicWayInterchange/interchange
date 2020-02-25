@@ -197,7 +197,15 @@ public class DataType {
 		Iterator<String> iterator = values.keySet().iterator();
 		while (iterator.hasNext()) {
 			String key = iterator.next();
-			selector.append(String.format("%s = '%s'", key, values.get(key)));
+			MessageProperty property = MessageProperty.getProperty(key);
+			assert property != null;
+			String values = this.values.get(key);
+			if (property.equals(MessageProperty.QUAD_TREE)) {
+				selector.append(quadTreeTilesSelector(getPropertyValueAsSet(property)));
+			}
+			else {
+				selector.append(String.format("%s = '%s'", key, getPropertyValue(property)));
+			}
 			if (iterator.hasNext()) {
 				selector.append(" AND ");
 			}
@@ -208,6 +216,27 @@ public class DataType {
 	public static Subscription toSubscription(DataType dataType) {
 		return new Subscription(dataType.toSelector(), SubscriptionStatus.REQUESTED);
 	}
+
+	private String quadTreeTilesSelector(Set<String> quadTreeTiles) {
+		if (quadTreeTiles.isEmpty()) {
+			return null;
+		} else {
+			StringBuilder quadTreeSelector = new StringBuilder();
+			Iterator<String> quadIterator = quadTreeTiles.iterator();
+			while (quadIterator.hasNext()) {
+				String quadTreeTile = quadIterator.next();
+				quadTreeSelector.append(MessageProperty.QUAD_TREE.getName());
+				quadTreeSelector.append(" like '%,");
+				quadTreeSelector.append(quadTreeTile);
+				quadTreeSelector.append("%'");
+				if (quadIterator.hasNext()) {
+					quadTreeSelector.append(" or ");
+				}
+			}
+			return quadTreeSelector.toString();
+		}
+	}
+
 }
 
 

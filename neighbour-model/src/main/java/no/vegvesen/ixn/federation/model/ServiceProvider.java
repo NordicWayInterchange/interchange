@@ -46,10 +46,8 @@ public class ServiceProvider implements Subscriber {
 	}
 
 	@Override
-	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
-		//TODO: change Subscriber::setSubscriptionRequest to only set status on subscription request,
-		// can not match the selector against the data type on local subscription
-		getLocalSubscriptionRequest().setStatus(subscriptionRequest.getStatus());
+	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
+		this.getLocalSubscriptionRequest().setStatus(subscriptionRequestStatus);
 	}
 
 	public void setName(String name) {

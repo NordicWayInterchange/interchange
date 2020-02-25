@@ -54,7 +54,7 @@ public class RoutingConfigurer {
 					removeUserFromGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
 				}
 				logger.info("Removed routing for subscriber {}", subscriber.getName());
-				subscriber.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.EMPTY);
+				subscriber.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
 				saveSubscriber(subscriber);
 				logger.debug("Saved subscriber {} with subscription request status EMPTY", subscriber.getName());
 			} catch (Exception e) {
@@ -79,15 +79,20 @@ public class RoutingConfigurer {
 		for (Subscriber subscriber : readyToSetupRouting) {
 			try {
 				logger.debug("Setting up routing for subscriber {}", subscriber.getName());
-				//Both neighbour and service providers binds to nwEx, service provider also binds to fedEx ????
+				//Both neighbour and service providers binds to nwEx to receive local messages
+				//Service provider also binds to fedEx to receive messages from neighbours
+				//This avoids loop of messages
 				SubscriptionRequest setUpSubscriptionRequest = qpidClient.setupRouting(subscriber, "nwEx");
+				subscriber.setSubscriptionRequestStatus(setUpSubscriptionRequest.getStatus());
 				if (subscriber instanceof ServiceProvider) {
 					qpidClient.setupRouting(subscriber, "fedEx");
 					addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
 				}
+				else if (subscriber instanceof Neighbour) {
+					((Neighbour)subscriber).setSubscriptionRequest(setUpSubscriptionRequest);
+				}
 				logger.info("Routing set up for subscriber {}", subscriber.getName());
 
-				subscriber.setSubscriptionRequest(setUpSubscriptionRequest);
 				saveSubscriber(subscriber);
 				logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", subscriber.getName());
 			} catch (Throwable e) {
