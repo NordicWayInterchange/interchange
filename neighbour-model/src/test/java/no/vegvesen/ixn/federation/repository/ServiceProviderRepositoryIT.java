@@ -67,11 +67,15 @@ public class ServiceProviderRepositoryIT {
 	@Test
 	public void findBySubscriptionStatusRequestedCanBeRetrieved() {
 		ServiceProvider audi = new ServiceProvider("audi");
-		audi.getLocalSubscriptionRequest().setSubscriptions(Collections.singleton(getDataTypeOriginatingCountry("DE")));
+		LocalSubscriptionRequest audiSR = audi.getLocalSubscriptionRequest();
+		audiSR.setStatus(SubscriptionRequestStatus.REQUESTED);
+		audiSR.setSubscriptions(Collections.singleton(getDataTypeOriginatingCountry("DE")));
 		repository.save(audi);
 
 		ServiceProvider ford = new ServiceProvider("Ford");
-		ford.getLocalSubscriptionRequest().setSubscriptions(Collections.singleton(getDataTypeOriginatingCountry("FI")));
+		LocalSubscriptionRequest fordSR = ford.getLocalSubscriptionRequest();
+		fordSR.setStatus(SubscriptionRequestStatus.REQUESTED);
+		fordSR.setSubscriptions(Collections.singleton(getDataTypeOriginatingCountry("FI")));
 		repository.save(ford);
 
 		List<ServiceProvider> spListRequested = repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.REQUESTED);
