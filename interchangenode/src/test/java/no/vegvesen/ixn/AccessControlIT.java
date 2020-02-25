@@ -1,6 +1,6 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
+import no.vegvesen.ixn.docker.DockerBaseIT;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.Logger;
