@@ -33,8 +33,8 @@ import static org.mockito.Mockito.when;
 
 @Ignore
 @SuppressWarnings("rawtypes")
-public class MessageForwarderIT extends DockerBaseIT {
-	private static Logger logger = LoggerFactory.getLogger(MessageForwarderIT.class);
+public class MessageCollectorOldIT extends DockerBaseIT {
+	private static Logger logger = LoggerFactory.getLogger(MessageCollectorOldIT.class);
 
 	private RestTemplate restTemplate() {
 		CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(localSslContext()).build();
@@ -74,11 +74,11 @@ public class MessageForwarderIT extends DockerBaseIT {
 		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Collections.singletonList(localNeighbour));
 
 		//the forwarder runs on the "remote" node
-		ForwarderProperties properties = new ForwarderProperties();
+		CollectorProperties properties = new CollectorProperties();
 		properties.setLocalIxnFederationPort(remoteContainer.getMappedPort(AMQPS_PORT).toString());
 		properties.setLocalIxnDomainName("localhost");
-		ForwardingCreator forwardingCreator = new ForwardingCreator(properties,localSslContext());
-		MessageForwarder messageForwarder = new MessageForwarder(fetcher, forwardingCreator);
+		CollectorCreator collectorCreator = new CollectorCreator(properties,localSslContext());
+		MessageCollector messageForwarder = new MessageCollector(fetcher, collectorCreator);
 		messageForwarder.runSchedule();
 
 		String sendUrl = String.format("amqps://localhost:%s", localMessagePort);
@@ -121,11 +121,11 @@ public class MessageForwarderIT extends DockerBaseIT {
 		Neighbour remoteNeighbourTwo = mockNeighbour(remoteContainerTwo, "remote-two");
 		NeighbourFetcher fetcher = mock(NeighbourFetcher.class);
 		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Arrays.asList(remoteNeighbourOne, remoteNeighbourTwo));
-		ForwarderProperties properties = new ForwarderProperties();
+		CollectorProperties properties = new CollectorProperties();
 		properties.setLocalIxnFederationPort("" + localMessagePort);
 		properties.setLocalIxnDomainName("localhost");
-		ForwardingCreator forwardingCreator = new ForwardingCreator(properties,localSslContext());
-		MessageForwarder messageForwarder = new MessageForwarder(fetcher,forwardingCreator);
+		CollectorCreator collectorCreator = new CollectorCreator(properties,localSslContext());
+		MessageCollector messageForwarder = new MessageCollector(fetcher, collectorCreator);
 		messageForwarder.runSchedule();
 
 		String localMessagingUrl = String.format("amqps://localhost:%s", localMessagePort);

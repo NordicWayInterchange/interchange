@@ -17,18 +17,18 @@ import java.util.Set;
 
 
 @Service
-public class MessageForwarder {
+public class MessageCollector {
 
     private NeighbourFetcher neighbourFetcher;
-    private final ForwardingCreator forwardingCreator;
-    private Map<String,MessageForwardListener> listeners;
-    private Logger logger = LoggerFactory.getLogger(MessageForwarder.class);
+    private final CollectorCreator collectorCreator;
+    private Map<String, MessageCollectorListener> listeners;
+    private Logger logger = LoggerFactory.getLogger(MessageCollector.class);
 
 
     @Autowired
-    public MessageForwarder(NeighbourFetcher fetcher, ForwardingCreator forwardingCreator) {
+    public MessageCollector(NeighbourFetcher fetcher, CollectorCreator collectorCreator) {
         this.neighbourFetcher = fetcher;
-        this.forwardingCreator = forwardingCreator;
+        this.collectorCreator = collectorCreator;
         this.listeners = new HashMap<>();
 
     }
@@ -43,7 +43,7 @@ public class MessageForwarder {
     private void checkListenerList() {
         Set<String> remoteNames = listeners.keySet();
         for (String remoteName : remoteNames) {
-            MessageForwardListener listener = listeners.get(remoteName);
+            MessageCollectorListener listener = listeners.get(remoteName);
             if (! listener.isRunning()) {
                 listeners.remove(remoteName);
                 logger.info("Removed stopped listener {}", remoteName);
@@ -61,8 +61,8 @@ public class MessageForwarder {
             if (! listeners.containsKey(name)) {
                 try {
                     logger.info("Setting up ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
-                    //MessageForwardListener messageListener = forwardingCreator.setupForwarding(ixn);
-                    MessageForwardListener messageListener = forwardingCreator.setupCollection(ixn);
+                    //MessageCollectorListener messageListener = collectorCreator.setupForwarding(ixn);
+                    MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
                     listeners.put(name, messageListener);
                 } catch (JMSException e) {
                     logger.warn("Tried to create connection to {}, but failed with exception.",name,e);
@@ -76,21 +76,21 @@ public class MessageForwarder {
             }
         }
         //TODO need a better way of doing this. Not even close to thread-safe..
-        List<MessageForwardListener> listenersToRemove = new ArrayList<>();
+        List<MessageCollectorListener> listenersToRemove = new ArrayList<>();
         for (String ixnName : listeners.keySet()) {
             if (! interchangeNames.contains(ixnName)) {
                 logger.info("Listener for {} is now being removed",ixnName);
-                MessageForwardListener toRemove = listeners.get(ixnName);
+                MessageCollectorListener toRemove = listeners.get(ixnName);
                 toRemove.teardown();
                 listenersToRemove.add(toRemove);
             }
         }
-        for (MessageForwardListener listener : listenersToRemove) {
+        for (MessageCollectorListener listener : listenersToRemove) {
             listeners.remove(listener);
         }
     }
 
-    Map<String, MessageForwardListener> getListeners() {
+    Map<String, MessageCollectorListener> getListeners() {
         return listeners;
     }
 }

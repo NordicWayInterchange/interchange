@@ -10,23 +10,23 @@ import org.springframework.context.annotation.Configuration;
 import javax.net.ssl.SSLContext;
 
 @Configuration
-public class QpidQueueForwardingConfigurator {
-    @Value("${forwarder.keystorepath}")
+public class QpidQueueCollectorConfigurator {
+    @Value("${collector.keystorepath}")
     private String keystorePath;
 
-    @Value("${forwarder.keystorepassword}")
+    @Value("${collector.keystorepassword}")
     private String keystorePassword;
 
-    @Value("${forwarder.keystoretype}")
+    @Value("${collector.keystoretype}")
     private String keystoreType;
 
-    @Value("${forwarder.truststorepath}")
+    @Value("${collector.truststorepath}")
     private String truststorePath;
 
-    @Value("${forwarder.truststorepassword}")
+    @Value("${collector.truststorepassword}")
     private String truststorePassword;
 
-    @Value("${forwarder.truststoretype}")
+    @Value("${collector.truststoretype}")
     private String truststoreType;
 
     @Bean

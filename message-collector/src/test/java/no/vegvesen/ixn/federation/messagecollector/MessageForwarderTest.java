@@ -25,22 +25,22 @@ public class MessageForwarderTest {
         NeighbourFetcher neighbourFetcher = mock(NeighbourFetcher.class);
         //when(neighbourFetcher.listNeighbourCandidates()).thenReturn(Arrays.asList(one,two));
         when(neighbourFetcher.listNeighboursToConsumeFrom()).thenReturn(Arrays.asList(one,two));
-        ForwardingCreator forwardingCreator = mock(ForwardingCreator.class);
-        //when(forwardingCreator.setupForwarding(one)).thenThrow(new JMSException("Expected exception"));
-        when(forwardingCreator.setupCollection(one)).thenThrow(new JMSException("Expected exception"));
+        CollectorCreator collectorCreator = mock(CollectorCreator.class);
+        //when(collectorCreator.setupForwarding(one)).thenThrow(new JMSException("Expected exception"));
+        when(collectorCreator.setupCollection(one)).thenThrow(new JMSException("Expected exception"));
 
         MessageProducer producer = mock(MessageProducer.class);
         MessageConsumer consumer = mock(MessageConsumer.class);
-        //when(forwardingCreator.setupForwarding(two)).thenReturn(new MessageForwardListener(consumer,producer));
-        when(forwardingCreator.setupCollection(two)).thenReturn(new MessageForwardListener(consumer,producer));
+        //when(collectorCreator.setupForwarding(two)).thenReturn(new MessageCollectorListener(consumer,producer));
+        when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(consumer,producer));
 
-        MessageForwarder forwarder = new MessageForwarder(neighbourFetcher,forwardingCreator);
+        MessageCollector forwarder = new MessageCollector(neighbourFetcher, collectorCreator);
         forwarder.runSchedule();
 
         //verify(neighbourFetcher).listNeighbourCandidates();
         verify(neighbourFetcher).listNeighboursToConsumeFrom();
-        //verify(forwardingCreator,times(2)).setupForwarding(any());
-        verify(forwardingCreator,times(2)).setupCollection(any());
+        //verify(collectorCreator,times(2)).setupForwarding(any());
+        verify(collectorCreator,times(2)).setupCollection(any());
 
         assertThat(forwarder.getListeners()).size().isEqualTo(1);
         assertThat(forwarder.getListeners()).containsKeys("two");

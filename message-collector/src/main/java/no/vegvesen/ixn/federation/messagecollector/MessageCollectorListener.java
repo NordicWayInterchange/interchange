@@ -12,13 +12,13 @@ import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MessageForwardListener implements MessageListener, ExceptionListener {
+public class MessageCollectorListener implements MessageListener, ExceptionListener {
     private AtomicBoolean running;
     private final MessageConsumer messageConsumer;
     private final MessageProducer producer;
-    private Logger log = LoggerFactory.getLogger(MessageForwardListener.class);
+    private Logger log = LoggerFactory.getLogger(MessageCollectorListener.class);
 
-    MessageForwardListener(MessageConsumer messageConsumer, MessageProducer producer) {
+    MessageCollectorListener(MessageConsumer messageConsumer, MessageProducer producer) {
         this.messageConsumer = messageConsumer;
         this.producer = producer;
         this.running = new AtomicBoolean(true);
@@ -36,11 +36,11 @@ public class MessageForwardListener implements MessageListener, ExceptionListene
             } catch (JMSException e) {
                 log.error("Problem receiving message", e);
                 teardown();
-                throw new MessageForwarderException(e);
+                throw new MessageCollectorException(e);
             }
         } else {
             log.debug("Got message, but listener is not running");
-            throw new MessageForwarderException("Not running!");
+            throw new MessageCollectorException("Not running!");
         }
     }
 

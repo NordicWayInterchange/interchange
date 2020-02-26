@@ -23,10 +23,10 @@ import static org.mockito.Mockito.when;
 
 @Ignore
 @RunWith(MockitoJUnitRunner.class)
-public class MessageForwardListenerIT extends DockerBaseIT {
+public class MessageCollectorListenerIT extends DockerBaseIT {
 
 	private static final SSLContext SSL_CONTEXT = TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks");
-	private static Logger logger = LoggerFactory.getLogger(MessageForwardListenerIT.class);
+	private static Logger logger = LoggerFactory.getLogger(MessageCollectorListenerIT.class);
 
 	@Rule
 	public GenericContainer localContainer = getQpidContainer("docker/localhost", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
@@ -35,7 +35,7 @@ public class MessageForwardListenerIT extends DockerBaseIT {
 	public GenericContainer remoteContainer = getQpidContainer("docker/remote", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	private String remoteAmqpsUrl;
-	private ForwardingCreator forwardingCreator;
+	private CollectorCreator collectorCreator;
 
 	@Before
 	public void setup() {
@@ -43,17 +43,17 @@ public class MessageForwardListenerIT extends DockerBaseIT {
 		Integer remoteAmqpsPort = remoteContainer.getMappedPort(AMQPS_PORT);
 		remoteAmqpsUrl = String.format("amqps://localhost:%s", remoteAmqpsPort);
 
-		ForwarderProperties forwarderProperties = new ForwarderProperties();
-		forwarderProperties.setLocalIxnDomainName("localhost");
-		forwarderProperties.setLocalIxnFederationPort("" + localAmqpsPort);
-		forwardingCreator = new ForwardingCreator(forwarderProperties, SSL_CONTEXT);
+		CollectorProperties collectorProperties = new CollectorProperties();
+		collectorProperties.setLocalIxnDomainName("localhost");
+		collectorProperties.setLocalIxnFederationPort("" + localAmqpsPort);
+		collectorCreator = new CollectorCreator(collectorProperties, SSL_CONTEXT);
 	}
 
 	@Test
 	public void testStopLocalContainerTriggersConnectionExceptionListener() throws JMSException, NamingException {
 		Neighbour remote = mock(Neighbour.class);
 		when(remote.getMessageChannelUrl()).thenReturn(remoteAmqpsUrl);
-		MessageForwardListener remoteForwardListener = forwardingCreator.setupCollection(remote);
+		MessageCollectorListener remoteForwardListener = collectorCreator.setupCollection(remote);
 
 		//Stop the container to trigger the connection exception listener to run
 		localContainer.stop();
@@ -65,7 +65,7 @@ public class MessageForwardListenerIT extends DockerBaseIT {
 	public void testStopRemoteContainerTriggersConnectionExceptionListener() throws JMSException, NamingException {
 		Neighbour remote = mock(Neighbour.class);
 		when(remote.getMessageChannelUrl()).thenReturn(remoteAmqpsUrl);
-		MessageForwardListener remoteForwardListener = forwardingCreator.setupCollection(remote);
+		MessageCollectorListener remoteForwardListener = collectorCreator.setupCollection(remote);
 
 		//Stop the container to trigger the connection exception listener to run
 		remoteContainer.stop();
@@ -75,14 +75,14 @@ public class MessageForwardListenerIT extends DockerBaseIT {
 
 	/*
 
-	TODO this test is removed to be able to refactor the internal classes in ForwardingCreator.
+	TODO this test is removed to be able to refactor the internal classes in CollectorCreator.
 	@Test
 	public void createProducerToRemote() throws NamingException, JMSException {
 		Neighbour remote = mock(Neighbour.class);
 		when(remote.getName()).thenReturn("remote");
 		when(remote.getMessageChannelUrl()).thenReturn(remoteAmqpsUrl);
 
-		MessageProducer producerToRemote = forwardingCreator.createProducerToLocal();
+		MessageProducer producerToRemote = collectorCreator.createProducerToLocal();
 
 		assertThat(producerToRemote.getDestination()).isNotNull();
 	}

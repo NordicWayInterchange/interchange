@@ -12,24 +12,24 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 
 @Component
-public class ForwardingCreator {
+public class CollectorCreator {
 
 
-    private final ForwarderProperties properties;
+    private final CollectorProperties properties;
     private final SSLContext sslContext;
-    private Logger logger = LoggerFactory.getLogger(ForwardingCreator.class);
+    private Logger logger = LoggerFactory.getLogger(CollectorCreator.class);
 
     @Autowired
-    public ForwardingCreator(ForwarderProperties properties, SSLContext sslContext) {
+    public CollectorCreator(CollectorProperties properties, SSLContext sslContext) {
         this.properties = properties;
         this.sslContext = sslContext;
     }
 
     //TODO logging!
-    MessageForwardListener setupCollection(Neighbour ixn) throws JMSException, NamingException {
+    MessageCollectorListener setupCollection(Neighbour ixn) throws JMSException, NamingException {
         String localIxnDomainName = properties.getLocalIxnDomainName();
         String writeUrl = String.format("amqps://%s:%s", localIxnDomainName,properties.getLocalIxnFederationPort());
-        String writeQueue = "fedEx"; //TODO externalize
+        String writeQueue = properties.getWritequeue();
         logger.debug("Write URL: {}, queue {}", writeUrl,writeQueue);
         IxnContext writeContext = new IxnContext(writeUrl,writeQueue,null);
         Destination writeDestination = writeContext.getSendQueue();
@@ -45,7 +45,7 @@ public class ForwardingCreator {
         Session readSession = readConnection.createSession(false,Session.AUTO_ACKNOWLEDGE);
 
         MessageConsumer consumer = readSession.createConsumer(readDestination);
-        MessageForwardListener listener = new MessageForwardListener(consumer,producer);
+        MessageCollectorListener listener = new MessageCollectorListener(consumer,producer);
         consumer.setMessageListener(listener);
 
         writeConnection.setExceptionListener(listener);
