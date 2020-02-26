@@ -1,7 +1,8 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
+import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionsApi;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -44,20 +45,21 @@ public class OnboardRESTClient {
     }
 
 
-    public SubscriptionRequestApi getServiceProviderSubscriptionRequest() {
-        return restTemplate.getForEntity(server + "/subscription/" + user,SubscriptionRequestApi.class).getBody();
+    public LocalSubscriptionsApi getServiceProviderSubscriptionRequest(String serviceProviderName) {
+		String url = String.format("%s/%s/subscriptions/", server, serviceProviderName);
+		return restTemplate.getForEntity(url, LocalSubscriptionsApi.class).getBody();
     }
 
-    public SubscriptionRequestApi deleteSubscriptions(SubscriptionRequestApi subscriptionRequest) {
-        HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequest);
-        return restTemplate.exchange(server + "/subscription", HttpMethod.DELETE, entity, SubscriptionRequestApi.class).getBody();
+    public void deleteSubscriptions(String serviceProviderName, Integer localSubscriptionId) {
+        restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, serviceProviderName, localSubscriptionId));
     }
 
-    public SubscriptionRequestApi addSubscriptions(SubscriptionRequestApi subscriptionRequestApi) {
+    public DataTypeApi addSubscription(Object serviceProviderName, DataTypeApi subscription) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi,headers);
-        return restTemplate.exchange(server + "/subscription", HttpMethod.POST, entity, SubscriptionRequestApi.class).getBody();
+        HttpEntity<DataTypeApi> entity = new HttpEntity<>(subscription,headers);
+		String url = String.format("/%s/subscriptions", serviceProviderName) ;
+		return restTemplate.exchange(server + url, HttpMethod.POST, entity, DataTypeApi.class).getBody();
     }
 
     public CapabilityApi deleteCapability(CapabilityApi capabilityApi) {

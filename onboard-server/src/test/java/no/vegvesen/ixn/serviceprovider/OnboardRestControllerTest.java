@@ -171,7 +171,7 @@ public class OnboardRestControllerTest {
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 
 		mockMvc.perform(
-				post(String.format("/%s/subscription", firstServiceProvider))
+				post(String.format("/%s/subscriptions", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(subscriptionRequestApiToServerJson))
@@ -190,7 +190,7 @@ public class OnboardRestControllerTest {
 		String invalidJson = validJson.replaceAll("messageType", "someMessyType");
 
 		mockMvc.perform(
-				post(String.format("/%s/subscription", firstServiceProvider))
+				post(String.format("/%s/subscriptions", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(invalidJson))
@@ -207,7 +207,7 @@ public class OnboardRestControllerTest {
 		String emptySubscription = objectMapper.writeValueAsString(subscriptionApi);
 
 		mockMvc.perform(
-				post(String.format("/%s/subscription", firstServiceProvider))
+				post(String.format("/%s/subscriptions", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(emptySubscription))
@@ -232,7 +232,7 @@ public class OnboardRestControllerTest {
 
 		// Subscription request api posted to the server
 
-		String deleteUrl = String.format("/%s/subscription/%s", firstServiceProviderName, "1");
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "1");
 		mockMvc.perform(
 				delete(deleteUrl)
 						.accept(MediaType.APPLICATION_JSON)
@@ -251,7 +251,7 @@ public class OnboardRestControllerTest {
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 
 		mockMvc.perform(
-				post(String.format("/%s/subscription", firstServiceProviderName))
+				post(String.format("/%s/subscriptions", firstServiceProviderName))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(subscriptionRequestApiToServerJson))

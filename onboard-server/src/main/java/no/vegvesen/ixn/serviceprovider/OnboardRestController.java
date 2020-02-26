@@ -12,6 +12,8 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
+import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
+import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionsApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -230,7 +229,7 @@ public class OnboardRestController {
 	}
 
 	//TODO this method does not set subscription status if not already set. Is that correct? Probably need to have a default status in Subscription class.
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscription")
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
 	public DataTypeApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -289,7 +288,7 @@ public class OnboardRestController {
 		return self;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscription/{dataTypeId}")
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscriptions/{dataTypeId}")
 	public void deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) {
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -356,8 +355,8 @@ public class OnboardRestController {
 
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ServiceProvider getServiceProviderSubscriptionRequest(@PathVariable String serviceProviderName) {
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public LocalSubscriptionsApi getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
 
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -366,7 +365,15 @@ public class OnboardRestController {
 			throw new RuntimeException("The requesting Service Provider does not exist in the database."); // TODO: Change to a better exception?
 		}
 
-		return serviceProvider;
+		return transformToLocalSubscriptionsApi(serviceProvider);
+	}
+
+	private LocalSubscriptionsApi transformToLocalSubscriptionsApi(ServiceProvider serviceProvider) {
+		List<DataTypeApiId> idDataTypes = new LinkedList<>();
+		for (DataType subscription : serviceProvider.getLocalSubscriptionRequest().getSubscriptions()) {
+			idDataTypes.add(new DataTypeApiId(subscription.getData_id(), capabilityTransformer.dataTypeToApi(subscription)));
+		}
+		return new LocalSubscriptionsApi(idDataTypes);
 	}
 
 	// TODO: Remove

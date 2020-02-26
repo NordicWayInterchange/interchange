@@ -55,6 +55,12 @@
             <artifactId>testcontainers</artifactId>
             <scope>test</scope>
          </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>onboard-rest-api</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
