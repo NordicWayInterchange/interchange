@@ -3,8 +3,6 @@ package no.vegvesen.ixn.federation.messagecollector;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-//TODO: generate additional-spring-configuration-metadata.json
-//TODO: set default values
 @Component
 @ConfigurationProperties(prefix ="collector")
 public class CollectorProperties {
@@ -18,7 +16,7 @@ public class CollectorProperties {
 	private String truststorepath;
 	private String truststorepassword;
 	private String truststoretype;
-	private String writequeue;
+	private String writequeue = "fedEx";
 
 	public CollectorProperties() {
 	}

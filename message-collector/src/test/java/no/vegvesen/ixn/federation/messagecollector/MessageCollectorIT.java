@@ -50,24 +50,25 @@ public class MessageCollectorIT extends DockerBaseIT {
 
     @Test
     public void testMessagesCollected() throws NamingException, JMSException {
+        Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
+
         Neighbour neighbour = new Neighbour();
         neighbour.setName("localhost");
-        String producerPort = producerContainer.getMappedPort(AMQPS_PORT).toString();
-        neighbour.setMessageChannelPort(producerPort);
+        neighbour.setMessageChannelPort(producerPort.toString());
 
         NeighbourFetcher neighbourFetcher = mock(NeighbourFetcher.class);
         when(neighbourFetcher.listNeighboursToConsumeFrom()).thenReturn(Arrays.asList(neighbour));
 
-        CollectorProperties properties = new CollectorProperties();
-        properties.setLocalIxnDomainName("localhost");
-        properties.setWritequeue("fedEx");
-        properties.setLocalIxnFederationPort(consumerContainer.getMappedPort(AMQPS_PORT).toString());
-        CollectorCreator collectorCreator = new CollectorCreator(properties,
-                TestKeystoreHelper.sslContext("jks/localhost.p12","jks/truststore.jks"));
+        String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
+        CollectorCreator collectorCreator = new CollectorCreator(
+                TestKeystoreHelper.sslContext("jks/localhost.p12","jks/truststore.jks"),
+                "localhost",
+                localIxnFederationPort,
+                "fedEx");
         MessageCollector forwarder = new MessageCollector(neighbourFetcher, collectorCreator);
         forwarder.runSchedule();
 
-        Source source = createSource(producerContainer.getMappedPort(AMQPS_PORT), "localhost", "jks/sp_producer.p12");
+        Source source = createSource(producerPort, "localhost", "jks/sp_producer.p12");
         source.start();
         source.send("fishy fishy");
         System.out.println(String.format("HTTP port is %s",producerContainer.getMappedPort(8080).toString()));

@@ -30,7 +30,6 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
         if (running.get()) {
             try {
                 log.debug("Sending message!");
-                //TODO: adhere to the originally published time to live, persistence from the message
                 producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
                 log.debug("Message sendt!");
             } catch (JMSException e) {

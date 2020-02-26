@@ -43,10 +43,7 @@ public class MessageCollectorListenerIT extends DockerBaseIT {
 		Integer remoteAmqpsPort = remoteContainer.getMappedPort(AMQPS_PORT);
 		remoteAmqpsUrl = String.format("amqps://localhost:%s", remoteAmqpsPort);
 
-		CollectorProperties collectorProperties = new CollectorProperties();
-		collectorProperties.setLocalIxnDomainName("localhost");
-		collectorProperties.setLocalIxnFederationPort("" + localAmqpsPort);
-		collectorCreator = new CollectorCreator(collectorProperties, SSL_CONTEXT);
+		collectorCreator = new CollectorCreator(SSL_CONTEXT, "localhost", localAmqpsPort.toString(), "fedEx");
 	}
 
 	@Test

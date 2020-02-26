@@ -74,10 +74,7 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Collections.singletonList(localNeighbour));
 
 		//the forwarder runs on the "remote" node
-		CollectorProperties properties = new CollectorProperties();
-		properties.setLocalIxnFederationPort(remoteContainer.getMappedPort(AMQPS_PORT).toString());
-		properties.setLocalIxnDomainName("localhost");
-		CollectorCreator collectorCreator = new CollectorCreator(properties,localSslContext());
+		CollectorCreator collectorCreator = new CollectorCreator(localSslContext(), "localhost", remoteContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
 		MessageCollector messageForwarder = new MessageCollector(fetcher, collectorCreator);
 		messageForwarder.runSchedule();
 
@@ -121,10 +118,7 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 		Neighbour remoteNeighbourTwo = mockNeighbour(remoteContainerTwo, "remote-two");
 		NeighbourFetcher fetcher = mock(NeighbourFetcher.class);
 		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Arrays.asList(remoteNeighbourOne, remoteNeighbourTwo));
-		CollectorProperties properties = new CollectorProperties();
-		properties.setLocalIxnFederationPort("" + localMessagePort);
-		properties.setLocalIxnDomainName("localhost");
-		CollectorCreator collectorCreator = new CollectorCreator(properties,localSslContext());
+		CollectorCreator collectorCreator = new CollectorCreator(localSslContext(), "localhost", localMessagePort.toString(), "fedEx");
 		MessageCollector messageForwarder = new MessageCollector(fetcher, collectorCreator);
 		messageForwarder.runSchedule();
 
