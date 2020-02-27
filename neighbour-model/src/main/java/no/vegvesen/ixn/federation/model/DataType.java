@@ -227,11 +227,10 @@ public class DataType {
 
 	private String oneSelector(MessageProperty property, String propertyValue) {
 		if (MessagePropertyType.INTEGER == property.getMessagePropertyType() ||
-			MessagePropertyType.INTEGER_ARRAY == property.getMessagePropertyType()) {
+				MessagePropertyType.INTEGER_ARRAY == property.getMessagePropertyType()) {
 			return String.format("%s = %s", property.getName(), propertyValue);
 		} else if (MessageProperty.QUAD_TREE == property) {
 			return String.format("%s like '%%,%s%%'", property.getName(), propertyValue);
-
 		}
 		return String.format("%s = '%s'", property.getName(), propertyValue);
 	}
