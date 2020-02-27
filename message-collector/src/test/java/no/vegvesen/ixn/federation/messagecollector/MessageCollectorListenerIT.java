@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class MessageCollectorListenerIT extends DockerBaseIT {
 
@@ -29,10 +28,10 @@ public class MessageCollectorListenerIT extends DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(MessageCollectorListenerIT.class);
 
 	@Rule
-	public GenericContainer localContainer = getQpidContainer("docker/localhost", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
+	public GenericContainer localContainer = getQpidContainer("docker/consumer", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	@Rule
-	public GenericContainer remoteContainer = getQpidContainer("docker/remote", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
+	public GenericContainer remoteContainer = getQpidContainer("docker/producer", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	private String remoteAmqpsUrl;
 	private CollectorCreator collectorCreator;
@@ -70,19 +69,4 @@ public class MessageCollectorListenerIT extends DockerBaseIT {
 		assertThat(remoteForwardListener.isRunning()).isFalse();
 	}
 
-	/*
-
-	TODO this test is removed to be able to refactor the internal classes in CollectorCreator.
-	@Test
-	public void createProducerToRemote() throws NamingException, JMSException {
-		Neighbour remote = mock(Neighbour.class);
-		when(remote.getName()).thenReturn("remote");
-		when(remote.getMessageChannelUrl()).thenReturn(remoteAmqpsUrl);
-
-		MessageProducer producerToRemote = collectorCreator.createProducerToLocal();
-
-		assertThat(producerToRemote.getDestination()).isNotNull();
-	}
-
-	*/
 }
