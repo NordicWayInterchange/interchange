@@ -58,7 +58,7 @@ public class MessageProperty {
 	public static final List<MessageProperty> iviApplicationProperties = Arrays.asList(
 			IVI_TYPE,
 			PICTOGRAM_CATEGORY_CODE,
-            new MessageProperty("iviContainer",false, true, MessagePropertyType.STRING)
+            new MessageProperty("iviContainer",false, false, MessagePropertyType.STRING)
     );
 
 	public static Set<String> mandatoryDatex2PropertyNames = Stream.of(
