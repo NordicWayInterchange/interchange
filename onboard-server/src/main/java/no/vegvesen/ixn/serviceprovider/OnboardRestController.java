@@ -220,7 +220,7 @@ public class OnboardRestController {
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
 			logger.info("Service provider name: {}", serviceProvider.getName());
-			Set<DataType> serviceProviderSubscriptions = serviceProvider.getLocalSubscriptionRequest().getSubscriptions();
+			Set<DataType> serviceProviderSubscriptions = serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions();
 			logger.info("Service Provider Subscriptions: {}", serviceProviderSubscriptions.toString());
 			localSubscriptions.addAll(serviceProviderSubscriptions);
 		}
@@ -254,9 +254,10 @@ public class OnboardRestController {
 			serviceProviderToUpdate.setLocalSubscriptionRequest(new LocalSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, newLocalSubscription));
 		} else {
 			// Add the subscriptions to the Service Provider subscription request.
-			serviceProviderToUpdate.getLocalSubscriptionRequest().addLocalSubscription(newLocalSubscription);
+			LocalSubscriptionRequest localSubscriptionRequest = serviceProviderToUpdate.getOrCreateLocalSubscriptionRequest();
+			localSubscriptionRequest.addLocalSubscription(newLocalSubscription);
 			// Flip Service Provider Subscription request to REQUESTED so it will be picked up the the routing configurer.
-			serviceProviderToUpdate.getLocalSubscriptionRequest().setStatus(SubscriptionRequestStatus.REQUESTED);
+			localSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
 		}
 
 		// Save updated Service Provider in the database.
@@ -303,7 +304,8 @@ public class OnboardRestController {
 		if (serviceProviderToUpdate == null) {
 			throw new SubscriptionRequestException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
 		}
-		Set<DataType> currentServiceProviderSubscriptions = serviceProviderToUpdate.getLocalSubscriptionRequest().getSubscriptions();
+		LocalSubscriptionRequest localSubscriptionRequest = serviceProviderToUpdate.getOrCreateLocalSubscriptionRequest();
+		Set<DataType> currentServiceProviderSubscriptions = localSubscriptionRequest.getSubscriptions();
 		if (currentServiceProviderSubscriptions.isEmpty()) {
 			throw new SubscriptionRequestException("The Service Provider trying to delete a subscription has no existing subscriptions. Nothing to delete.");
 		}
@@ -321,11 +323,11 @@ public class OnboardRestController {
 		if (currentServiceProviderSubscriptions.isEmpty()) {
 			// Subscription is now empty, notify Routing Configurer to tear down the queue.
 			logger.info("Service Provider subscriptions are now empty. Setting status to TEAR_DOWN.");
-			serviceProviderToUpdate.getLocalSubscriptionRequest().setStatus(SubscriptionRequestStatus.TEAR_DOWN);
+			localSubscriptionRequest.setStatus(SubscriptionRequestStatus.TEAR_DOWN);
 		} else {
 			// Flip status to REQUESTED to notify Routing Configurer to change the queue filter.
 			logger.info("Service Provider subscriptions were updated, but are not empty. Setting status to REQUESTED");
-			serviceProviderToUpdate.getLocalSubscriptionRequest().setStatus(SubscriptionRequestStatus.REQUESTED);
+			localSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
 		}
 
 		// Save updated Service Provider
@@ -370,7 +372,7 @@ public class OnboardRestController {
 
 	private LocalSubscriptionsApi transformToLocalSubscriptionsApi(ServiceProvider serviceProvider) {
 		List<DataTypeApiId> idDataTypes = new LinkedList<>();
-		for (DataType subscription : serviceProvider.getLocalSubscriptionRequest().getSubscriptions()) {
+		for (DataType subscription : serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions()) {
 			idDataTypes.add(new DataTypeApiId(subscription.getData_id(), capabilityTransformer.dataTypeToApi(subscription)));
 		}
 		return new LocalSubscriptionsApi(idDataTypes);

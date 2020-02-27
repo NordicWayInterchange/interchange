@@ -42,12 +42,13 @@ public class ServiceProvider implements Subscriber {
 
 	@Override
 	public SubscriptionRequest getSubscriptionRequest() {
-		return new SubscriptionRequest(getLocalSubscriptionRequest().getStatus(), getLocalSubscriptionRequest().getSubscriptions().stream().map(DataType::toSubscription).collect(Collectors.toSet()));
+		LocalSubscriptionRequest localSubscriptionRequest = getOrCreateLocalSubscriptionRequest();
+		return new SubscriptionRequest(localSubscriptionRequest.getStatus(), localSubscriptionRequest.getSubscriptions().stream().map(DataType::toSubscription).collect(Collectors.toSet()));
 	}
 
 	@Override
 	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
-		this.getLocalSubscriptionRequest().setStatus(subscriptionRequestStatus);
+		this.getOrCreateLocalSubscriptionRequest().setStatus(subscriptionRequestStatus);
 	}
 
 	public void setName(String name) {
@@ -71,6 +72,13 @@ public class ServiceProvider implements Subscriber {
 	}
 
 	public LocalSubscriptionRequest getLocalSubscriptionRequest() {
+		return subscriptionRequest;
+	}
+
+	public LocalSubscriptionRequest getOrCreateLocalSubscriptionRequest() {
+		if (subscriptionRequest == null) {
+			subscriptionRequest = new LocalSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+		}
 		return subscriptionRequest;
 	}
 
