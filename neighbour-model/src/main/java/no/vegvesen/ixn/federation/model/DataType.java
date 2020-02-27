@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.properties.MessageProperty;
+import no.vegvesen.ixn.properties.MessagePropertyType;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,7 +158,7 @@ public class DataType {
 			throw new RuntimeException("No such property " + key);
 		}
 		boolean matches;
-		if (messageProperty.isArray()) {
+		if (messageProperty.getMessagePropertyType().isArray()) {
 			matches = matchesArray(v1, v2);
 		} else {
 			matches = matchesSingleValue(v1, v2);
@@ -193,50 +194,64 @@ public class DataType {
 	}
 
 	public String toSelector() {
-		StringBuilder selector = new StringBuilder();
-		Iterator<String> iterator = values.keySet().iterator();
-		while (iterator.hasNext()) {
-			String key = iterator.next();
+		Set<String> selectorElements = new HashSet<>();
+		for (String key : values.keySet()) {
 			MessageProperty property = MessageProperty.getProperty(key);
 			assert property != null;
-			String values = this.values.get(key);
-			if (property.equals(MessageProperty.QUAD_TREE)) {
-				selector.append(quadTreeTilesSelector(getPropertyValueAsSet(property)));
-			}
-			else {
-				selector.append(String.format("%s = '%s'", key, getPropertyValue(property)));
-			}
-			if (iterator.hasNext()) {
-				selector.append(" AND ");
+			switch (property.getMessagePropertyType()) {
+				case INTEGER:
+				case STRING:
+					addSelector(selectorElements, singleValueSelector(property));
+					break;
+				case STRING_ARRAY:
+				case INTEGER_ARRAY:
+					addSelector(selectorElements, arraySelector(property));
 			}
 		}
-		return selector.toString();
+		return String.join(" AND ", selectorElements);
+	}
+
+	private void addSelector(Set<String> selectorElements, String s) {
+		if (s != null && s.length() > 0) {
+			selectorElements.add(s);
+		}
+	}
+
+	private String singleValueSelector(MessageProperty property) {
+		String propertyValue = getPropertyValue(property);
+		if (propertyValue == null) {
+			return null;
+		}
+		return oneSelector(property, propertyValue);
+	}
+
+	private String oneSelector(MessageProperty property, String propertyValue) {
+		if (MessagePropertyType.INTEGER == property.getMessagePropertyType() ||
+			MessagePropertyType.INTEGER_ARRAY == property.getMessagePropertyType()) {
+			return String.format("%s = %s", property.getName(), propertyValue);
+		} else if (MessageProperty.QUAD_TREE == property) {
+			return String.format("%s like '%%,%s%%'", property.getName(), propertyValue);
+
+		}
+		return String.format("%s = '%s'", property.getName(), propertyValue);
+	}
+
+	private String arraySelector(MessageProperty property) {
+		Set<String> values = getPropertyValueAsSet(property);
+		if (values.isEmpty()) {
+			return null;
+		} else {
+			Set<String> arraySelectors = new HashSet<>();
+			for (String value : values) {
+				addSelector(arraySelectors, oneSelector(property, value));
+			}
+			return String.format("(%s)", String.join(" OR ", arraySelectors));
+		}
 	}
 
 	public static Subscription toSubscription(DataType dataType) {
 		return new Subscription(dataType.toSelector(), SubscriptionStatus.REQUESTED);
 	}
-
-	private String quadTreeTilesSelector(Set<String> quadTreeTiles) {
-		if (quadTreeTiles.isEmpty()) {
-			return null;
-		} else {
-			StringBuilder quadTreeSelector = new StringBuilder();
-			Iterator<String> quadIterator = quadTreeTiles.iterator();
-			while (quadIterator.hasNext()) {
-				String quadTreeTile = quadIterator.next();
-				quadTreeSelector.append(MessageProperty.QUAD_TREE.getName());
-				quadTreeSelector.append(" like '%,");
-				quadTreeSelector.append(quadTreeTile);
-				quadTreeSelector.append("%'");
-				if (quadIterator.hasNext()) {
-					quadTreeSelector.append(" or ");
-				}
-			}
-			return quadTreeSelector.toString();
-		}
-	}
-
 }
 
 

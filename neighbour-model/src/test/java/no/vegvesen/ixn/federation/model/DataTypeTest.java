@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
 import org.jetbrains.annotations.NotNull;
@@ -15,17 +16,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DataTypeTest {
 
-    private DataType firstDataType = new DataType(getDatexHeaders( "NO"));
-    private DataType secondDataType = new DataType(getDatexHeaders("SE"));
+	private DataType firstDataType = new DataType(getDatexHeaders("NO"));
+	private DataType secondDataType = new DataType(getDatexHeaders("SE"));
 
 	@Test
-	public void dataTypeInCapabilitiesReturnsTrue(){
+	public void dataTypeInCapabilitiesReturnsTrue() {
 		Set<DataType> testCapabilities = Collections.singleton(firstDataType);
 		Assert.assertTrue(firstDataType.isContainedInSet(testCapabilities));
 	}
 
 	@Test
-	public void dataTypeNotInCapabilitiesReturnsFalse(){
+	public void dataTypeNotInCapabilitiesReturnsFalse() {
 		Set<DataType> testCapabilities = Collections.singleton(secondDataType);
 		Assert.assertFalse(firstDataType.isContainedInSet(testCapabilities));
 	}
@@ -225,10 +226,11 @@ public class DataTypeTest {
 		DataType datex1233 = new DataType(datex1233Props);
 		assertThat(denm0123.matches(datex1233)).isFalse();
 	}
+
 	@Test
 	public void quadTreeSubscriptionMatchesLongerCapability() {
 		DataType bcdef = getDatexWithQuadTree("NO", Sets.newHashSet("ABCDE", "BCDEF", "CDEFG"));
-		DataType bcdefg = getDatexWithQuadTree("NO", Sets.newHashSet( "BCDEFG"));
+		DataType bcdefg = getDatexWithQuadTree("NO", Sets.newHashSet("BCDEFG"));
 		assertThat(bcdef.matches(bcdefg)).isTrue();
 		assertThat(bcdefg.matches(bcdef)).isTrue();
 	}
@@ -236,7 +238,7 @@ public class DataTypeTest {
 	@Test
 	public void quadTreeSubscriptionMatchesNot() {
 		DataType cdefg = getDatexWithQuadTree("NO", Sets.newHashSet("ABCDE", "BCDEF", "CDEFG"));
-		DataType defg = getDatexWithQuadTree("NO", Sets.newHashSet( "DEFG"));
+		DataType defg = getDatexWithQuadTree("NO", Sets.newHashSet("DEFG"));
 		assertThat(defg.matches(cdefg)).isFalse();
 		assertThat(cdefg.matches(defg)).isFalse();
 	}
@@ -287,6 +289,65 @@ public class DataTypeTest {
 		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
 		DataType dataType = new DataType(values);
-		assertThat(dataType.toSelector()).contains("messageType = 'DATEX2'").contains(" AND ").contains("originatingCountry = 'NO'");
+		String selector = dataType.toSelector();
+		assertThat(selector)
+				.contains("messageType = 'DATEX2'")
+				.contains(" AND ")
+				.contains("originatingCountry = 'NO'")
+		.doesNotEndWith(" AND ")
+		.doesNotEndWith(" AND");
+	}
+
+	@Test
+	public void toSelectorIntegerValueCreatesFilterWithoutApostrophe() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), IviDataTypeApi.IVI);
+		values.put(MessageProperty.IVI_TYPE.getName(), "123");
+		DataType dataType = new DataType(values);
+		assertThat(dataType.toSelector())
+				.contains("iviType = 123")
+				.contains("messageType = 'IVI'")
+				.contains(" AND ")
+				.doesNotContain(" OR ");
+	}
+
+	@Test
+	public void toSelectorQuadTree() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), IviDataTypeApi.IVI);
+		values.put(MessageProperty.QUAD_TREE.getName(), "0123,32101234");
+		DataType dataType = new DataType(values);
+		String selector = dataType.toSelector();
+		assertThat(selector)
+				.contains("quadTree like '%,0123%")
+				.contains("quadTree like '%,32101234%")
+				.contains(" AND ");
+	}
+
+	@Test
+	public void toSelectorNullValuesFromArrayGivesNoSelector() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.QUAD_TREE.getName(), ",,,,");
+		DataType dataType = new DataType(values);
+		String selector = dataType.toSelector();
+		assertThat(selector).isEqualTo("");
+	}
+
+	@Test
+	public void toSelectorNullValuesFromStringArrayGivesNoSelector() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.PUBLICATION_SUB_TYPE.getName(), ",,,,");
+		DataType dataType = new DataType(values);
+		String selector = dataType.toSelector();
+		assertThat(selector).isEqualTo("");
+	}
+
+	@Test
+	public void toSelectorNullValuesFromIntegerArrayGivesNoSelector() {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), ",,,,");
+		DataType dataType = new DataType(values);
+		String selector = dataType.toSelector();
+		assertThat(selector).isEqualTo("");
 	}
 }
