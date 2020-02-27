@@ -9,7 +9,6 @@ import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -30,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("rawtypes")
 public class MessageForwarderIT extends DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(MessageForwarderIT.class);
 
@@ -145,7 +145,6 @@ public class MessageForwarderIT extends DockerBaseIT {
 		assertThat(remoteTwoReceivedSecondMessage).withFailMessage("first messages is not routed").isNotNull();
 	}
 
-	@NotNull
 	private Neighbour mockNeighbour(GenericContainer container, String neighbourName) {
 		String messagePort = "" + container.getMappedPort(AMQPS_PORT);
 		String remoteControlChannelPort = "" + container.getMappedPort(HTTPS_PORT);
