@@ -42,23 +42,16 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 	}
 
 	@Rule
-	public GenericContainer localContainer = getQpidContainer("docker/localhost", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
+	public GenericContainer localContainer = getQpidContainer("docker/consumer", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	@Rule
-	public GenericContainer remoteContainer = getQpidContainer("docker/remote", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
+	public GenericContainer remoteContainer = getQpidContainer("docker/producer", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	@Rule
-	public GenericContainer remoteContainerTwo = getQpidContainer("docker/remote", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
+	public GenericContainer remoteContainerTwo = getQpidContainer("docker/producer", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	private SSLContext localSslContext() {
 		return TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks");
-	}
-
-
-	//the collector runs on the consuming side now. So we need one remote that sends messages to the collector (through the "local" queue), and one local, that we write to (the fedEx)
-	@Test
-	public void testSendMessageFromRemoteToLocal() {
-
 	}
 
 
@@ -71,26 +64,26 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 		Neighbour remoteNeighbour = mockNeighbour(remoteContainer, "remote");
 		NeighbourFetcher fetcher = mock(NeighbourFetcher.class);
 		//when(fetcher.listNeighbourCandidates()).thenReturn(Collections.singletonList(remoteNeighbour));
-		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Collections.singletonList(localNeighbour));
+		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Collections.singletonList(remoteNeighbour));
 
 		//the forwarder runs on the "remote" node
-		CollectorCreator collectorCreator = new CollectorCreator(localSslContext(), "localhost", remoteContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
+		CollectorCreator collectorCreator = new CollectorCreator(localSslContext(), "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
 		MessageCollector messageForwarder = new MessageCollector(fetcher, collectorCreator);
 		messageForwarder.runSchedule();
 
-		String sendUrl = String.format("amqps://localhost:%s", localMessagePort);
-		Source source = new Source(sendUrl, "remote", localSslContext());
+		String sendUrl = String.format("amqps://localhost:%s", remoteContainer.getMappedPort(AMQPS_PORT).toString());
+		Source source = new Source(sendUrl, "localhost", localSslContext());
 		source.start();
 		source.send("fisk");
 
-		Sink sink = new Sink(remoteNeighbour.getMessageChannelUrl(), "se-out", localSslContext());
+		Sink sink = new Sink(localNeighbour.getMessageChannelUrl(), "sp_consumer", localSslContext());
 		MessageConsumer sinkConsumer = sink.createConsumer();
 		Message receive1 = sinkConsumer.receive(1000);
 		assertThat(receive1).withFailMessage("no messages are routed").isNotNull();
 
 		logger.debug("Removing the queue 'remote' on local node, should give error on consumer");
-		QpidClient qpidClient = new QpidClient(String.format("https://localhost:%s/", localContainer.getMappedPort(HTTPS_PORT)), "localhost", restTemplate());
-		qpidClient.removeQueue("remote");
+		QpidClient qpidClient = new QpidClient(String.format("https://localhost:%s/", remoteContainer.getMappedPort(HTTPS_PORT)), "localhost", restTemplate());
+		qpidClient.removeQueue("localhost");
 
 
 		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Collections.emptyList());
@@ -122,23 +115,23 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 		MessageCollector messageForwarder = new MessageCollector(fetcher, collectorCreator);
 		messageForwarder.runSchedule();
 
-		String localMessagingUrl = String.format("amqps://localhost:%s", localMessagePort);
-		Source sourceLocalOutQueueToRemote = new Source(localMessagingUrl, "remote", localSslContext());
-		sourceLocalOutQueueToRemote.start();
-		sourceLocalOutQueueToRemote.send("fish");
+		String remoteMessagingUrl = String.format("amqps://localhost:%s", remoteContainer.getMappedPort(AMQPS_PORT).toString());
+		Source sourceRemoteOutQueueToLocal = new Source(remoteMessagingUrl, "localhost", localSslContext());
+		sourceRemoteOutQueueToLocal.start();
+		sourceRemoteOutQueueToLocal.send("fish");
 
 		Sink remoteSink = new Sink(remoteNeighbourOne.getMessageChannelUrl(), "se-out", localSslContext());
 		MessageConsumer remoteConsumer = remoteSink.createConsumer();
 		Message receive1 = remoteConsumer.receive(1000);
 		assertThat(receive1).withFailMessage("first messages is not routed to remote").isNotNull();
 
-		sourceLocalOutQueueToRemote.send("more fish");
+		sourceRemoteOutQueueToLocal.send("more fish");
 		Message receive2 = remoteConsumer.receive(1000);
 		assertThat(receive2).withFailMessage("first messages is not routed").isNotNull();
 
 
 
-		Source sourceLocalOutQueueToRemoteTwo = new Source(localMessagingUrl, "remote-two", localSslContext());
+		Source sourceLocalOutQueueToRemoteTwo = new Source(remoteMessagingUrl, "remote-two", localSslContext());
 		sourceLocalOutQueueToRemoteTwo.start();
 		sourceLocalOutQueueToRemoteTwo.send("fishy stuff");
 

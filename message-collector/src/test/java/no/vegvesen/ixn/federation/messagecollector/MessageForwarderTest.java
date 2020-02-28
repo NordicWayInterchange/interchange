@@ -23,23 +23,18 @@ public class MessageForwarderTest {
         Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
 
         NeighbourFetcher neighbourFetcher = mock(NeighbourFetcher.class);
-        //when(neighbourFetcher.listNeighbourCandidates()).thenReturn(Arrays.asList(one,two));
         when(neighbourFetcher.listNeighboursToConsumeFrom()).thenReturn(Arrays.asList(one,two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
-        //when(collectorCreator.setupForwarding(one)).thenThrow(new JMSException("Expected exception"));
         when(collectorCreator.setupCollection(one)).thenThrow(new JMSException("Expected exception"));
 
         MessageProducer producer = mock(MessageProducer.class);
         MessageConsumer consumer = mock(MessageConsumer.class);
-        //when(collectorCreator.setupForwarding(two)).thenReturn(new MessageCollectorListener(consumer,producer));
         when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(consumer,producer));
 
         MessageCollector forwarder = new MessageCollector(neighbourFetcher, collectorCreator);
         forwarder.runSchedule();
 
-        //verify(neighbourFetcher).listNeighbourCandidates();
         verify(neighbourFetcher).listNeighboursToConsumeFrom();
-        //verify(collectorCreator,times(2)).setupForwarding(any());
         verify(collectorCreator,times(2)).setupCollection(any());
 
         assertThat(forwarder.getListeners()).size().isEqualTo(1);
