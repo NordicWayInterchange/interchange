@@ -6,15 +6,18 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
+import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
+import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.internal.util.collections.Sets;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
@@ -68,11 +71,9 @@ public class NeighbourRESTFacadeTest {
 	}
 
 	@Test
-	public void successfulPostOfCapabilitiesReturnsInterchange()throws Exception{
+	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
-		DataType dataType = new DataType();
-		dataType.setHow("datex2.0;1");
-		dataType.setWhere("NO");
+		DataTypeApi dataType = new Datex2DataTypeApi("NO");
 		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
@@ -89,17 +90,63 @@ public class NeighbourRESTFacadeTest {
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType dataTypeInCapabilities = dataTypes.next();
 
-		assertThat(dataTypeInCapabilities.getHow()).isEqualTo(dataType.getHow());
-		assertThat(dataTypeInCapabilities.getWhere()).isEqualTo(dataType.getWhere());
+		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
+	}
+
+	@Test
+	public void successfulPostOfCapabilitiesReturnsInterchangeWithDenmCapabilities() throws Exception {
+		DenmDataTypeApi dataType = new DenmDataTypeApi("NO-123123", "Norwegian Road Broadcasting", "NO", "P1", "application/base64", Sets.newSet("aaa"), "road", "cc1", "scc2");
+		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
+
+		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
+
+		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
+
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
+
+		assertThat(res.getDataTypes()).hasSize(1);
+
+		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
+		DataType remoteServerResponse = dataTypes.next();
+
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo(dataType.getServiceType());
+	}
+
+	@Test
+	public void successfulPostOfCapabilitiesReturnsInterchangeWithIviCapabilities() throws Exception {
+		IviDataTypeApi dataType = new IviDataTypeApi("NO-123123", "Norwegian Road Broadcasting", "NO", "P1", "application/base64", Sets.newSet("aaa"), "road", 12321, Sets.newSet(92827));
+		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
+
+		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
+
+		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
+
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
+
+		assertThat(res.getDataTypes()).hasSize(1);
+
+		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
+		DataType remoteServerResponse = dataTypes.next();
+
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		assertThat(remoteServerResponse.getPropertyValueAsInteger(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIviType());
 	}
 
 	@Test
 	public void successfulPostOfSubscriptionRequestReturnsSubscriptionRequest() throws Exception{
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		String selector = "where LIKE 'NO'";
-		subscriptionApi.setSelector(selector);
-		subscriptionApi.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscriptionApi.setSelector("originatingCountry = 'NO'");
+		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("remote server", Collections.singleton(subscriptionApi) );
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionRequestApi);
@@ -126,7 +173,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPollOfSubscriptionReturnsSubscription()throws Exception{
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setPath("bouvet/subscription/1");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
@@ -176,7 +223,7 @@ public class NeighbourRESTFacadeTest {
 
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		Set<Subscription> subscriptionSet = Collections.singleton(subscription);
 
 		// Subscription request received from the neighbour has empty set of subscription
@@ -196,7 +243,7 @@ public class NeighbourRESTFacadeTest {
 	public void serverClosesConnectionUnexpectedlyOnSubscriptionRequestPost() throws Exception {
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
-		subscription.setSelector("where LIKE 'NO'");
+		subscription.setSelector("originatingCountry = 'NO'");
 		Set<Subscription> subscriptions = Collections.singleton(subscription);
 
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
@@ -228,7 +275,7 @@ public class NeighbourRESTFacadeTest {
 	@Test(expected = SubscriptionPollException.class)
 	public void test() throws IOException {
 
-		Subscription subscription = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setPath("bouvet/subscription/1");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);

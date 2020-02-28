@@ -5,12 +5,15 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.capability.DataTypeSelectorMatcher;
+import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
+import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
+import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,7 @@ import java.util.Set;
 
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
 
-@Api(value = "/", description = "Nordic Way Federation API", produces = "application/json")
+@Api(value = "/", produces = "application/json")
 @RestController("/")
 public class NeighbourRestController {
 
@@ -36,9 +39,9 @@ public class NeighbourRestController {
 	private String myName;
 	private NeighbourRepository neighbourRepository;
 	private SelfRepository selfRepository;
-	private CapabilityTransformer capabilityTransformer;
-	private SubscriptionTransformer subscriptionTransformer;
-	private SubscriptionRequestTransformer subscriptionRequestTransformer;
+	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
+	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 	private DNSFacade dnsFacade;
@@ -46,16 +49,10 @@ public class NeighbourRestController {
 	@Autowired
 	public NeighbourRestController(NeighbourRepository neighbourRepository,
 								   SelfRepository selfRepository,
-								   CapabilityTransformer capabilityTransformer,
-								   SubscriptionTransformer subscriptionTransformer,
-								   SubscriptionRequestTransformer subscriptionRequestTransformer,
 								   DNSFacade dnsFacade) {
 
 		this.neighbourRepository = neighbourRepository;
 		this.selfRepository = selfRepository;
-		this.capabilityTransformer = capabilityTransformer;
-		this.subscriptionTransformer = subscriptionTransformer;
-		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
 		this.dnsFacade = dnsFacade;
 	}
 
@@ -73,36 +70,22 @@ public class NeighbourRestController {
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
 	private Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
-
-		// Get local Service Provider capabilities.
-		Self self = getSelf();
-		Set<DataType> localCapabilities = self.getLocalCapabilities();
-
 		// Process the subscription request
 		for (Subscription neighbourSubscription : neighbourSubscriptionRequest) {
+			try {
+				JMSSelectorFilterFactory.get(neighbourSubscription.getSelector());
+				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
+			} catch (SelectorAlwaysTrueException e) {
+				// The subscription has an illegal selector - selector always true
+				logger.error("Subscription had illegal selectors.", e);
+				logger.warn("Setting status of subscription to ILLEGAL");
+				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
 
-			// The initial status of a subscription is NO_OVERLAP.
-			// This status is updated if the selector matches a local data type or is illegal or not valid.
-			neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NO_OVERLAP);
-
-			for (DataType localDataType : localCapabilities) {
-				try {
-					if (DataTypeSelectorMatcher.matches(localDataType, neighbourSubscription.getSelector())) {
-						// Subscription matches local data type - update status to ACCEPTED
-						neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ACCEPTED);
-					}
-				} catch (SelectorAlwaysTrueException e) {
-					// The subscription has an illegal selector - selector always true
-					logger.error("Subscription had illegal selectors.", e);
-					logger.warn("Setting status of subscription to ILLEGAL");
-					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.ILLEGAL);
-
-				} catch (InvalidSelectorException e) {
-					// The subscription has an invalid selector
-					logger.error("Subscription has invalid selector.", e);
-					logger.warn("Setting status of subscription to NOT_VALID");
-					neighbourSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.NOT_VALID);
-				}
+			} catch (InvalidSelectorException e) {
+				// The subscription has an invalid selector
+				logger.error("Subscription has invalid selector.", e);
+				logger.warn("Setting status of subscription to NOT_VALID");
+				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.NOT_VALID);
 			}
 		}
 		return neighbourSubscriptionRequest;
@@ -110,8 +93,8 @@ public class NeighbourRestController {
 
 	private void checkIfCommonNameMatchesNameInApiObject(String apiName) {
 
-		Object principal = SecurityContextHolder.getContext().getAuthentication();
-		String commonName = ((Authentication) principal).getName();
+		Authentication principal = SecurityContextHolder.getContext().getAuthentication();
+		String commonName = principal.getName();
 
 		if (!commonName.equals(apiName)) {
 			logger.error("Received capability post from neighbour {}, but CN on certificate was {}. Rejecting...", apiName, commonName);
@@ -124,7 +107,7 @@ public class NeighbourRestController {
 	@ApiResponses({@ApiResponse(code = 202, message = "Successfully requested a subscription", response = SubscriptionRequestApi.class),
 			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, path = "/subscription", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionRequestApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 
@@ -163,7 +146,7 @@ public class NeighbourRestController {
 			logger.info("Received empty subscription request.");
 			logger.info("Neighbour has existing subscription: {}", neighbourToUpdate.getSubscriptionRequest().getSubscriptions().toString());
 			logger.info("Setting status of subscription request to TEAR_DOWN.");
-			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
+			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.TEAR_DOWN);
 			neighbourToUpdate.getSubscriptionRequest().setSubscriptions(Collections.emptySet());
 		} else {
 			// Subscription request is not empty
@@ -173,7 +156,7 @@ public class NeighbourRestController {
 			logger.info("Processing subscription request...");
 			Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(incomingSubscriptionRequestNeighbour.getSubscriptionRequest().getSubscriptions());
 			neighbourToUpdate.getSubscriptionRequest().setSubscriptions(processedSubscriptionRequest);
-			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.REQUESTED);
 
 			logger.info("Processed subscription request: {}", neighbourToUpdate.getSubscriptionRequest().toString());
 
@@ -201,9 +184,9 @@ public class NeighbourRestController {
 			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the polling Neighbour does not exist.", response = ErrorDetails.class),
 			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(method = RequestMethod.GET, value = SUBSCRIPTION_POLLING_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscription/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	public SubscriptionApi pollSubscription(@PathVariable String ixnName, @PathVariable Integer subscriptionId) {
+	public SubscriptionApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 
 		logger.info("Received poll of subscription from neighbour {}.", ixnName);
 
@@ -257,7 +240,7 @@ public class NeighbourRestController {
 		// Update status of capabilities to KNOWN, and set status of fedIn to EMPTY
 		// to trigger subscription request from client side.
 		neighbourToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		neighbourToUpdate.getFedIn().setStatus(SubscriptionRequest.SubscriptionRequestStatus.EMPTY);
+		neighbourToUpdate.getFedIn().setStatus(SubscriptionRequestStatus.EMPTY);
 
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);

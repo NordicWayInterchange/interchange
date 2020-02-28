@@ -26,13 +26,6 @@
 
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>test-data-helpers</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-dns</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -59,6 +52,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

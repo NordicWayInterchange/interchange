@@ -46,7 +46,7 @@ data:
             {{- end }}
             {
               "arguments": {
-                "x-filter-jms-selector": "where LIKE '%'"
+                "x-filter-jms-selector": "originatingCountry LIKE '%'"
               },
               "bindingKey": "binding_key",
               "destination": "test-out"
@@ -78,7 +78,7 @@ data:
             {{- end }}
             {
               "arguments": {
-                "x-filter-jms-selector": "where LIKE '%'"
+                "x-filter-jms-selector": "originatingCountry LIKE '%'"
               },
               "bindingKey": "binding_key",
               "destination": "test-out"

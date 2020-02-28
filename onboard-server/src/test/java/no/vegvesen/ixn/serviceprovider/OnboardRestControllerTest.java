@@ -1,17 +1,24 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import org.junit.Before;
+import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
+import no.vegvesen.ixn.properties.MessageProperty;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -20,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,7 +41,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(MockitoJUnitRunner.class)
 @WebMvcTest(controllers = OnboardRestController.class)
 public class OnboardRestControllerTest {
 
@@ -42,24 +49,33 @@ public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;
 
-	private ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
-	private SelfRepository selfRepository = mock(SelfRepository.class);
+	@MockBean
+	private ServiceProviderRepository serviceProviderRepository;
+	@MockBean
+	private SelfRepository selfRepository;
 
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+	//Unfortunately we have to mock beans not used in the class under test
+	//because the spring test wires up all jpa repositories not mocked
+	@MockBean
+	private DiscoveryStateRepository discoveryStateRepository;
+	@MockBean
+	private NeighbourRepository neighbourRepository;
 
-	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
-	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
+	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 
-
-	private OnboardRestController onboardRestController = new OnboardRestController(serviceProviderRepository, selfRepository, capabilityTransformer, subscriptionRequestTransformer);
+	@Autowired
+	private OnboardRestController onboardRestController;
 
 	private String capabilitiesPath = "/capabilities";
-	private String subscriptionPath = "/subscription";
 
 
-	@Before
-	public void setUp() {
-		mockMvc = MockMvcBuilders.standaloneSetup(onboardRestController).setControllerAdvice(OnboardServerErrorAdvice.class).build();
+	@BeforeEach
+	void setUp() {
+		mockMvc = MockMvcBuilders
+				.standaloneSetup(onboardRestController)
+				.setMessageConverters(OnboardStrictWebConfig.strictJsonMessageConverter())
+				.setControllerAdvice(OnboardServerErrorAdvice.class)
+				.build();
 	}
 
 	private void mockCertificate(String commonName) {
@@ -73,14 +89,14 @@ public class OnboardRestControllerTest {
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
-	public void postingCapabilitiesReturnsStatusOk() throws Exception {
+	void postingCapabilitiesReturnsStatusOk() throws Exception {
 
 		mockCertificate("First Service Provider");
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DataType a = new DataType("datex2;1.0", "NO", "Obstruction");
-		DataType b = new DataType("datex2;1.0", "SE", "Works");
-		Set<DataType> capabilities = Stream.of(a, b).collect(Collectors.toSet());
+		DataTypeApi a = new Datex2DataTypeApi( "NO");
+		DataTypeApi b = new Datex2DataTypeApi("SE");
+		Set<DataTypeApi> capabilities = Stream.of(a, b).collect(Collectors.toSet());
 		CapabilityApi capabilityApi = new CapabilityApi("First Service Provider", capabilities);
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApi);
 
@@ -94,12 +110,12 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void deletingExistingCapabilitiesReturnsStatusOk() throws Exception {
+	void deletingExistingCapabilitiesReturnsStatusOk() throws Exception {
 		mockCertificate("Second Service Provider");
 
 		// The existing data types of the positng Service Provider
-		DataType a = new DataType("datex2;1.0", "NO", "Obstruction");
-		DataType b = new DataType("datex2;1.0", "SE", "Works");
+		DataTypeApi a = new Datex2DataTypeApi("NO");
+		DataTypeApi b = new Datex2DataTypeApi("SE");
 
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
@@ -108,7 +124,7 @@ public class OnboardRestControllerTest {
 
 		// Mock existing service provider with two capabilities in database
 		ServiceProvider secondServiceProvider = new ServiceProvider("Second Service Provider");
-		Set<DataType> capabilities = Stream.of(a, b).collect(Collectors.toSet());
+		Set<DataType> capabilities = dataTypeTransformer.dataTypeApiToDataType(Stream.of(a, b).collect(Collectors.toSet()));
 		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
 
@@ -124,12 +140,12 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void commonNameAndApiNameMismatchReturnsStatusForbiddenInCapabilities() throws Exception {
+	void commonNameAndApiNameMismatchReturnsStatusForbiddenInCapabilities() throws Exception {
 
 		mockCertificate("First Service Provider");
 
 		CapabilityApi capabilityApi = new CapabilityApi();
-		DataType a = new DataType("datex2;1.0", "FI", "Conditions");
+		DataTypeApi a = new Datex2DataTypeApi("FI");
 		capabilityApi.setCapabilities(Collections.singleton(a));
 		capabilityApi.setName("Second Service Provider");
 
@@ -146,127 +162,96 @@ public class OnboardRestControllerTest {
 
 
 	@Test
-	public void postingSubscriptionReturnsStatusOk() throws Exception {
+	void postingSubscriptionReturnsStatusOk() throws Exception {
+		String firstServiceProvider = "FirstServiceProvider";
+		mockCertificate(firstServiceProvider);
 
-		mockCertificate("First Service Provider");
+		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
 
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE 'SE'");
-
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName("First Service Provider");
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
-
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 
 		mockMvc.perform(
-				post(subscriptionPath)
+				post(String.format("/%s/subscriptions", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(subscriptionRequestApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-
 	}
 
 	@Test
-	public void postingUnparsableSubscriptionReturnsBadRequest() throws Exception {
+	void postingUnparsableSubscriptionReturnsBadRequest() throws Exception {
+		String firstServiceProvider = "FirstServiceProvider";
+		mockCertificate(firstServiceProvider);
 
-		mockCertificate("First Service Provider");
+		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
 
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE `SE`");
-
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName("First Service Provider");
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
-
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+		String validJson = objectMapper.writeValueAsString(subscriptionApi);
+		String invalidJson = validJson.replaceAll("messageType", "someMessyType");
 
 		mockMvc.perform(
-				post(subscriptionPath)
+				post(String.format("/%s/subscriptions", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(subscriptionRequestApiToServerJson))
+						.content(invalidJson))
 				.andDo(print())
 				.andExpect(status().isBadRequest());
-
 	}
 
 	@Test
-	public void postingInvalidSubscriptionReturnsStatusBadRequest() throws Exception {
-		mockCertificate("First Service Provider");
+	void postingInvalidSubscriptionReturnsStatusBadRequest() throws Exception {
+		String firstServiceProvider = "FirstServiceProvider";
+		mockCertificate(firstServiceProvider);
 
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE '%'");
-
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName("First Service Provider");
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
-
-		String postJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+		DataTypeApi subscriptionApi = new DataTypeApi();
+		String emptySubscription = objectMapper.writeValueAsString(subscriptionApi);
 
 		mockMvc.perform(
-				post(subscriptionPath)
+				post(String.format("/%s/subscriptions", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(postJson))
+						.content(emptySubscription))
 				.andDo(print())
 				.andExpect(status().isBadRequest());
-
-
 	}
 
 	@Test
-	public void deletingSubscriptionReturnsStatusOk() throws Exception {
-
-		mockCertificate("First Service Provider");
+	void deletingSubscriptionReturnsStatusOk() throws Exception {
+		String firstServiceProviderName = "FirstServiceProvider";
+		mockCertificate(firstServiceProviderName);
 
 		// The existing subscriptions of the Service Provider
-		Subscription a = new Subscription("where LIKE 'SE'", Subscription.SubscriptionStatus.REQUESTED);
-		Subscription b = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
-
+		LocalSubscriptionRequest serviceProviderSubscriptionRequest = new LocalSubscriptionRequest();
+		serviceProviderSubscriptionRequest.addLocalSubscription(new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE"));
+		serviceProviderSubscriptionRequest.addLocalSubscription(new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI"));
+		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setName("First Service Provider");
-		SubscriptionRequest serviceProviderSubscriptionRequest = new SubscriptionRequest();
-		serviceProviderSubscriptionRequest.setSubscriptions(Stream.of(a, b).collect(Collectors.toSet()));
-		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
-		firstServiceProvider.setSubscriptionRequest(serviceProviderSubscriptionRequest);
-
+		firstServiceProvider.setName(firstServiceProviderName);
+		firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		// Subscription request api posted to the server
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName(firstServiceProvider.getName());
-		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(a);
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
 
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
-
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "1");
 		mockMvc.perform(
-				delete(subscriptionPath)
+				delete(deleteUrl)
 						.accept(MediaType.APPLICATION_JSON)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(subscriptionRequestApiToServerJson))
+						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	public void commonNameAndApiNameMismatchReturnsStatusForbiddenInSubscription() throws Exception {
+	void commonNameAndApiNameMismatchReturnsStatusForbiddenInSubscription() throws Exception {
+		String firstServiceProviderName = "FirstServiceProvider";
+		String secondServiceProviderName = "SecondServiceProvider";
+		mockCertificate(secondServiceProviderName);
 
-		mockCertificate("First Service Provider");
-
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
-		subscriptionRequestApi.setName("Second Service Provider");
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE 'NO'");
-		subscriptionRequestApi.setSubscriptions(Collections.singleton(subscriptionApi));
-
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionRequestApi);
+		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 
 		mockMvc.perform(
-				post(subscriptionPath)
+				post(String.format("/%s/subscriptions", firstServiceProviderName))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(subscriptionRequestApiToServerJson))
@@ -275,11 +260,11 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	public void calculateSelfCapabilitiesTest() {
+	void calculateSelfCapabilitiesTest() {
 
-		DataType a = new DataType("datex2;1.0", "SE", "Obstruction");
-		DataType b = new DataType("datex2;1.0", "FI", "Works");
-		DataType c = new DataType("datex2;1.0", "NO", "Obtruction");
+		DataType a = getDatex("SE");
+		DataType b = getDatex("FI");
+		DataType c = getDatex("NO");
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
@@ -299,33 +284,49 @@ public class OnboardRestControllerTest {
 		assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
 	}
 
-	@Test
-	public void calculateSelfSubscriptionsTest() {
+	@NotNull
+	private DataType getDatex(String se) {
+		HashMap<String, String> datexHeaders = new HashMap<>();
+		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		datexHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), se);
+		return new DataType(datexHeaders);
+	}
 
-		Subscription a = new Subscription("where LIKE 'FI'", Subscription.SubscriptionStatus.REQUESTED);
-		Subscription b = new Subscription("where LIKE 'SE'", Subscription.SubscriptionStatus.REQUESTED);
-		Subscription c = new Subscription("where LIKE 'NO'", Subscription.SubscriptionStatus.REQUESTED);
+	@Test
+	void calculateSelfSubscriptionsTest() {
+
+		DataType localSubA = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
+		DataType localSubB = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
+		DataType localSubC = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
-		SubscriptionRequest firstServiceProviderSubscriptionRequest = new SubscriptionRequest();
-		firstServiceProviderSubscriptionRequest.setSubscriptions(Stream.of(a, b).collect(Collectors.toSet()));
-		firstServiceProviderSubscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
-		firstServiceProvider.setSubscriptionRequest(firstServiceProviderSubscriptionRequest);
+		firstServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubA);
+		firstServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubB);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider();
 		secondServiceProvider.setName("Second Service Provider");
-		SubscriptionRequest secondServiceProviderSubscriptionRequest = new SubscriptionRequest();
-		secondServiceProviderSubscriptionRequest.setSubscriptions(Stream.of(b, c).collect(Collectors.toSet()));
-		secondServiceProviderSubscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
-		secondServiceProvider.setSubscriptionRequest(secondServiceProviderSubscriptionRequest);
+		secondServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubB);
+		secondServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubC);
 
 		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 
-		Set<Subscription> selfSubscriptions = onboardRestController.calculateSelfSubscriptions(serviceProviders);
+		Set<DataType> selfSubscriptions = onboardRestController.calculateSelfSubscriptions(serviceProviders);
 
 		assertEquals(selfSubscriptions.size(), 3);
-		assertTrue(selfSubscriptions.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
+		assertTrue(selfSubscriptions.containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet())));
 	}
 
+	@Test
+	void postUnknownPropertyNameThrowsBadRequestException() throws Exception {
+		mockCertificate("best service provider");
+		String capabilityApiToServerJson = "{\"version\":\"1.0\",\"name\":\"best service provider\",\"capabilities\":[{\"messageType\":\"DENM\",\"noSuchProperty\":\"pubid\",\"publisherName\":\"pubname\",\"originatingCountry\":\"NO\",\"protocolVersion\":\"1.0\",\"contentType\":\"application/base64\",\"quadTree\":[],\"serviceType\":\"serviceType\",\"causeCode\":\"1\",\"subCauseCode\":\"1\"}]}";
+		mockMvc.perform(
+				post(capabilitiesPath)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(capabilityApiToServerJson))
+				.andDo(print())
+				.andExpect(status().is4xxClientError());
+	}
 }

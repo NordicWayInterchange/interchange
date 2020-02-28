@@ -1,0 +1,49 @@
+## the name which will be used to address the QPID server externally
+# external_name: test.nordic-way.io
+
+interchange:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
+    tag: latest
+qpid:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/qpid
+    tag: latest
+
+  persistence:
+    enabled: false
+    storageClassName: standard
+    size: 10Gi
+
+  ## must provide the name of a k8s secret (in the same namespace)
+  ## which includes a private key and a signed certificate.
+  ## the cert must have the same CN as .Values.external_name
+  # tls_secret_name: qpid-certs
+  server_private_key_file: server.key
+  server_certificate_file: server.crt
+  ca_certificate_file: server.crt
+
+  ## the external IP of the Loadbalanceer. Use if you have static external IP
+  # static_external_ip: 1.2.3.4
+
+  ## credentials used by the interchange server(s)
+  interchange_user: interchange
+  interchange_password: c81b984cd23adb8bada75135ee6bb3e9
+
+  ## admin credentials
+  admin_user: qpid-admin
+  admin_password: d5779aa9d01f422db0b3d1b12b916e09
+
+  ## each user specified here will receive access to the onramp queue as well as their own queue/binding
+  users: []
+  # - name: king_harald
+  #   binding: "originatingCountry='NO'"
+  # - name: king_gustaf
+  #   binding: "originatingCountry='SE'"
+
+  ## if a user requires additional queues, they can be specified here
+  additional_queues: []
+  # - name: odin
+  #   binding: "originatingCountry='valhalla'"
+  #   user: king_harald
+

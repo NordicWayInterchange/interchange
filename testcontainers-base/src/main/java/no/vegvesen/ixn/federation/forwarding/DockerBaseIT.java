@@ -14,10 +14,9 @@ public class DockerBaseIT {
 	protected static final int HTTPS_PORT = 443;
 	protected static final int AMQPS_PORT = 5671;
 	protected static final int AMQP_PORT = 5672;
-	protected static final int JDBC_PORT = 5432;
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";
 
-	private static Path getFolderPath(String dockerFolderName) {
+	protected static Path getFolderPath(String dockerFolderName) {
 		String projectFolder = "interchange";
 
 		String ciWorkdir = System.getenv(CI_WORKDIR);
@@ -59,15 +58,6 @@ public class DockerBaseIT {
 				.withEnv("SERVER_CERTIFICATE_FILE", "/jks/" + serverCertFile)
 				.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/" + serverKeyFile)
 				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
-	}
-
-	protected static GenericContainer getPostgisContainer(String dockerFile) {
-		return new GenericContainer(
-				new ImageFromDockerfile().withFileFromPath(".", getFolderPath(dockerFile)))
-				.withEnv("POSTGRES_USER", "geolookup")
-				.withEnv("POSTGRES_PASSWORD", "geolookup")
-				.withEnv("POSTGRES_DB", "geolookup")
-				.withExposedPorts(JDBC_PORT);
 	}
 
 }

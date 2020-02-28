@@ -4,9 +4,6 @@
 interchange:
   image: eu.gcr.io/nordic-way-aad182cc/interchangenode:latest
 
-postgis:
-  image: eu.gcr.io/nordic-way-aad182cc/postgis:latest
-
 qpid:
   persistence:
     enabled: false
@@ -36,12 +33,12 @@ qpid:
   ## each user specified here will receive access to the onramp queue as well as their own queue/binding
   users: []
   # - name: king_harald
-  #   binding: "where='NO'"
+  #   binding: "originatingCountry='NO'"
   # - name: king_gustaf
-  #   binding: "where='SE'"
+  #   binding: "originatingCountry='SE'"
 
   ## if a user requires additional queues, they can be specified here
   additional_queues: []
   # - name: odin
-  #   binding: "where='valhalla'"
+  #   binding: "originatingCountry='valhalla'"
   #   user: king_harald

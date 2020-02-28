@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
@@ -16,8 +17,6 @@ public class SubscriptionRequest {
 	@SequenceGenerator(name="subreq_generator", sequenceName = "subreq_seq")
 	@Column(name="subreq_id")
 	private Integer subreq_id;
-
-	public enum SubscriptionRequestStatus{REQUESTED, ESTABLISHED, NO_OVERLAP, TEAR_DOWN, EMPTY, FAILED, UNREACHABLE, REJECTED, FEDERATED_ACCESS_GRANTED}
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
@@ -61,9 +60,9 @@ public class SubscriptionRequest {
 
 	public boolean subscriptionRequestRejected(){
 		for(Subscription s : subscription){
-			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.CREATED
-				|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.ACCEPTED
-				|| s.getSubscriptionStatus() == Subscription.SubscriptionStatus.REQUESTED){
+			if(s.getSubscriptionStatus() == SubscriptionStatus.CREATED
+				|| s.getSubscriptionStatus() == SubscriptionStatus.ACCEPTED
+				|| s.getSubscriptionStatus() == SubscriptionStatus.REQUESTED){
 				return false;
 			}
 		}
@@ -72,7 +71,7 @@ public class SubscriptionRequest {
 
 	public boolean subscriptionRequestEstablished(){
 		for(Subscription s : subscription){
-			if(s.getSubscriptionStatus() == Subscription.SubscriptionStatus.CREATED){
+			if(s.getSubscriptionStatus() == SubscriptionStatus.CREATED){
 				return true;
 			}
 		}

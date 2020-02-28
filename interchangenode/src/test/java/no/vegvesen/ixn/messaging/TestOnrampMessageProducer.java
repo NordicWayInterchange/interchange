@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.messaging;
 
+import no.vegvesen.ixn.properties.MessageProperty;
+import no.vegvesen.ixn.util.KeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.jms.TextMessage;
-
-import static no.vegvesen.ixn.MessageProperties.*;
 
 @Component
 public class TestOnrampMessageProducer {
@@ -14,19 +14,30 @@ public class TestOnrampMessageProducer {
     @Autowired
     JmsTemplate jmsTemplate;
 
-    public void sendMessage(float lat, float lon, String who, String userID, String what, String body, long expiration){
+    public void sendMessage(String publisher,
+                            String originatingCountry,
+                            String protocolVersion,
+                            String messageType,
+                            float latitude,
+                            float longitude,
+                            String body,
+                            long expiration,
+                            KeyValue ... additionalValues
+                            ) {
         this.jmsTemplate.send("onramp", session -> {
-
             TextMessage outgoingMessage = session.createTextMessage();
-            outgoingMessage.setFloatProperty(LAT, lat);
-            outgoingMessage.setFloatProperty(LON, lon);
-            outgoingMessage.setStringProperty(WHO, who);
-            outgoingMessage.setStringProperty(USERID, userID);
-            outgoingMessage.setStringProperty(WHAT, what);
+            outgoingMessage.setFloatProperty("latitude",latitude);
+            outgoingMessage.setFloatProperty("longitude",longitude);
+            outgoingMessage.setStringProperty("publisherName",publisher);
+            outgoingMessage.setStringProperty("originatingCountry",originatingCountry);
+            outgoingMessage.setStringProperty("protocolVersion",protocolVersion);
+            outgoingMessage.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(),messageType);
+            for (KeyValue kv : additionalValues) {
+               outgoingMessage.setStringProperty(kv.getKey(),kv.getValue());
+            }
             outgoingMessage.setText(body);
             outgoingMessage.setJMSExpiration(expiration);
             return outgoingMessage;
         });
-
     }
 }

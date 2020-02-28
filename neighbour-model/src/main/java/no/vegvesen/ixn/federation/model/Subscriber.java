@@ -5,5 +5,5 @@ public interface Subscriber {
 
 	SubscriptionRequest getSubscriptionRequest();
 
-	void setSubscriptionRequest(SubscriptionRequest subscriptionRequest);
+	void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus);
 }

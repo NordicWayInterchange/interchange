@@ -1,8 +1,9 @@
 package no.vegvesen.ixn.federation.model;
 
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "subscriptions")
@@ -13,8 +14,6 @@ public class Subscription {
 	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq")
 	@Column(name = "sub_id")
 	private Integer sub_id;
-
-	public enum SubscriptionStatus {REQUESTED, ACCEPTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, GIVE_UP, FAILED, UNREACHABLE, REJECTED}
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;

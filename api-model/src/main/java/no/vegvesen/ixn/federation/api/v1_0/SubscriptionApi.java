@@ -1,5 +1,4 @@
 package no.vegvesen.ixn.federation.api.v1_0;
-import no.vegvesen.ixn.federation.model.Subscription.SubscriptionStatus;
 
 public class SubscriptionApi{
 
@@ -48,4 +47,5 @@ public class SubscriptionApi{
 				", status='" + status + '\'' +
 				'}';
 	}
+
 }

@@ -16,16 +16,13 @@
  */
 package no.vegvesen.ixn.messaging;
 
-import no.vegvesen.ixn.model.IxnMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.jms.TextMessage;
-
-import static no.vegvesen.ixn.MessageProperties.*;
+import javax.jms.Message;
 
 @Component
 public class IxnMessageProducer {
@@ -39,47 +36,9 @@ public class IxnMessageProducer {
 		this.jmsTemplate = jmsTemplate;
 	}
 
-	// Duplicates message for each country and situation record type.
-	public void sendMessage(String destination, final IxnMessage message) {
-
-		for (String country : message.getCountries()) {
-			for (String situationRecordType : message.getWhat()) {
-
-				logger.debug("*** Sending message ***");
-
-				this.jmsTemplate.send(destination, session -> {
-
-					TextMessage outgoingMessage = session.createTextMessage();
-					outgoingMessage.setDoubleProperty(LAT, message.getLat());
-					outgoingMessage.setDoubleProperty(LON, message.getLon());
-					outgoingMessage.setStringProperty(WHO, message.getWho());
-					outgoingMessage.setStringProperty(USERID, message.getUserID());
-					outgoingMessage.setStringProperty(WHERE, country);
-					outgoingMessage.setStringProperty(WHAT, situationRecordType);
-					if (message.getHow() != null) {
-						outgoingMessage.setStringProperty(HOW, message.getHow());
-					}
-					if (message.getWhen() != null) {
-						outgoingMessage.setStringProperty(WHEN, message.getWhen());
-					}
-					outgoingMessage.setJMSExpiration(message.getExpiration());
-					outgoingMessage.setText(message.getBody());
-					logger.debug("sending lon: {} lat: {} who: {} userID: {} country:  {} what: {} body: {}",
-							message.getLon(),
-							message.getLat(),
-							message.getWho(),
-							message.getUserID(),
-							country,
-							situationRecordType,
-							message.getBody());
-					return outgoingMessage;
-				});
-			}
-		}
-	}
-
-	public void sendMessage(String destination, final TextMessage textMessage) {
+	public void sendMessage(String destination, final Message textMessage) {
 		this.jmsTemplate.send(destination, session -> textMessage);
 	}
+
 }
 

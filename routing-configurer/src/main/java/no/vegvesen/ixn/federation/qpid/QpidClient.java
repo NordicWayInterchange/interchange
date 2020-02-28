@@ -1,9 +1,7 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscriber;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -134,12 +132,12 @@ public class QpidClient {
 		SubscriptionRequest subscriptionRequest = toSetUp.getSubscriptionRequest();
 		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
 			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription), exchangeName);
-			subscription.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
+			subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 		}
 		if (toSetUp instanceof ServiceProvider) {
 			addReadAccess(toSetUp, toSetUp.getName());
 		}
-		subscriptionRequest.setStatus(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+		subscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		return subscriptionRequest;
 	}
 

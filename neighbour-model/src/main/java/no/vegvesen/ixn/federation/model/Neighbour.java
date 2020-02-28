@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -39,11 +40,11 @@ public class Neighbour implements Subscriber {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "neighbour_id_sub_out", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_neighbour_sub_out"))
-	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "neighbour_id_fed_in", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_neighbour_fed_in"))
-	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequest.SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
@@ -88,9 +89,13 @@ public class Neighbour implements Subscriber {
 		return subscriptionRequest;
 	}
 
-	@Override
 	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
 		this.subscriptionRequest = subscriptionRequest;
+	}
+
+	@Override
+	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
+		this.subscriptionRequest.setStatus(subscriptionRequestStatus);
 	}
 
 	public SubscriptionRequest getFedIn() {
@@ -139,6 +144,7 @@ public class Neighbour implements Subscriber {
 	}
 
 
+	@SuppressWarnings("WeakerAccess")
 	public LocalDateTime getBackoffStartTime() {
 		return backoffStart;
 	}
@@ -164,7 +170,7 @@ public class Neighbour implements Subscriber {
 		Set<Subscription> subscriptionsForPolling = new HashSet<>();
 
 		for (Subscription subscription : this.getFedIn().getSubscriptions()) {
-			if (subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.REQUESTED) || subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.ACCEPTED)) {
+			if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED) || subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED)) {
 				subscriptionsForPolling.add(subscription);
 			}
 		}
@@ -176,7 +182,7 @@ public class Neighbour implements Subscriber {
 		Set<Subscription> subscriptionsWithStatusFailed = new HashSet<>();
 
 		for (Subscription subscription : this.getFedIn().getSubscriptions()) {
-			if (subscription.getSubscriptionStatus().equals(Subscription.SubscriptionStatus.FAILED)) {
+			if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.FAILED)) {
 				subscriptionsWithStatusFailed.add(subscription);
 			}
 		}
@@ -230,7 +236,7 @@ public class Neighbour implements Subscriber {
 	}
 
 	public boolean hasEstablishedSubscriptions() {
-		return getSubscriptionRequest() != null && getSubscriptionRequest().getStatus() == SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED;
+		return getSubscriptionRequest() != null && getSubscriptionRequest().getStatus() == SubscriptionRequestStatus.ESTABLISHED;
 	}
 
 	public boolean hasCapabilities() {

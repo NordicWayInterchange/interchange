@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 
-import no.vegvesen.ixn.federation.capability.DataTypeSelectorMatcher;
+import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class Self {
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "self_id_sub", foreignKey = @ForeignKey(name="fk_sub_self"))
-	private Set<Subscription> localSubscriptions = new HashSet<>();
+	private Set<DataType> localSubscriptions = new HashSet<>();
 
 	private LocalDateTime lastUpdatedLocalCapabilities;
 	private LocalDateTime lastUpdatedLocalSubscriptions;
@@ -61,18 +61,14 @@ public class Self {
 		}
 	}
 
-	public Set<Subscription> getLocalSubscriptions() {
+	public Set<DataType> getLocalSubscriptions() {
 		return localSubscriptions;
 	}
 
-	public void setLocalSubscriptions(Set<Subscription> localSubscriptions) {
+	public void setLocalSubscriptions(Set<DataType> localSubscriptions) {
 		if(localSubscriptions != null){
 			this.localSubscriptions = localSubscriptions;
 		}
-	}
-
-	public Set<String> getLocalSubscriptionSelectors() {
-		return getLocalSubscriptions().stream().map(Subscription::getSelector).collect(Collectors.toSet());
 	}
 
 	public LocalDateTime getLastUpdatedLocalCapabilities() {
@@ -94,12 +90,10 @@ public class Self {
 	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
-		Set<String> localSelectors = getLocalSubscriptionSelectors();
-		Set<Subscription> calculatedSubscriptions = DataTypeSelectorMatcher.calculateCommonInterestSelectors(neighbourCapsDataTypes, localSelectors).stream().map(selector -> {
-			Subscription subscription = new Subscription();
-			subscription.setSelector(selector);
-			return subscription;
-		}).collect(Collectors.toSet());
+		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)
+				.stream()
+				.map(DataType::toSubscription)
+				.collect(Collectors.toSet());
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;
 	}

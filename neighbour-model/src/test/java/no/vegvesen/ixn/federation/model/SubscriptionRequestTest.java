@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,16 +16,16 @@ public class SubscriptionRequestTest {
 	@Before
 	public void setUp(){
 		norway = new Subscription();
-		norway.setSelector("where='NO'");
+		norway.setSelector("originatingCountry='NO'");
 
 		sweden = new Subscription();
-		sweden.setSelector("where='SE'");
+		sweden.setSelector("originatingCountry='SE'");
 	}
 
 	@Test
 	public void subscriptionRequestWithOneCreatedSubscriptionNotRejected(){
-		norway.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
-		sweden.setSubscriptionStatus(Subscription.SubscriptionStatus.REJECTED);
+		norway.setSubscriptionStatus(SubscriptionStatus.CREATED);
+		sweden.setSubscriptionStatus(SubscriptionStatus.REJECTED);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Stream.of(norway, sweden).collect(Collectors.toSet()));
 
@@ -33,8 +34,8 @@ public class SubscriptionRequestTest {
 
 	@Test
 	public void subscriptionRequestWithOneCreatedSubscriptionIsEstablished(){
-		sweden.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
-		norway.setSubscriptionStatus(Subscription.SubscriptionStatus.REJECTED);
+		sweden.setSubscriptionStatus(SubscriptionStatus.CREATED);
+		norway.setSubscriptionStatus(SubscriptionStatus.REJECTED);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Stream.of(norway, sweden).collect(Collectors.toSet()));
 
@@ -43,8 +44,8 @@ public class SubscriptionRequestTest {
 
 	@Test
 	public void subscriptionRequestWithStatusRejectedIsRejected(){
-		sweden.setSubscriptionStatus(Subscription.SubscriptionStatus.NO_OVERLAP);
-		norway.setSubscriptionStatus(Subscription.SubscriptionStatus.ILLEGAL);
+		sweden.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
+		norway.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Stream.of(norway, sweden).collect(Collectors.toSet()));
 

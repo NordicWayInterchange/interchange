@@ -1,20 +1,25 @@
 package no.vegvesen.interchange;
 
-import no.vegvesen.ixn.*;
+import no.vegvesen.ixn.BasicAuthSink;
+import no.vegvesen.ixn.BasicAuthSource;
+import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 
 public class DebugClient implements MessageListener {
 	private static final String GREEN = "[1;32m";
@@ -61,42 +66,43 @@ public class DebugClient implements MessageListener {
 		try {
 			msg.acknowledge();
 
-			int delay = -1;
-			if (msg.getStringProperty("when") != null) {
-				try {
-					delay = (int) ZonedDateTime.parse(msg.getStringProperty("when")).until(ZonedDateTime.now(), ChronoUnit.MILLIS);
-				} catch (Exception e) {
-					System.err.println("Could not parse \"when\"-field to calculate delay; " + msg.getStringProperty("when"));
-				}
+			long delay = -1;
+			try {
+				long  timestamp = msg.getLongProperty(MessageProperty.TIMESTAMP.getName());
+				delay = System.currentTimeMillis() - timestamp;
+			} catch (Exception e) {
+				System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
 			}
 
-			printWithColor(GREEN, " Got message from " + msg.getStringProperty("who") + " @ delay=" + delay + "ms:");
-			printWithColor(GREEN, " (Msg type: " + msg.getStringProperty("what") + ")\n");
+			String publisherName = msg.getStringProperty(MessageProperty.PUBLISHER_NAME.getName());
+			printWithColor(GREEN, " Got message from " + publisherName + " @ delay=" + delay + "ms:");
+			printWithColor(GREEN, " (Msg type: " + msg.getStringProperty(MessageProperty.MESSAGE_TYPE.getName()) + ")\n");
 			printWithColor(GREEN, " Msg props:");
 			printWithColor(GREEN, " UserID:" + ((JmsMessage) msg).getFacade().getUserId());
 			printWithColor(GREEN, " Type:" + ((JmsMessage) msg).getFacade().getType());
 			printWithColor(GREEN, " Expiration:" + ((JmsMessage) msg).getFacade().getExpiration());
 			printWithColor(GREEN, " App props:");
-			printWithColor(GREEN, " who: " + msg.getStringProperty("who"));
-			printWithColor(GREEN, " how: " + msg.getStringProperty("how"));
-			printWithColor(GREEN, " what: " + msg.getStringProperty("what"));
+			printWithColor(GREEN, " who: " + publisherName);
+			printWithColor(GREEN, " how: " + msg.getStringProperty(MessageProperty.PUBLICATION_TYPE.getName()));
+			printWithColor(GREEN, " what: " + msg.getStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName()));
 			try {
-				printWithColor(GREEN, " lat (String): " + msg.getStringProperty("lat"));
-				printWithColor(GREEN, " lon (String): " + msg.getStringProperty("lon"));
+				printWithColor(GREEN, " lat (String): " + msg.getStringProperty(MessageProperty.LATITUDE.getName()));
+				printWithColor(GREEN, " lon (String): " + msg.getStringProperty(MessageProperty.LONGITUDE.getName()));
 			} catch (Exception ignored) {
 			}
 			try {
-				printWithColor(GREEN, " lat (double): " + msg.getDoubleProperty("lat"));
-				printWithColor(GREEN, " lon (double): " + msg.getDoubleProperty("lon"));
+				printWithColor(GREEN, " lat (double): " + msg.getDoubleProperty(MessageProperty.LATITUDE.getName()));
+				printWithColor(GREEN, " lon (double): " + msg.getDoubleProperty(MessageProperty.LONGITUDE.getName()));
 			} catch (Exception ignored) {
 			}
 			try {
-				printWithColor(GREEN, " lat (float): " + msg.getFloatProperty("lat"));
-				printWithColor(GREEN, " lon (float): " + msg.getFloatProperty("lon"));
+				printWithColor(GREEN, " lat (float): " + msg.getFloatProperty(MessageProperty.LATITUDE.getName()));
+				printWithColor(GREEN, " lon (float): " + msg.getFloatProperty(MessageProperty.LONGITUDE.getName()));
 			} catch (Exception ignored) {
 			}
-			printWithColor(GREEN, " where: " + msg.getStringProperty("where"));
-			printWithColor(GREEN, " when: " + msg.getStringProperty("when") + "\n");
+			printWithColor(GREEN, " where: " + msg.getStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName()));
+			printWithColor(GREEN, " quadTree: " + msg.getStringProperty(MessageProperty.QUAD_TREE.getName()));
+			printWithColor(GREEN, " when: " + msg.getLongProperty(MessageProperty.TIMESTAMP.getName()) + "\n");
 
 			try {
 				printWithColor(GREY, "\t" + ((JmsTextMessage) msg).getText());
@@ -127,16 +133,17 @@ public class DebugClient implements MessageListener {
 		sendMessage("NO", msg);
 	}
 
-	private void sendMessage(String where, String msg) {
+	private void sendMessage(String originatingCountry, String msg) {
 		try {
 			JmsTextMessage message = send.createTextMessage(msg);
-			message.setStringProperty("who", "Norwegian Public Roads Administration");
-			message.setStringProperty("how", "Datex2");
-			message.setStringProperty("what", "Conditions");
-			message.setStringProperty("lat", "63.0");
-			message.setStringProperty("lon", "10.0");
-			message.setStringProperty("where", where);
-			message.setStringProperty("when", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+			message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
+			message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+			message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), Datex2DataTypeApi.DATEX_2 + ";2.3");
+			message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Conditions");
+			message.setStringProperty(MessageProperty.LATITUDE.getName(), "63.0");
+			message.setStringProperty(MessageProperty.LONGITUDE.getName(), "10.0");
+			message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+			message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
 			printWithColor(BROWN, " sending message");
 			printWithColor(BLACK, " ");
 			send.sendTextMessage(message, TIME_TO_LIVE_THIRTY_SECONDS);

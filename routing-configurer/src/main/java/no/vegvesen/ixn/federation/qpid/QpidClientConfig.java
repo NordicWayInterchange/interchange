@@ -26,7 +26,7 @@ public class QpidClientConfig {
 	private HttpClient httpsClient() {
 		return HttpClients.custom()
 				.setSSLContext(sslContext)
-				.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE) //TODO: Use basic auth for qpid client
+				.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
 				.build();
 	}
 

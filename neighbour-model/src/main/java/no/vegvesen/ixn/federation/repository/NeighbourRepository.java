@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.repository;
 
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -18,19 +19,18 @@ public interface NeighbourRepository extends CrudRepository<Neighbour, Integer> 
 
 	List<Neighbour> findByCapabilities_Status(Capabilities.CapabilitiesStatus capabilitiesStatus);
 
-	List<Neighbour> findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus status);
+	List<Neighbour> findBySubscriptionRequest_Status(SubscriptionRequestStatus status);
 
-	List<Neighbour> findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus... statuses);
+	List<Neighbour> findByFedIn_StatusIn(SubscriptionRequestStatus... statuses);
 
-	@SuppressWarnings("SpringDataRepositoryMethodParametersInspection")
-	List<Neighbour> findNeighboursByFedIn_Subscription_SubscriptionStatusIn(Subscription.SubscriptionStatus... subscriptionStatus);
+	List<Neighbour> findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus... subscriptionStatus);
 
-	List<Neighbour> findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus capabilitiesStatus, SubscriptionRequest.SubscriptionRequestStatus requestStatus);
+	List<Neighbour> findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus capabilitiesStatus, SubscriptionRequestStatus requestStatus);
 
 	@Query(value = "select distinct i from Neighbour i join i.subscriptionRequest sr join sr.subscription s where sr.status = :subscriptionRequestStatus and s.subscriptionStatus = :subscriptionStatus")
 	List<Neighbour> findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(
-			@Param("subscriptionRequestStatus") SubscriptionRequest.SubscriptionRequestStatus subscriptionRequestStatus,
-			@Param("subscriptionStatus") Subscription.SubscriptionStatus subscriptionStatus
+			@Param("subscriptionRequestStatus") SubscriptionRequestStatus subscriptionRequestStatus,
+			@Param("subscriptionStatus") SubscriptionStatus subscriptionStatus
 	);
 
 }

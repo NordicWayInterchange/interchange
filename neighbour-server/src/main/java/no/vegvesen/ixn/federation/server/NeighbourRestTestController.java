@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.server;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
@@ -67,7 +65,7 @@ public abstract class NeighbourRestTestController {
 		if(Neighbour != null){
 			try {
 				Subscription updateSubscription = Neighbour.getSubscriptionById(subscriptionId);
-				updateSubscription.setSubscriptionStatus(Subscription.SubscriptionStatus.CREATED);
+				updateSubscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 				neighbourRepository.save(Neighbour);
 				return updateSubscription;
 
@@ -98,8 +96,8 @@ public abstract class NeighbourRestTestController {
 	@Secured("ROLE_USER")
 	public CapabilityApi updateCapabilities(@RequestBody CapabilityApi neighbourCapabilities) {
 
-		DataType volvoDataTypeOne = new DataType("datex2;1.0", "NO", "Works" );
-		DataType volvoDataTypeTwo = new DataType("datex2;1.0", "NO", "Conditions");
+		DataTypeApi volvoDataTypeOne = new Datex2DataTypeApi("NO");
+		DataTypeApi volvoDataTypeTwo = new Datex2DataTypeApi("NO");
 
 		CapabilityApi capabilityApi = new CapabilityApi();
 		capabilityApi.setCapabilities(Stream.of(volvoDataTypeOne, volvoDataTypeTwo).collect(Collectors.toSet()));
@@ -117,20 +115,20 @@ public abstract class NeighbourRestTestController {
 		logger.info("Poll nr: {}", pollingCounter);
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("where LIKE 'NO'");
+		subscriptionApi.setSelector("originatingCountry = 'NO'");
 		subscriptionApi.setPath(ixnName + "/subscription/"+subscriptionId);
-		subscriptionApi.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
 
 		if(pollingCounter <= 2){
 			logger.info(" - Returning subscription");
 			return subscriptionApi;
-		}else if( pollingCounter >= 3 && pollingCounter <=4){
+		}else if(pollingCounter <= 4){
 			logger.error(" - Throwing error!!!");
 			throw new RuntimeException("Error error ");
-		}else if(pollingCounter >= 5 && pollingCounter <= 6){
+		}else if(pollingCounter <= 6){
 			logger.info(" - Returning subscription");
 			return subscriptionApi;
-		}else if(pollingCounter >= 7 && pollingCounter <= 9){
+		}else if(pollingCounter <= 9){
 			logger.info(" - Throwing error!!!!");
 			throw new RuntimeException("Error error again");
 		}else{

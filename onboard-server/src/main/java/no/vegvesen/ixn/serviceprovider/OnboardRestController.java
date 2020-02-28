@@ -1,16 +1,17 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.capability.DataTypeSelectorMatcher;
-import no.vegvesen.ixn.federation.exceptions.*;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Self;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
+import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
+import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
+import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
+import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
+import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionsApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,20 +22,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 
 @RestController
 public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final SelfRepository selfRepository;
-	private CapabilityTransformer capabilityTransformer;
-	private SubscriptionRequestTransformer subscriptionRequestTransformer;
+	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 
 	@Value("${interchange.node-provider.name}")
@@ -42,14 +40,9 @@ public class OnboardRestController {
 
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
-								 SelfRepository selfRepository,
-								 CapabilityTransformer capabilityTransformer,
-								 SubscriptionRequestTransformer subscriptionRequestTransformer) {
+								 SelfRepository selfRepository) {
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.selfRepository = selfRepository;
-		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
-		this.capabilityTransformer = capabilityTransformer;
-
 	}
 
 
@@ -65,13 +58,13 @@ public class OnboardRestController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = CAPABILITIES_PATH , produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, path = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	public CapabilityApi addCapabilities(@RequestBody CapabilityApi capabilityApi) {
 		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
 		logger.info("Capabilities - Received POST from Service Provider: {}", capabilityApi.getName());
 
-		if(capabilityApi.getCapabilities().isEmpty()){
+		if (capabilityApi.getCapabilities().isEmpty()) {
 			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to add.");
 		}
 
@@ -88,19 +81,19 @@ public class OnboardRestController {
 		} else {
 			// Add the incoming capabilities to the capabilities of the Service Provider.
 			Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
-			Set<DataType> capabilitiesToAdd = capabilityApi.getCapabilities();
+			Set<DataTypeApi> capabilitiesToAdd = capabilityApi.getCapabilities();
 
-			if(currentServiceProviderCapabilities.containsAll(capabilitiesToAdd)){
+			if (currentServiceProviderCapabilities.containsAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToAdd))) {
 				throw new CapabilityPostException("The posted capabilities already exist in the Service Provider capabilities. Nothing to add.");
 			}
 
-			currentServiceProviderCapabilities.addAll(capabilitiesToAdd);
+			currentServiceProviderCapabilities.addAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToAdd));
 		}
 
 		logger.info("Service provider to update: {}", serviceProviderToUpdate.toString());
 
 		//TODO this could be done in one method in Capabilities.
-		if(serviceProviderToUpdate.getCapabilities().hasDataTypes()) {
+		if (serviceProviderToUpdate.getCapabilities().hasDataTypes()) {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		}
 		// Save the Service Provider representation in the database.
@@ -123,7 +116,7 @@ public class OnboardRestController {
 
 		logger.info("Capabilities - Received DELETE from Service Provider: {}", capabilityApi.getName());
 
-		if(capabilityApi.getCapabilities().isEmpty()){
+		if (capabilityApi.getCapabilities().isEmpty()) {
 			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to delete.");
 		}
 
@@ -143,18 +136,18 @@ public class OnboardRestController {
 
 		// Service provider already exists. Remove the incoming capabilities from the Service Provider capabilities.
 		Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
-		Set<DataType> capabilitiesToDelete = capabilityApi.getCapabilities();
+		Set<DataTypeApi> capabilitiesToDelete = capabilityApi.getCapabilities();
 
-		if(!currentServiceProviderCapabilities.containsAll(capabilitiesToDelete)){
+		if (!currentServiceProviderCapabilities.containsAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToDelete))) {
 			throw new CapabilityPostException("The incoming capabilities to delete are not all in the Service Provider capabilities. Cannot delete capabilities that don't exist.");
 
 		}
 
-		currentServiceProviderCapabilities.removeAll(capabilitiesToDelete);
+		currentServiceProviderCapabilities.removeAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToDelete));
 
-		if(currentServiceProviderCapabilities.size() == 0){
+		if (currentServiceProviderCapabilities.size() == 0) {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-		}else{
+		} else {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		}
 
@@ -172,12 +165,12 @@ public class OnboardRestController {
 		return capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
 	}
 
-	private void updateSelfCapabilities(Self self, Set<DataType> previousCapabilities, Set<DataType> updatedCapabilities){
+	private void updateSelfCapabilities(Self self, Set<DataType> previousCapabilities, Set<DataType> updatedCapabilities) {
 		// If old version and updated version of the capabilities are not equal, then we update the timestamp
 		logger.info("Previous capabilities: {}", previousCapabilities);
 		logger.info("Updated capabilities:  {}", updatedCapabilities);
 
-		if(!previousCapabilities.equals(updatedCapabilities)){
+		if (!previousCapabilities.equals(updatedCapabilities)) {
 			logger.info("Capabilities have changed. Updating representation of self.");
 			self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 			self.setLocalCapabilities(updatedCapabilities);
@@ -203,12 +196,13 @@ public class OnboardRestController {
 	}
 
 
-	private void updateSelfSubscriptions(Self self, Set<Subscription> previousSubscriptions, Set<Subscription> updatedSubscriptions){
+	//TODO: simplify self updates: get service providers from db, aggregate, store
+	private void updateSelfSubscriptions(Self self, Set<DataType> previousSubscriptions, Set<DataType> updatedSubscriptions) {
 
 		logger.info("Previous subscriptions: {}", previousSubscriptions.toString());
 		logger.info("Updated subscriptions: {}", updatedSubscriptions.toString());
 
-		if(!previousSubscriptions.equals(updatedSubscriptions)){
+		if (!previousSubscriptions.equals(updatedSubscriptions)) {
 			logger.info("Subscriptions have changed. Updating representation of self.");
 			self.setLocalSubscriptions(updatedSubscriptions);
 			self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
@@ -219,13 +213,13 @@ public class OnboardRestController {
 		}
 	}
 
-	Set<Subscription> calculateSelfSubscriptions(Iterable<ServiceProvider> serviceProviders){
+	Set<DataType> calculateSelfSubscriptions(Iterable<ServiceProvider> serviceProviders) {
 		logger.info("Calculating Self subscriptions...");
-		Set<Subscription> localSubscriptions = new HashSet<>();
+		Set<DataType> localSubscriptions = new HashSet<>();
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
 			logger.info("Service provider name: {}", serviceProvider.getName());
-			Set<Subscription> serviceProviderSubscriptions = serviceProvider.getSubscriptionRequest().getSubscriptions();
+			Set<DataType> serviceProviderSubscriptions = serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions();
 			logger.info("Service Provider Subscriptions: {}", serviceProviderSubscriptions.toString());
 			localSubscriptions.addAll(serviceProviderSubscriptions);
 		}
@@ -233,65 +227,51 @@ public class OnboardRestController {
 		return localSubscriptions;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = SUBSCRIPTION_PATH)
-	public SubscriptionRequestApi addSubscriptions(@RequestBody SubscriptionRequestApi subscriptionRequestApi) {
-		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
+	public DataTypeApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
+		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		logger.info("Subscription - Received POST from Service Provider: {}", subscriptionRequestApi.getName());
+		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
 
-		if(subscriptionRequestApi.getSubscriptions().isEmpty()){
-			throw new SubscriptionRequestException("Bad api object for Subscription Request. The Subscription Request api object had no subscriptions. Nothing to add.");
+		if (dataTypeApi == null) {
+			throw new SubscriptionRequestException("Bad api object for Subscription Request. The DataTypeApi object was null. Nothing to add.");
 		}
 
-		ServiceProvider incomingPost = subscriptionRequestTransformer.subscriptionRequestApiToServiceProvider(subscriptionRequestApi);
-		logger.info("Incoming service provider post: {}", incomingPost.toString());
+		logger.info("Service provider {} Incoming subscription post: {}", serviceProviderName, dataTypeApi.toString());
+		DataType newLocalSubscription = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
+		serviceProviderRepository.findByName(serviceProviderName);
 
-		Set<Subscription> incomingSubscriptions = incomingPost.getSubscriptionRequest().getSubscriptions();
-		for (Subscription subscription : incomingSubscriptions) {
-			String selector = subscription.getSelector();
-			try {
-				DataTypeSelectorMatcher.validateSelector(selector);
-			} catch (SelectorAlwaysTrueException | InvalidSelectorException e) {
-				throw new SubscriptionRequestException("Error validating incoming subscription",e);
-			}
-		}
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
 		Self self = fetchSelf();
-		Set<Subscription> previousSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
+		Set<DataType> previousSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
 
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(subscriptionRequestApi.getName());
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProviderToUpdate == null) {
-			logger.info("The posting Service Provider does not exist in the database. Converting incoming API object to Service Provider.");
-			serviceProviderToUpdate = subscriptionRequestTransformer.subscriptionRequestApiToServiceProvider(subscriptionRequestApi);
+			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
+			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
+			serviceProviderToUpdate.setLocalSubscriptionRequest(new LocalSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, newLocalSubscription));
 		} else {
 			// Add the subscriptions to the Service Provider subscription request.
-			Set<Subscription> currentServiceProviderSubscriptions = serviceProviderToUpdate.getSubscriptionRequest().getSubscriptions();
-			Set<Subscription> subscriptionsToAdd = incomingPost.getSubscriptionRequest().getSubscriptions();
-
-			if(currentServiceProviderSubscriptions.containsAll(subscriptionsToAdd)){
-				throw new SubscriptionRequestException("The Service Provider subscriptions already exist. Nothing to add.");
-			}
-
-			currentServiceProviderSubscriptions.addAll(subscriptionsToAdd);
+			LocalSubscriptionRequest localSubscriptionRequest = serviceProviderToUpdate.getOrCreateLocalSubscriptionRequest();
+			localSubscriptionRequest.addLocalSubscription(newLocalSubscription);
+			// Flip Service Provider Subscription request to REQUESTED so it will be picked up the the routing configurer.
+			localSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
 		}
-
-		// Flip Service Provider Subscription request to REQUESTED so it will be picked up the the routing configurer.
-		serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
 
 		// Save updated Service Provider in the database.
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		// Get the current Self subscriptions. Recalculate the Self subscriptions now that a Service Provider has been updated.
-		Self  updatedSelf = selfRepository.findByName(nodeProviderName);
+		Self updatedSelf = selfRepository.findByName(nodeProviderName);
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-		Set<Subscription> updatedSelfSubscriptions = calculateSelfSubscriptions(serviceProviders);
+		Set<DataType> updatedSelfSubscriptions = calculateSelfSubscriptions(serviceProviders);
 
 		// Update representation of Self if it has changed.
 		updateSelfSubscriptions(updatedSelf, previousSelfSubscriptions, updatedSelfSubscriptions);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
 
-		SubscriptionRequestApi returnSubscriptionRequest = subscriptionRequestTransformer.serviceProviderToSubscriptionRequestApi(serviceProviderToUpdate);
+		DataTypeApi returnSubscriptionRequest = dataTypeTransformer.dataTypeToApi(newLocalSubscription);
 		logger.info("Returning Service Provider as subscription request API: {}", returnSubscriptionRequest.toString());
 
 		return returnSubscriptionRequest;
@@ -307,49 +287,44 @@ public class OnboardRestController {
 		return self;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = SUBSCRIPTION_PATH)
-	public SubscriptionRequestApi deleteSubscription(@RequestBody SubscriptionRequestApi subscriptionRequestApi){
-		checkIfCommonNameMatchesNameInApiObject(subscriptionRequestApi.getName());
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscriptions/{dataTypeId}")
+	public void deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) {
+		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		logger.info("Subscription - Received DELETE from Service Provider");
-
-		if(subscriptionRequestApi.getSubscriptions().isEmpty()){
-			throw new SubscriptionRequestException("Bad API object for subscription request. The subscriptions to delete were empty.");
-		}
-
-		ServiceProvider incomingPost = subscriptionRequestTransformer.subscriptionRequestApiToServiceProvider(subscriptionRequestApi);
-		logger.info("Incoming service provider post: {}", incomingPost.toString());
-
+		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
 		Self self = fetchSelf();
 
-		Set<Subscription> currentSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
+		Set<DataType> currentSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
 
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(subscriptionRequestApi.getName());
-		if(serviceProviderToUpdate == null){
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProviderToUpdate == null) {
 			throw new SubscriptionRequestException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
-		}else if(serviceProviderToUpdate.getSubscriptionRequest().getSubscriptions().isEmpty()){
+		}
+		LocalSubscriptionRequest localSubscriptionRequest = serviceProviderToUpdate.getOrCreateLocalSubscriptionRequest();
+		Set<DataType> currentServiceProviderSubscriptions = localSubscriptionRequest.getSubscriptions();
+		if (currentServiceProviderSubscriptions.isEmpty()) {
 			throw new SubscriptionRequestException("The Service Provider trying to delete a subscription has no existing subscriptions. Nothing to delete.");
 		}
+		Optional<DataType> subscriptionToDelete = currentServiceProviderSubscriptions
+				.stream()
+				.filter(dataType -> dataType.getData_id().equals(dataTypeId))
+				.findFirst();
 
-		Set<Subscription> currentServiceProviderSubscriptions = serviceProviderToUpdate.getSubscriptionRequest().getSubscriptions();
-		Set<Subscription> subscriptionsToDelete = incomingPost.getSubscriptionRequest().getSubscriptions();
-
-		if(!currentServiceProviderSubscriptions.containsAll(subscriptionsToDelete)){
+		if (!subscriptionToDelete.isPresent()) {
 			throw new SubscriptionRequestException("The incoming subscriptions to delete are not all in the Service Provider subscriptions. Cannot delete subscriptions that don't exist.");
 		}
+		currentServiceProviderSubscriptions.remove(subscriptionToDelete.get());
 
-		currentServiceProviderSubscriptions.removeAll(subscriptionsToDelete);
-
-		if(currentServiceProviderSubscriptions.isEmpty()){
+		if (currentServiceProviderSubscriptions.isEmpty()) {
 			// Subscription is now empty, notify Routing Configurer to tear down the queue.
 			logger.info("Service Provider subscriptions are now empty. Setting status to TEAR_DOWN.");
-			serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.TEAR_DOWN);
-		}else{
+			localSubscriptionRequest.setStatus(SubscriptionRequestStatus.TEAR_DOWN);
+		} else {
 			// Flip status to REQUESTED to notify Routing Configurer to change the queue filter.
 			logger.info("Service Provider subscriptions were updated, but are not empty. Setting status to REQUESTED");
-			serviceProviderToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequest.SubscriptionRequestStatus.REQUESTED);
+			localSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
 		}
 
 		// Save updated Service Provider
@@ -357,21 +332,20 @@ public class OnboardRestController {
 
 		Self updatedSelfRepresentation = selfRepository.findByName(nodeProviderName);
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-		Set<Subscription> updatedSelfSubscriptions = calculateSelfSubscriptions(serviceProviders);
+		Set<DataType> updatedSelfSubscriptions = calculateSelfSubscriptions(serviceProviders);
 
 		updateSelfSubscriptions(updatedSelfRepresentation, currentSelfSubscriptions, updatedSelfSubscriptions);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
-		return subscriptionRequestTransformer.serviceProviderToSubscriptionRequestApi(serviceProviderToUpdate);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = SP_CAPS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-	public CapabilityApi getServiceProviderCapabilities(@PathVariable String serviceProviderName)throws Exception{
+	@RequestMapping(method = RequestMethod.GET, path = "/capabilities/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public CapabilityApi getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
 
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-		if(serviceProvider == null){
+		if (serviceProvider == null) {
 			throw new RuntimeException("The requesting Service Provider does not exist in the database."); // TODO: Change to a better exception?
 		}
 
@@ -380,17 +354,25 @@ public class OnboardRestController {
 
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = SP_SUBREQ_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-	public SubscriptionRequestApi getServiceProviderSubscriptionRequest(@PathVariable String serviceProviderName){
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public LocalSubscriptionsApi getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
 
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-		if(serviceProvider == null){
+		if (serviceProvider == null) {
 			throw new RuntimeException("The requesting Service Provider does not exist in the database."); // TODO: Change to a better exception?
 		}
 
-		return subscriptionRequestTransformer.serviceProviderToSubscriptionRequestApi(serviceProvider);
+		return transformToLocalSubscriptionsApi(serviceProvider);
+	}
+
+	private LocalSubscriptionsApi transformToLocalSubscriptionsApi(ServiceProvider serviceProvider) {
+		List<DataTypeApiId> idDataTypes = new LinkedList<>();
+		for (DataType subscription : serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions()) {
+			idDataTypes.add(new DataTypeApiId(subscription.getData_id(), dataTypeTransformer.dataTypeToApi(subscription)));
+		}
+		return new LocalSubscriptionsApi(idDataTypes);
 	}
 
 	// TODO: Remove
@@ -410,11 +392,8 @@ public class OnboardRestController {
 
 	// TODO: Remove
 	@RequestMapping(method = RequestMethod.GET, path = "/getSelfRepresentation", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Self getSelfRepresentation(){
-
-		Self self = fetchSelf();
-
-		return self;
+	public Self getSelfRepresentation() {
+		return fetchSelf();
 	}
 
 }

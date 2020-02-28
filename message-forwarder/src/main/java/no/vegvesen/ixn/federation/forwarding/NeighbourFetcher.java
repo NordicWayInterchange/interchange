@@ -1,13 +1,14 @@
 package no.vegvesen.ixn.federation.forwarding;
 
 import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@SuppressWarnings("WeakerAccess")
 @Component
 public class NeighbourFetcher {
     private NeighbourRepository repository;
@@ -19,8 +20,7 @@ public class NeighbourFetcher {
     }
 
     public List<Neighbour> listNeighbourCandidates() {
-        List<Neighbour> interchanges = repository.findBySubscriptionRequest_Status(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
-        return interchanges;
+		return repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.ESTABLISHED);
     }
 
 }
