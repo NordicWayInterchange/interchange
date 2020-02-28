@@ -25,7 +25,7 @@ public class NeighbourFetcher {
     }
 */
     public List<Neighbour> listNeighboursToConsumeFrom() {
-        List<Neighbour> neighbours = repository.findByFedIn_StatusIn(SubscriptionRequest.SubscriptionRequestStatus.ESTABLISHED);
+        List<Neighbour> neighbours = repository.findByFedIn_StatusIn(SubscriptionRequestStatus.ESTABLISHED);
         return neighbours;
     }
 }
