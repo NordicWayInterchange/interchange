@@ -9,8 +9,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
-import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
-import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
+import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
 import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionsApi;
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ public class OnboardRestController {
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final SelfRepository selfRepository;
 	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
-	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(new SubscriptionTransformer());
+	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 
 	@Value("${interchange.node-provider.name}")
@@ -84,11 +83,11 @@ public class OnboardRestController {
 			Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
 			Set<DataTypeApi> capabilitiesToAdd = capabilityApi.getCapabilities();
 
-			if (currentServiceProviderCapabilities.containsAll(capabilityTransformer.dataTypeApiToDataType(capabilitiesToAdd))) {
+			if (currentServiceProviderCapabilities.containsAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToAdd))) {
 				throw new CapabilityPostException("The posted capabilities already exist in the Service Provider capabilities. Nothing to add.");
 			}
 
-			currentServiceProviderCapabilities.addAll(capabilityTransformer.dataTypeApiToDataType(capabilitiesToAdd));
+			currentServiceProviderCapabilities.addAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToAdd));
 		}
 
 		logger.info("Service provider to update: {}", serviceProviderToUpdate.toString());
@@ -139,12 +138,12 @@ public class OnboardRestController {
 		Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
 		Set<DataTypeApi> capabilitiesToDelete = capabilityApi.getCapabilities();
 
-		if (!currentServiceProviderCapabilities.containsAll(capabilityTransformer.dataTypeApiToDataType(capabilitiesToDelete))) {
+		if (!currentServiceProviderCapabilities.containsAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToDelete))) {
 			throw new CapabilityPostException("The incoming capabilities to delete are not all in the Service Provider capabilities. Cannot delete capabilities that don't exist.");
 
 		}
 
-		currentServiceProviderCapabilities.removeAll(capabilityTransformer.dataTypeApiToDataType(capabilitiesToDelete));
+		currentServiceProviderCapabilities.removeAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToDelete));
 
 		if (currentServiceProviderCapabilities.size() == 0) {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
@@ -239,7 +238,7 @@ public class OnboardRestController {
 		}
 
 		logger.info("Service provider {} Incoming subscription post: {}", serviceProviderName, dataTypeApi.toString());
-		DataType newLocalSubscription = capabilityTransformer.dataTypeApiToDataType(dataTypeApi);
+		DataType newLocalSubscription = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
 		serviceProviderRepository.findByName(serviceProviderName);
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
@@ -272,7 +271,7 @@ public class OnboardRestController {
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
 
-		DataTypeApi returnSubscriptionRequest = capabilityTransformer.dataTypeToApi(newLocalSubscription);
+		DataTypeApi returnSubscriptionRequest = dataTypeTransformer.dataTypeToApi(newLocalSubscription);
 		logger.info("Returning Service Provider as subscription request API: {}", returnSubscriptionRequest.toString());
 
 		return returnSubscriptionRequest;
@@ -371,7 +370,7 @@ public class OnboardRestController {
 	private LocalSubscriptionsApi transformToLocalSubscriptionsApi(ServiceProvider serviceProvider) {
 		List<DataTypeApiId> idDataTypes = new LinkedList<>();
 		for (DataType subscription : serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions()) {
-			idDataTypes.add(new DataTypeApiId(subscription.getData_id(), capabilityTransformer.dataTypeToApi(subscription)));
+			idDataTypes.add(new DataTypeApiId(subscription.getData_id(), dataTypeTransformer.dataTypeToApi(subscription)));
 		}
 		return new LocalSubscriptionsApi(idDataTypes);
 	}

@@ -1,14 +1,15 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
-import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
+import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Rule;
@@ -60,8 +61,7 @@ public class OnboardRestControllerTest {
 	@MockBean
 	private NeighbourRepository neighbourRepository;
 
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
-	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
+	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 
 	@Autowired
 	private OnboardRestController onboardRestController;
@@ -124,7 +124,7 @@ public class OnboardRestControllerTest {
 
 		// Mock existing service provider with two capabilities in database
 		ServiceProvider secondServiceProvider = new ServiceProvider("Second Service Provider");
-		Set<DataType> capabilities = capabilityTransformer.dataTypeApiToDataType(Stream.of(a, b).collect(Collectors.toSet()));
+		Set<DataType> capabilities = dataTypeTransformer.dataTypeApiToDataType(Stream.of(a, b).collect(Collectors.toSet()));
 		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
 
