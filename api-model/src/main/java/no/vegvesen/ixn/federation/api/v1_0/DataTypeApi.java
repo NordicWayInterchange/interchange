@@ -156,14 +156,15 @@ public class DataTypeApi {
 		return values;
 	}
 
-	void putValue(Map<String, String> values, MessageProperty messageProperty, Set<String> value) {
+	static void putValue(Map<String, String> values, MessageProperty messageProperty, Set<String> value) {
 		if (value != null && value.size() > 0) {
 			String join = String.join(",", value);
 			values.put(messageProperty.getName(), join);
 		}
 	}
 
-	void putIntegerValue(Map<String, String> values, MessageProperty messageProperty, Set<Integer> value) {
+	@SuppressWarnings("SameParameterValue")
+	static void putIntegerValue(Map<String, String> values, MessageProperty messageProperty, Set<Integer> value) {
 		if (value != null && value.size() > 0) {
 			Set<String> stringIntegers = Stream.of(value).flatMap(Collection::stream).map(Object::toString).collect(Collectors.toSet());
 			String join = String.join(",", stringIntegers);
@@ -171,13 +172,14 @@ public class DataTypeApi {
 		}
 	}
 
-	void putValue(Map<String, String> values, MessageProperty messageProperty, String value) {
+	static void putValue(Map<String, String> values, MessageProperty messageProperty, String value) {
 		if (value != null && value.length() > 0) {
 			values.put(messageProperty.getName(), value);
 		}
 	}
 
-	void putValue(Map<String, String> values, MessageProperty messageProperty, Integer value) {
+	@SuppressWarnings("SameParameterValue")
+	static void putValue(Map<String, String> values, MessageProperty messageProperty, Integer value) {
 		if (value != null) {
 			values.put(messageProperty.getName(), value.toString());
 		}
