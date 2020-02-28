@@ -1,29 +1,29 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: {{ .Release.Name }}-message-forwarder
+  name: {{ .Release.Name }}-message-collector
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    component: message-forwarder
+    component: message-collector
     release: {{ .Release.Name }}
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
-      component: message-forwarder
+      component: message-collector
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
         app: {{ .Chart.Name }}
-        component: message-forwarder
+        component: message-collector
         release: {{ .Release.Name }}
     spec:
       containers:
-      - name: message-forwarder
-        image: "{{ .Values.message_forwarder.image.repository }}:{{ .Values.message_forwarder.image.tag }}"
+      - name: message-collector
+        image: "{{ .Values.message_collector.image.repository }}:{{ .Values.message_collector.image.tag }}"
         env:
         - name: POSTGRES_URI
           value: jdbc:postgresql://{{ .Release.Name }}-database:5432/federation
@@ -32,7 +32,7 @@ spec:
         - name: KEY_STORE_PASSWORD
           value: {{ .Values.self.key_store_password | quote }}
         - name: KEY_STORE_TYPE
-          value: {{ .Values.message_forwarder.key_store_type | quote }}
+          value: {{ .Values.message_collector.key_store_type | quote }}
         - name: DOMAIN_NAME
           value: {{ .Values.self.domain_name | quote }}
         - name: TRUST_STORE
@@ -40,11 +40,11 @@ spec:
         - name: TRUST_STORE_PASSWORD
           value: {{ .Values.self.trust_store_password | quote }}
         - name: TRUST_STORE_TYPE
-          value: {{ .Values.message_forwarder.trust_store_type | quote }}
+          value: {{ .Values.message_collector.trust_store_type | quote }}
         - name: SERVER_NAME
           value: {{ .Values.external_name | quote }}
         - name: LOG_LEVELS
-          value: "{{- range .Values.message_forwarder.logging -}}
+          value: "{{- range .Values.message_collector.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                   {{- end }}"
         volumeMounts:
