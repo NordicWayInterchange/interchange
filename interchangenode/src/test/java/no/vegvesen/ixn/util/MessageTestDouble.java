@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.util;
 
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.jms.Destination;
@@ -10,6 +11,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("RedundantThrows")
 public class MessageTestDouble implements Message {
 
     private final Map<String, String> properties;
@@ -196,7 +198,8 @@ public class MessageTestDouble implements Message {
         return properties.get(name);
     }
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     public Enumeration getPropertyNames() throws JMSException {
         throw new IllegalStateException("Method not implemented");
     }
@@ -298,12 +301,12 @@ public class MessageTestDouble implements Message {
         KeyValue... additionalProperties) {
 
         Map<String, String> properties = new HashMap<>();
-        properties.put("publisherName",publisher);
-        properties.put("originatingCountry",originatingCountry);
-        properties.put("protocolVersion",protocolVersion);
+        properties.put(MessageProperty.PUBLISHER_NAME.getName(),publisher);
+        properties.put(MessageProperty.ORIGINATING_COUNTRY.getName(),originatingCountry);
+        properties.put(MessageProperty.PROTOCOL_VERSION.getName(),protocolVersion);
         properties.put(MessageProperty.MESSAGE_TYPE.getName(),messageType);
-        properties.put("latitude",latitude);
-        properties.put("longitude",longitude);
+        properties.put(MessageProperty.LATITUDE.getName(),latitude);
+        properties.put(MessageProperty.LONGITUDE.getName(),longitude);
         for (KeyValue kv : additionalProperties) {
             properties.put(kv.getKey(),kv.getValue());
         }
@@ -319,7 +322,7 @@ public class MessageTestDouble implements Message {
         return createMessage(publisher,
                 originatingCountry,
                 protocolVersion,
-                "DATEX2",
+				Datex2DataTypeApi.DATEX_2,
                 latitude,
                 longitude,
                 additionalProperties);
