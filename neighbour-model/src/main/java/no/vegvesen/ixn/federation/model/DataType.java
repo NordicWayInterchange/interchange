@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;
@@ -96,7 +94,8 @@ public class DataType {
 		if (commaSeparatedString == null) {
 			return Collections.emptyList();
 		}
-		return Stream.of(Lists.newArrayList(commaSeparatedString.split(","))).flatMap(Collection::stream)
+		List<String> elements = Arrays.asList(commaSeparatedString.split(","));
+		return elements.stream()
 				.filter(s -> s.length() > 0)
 				.collect(Collectors.toList());
 	}
@@ -106,7 +105,7 @@ public class DataType {
 		if (propertyValueAsList.isEmpty()) {
 			return Collections.emptySet();
 		}
-		return Sets.newHashSet(propertyValueAsList);
+		return new HashSet<>(propertyValueAsList);
 	}
 
 	public Integer getPropertyValueAsInteger(MessageProperty messageProperty) {
@@ -138,7 +137,7 @@ public class DataType {
 	public boolean matches(DataType other) {
 		Set<String> thisKeys = values.keySet();
 		Set<String> otherKeys = other.values.keySet();
-		Sets.SetView<String> commonKeys = Sets.intersection(thisKeys, otherKeys);
+		Set<String> commonKeys = intersection(thisKeys, otherKeys);
 		for (String key : commonKeys) {
 			boolean match = matches(key, this.getValues().get(key), other.getValues().get(key));
 			if (!match) {
@@ -170,7 +169,13 @@ public class DataType {
 	static boolean matchesArray(String v1, String v2) {
 		Set<String> v1values = new HashSet<>(getListElements(v1));
 		Set<String> v2values = new HashSet<>(getListElements(v2));
-		return !Sets.intersection(v1values, v2values).isEmpty();
+		return !intersection(v1values, v2values).isEmpty();
+	}
+
+	private static Set<String> intersection(Set<String> v1values, Set<String> v2values) {
+		Set<String> intersection = new HashSet<>(v1values);
+		intersection.retainAll(v2values);
+		return intersection;
 	}
 
 	static boolean matchesSingleValue(String v1, String v2) {
