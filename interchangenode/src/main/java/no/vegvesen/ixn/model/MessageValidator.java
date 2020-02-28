@@ -19,40 +19,30 @@ public class MessageValidator {
 
     private PropertyExistsValidator propertyExistsValidator = new PropertyExistsValidator();
 
-
     public boolean isValid(Message message) {
 		String messageType = getMessageType(message);
 		if (messageType == null) {
 			logger.error("Could not get messageType from message");
 			return false;
 		}
+		Set<String> mandatoryPropertyNames;
 		switch (messageType) {
 			case Datex2DataTypeApi.DATEX_2:
-				//validate the datex message;
-				if (!validateProperties(message, MessageProperty.mandatoryDatex2PropertyNames)) {
-					return false;
-				}
+				mandatoryPropertyNames = MessageProperty.mandatoryDatex2PropertyNames;
 				break;
 			case DenmDataTypeApi.DENM:
-				//validate the DENM message;
-				if (!validateProperties(message, MessageProperty.mandatoryDenmPropertyNames)) {
-					return false;
-				}
+				mandatoryPropertyNames = MessageProperty.mandatoryDenmPropertyNames;
 				break;
 			case IviDataTypeApi.IVI:
-				//validate the IVI message;
-				if (!validateProperties(message, MessageProperty.mandatoryIviPropertyNames)) {
-					return false;
-				}
+				mandatoryPropertyNames = MessageProperty.mandatoryIviPropertyNames;
 				break;
 			default:
 				return false;
-
 		}
-		return true;
+		return validProperties(message, mandatoryPropertyNames);
     }
 
-    private boolean validateProperties(Message message, Set<String> propertyNames) {
+    private boolean validProperties(Message message, Set<String> propertyNames) {
 		for (String propertyName : propertyNames) {
 			if (!propertyExistsValidator.validateProperty(message, propertyName)) {
 				logger.warn("propertyName '{}' does not exist on message",propertyName);
