@@ -134,9 +134,7 @@ public class QpidClient {
 			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription), exchangeName);
 			subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 		}
-		if (toSetUp instanceof ServiceProvider) {
-			addReadAccess(toSetUp, toSetUp.getName());
-		}
+		addReadAccess(toSetUp, toSetUp.getName());
 		subscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		return subscriptionRequest;
 	}
