@@ -308,16 +308,15 @@ public class OnboardRestController {
 		if (currentServiceProviderSubscriptions.isEmpty()) {
 			throw new SubscriptionRequestException("The Service Provider trying to delete a subscription has no existing subscriptions. Nothing to delete.");
 		}
-		Set<DataType> subscriptionsToDelete = currentServiceProviderSubscriptions
+		Optional<DataType> subscriptionToDelete = currentServiceProviderSubscriptions
 				.stream()
 				.filter(dataType -> dataType.getData_id().equals(dataTypeId))
-				.collect(Collectors.toSet());
+				.findFirst();
 
-		if (subscriptionsToDelete.isEmpty()) {
+		if (!subscriptionToDelete.isPresent()) {
 			throw new SubscriptionRequestException("The incoming subscriptions to delete are not all in the Service Provider subscriptions. Cannot delete subscriptions that don't exist.");
 		}
-
-		currentServiceProviderSubscriptions.removeAll(subscriptionsToDelete);
+		currentServiceProviderSubscriptions.remove(subscriptionToDelete.get());
 
 		if (currentServiceProviderSubscriptions.isEmpty()) {
 			// Subscription is now empty, notify Routing Configurer to tear down the queue.
