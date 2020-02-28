@@ -1,5 +1,8 @@
 package no.vegvesen.ixn.model;
 
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,19 +27,19 @@ public class MessageValidator {
 			return false;
 		}
 		switch (messageType) {
-			case "DATEX2":
+			case Datex2DataTypeApi.DATEX_2:
 				//validate the datex message;
 				if (!validateProperties(message, MessageProperty.mandatoryDatex2PropertyNames)) {
 					return false;
 				}
 				break;
-			case "DENM":
+			case DenmDataTypeApi.DENM:
 				//validate the DENM message;
 				if (!validateProperties(message, MessageProperty.mandatoryDenmPropertyNames)) {
 					return false;
 				}
 				break;
-			case "IVI":
+			case IviDataTypeApi.IVI:
 				//validate the IVI message;
 				if (!validateProperties(message, MessageProperty.mandatoryIviPropertyNames)) {
 					return false;
