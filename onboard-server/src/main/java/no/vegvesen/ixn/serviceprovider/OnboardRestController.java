@@ -2,7 +2,6 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
@@ -25,7 +24,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 
 @RestController
 public class OnboardRestController {
@@ -59,7 +59,7 @@ public class OnboardRestController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = RESTEndpointPaths.CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, path = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	public CapabilityApi addCapabilities(@RequestBody CapabilityApi capabilityApi) {
 		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
@@ -111,7 +111,7 @@ public class OnboardRestController {
 		return capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = RESTEndpointPaths.CAPABILITIES_PATH)
+	@RequestMapping(method = RequestMethod.DELETE, path = CAPABILITIES_PATH)
 	public CapabilityApi deleteCapability(@RequestBody CapabilityApi capabilityApi) {
 		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
@@ -228,7 +228,6 @@ public class OnboardRestController {
 		return localSubscriptions;
 	}
 
-	//TODO this method does not set subscription status if not already set. Is that correct? Probably need to have a default status in Subscription class.
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
 	public DataTypeApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
