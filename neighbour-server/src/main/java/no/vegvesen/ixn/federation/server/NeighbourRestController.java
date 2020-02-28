@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.capability.DataTypeSelectorMatcher;
+import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
@@ -70,36 +70,22 @@ public class NeighbourRestController {
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
 	private Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
-
-		// Get local Service Provider capabilities.
-		Self self = getSelf();
-		Set<DataType> localCapabilities = self.getLocalCapabilities();
-
 		// Process the subscription request
 		for (Subscription neighbourSubscription : neighbourSubscriptionRequest) {
+			try {
+				JMSSelectorFilterFactory.get(neighbourSubscription.getSelector());
+				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
+			} catch (SelectorAlwaysTrueException e) {
+				// The subscription has an illegal selector - selector always true
+				logger.error("Subscription had illegal selectors.", e);
+				logger.warn("Setting status of subscription to ILLEGAL");
+				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
 
-			// The initial status of a subscription is NO_OVERLAP.
-			// This status is updated if the selector matches a local data type or is illegal or not valid.
-			neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
-
-			for (DataType localDataType : localCapabilities) {
-				try {
-					if (DataTypeSelectorMatcher.matches(localDataType, neighbourSubscription.getSelector())) {
-						// Subscription matches local data type - update status to ACCEPTED
-						neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
-					}
-				} catch (SelectorAlwaysTrueException e) {
-					// The subscription has an illegal selector - selector always true
-					logger.error("Subscription had illegal selectors.", e);
-					logger.warn("Setting status of subscription to ILLEGAL");
-					neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
-
-				} catch (InvalidSelectorException e) {
-					// The subscription has an invalid selector
-					logger.error("Subscription has invalid selector.", e);
-					logger.warn("Setting status of subscription to NOT_VALID");
-					neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.NOT_VALID);
-				}
+			} catch (InvalidSelectorException e) {
+				// The subscription has an invalid selector
+				logger.error("Subscription has invalid selector.", e);
+				logger.warn("Setting status of subscription to NOT_VALID");
+				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.NOT_VALID);
 			}
 		}
 		return neighbourSubscriptionRequest;
