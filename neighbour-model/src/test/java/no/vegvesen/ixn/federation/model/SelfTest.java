@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
+import org.assertj.core.util.Sets;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -20,7 +20,7 @@ public class SelfTest {
 		Set<DataType> localSubscriptions = getDataTypeSetOriginatingCountry("NO");
 		self.setLocalSubscriptions(localSubscriptions);
 
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,Sets.newHashSet(getDatexNoDataType()));
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newLinkedHashSet(getDatexNoDataType()));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(),new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = self.calculateCustomSubscriptionForNeighbour(neighbour);
 
@@ -31,7 +31,7 @@ public class SelfTest {
 	@Test
 	public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
 		Self self = new Self("self");
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,Sets.newHashSet(getDatexNoDataType()));
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,Sets.newLinkedHashSet(getDatexNoDataType()));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(),new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = self.calculateCustomSubscriptionForNeighbour(neighbour);
 		assertThat(calculatedSubscription).hasSize(0);
@@ -40,7 +40,7 @@ public class SelfTest {
 
 
 	private Set<DataType> getDataTypeSetOriginatingCountry(String country) {
-		return Sets.newHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
+		return Sets.newLinkedHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
 	}
 
 	private DataType getDatexNoDataType() {

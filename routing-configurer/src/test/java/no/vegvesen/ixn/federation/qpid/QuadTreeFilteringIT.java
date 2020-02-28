@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import com.google.common.collect.Sets;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
@@ -9,6 +8,7 @@ import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
+import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -27,10 +27,12 @@ import org.testcontainers.containers.GenericContainer;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.net.ssl.SSLContext;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings("rawtypes")
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = {QuadTreeFilteringIT.Initializer.class})
@@ -99,7 +101,7 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 
 	private Message sendReceiveMessageNeighbour(String messageQuadTreeTiles, String selector) throws Exception {
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
-		Neighbour king_gustaf = new Neighbour("king_gustaf", null, new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newHashSet(subscription)), null);
+		Neighbour king_gustaf = new Neighbour("king_gustaf", null, new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newLinkedHashSet(subscription)), null);
 		qpidClient.setupRouting(king_gustaf, "nwEx");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext("jks/king_gustaf.p12", "jks/truststore.jks");

@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.federation.capability;
 
-import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.assertj.core.util.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -134,7 +134,7 @@ public class DataTypeSelectorMatcherTest {
 	@Test
 	@Ignore("Todo: works when local subscriptions are set of DataType ")
 	public void quadTreeSubscriptionMatchesLongerCapability() {
-		DataType dataType = getDatexWithQuadTree("NO", Sets.newHashSet("ABCDE", "BCDEF", "CDEFG"));
+		DataType dataType = getDatexWithQuadTree("NO", Sets.newLinkedHashSet("ABCDE", "BCDEF", "CDEFG"));
 		assertThat(DataTypeSelectorMatcher.matches(dataType, "quadTree like '%,BCDEFG%' AND messageType = 'DATEX2'")).isTrue();
 	}
 
@@ -165,13 +165,13 @@ public class DataTypeSelectorMatcherTest {
 
 	@Test
 	public void filterCapabilitiesWithQuadTreeMatchesFilterWithoutQuadTree() {
-		DataType noCapabilityWithQuad = getDatexWithQuadTree("NO", Sets.newHashSet("anyquadtile"));
+		DataType noCapabilityWithQuad = getDatexWithQuadTree("NO", Sets.newLinkedHashSet("anyquadtile"));
 		assertThat(DataTypeSelectorMatcher.matches(noCapabilityWithQuad, "originatingCountry = 'NO'")).isTrue();
 	}
 
 	@Test
 	public void calculateCommonInterestWithValidAndInvalidSelectorMatchesValidSelector() {
-		HashSet<DataType> dataTypes = Sets.newHashSet(getDatex("NO"));
+		HashSet<DataType> dataTypes = Sets.newLinkedHashSet(getDatex("NO"));
 		LinkedHashSet<String> selectors = Sets.newLinkedHashSet();
 		selectors.add("originatingCountry = 'NO'");
 		selectors.add("invalidSelector = 'SOMEVALUE'");
@@ -180,7 +180,7 @@ public class DataTypeSelectorMatcherTest {
 
 	@Test
 	public void calculateCommonInterestWithValidAndInvalidSelectorMatchesValidSelectorReverseOrder() {
-		HashSet<DataType> dataTypes = Sets.newHashSet(getDatex("NO"));
+		HashSet<DataType> dataTypes = Sets.newLinkedHashSet(getDatex("NO"));
 		LinkedHashSet<String> selectors = Sets.newLinkedHashSet();
 		selectors.add("invalidSelector = 'SOMEVALUE'");
 		selectors.add("originatingCountry = 'NO'");
@@ -195,7 +195,7 @@ public class DataTypeSelectorMatcherTest {
 
 	@Test
 	public void quadTreeFilterMatchesFirstFromCapability() {
-		DataType abcBcdQuads = getDatexWithQuadTree("NO", Sets.newHashSet("ABC", "BCD"));
+		DataType abcBcdQuads = getDatexWithQuadTree("NO", Sets.newLinkedHashSet("ABC", "BCD"));
 		assertThat(DataTypeSelectorMatcher.matches(abcBcdQuads, "quadTree like '%,ABC%' and messageType = 'DATEX2'")).isTrue();
 	}
 

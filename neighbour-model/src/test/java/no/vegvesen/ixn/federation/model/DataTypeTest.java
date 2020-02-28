@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
+import org.assertj.core.util.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
@@ -229,16 +229,16 @@ public class DataTypeTest {
 
 	@Test
 	public void quadTreeSubscriptionMatchesLongerCapability() {
-		DataType bcdef = getDatexWithQuadTree("NO", Sets.newHashSet("ABCDE", "BCDEF", "CDEFG"));
-		DataType bcdefg = getDatexWithQuadTree("NO", Sets.newHashSet("BCDEFG"));
+		DataType bcdef = getDatexWithQuadTree("NO", Sets.newLinkedHashSet("ABCDE", "BCDEF", "CDEFG"));
+		DataType bcdefg = getDatexWithQuadTree("NO", Sets.newLinkedHashSet("BCDEFG"));
 		assertThat(bcdef.matches(bcdefg)).isTrue();
 		assertThat(bcdefg.matches(bcdef)).isTrue();
 	}
 
 	@Test
 	public void quadTreeSubscriptionMatchesNot() {
-		DataType cdefg = getDatexWithQuadTree("NO", Sets.newHashSet("ABCDE", "BCDEF", "CDEFG"));
-		DataType defg = getDatexWithQuadTree("NO", Sets.newHashSet("DEFG"));
+		DataType cdefg = getDatexWithQuadTree("NO", Sets.newLinkedHashSet("ABCDE", "BCDEF", "CDEFG"));
+		DataType defg = getDatexWithQuadTree("NO", Sets.newLinkedHashSet("DEFG"));
 		assertThat(defg.matches(cdefg)).isFalse();
 		assertThat(cdefg.matches(defg)).isFalse();
 	}
@@ -247,15 +247,15 @@ public class DataTypeTest {
 	@Test
 	public void filterCapabilitiesWithoutQuadTreeMatchesFilterWithQuadTree() {
 		DataType noCapabilityWithoutQuadTree = getDatex("NO");
-		DataType noCapabilityWithQuadTree = getDatexWithQuadTree("NO", Sets.newHashSet("anyquadtile"));
+		DataType noCapabilityWithQuadTree = getDatexWithQuadTree("NO", Sets.newLinkedHashSet("anyquadtile"));
 		assertThat(noCapabilityWithQuadTree.matches(noCapabilityWithoutQuadTree)).isTrue();
 		assertThat(noCapabilityWithoutQuadTree.matches(noCapabilityWithQuadTree)).isTrue();
 	}
 
 	@Test
 	public void datexDifferentPublicationSubTypesMatchesNot() {
-		DataType s123 = datexDataType("NO", "Situation", Sets.newHashSet("s1,s2,s3"));
-		DataType s456 = datexDataType("NO", "Situation", Sets.newHashSet("s4,s5,s6"));
+		DataType s123 = datexDataType("NO", "Situation", Sets.newLinkedHashSet("s1,s2,s3"));
+		DataType s456 = datexDataType("NO", "Situation", Sets.newLinkedHashSet("s4,s5,s6"));
 		assertThat(s123.matches(s456)).isFalse();
 	}
 

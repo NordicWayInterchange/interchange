@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
@@ -11,6 +10,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
+import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,7 +85,7 @@ public class NeighbourDiscovererTest {
 	}
 
 	private Set<DataType> getDataTypeSetOriginatingCountry(String country) {
-		return Sets.newHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
+		return Sets.newLinkedHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
 	}
 
 	@Test

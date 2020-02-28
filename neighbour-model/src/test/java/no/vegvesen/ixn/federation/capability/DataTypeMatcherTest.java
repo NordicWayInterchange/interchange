@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.federation.capability;
 
-import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
+import org.assertj.core.util.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -14,9 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DataTypeMatcherTest {
 	private Set<DataType> empty = Collections.emptySet();
-	private Set<DataType> noSeFi = Sets.newHashSet(getDatex("NO"), getDatex("SE"), getDatex("FI"));
-	private Set<DataType> noSe = Sets.newHashSet(getDatex("NO"), getDatex("SE"));
-	private Set<DataType> no = Sets.newHashSet(getDatex("NO"));
+	private Set<DataType> noSeFi = Sets.newLinkedHashSet(getDatex("NO"), getDatex("SE"), getDatex("FI"));
+	private Set<DataType> noSe = Sets.newLinkedHashSet(getDatex("NO"), getDatex("SE"));
+	private Set<DataType> no = Sets.newLinkedHashSet(getDatex("NO"));
 
 	@Test
 	public void testCalculateCommonInterestForCountry() {
@@ -43,7 +43,7 @@ public class DataTypeMatcherTest {
 	public void calculateCommonInterestAlsoSkipsWhenHeaderNotFound() {
 		Map<String, String> denmInvalidProperties = Maps.newHashMap("noSuchProperty", "anyValue");
 		denmInvalidProperties.put(MessageProperty.MESSAGE_TYPE.getName(), "DENM");
-		HashSet<DataType> denmInvalidDataTypeSet = Sets.newHashSet(new DataType(denmInvalidProperties));
+		HashSet<DataType> denmInvalidDataTypeSet = Sets.newLinkedHashSet(new DataType(denmInvalidProperties));
 		assertThat(DataTypeMatcher.calculateCommonInterest(no, denmInvalidDataTypeSet)).isEmpty();
 		assertThat(DataTypeMatcher.calculateCommonInterest(denmInvalidDataTypeSet, no)).isEmpty();
 	}
@@ -52,14 +52,14 @@ public class DataTypeMatcherTest {
 	public void quadTreeSubscriptionMatchesShorterCapability() {
 		DataType noQuadBcdef = getDatex("NO");
 		noQuadBcdef.getValues().put(MessageProperty.QUAD_TREE.getName(), "ABCDE,BCDEF,CDEFG");
-		HashSet<DataType> noBcdefSe0123 = Sets.newHashSet(noQuadBcdef);
+		HashSet<DataType> noBcdefSe0123 = Sets.newLinkedHashSet(noQuadBcdef);
 		DataType se = getDatex("SE");
 		se.getValues().put(MessageProperty.QUAD_TREE.getName(), "01230123,2301,2301");
 		noBcdefSe0123.add(se);
 
 		DataType noQuadBcd = getDatex("NO");
 		noQuadBcdef.getValues().put(MessageProperty.QUAD_TREE.getName(), "ABCDE,BCD,CDEFG");
-		HashSet<DataType> bcd = Sets.newHashSet(noQuadBcd);
+		HashSet<DataType> bcd = Sets.newLinkedHashSet(noQuadBcd);
 
 		assertThat(DataTypeMatcher.calculateCommonInterest(noBcdefSe0123, bcd)).hasSize(1);
 		assertThat(DataTypeMatcher.calculateCommonInterest(bcd, noBcdefSe0123)).hasSize(1);
@@ -81,7 +81,7 @@ public class DataTypeMatcherTest {
 	public void selectorRefersToValidHeaderNotSpecifiedAsCapabilityMatches() {
 		DataType datexNoPublicationType = getDatex("NO");
 		datexNoPublicationType.getValues().put(MessageProperty.PUBLICATION_TYPE.getName(), "SOME-TYPE");
-		assertThat(DataTypeMatcher.calculateCommonInterest(no, Sets.newHashSet(datexNoPublicationType))).hasSize(1);
+		assertThat(DataTypeMatcher.calculateCommonInterest(no, Sets.newLinkedHashSet(datexNoPublicationType))).hasSize(1);
 	}
 
 	@NotNull

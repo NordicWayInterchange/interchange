@@ -1,9 +1,12 @@
 package no.vegvesen.ixn.federation.repository;
 
-import com.google.common.collect.Sets;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.DataType;
+import no.vegvesen.ixn.federation.model.LocalSubscriptionRequest;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
+import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -103,7 +106,7 @@ public class ServiceProviderRepositoryIT {
 	@Test
 	public void newServiceProviderWithLocalSubscriptionCanBeStoredAndRetrieved() {
 		ServiceProvider bentley = new ServiceProvider("bentley");
-		HashSet<DataType> datex2 = Sets.newHashSet(new DataType(Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2")));
+		HashSet<DataType> datex2 = Sets.newLinkedHashSet(new DataType(Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2")));
 		bentley.setLocalSubscriptionRequest(new LocalSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, datex2));
 
 		repository.save(bentley);

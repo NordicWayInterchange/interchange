@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import org.assertj.core.util.Sets;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class CapabilityApiJsonTest {
 	@Test
 	public void capabilitiesApiDatexTransformedToJsonAndBackToCapabilitiesApi() throws IOException {
 		HashSet<Datex2DataTypeApi> capabilities = new HashSet<>();
-		capabilities.add(new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", "pv1", "ct3", Collections.emptySet(), "myPublicationType", Sets.newHashSet("aa", "bb")));
+		capabilities.add(new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", "pv1", "ct3", Collections.emptySet(), "myPublicationType", Sets.newLinkedHashSet("aa", "bb")));
 		CapabilityApi capabilityApi = new CapabilityApi("norway", capabilities);
 
 		ObjectMapper objectMapper = new ObjectMapper();
