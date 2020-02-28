@@ -111,7 +111,7 @@
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-broker-core</artifactId>
-                <version>7.0.6</version>
+                <version>7.1.8</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.google.guava</groupId>
