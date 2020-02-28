@@ -3,7 +3,6 @@
 REGISTRY=eu.gcr.io/nordic-way-aad182cc
 TAG="$(git rev-parse --short HEAD)"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-IMAGES="interchangenode qpid message-forwarder neighbour-discoverer neighbour-server routing-configurer onboard-server"
 BRANCH_TAG="${BRANCH//[^a-zA-Z_0-9]/_}"
 IMAGES="interchangenode qpid message-forwarder neighbour-discoverer neighbour-server routing-configurer onboard-server"
 
