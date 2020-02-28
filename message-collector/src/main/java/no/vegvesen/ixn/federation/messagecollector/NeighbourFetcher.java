@@ -19,13 +19,8 @@ public class NeighbourFetcher {
         this.repository = repository;
     }
 
-    /*
-    public List<Neighbour> listNeighbourCandidates() {
-		return repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.ESTABLISHED);
-    }
-*/
     public List<Neighbour> listNeighboursToConsumeFrom() {
-        List<Neighbour> neighbours = repository.findByFedIn_StatusIn(SubscriptionRequestStatus.ESTABLISHED);
+        List<Neighbour> neighbours = repository.findByFedIn_StatusIn(SubscriptionRequestStatus.FEDERATED_ACCESS_GRANTED);
         return neighbours;
     }
 }
