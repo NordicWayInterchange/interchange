@@ -5,22 +5,22 @@ box "<size:22>Interchange A</size>" #LightGrey
 database "broker" as client_broker
 queue fedEx
 database "Database" as client_db
-Actor "Message\nCollector" as A
+Actor "Message\nCollector" as C
 end box
 
 box "<size:22>Interchange B</size>" #LightBlue
-queue a_queue
+queue A
 database "message \nbroker" as server_broker
 end box
 
-A -> client_db: Get all neighbours with // subscriptionRequest Status FEDERATED_ACCESS_GRANTED
-A <-- client_db: Interchange B
+C -> client_db: Get all neighbours with // subscriptionRequest Status FEDERATED_ACCESS_GRANTED
+C <-- client_db: Interchange B
 
-activate A
-A -> A: Setup message listener
+activate C
+C -> C: Setup message listener
 
-activate A
-A -> a_queue: listen for messages to A
-A -> fedEx: send to fedEx
+activate C
+C -> A: listen for messages to A
+C -> fedEx: send to fedEx
 
 @enduml
