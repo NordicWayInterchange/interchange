@@ -68,7 +68,7 @@ services:
     ports:
       - 8666:8080
       - 443
-      - 63002:5671
+      - 5671:5671
       - 5672
     volumes:
       - "./qpid/local:/config"
@@ -90,7 +90,7 @@ services:
     depends_on:
       - local_db
     ports:
-      - 32443:8090
+      - 443:8090
     volumes:
       - "./tmp:/jks"
     environment:
