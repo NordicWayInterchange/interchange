@@ -286,7 +286,7 @@ public class NeighbourRestController {
 			neighbour.setControlChannelPort(dnsNeighbour.getControlChannelPort());
 			neighbour.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
 		} else {
-			throw new DiscoveryException(
+			throw new InterchangeNotFoundException(
 					String.format("Received capability post from neighbour %s, but could not find in DNS %s",
 							neighbour.getName(),
 							dnsFacade.getDnsServerName()));
