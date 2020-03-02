@@ -12,7 +12,7 @@ services:
       - POSTGRES_DB=federation
 
   local_onboard_server:
-    image: eu.gcr.io/nordic-way-aad182cc/onboard-server:federation-master
+    image: eu.gcr.io/nordic-way-aad182cc/onboard-server:federation-nw2
     container_name: local_onboard_server
     depends_on:
       - local_db
@@ -32,7 +32,7 @@ services:
 
 
   local_interchange_app:
-    image: eu.gcr.io/nordic-way-aad182cc/interchangenode:federation-master
+    image: eu.gcr.io/nordic-way-aad182cc/interchangenode:federation-nw2
     container_name: local_interchange_app
     hostname: local_interchange_app
     links:
@@ -47,7 +47,7 @@ services:
 
 
   local_postgis:
-    image: eu.gcr.io/nordic-way-aad182cc/postgis:federation-master
+    image: eu.gcr.io/nordic-way-aad182cc/postgis:federation-nw2
     environment:
     - POSTGRES_USER=geolookup
     - POSTGRES_PASSWORD=geolookup
@@ -85,12 +85,12 @@ services:
       - PASSWD_FILE=/config/passwd
 
   local_neighbour_server:
-    image: eu.gcr.io/nordic-way-aad182cc/neighbour-server:federation-master
+    image: eu.gcr.io/nordic-way-aad182cc/neighbour-server:federation-nw2
     container_name: local_neighbour_server
     depends_on:
       - local_db
     ports:
-      - 8090
+      - 32443:8090
     volumes:
       - "./tmp:/jks"
     environment:
@@ -104,7 +104,7 @@ services:
       - KEY_STORE_PASSWORD=password
 
   local_routing_configurer:
-    image: eu.gcr.io/nordic-way-aad182cc/routing-configurer:federation-master
+    image: eu.gcr.io/nordic-way-aad182cc/routing-configurer:federation-nw2
     container_name: local_routing_configurer
     depends_on:
       - local_db
@@ -123,7 +123,7 @@ services:
       - KEY_PASSWORD=password
 
   local_neighbour_discoverer:
-    image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer:federation-master
+    image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer:federation-nw2
     container_name: local_neighbour_discoverer
     depends_on:
       - local_db
@@ -141,7 +141,7 @@ services:
       - KEY_PASSWORD=password
 
   local_message_forwarder_app:
-    image: eu.gcr.io/nordic-way-aad182cc/message-forwarder:federation-master
+    image: eu.gcr.io/nordic-way-aad182cc/message-forwarder:federation-nw2
     container_name: local_message_forwarder_app
     depends_on:
     - local_db
