@@ -4,18 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
+import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -114,7 +111,7 @@ public class NeighbourRestControllerTest {
 
 	@Test
 	public void postingCapabilitiesUnknownInDNSReturnsError() throws Exception {
-		expectedException.expectCause(isA(DiscoveryException.class));
+		expectedException.expectCause(isA(InterchangeNotFoundException.class));
 
 		// Mocking the incoming certificate
 		mockCertificate("unknownNeighbour");
