@@ -29,6 +29,11 @@ public class NeighbourServiceErrorAdvice {
 		return error(NOT_FOUND, e);
 	}
 
+	@ExceptionHandler({InterchangeNotInDNSException.class})
+	public ResponseEntity<ErrorDetails> interchangeNotInDNSException(InterchangeNotInDNSException e){
+		return error(BAD_REQUEST, e);
+	}
+
 	@ExceptionHandler({SubscriptionNotFoundException.class})
 	public ResponseEntity<ErrorDetails> subscriptionNotFoundException(SubscriptionNotFoundException e){
 		return error(NOT_FOUND, e);
