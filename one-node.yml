@@ -63,7 +63,7 @@ services:
     - 6677:5432
 
   local_qpid:
-    image: eu.gcr.io/nordic-way-aad182cc/qpid:federation-master
+    image: eu.gcr.io/nordic-way-aad182cc/qpid:federation-nw2
     container_name: local_qpid
     ports:
       - 8666:8080
