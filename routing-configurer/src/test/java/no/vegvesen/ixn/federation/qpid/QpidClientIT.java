@@ -243,13 +243,20 @@ public class QpidClientIT extends DockerBaseIT {
 	}
 
 	@Test
-	public void newNeighbourCanNotWriteToOnramp() throws JMSException, NamingException {
+	public void newNeighbourCanNeitherWriteToFedExNorOnramp() throws JMSException, NamingException {
 		HashSet<Subscription> subscriptions = new HashSet<>();
 		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED));
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions), null);
 		client.setupRouting(nordea, NW_EX);
 		client.addInterchangeUserToGroups(nordea.getName(), FEDERATED_GROUP_NAME);
 		SSLContext nordeaSslContext = setUpTestSslContext("jks/nordea.p12");
+		try {
+			Source writeFedExExchange = new Source(AMQPS_URL, "fedEx", nordeaSslContext);
+			writeFedExExchange.start();
+			writeFedExExchange.send("Ordinary business at the Nordea office.");
+			fail("Should not allow neighbour nordea to write on (fedEx)");
+		} catch (JMSException ignore) {
+		}
 		try {
 			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
 			writeOnramp.start();
