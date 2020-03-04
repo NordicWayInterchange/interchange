@@ -62,7 +62,7 @@ public class MessageCollector {
             interchangeNames.add(name);
             if (! listeners.containsKey(name)) {
                 try {
-                    logger.info("Setting up ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
+                    logger.info("Setting up collection from ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
                     MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
                     listeners.put(name, messageListener);
                 } catch (JMSException e) {

@@ -33,7 +33,6 @@ public class CollectorCreator {
         this.writeQueue = writequeue;
     }
 
-    //TODO logging!
     MessageCollectorListener setupCollection(Neighbour ixn) throws JMSException, NamingException {
         String writeUrl = String.format("amqps://%s:%s", localIxnDomainName, localIxnFederationPort);
         logger.debug("Write URL: {}, queue {}", writeUrl, writeQueue);
@@ -44,8 +43,9 @@ public class CollectorCreator {
         MessageProducer producer = writeSession.createProducer(writeDestination);
 
         String readUrl = ixn.getMessageChannelUrl();
-        IxnContext readContext = new IxnContext(readUrl,null, localIxnDomainName);
-        logger.debug("Read URL: {}, queue {}",readUrl, localIxnDomainName);
+        String readQueue = this.localIxnDomainName;
+        IxnContext readContext = new IxnContext(readUrl,null, readQueue);
+        logger.debug("Read URL: {}, queue {}",readUrl, readQueue);
         Destination readDestination = readContext.getReceiveQueue();
         Connection readConnection = readContext.createConnection(sslContext);
         Session readSession = readConnection.createSession(false,Session.AUTO_ACKNOWLEDGE);
