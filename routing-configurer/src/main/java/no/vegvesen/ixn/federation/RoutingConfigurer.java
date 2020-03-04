@@ -53,6 +53,9 @@ public class RoutingConfigurer {
 				if (subscriber instanceof ServiceProvider) {
 					removeUserFromGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
 				}
+				else if (subscriber instanceof Neighbour){
+					removeUserFromGroup(FEDERATED_GROUP_NAME, subscriber);
+				}
 				logger.info("Removed routing for subscriber {}", subscriber.getName());
 				subscriber.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
 				saveSubscriber(subscriber);
