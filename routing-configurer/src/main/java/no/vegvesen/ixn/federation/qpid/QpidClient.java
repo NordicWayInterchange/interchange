@@ -132,7 +132,7 @@ public class QpidClient {
 		}
 		SubscriptionRequest subscriptionRequest = toSetUp.getSubscriptionRequest();
 		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
-			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription), exchangeName);
+			updateBinding(subscription.getSelector(), toSetUp.getName(), subscription.bindKey(), exchangeName);
 			subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 		}
 		addReadAccess(toSetUp.getName(), toSetUp.getName());
@@ -141,40 +141,22 @@ public class QpidClient {
 	}
 
 	private void unbindOldUnwantedBindings(Subscriber interchange, String exchangeName) {
-		Set<String> unwantedBindKeys = getUnwantedBindKeys(interchange);
+		Set<String> existingBindKeys = getQueueBindKeys(interchange.getName());
+		Set<String> unwantedBindKeys = interchange.getUnwantedBindKeys(existingBindKeys);
 		for (String unwantedBindKey : unwantedBindKeys) {
-			unbindBindKey(interchange, unwantedBindKey, exchangeName);
+			unbindBindKey(interchange.getName(), unwantedBindKey, exchangeName);
 		}
 	}
 
-	private void unbindBindKey(Subscriber interchange, String unwantedBindKey, String exchangeName) {
+	private void unbindBindKey(String interchange, String unwantedBindKey, String exchangeName) {
 		JSONObject json = new JSONObject();
-		json.put("destination", interchange.getName());
+		json.put("destination", interchange);
 		json.put("bindingKey", unwantedBindKey);
 		String jsonString = json.toString();
 
 		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/unbind");
 	}
 
-	private Set<String> getUnwantedBindKeys(Subscriber interchange) {
-		Set<String> existingBindKeys = getQueueBindKeys(interchange.getName());
-		Set<String> wantedBindKeys = wantedBindings(interchange);
-		Set<String> unwantedBindKeys = new HashSet<>(existingBindKeys);
-		unwantedBindKeys.removeAll(wantedBindKeys);
-		return unwantedBindKeys;
-	}
-
-	private Set<String> wantedBindings(Subscriber interchange) {
-		Set<String> wantedBindings = new HashSet<>();
-		for (Subscription subscription : interchange.getSubscriptionRequest().getSubscriptions()) {
-			wantedBindings.add(bindKey(interchange, subscription));
-		}
-		return wantedBindings;
-	}
-
-	private String bindKey(Subscriber interchange, Subscription subscription) {
-		return interchange.getName() + "-" + subscription.getSelector().hashCode();
-	}
 
 	Set<String> getQueueBindKeys(String queueName) {
 		HashSet<String> existingBindKeys = new HashSet<>();

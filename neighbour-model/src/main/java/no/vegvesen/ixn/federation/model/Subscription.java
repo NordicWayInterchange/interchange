@@ -93,4 +93,8 @@ public class Subscription {
 				", path='" + path + '\'' +
 				'}';
 	}
+
+	public String bindKey() {
+		return "" + selector.hashCode();
+	}
 }
