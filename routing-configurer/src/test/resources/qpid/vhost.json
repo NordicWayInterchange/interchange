@@ -74,15 +74,6 @@
           }
         },
         {
-          "objectType": "EXCHANGE",
-          "identity": "federated-interchanges",
-          "operation": "PUBLISH",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "fedEx"
-          }
-        },
-        {
           "objectType": "VIRTUALHOST",
           "identity": "federated-interchanges",
           "operation": "ACCESS",
