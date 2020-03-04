@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
@@ -78,24 +79,27 @@ public class RoutingConfigurer {
 		tearDownRouting(readyToTearDownRouting);
 	}
 
+	//Both neighbour and service providers binds to nwEx to receive local messages
+	//Service provider also binds to fedEx to receive messages from neighbours
+	//This avoids loop of messages
 	private void setupRouting(List<? extends Subscriber> readyToSetupRouting) {
 		for (Subscriber subscriber : readyToSetupRouting) {
 			try {
 				logger.debug("Setting up routing for subscriber {}", subscriber.getName());
-				//Both neighbour and service providers binds to nwEx to receive local messages
-				//Service provider also binds to fedEx to receive messages from neighbours
-				//This avoids loop of messages
-				SubscriptionRequest setUpSubscriptionRequest = qpidClient.setupRouting(subscriber, "nwEx");
-				subscriber.setSubscriptionRequestStatus(setUpSubscriptionRequest.getStatus());
+				createQueue(subscriber);
 				if (subscriber instanceof ServiceProvider) {
-					qpidClient.setupRouting(subscriber, "fedEx");
 					addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
+					bindSubscriptions("nwEx", subscriber);
+					bindSubscriptions("fedEx", subscriber);
 				}
-				else if (subscriber instanceof Neighbour) {
+				else if (subscriber instanceof Neighbour){
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, subscriber);
-					((Neighbour)subscriber).setSubscriptionRequest(setUpSubscriptionRequest);
+					bindSubscriptions("nwEx", subscriber);
 				}
-				logger.info("Routing set up for subscriber {}", subscriber.getName());
+				for (Subscription subscription : subscriber.getSubscriptionRequest().getSubscriptions()) {
+					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+				}
+				subscriber.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
 
 				saveSubscriber(subscriber);
 				logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", subscriber.getName());
@@ -104,6 +108,27 @@ public class RoutingConfigurer {
 			}
 		}
 	}
+
+	private void createQueue(Subscriber subscriber) {
+		qpidClient.createQueue(subscriber.getName());
+		qpidClient.addReadAccess(subscriber.getName(), subscriber.getName());
+	}
+
+	private void bindSubscriptions(String exchange, Subscriber subscriber) {
+		unbindOldUnwantedBindings(subscriber, exchange);
+		for (Subscription subscription : subscriber.getSubscriptionRequest().getSubscriptions()) {
+			qpidClient.addBinding(subscription.getSelector(), subscriber.getName(), subscription.bindKey(), exchange);
+		}
+	}
+
+	private void unbindOldUnwantedBindings(Subscriber interchange, String exchangeName) {
+		Set<String> existingBindKeys = qpidClient.getQueueBindKeys(interchange.getName());
+		Set<String> unwantedBindKeys = interchange.getUnwantedBindKeys(existingBindKeys);
+		for (String unwantedBindKey : unwantedBindKeys) {
+			qpidClient.unbindBindKey(interchange.getName(), unwantedBindKey, exchangeName);
+		}
+	}
+
 
 
 	private void addSubscriberToGroup(String groupName, Subscriber subscriber) {

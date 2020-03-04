@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import no.vegvesen.ixn.federation.model.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -74,14 +72,14 @@ public class QpidClient {
 		}
 	}
 
-	private void updateBinding(String binding, String queueName, String bindingKey, String exchangeName) {
+	public void addBinding(String selector, String queueName, String bindingKey, String exchangeName) {
 		JSONObject json = new JSONObject();
 		json.put("destination", queueName);
 		json.put("bindingKey", bindingKey);
 		json.put("replaceExistingArguments", true);
 
 		JSONObject innerjson = new JSONObject();
-		innerjson.put("x-filter-jms-selector", binding);
+		innerjson.put("x-filter-jms-selector", selector);
 
 		json.put("arguments", innerjson);
 		String jsonString = json.toString();
@@ -89,9 +87,15 @@ public class QpidClient {
 		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/bind");
 	}
 
-	void createQueue(Subscriber subscriber) {
+	public void createQueue(String queueName) {
+		if (!queueExists(queueName)) {
+			_createQueue(queueName);
+		}
+	}
+
+	void _createQueue(String queueName) {
 		JSONObject json = new JSONObject();
-		json.put("name", subscriber.getName());
+		json.put("name", queueName);
 		json.put("durable", true);
 		String jsonString = json.toString();
 		postQpid(queuesURL, jsonString, "/");
@@ -124,31 +128,8 @@ public class QpidClient {
 		return null;
 	}
 
-	public SubscriptionRequest setupRouting(Subscriber toSetUp, String exchangeName) {
-		if (queueExists(toSetUp.getName())) {
-			unbindOldUnwantedBindings(toSetUp, exchangeName);
-		} else {
-			createQueue(toSetUp);
-		}
-		SubscriptionRequest subscriptionRequest = toSetUp.getSubscriptionRequest();
-		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
-			updateBinding(subscription.getSelector(), toSetUp.getName(), subscription.bindKey(), exchangeName);
-			subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-		}
-		addReadAccess(toSetUp.getName(), toSetUp.getName());
-		subscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
-		return subscriptionRequest;
-	}
 
-	private void unbindOldUnwantedBindings(Subscriber interchange, String exchangeName) {
-		Set<String> existingBindKeys = getQueueBindKeys(interchange.getName());
-		Set<String> unwantedBindKeys = interchange.getUnwantedBindKeys(existingBindKeys);
-		for (String unwantedBindKey : unwantedBindKeys) {
-			unbindBindKey(interchange.getName(), unwantedBindKey, exchangeName);
-		}
-	}
-
-	private void unbindBindKey(String interchange, String unwantedBindKey, String exchangeName) {
+	public void unbindBindKey(String interchange, String unwantedBindKey, String exchangeName) {
 		JSONObject json = new JSONObject();
 		json.put("destination", interchange);
 		json.put("bindingKey", unwantedBindKey);
@@ -158,7 +139,7 @@ public class QpidClient {
 	}
 
 
-	Set<String> getQueueBindKeys(String queueName) {
+	public Set<String> getQueueBindKeys(String queueName) {
 		HashSet<String> existingBindKeys = new HashSet<>();
 		String url = queuesURL + "/" + queueName + "/getPublishingLinks";
 
@@ -217,7 +198,7 @@ public class QpidClient {
 		postQpid(groupsUrl, jsonString, groupName);
 	}
 
-	void addReadAccess(String subscriberName, String queue) {
+	public void addReadAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
 		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(subscriberName, queue, aclRules);
 

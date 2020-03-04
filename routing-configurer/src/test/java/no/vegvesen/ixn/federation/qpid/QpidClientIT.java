@@ -84,24 +84,19 @@ public class QpidClientIT extends DockerBaseIT {
 
 	@Test
 	public void createQueue() {
-		Neighbour findus = new Neighbour("findus", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
-
-		client.createQueue(findus);
+		client.createQueue("findus");
 	}
 
 	@Test(expected = Exception.class)
 	public void createQueueWithIllegalCharactersInIdFails() {
-		Neighbour torsk = new Neighbour("torsk", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
-
-		client.createQueue(torsk);
-		client.createQueue(torsk); //create some queue that already exists
+		client._createQueue("torsk");
+		client._createQueue("torsk"); //create some queue that already exists
 	}
 
 	@Test
 	public void createdQueueCanBeQueriedFromQpid() {
-		Neighbour leroy = new Neighbour("leroy", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
-		client.createQueue(leroy);
-		assertThat(client.queueExists(leroy.getName())).isTrue();
+		client.createQueue("leroy");
+		assertThat(client.queueExists("leroy")).isTrue();
 	}
 
 	@Test
@@ -114,8 +109,22 @@ public class QpidClientIT extends DockerBaseIT {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", SubscriptionStatus.REQUESTED)));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		client.setupRouting(flounder, NW_EX);
+		setupRouting(flounder, NW_EX);
 		assertThat(client.queueExists(flounder.getName())).isTrue();
+	}
+
+	//todo: users of this is candidate for RoutingConfigurerIT
+	private void setupRouting(Subscriber subscriber, String exchangeName) {
+		client.createQueue(subscriber.getName());
+		client.addReadAccess(subscriber.getName(), subscriber.getName());
+		for (Subscription subscription : subscriber.getSubscriptionRequest().getSubscriptions()) {
+			client.addBinding(subscription.getSelector(), subscriber.getName(), subscription.bindKey(), exchangeName);
+		}
+		Set<String> existing = client.getQueueBindKeys(subscriber.getName());
+		Set<String> unwantedBindKeys = subscriber.getUnwantedBindKeys(existing);
+		for (String unwantedBindKey : unwantedBindKeys) {
+			client.unbindBindKey(subscriber.getName(), unwantedBindKey, exchangeName);
+		}
 	}
 
 	@Test
@@ -125,7 +134,7 @@ public class QpidClientIT extends DockerBaseIT {
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		client.setupRouting(halibut, NW_EX);
+		setupRouting(halibut, NW_EX);
 		assertThat(client.queueExists(halibut.getName())).isTrue();
 	}
 
@@ -134,9 +143,9 @@ public class QpidClientIT extends DockerBaseIT {
 		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", SubscriptionStatus.REQUESTED)));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		client.setupRouting(seabass, NW_EX);
+		setupRouting(seabass, NW_EX);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
-		client.setupRouting(seabass, NW_EX);
+		setupRouting(seabass, NW_EX);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
 	}
 
@@ -147,28 +156,26 @@ public class QpidClientIT extends DockerBaseIT {
 		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		client.setupRouting(trout, NW_EX);
+		setupRouting(trout, NW_EX);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
 		subscriptions = new HashSet<>(Collections.singletonList(s1));
 		subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		client.setupRouting(trout, NW_EX);
+		setupRouting(trout, NW_EX);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
 	}
 
 	@Test
 	public void tearDownQueue() {
-		Neighbour crab = new Neighbour("crab", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
-
 		//Set up a new queue
-		client.createQueue(crab);
-		assertThat(client.queueExists(crab.getName())).isTrue();
+		client.createQueue("crab");
+		assertThat(client.queueExists("crab")).isTrue();
 
 		//Delete the queue
-		client.removeQueue(crab.getName());
-		assertThat(client.queueExists(crab.getName())).isFalse();
+		client.removeQueue("crab");
+		assertThat(client.queueExists("crab")).isFalse();
 	}
 
 	@Test
@@ -196,8 +203,7 @@ public class QpidClientIT extends DockerBaseIT {
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		client.setupRouting(king_gustaf, NW_EX);
-		client.setupRouting(king_gustaf, FED_EX);
+		setupRouting(king_gustaf, NW_EX);
 		client.addInterchangeUserToGroups(king_gustaf.getName(), SERVICE_PROVIDERS_GROUP_NAME);
 		SSLContext kingGustafSslContext = setUpTestSslContext("jks/king_gustaf.p12");
 		Sink readKingGustafQueue = new Sink(AMQPS_URL, "king_gustaf", kingGustafSslContext);
@@ -248,7 +254,7 @@ public class QpidClientIT extends DockerBaseIT {
 		HashSet<Subscription> subscriptions = new HashSet<>();
 		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED));
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions), null);
-		client.setupRouting(nordea, NW_EX);
+		setupRouting(nordea, NW_EX);
 		client.addInterchangeUserToGroups(nordea.getName(), FEDERATED_GROUP_NAME);
 		SSLContext nordeaSslContext = setUpTestSslContext("jks/nordea.p12");
 		try {
