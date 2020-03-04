@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
+import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 
 @Component
@@ -88,6 +89,7 @@ public class RoutingConfigurer {
 					addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
 				}
 				else if (subscriber instanceof Neighbour) {
+					addSubscriberToGroup(FEDERATED_GROUP_NAME, subscriber);
 					((Neighbour)subscriber).setSubscriptionRequest(setUpSubscriptionRequest);
 				}
 				logger.info("Routing set up for subscriber {}", subscriber.getName());
@@ -111,21 +113,6 @@ public class RoutingConfigurer {
 			logger.info("Added subscriber {} to Qpid group {}", subscriber.getName(), groupName);
 		} else {
 			logger.warn("Subscriber {} already exists in the group {}", subscriber.getName(), groupName);
-		}
-	}
-
-	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.remove}")
-	private void removeNeighbourFromGroups() {
-		logger.debug("Looking for neighbours with rejected fedIn to remove from Qpid groups.");
-		String groupName = "federated-interchanges";
-		List<Neighbour> neighboursToRemoveFromGroups = neighbourRepository.findByFedIn_StatusIn(
-				SubscriptionRequestStatus.REJECTED);
-
-		if (!neighboursToRemoveFromGroups.isEmpty()) {
-			for (Neighbour neighbour : neighboursToRemoveFromGroups) {
-				removeUserFromGroup(groupName, neighbour);
-				neighbour.getFedIn().setStatus(SubscriptionRequestStatus.EMPTY);
-			}
 		}
 	}
 
