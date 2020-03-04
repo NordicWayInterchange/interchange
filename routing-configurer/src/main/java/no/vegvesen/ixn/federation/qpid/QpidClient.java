@@ -104,6 +104,7 @@ public class QpidClient {
 	private String lookupQueueId(String queueName) {
 		String queueQueryUrl = queuesURL + "/" + queueName;
 		logger.debug("quering for queue {} with url {}", queueName, queueQueryUrl);
+		@SuppressWarnings("rawtypes")
 		ResponseEntity<HashMap> response;
 		try {
 			response = restTemplate.getForEntity(new URI(queueQueryUrl), HashMap.class);
@@ -134,7 +135,7 @@ public class QpidClient {
 			updateBinding(subscription.getSelector(), toSetUp.getName(), bindKey(toSetUp, subscription), exchangeName);
 			subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 		}
-		addReadAccess(toSetUp, toSetUp.getName());
+		addReadAccess(toSetUp.getName(), toSetUp.getName());
 		subscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		return subscriptionRequest;
 	}
@@ -234,9 +235,9 @@ public class QpidClient {
 		postQpid(groupsUrl, jsonString, groupName);
 	}
 
-	void addReadAccess(Subscriber subscriber, String queue) {
+	void addReadAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
-		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(subscriber, queue, aclRules);
+		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(subscriberName, queue, aclRules);
 
 		StringBuilder newAclRules1 = new StringBuilder();
 		for (String aclRule : aclRules1) {
@@ -248,12 +249,12 @@ public class QpidClient {
 		base64EncodedAcl.put("path", "data:text/plain;base64," + Base64.getEncoder().encodeToString(newAclRules.getBytes()));
 		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
 		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
-		logger.info("Added read access to {} for Subscriber {}", queue, subscriber.getName());
+		logger.info("Added read access to {} for Subscriber {}", queue, subscriberName);
 	}
 
-	List<String> addOneConsumeRuleBeforeLastRule(Subscriber subscriber, String newConsumeQueue, List<String> aclRulesLegacyFormat) {
+	List<String> addOneConsumeRuleBeforeLastRule(String subscriberName, String newConsumeQueue, List<String> aclRulesLegacyFormat) {
 		LinkedList<String> aclRules = new LinkedList<>(aclRulesLegacyFormat);
-		String newAclEntry = String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", subscriber.getName(), newConsumeQueue);
+		String newAclEntry = String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", subscriberName, newConsumeQueue);
 		aclRules.add(aclRules.size()-1, newAclEntry); // add the new rule before the last rule "DENY ALL"
 		logger.debug("new acl rules {}", aclRules);
 		return aclRules;
