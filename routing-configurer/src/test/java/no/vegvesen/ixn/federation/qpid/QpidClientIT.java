@@ -16,7 +16,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -116,14 +115,6 @@ public class QpidClientIT extends DockerBaseIT {
 		client.removeMemberFromGroup(deleteUser, FEDERATED_GROUP_NAME);
 		userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
 		assertThat(userNames).doesNotContain(deleteUser);
-	}
-
-	private static String getFilePathFromClasspathResource(String classpathResource) {
-		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
-		if (resource != null) {
-			return resource.getFile();
-		}
-		throw new RuntimeException("Could not load classpath resource " + classpathResource);
 	}
 
 	@Test

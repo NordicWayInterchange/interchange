@@ -209,12 +209,6 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 	}
 
 
-
-	/**
-	 * Called from newNeighbourCanWriteToFedExButNotOnramp to avoid setting up more neighbour nodes in the test
-	 *
-	 * @param neighbourQueue name of the queue to be read by the node itself
-	 */
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("jks/localhost.p12");
 		Sink neighbourSink = new Sink(AMQPS_URL, neighbourQueue, localhostSslContext);
