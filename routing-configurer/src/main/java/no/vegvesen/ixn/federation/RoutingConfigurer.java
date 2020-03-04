@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 
 @Component
@@ -101,18 +100,6 @@ public class RoutingConfigurer {
 		}
 	}
 
-	@Scheduled(fixedRateString = "${routing-configurer.groups-interval.add}")
-	private void setupUserInFederationGroup() {
-		logger.debug("Looking for users with fedIn ESTABLISHED to add to Qpid groups.");
-		List<Neighbour> neighboursToAddToGroups = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.ESTABLISHED);
-		logger.debug("Found {} users to add to Qpid group {}", neighboursToAddToGroups, FEDERATED_GROUP_NAME);
-
-		for (Neighbour neighbour : neighboursToAddToGroups) {
-			addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour);
-			neighbour.getFedIn().setStatus(SubscriptionRequestStatus.FEDERATED_ACCESS_GRANTED);
-			neighbourRepository.save(neighbour);
-		}
-	}
 
 	private void addSubscriberToGroup(String groupName, Subscriber subscriber) {
 		List<String> existingGroupMembers = qpidClient.getInterchangesUserNames(groupName);
