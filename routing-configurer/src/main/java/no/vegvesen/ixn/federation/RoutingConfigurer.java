@@ -57,10 +57,10 @@ public class RoutingConfigurer {
 			logger.debug("Removing routing for subscriber {}", subscriber.getName());
 			qpidClient.removeQueue(subscriber.getName());
 			if (subscriber instanceof ServiceProvider) {
-				removeUserFromGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
+				removeSubscriberFromGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
 			}
 			else if (subscriber instanceof Neighbour){
-				removeUserFromGroup(FEDERATED_GROUP_NAME, subscriber);
+				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, subscriber);
 			}
 			logger.info("Removed routing for subscriber {}", subscriber.getName());
 			subscriber.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
@@ -138,23 +138,23 @@ public class RoutingConfigurer {
 	}
 
 	private void addSubscriberToGroup(String groupName, Subscriber subscriber) {
-		List<String> existingGroupMembers = qpidClient.getInterchangesUserNames(groupName);
+		List<String> existingGroupMembers = qpidClient.getGroupMemberNames(groupName);
 		logger.debug("Attempting to add subscriber {} to the group {}", subscriber.getName(), groupName);
 		logger.debug("Group {} contains the following members: {}", groupName, Arrays.toString(existingGroupMembers.toArray()));
 		if (!existingGroupMembers.contains(subscriber.getName())) {
 			logger.debug("Subscriber {} did not exist in the group {}. Adding...", subscriber, groupName);
-			qpidClient.addInterchangeUserToGroups(subscriber.getName(), groupName);
+			qpidClient.addMemberToGroup(subscriber.getName(), groupName);
 			logger.info("Added subscriber {} to Qpid group {}", subscriber.getName(), groupName);
 		} else {
 			logger.warn("Subscriber {} already exists in the group {}", subscriber.getName(), groupName);
 		}
 	}
 
-	private void removeUserFromGroup(String groupName, Subscriber subscriber) {
-		List<String> userNames = qpidClient.getInterchangesUserNames(groupName);
-		if (userNames.contains(subscriber.getName())) {
+	private void removeSubscriberFromGroup(String groupName, Subscriber subscriber) {
+		List<String> existingGroupMembers = qpidClient.getGroupMemberNames(groupName);
+		if (existingGroupMembers.contains(subscriber.getName())) {
 			logger.debug("Subscriber {} found in the groups {} Removing...", subscriber.getName(), groupName);
-			qpidClient.removeInterchangeUserFromGroups(groupName, subscriber.getName());
+			qpidClient.removeMemberFromGroup(groupName, subscriber.getName());
 			logger.info("Removed subscriber {} from Qpid group {}", subscriber.getName(), groupName);
 		} else {
 			logger.warn("Subscriber {} does not exist in the group {} and cannot be removed.", subscriber.getName(), groupName);

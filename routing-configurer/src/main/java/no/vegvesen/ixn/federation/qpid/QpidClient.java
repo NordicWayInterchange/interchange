@@ -166,7 +166,7 @@ public class QpidClient {
 		restTemplate.delete(queuesURL + "?id=" + queueId);
 	}
 
-	public List<String> getInterchangesUserNames(String groupName) {
+	public List<String> getGroupMemberNames(String groupName) {
 		String url = groupsUrl + groupName;
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
@@ -185,12 +185,12 @@ public class QpidClient {
 		return groupMemberNames;
 	}
 
-	public void removeInterchangeUserFromGroups(String groupName, String neighbourName) {
+	public void removeMemberFromGroup(String groupName, String neighbourName) {
 		String url = groupsUrl + groupName + "/" + neighbourName;
 		restTemplate.delete(url);
 	}
 
-	public void addInterchangeUserToGroups(String name, String groupName) {
+	public void addMemberToGroup(String name, String groupName) {
 		JSONObject groupJsonObject = new JSONObject();
 		groupJsonObject.put("name", name);
 		String jsonString = groupJsonObject.toString();

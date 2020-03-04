@@ -99,9 +99,9 @@ public class QpidClientIT extends DockerBaseIT {
 	@Test
 	public void addAnInterchangeToGroups() {
 		String newUser = "herring";
-		client.addInterchangeUserToGroups(newUser, FEDERATED_GROUP_NAME);
+		client.addMemberToGroup(newUser, FEDERATED_GROUP_NAME);
 
-		List<String> userNames = client.getInterchangesUserNames(FEDERATED_GROUP_NAME);
+		List<String> userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
 
 		assertThat(userNames).contains(newUser);
 	}
@@ -109,12 +109,12 @@ public class QpidClientIT extends DockerBaseIT {
 	@Test
 	public void deleteAnInterchangeFromGroups() {
 		String deleteUser = "carp";
-		client.addInterchangeUserToGroups(deleteUser, FEDERATED_GROUP_NAME);
-		List<String> userNames = client.getInterchangesUserNames(FEDERATED_GROUP_NAME);
+		client.addMemberToGroup(deleteUser, FEDERATED_GROUP_NAME);
+		List<String> userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
 		assertThat(userNames).contains(deleteUser);
 
-		client.removeInterchangeUserFromGroups(FEDERATED_GROUP_NAME, deleteUser);
-		userNames = client.getInterchangesUserNames(FEDERATED_GROUP_NAME);
+		client.removeMemberFromGroup(FEDERATED_GROUP_NAME, deleteUser);
+		userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
 		assertThat(userNames).doesNotContain(deleteUser);
 	}
 

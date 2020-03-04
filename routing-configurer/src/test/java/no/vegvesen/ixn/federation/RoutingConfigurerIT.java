@@ -191,10 +191,10 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 
 		routingConfigurer.setupSubscriberRouting(toreDownNeighbour);
-		assertThat(client.getInterchangesUserNames(QpidClient.FEDERATED_GROUP_NAME)).contains(toreDownNeighbour.getName());
+		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).contains(toreDownNeighbour.getName());
 
 		routingConfigurer.tearDownSubscriberRouting(toreDownNeighbour);
-		assertThat(client.getInterchangesUserNames(QpidClient.FEDERATED_GROUP_NAME)).doesNotContain(toreDownNeighbour.getName());
+		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).doesNotContain(toreDownNeighbour.getName());
 	}
 
 	@Test
@@ -202,10 +202,10 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
 
 		routingConfigurer.setupSubscriberRouting(toreDownServiceProvider);
-		assertThat(client.getInterchangesUserNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
 
 		routingConfigurer.tearDownSubscriberRouting(toreDownServiceProvider);
-		assertThat(client.getInterchangesUserNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
 	}
 
 
