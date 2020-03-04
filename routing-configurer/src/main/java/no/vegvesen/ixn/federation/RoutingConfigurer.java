@@ -154,7 +154,7 @@ public class RoutingConfigurer {
 		List<String> existingGroupMembers = qpidClient.getGroupMemberNames(groupName);
 		if (existingGroupMembers.contains(subscriber.getName())) {
 			logger.debug("Subscriber {} found in the groups {} Removing...", subscriber.getName(), groupName);
-			qpidClient.removeMemberFromGroup(groupName, subscriber.getName());
+			qpidClient.removeMemberFromGroup(subscriber.getName(), groupName);
 			logger.info("Removed subscriber {} from Qpid group {}", subscriber.getName(), groupName);
 		} else {
 			logger.warn("Subscriber {} does not exist in the group {} and cannot be removed.", subscriber.getName(), groupName);

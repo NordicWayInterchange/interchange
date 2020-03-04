@@ -113,7 +113,7 @@ public class QpidClientIT extends DockerBaseIT {
 		List<String> userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
 		assertThat(userNames).contains(deleteUser);
 
-		client.removeMemberFromGroup(FEDERATED_GROUP_NAME, deleteUser);
+		client.removeMemberFromGroup(deleteUser, FEDERATED_GROUP_NAME);
 		userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
 		assertThat(userNames).doesNotContain(deleteUser);
 	}

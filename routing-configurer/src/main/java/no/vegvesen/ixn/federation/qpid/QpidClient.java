@@ -185,14 +185,14 @@ public class QpidClient {
 		return groupMemberNames;
 	}
 
-	public void removeMemberFromGroup(String groupName, String neighbourName) {
-		String url = groupsUrl + groupName + "/" + neighbourName;
+	public void removeMemberFromGroup(String memberName, String groupName) {
+		String url = groupsUrl + groupName + "/" + memberName;
 		restTemplate.delete(url);
 	}
 
-	public void addMemberToGroup(String name, String groupName) {
+	public void addMemberToGroup(String memberName, String groupName) {
 		JSONObject groupJsonObject = new JSONObject();
-		groupJsonObject.put("name", name);
+		groupJsonObject.put("name", memberName);
 		String jsonString = groupJsonObject.toString();
 
 		postQpid(groupsUrl, jsonString, groupName);
