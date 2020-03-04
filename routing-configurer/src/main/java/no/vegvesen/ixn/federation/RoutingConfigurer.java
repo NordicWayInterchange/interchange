@@ -46,7 +46,7 @@ public class RoutingConfigurer {
 		tearDownRouting(readyToTearDownRouting);
 	}
 
-	private void tearDownRouting(List<? extends Subscriber> readyToTearDownRouting) {
+	void tearDownRouting(List<? extends Subscriber> readyToTearDownRouting) {
 		for (Subscriber subscriber : readyToTearDownRouting) {
 			try {
 				logger.debug("Removing routing for subscriber {}", subscriber.getName());
@@ -84,28 +84,32 @@ public class RoutingConfigurer {
 	//This avoids loop of messages
 	private void setupRouting(List<? extends Subscriber> readyToSetupRouting) {
 		for (Subscriber subscriber : readyToSetupRouting) {
-			try {
-				logger.debug("Setting up routing for subscriber {}", subscriber.getName());
-				createQueue(subscriber);
-				if (subscriber instanceof ServiceProvider) {
-					addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
-					bindSubscriptions("nwEx", subscriber);
-					bindSubscriptions("fedEx", subscriber);
-				}
-				else if (subscriber instanceof Neighbour){
-					addSubscriberToGroup(FEDERATED_GROUP_NAME, subscriber);
-					bindSubscriptions("nwEx", subscriber);
-				}
-				for (Subscription subscription : subscriber.getSubscriptionRequest().getSubscriptions()) {
-					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-				}
-				subscriber.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+			setupSubscriberRouting(subscriber);
+		}
+	}
 
-				saveSubscriber(subscriber);
-				logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", subscriber.getName());
-			} catch (Throwable e) {
-				logger.error("Could not set up routing for subscriber {}", subscriber.getName(), e);
+	void setupSubscriberRouting(Subscriber subscriber) {
+		try {
+			logger.debug("Setting up routing for subscriber {}", subscriber.getName());
+			createQueue(subscriber);
+			if (subscriber instanceof ServiceProvider) {
+				addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
+				bindSubscriptions("nwEx", subscriber);
+				bindSubscriptions("fedEx", subscriber);
 			}
+			else if (subscriber instanceof Neighbour){
+				addSubscriberToGroup(FEDERATED_GROUP_NAME, subscriber);
+				bindSubscriptions("nwEx", subscriber);
+			}
+			for (Subscription subscription : subscriber.getSubscriptionRequest().getSubscriptions()) {
+				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+			}
+			subscriber.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+
+			saveSubscriber(subscriber);
+			logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", subscriber.getName());
+		} catch (Throwable e) {
+			logger.error("Could not set up routing for subscriber {}", subscriber.getName(), e);
 		}
 	}
 
@@ -128,8 +132,6 @@ public class RoutingConfigurer {
 			qpidClient.unbindBindKey(interchange.getName(), unwantedBindKey, exchangeName);
 		}
 	}
-
-
 
 	private void addSubscriberToGroup(String groupName, Subscriber subscriber) {
 		List<String> existingGroupMembers = qpidClient.getInterchangesUserNames(groupName);

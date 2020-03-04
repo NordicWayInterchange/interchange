@@ -101,7 +101,7 @@ public class QpidClient {
 		postQpid(queuesURL, jsonString, "/");
 	}
 
-	boolean queueExists(String queueName) {
+	public boolean queueExists(String queueName) {
 		return lookupQueueId(queueName) != null;
 	}
 
