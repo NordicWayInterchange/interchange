@@ -35,6 +35,7 @@ import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
+@SuppressWarnings("rawtypes")
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
@@ -242,16 +243,13 @@ public class QpidClientIT extends DockerBaseIT {
 	}
 
 	@Test
-	public void newNeighbourCanWriteToFedExButNotOnramp() throws JMSException, NamingException {
+	public void newNeighbourCanNotWriteToOnramp() throws JMSException, NamingException {
 		HashSet<Subscription> subscriptions = new HashSet<>();
 		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.REQUESTED));
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions), null);
 		client.setupRouting(nordea, NW_EX);
 		client.addInterchangeUserToGroups(nordea.getName(), FEDERATED_GROUP_NAME);
 		SSLContext nordeaSslContext = setUpTestSslContext("jks/nordea.p12");
-		Source writeFedExExchange = new Source(AMQPS_URL, "fedEx", nordeaSslContext);
-		writeFedExExchange.start();
-		writeFedExExchange.send("Ordinary business at the Nordea office.");
 		try {
 			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
 			writeOnramp.start();
