@@ -186,6 +186,30 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 		theNodeItselfCanReadFromAnyNeighbourQueue("nordea");
 	}
 
+	@Test
+	public void neighbourToreDownWillBeRemovedFromFederatedInterchangesGroup() {
+		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
+
+		routingConfigurer.setupSubscriberRouting(toreDownNeighbour);
+		assertThat(client.getInterchangesUserNames(QpidClient.FEDERATED_GROUP_NAME)).contains(toreDownNeighbour.getName());
+
+		routingConfigurer.tearDownSubscriberRouting(toreDownNeighbour);
+		assertThat(client.getInterchangesUserNames(QpidClient.FEDERATED_GROUP_NAME)).doesNotContain(toreDownNeighbour.getName());
+	}
+
+	@Test
+	public void subcriberToreDownWillBeRemovedFromSubscribFederatedInterchangesGroup() {
+		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
+
+		routingConfigurer.setupSubscriberRouting(toreDownServiceProvider);
+		assertThat(client.getInterchangesUserNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
+
+		routingConfigurer.tearDownSubscriberRouting(toreDownServiceProvider);
+		assertThat(client.getInterchangesUserNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
+	}
+
+
+
 	/**
 	 * Called from newNeighbourCanWriteToFedExButNotOnramp to avoid setting up more neighbour nodes in the test
 	 *

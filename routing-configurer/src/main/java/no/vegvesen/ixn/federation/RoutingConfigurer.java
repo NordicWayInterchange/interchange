@@ -48,22 +48,26 @@ public class RoutingConfigurer {
 
 	void tearDownRouting(List<? extends Subscriber> readyToTearDownRouting) {
 		for (Subscriber subscriber : readyToTearDownRouting) {
-			try {
-				logger.debug("Removing routing for subscriber {}", subscriber.getName());
-				qpidClient.removeQueue(subscriber.getName());
-				if (subscriber instanceof ServiceProvider) {
-					removeUserFromGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
-				}
-				else if (subscriber instanceof Neighbour){
-					removeUserFromGroup(FEDERATED_GROUP_NAME, subscriber);
-				}
-				logger.info("Removed routing for subscriber {}", subscriber.getName());
-				subscriber.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
-				saveSubscriber(subscriber);
-				logger.debug("Saved subscriber {} with subscription request status EMPTY", subscriber.getName());
-			} catch (Exception e) {
-				logger.error("Could not remove routing for subscriber {}", subscriber.getName(), e);
+			tearDownSubscriberRouting(subscriber);
+		}
+	}
+
+	void tearDownSubscriberRouting(Subscriber subscriber) {
+		try {
+			logger.debug("Removing routing for subscriber {}", subscriber.getName());
+			qpidClient.removeQueue(subscriber.getName());
+			if (subscriber instanceof ServiceProvider) {
+				removeUserFromGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
 			}
+			else if (subscriber instanceof Neighbour){
+				removeUserFromGroup(FEDERATED_GROUP_NAME, subscriber);
+			}
+			logger.info("Removed routing for subscriber {}", subscriber.getName());
+			subscriber.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
+			saveSubscriber(subscriber);
+			logger.debug("Saved subscriber {} with subscription request status EMPTY", subscriber.getName());
+		} catch (Exception e) {
+			logger.error("Could not remove routing for subscriber {}", subscriber.getName(), e);
 		}
 	}
 
