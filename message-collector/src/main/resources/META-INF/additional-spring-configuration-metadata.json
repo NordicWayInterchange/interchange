@@ -55,6 +55,13 @@
       "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties",
       "description": "The destination queue or exchange for the collected messages",
       "defaultValue": "fedEx"
+    },
+    {
+      "name": "collector.fixeddelay",
+      "description": "Time, in milliseconds, between each time the messagecollector sets up AMQPS connections to new neighbours and tears down connections to neighbours that have been removed",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties",
+      "defaultValue": "30000"
     }
   ],
   "hints": []

@@ -21,6 +21,8 @@ public class MessageCollector {
 
     private NeighbourFetcher neighbourFetcher;
     private final CollectorCreator collectorCreator;
+
+    //NOTE: This is implicitly thread safe. If more than one thread can access the listeners map, the implementation of the listener Map will have to change.
     private Map<String, MessageCollectorListener> listeners;
     private Logger logger = LoggerFactory.getLogger(MessageCollector.class);
 
@@ -33,7 +35,7 @@ public class MessageCollector {
 
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRateString = "${collector.fixeddelay}")
     public void runSchedule() throws NamingException {
         checkListenerList();
         setupConnectionsToNewNeighbours();
@@ -61,7 +63,6 @@ public class MessageCollector {
             if (! listeners.containsKey(name)) {
                 try {
                     logger.info("Setting up ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
-                    //MessageCollectorListener messageListener = collectorCreator.setupForwarding(ixn);
                     MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
                     listeners.put(name, messageListener);
                 } catch (JMSException e) {
@@ -75,7 +76,6 @@ public class MessageCollector {
                 }
             }
         }
-        //TODO need a better way of doing this. Not even close to thread-safe..
         List<MessageCollectorListener> listenersToRemove = new ArrayList<>();
         for (String ixnName : listeners.keySet()) {
             if (! interchangeNames.contains(ixnName)) {

@@ -17,6 +17,7 @@ public class CollectorProperties {
 	private String truststorepassword;
 	private String truststoretype;
 	private String writequeue = "fedEx";
+	private String fixeddelay = "30000";
 
 	public CollectorProperties() {
 	}
@@ -93,6 +94,14 @@ public class CollectorProperties {
 		this.writequeue = writequeue;
 	}
 
+	public String getFixeddelay() {
+		return fixeddelay;
+	}
+
+	public void setFixeddelay(String fixeddelay) {
+		this.fixeddelay = fixeddelay;
+	}
+
 	@Override
 	public String toString() {
 		return "CollectorProperties{" +
@@ -105,6 +114,7 @@ public class CollectorProperties {
 				", truststorepassword='" + truststorepassword + '\'' +
 				", truststoretype='" + truststoretype + '\'' +
 				", writequeue='" + writequeue + '\'' +
+				", fixeddelay='" + fixeddelay + '\'' +
 				'}';
 	}
 }
