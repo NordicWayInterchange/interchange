@@ -83,15 +83,6 @@
           }
         },
         {
-          "objectType": "EXCHANGE",
-          "identity": "federated-interchanges",
-          "operation": "PUBLISH",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "fedEx"
-          }
-        },
-        {
           "objectType": "QUEUE",
           "identity": "king_gustaf.itsinterchange.eu",
           "operation": "CONSUME",

@@ -1,5 +1,5 @@
 @startuml
-skinparam sequenceMessageAlign center
+skinparam sequenceMessage Align center
 
 box "<size:22>Interchange A</size>" #LightGrey
 database "broker" as client_broker
@@ -9,11 +9,17 @@ Actor "Message\nCollector" as C
 end box
 
 box "<size:22>Interchange B</size>" #LightBlue
+
+
 queue A
+queue nwEx
 database "message \nbroker" as server_broker
+activate nwEx
+nwEx -> A: A subscription
+activate A
 end box
 
-C -> client_db: Get all neighbours with // subscriptionRequest Status FEDERATED_ACCESS_GRANTED
+C -> client_db: Get all neighbours with \n SubscriptionRequestStatus ESTABLISHED
 C <-- client_db: Interchange B
 
 activate C

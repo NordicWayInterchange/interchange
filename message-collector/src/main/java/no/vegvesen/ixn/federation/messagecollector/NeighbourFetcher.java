@@ -20,7 +20,6 @@ public class NeighbourFetcher {
     }
 
     public List<Neighbour> listNeighboursToConsumeFrom() {
-        List<Neighbour> neighbours = repository.findByFedIn_StatusIn(SubscriptionRequestStatus.FEDERATED_ACCESS_GRANTED);
-        return neighbours;
+		return repository.findByFedIn_StatusIn(SubscriptionRequestStatus.ESTABLISHED);
     }
 }

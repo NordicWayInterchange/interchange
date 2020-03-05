@@ -92,7 +92,9 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 
 		logger.debug("Recreating the message queue");
 		when(remoteNeighbour.getSubscriptionRequest()).thenReturn(new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, Collections.emptySet()));
-		qpidClient.setupRouting(remoteNeighbour, "nwEx");
+		qpidClient.createQueue(remoteNeighbour.getName());
+		qpidClient.addReadAccess(remoteNeighbour.getName(), remoteNeighbour.getName());
+		qpidClient.addMemberToGroup(remoteNeighbour.getName(), QpidClient.FEDERATED_GROUP_NAME);
 
 		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Collections.singletonList(remoteNeighbour));
 		messageForwarder.runSchedule();
