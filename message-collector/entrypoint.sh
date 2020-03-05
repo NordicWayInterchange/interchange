@@ -4,7 +4,6 @@ echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 
 LOG_LEVELS=${LOG_LEVELS:-" "}
 
-#TODO need to put more of the settings into env variables.
 java -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect \
      -Dspring.datasource.url=${POSTGRES_URI} \
      -Dcollector.localIxnDomainName=${SERVER_NAME} \
