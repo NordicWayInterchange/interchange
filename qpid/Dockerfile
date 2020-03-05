@@ -2,7 +2,7 @@ FROM java:8-alpine
 
 RUN apk add --no-cache bash openssl jq
 
-ENV QPID_VERSION=7.0.6
+ENV QPID_VERSION=7.1.8
 
 RUN cd /usr/local && \
     wget http://archive.apache.org/dist/qpid/broker-j/${QPID_VERSION}/binaries/apache-qpid-broker-j-${QPID_VERSION}-bin.tar.gz && \
