@@ -1,0 +1,68 @@
+{
+  "groups": [
+    {
+      "name": "collector",
+      "type": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "collector.localIxnDomainName",
+      "type": "java.lang.String",
+      "description": "The domain name of the interchange",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties"
+    },
+    {
+      "name": "collector.localIxnFederationPort",
+      "type": "java.lang.String",
+      "description": "The message channel port of the interchange",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties"
+    },
+    {
+      "name": "collector.keystorepath",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties"
+    },
+    {
+      "name": "collector.keystorepassword",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties"
+    },
+    {
+      "name": "collector.keystoretype",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties"
+    },
+    {
+      "name": "collector.truststorepath",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties"
+    },
+    {
+      "name": "collector.truststorepassword",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties"
+    },
+    {
+      "name": "collector.truststoretype",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties"
+    },
+    {
+      "name": "collector.writequeue",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties",
+      "description": "The destination queue or exchange for the collected messages",
+      "defaultValue": "fedEx"
+    },
+    {
+      "name": "collector.fixeddelay",
+      "description": "Time, in milliseconds, between each time the messagecollector sets up AMQPS connections to new neighbours and tears down connections to neighbours that have been removed",
+      "type": "java.lang.String",
+      "sourceType": "no.vegvesen.ixn.federation.messagecollector.CollectorProperties",
+      "defaultValue": "30000"
+    }
+  ],
+  "hints": []
+}

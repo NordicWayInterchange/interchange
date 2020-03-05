@@ -4,16 +4,6 @@
       "name": "routing-configurer.interval",
       "type": "java.lang.String",
       "description": "Time, in milliseconds, between each time neighbours and service providers are added to the message broker."
-    },
-    {
-      "name": "routing-configurer.groups-interval.add",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, between each time new neighbours that forwards messages to us will be added to our groups file."
-    },
-    {
-      "name": "routing-configurer.groups-interval.remove",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, between each time neighbours no longer forwards messages to us will be removed from our groups file."
     }
   ]
 }

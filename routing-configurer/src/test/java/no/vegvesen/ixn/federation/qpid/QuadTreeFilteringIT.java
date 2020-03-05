@@ -4,7 +4,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
+import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
@@ -65,9 +65,9 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 	@Before
 	public void setUp() {
 		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
-		List<String> administrators = qpidClient.getInterchangesUserNames("administrators");
+		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
 		if (!administrators.contains("king_gustaf")) {
-			qpidClient.addInterchangeUserToGroups("king_gustaf", "administrators");
+			qpidClient.addMemberToGroup("king_gustaf", "administrators");
 		}
 	}
 
@@ -102,7 +102,9 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 	private Message sendReceiveMessageNeighbour(String messageQuadTreeTiles, String selector) throws Exception {
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
 		Neighbour king_gustaf = new Neighbour("king_gustaf", null, new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newLinkedHashSet(subscription)), null);
-		qpidClient.setupRouting(king_gustaf, "nwEx");
+		qpidClient.createQueue(king_gustaf.getName());
+		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());
+		qpidClient.addBinding(subscription.getSelector(), king_gustaf.getName(), subscription.bindKey(), "nwEx");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext("jks/king_gustaf.p12", "jks/truststore.jks");
 
@@ -132,7 +134,9 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 	private Message sendReceiveMessageServiceProvider(String messageQuadTreeTiles, DataType subscription) throws Exception {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		king_gustaf.setLocalSubscriptionRequest(new LocalSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscription));
-		qpidClient.setupRouting(king_gustaf, "nwEx");
+		qpidClient.createQueue(king_gustaf.getName());
+		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());
+		qpidClient.addBinding(subscription.toSelector(), king_gustaf.getName(), ""+subscription.toSelector().hashCode(), "nwEx");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext("jks/king_gustaf.p12", "jks/truststore.jks");
 

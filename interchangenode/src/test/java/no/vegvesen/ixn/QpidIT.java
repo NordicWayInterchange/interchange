@@ -1,6 +1,6 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
+import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
 import no.vegvesen.ixn.util.KeyValue;
 import org.junit.ClassRule;

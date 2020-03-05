@@ -1,0 +1,32 @@
+@startuml
+skinparam sequenceMessage Align center
+
+box "<size:22>Interchange A</size>" #LightGrey
+database "broker" as client_broker
+queue fedEx
+database "Database" as client_db
+Actor "Message\nCollector" as C
+end box
+
+box "<size:22>Interchange B</size>" #LightBlue
+
+
+queue A
+queue nwEx
+database "message \nbroker" as server_broker
+activate nwEx
+nwEx -> A: A subscription
+activate A
+end box
+
+C -> client_db: Get all neighbours with \n SubscriptionRequestStatus ESTABLISHED
+C <-- client_db: Interchange B
+
+activate C
+C -> C: Setup message listener
+
+activate C
+C -> A: listen for messages to A
+C -> fedEx: send to fedEx
+
+@enduml
