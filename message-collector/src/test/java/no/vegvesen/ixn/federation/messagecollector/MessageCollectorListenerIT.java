@@ -38,15 +38,13 @@ public class MessageCollectorListenerIT extends DockerBaseIT {
 
 	@Before
 	public void setup() {
-		Integer localAmqpsPort = localContainer.getMappedPort(AMQPS_PORT);
-		Integer remoteAmqpsPort = remoteContainer.getMappedPort(AMQPS_PORT);
-		remoteAmqpsUrl = String.format("amqps://localhost:%s", remoteAmqpsPort);
 
-		collectorCreator = new CollectorCreator(SSL_CONTEXT, "localhost", localAmqpsPort.toString(), "fedEx");
 	}
 
 	@Test
 	public void testStopLocalContainerTriggersConnectionExceptionListener() throws JMSException, NamingException {
+		remoteAmqpsUrl = String.format("amqps://localhost:%s", remoteContainer.getMappedPort(AMQPS_PORT));
+		collectorCreator = new CollectorCreator(SSL_CONTEXT, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
 		Neighbour remote = mock(Neighbour.class);
 		when(remote.getMessageChannelUrl()).thenReturn(remoteAmqpsUrl);
 		MessageCollectorListener remoteForwardListener = collectorCreator.setupCollection(remote);
@@ -55,13 +53,11 @@ public class MessageCollectorListenerIT extends DockerBaseIT {
 		localContainer.stop();
 
 		assertThat(remoteForwardListener.isRunning()).isFalse();
-	}
 
-	@Test
-	public void testStopRemoteContainerTriggersConnectionExceptionListener() throws JMSException, NamingException {
-		Neighbour remote = mock(Neighbour.class);
-		when(remote.getMessageChannelUrl()).thenReturn(remoteAmqpsUrl);
-		MessageCollectorListener remoteForwardListener = collectorCreator.setupCollection(remote);
+
+		localContainer.start();
+		collectorCreator = new CollectorCreator(SSL_CONTEXT, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
+		remoteForwardListener = collectorCreator.setupCollection(remote);
 
 		//Stop the container to trigger the connection exception listener to run
 		remoteContainer.stop();
