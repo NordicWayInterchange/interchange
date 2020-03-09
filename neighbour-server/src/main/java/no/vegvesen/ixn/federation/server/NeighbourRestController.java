@@ -205,7 +205,7 @@ public class NeighbourRestController {
 
 			return subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		} else {
-			throw new InterchangeNotFoundException("The requested Neighbour does not exist.");
+			throw new InterchangeNotFoundException("The requested Neighbour is not known to this interchange node.");
 		}
 	}
 
@@ -269,7 +269,7 @@ public class NeighbourRestController {
 			neighbour.setControlChannelPort(dnsNeighbour.getControlChannelPort());
 			neighbour.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
 		} else {
-			throw new DiscoveryException(
+			throw new InterchangeNotInDNSException(
 					String.format("Received capability post from neighbour %s, but could not find in DNS %s",
 							neighbour.getName(),
 							dnsFacade.getDnsServerName()));

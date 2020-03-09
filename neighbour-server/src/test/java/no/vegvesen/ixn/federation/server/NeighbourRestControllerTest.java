@@ -171,8 +171,7 @@ class NeighbourRestControllerTest {
 	}
 
 	@Test
-	void postingCapabilitiesUnknownInDNSReturnsError() throws Exception {
-
+	public void postingCapabilitiesUnknownInDNSReturnsError() throws Exception {
 		// Mocking the incoming certificate
 		mockCertificate("unknownNeighbour");
 
@@ -192,7 +191,8 @@ class NeighbourRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(capabilityApiToServerJson))
-				.andDo(print());
+				.andDo(print())
+				.andExpect(status().is4xxClientError());
 		verify(dnsFacade,times(1)).getNeighbours();
 	}
 
