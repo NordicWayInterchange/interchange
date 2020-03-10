@@ -1,0 +1,33 @@
+version: '3'
+services:
+  nameserver:
+    build:
+      context: ./fake-dns-server
+      dockerfile: dns-dockerfile
+    cap_add:
+    - NET_ADMIN
+    container_name: nameserver
+    hostname: nameserver
+    networks:
+      testing_net:
+        ipv4_address: 172.28.1.1
+        aliases:
+          - dns.interchange.kyrre.priv.no
+  dns-client:
+    dns: 172.28.1.1
+    depends_on:
+      - nameserver
+    build:
+      context: ./dns-client
+    networks:
+      - testing_net
+
+
+networks:
+  testing_net:
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.28.1.0/16
+
+
