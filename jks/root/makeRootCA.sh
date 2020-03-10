@@ -1,9 +1,17 @@
 #!/bin/bash
 
+if [ "$#" -ne 1 ]; then
+    echo no domainname for the root ca
+    echo "USAGE: $0 <ca-domainname>"
+    exit 1
+fi
+
 if [ -d "ca" ]; then
 	echo ca dir already present, exiting.
 	exit 1
 fi
+
+
 
 mkdir ca
 cd ca
@@ -14,7 +22,8 @@ echo '1000' > serial
 cd ..
 
 echo Enter domain name for the rootCA:
-read DOMAINNAME
+#read DOMAINNAME
+DOMAINNAME=$1
 
 sed "s/DOMAINNAME/$DOMAINNAME/g" root.tmpl > openssl_root.cnf
 

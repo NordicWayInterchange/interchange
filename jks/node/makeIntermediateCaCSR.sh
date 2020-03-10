@@ -8,6 +8,11 @@
 # rootCrtPth=$1
 # rootCrtFileName="$(basename -- $rootCrtPth)"
 
+if [ "$#" -ne 1 ]; then
+    echo "USAGE: $0 <intermediateCA domain name>"
+    exit 1
+fi
+
 if [ ! -d "ca" ]; then
         mkdir ca
         cd ca
@@ -29,7 +34,8 @@ if [ ! -d "ca/intermediate" ]; then
 fi
 
 echo Enter domain name for the intermediateCA:
-read DOMAINNAME
+#read DOMAINNAME
+DOMAINNAME=$1
 
 sed "s/DOMAIN/$DOMAINNAME/g" inter.tmpl > openssl_intermediate.cnf
 

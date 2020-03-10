@@ -1,6 +1,11 @@
 #!/bin/bash
 
 #Fully Qualified Domain Name
+if [ "$#" -ne 2 ]; then
+    echo Illegal number of arguments.
+    echo "USAGE: $0 <client-identifier> <CA_DOMAIN_NAME>"
+    exit 1
+fi
 
 if [ ! -d "ca/intermediate" ]; then
 	echo no intermediate CAs created. exiting
@@ -8,12 +13,14 @@ if [ ! -d "ca/intermediate" ]; then
 fi
 
 echo Enter an identifier for the client:
-read ident
+#read ident
+ident=$1
 
 sed "s/FQDN/$FQDN/g" serverCert.tmpl > openssl_csr_san.cnf
 
 echo Enter DOMAINNAME for the intermediate CA you want to use:
-read CADOMAINNAME
+#read CADOMAINNAME
+CADOMAINNAME=$2
 
 if [ ! -f "ca/intermediate/certs/int.$CADOMAINNAME.crt.pem" ]; then 
         echo could not find cert for $CADOMAINNAME. Exiting.

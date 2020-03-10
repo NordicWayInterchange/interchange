@@ -2,18 +2,26 @@
 
 #Fully Qualified Domain Name
 
+if [ "$#" -ne 2 ]; then
+    echo "USAGE: $0 <server FQDN> <ca-domainname>"
+    exit 1
+fi
+
 if [ ! -d "ca/intermediate" ]; then
 	echo no intermediate CAs created. exiting
 	exit 1
 fi
 
 echo Enter fully qualified domain name FQDN for the server:
-read FQDN
+#read FQDN
+FQDN=$1
 
 sed "s/FQDN/$FQDN/g" serverCert.tmpl > openssl_csr_san.cnf
+CADOMAINNAME=$2
 
 echo Enter DOMAINNAME for the intermediate CA:
-read CADOMAINNAME
+#read CADOMAINNAME
+CADOMAINNAME=$2
 
 if [ ! -f "ca/intermediate/certs/int.$CADOMAINNAME.crt.pem" ]; then 
 	echo could not find cert for $CADOMAINNAME. Exiting.
