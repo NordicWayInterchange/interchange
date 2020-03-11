@@ -13,6 +13,21 @@ services:
         ipv4_address: 172.28.1.1
         aliases:
           - dns.interchange.kyrre.priv.no
+
+  local_db:
+    image: postgres:9.6
+    container_name: local_db
+    depends_on:
+      - nameserver
+    ports:
+      - 5432
+    environment:
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation
+    networks:
+      - testing_net
+
   dns-client:
     dns: 172.28.1.1
     depends_on:
