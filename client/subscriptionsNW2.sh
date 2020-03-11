@@ -3,5 +3,5 @@ curl \
  --cert chain.<service-provider>.crt.pem \
  --cacert ca.rootCA.crt.pem \
  --header 'Content-Type:application/json' \
- --data '{"name": "service-provider-name", "subscriptions": [{ "selector": "where = 'DK' and how like 'datex2%'" }]}' \
+ --data @subscriptions.json \
   https://bouveta-fed.itsinterchange.eu:4141/subscription
