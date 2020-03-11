@@ -28,12 +28,35 @@ services:
     networks:
       - testing_net
 
+  onboard_server:
+    image: eu.gcr.io/nordic-way-aad182cc/onboard-server:docker_compose_systemtests
+    container_name: onboard_server
+    depends_on:
+      - local_db
+    ports:
+      - 32666:8797
+    volumes:
+    - "./keys_nodea:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - SERVER_NAME=nodea.interchange.kyrre.priv.no
+      - DOMAIN_NAME=interchange.kyrre.priv.no
+      - SP_CHNL_PORT=8797
+      - TRUST_STORE=/jks/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/chain.nodea.interchange.kyrre.priv.no.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - testing_net
+
   dns-client:
     dns: 172.28.1.1
     depends_on:
       - nameserver
     build:
       context: ./dns-client
+    environment:
+      - DOMAIN_TO_CHECK_FOR=interchange.kyrre.priv.no
     networks:
       - testing_net
 
