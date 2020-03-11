@@ -1,0 +1,8 @@
+{
+  "name": "service-provider-name",
+  "subscriptions": [
+    {
+      "selector": "where = 'DK' and how like 'datex2%'"
+    }
+  ]
+}
