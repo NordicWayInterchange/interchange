@@ -1,0 +1,6 @@
+openssl req -new -newkey rsa:2048 -nodes -keyout localhost.key -out ca.csr -subj "/CN=localhost/O=Nordic Way/C=NO" 
+openssl x509 -req -days 365 -in ca.csr -signkey localhost.key -out localhost.crt
+keytool -import -trustcacerts -file localhost.crt -keystore truststore.jks -storepass password -noprompt
+openssl req -new -newkey rsa:2048 -nodes -keyout guest.key -out guest.csr -subj "/CN=guest/O=Nordic Way/C=NO"
+openssl x509 -req -days 365 -in guest.csr -out guest.crt -CA localhost.crt -CAkey localhost.key -CAcreateserial -sha256
+openssl pkcs12 -export -out guest.p12 -inkey guest.key -in guest.crt -name guest -CAfile localhost.crt -password pass:password
