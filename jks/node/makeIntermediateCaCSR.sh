@@ -40,6 +40,6 @@ DOMAINNAME=$1
 sed "s/DOMAIN/$DOMAINNAME/g" inter.tmpl > openssl_intermediate.cnf
 
 #create CSR:
-openssl req -nodes -config openssl_intermediate.cnf -new -newkey rsa:4096 -keyout ca/intermediate/private/int.$DOMAINNAME.key.pem -out ca/intermediate/csr/int.$DOMAINNAME.csr 
+openssl req -nodes -config openssl_intermediate.cnf -new -newkey rsa:4096 -keyout ca/intermediate/private/int.$DOMAINNAME.key.pem -out ca/intermediate/csr/int.$DOMAINNAME.csr -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=NO"
 
 echo Certificate Signing Request file created: ca/intermediate/csr/int.$DOMAINNAME.csr

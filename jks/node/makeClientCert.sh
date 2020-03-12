@@ -29,8 +29,7 @@ fi
 
 sed "s/DOMAIN/$CADOMAINNAME/g" inter.tmpl > openssl_intermediate.cnf 
 
-openssl req -out ca/intermediate/csr/$ident.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$ident.key.pem -config openssl_csr_san.cnf
-
+openssl req -out ca/intermediate/csr/$ident.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$ident.key.pem -config openssl_csr_san.cnf -subj "/CN=$ident/O=Nordic Way/C=NO"
 openssl ca -config openssl_intermediate.cnf -extensions usr_cert -days 3750 -notext -md sha512 -in ca/intermediate/csr/$ident.csr.pem -out ca/intermediate/certs/$ident.crt.pem
 
 cat ca/intermediate/certs/$ident.crt.pem ca/intermediate/certs/chain.$CADOMAINNAME.crt.pem > ca/intermediate/certs/chain.$ident.crt.pem

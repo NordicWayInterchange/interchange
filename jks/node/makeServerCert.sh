@@ -17,7 +17,7 @@ echo Enter fully qualified domain name FQDN for the server:
 FQDN=$1
 
 sed "s/FQDN/$FQDN/g" serverCert.tmpl > openssl_csr_san.cnf
-CADOMAINNAME=$2
+#CADOMAINNAME=$2
 
 echo Enter DOMAINNAME for the intermediate CA:
 #read CADOMAINNAME
@@ -30,7 +30,7 @@ fi
 
 sed "s/DOMAIN/$CADOMAINNAME/g" inter.tmpl > openssl_intermediate.cnf
 
-openssl req -out ca/intermediate/csr/$FQDN.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$FQDN.key.pem -config openssl_csr_san.cnf
+openssl req -out ca/intermediate/csr/$FQDN.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$FQDN.key.pem -config openssl_csr_san.cnf -subj "/CN=${FQDN}/O=Nordic Way/C=NO"
 
 openssl ca -config openssl_intermediate.cnf -extensions server_cert -days 3750 -notext -md sha512 -in ca/intermediate/csr/$FQDN.csr.pem -out ca/intermediate/certs/$FQDN.crt.pem
 
