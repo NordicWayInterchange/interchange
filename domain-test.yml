@@ -48,6 +48,23 @@ services:
       - KEY_STORE_PASSWORD=password
     networks:
       - testing_net
+    hostname: nodea.interchange.kyrre.priv.no
+
+  onboard_client:
+    build:
+      context: ./onboard-rest-client
+    depends_on:
+      - onboard_server
+    volumes:
+      - "./keys_sp_kyrre:/jks"
+    environment:
+      - ONBOARD_SERVER=https://nodea.interchange.kyrre.priv.no
+      - USER=kyrre
+      - TRUST_STORE=/jks/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/chain.kyrre.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_PASSWORD=password
 
   dns-client:
     dns: 172.28.1.1
