@@ -7,6 +7,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.OutputFrame;
+import org.testcontainers.containers.output.ToStringConsumer;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -31,6 +33,7 @@ public class IxnContextTest extends DockerBaseIT {
 		return url;
 	}
 
+
 	/**
 	 * This test triggers a DoS recognition on the server to avoid too many open connections.
 	 * 2020-03-12 10:22:56,500 WARN  [IO-/10.166.15.234:58076] (o.a.q.s.t.AbstractAMQPConnection) - Connection has taken more than 10000 ms to establish.  Closing as possible DoS.
@@ -44,15 +47,20 @@ public class IxnContextTest extends DockerBaseIT {
 	 */
 	@Test
 	public void createConnectionFailsAfterWaitingDoSLimit() throws JMSException, NamingException, InterruptedException {
-		SSLContext kingHaraldDev = TestKeystoreHelper.sslContext("jks/guest.p12", "jks/truststore.jks");
-		IxnContext context = new IxnContext(getQpidURI(), "onramp", null);
-		Connection connection = context.createConnection(kingHaraldDev);
+		ToStringConsumer serverLogConsumer = new ToStringConsumer();
+		localContainer.followOutput(serverLogConsumer, OutputFrame.OutputType.STDOUT);
+
+		SSLContext guestSSLContext = TestKeystoreHelper.sslContext("jks/guest.p12", "jks/truststore.jks");
+		IxnContext ixnContext = new IxnContext(getQpidURI(), "onramp", null);
+		Connection questConnection = ixnContext.createConnection(guestSSLContext);
 		Thread.sleep(11000); //10 seconds is the connection creation to start limit
 		try {
-			connection.start();
+			questConnection.start();
 			fail("one of the connections should have been terminated on the server due to DoS");
 		} catch (Exception e) {
 			assertTrue(e instanceof JmsConnectionFailedException);
+			String serverLog = serverLogConsumer.toUtf8String();
+			assertTrue(serverLog.contains("Closing as possible DoS."));
 			e.printStackTrace();
 		}
 	}
