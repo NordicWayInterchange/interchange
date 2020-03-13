@@ -24,9 +24,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @SuppressWarnings("rawtypes")
-public class IxnContextTest extends DockerBaseIT {
+public class IxnContextIT extends DockerBaseIT {
 
-	private static Logger logger = LoggerFactory.getLogger(IxnContextTest.class);
+	private static Logger logger = LoggerFactory.getLogger(IxnContextIT.class);
 
 	@ClassRule
 	public static Network network = Network.newNetwork();
