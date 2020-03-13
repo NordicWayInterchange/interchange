@@ -15,6 +15,7 @@ public class OnboardRestClientApplication {
     public static void main(String[] args) throws IOException {
         if (args.length < 4) {
             System.out.println("Not enough arguments");
+            return;
         }
         String server = args[0];
         String user = args[1];

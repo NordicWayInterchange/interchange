@@ -11,8 +11,6 @@ if [ -d "ca" ]; then
 	exit 1
 fi
 
-
-
 mkdir ca
 cd ca
 mkdir newcerts certs crl private requests
@@ -22,15 +20,12 @@ echo '1000' > serial
 cd ..
 
 echo Enter domain name for the rootCA:
-#read DOMAINNAME
 DOMAINNAME=$1
-
+CA_PEM_FILE=ca.$DOMAINNAME.key.pem
+CSR_FILE=ca.$DOMAINNAME.crt.pem
 sed "s/DOMAINNAME/$DOMAINNAME/g" root.tmpl > openssl_root.cnf
 
-#openssl genrsa -aes256 -out ca/private/ca.$DOMAINNAME.key.pem 4096
-openssl genrsa -out ca/private/ca.$DOMAINNAME.key.pem 4096
-
-#openssl req -config openssl_root.cnf -new -x509 -sha512 -extensions v3_ca -key ca/private/ca.$DOMAINNAME.key.pem -out ca/certs/ca.$DOMAINNAME.crt.pem -days 3650 -set_serial 0
-openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/ca.$DOMAINNAME.key.pem -out ca/certs/ca.$DOMAINNAME.crt.pem -days 3650 -set_serial 0 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=NO"
+openssl genrsa -out ca/private/$CA_PEM_FILE 4096
+openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/$CA_PEM_FILE -out ca/certs/$CSR_FILE -days 3650 -set_serial 0 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=NO"
 
 

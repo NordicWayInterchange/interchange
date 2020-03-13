@@ -14,4 +14,5 @@ openssl pkcs12 \
 	-inkey ca/intermediate/private/${NAME}.key.pem \
 	-in ca/intermediate/certs/chain.${NAME}.crt.pem \
 	-name ${NAME} -CAfile ca/intermediate/certs/chain.${CA}.crt.pem \
+	-chain \
 	-password pass:${PASSWORD}

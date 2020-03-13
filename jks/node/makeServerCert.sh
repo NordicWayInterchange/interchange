@@ -13,14 +13,11 @@ if [ ! -d "ca/intermediate" ]; then
 fi
 
 echo Enter fully qualified domain name FQDN for the server:
-#read FQDN
 FQDN=$1
 
 sed "s/FQDN/$FQDN/g" serverCert.tmpl > openssl_csr_san.cnf
-#CADOMAINNAME=$2
 
 echo Enter DOMAINNAME for the intermediate CA:
-#read CADOMAINNAME
 CADOMAINNAME=$2
 
 if [ ! -f "ca/intermediate/certs/int.$CADOMAINNAME.crt.pem" ]; then 
