@@ -62,7 +62,7 @@ public class IxnContextIT extends DockerBaseIT {
 		SSLContext guestSSLContext = TestKeystoreHelper.sslContext("jks/guest.p12", "jks/truststore.jks");
 		IxnContext ixnContext = new IxnContext(getQpidURI(), "onramp", null);
 		Connection guestConnection = ixnContext.createConnection(guestSSLContext);
-		Thread.sleep(11000);
+		Thread.sleep(11000); //DoS limit between create and start of connection interval 10 seconds
 		try {
 			guestConnection.start();
 			logger.error(serverLogConsumer.toUtf8String());
