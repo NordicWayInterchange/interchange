@@ -1,5 +1,4 @@
-#!/bin/bash -x
-
+#!/bin/bash
 if [ "$#" -ne 3 ]; then
     echo "USAGE: $0 <USER_NAME> <CA_NAME> <STORE_PASSWORD>"
     exit 1
