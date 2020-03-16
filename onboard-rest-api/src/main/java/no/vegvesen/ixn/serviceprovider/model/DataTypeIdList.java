@@ -3,13 +3,13 @@ package no.vegvesen.ixn.serviceprovider.model;
 import java.util.LinkedList;
 import java.util.List;
 
-public class LocalSubscriptionsApi {
+public class DataTypeIdList {
 	List<DataTypeApiId> subscriptions = new LinkedList<>();
 
-	public LocalSubscriptionsApi() {
+	public DataTypeIdList() {
 	}
 
-	public LocalSubscriptionsApi(List<DataTypeApiId> subscriptions) {
+	public DataTypeIdList(List<DataTypeApiId> subscriptions) {
 		this.subscriptions = subscriptions;
 	}
 

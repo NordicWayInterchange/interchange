@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionsApi;
+import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +24,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings("rawtypes")
 public class OnboardRestClientIT extends DockerBaseIT {
 
 	private static Logger log = LoggerFactory.getLogger(OnboardRestClientIT.class);
@@ -113,7 +112,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 		String serviceProviderName = "onboard";
 		client.addSubscription(serviceProviderName, new Datex2DataTypeApi("NO"));
 
-        LocalSubscriptionsApi localSubscriptions = client.getServiceProviderSubscriptionRequest(serviceProviderName);
+        DataTypeIdList localSubscriptions = client.getServiceProviderSubscriptionRequest(serviceProviderName);
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(localSubscriptions));
 
@@ -122,7 +121,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         DataTypeApiId idSubToDelete = localSubscriptions.getSubscriptions().iterator().next();
 
         client.deleteSubscriptions(serviceProviderName, idSubToDelete.getId());
-		LocalSubscriptionsApi afterDelete = client.getServiceProviderSubscriptionRequest(serviceProviderName);
+		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest(serviceProviderName);
 		assertThat(afterDelete.getSubscriptions()).hasSize(0);
 	}
 
@@ -136,12 +135,12 @@ public class OnboardRestClientIT extends DockerBaseIT {
         CapabilityApi capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
-		LocalSubscriptionsApi serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptionRequest(serviceProviderName);
+		DataTypeIdList serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptionRequest(serviceProviderName);
 		for (DataTypeApiId subscription : serviceProviderSubscriptionRequest.getSubscriptions()) {
 			System.out.println("deleting subscription " + subscription.getId());
 			client.deleteSubscriptions(serviceProviderName, subscription.getId());
 		}
-		LocalSubscriptionsApi afterDelete = client.getServiceProviderSubscriptionRequest(serviceProviderName);
+		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest(serviceProviderName);
 		assertThat(afterDelete.getSubscriptions()).hasSize(0);
     }
 

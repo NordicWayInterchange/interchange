@@ -2,7 +2,7 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionsApi;
+import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -45,9 +45,9 @@ public class OnboardRESTClient {
     }
 
 
-    public LocalSubscriptionsApi getServiceProviderSubscriptionRequest(String serviceProviderName) {
+    public DataTypeIdList getServiceProviderSubscriptionRequest(String serviceProviderName) {
 		String url = String.format("%s/%s/subscriptions/", server, serviceProviderName);
-		return restTemplate.getForEntity(url, LocalSubscriptionsApi.class).getBody();
+		return restTemplate.getForEntity(url, DataTypeIdList.class).getBody();
     }
 
     public void deleteSubscriptions(String serviceProviderName, Integer localSubscriptionId) {

@@ -11,7 +11,7 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionsApi;
+import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -362,26 +362,26 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-	public LocalSubscriptionsApi getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
+	public DataTypeIdList getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProvider == null) {
-			throw new RuntimeException("The requesting Service Provider does not exist in the database."); // TODO: Change to a better exception?
+			throw new NotFoundException("The requesting Service Provider does not exist in the database.");
 		}
 
-		LocalSubscriptionsApi localSubscriptionsApi = transformToLocalSubscriptionsApi(serviceProvider);
+		DataTypeIdList dataTypeIdList = transformToLocalSubscriptionsApi(serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions());
 		OnboardMDCUtil.removeLogVariables();
-		return localSubscriptionsApi;
+		return dataTypeIdList;
 	}
 
-	private LocalSubscriptionsApi transformToLocalSubscriptionsApi(ServiceProvider serviceProvider) {
+	private DataTypeIdList transformToLocalSubscriptionsApi(Set<DataType> dataTypes) {
 		List<DataTypeApiId> idDataTypes = new LinkedList<>();
-		for (DataType subscription : serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions()) {
-			idDataTypes.add(new DataTypeApiId(subscription.getData_id(), dataTypeTransformer.dataTypeToApi(subscription)));
+		for (DataType dataType : dataTypes) {
+			idDataTypes.add(new DataTypeApiId(dataType.getData_id(), dataTypeTransformer.dataTypeToApi(dataType)));
 		}
-		return new LocalSubscriptionsApi(idDataTypes);
+		return new DataTypeIdList(idDataTypes);
 	}
 
 	// TODO: Remove
