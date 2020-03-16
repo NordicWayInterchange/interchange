@@ -2,7 +2,7 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -26,18 +26,26 @@ public class OnboardRestClientApplication {
                 keystorePassword,
                 KeystoreType.PKCS12, keyPassword);
         String trustStorePath = args[5];
-        //String trustStorePath = "/jks/truststore.jks";
         String trustStorePassword = args[6];
-        //String trustStorePassword = "password";
         KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
                 trustStorePassword,KeystoreType.JKS);
-
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
 
         OnboardRESTClient client = new OnboardRESTClient(sslContext,server,user);
-        CapabilityApi serviceProviderCapabilities = client.getServiceProviderCapabilities();
+        Object result = null;
+        if (args.length > 8) {
+            String action = args[7];
+            if (action.equals("addsubscription")) {
+                result = client.addSubscription(user, new Datex2DataTypeApi("NO"));
+
+            } else {
+                System.out.println(String.format("Action %s not recognised",action));
+            }
+        } else {
+            result = client.getServiceProviderCapabilities();
+        }
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writeValueAsString(serviceProviderCapabilities));
+        System.out.println(mapper.writeValueAsString(result));
 
     }
 

@@ -54,7 +54,7 @@ public class OnboardRESTClient {
         restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, serviceProviderName, localSubscriptionId));
     }
 
-    public DataTypeApiId addSubscription(Object serviceProviderName, DataTypeApi subscription) {
+    public DataTypeApiId addSubscription(String serviceProviderName, DataTypeApi subscription) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<DataTypeApi> entity = new HttpEntity<>(subscription,headers);
