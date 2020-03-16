@@ -61,6 +61,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.POST, path = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	public CapabilityApi addCapabilities(@RequestBody CapabilityApi capabilityApi) {
+		OnboardMDCUtil.setLogVariables(this.nodeProviderName, capabilityApi.getName());
 		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
 		logger.info("Capabilities - Received POST from Service Provider: {}", capabilityApi.getName());
@@ -108,11 +109,14 @@ public class OnboardRestController {
 		updateSelfCapabilities(selfAfterUpdate, currentSelfCapabilities, updatedSelfCapabilities);
 
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
-		return capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
+		CapabilityApi returning = capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
+		OnboardMDCUtil.removeLogVariables();
+		return returning;
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = CAPABILITIES_PATH)
 	public CapabilityApi deleteCapability(@RequestBody CapabilityApi capabilityApi) {
+		OnboardMDCUtil.setLogVariables(this.nodeProviderName, capabilityApi.getName());
 		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
 		logger.info("Capabilities - Received DELETE from Service Provider: {}", capabilityApi.getName());
@@ -163,7 +167,9 @@ public class OnboardRestController {
 		updateSelfCapabilities(updatedSelfRepresentation, previousSelfCapabilities, updatedSelfCapabilities);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
-		return capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
+		CapabilityApi capabilityApi1 = capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
+		OnboardMDCUtil.removeLogVariables();
+		return capabilityApi1;
 	}
 
 	private void updateSelfCapabilities(Self self, Set<DataType> previousCapabilities, Set<DataType> updatedCapabilities) {
@@ -234,6 +240,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
 	public DataTypeApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
+		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
@@ -269,7 +276,9 @@ public class OnboardRestController {
 
 		updateSelfSubscriptions(previousSelfSubscriptions);
 
-		return dataTypeTransformer.dataTypeToApi(newLocalSubscription);
+		DataTypeApi returning = dataTypeTransformer.dataTypeToApi(newLocalSubscription);
+		OnboardMDCUtil.removeLogVariables();
+		return returning;
 	}
 
 	// Get the self representation from the database. If it doesn't exist, create it.
@@ -284,6 +293,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscriptions/{dataTypeId}")
 	public RedirectView deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) throws NotFoundException {
+		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
@@ -328,11 +338,14 @@ public class OnboardRestController {
 
 		updateSelfSubscriptions(currentSelfSubscriptions);
 
-		return new RedirectView("/{serviceProviderName}/subscriptions/");
+		RedirectView redirect = new RedirectView("/{serviceProviderName}/subscriptions/");
+		OnboardMDCUtil.removeLogVariables();
+		return redirect;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/capabilities/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public CapabilityApi getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
+		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -342,13 +355,15 @@ public class OnboardRestController {
 		}
 
 
-		return capabilityTransformer.serviceProviderToCapabilityApi(serviceProvider);
+		CapabilityApi capabilityApi = capabilityTransformer.serviceProviderToCapabilityApi(serviceProvider);
+		OnboardMDCUtil.removeLogVariables();
+		return capabilityApi;
 
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	public LocalSubscriptionsApi getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
-
+		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
@@ -356,7 +371,9 @@ public class OnboardRestController {
 			throw new RuntimeException("The requesting Service Provider does not exist in the database."); // TODO: Change to a better exception?
 		}
 
-		return transformToLocalSubscriptionsApi(serviceProvider);
+		LocalSubscriptionsApi localSubscriptionsApi = transformToLocalSubscriptionsApi(serviceProvider);
+		OnboardMDCUtil.removeLogVariables();
+		return localSubscriptionsApi;
 	}
 
 	private LocalSubscriptionsApi transformToLocalSubscriptionsApi(ServiceProvider serviceProvider) {
