@@ -1,4 +1,4 @@
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
 	echo "USAGE: $0 <ca domain name> <password>"
 	exit 1 
 fi
