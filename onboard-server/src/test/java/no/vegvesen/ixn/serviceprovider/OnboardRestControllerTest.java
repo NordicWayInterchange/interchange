@@ -91,20 +91,21 @@ public class OnboardRestControllerTest {
 	@Test
 	void postingCapabilitiesReturnsStatusOk() throws Exception {
 
-		mockCertificate("First Service Provider");
+		String firstServiceProvider = "First Service Provider";
+		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DataTypeApi a = new Datex2DataTypeApi( "NO");
-		DataTypeApi b = new Datex2DataTypeApi("SE");
-		Set<DataTypeApi> capabilities = Stream.of(a, b).collect(Collectors.toSet());
-		CapabilityApi capabilityApi = new CapabilityApi("First Service Provider", capabilities);
-		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApi);
+		DataTypeApi datexNo = new Datex2DataTypeApi( "NO");
+		String datexNoString = objectMapper.writeValueAsString(datexNo);
+		String capabilitiesPath = String.format("/%s/capabilities", firstServiceProvider);
+
+		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
 		mockMvc.perform(
 				post(capabilitiesPath)
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(capabilityApiToServerJson))
+						.content(datexNoString))
 				.andDo(print())
 				.andExpect(status().isOk());
 	}
@@ -144,18 +145,16 @@ public class OnboardRestControllerTest {
 
 		mockCertificate("First Service Provider");
 
-		CapabilityApi capabilityApi = new CapabilityApi();
-		DataTypeApi a = new Datex2DataTypeApi("FI");
-		capabilityApi.setCapabilities(Collections.singleton(a));
-		capabilityApi.setName("Second Service Provider");
+		DataTypeApi datexFi = new Datex2DataTypeApi("FI");
+		String capabilitiesPath = String.format("/%s/capabilities", "SecondServiceProvider");
 
-		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApi);
+		String datexFiString = objectMapper.writeValueAsString(datexFi);
 
 		mockMvc.perform(
 				post(capabilitiesPath)
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(capabilityApiToServerJson))
+						.content(datexFiString))
 				.andDo(print())
 				.andExpect(status().isForbidden());
 	}

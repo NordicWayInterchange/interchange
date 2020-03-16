@@ -2,6 +2,7 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
+import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
@@ -33,11 +34,11 @@ public class OnboardRESTClient {
         this.user = user;
     }
 
-    public CapabilityApi addCapabilities(CapabilityApi capabilities) {
+    public DataTypeApiId addCapability(DataTypeApi capability, String serviceProviderName) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<CapabilityApi> entity = new HttpEntity<>(capabilities,headers);
-        return restTemplate.exchange(server + "/capabilities", HttpMethod.POST, entity, CapabilityApi.class).getBody();
+        HttpEntity<DataTypeApi> entity = new HttpEntity<>(capability,headers);
+        return restTemplate.exchange(server + "/" + serviceProviderName + "/capabilities", HttpMethod.POST, entity, DataTypeApiId.class).getBody();
     }
 
     public CapabilityApi getServiceProviderCapabilities() {
@@ -54,12 +55,12 @@ public class OnboardRESTClient {
         restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, serviceProviderName, localSubscriptionId));
     }
 
-    public DataTypeApi addSubscription(Object serviceProviderName, DataTypeApi subscription) {
+    public DataTypeApiId addSubscription(Object serviceProviderName, DataTypeApi subscription) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<DataTypeApi> entity = new HttpEntity<>(subscription,headers);
 		String url = String.format("/%s/subscriptions", serviceProviderName) ;
-		return restTemplate.exchange(server + url, HttpMethod.POST, entity, DataTypeApi.class).getBody();
+		return restTemplate.exchange(server + url, HttpMethod.POST, entity, DataTypeApiId.class).getBody();
     }
 
     public CapabilityApi deleteCapability(CapabilityApi capabilityApi) {

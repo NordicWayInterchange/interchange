@@ -3,13 +3,15 @@ package no.vegvesen.ixn.serviceprovider.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.docker.DockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -20,7 +22,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import javax.net.ssl.SSLContext;
-import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -89,13 +90,10 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addCapabilityCheckAndDelete() throws JsonProcessingException {
-        CapabilityApi capabilities = new CapabilityApi();
-        capabilities.setName("onboard");
+		String serviceProviderName = "onboard";
 
-        Datex2DataTypeApi datexNO = new Datex2DataTypeApi();
-        datexNO.setOriginatingCountry("NO");
-        capabilities.setCapabilities(Collections.singleton(datexNO));
-        client.addCapabilities(capabilities);
+        Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
+        client.addCapability(datexNO, serviceProviderName);
 
         ObjectMapper objectMapper = new ObjectMapper();
         CapabilityApi newCapabilities = client.getServiceProviderCapabilities();
@@ -129,7 +127,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 		String serviceProviderName = "onboard";
-		DataTypeApi addedSubscription = client.addSubscription(serviceProviderName, new Datex2DataTypeApi("NO"));
+		DataTypeApiId addedSubscription = client.addSubscription(serviceProviderName, new Datex2DataTypeApi("NO"));
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
         CapabilityApi capabilities = client.getServiceProviderCapabilities();

@@ -25,8 +25,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
-
 @RestController
 public class OnboardRestController {
 
@@ -59,38 +57,35 @@ public class OnboardRestController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-	public CapabilityApi addCapabilities(@RequestBody CapabilityApi capabilityApi) {
-		OnboardMDCUtil.setLogVariables(this.nodeProviderName, capabilityApi.getName());
-		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+	public DataTypeApiId addCapabilities(@PathVariable String serviceProviderName, @RequestBody DataTypeApi capabilityDataType) {
+		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
+		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		logger.info("Capabilities - Received POST from Service Provider: {}", capabilityApi.getName());
+		logger.info("Capabilities - Received POST from Service Provider: {}", serviceProviderName);
 
-		if (capabilityApi.getCapabilities().isEmpty()) {
-			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to add.");
+		if (capabilityDataType == null) {
+			throw new CapabilityPostException("Bad api object. The posted DataTypeApi object had no capabilities. Nothing to add.");
 		}
-
 
 		Self selfBeforeUpdate = fetchSelf();
 		Set<DataType> currentSelfCapabilities = selfBeforeUpdate.getLocalCapabilities();
 
-
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(capabilityApi.getName());
+		DataType newLocalCapability = dataTypeTransformer.dataTypeApiToDataType(capabilityDataType);
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider is new. Converting incoming API object to Service Provider");
-			serviceProviderToUpdate = capabilityTransformer.capabilityApiToServiceProvider(capabilityApi);
-		} else {
-			// Add the incoming capabilities to the capabilities of the Service Provider.
-			Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
-			Set<DataTypeApi> capabilitiesToAdd = capabilityApi.getCapabilities();
-
-			if (currentServiceProviderCapabilities.containsAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToAdd))) {
-				throw new CapabilityPostException("The posted capabilities already exist in the Service Provider capabilities. Nothing to add.");
-			}
-
-			currentServiceProviderCapabilities.addAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToAdd));
+			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
 		}
+		// Add the incoming capabilities to the capabilities of the Service Provider.
+		Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
+
+		if (currentServiceProviderCapabilities.contains(newLocalCapability)) {
+			throw new CapabilityPostException("The posted capability already exist in the Service Provider capabilities. Nothing to add.");
+		}
+
+		currentServiceProviderCapabilities.add(newLocalCapability);
 
 		logger.info("Service provider to update: {}", serviceProviderToUpdate.toString());
 
@@ -99,7 +94,13 @@ public class OnboardRestController {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		}
 		// Save the Service Provider representation in the database.
-		serviceProviderRepository.save(serviceProviderToUpdate);
+		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+		DataType dataTypeId = null;
+		for (DataType dataType : saved.getCapabilities().getDataTypes()) {
+			if (dataType.equals(newLocalCapability)) {
+				dataTypeId = dataType;
+			}
+		}
 
 		// Recalculate Self capabilities now that we updated a Service Provider.
 		Self selfAfterUpdate = selfRepository.findByName(nodeProviderName);
@@ -109,13 +110,16 @@ public class OnboardRestController {
 		updateSelfCapabilities(selfAfterUpdate, currentSelfCapabilities, updatedSelfCapabilities);
 
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
-		CapabilityApi returning = capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
+		DataTypeApiId dataTypeApiId = null;
+		if (dataTypeId != null) {
+			dataTypeApiId = transformToDataTypeApiId(dataTypeId);
+		}
 		OnboardMDCUtil.removeLogVariables();
-		return returning;
+		return dataTypeApiId;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = CAPABILITIES_PATH)
-	public CapabilityApi deleteCapability(@RequestBody CapabilityApi capabilityApi) {
+	@RequestMapping(method = RequestMethod.DELETE, path = "/capabilities")
+	public CapabilityApi deleteCapability( @RequestBody CapabilityApi capabilityApi) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, capabilityApi.getName());
 		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
 
@@ -124,7 +128,6 @@ public class OnboardRestController {
 		if (capabilityApi.getCapabilities().isEmpty()) {
 			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to delete.");
 		}
-
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
 		Self previousSelfRepresentation = fetchSelf();
@@ -239,7 +242,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
-	public DataTypeApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
+	public DataTypeApiId addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -276,7 +279,7 @@ public class OnboardRestController {
 
 		updateSelfSubscriptions(previousSelfSubscriptions);
 
-		DataTypeApi returning = dataTypeTransformer.dataTypeToApi(newLocalSubscription);
+		DataTypeApiId returning = transformToDataTypeApiId(newLocalSubscription);
 		OnboardMDCUtil.removeLogVariables();
 		return returning;
 	}
@@ -351,7 +354,7 @@ public class OnboardRestController {
 
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProvider == null) {
-			throw new RuntimeException("The requesting Service Provider does not exist in the database."); // TODO: Change to a better exception?
+			throw new NotFoundException("The requesting Service Provider does not exist in the database.");
 		}
 
 
@@ -371,17 +374,21 @@ public class OnboardRestController {
 			throw new NotFoundException("The requesting Service Provider does not exist in the database.");
 		}
 
-		DataTypeIdList dataTypeIdList = transformToLocalSubscriptionsApi(serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions());
+		DataTypeIdList dataTypeIdList = transformToDataTypeIdList(serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions());
 		OnboardMDCUtil.removeLogVariables();
 		return dataTypeIdList;
 	}
 
-	private DataTypeIdList transformToLocalSubscriptionsApi(Set<DataType> dataTypes) {
+	private DataTypeIdList transformToDataTypeIdList(Set<DataType> dataTypes) {
 		List<DataTypeApiId> idDataTypes = new LinkedList<>();
 		for (DataType dataType : dataTypes) {
-			idDataTypes.add(new DataTypeApiId(dataType.getData_id(), dataTypeTransformer.dataTypeToApi(dataType)));
+			idDataTypes.add(transformToDataTypeApiId(dataType));
 		}
 		return new DataTypeIdList(idDataTypes);
+	}
+
+	private DataTypeApiId transformToDataTypeApiId(DataType dataType) {
+		return new DataTypeApiId(dataType.getData_id(), dataTypeTransformer.dataTypeToApi(dataType));
 	}
 
 	// TODO: Remove
