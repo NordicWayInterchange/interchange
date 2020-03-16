@@ -197,20 +197,24 @@ public class OnboardRestController {
 	}
 
 
-	//TODO: simplify self updates: get service providers from db, aggregate, store
-	private void updateSelfSubscriptions(Self self, Set<DataType> previousSubscriptions, Set<DataType> updatedSubscriptions) {
-
-		logger.info("Previous subscriptions: {}", previousSubscriptions.toString());
-		logger.info("Updated subscriptions: {}", updatedSubscriptions.toString());
+	private void updateSelfSubscriptions(Set<DataType> previousSubscriptions) {
+		// Get the current Self subscriptions. Recalculate the Self subscriptions now that a Service Provider has been updated.
+		Self self = selfRepository.findByName(nodeProviderName);
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+		Set<DataType> updatedSubscriptions = calculateSelfSubscriptions(serviceProviders);
 
 		if (!previousSubscriptions.equals(updatedSubscriptions)) {
-			logger.info("Subscriptions have changed. Updating representation of self.");
+			logger.debug("Subscriptions have changed from {} to {}. Updating representation of self.",
+					previousSubscriptions.toString(),
+					updatedSubscriptions.toString());
 			self.setLocalSubscriptions(updatedSubscriptions);
 			self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 			selfRepository.save(self);
 			logger.info("Updated Self: {}", self.toString());
 		} else {
-			logger.info("Subscriptions have not changed. Keeping the current representation of self.");
+			logger.debug("Subscriptions have not changed from {} to {}. No self update.",
+					previousSubscriptions.toString(),
+					updatedSubscriptions.toString());
 		}
 	}
 
@@ -260,22 +264,12 @@ public class OnboardRestController {
 		}
 
 		// Save updated Service Provider in the database.
-		serviceProviderRepository.save(serviceProviderToUpdate);
+		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+		logger.debug("Updated Service Provider: {}", saved.toString());
 
-		// Get the current Self subscriptions. Recalculate the Self subscriptions now that a Service Provider has been updated.
-		Self updatedSelf = selfRepository.findByName(nodeProviderName);
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-		Set<DataType> updatedSelfSubscriptions = calculateSelfSubscriptions(serviceProviders);
+		updateSelfSubscriptions(previousSelfSubscriptions);
 
-		// Update representation of Self if it has changed.
-		updateSelfSubscriptions(updatedSelf, previousSelfSubscriptions, updatedSelfSubscriptions);
-
-		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
-
-		DataTypeApi returnSubscriptionRequest = dataTypeTransformer.dataTypeToApi(newLocalSubscription);
-		logger.info("Returning Service Provider as subscription request API: {}", returnSubscriptionRequest.toString());
-
-		return returnSubscriptionRequest;
+		return dataTypeTransformer.dataTypeToApi(newLocalSubscription);
 	}
 
 	// Get the self representation from the database. If it doesn't exist, create it.
@@ -314,7 +308,7 @@ public class OnboardRestController {
 				.findFirst();
 
 		if (!subscriptionToDelete.isPresent()) {
-			throw new NotFoundException("The incoming subscription to delete are not in the Service Provider subscriptions. Cannot delete subscriptions that don't exist.");
+			throw new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that don't exist.");
 		}
 		currentServiceProviderSubscriptions.remove(subscriptionToDelete.get());
 
@@ -329,15 +323,11 @@ public class OnboardRestController {
 		}
 
 		// Save updated Service Provider
-		serviceProviderRepository.save(serviceProviderToUpdate);
+		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+		logger.debug("Updated Service Provider: {}", saved.toString());
 
-		Self updatedSelfRepresentation = selfRepository.findByName(nodeProviderName);
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-		Set<DataType> updatedSelfSubscriptions = calculateSelfSubscriptions(serviceProviders);
+		updateSelfSubscriptions(currentSelfSubscriptions);
 
-		updateSelfSubscriptions(updatedSelfRepresentation, currentSelfSubscriptions, updatedSelfSubscriptions);
-
-		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
 		return new RedirectView("/{serviceProviderName}/subscriptions/");
 	}
 
