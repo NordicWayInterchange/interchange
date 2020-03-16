@@ -216,7 +216,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	void deletingSubscriptionReturnsStatusOk() throws Exception {
+	void deletingSubscriptionReturnsStatusRedirectToRefreshTheCurrentSubscriptions() throws Exception {
 		String firstServiceProviderName = "FirstServiceProvider";
 		mockCertificate(firstServiceProviderName);
 
@@ -238,7 +238,7 @@ public class OnboardRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().isOk());
+				.andExpect(status().is3xxRedirection());
 	}
 
 	@Test

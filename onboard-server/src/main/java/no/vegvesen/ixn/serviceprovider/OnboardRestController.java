@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -288,7 +289,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscriptions/{dataTypeId}")
-	public void deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) {
+	public RedirectView deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) {
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
@@ -337,6 +338,7 @@ public class OnboardRestController {
 		updateSelfSubscriptions(updatedSelfRepresentation, currentSelfSubscriptions, updatedSelfSubscriptions);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
+		return new RedirectView("/{serviceProviderName}/subscriptions/");
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/capabilities/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
