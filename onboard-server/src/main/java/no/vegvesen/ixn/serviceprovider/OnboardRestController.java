@@ -102,12 +102,7 @@ public class OnboardRestController {
 			}
 		}
 
-		// Recalculate Self capabilities now that we updated a Service Provider.
-		Self selfAfterUpdate = selfRepository.findByName(nodeProviderName);
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-		Set<DataType> updatedSelfCapabilities = calculateSelfCapabilities(serviceProviders);
-
-		updateSelfCapabilities(selfAfterUpdate, currentSelfCapabilities, updatedSelfCapabilities);
+		updateSelfCapabilities(currentSelfCapabilities);
 
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		DataTypeApiId dataTypeApiId = null;
@@ -162,12 +157,7 @@ public class OnboardRestController {
 		// Save the updated Service Provider representation in the database.
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
-		// Recalculate Self representation now that a Service Provider has been updated.
-		Self updatedSelfRepresentation = selfRepository.findByName(nodeProviderName);
-		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-		Set<DataType> updatedSelfCapabilities = calculateSelfCapabilities(serviceProviders);
-
-		updateSelfCapabilities(updatedSelfRepresentation, previousSelfCapabilities, updatedSelfCapabilities);
+		updateSelfCapabilities(previousSelfCapabilities);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
 		CapabilityApi capabilityApi1 = capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
@@ -175,7 +165,12 @@ public class OnboardRestController {
 		return capabilityApi1;
 	}
 
-	private void updateSelfCapabilities(Self self, Set<DataType> previousCapabilities, Set<DataType> updatedCapabilities) {
+	private void updateSelfCapabilities(Set<DataType> previousCapabilities) {
+		// Recalculate Self capabilities now that we updated a Service Provider.
+		Self self = selfRepository.findByName(nodeProviderName);
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+		Set<DataType> updatedCapabilities = calculateSelfCapabilities(serviceProviders);
+
 		// If old version and updated version of the capabilities are not equal, then we update the timestamp
 		logger.info("Previous capabilities: {}", previousCapabilities);
 		logger.info("Updated capabilities:  {}", updatedCapabilities);
@@ -346,34 +341,29 @@ public class OnboardRestController {
 		return redirect;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/capabilities/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public CapabilityApi getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+	public DataTypeIdList getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		DataTypeIdList dataTypeIdList = transformToDataTypeIdList(serviceProvider.getCapabilities().getDataTypes());
+		OnboardMDCUtil.removeLogVariables();
+		return dataTypeIdList;
 
+	}
+
+	private ServiceProvider checkAndGetServiceProvider(@PathVariable String serviceProviderName) {
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProvider == null) {
 			throw new NotFoundException("The requesting Service Provider does not exist in the database.");
 		}
-
-
-		CapabilityApi capabilityApi = capabilityTransformer.serviceProviderToCapabilityApi(serviceProvider);
-		OnboardMDCUtil.removeLogVariables();
-		return capabilityApi;
-
+		return serviceProvider;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	public DataTypeIdList getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
-		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-
-		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProvider == null) {
-			throw new NotFoundException("The requesting Service Provider does not exist in the database.");
-		}
-
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		DataTypeIdList dataTypeIdList = transformToDataTypeIdList(serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions());
 		OnboardMDCUtil.removeLogVariables();
 		return dataTypeIdList;
