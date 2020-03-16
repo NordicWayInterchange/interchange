@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.exceptions.*;
+import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -65,7 +66,9 @@ public class NeighbourServiceErrorAdvice {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
 
 		logger.error("Error in interchange server. ", e);
-		return new ResponseEntity<>(errorDetails, status);
+		ResponseEntity<ErrorDetails> errorDetailsResponseEntity = new ResponseEntity<>(errorDetails, status);
+		NeighbourMDCUtil.removeLogVariables();
+		return errorDetailsResponseEntity;
 	}
 
 

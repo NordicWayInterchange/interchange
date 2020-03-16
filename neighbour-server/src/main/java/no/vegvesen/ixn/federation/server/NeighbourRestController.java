@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
+import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +111,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/subscription", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionRequestApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
-
+		NeighbourMDCUtil.setLogVariables(this.myName, neighbourSubscriptionRequest.getName());
 		logger.info("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
@@ -176,7 +177,9 @@ public class NeighbourRestController {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbourToUpdate);
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
-		return subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbourToUpdate);
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbourToUpdate);
+		NeighbourMDCUtil.removeLogVariables();
+		return subscriptionRequestApi;
 	}
 
 	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -187,7 +190,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscription/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
-
+		NeighbourMDCUtil.setLogVariables(this.myName, ixnName);
 		logger.info("Received poll of subscription from neighbour {}.", ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
@@ -203,7 +206,9 @@ public class NeighbourRestController {
 			logger.info("Neighbour {} polled for status of subscription {}.", Neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			return subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
+			SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
+			NeighbourMDCUtil.removeLogVariables();
+			return subscriptionApi;
 		} else {
 			throw new InterchangeNotFoundException("The requested Neighbour is not known to this interchange node.");
 		}
@@ -216,6 +221,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public CapabilityApi updateCapabilities(@RequestBody CapabilityApi neighbourCapabilities) {
+		NeighbourMDCUtil.setLogVariables(this.myName, neighbourCapabilities.getName());
 
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
 
@@ -249,7 +255,7 @@ public class NeighbourRestController {
 		Self self = getSelf();
 		CapabilityApi capabilityApiResponse = capabilityTransformer.selfToCapabilityApi(self);
 		logger.info("Responding with local capabilities: {}", capabilityApiResponse.toString());
-
+		NeighbourMDCUtil.removeLogVariables();
 		return capabilityApiResponse;
 	}
 
