@@ -230,6 +230,11 @@ public class OnboardRestControllerTest {
 		firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
+		//Self
+		Self self = new Self("this-server-name");
+		self.setLocalSubscriptions(serviceProviderSubscriptionRequest.getSubscriptions());//same subscriptions as the service provider
+		doReturn(self).when(selfRepository).findByName(any(String.class));
+
 		// Subscription request api posted to the server
 
 		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "1");
@@ -239,6 +244,49 @@ public class OnboardRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is3xxRedirection());
+	}
+
+	@Test
+	void deletingNonExistingSubscriptionReturnsStatusNotFound() throws Exception {
+		String firstServiceProviderName = "FirstServiceProvider";
+		mockCertificate(firstServiceProviderName);
+
+		// The existing subscriptions of the Service Provider
+		LocalSubscriptionRequest serviceProviderSubscriptionRequest = new LocalSubscriptionRequest();
+		serviceProviderSubscriptionRequest.addLocalSubscription(new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE"));
+		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
+		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
+		firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
+		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
+
+		// Subscription request api posted to the server
+
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "3");
+		mockMvc.perform(
+				delete(deleteUrl)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void deletingSubscriptionOnServiceProviderThatDoesNotExistReturnsStatusNotFound() throws Exception {
+		String firstServiceProviderName = "some-non-existing-service-provider";
+		mockCertificate(firstServiceProviderName);
+
+		// The existing subscriptions of the Service Provider
+		doReturn(null).when(serviceProviderRepository).findByName(any(String.class));
+
+		// Subscription request api posted to the server
+
+		String deleteUrl = String.format("/%s/subscriptions/%s", firstServiceProviderName, "1");
+		mockMvc.perform(
+				delete(deleteUrl)
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isNotFound());
 	}
 
 	@Test

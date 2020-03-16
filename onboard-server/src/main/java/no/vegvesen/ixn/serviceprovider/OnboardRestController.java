@@ -289,7 +289,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscriptions/{dataTypeId}")
-	public RedirectView deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) {
+	public RedirectView deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) throws NotFoundException {
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
@@ -301,7 +301,7 @@ public class OnboardRestController {
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProviderToUpdate == null) {
-			throw new SubscriptionRequestException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
+			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
 		}
 		LocalSubscriptionRequest localSubscriptionRequest = serviceProviderToUpdate.getOrCreateLocalSubscriptionRequest();
 		Set<DataType> currentServiceProviderSubscriptions = localSubscriptionRequest.getSubscriptions();
@@ -314,7 +314,7 @@ public class OnboardRestController {
 				.findFirst();
 
 		if (!subscriptionToDelete.isPresent()) {
-			throw new SubscriptionRequestException("The incoming subscriptions to delete are not all in the Service Provider subscriptions. Cannot delete subscriptions that don't exist.");
+			throw new NotFoundException("The incoming subscription to delete are not in the Service Provider subscriptions. Cannot delete subscriptions that don't exist.");
 		}
 		currentServiceProviderSubscriptions.remove(subscriptionToDelete.get());
 

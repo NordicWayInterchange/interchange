@@ -46,6 +46,11 @@ public class OnboardServerErrorAdvice {
 		return error(BAD_REQUEST, e);
 	}
 
+	@ExceptionHandler({NotFoundException.class})
+	public ResponseEntity<ErrorDetails> unknownProperty(NotFoundException e){
+		return error(NOT_FOUND, e);
+	}
+
 
 	private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), status.toString(), e.getMessage());
