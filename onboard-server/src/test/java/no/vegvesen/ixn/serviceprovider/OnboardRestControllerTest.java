@@ -169,6 +169,7 @@ public class OnboardRestControllerTest {
 		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
+		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -234,6 +235,7 @@ public class OnboardRestControllerTest {
 		Self self = new Self("this-server-name");
 		self.setLocalSubscriptions(serviceProviderSubscriptionRequest.getSubscriptions());//same subscriptions as the service provider
 		doReturn(self).when(selfRepository).findByName(any(String.class));
+		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
 		// Subscription request api posted to the server
 
