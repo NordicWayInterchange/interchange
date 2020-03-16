@@ -9,11 +9,11 @@ services:
     environment:
       - ONBOARD_SERVER=https://nodea.interchange.kyrre.priv.no:8797
       - USER=kyrre
-      - TRUST_STORE=/jks/truststore.jks
-      - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/chain.kyrre.p12
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
+      - TRUST_STORE_PATH=/jks/truststore.jks
+      - TRUST_STORE_PASSWORD=password
     networks:
       - testing_net
 

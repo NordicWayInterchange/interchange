@@ -13,7 +13,7 @@ import java.io.IOException;
 public class OnboardRestClientApplication {
 
     public static void main(String[] args) throws IOException {
-        if (args.length < 4) {
+        if (args.length < 7) {
             System.out.println("Not enough arguments");
             return;
         }
@@ -25,8 +25,10 @@ public class OnboardRestClientApplication {
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
                 keystorePassword,
                 KeystoreType.PKCS12, keyPassword);
-        String trustStorePath = "/jks/truststore.jks";
-        String trustStorePassword = "password";
+        String trustStorePath = args[5];
+        //String trustStorePath = "/jks/truststore.jks";
+        String trustStorePassword = args[6];
+        //String trustStorePassword = "password";
         KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
                 trustStorePassword,KeystoreType.JKS);
 
