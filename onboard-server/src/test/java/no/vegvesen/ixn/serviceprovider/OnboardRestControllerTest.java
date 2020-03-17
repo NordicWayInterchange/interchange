@@ -3,6 +3,8 @@ package no.vegvesen.ixn.serviceprovider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -115,12 +117,9 @@ public class OnboardRestControllerTest {
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
 		// Mock existing service provider with two capabilities in database
-		DataType dataType42 = mock(DataType.class);
-		DataType dataType6 = mock(DataType.class);
-		DataType dataType7 = mock(DataType.class);
-		when(dataType42.getData_id()).thenReturn(42);
-		when(dataType6.getData_id()).thenReturn(6);
-		when(dataType7.getData_id()).thenReturn(7);
+		DataType dataType42 = new DataType(42, MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		DataType dataType6 = new DataType(6, MessageProperty.MESSAGE_TYPE.getName(), DenmDataTypeApi.DENM);
+		DataType dataType7 = new DataType(7, MessageProperty.MESSAGE_TYPE.getName(), IviDataTypeApi.IVI);
 		Set<DataType> capabilities = Sets.newLinkedHashSet(dataType42, dataType6, dataType7);
 		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities);
 
