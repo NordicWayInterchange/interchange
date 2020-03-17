@@ -138,11 +138,8 @@ public class OnboardRestController {
 				.stream()
 				.filter(dataType -> dataType.getData_id().equals(capabilityId))
 				.findFirst();
-
-		if (!subscriptionToDelete.isPresent()) {
-			throw new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist.");
-		}
-		currentServiceProviderCapabilities.remove(subscriptionToDelete.get());
+		DataType toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
+		currentServiceProviderCapabilities.remove(toDelete);
 
 		if (currentServiceProviderCapabilities.size() == 0) {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
@@ -310,11 +307,8 @@ public class OnboardRestController {
 				.stream()
 				.filter(dataType -> dataType.getData_id().equals(dataTypeId))
 				.findFirst();
-
-		if (!subscriptionToDelete.isPresent()) {
-			throw new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that don't exist.");
-		}
-		currentServiceProviderSubscriptions.remove(subscriptionToDelete.get());
+		DataType dataTypeToDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that don't exist."));
+		currentServiceProviderSubscriptions.remove(dataTypeToDelete);
 
 		if (currentServiceProviderSubscriptions.isEmpty()) {
 			// Subscription is now empty, notify Routing Configurer to tear down the queue.
