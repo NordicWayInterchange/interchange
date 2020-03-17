@@ -98,7 +98,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         DataTypeIdList newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
 
-		DataTypeApiId dataTypeApiId = newCapabilities.getSubscriptions().iterator().next();
+		DataTypeApiId dataTypeApiId = newCapabilities.getDataTypes().iterator().next();
 		client.deleteCapability(serviceProviderName, dataTypeApiId.getId());
 
         newCapabilities = client.getServiceProviderCapabilities();
@@ -115,12 +115,12 @@ public class OnboardRestClientIT extends DockerBaseIT {
         System.out.println(objectMapper.writeValueAsString(localSubscriptions));
 
         assertThat(localSubscriptions).isNotNull();
-        assertThat(localSubscriptions.getSubscriptions()).isNotNull().hasSize(1);
-        DataTypeApiId idSubToDelete = localSubscriptions.getSubscriptions().iterator().next();
+        assertThat(localSubscriptions.getDataTypes()).isNotNull().hasSize(1);
+        DataTypeApiId idSubToDelete = localSubscriptions.getDataTypes().iterator().next();
 
         client.deleteSubscriptions(serviceProviderName, idSubToDelete.getId());
 		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest(serviceProviderName);
-		assertThat(afterDelete.getSubscriptions()).hasSize(0);
+		assertThat(afterDelete.getDataTypes()).hasSize(0);
 	}
 
     @Test
@@ -134,12 +134,12 @@ public class OnboardRestClientIT extends DockerBaseIT {
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
 		DataTypeIdList serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptionRequest(serviceProviderName);
-		for (DataTypeApiId subscription : serviceProviderSubscriptionRequest.getSubscriptions()) {
+		for (DataTypeApiId subscription : serviceProviderSubscriptionRequest.getDataTypes()) {
 			System.out.println("deleting subscription " + subscription.getId());
 			client.deleteSubscriptions(serviceProviderName, subscription.getId());
 		}
 		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest(serviceProviderName);
-		assertThat(afterDelete.getSubscriptions()).hasSize(0);
+		assertThat(afterDelete.getDataTypes()).hasSize(0);
     }
 
 }

@@ -4,20 +4,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class DataTypeIdList {
-	List<DataTypeApiId> subscriptions = new LinkedList<>();
+	List<DataTypeApiId> dataTypes = new LinkedList<>();
 
 	public DataTypeIdList() {
 	}
 
-	public DataTypeIdList(List<DataTypeApiId> subscriptions) {
-		this.subscriptions = subscriptions;
+	public DataTypeIdList(List<DataTypeApiId> dataTypes) {
+		this.dataTypes = dataTypes;
 	}
 
-	public List<DataTypeApiId> getSubscriptions() {
-		return subscriptions;
+	public List<DataTypeApiId> getDataTypes() {
+		return dataTypes;
 	}
 
-	public void setSubscriptions(List<DataTypeApiId> subscriptions) {
-		this.subscriptions = subscriptions;
+	public void setDataTypes(List<DataTypeApiId> dataTypes) {
+		this.dataTypes = dataTypes;
 	}
 }
