@@ -365,10 +365,12 @@ public class OnboardRestControllerTest {
 
 	@Test
 	void postUnknownPropertyNameThrowsBadRequestException() throws Exception {
-		mockCertificate("best service provider");
-		String capabilityApiToServerJson = "{\"version\":\"1.0\",\"name\":\"best service provider\",\"capabilities\":[{\"messageType\":\"DENM\",\"noSuchProperty\":\"pubid\",\"publisherName\":\"pubname\",\"originatingCountry\":\"NO\",\"protocolVersion\":\"1.0\",\"contentType\":\"application/base64\",\"quadTree\":[],\"serviceType\":\"serviceType\",\"causeCode\":\"1\",\"subCauseCode\":\"1\"}]}";
+		String serviceProviderName = "best service provider";
+		mockCertificate(serviceProviderName);
+		String capabilityApiToServerJson = "{\"messageType\":\"DENM\",\"noSuchProperty\":\"pubid\",\"publisherName\":\"pubname\",\"originatingCountry\":\"NO\",\"protocolVersion\":\"1.0\",\"contentType\":\"application/base64\",\"quadTree\":[],\"serviceType\":\"serviceType\",\"causeCode\":\"1\",\"subCauseCode\":\"1\"}";
+		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 		mockMvc.perform(
-				post("/capabilities")
+				post(String.format("/%s/capabilities", serviceProviderName))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(capabilityApiToServerJson))
