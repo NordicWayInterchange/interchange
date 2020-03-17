@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
@@ -11,6 +10,7 @@ import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.assertj.core.util.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,8 +64,6 @@ public class OnboardRestControllerTest {
 
 	@Autowired
 	private OnboardRestController onboardRestController;
-
-	private String capabilitiesPath = "/capabilities";
 
 
 	@BeforeEach
@@ -112,32 +109,33 @@ public class OnboardRestControllerTest {
 
 	@Test
 	void deletingExistingCapabilitiesReturnsStatusOk() throws Exception {
-		mockCertificate("Second Service Provider");
-
-		// The existing data types of the positng Service Provider
-		DataTypeApi a = new Datex2DataTypeApi("NO");
-		DataTypeApi b = new Datex2DataTypeApi("SE");
+		String serviceProviderName = "Second Service Provider";
+		mockCertificate(serviceProviderName);
 
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
-		CapabilityApi capabilityApi = new CapabilityApi("Second Service Provider", Collections.singleton(a));
-		String capabilityApiToServerJson = objectMapper.writeValueAsString(capabilityApi);
-
 		// Mock existing service provider with two capabilities in database
-		ServiceProvider secondServiceProvider = new ServiceProvider("Second Service Provider");
-		Set<DataType> capabilities = dataTypeTransformer.dataTypeApiToDataType(Stream.of(a, b).collect(Collectors.toSet()));
+		DataType dataType42 = mock(DataType.class);
+		DataType dataType6 = mock(DataType.class);
+		DataType dataType7 = mock(DataType.class);
+		when(dataType42.getData_id()).thenReturn(42);
+		when(dataType6.getData_id()).thenReturn(6);
+		when(dataType7.getData_id()).thenReturn(7);
+		Set<DataType> capabilities = Sets.newLinkedHashSet(dataType42, dataType6, dataType7);
 		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities);
+
+		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
+		Integer dataTypeId = 42;
 		mockMvc.perform(
-				delete(capabilitiesPath)
+				delete(String.format("/%s/capabilities/%s", serviceProviderName, dataTypeId))
 						.accept(MediaType.APPLICATION_JSON)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(capabilityApiToServerJson))
+						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().isOk());
+				.andExpect(status().is3xxRedirection());
 	}
 
 	@Test
@@ -371,7 +369,7 @@ public class OnboardRestControllerTest {
 		mockCertificate("best service provider");
 		String capabilityApiToServerJson = "{\"version\":\"1.0\",\"name\":\"best service provider\",\"capabilities\":[{\"messageType\":\"DENM\",\"noSuchProperty\":\"pubid\",\"publisherName\":\"pubname\",\"originatingCountry\":\"NO\",\"protocolVersion\":\"1.0\",\"contentType\":\"application/base64\",\"quadTree\":[],\"serviceType\":\"serviceType\",\"causeCode\":\"1\",\"subCauseCode\":\"1\"}]}";
 		mockMvc.perform(
-				post(capabilitiesPath)
+				post("/capabilities")
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(capabilityApiToServerJson))

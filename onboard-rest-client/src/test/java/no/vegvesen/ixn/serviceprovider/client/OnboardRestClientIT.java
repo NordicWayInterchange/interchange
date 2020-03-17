@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
@@ -96,13 +95,14 @@ public class OnboardRestClientIT extends DockerBaseIT {
         client.addCapability(datexNO, serviceProviderName);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        CapabilityApi newCapabilities = client.getServiceProviderCapabilities();
+        DataTypeIdList newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
 
-        client.deleteCapability(newCapabilities);
+		DataTypeApiId dataTypeApiId = newCapabilities.getSubscriptions().iterator().next();
+		client.deleteCapability(serviceProviderName, dataTypeApiId.getId());
+
         newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
-
     }
 
     @Test
@@ -130,7 +130,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 		DataTypeApiId addedSubscription = client.addSubscription(serviceProviderName, new Datex2DataTypeApi("NO"));
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
-        CapabilityApi capabilities = client.getServiceProviderCapabilities();
+        DataTypeIdList capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
 		DataTypeIdList serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptionRequest(serviceProviderName);

@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
 import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
@@ -41,13 +40,13 @@ public class OnboardRESTClient {
         return restTemplate.exchange(server + "/" + serviceProviderName + "/capabilities", HttpMethod.POST, entity, DataTypeApiId.class).getBody();
     }
 
-    public CapabilityApi getServiceProviderCapabilities() {
-        return restTemplate.getForEntity(server + "/capabilities/" + user, CapabilityApi.class).getBody();
+    public DataTypeIdList getServiceProviderCapabilities() {
+        return restTemplate.getForEntity(server + "/" + user + "/capabilities", DataTypeIdList.class).getBody();
     }
 
 
     public DataTypeIdList getServiceProviderSubscriptionRequest(String serviceProviderName) {
-		String url = String.format("%s/%s/subscriptions/", server, serviceProviderName);
+		String url = String.format("%s/%s/subscriptions/", server, user);
 		return restTemplate.getForEntity(url, DataTypeIdList.class).getBody();
     }
 
@@ -63,9 +62,8 @@ public class OnboardRESTClient {
 		return restTemplate.exchange(server + url, HttpMethod.POST, entity, DataTypeApiId.class).getBody();
     }
 
-    public CapabilityApi deleteCapability(CapabilityApi capabilityApi) {
-        HttpEntity<CapabilityApi> entity = new HttpEntity<>(capabilityApi);
-        return restTemplate.exchange(server + "/capabilities" ,HttpMethod.DELETE ,entity, CapabilityApi.class).getBody();
+    public void deleteCapability(String serviceProviderName, Integer capabilityId) {
+		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, serviceProviderName, capabilityId));
     }
 }
 

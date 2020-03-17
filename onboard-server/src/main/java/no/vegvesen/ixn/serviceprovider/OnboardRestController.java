@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
@@ -113,40 +112,37 @@ public class OnboardRestController {
 		return dataTypeApiId;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, path = "/capabilities")
-	public CapabilityApi deleteCapability( @RequestBody CapabilityApi capabilityApi) {
-		OnboardMDCUtil.setLogVariables(this.nodeProviderName, capabilityApi.getName());
-		checkIfCommonNameMatchesNameInApiObject(capabilityApi.getName());
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/capabilities/{capabilityId}")
+	public RedirectView deleteCapability(@PathVariable String serviceProviderName, @PathVariable Integer capabilityId ) {
+		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
+		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		logger.info("Capabilities - Received DELETE from Service Provider: {}", capabilityApi.getName());
-
-		if (capabilityApi.getCapabilities().isEmpty()) {
-			throw new CapabilityPostException("Bad api object. The posted CapabilityApi object had no capabilities. Nothing to delete.");
-		}
+		logger.info("Capabilities - Received DELETE from Service Provider: {}", serviceProviderName);
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
 		Self previousSelfRepresentation = fetchSelf();
 		// Get previous Self capabilities to compare with the updated capabilities.
 		Set<DataType> previousSelfCapabilities = new HashSet<>(previousSelfRepresentation.getLocalCapabilities());
 
-
 		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(capabilityApi.getName());
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProviderToUpdate == null) {
 			logger.warn("The Service Provider trying to delete a capability is new. No capabilities to delete. Rejecting...");
-			throw new CapabilityPostException("The Service Provider trying to delete a capability does not exist in the database. Rejecting...");
+			throw new NotFoundException("The Service Provider trying to delete a capability does not exist in the database. Rejecting...");
 		}
 
-		// Service provider already exists. Remove the incoming capabilities from the Service Provider capabilities.
+		// Service provider  exists. Remove the incoming capabilities from the Service Provider capabilities.
 		Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
-		Set<DataTypeApi> capabilitiesToDelete = capabilityApi.getCapabilities();
 
-		if (!currentServiceProviderCapabilities.containsAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToDelete))) {
-			throw new CapabilityPostException("The incoming capabilities to delete are not all in the Service Provider capabilities. Cannot delete capabilities that don't exist.");
+		Optional<DataType> subscriptionToDelete = currentServiceProviderCapabilities
+				.stream()
+				.filter(dataType -> dataType.getData_id().equals(capabilityId))
+				.findFirst();
 
+		if (!subscriptionToDelete.isPresent()) {
+			throw new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist.");
 		}
-
-		currentServiceProviderCapabilities.removeAll(dataTypeTransformer.dataTypeApiToDataType(capabilitiesToDelete));
+		currentServiceProviderCapabilities.remove(subscriptionToDelete.get());
 
 		if (currentServiceProviderCapabilities.size() == 0) {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
@@ -160,9 +156,9 @@ public class OnboardRestController {
 		updateSelfCapabilities(previousSelfCapabilities);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
-		CapabilityApi capabilityApi1 = capabilityTransformer.serviceProviderToCapabilityApi(serviceProviderToUpdate);
+		RedirectView redirectView = new RedirectView("{serviceProviderName}/capabilities");
 		OnboardMDCUtil.removeLogVariables();
-		return capabilityApi1;
+		return redirectView;
 	}
 
 	private void updateSelfCapabilities(Set<DataType> previousCapabilities) {
