@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -33,8 +34,6 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -89,7 +88,7 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 
 	@Test
 	public void interchangeWithOneBindingIsCreated() {
-		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", SubscriptionStatus.ACCEPTED)));
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupSubscriberRouting(flounder);
@@ -100,7 +99,7 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 	public void interchangeWithTwoBindingsIsCreated() {
 		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED);
 		Subscription s2 = new Subscription("b = c", SubscriptionStatus.ACCEPTED);
-		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupSubscriberRouting(halibut);
@@ -111,7 +110,7 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 	public void interchangeWithTwoBindingsAndOnlyOneIsAcceptedIsCreated() {
 		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED);
 		Subscription s2 = new Subscription("b = c", SubscriptionStatus.REJECTED);
-		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour salmon = new Neighbour("salmon", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupSubscriberRouting(salmon);
@@ -122,7 +121,7 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 
 	@Test
 	public void interchangeIsBothCreatedAndUpdated() {
-		Set<Subscription> subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", SubscriptionStatus.ACCEPTED)));
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupSubscriberRouting(seabass);
@@ -135,13 +134,13 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 	public void interchangeCanUnbindSubscription() {
 		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED);
 		Subscription s2 = new Subscription("b = c", SubscriptionStatus.ACCEPTED);
-		Set<Subscription> subscriptions = new HashSet<>(Arrays.asList(s1, s2));
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupSubscriberRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
-		subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", SubscriptionStatus.ACCEPTED)));
+		subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED));
 		subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
