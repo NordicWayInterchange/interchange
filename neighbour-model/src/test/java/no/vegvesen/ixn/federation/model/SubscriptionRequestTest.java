@@ -23,23 +23,16 @@ public class SubscriptionRequestTest {
 	}
 
 	@Test
-	public void subscriptionRequestWithOneCreatedSubscriptionNotRejected(){
-		norway.setSubscriptionStatus(SubscriptionStatus.CREATED);
-		sweden.setSubscriptionStatus(SubscriptionStatus.REJECTED);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
-		subscriptionRequest.setSubscriptions(Stream.of(norway, sweden).collect(Collectors.toSet()));
-
-		Assert.assertFalse(subscriptionRequest.subscriptionRequestRejected());
-	}
-
-	@Test
 	public void subscriptionRequestWithOneCreatedSubscriptionIsEstablished(){
 		sweden.setSubscriptionStatus(SubscriptionStatus.CREATED);
 		norway.setSubscriptionStatus(SubscriptionStatus.REJECTED);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Stream.of(norway, sweden).collect(Collectors.toSet()));
 
-		Assert.assertTrue(subscriptionRequest.subscriptionRequestEstablished());
+		subscriptionRequest.setStatusFromSubscriptionStatus();
+
+		Assert.assertNotEquals(SubscriptionRequestStatus.REJECTED, subscriptionRequest.getStatus());
+		Assert.assertEquals(SubscriptionRequestStatus.ESTABLISHED, subscriptionRequest.getStatus());
 	}
 
 	@Test
@@ -49,7 +42,9 @@ public class SubscriptionRequestTest {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Stream.of(norway, sweden).collect(Collectors.toSet()));
 
-		Assert.assertTrue(subscriptionRequest.subscriptionRequestRejected());
+		subscriptionRequest.setStatusFromSubscriptionStatus();
+
+		Assert.assertEquals(SubscriptionRequestStatus.REJECTED, subscriptionRequest.getStatus());
 	}
 
 
