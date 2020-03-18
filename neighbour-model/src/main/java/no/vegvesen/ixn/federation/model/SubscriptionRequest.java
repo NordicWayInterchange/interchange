@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "subscription_request")
@@ -14,15 +15,15 @@ public class SubscriptionRequest {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subreq_generator")
-	@SequenceGenerator(name="subreq_generator", sequenceName = "subreq_seq")
-	@Column(name="subreq_id")
+	@SequenceGenerator(name = "subreq_generator", sequenceName = "subreq_seq")
+	@Column(name = "subreq_id")
 	private Integer subreq_id;
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "subreq_id_sub", foreignKey = @ForeignKey(name="fk_sub_subreq"))
+	@JoinColumn(name = "subreq_id_sub", foreignKey = @ForeignKey(name = "fk_sub_subreq"))
 	private Set<Subscription> subscription = new HashSet<>();
 
 	@Column
@@ -30,7 +31,7 @@ public class SubscriptionRequest {
 	private LocalDateTime lastUpdated;
 
 
-	public SubscriptionRequest(){
+	public SubscriptionRequest() {
 
 	}
 
@@ -58,24 +59,15 @@ public class SubscriptionRequest {
 		}
 	}
 
-	public boolean subscriptionRequestRejected(){
-		for(Subscription s : subscription){
-			if(s.getSubscriptionStatus() == SubscriptionStatus.CREATED
-				|| s.getSubscriptionStatus() == SubscriptionStatus.ACCEPTED
-				|| s.getSubscriptionStatus() == SubscriptionStatus.REQUESTED){
-				return false;
-			}
-		}
-		return true;
+	public boolean subscriptionRequestRejected() {
+		return subscription.stream().noneMatch(
+				s -> s.getSubscriptionStatus() == SubscriptionStatus.CREATED
+						|| s.getSubscriptionStatus() == SubscriptionStatus.ACCEPTED
+						|| s.getSubscriptionStatus() == SubscriptionStatus.REQUESTED);
 	}
 
-	public boolean subscriptionRequestEstablished(){
-		for(Subscription s : subscription){
-			if(s.getSubscriptionStatus() == SubscriptionStatus.CREATED){
-				return true;
-			}
-		}
-		return false;
+	public boolean subscriptionRequestEstablished() {
+		return subscription.stream().anyMatch(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED));
 	}
 
 	@Override
