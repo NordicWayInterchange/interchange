@@ -25,13 +25,6 @@ public class CapabilityTransformer {
 		return capabilities;
 	}
 
-	public ServiceProvider capabilityApiToServiceProvider(CapabilityApi capabilityApi) {
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setName(capabilityApi.getName());
-		serviceProvider.setCapabilities(toCapabilities(capabilityApi));
-		return serviceProvider;
-	}
-
 	private Capabilities toCapabilities(CapabilityApi capabilityApi) {
 		Capabilities capabilitiesObject = new Capabilities();
 		capabilitiesObject.setDataTypes(dataTypeTransformer.dataTypeApiToDataType(capabilityApi.getCapabilities()));

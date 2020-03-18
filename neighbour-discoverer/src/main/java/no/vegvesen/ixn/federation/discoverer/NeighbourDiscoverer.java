@@ -8,7 +8,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
-import no.vegvesen.ixn.federation.utils.MDCUtil;
+import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class NeighbourDiscoverer {
 		this.neighbourRESTFacade = neighbourRESTFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
-		MDCUtil.setLogVariables(myName, null);
+		NeighbourMDCUtil.setLogVariables(myName, null);
 	}
 
 
@@ -103,7 +103,7 @@ public class NeighbourDiscoverer {
 		for (Neighbour neighbour : NeighboursWithFailedSubscriptionsInFedIn) {
 			for (Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()) {
 
-				MDCUtil.setLogVariables(myName, neighbour.getName());
+				NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 				// Check if we can retry poll (Exponential back-off)
 				if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
 					try {
@@ -131,7 +131,7 @@ public class NeighbourDiscoverer {
 						}
 					} finally {
 						neighbourRepository.save(neighbour);
-						MDCUtil.removeLogVariables();
+						NeighbourMDCUtil.removeLogVariables();
 					}
 				}
 			}
@@ -147,7 +147,7 @@ public class NeighbourDiscoverer {
 		for (Neighbour neighbour : NeighboursToPoll) {
 			for (Subscription subscription : neighbour.getSubscriptionsForPolling()) {
 
-				MDCUtil.setLogVariables(myName, neighbour.getName());
+				NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 				try {
 					// Check if we are allowed to poll the subscription
 					if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
@@ -178,7 +178,7 @@ public class NeighbourDiscoverer {
 				} finally {
 					logger.info("Saving updated neighbour: {}", neighbour.toString());
 					neighbourRepository.save(neighbour);
-					MDCUtil.removeLogVariables();
+					NeighbourMDCUtil.removeLogVariables();
 				}
 			}
 		}
@@ -210,7 +210,7 @@ public class NeighbourDiscoverer {
 		for (Neighbour neighbour : neighboursWithFailedCapabilityExchange) {
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
 
-				MDCUtil.setLogVariables(myName, neighbour.getName());
+				NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 				logger.warn("Posting capabilities to neighbour {} in graceful backoff.", neighbour.getName());
 
 				try {
@@ -242,7 +242,7 @@ public class NeighbourDiscoverer {
 				} finally {
 					neighbourRepository.save(neighbour);
 					logger.info("Saving updated neighbour: {}", neighbour.toString());
-					MDCUtil.removeLogVariables();
+					NeighbourMDCUtil.removeLogVariables();
 				}
 			}
 		}
@@ -264,7 +264,7 @@ public class NeighbourDiscoverer {
 		for (Neighbour neighbour : neighboursWithFailedSubscriptionRequest) {
 			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
 
-				MDCUtil.setLogVariables(myName, neighbour.getName());
+				NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 				logger.info("Posting subscription request to neighbour {} in graceful backoff.", neighbour.getName());
 
 				try {
@@ -297,7 +297,7 @@ public class NeighbourDiscoverer {
 				} finally {
 					neighbour = neighbourRepository.save(neighbour);
 					logger.info("Saving updated neighbour: {}", neighbour.toString());
-					MDCUtil.removeLogVariables();
+					NeighbourMDCUtil.removeLogVariables();
 				}
 			}
 		}
@@ -341,7 +341,7 @@ public class NeighbourDiscoverer {
 	void subscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self) {
 		DiscoveryState discoveryState = getDiscoveryState();
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
-			MDCUtil.setLogVariables(myName, neighbour.getName());
+			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 
 			try {
 				if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
@@ -382,7 +382,7 @@ public class NeighbourDiscoverer {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			MDCUtil.removeLogVariables();
+			NeighbourMDCUtil.removeLogVariables();
 		}
 
 	}
@@ -459,7 +459,7 @@ public class NeighbourDiscoverer {
 	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self) {
 		DiscoveryState discoveryState = getDiscoveryState();
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
-			MDCUtil.setLogVariables(myName, neighbour.getName());
+			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 			try {
 				// Throws CapabilityPostException if unsuccessful.
@@ -479,7 +479,7 @@ public class NeighbourDiscoverer {
 			} finally {
 				neighbour = neighbourRepository.save(neighbour);
 				logger.info("Saving updated neighbour: {}", neighbour.toString());
-				MDCUtil.removeLogVariables();
+				NeighbourMDCUtil.removeLogVariables();
 			}
 		}
 	}
@@ -491,7 +491,7 @@ public class NeighbourDiscoverer {
 		logger.debug("Got neighbours from DNS {}.", neighbours);
 
 		for (Neighbour neighbour : neighbours) {
-		    MDCUtil.setLogVariables(myName, neighbour.getName());
+		    NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			if (neighbourRepository.findByName(neighbour.getName()) == null && !neighbour.getName().equals(myName)) {
 
 				// Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
@@ -499,7 +499,7 @@ public class NeighbourDiscoverer {
 				logger.info("Found a new neighbour. Saving in database");
 				neighbourRepository.save(neighbour);
 			}
-			MDCUtil.removeLogVariables();
+			NeighbourMDCUtil.removeLogVariables();
 		}
 	}
 
