@@ -20,9 +20,14 @@ import java.util.concurrent.Callable;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 
-@Command(name = "onboardclient", description = "Onboard REST client",showAtFileInUsageHelp = true, subcommands =
-        {OnboardRestClientApplication.GetServiceProviderCapabilities.class,
-        OnboardRestClientApplication.AddServerProviderCapabilities.class})
+@Command(name = "onboardclient", description = "Onboard REST client",showAtFileInUsageHelp = true, subcommands = {
+        OnboardRestClientApplication.GetServiceProviderCapabilities.class,
+        OnboardRestClientApplication.AddServiceProviderCapability.class,
+        OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
+        OnboardRestClientApplication.AddServiceProviderSubscription.class,
+        OnboardRestClientApplication.DeleteServiceProviderCapability.class,
+        OnboardRestClientApplication.DeleteServiceProviderSubscription.class
+})
 public class OnboardRestClientApplication implements Callable<Integer> {
 
     @Parameters(index = "0",description = "The onboard server address")
@@ -62,13 +67,13 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         }
     }
 
-    @Command(name = "addcapabilities",description = "Add service provider capabilities form file")
-    static class AddServerProviderCapabilities implements Callable<Integer> {
+    @Command(name = "addcapability",description = "Add service provider capability from file")
+    static class AddServiceProviderCapability implements Callable<Integer> {
 
         @ParentCommand
         OnboardRestClientApplication parentCommand;
 
-        @Option(names = {"-f","--filename"}, description = "The capabilities json file")
+        @Option(names = {"-f","--filename"}, description = "The capability json file")
         File file;
 
         @Override
@@ -82,26 +87,81 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         }
     }
 
+    @Command(name = "getsubscriptions", description = "Get the service provider subscriptions")
+    static class GetServiceProviderSubscriptions implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            DataTypeIdList capabilities = client.getServiceProviderCapabilities();
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(mapper.writeValueAsString(capabilities));
+            return 0;
+        }
+    }
+
+    @Command(name = "addsubscription", description = "Add a subscription for the service provider")
+    static class AddServiceProviderSubscription implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Option(names = {"-f","--filename"}, description = "The subscription json file")
+        File file;
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            DataTypeApi subscription = mapper.readValue(file,DataTypeApi.class);
+            DataTypeApiId result = client.addSubscription(subscription);
+            System.out.println(mapper.writeValueAsString(result));
+            return 0;
+        }
+    }
+
+    @Command(name = "deletecapability", description = "Delete a service provider capability")
+    static class DeleteServiceProviderCapability implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The ID of the capability to delete")
+        Integer capabilityId;
+
+        @Override
+        public Integer call() {
+            OnboardRESTClient client = parentCommand.createClient();
+            client.deleteCapability(capabilityId);
+            System.out.println(String.format("Capability %d deleted successfully",capabilityId));
+            return 0;
+        }
+    }
+
+    @Command(name = "deletesubscription", description = "Delete a service provider subscription")
+    static class DeleteServiceProviderSubscription implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The ID of the subscription to delete")
+        Integer subscriptionId;
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            client.deleteSubscriptions(subscriptionId);
+            System.out.println(String.format("Subscription %d deleted successfully",subscriptionId));
+            return 0;
+        }
+    }
+
     public static void main(String[] args) {
         int exitCode = new CommandLine(new OnboardRestClientApplication()).execute(args);
         System.exit(exitCode);
-        /*
-        OnboardRESTClient client = new OnboardRESTClient(sslContext,server,user);
-        Object result = null;
-        if (args.length > 8) {
-            String action = args[7];
-            if (action.equals("addsubscription")) {
-                result = client.addSubscription(user, new Datex2DataTypeApi("NO"));
-
-            } else {
-                System.out.println(String.format("Action %s not recognised",action));
-            }
-        } else {
-            result = client.getServiceProviderCapabilities();
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writeValueAsString(result));
-*/
     }
 
     @Override
