@@ -124,7 +124,7 @@ public class RoutingConfigurer {
 
 	private void bindSubscriptions(String exchange, Subscriber subscriber) {
 		unbindOldUnwantedBindings(subscriber, exchange);
-		for (Subscription subscription : subscriber.getSubscriptionRequest().getSubscriptions()) {
+		for (Subscription subscription : subscriber.getSubscriptionRequest().getAcceptedSubscriptions()) {
 			qpidClient.addBinding(subscription.getSelector(), subscriber.getName(), subscription.bindKey(), exchange);
 		}
 	}

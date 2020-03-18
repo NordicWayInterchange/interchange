@@ -19,7 +19,7 @@ public interface Subscriber {
 
 	default Set<String> wantedBindings() {
 		Set<String> wantedBindings = new HashSet<>();
-		for (Subscription subscription : getSubscriptionRequest().getSubscriptions()) {
+		for (Subscription subscription : getSubscriptionRequest().getAcceptedSubscriptions()) {
 			wantedBindings.add(subscription.bindKey());
 		}
 		return wantedBindings;

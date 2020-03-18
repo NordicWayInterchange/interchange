@@ -87,4 +87,11 @@ public class SubscriptionRequest {
 			this.status = SubscriptionRequestStatus.REQUESTED;
 		}
 	}
+
+	public Set<Subscription> getAcceptedSubscriptions() {
+		return getSubscriptions().stream()
+				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED))
+				.collect(Collectors.toSet());
+	}
+
 }
