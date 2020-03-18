@@ -141,7 +141,7 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 		routingConfigurer.setupSubscriberRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
-		subscriptions = new HashSet<>(Collections.singletonList(s1));
+		subscriptions = new HashSet<>(Collections.singletonList(new Subscription("a = b", SubscriptionStatus.ACCEPTED)));
 		subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
