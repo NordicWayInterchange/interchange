@@ -63,17 +63,6 @@ public class SubscriptionRequest {
 		}
 	}
 
-	public boolean subscriptionRequestRejected() {
-		return subscription.stream().noneMatch(
-				s -> s.getSubscriptionStatus() == SubscriptionStatus.CREATED
-						|| s.getSubscriptionStatus() == SubscriptionStatus.ACCEPTED
-						|| s.getSubscriptionStatus() == SubscriptionStatus.REQUESTED);
-	}
-
-	public boolean subscriptionRequestEstablished() {
-		return subscription.stream().anyMatch(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED));
-	}
-
 	@Override
 	public String toString() {
 		return "SubscriptionRequest{" +
