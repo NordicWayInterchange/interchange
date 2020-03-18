@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
-import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
+import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
+import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -94,11 +94,11 @@ public class OnboardRestClientIT extends DockerBaseIT {
         client.addCapability(datexNO);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        DataTypeIdList newCapabilities = client.getServiceProviderCapabilities();
+        LocalDataTypeList newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
 
-		DataTypeApiId dataTypeApiId = newCapabilities.getDataTypes().iterator().next();
-		client.deleteCapability(dataTypeApiId.getId());
+		LocalDataType localDataType = newCapabilities.getDataTypes().iterator().next();
+		client.deleteCapability(localDataType.getId());
 
         newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
@@ -108,34 +108,34 @@ public class OnboardRestClientIT extends DockerBaseIT {
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
 		client.addSubscription(new Datex2DataTypeApi("NO"));
 
-        DataTypeIdList localSubscriptions = client.getServiceProviderSubscriptionRequest();
+        LocalDataTypeList localSubscriptions = client.getServiceProviderSubscriptionRequest();
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(localSubscriptions));
 
         assertThat(localSubscriptions).isNotNull();
         assertThat(localSubscriptions.getDataTypes()).isNotNull().hasSize(1);
-        DataTypeApiId idSubToDelete = localSubscriptions.getDataTypes().iterator().next();
+        LocalDataType idSubToDelete = localSubscriptions.getDataTypes().iterator().next();
 
         client.deleteSubscriptions(idSubToDelete.getId());
-		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest();
+		LocalDataTypeList afterDelete = client.getServiceProviderSubscriptionRequest();
 		assertThat(afterDelete.getDataTypes()).hasSize(0);
 	}
 
     @Test
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-		DataTypeApiId addedSubscription = client.addSubscription(new Datex2DataTypeApi("NO"));
+		LocalDataType addedSubscription = client.addSubscription(new Datex2DataTypeApi("NO"));
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
-        DataTypeIdList capabilities = client.getServiceProviderCapabilities();
+        LocalDataTypeList capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
-		DataTypeIdList serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptionRequest();
-		for (DataTypeApiId subscription : serviceProviderSubscriptionRequest.getDataTypes()) {
+		LocalDataTypeList serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptionRequest();
+		for (LocalDataType subscription : serviceProviderSubscriptionRequest.getDataTypes()) {
 			System.out.println("deleting subscription " + subscription.getId());
 			client.deleteSubscriptions(subscription.getId());
 		}
-		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest();
+		LocalDataTypeList afterDelete = client.getServiceProviderSubscriptionRequest();
 		assertThat(afterDelete.getDataTypes()).hasSize(0);
     }
 

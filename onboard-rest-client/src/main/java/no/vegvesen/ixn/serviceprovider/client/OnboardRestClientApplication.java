@@ -3,8 +3,8 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
-import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
+import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
+import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -60,7 +60,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            DataTypeIdList serviceProviderCapabilities = client.getServiceProviderCapabilities();
+            LocalDataTypeList serviceProviderCapabilities = client.getServiceProviderCapabilities();
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(serviceProviderCapabilities));
             return 0;
@@ -81,7 +81,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
             DataTypeApi capability = mapper.readValue(file,DataTypeApi.class);
-            DataTypeApiId result = client.addCapability(capability);
+            LocalDataType result = client.addCapability(capability);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
@@ -96,7 +96,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            DataTypeIdList capabilities = client.getServiceProviderCapabilities();
+            LocalDataTypeList capabilities = client.getServiceProviderCapabilities();
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(capabilities));
             return 0;
@@ -117,7 +117,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
             DataTypeApi subscription = mapper.readValue(file,DataTypeApi.class);
-            DataTypeApiId result = client.addSubscription(subscription);
+            LocalDataType result = client.addSubscription(subscription);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
