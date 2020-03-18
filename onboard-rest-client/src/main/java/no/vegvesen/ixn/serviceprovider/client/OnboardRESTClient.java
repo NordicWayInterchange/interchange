@@ -33,11 +33,11 @@ public class OnboardRESTClient {
         this.user = user;
     }
 
-    public DataTypeApiId addCapability(DataTypeApi capability, String serviceProviderName) {
+    public DataTypeApiId addCapability(DataTypeApi capability) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<DataTypeApi> entity = new HttpEntity<>(capability,headers);
-        return restTemplate.exchange(server + "/" + serviceProviderName + "/capabilities", HttpMethod.POST, entity, DataTypeApiId.class).getBody();
+        return restTemplate.exchange(server + "/" + user + "/capabilities", HttpMethod.POST, entity, DataTypeApiId.class).getBody();
     }
 
     public DataTypeIdList getServiceProviderCapabilities() {
@@ -45,25 +45,25 @@ public class OnboardRESTClient {
     }
 
 
-    public DataTypeIdList getServiceProviderSubscriptionRequest(String serviceProviderName) {
+    public DataTypeIdList getServiceProviderSubscriptionRequest() {
 		String url = String.format("%s/%s/subscriptions/", server, user);
 		return restTemplate.getForEntity(url, DataTypeIdList.class).getBody();
     }
 
-    public void deleteSubscriptions(String serviceProviderName, Integer localSubscriptionId) {
-        restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, serviceProviderName, localSubscriptionId));
+    public void deleteSubscriptions(Integer localSubscriptionId) {
+        restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId));
     }
 
-    public DataTypeApiId addSubscription(String serviceProviderName, DataTypeApi subscription) {
+    public DataTypeApiId addSubscription(DataTypeApi subscription) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<DataTypeApi> entity = new HttpEntity<>(subscription,headers);
-		String url = String.format("/%s/subscriptions", serviceProviderName) ;
+		String url = String.format("/%s/subscriptions", user) ;
 		return restTemplate.exchange(server + url, HttpMethod.POST, entity, DataTypeApiId.class).getBody();
     }
 
-    public void deleteCapability(String serviceProviderName, Integer capabilityId) {
-		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, serviceProviderName, capabilityId));
+    public void deleteCapability(Integer capabilityId) {
+		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, user, capabilityId));
     }
 }
 

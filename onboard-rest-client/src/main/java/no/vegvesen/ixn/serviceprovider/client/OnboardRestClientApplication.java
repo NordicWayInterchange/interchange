@@ -2,7 +2,9 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
+import no.vegvesen.ixn.serviceprovider.model.DataTypeApiId;
+import no.vegvesen.ixn.serviceprovider.model.DataTypeIdList;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -44,7 +46,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
     @Option(names = {"-w","--truststorepassword"}, description = "The password of the jks trust store")
     String trustStorePassword;
 
-    @Command(name = "getcapabilities",description = "Get the serivce provider capabilities")
+    @Command(name = "getcapabilities",description = "Get the service provider capabilities")
     static class GetServiceProviderCapabilities implements Callable<Integer> {
 
         @ParentCommand
@@ -53,14 +55,14 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            CapabilityApi serviceProviderCapabilities = client.getServiceProviderCapabilities();
+            DataTypeIdList serviceProviderCapabilities = client.getServiceProviderCapabilities();
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(serviceProviderCapabilities));
             return 0;
         }
     }
 
-    @Command(name = "addcapabilities",description = "Add service provider capabiltites form file")
+    @Command(name = "addcapabilities",description = "Add service provider capabilities form file")
     static class AddServerProviderCapabilities implements Callable<Integer> {
 
         @ParentCommand
@@ -73,8 +75,8 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws IOException {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            CapabilityApi capabilityApi = mapper.readValue(file, CapabilityApi.class);
-            CapabilityApi result = client.addCapabilities(capabilityApi);
+            DataTypeApi capability = mapper.readValue(file,DataTypeApi.class);
+            DataTypeApiId result = client.addCapability(capability);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }

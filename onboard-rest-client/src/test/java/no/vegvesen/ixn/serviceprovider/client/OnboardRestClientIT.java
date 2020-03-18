@@ -89,17 +89,16 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addCapabilityCheckAndDelete() throws JsonProcessingException {
-		String serviceProviderName = "onboard";
 
         Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
-        client.addCapability(datexNO, serviceProviderName);
+        client.addCapability(datexNO);
 
         ObjectMapper objectMapper = new ObjectMapper();
         DataTypeIdList newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
 
 		DataTypeApiId dataTypeApiId = newCapabilities.getDataTypes().iterator().next();
-		client.deleteCapability(serviceProviderName, dataTypeApiId.getId());
+		client.deleteCapability(dataTypeApiId.getId());
 
         newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
@@ -107,10 +106,9 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
-		String serviceProviderName = "onboard";
-		client.addSubscription(serviceProviderName, new Datex2DataTypeApi("NO"));
+		client.addSubscription(new Datex2DataTypeApi("NO"));
 
-        DataTypeIdList localSubscriptions = client.getServiceProviderSubscriptionRequest(serviceProviderName);
+        DataTypeIdList localSubscriptions = client.getServiceProviderSubscriptionRequest();
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(localSubscriptions));
 
@@ -118,27 +116,26 @@ public class OnboardRestClientIT extends DockerBaseIT {
         assertThat(localSubscriptions.getDataTypes()).isNotNull().hasSize(1);
         DataTypeApiId idSubToDelete = localSubscriptions.getDataTypes().iterator().next();
 
-        client.deleteSubscriptions(serviceProviderName, idSubToDelete.getId());
-		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest(serviceProviderName);
+        client.deleteSubscriptions(idSubToDelete.getId());
+		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest();
 		assertThat(afterDelete.getDataTypes()).hasSize(0);
 	}
 
     @Test
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-		String serviceProviderName = "onboard";
-		DataTypeApiId addedSubscription = client.addSubscription(serviceProviderName, new Datex2DataTypeApi("NO"));
+		DataTypeApiId addedSubscription = client.addSubscription(new Datex2DataTypeApi("NO"));
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
         DataTypeIdList capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
-		DataTypeIdList serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptionRequest(serviceProviderName);
+		DataTypeIdList serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptionRequest();
 		for (DataTypeApiId subscription : serviceProviderSubscriptionRequest.getDataTypes()) {
 			System.out.println("deleting subscription " + subscription.getId());
-			client.deleteSubscriptions(serviceProviderName, subscription.getId());
+			client.deleteSubscriptions(subscription.getId());
 		}
-		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest(serviceProviderName);
+		DataTypeIdList afterDelete = client.getServiceProviderSubscriptionRequest();
 		assertThat(afterDelete.getDataTypes()).hasSize(0);
     }
 
