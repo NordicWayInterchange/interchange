@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
+import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -21,9 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -32,7 +31,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 @WebMvcTest
 class NeighbourRestControllerTest {
 
@@ -96,8 +94,7 @@ class NeighbourRestControllerTest {
 		// Mock dns lookup
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
-		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
+		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -106,7 +103,7 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-		verify(dnsFacade,times(1)).getNeighbours();
+		verify(dnsFacade,times(1)).findNeighbour(anyString());
 	}
 
 	@Test
@@ -127,8 +124,7 @@ class NeighbourRestControllerTest {
 		// Mock dns lookup
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
-		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
+		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -137,7 +133,7 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-		verify(dnsFacade,times(1)).getNeighbours();
+		verify(dnsFacade,times(1)).findNeighbour(anyString());
 	}
 
 	@Test
@@ -157,8 +153,7 @@ class NeighbourRestControllerTest {
 		// Mock dns lookup
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
-		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
+		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -167,7 +162,7 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-		verify(dnsFacade,times(1)).getNeighbours();
+		verify(dnsFacade,times(1)).findNeighbour(anyString());
 	}
 
 	@Test
@@ -181,7 +176,7 @@ class NeighbourRestControllerTest {
 		unknownNeighbour.setCapabilities(Collections.singleton(new Datex2DataTypeApi("NO")));
 
 		// Mock response from DNS facade on Server
-		doReturn(Collections.emptyList()).when(dnsFacade).getNeighbours();
+		doThrow(new InterchangeNotInDNSException("expected")).when(dnsFacade).findNeighbour(anyString());
 
 		// Create capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(unknownNeighbour);
@@ -193,7 +188,7 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().is4xxClientError());
-		verify(dnsFacade,times(1)).getNeighbours();
+		verify(dnsFacade,times(1)).findNeighbour("unknownNeighbour");
 	}
 
 	@Test
@@ -306,8 +301,7 @@ class NeighbourRestControllerTest {
 		// Mock dns lookup
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		List<Neighbour> dnsReturn = Arrays.asList(ericssonNeighbour);
-		doReturn(dnsReturn).when(dnsFacade).getNeighbours();
+		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -316,7 +310,7 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-		verify(dnsFacade,times(1)).getNeighbours();
+		verify(dnsFacade,times(1)).findNeighbour(anyString());
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
 

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,6 +49,16 @@ public class DNSFacadeTest {
 		assertThat(bouvet).isNotNull();
 		assertThat(bouvet.getControlChannelUrl("/")).isNotNull();
 		assertThat(bouvet.getMessageChannelPort()).isNotNull().isEqualTo("5671");
+	}
 
+	@Test
+	public void findBouvetExists() {
+		Neighbour neighbour = dnsFacade.findNeighbour("bouveta-fed.itsinterchange.eu");
+		assertThat(neighbour).isNotNull();
+	}
+
+	@Test(expected = InterchangeNotInDNSException.class)
+	public void findNotDefinedDoesNotExists() {
+		dnsFacade.findNeighbour("no-such-interchange.itsinterchange.eu");
 	}
 }
