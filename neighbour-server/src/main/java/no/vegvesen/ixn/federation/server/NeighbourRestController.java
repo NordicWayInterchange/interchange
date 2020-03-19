@@ -253,15 +253,4 @@ public class NeighbourRestController {
 		NeighbourMDCUtil.removeLogVariables();
 		return capabilityApiResponse;
 	}
-
-	private Neighbour findNeighbourInDns(Neighbour neighbour) {
-		Neighbour dnsNeighbour = dnsFacade.findNeighbour(neighbour.getName());
-		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}, message {}",
-				neighbour.getName(),
-				dnsNeighbour.getControlChannelPort(),
-				dnsNeighbour.getMessageChannelPort());
-		neighbour.setControlChannelPort(dnsNeighbour.getControlChannelPort());
-		neighbour.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
-		return neighbour;
-	}
 }
