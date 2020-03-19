@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public class DNSFacade {
 			try {
 				controlChannelPorts = getSrvRecords("_ixc._tcp.");
 			} catch (RuntimeException e) {
-				logger.warn("No control channel ports found in DNS",e);
+				logger.warn("No control channel ports found in DNS", e);
 			}
 
 			List<Neighbour> neighbours = new LinkedList<>();
@@ -47,8 +48,7 @@ public class DNSFacade {
 							neighbour.getMessageChannelPort(),
 							neighbour.getControlChannelPort(),
 							neighbour.getName());
-				}
-				else {
+				} else {
 					neighbour.setControlChannelPort(dnsProperties.getControlChannelPort());
 					logger.debug("DNS server {} has only message channel port {} for node, using standard port for control channel {} for node {}",
 							getDnsServerName(),
@@ -90,5 +90,17 @@ public class DNSFacade {
 
 	public String getDnsServerName() {
 		return this.dnsProperties.getDomainName();
+	}
+
+	public Neighbour findNeighbour(String neighbourName) {
+		return getNeighbours().stream()
+				.filter(n -> n.getName().equals(neighbourName))
+				.findFirst()
+				.orElseThrow(() ->
+						new InterchangeNotInDNSException(
+								String.format("Received capability post from neighbour %s, but could not find in DNS %s",
+										neighbourName,
+										getDnsServerName()))
+				);
 	}
 }

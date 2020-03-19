@@ -27,10 +27,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
-import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.*;
+import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 
 @Api(value = "/", produces = "application/json")
 @RestController("/")
@@ -57,10 +56,10 @@ public class NeighbourRestController {
 		this.dnsFacade = dnsFacade;
 	}
 
-	private Self getSelf(){
+	private Self getSelf() {
 		Self self = selfRepository.findByName(myName);
 
-		if(self == null){
+		if (self == null) {
 			self = new Self(myName);
 		}
 
@@ -254,26 +253,13 @@ public class NeighbourRestController {
 	}
 
 	private Neighbour findNeighbourInDns(Neighbour neighbour) {
-		List<Neighbour> dnsNeighbours = dnsFacade.getNeighbours();
-		Neighbour dnsNeighbour = null;
-		for (Neighbour dnsNeighbourCandidate : dnsNeighbours) {
-			if (dnsNeighbourCandidate.getName().equals(neighbour.getName())) {
-				dnsNeighbour = dnsNeighbourCandidate;
-			}
-		}
-		if (dnsNeighbour != null) {
-			logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}, message {}",
-					neighbour.getName(),
-					dnsNeighbour.getControlChannelPort(),
-					dnsNeighbour.getMessageChannelPort());
-			neighbour.setControlChannelPort(dnsNeighbour.getControlChannelPort());
-			neighbour.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
-		} else {
-			throw new InterchangeNotInDNSException(
-					String.format("Received capability post from neighbour %s, but could not find in DNS %s",
-							neighbour.getName(),
-							dnsFacade.getDnsServerName()));
-		}
+		Neighbour dnsNeighbour = dnsFacade.findNeighbour(neighbour.getName());
+		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}, message {}",
+				neighbour.getName(),
+				dnsNeighbour.getControlChannelPort(),
+				dnsNeighbour.getMessageChannelPort());
+		neighbour.setControlChannelPort(dnsNeighbour.getControlChannelPort());
+		neighbour.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
 		return neighbour;
 	}
 }
