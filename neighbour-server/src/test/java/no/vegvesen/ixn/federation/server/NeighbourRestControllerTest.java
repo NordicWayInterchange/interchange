@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Sets;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.model.*;
@@ -9,6 +8,7 @@ import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +148,7 @@ class NeighbourRestControllerTest {
 		CapabilityApi ericsson = new CapabilityApi();
 		ericsson.setName("ericsson");
 		IviDataTypeApi ericssonDataType = new IviDataTypeApi();
-		ericssonDataType.setPictogramCategoryCodes(Sets.newHashSet(3993));
+		ericssonDataType.setPictogramCategoryCodes(Sets.newLinkedHashSet(3993));
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server
@@ -200,6 +200,43 @@ class NeighbourRestControllerTest {
 	void postingSubscriptionRequestReturnsStatusAccepted() throws Exception {
 		mockCertificate("ericsson");
 
+		// Create incoming subscription request api objcet
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
+		ericsson.setName("ericsson");
+		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", SubscriptionStatus.REQUESTED)));
+
+		// Convert to JSON
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
+
+		// Mock saving Neighbour to Neighbour repository
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
+		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
+		firstSubscription.setPath("/ericsson/subscription/1");
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(firstSubscription);
+		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
+		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
+
+		doReturn(updatedNeighbour).when(neighbourRepository).save(any(Neighbour.class));
+		doReturn(updatedNeighbour).when(neighbourRepository).findByName(anyString());
+
+		// Mock response from DNS facade on Server
+		Neighbour ericssonNeighbour = new Neighbour();
+		ericssonNeighbour.setName("ericsson");
+		doReturn(Collections.singletonList(ericssonNeighbour)).when(dnsFacade).getNeighbours();
+
+		mockMvc.perform(post(subscriptionRequestPath)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(subscriptionRequestApiToServerJson))
+				.andExpect(status().isAccepted());
+		verify(neighbourRepository,times(2)).save(any(Neighbour.class)); //saved twice because first save generates id, and second save saves the path derived from the ids
+		verify(neighbourRepository,times(1)).findByName(anyString());
+		verify(dnsFacade, times(0)).getNeighbours();
+	}
+
+	@Test
+	void postingSubscriptionRequestFromUnseenNeighbourReturnsException() throws Exception {
+		mockCertificate("ericsson");
 
 		// Create incoming subscription request api objcet
 		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
@@ -218,22 +255,18 @@ class NeighbourRestControllerTest {
 
 		doReturn(updatedNeighbour).when(neighbourRepository).save(any(Neighbour.class));
 
-
 		// Mock response from DNS facade on Server
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Collections.singletonList(ericssonNeighbour)).when(dnsFacade).getNeighbours();
 
-
 		mockMvc.perform(post(subscriptionRequestPath)
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(subscriptionRequestApiToServerJson))
-				.andExpect(status().isAccepted());
-		//TODO do we really need to save the Neighbour twice here?
-		verify(neighbourRepository,times(2)).save(any(Neighbour.class));
-		verify(dnsFacade).getNeighbours();
-
+				.andExpect(status().is4xxClientError());
+		verify(neighbourRepository,times(1)).findByName(anyString());
+		verify(dnsFacade, times(0)).getNeighbours();
 	}
 
 	@Test
@@ -284,6 +317,7 @@ class NeighbourRestControllerTest {
 				.andDo(print())
 				.andExpect(status().isOk());
 		verify(dnsFacade,times(1)).getNeighbours();
+		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
 
 	@Test

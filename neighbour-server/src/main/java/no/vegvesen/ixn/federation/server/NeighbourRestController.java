@@ -126,13 +126,7 @@ public class NeighbourRestController {
 		Neighbour neighbourToUpdate = neighbourRepository.findByName(incomingSubscriptionRequestNeighbour.getName());
 
 		if (neighbourToUpdate == null) {
-			// Neighbour does not exist in DB. Set capabilities status UNKNOWN.
-			logger.info("Subscription request was from unknown neighbour");
-
-			// Perform DNS lookup on neighbour and set capabilities status to UNKNOWN
-			neighbourToUpdate = findNeighbourInDns(incomingSubscriptionRequestNeighbour);
-			neighbourToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-			logger.info("Setting capabilities status of neighbour to UNKNOWN.");
+			throw new SubscriptionRequestException("Neighbours can not request subscriptions before capabilities are exchanged.");
 		}
 
 		//Check if subscription request is empty or not
