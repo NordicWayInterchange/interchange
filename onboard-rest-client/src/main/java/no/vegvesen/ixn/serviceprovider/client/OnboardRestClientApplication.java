@@ -178,7 +178,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
     }
 
-    private OnboardRESTClient createClient() {
+    public OnboardRESTClient createClient() {
         return new OnboardRESTClient(createSSLContext(),server,user);
     }
 }

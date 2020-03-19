@@ -30,7 +30,9 @@ services:
 
   onboard_server:
     dns: 172.28.1.1
-    image: eu.gcr.io/nordic-way-aad182cc/onboard-server:docker_compose_systemtests
+    #image: eu.gcr.io/nordic-way-aad182cc/onboard-server:docker_compose_systemtests
+    build:
+      context: ./onboard-server
     container_name: onboard_server
     depends_on:
       - local_db

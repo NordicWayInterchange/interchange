@@ -83,10 +83,6 @@ public class OnboardRestClientIT extends DockerBaseIT {
     }
 
 
-    private String getServerUri() {
-        return "https://localhost:" + onboardServer.getMappedPort(8899);
-    }
-
     @Test
     public void addCapabilityCheckAndDelete() throws JsonProcessingException {
 
