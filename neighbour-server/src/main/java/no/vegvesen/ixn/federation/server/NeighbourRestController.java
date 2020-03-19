@@ -223,17 +223,19 @@ public class NeighbourRestController {
 		logger.info("Common name of certificate matches Neighbour name in capability api object.");
 
 		// Transform CapabilityApi to Neighbour to find posting neighbour in db
-		Neighbour neighbour = capabilityTransformer.capabilityApiToNeighbour(neighbourCapabilities);
+		Neighbour incomingNeighbour = capabilityTransformer.capabilityApiToNeighbour(neighbourCapabilities);
 
 		logger.info("Looking up neighbour in DB.");
-		Neighbour neighbourToUpdate = neighbourRepository.findByName(neighbour.getName());
+		Neighbour neighbourToUpdate = neighbourRepository.findByName(incomingNeighbour.getName());
 
 		if (neighbourToUpdate == null) {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
-			neighbourToUpdate = findNeighbourInDns(neighbour);
+			Neighbour dnsNeighbour = dnsFacade.findNeighbour(incomingNeighbour.getName());
+			neighbourToUpdate = incomingNeighbour;
+			neighbourToUpdate.setDnsProperties(dnsNeighbour);
 		} else {
 			logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
-			neighbourToUpdate.setCapabilities(neighbour.getCapabilities());
+			neighbourToUpdate.setCapabilities(incomingNeighbour.getCapabilities());
 		}
 
 		// Update status of capabilities to KNOWN, and set status of fedIn to EMPTY

@@ -254,4 +254,16 @@ public class Neighbour {
 		}
 		return wantedBindings;
 	}
+
+	public void setDnsProperties(Neighbour dnsNeighbour) {
+		assert dnsNeighbour.getName().equals(this.getName());
+		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}, message {}",
+				this.getName(),
+				dnsNeighbour.getControlChannelPort(),
+				dnsNeighbour.getMessageChannelPort());
+		this.setControlChannelPort(dnsNeighbour.getControlChannelPort());
+		this.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
+
+	}
+
 }
