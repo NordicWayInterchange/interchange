@@ -34,6 +34,8 @@ public class SubscriptionRequest {
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
 
+	private LocalDateTime successfulRequest;
+
 
 	public SubscriptionRequest() {
 
@@ -94,4 +96,11 @@ public class SubscriptionRequest {
 				.collect(Collectors.toSet());
 	}
 
+	public LocalDateTime getSuccessfulRequest() {
+		return successfulRequest;
+	}
+
+	public void setSuccessfulRequest(LocalDateTime successfulRequest) {
+		this.successfulRequest = successfulRequest;
+	}
 }

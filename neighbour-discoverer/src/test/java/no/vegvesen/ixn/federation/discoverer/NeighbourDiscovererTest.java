@@ -151,8 +151,9 @@ public class NeighbourDiscovererTest {
 		Neighbour ericsson = createNeighbour();
 		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
+		when(selfRepository.findByName(anyString())).thenReturn(self);
 
-		neighbourDiscoverer.subscriptionRequest(Collections.singletonList(ericsson), self);
+		neighbourDiscoverer.subscriptionRequest(Collections.singletonList(ericsson));
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -437,8 +438,9 @@ public class NeighbourDiscovererTest {
 		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("NO");
 
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
+		when(selfRepository.findByName(anyString())).thenReturn(discoveringNode);
 
-		neighbourDiscoverer.subscriptionRequest(neighbours, discoveringNode);
+		neighbourDiscoverer.subscriptionRequest(neighbours);
 
 		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 	}
@@ -472,8 +474,9 @@ public class NeighbourDiscovererTest {
 				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
 				new SubscriptionRequest());
 
+		when(selfRepository.findByName(anyString())).thenReturn(self);
 
-	    neighbourDiscoverer.subscriptionRequest(Arrays.asList(neighbour,otherNeighbour),self);
+	    neighbourDiscoverer.subscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
 	    verify(neighbourRepository,times(2)).save(any(Neighbour.class));
     }
 
@@ -504,17 +507,11 @@ public class NeighbourDiscovererTest {
 				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
 				new SubscriptionRequest());
 
-		neighbourDiscoverer.subscriptionRequest(Arrays.asList(neighbour,otherNeighbour),self);
+		when(selfRepository.findByName(anyString())).thenReturn(self);
+
+		neighbourDiscoverer.subscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
 		verify(neighbourRepository).save(otherNeighbour);
 
     }
-
-    @Test
-	public void shouldUpdateSubscriptionsWitLastSubscriptionRequestNull() {
-		LocalDateTime lastSubscriptionRequest = null;
-		LocalDateTime lastUpdated = LocalDateTime.now().minusMinutes(10);
-		boolean checkSubsctiptionRequestsForUpdates = neighbourDiscoverer.shouldCheckSubsctiptionRequestsForUpdates(lastSubscriptionRequest, lastUpdated);
-		Assert.assertFalse(checkSubsctiptionRequestsForUpdates);
-	}
 
 }

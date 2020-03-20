@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
+
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -58,5 +61,21 @@ public class NeighbourTest {
 		Neighbour fullDomainName = new Neighbour("my-host", null, null, null);
 		fullDomainName.setControlChannelPort("1234");
 		assertThat(fullDomainName.getControlChannelUrl("/thePath")).isEqualTo("https://my-host:1234/thePath");
+	}
+
+	@Test
+	public void neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
+		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
+		LocalDateTime localSubscriptionsUpdatedNow = LocalDateTime.now();
+		Assertions.assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionsUpdatedNow)).isTrue();
+	}
+
+	@Test
+	public void neighbourJustHadSubscriptionRequestShouldNotCheckSubscriptionRequest() {
+		SubscriptionRequest fedIn = new SubscriptionRequest();
+		LocalDateTime now = LocalDateTime.now();
+		fedIn.setSuccessfulRequest(now);
+		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, fedIn);
+		Assertions.assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(now)).isFalse();
 	}
 }
