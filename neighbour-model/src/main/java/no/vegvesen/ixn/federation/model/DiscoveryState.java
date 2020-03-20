@@ -15,7 +15,6 @@ public class DiscoveryState {
 
 	private String name;
 	private LocalDateTime lastCapabilityExchange;
-	private LocalDateTime lastSubscriptionRequest;
 
 	public DiscoveryState() {
 	}
@@ -40,11 +39,4 @@ public class DiscoveryState {
 		this.lastCapabilityExchange = lastCapabilityExchange;
 	}
 
-	public LocalDateTime getLastSubscriptionRequest() {
-		return lastSubscriptionRequest;
-	}
-
-	public void setLastSubscriptionRequest(LocalDateTime lastSubscriptionRequest) {
-		this.lastSubscriptionRequest = lastSubscriptionRequest;
-	}
 }

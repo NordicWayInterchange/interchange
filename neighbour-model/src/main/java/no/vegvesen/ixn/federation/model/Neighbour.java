@@ -161,7 +161,7 @@ public class Neighbour implements Subscriber {
 		this.backoffAttempts = backoffAttempts;
 	}
 
-	public LocalDateTime getNextPostAttempt(int startIntervalLength,int randomShift) {
+	public LocalDateTime getNextPostAttempt(int startIntervalLength, int randomShift) {
 		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, getBackoffAttempts()) * startIntervalLength) + randomShift;
 		return getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
 	}
@@ -252,5 +252,11 @@ public class Neighbour implements Subscriber {
 		this.setControlChannelPort(dnsNeighbour.getControlChannelPort());
 		this.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
 
+	}
+
+	public boolean shouldCheckSubscriptionRequestsForUpdates(LocalDateTime localSubscriptionsUpdated) {
+		return this.getFedIn() == null
+				|| this.getFedIn().getSuccessfulRequest() == null
+				|| this.getFedIn().getSuccessfulRequest().isBefore(localSubscriptionsUpdated);
 	}
 }
