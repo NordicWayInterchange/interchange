@@ -70,7 +70,7 @@ public class NeighbourRepositorySelectorIT {
 
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> getInterchangeForSubscriptionRequest = neighbourRepository.findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequestStatus.EMPTY);
+		List<Neighbour> getInterchangeForSubscriptionRequest = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
 
 		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeForSubscriptionRequest));
 	}

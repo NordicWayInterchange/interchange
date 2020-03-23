@@ -253,15 +253,9 @@ public class NeighbourDiscoverer {
 				try {
 					// Create representation of discovering Neighbour and calculate custom subscription for neighbour.
 					Set<Subscription> newSubscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour);
-
-					// Throws SubscriptionRequestException if unsuccessful.
 					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(self,neighbour,newSubscriptions);
-
 					neighbour.setBackoffAttempts(0);
 					neighbour.setFedIn(postResponseSubscriptionRequest);
-					neighbour.getFedIn().setStatus(SubscriptionRequestStatus.REQUESTED);
-
-
 					logger.info("Successfully posted subscription request to neighbour in graceful backoff.");
 				} catch (SubscriptionRequestException e) {
 					neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
@@ -284,23 +278,13 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void performSubscriptionRequestWithKnownNeighbours(){
-		// Perform subscription request with all neighbours with capabilities KNOWN and fedIn EMPTY
-		logger.info("Checking for any Neighbours with KNOWN capabilities and EMPTY fedIn for subscription request");
-		List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findNeighboursByCapabilities_Status_AndFedIn_Status(Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequestStatus.EMPTY);
-		subscriptionRequest(neighboursForSubscriptionRequest);
-	}
-
-	@Scheduled(fixedRateString = "${discoverer.updated-service-provider-check-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
-	public void checkForUpdatedServiceProviderSubscriptionRequests() {
-		// Check if representation of Self has been updated by local Service Providers.
-		// If Self has updated Subscriptions since last time we posted a subscription request, we need to recalculate the subscription request for all neighbours.
-		logger.info("Checking if any Service Providers have updated their subscriptions...");
+		// Perform subscription request with all neighbours with capabilities KNOWN
+		logger.info("Checking for any Neighbours with KNOWN capabilities");
 		List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
 		subscriptionRequest(neighboursForSubscriptionRequest);
 	}
 
 	void subscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest) {
-
 		Self self = selfRepository.findByName(myName);
 		if(self == null){
 			logger.warn("No local capabilities nor subscriptions.");
@@ -357,12 +341,10 @@ public class NeighbourDiscoverer {
 		SubscriptionRequest fedIn = neighbour.getFedIn();
 		try {
 			// Throws SubscriptionRequestException if unsuccessful
-			SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self,neighbour,calculatedSubscriptionForNeighbour);
-			fedIn.setSubscriptions(subscriptionRequestResponse.getSubscriptions());
-			fedIn.setStatus(SubscriptionRequestStatus.REQUESTED);
-
-			logger.info("Successfully posted a subscription request to neighbour {}", neighbour.getName());
-
+			SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
+			neighbour.setFedIn(subscriptionRequestResponse);
+			neighbour.setBackoffAttempts(0);
+			logger.info("Successfully posted subscription request to neighbour.");
 		} catch (SubscriptionRequestException e) {
 			fedIn.setStatus(SubscriptionRequestStatus.FAILED);
 			neighbour.setBackoffAttempts(0);
