@@ -2,14 +2,14 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 
-public class DataTypeApiId {
+public class LocalDataType {
 	Integer id;
 	DataTypeApi dataType;
 
-	public DataTypeApiId() {
+	public LocalDataType() {
 	}
 
-	public DataTypeApiId(Integer id, DataTypeApi dataType) {
+	public LocalDataType(Integer id, DataTypeApi dataType) {
 		this.id = id;
 		this.dataType = dataType;
 	}

@@ -2,18 +2,23 @@
 
 #Fully Qualified Domain Name
 
+if [ "$#" -ne 2 ]; then
+    echo "USAGE: $0 <server FQDN> <ca-domainname>"
+    exit 1
+fi
+
 if [ ! -d "ca/intermediate" ]; then
 	echo no intermediate CAs created. exiting
 	exit 1
 fi
 
 echo Enter fully qualified domain name FQDN for the server:
-read FQDN
+FQDN=$1
+CADOMAINNAME=$2
+COUNTRY_CODE=$3
 
 sed "s/FQDN/$FQDN/g" serverCert.tmpl > openssl_csr_san.cnf
 
-echo Enter DOMAINNAME for the intermediate CA:
-read CADOMAINNAME
 
 if [ ! -f "ca/intermediate/certs/int.$CADOMAINNAME.crt.pem" ]; then 
 	echo could not find cert for $CADOMAINNAME. Exiting.
@@ -22,7 +27,7 @@ fi
 
 sed "s/DOMAIN/$CADOMAINNAME/g" inter.tmpl > openssl_intermediate.cnf
 
-openssl req -out ca/intermediate/csr/$FQDN.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$FQDN.key.pem -config openssl_csr_san.cnf
+openssl req -out ca/intermediate/csr/$FQDN.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$FQDN.key.pem -config openssl_csr_san.cnf -subj "/CN=${FQDN}/O=Nordic Way/C=${COUNTRY_CODE}"
 
 openssl ca -config openssl_intermediate.cnf -extensions server_cert -days 3750 -notext -md sha512 -in ca/intermediate/csr/$FQDN.csr.pem -out ca/intermediate/certs/$FQDN.crt.pem
 

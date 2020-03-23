@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ "$1" == "" ]; then
-	echo Usage: $0 path/to/csrFile.csr
+if [ "$#" -ne 2 ]; then
+	echo "Usage: $0 <path/to/csrFile.csr> <intermediateCA domain name>"
 	exit 1
 fi
 
@@ -22,7 +22,8 @@ if [ ! -d "ca/intermediate" ]; then
 fi
 
 echo Enter domain name for the intermediateCA:
-read DOMAINNAME
+#read DOMAINNAME
+DOMAINNAME=$2
 
 #sed "s/DOMAIN/$DOMAINNAME/g" inter.tmpl > openssl_intermediate.cnf
 #openssl req -config openssl_intermediate.cnf -new -newkey rsa:4096 -keyout ca/intermediate/private/int.$DOMAINNAME.key.pem -out ca/intermediate/csr/int.$DOMAINNAME.csr

@@ -7,8 +7,15 @@ import java.util.List;
 public class DnsClient {
 
     public static void main(String[] args) {
-
-        DNSProperties properties = new DNSProperties("443","itsinterchange.eu");
+        String controlChannelPort = "443";
+        String domainName = "itsinterchange.eu";
+        if (args.length > 0) {
+           domainName = args[0];
+        }
+        if (args.length > 1 ) {
+            controlChannelPort = args[1];
+        }
+        DNSProperties properties = new DNSProperties(controlChannelPort, domainName);
         DNSFacade facade = new DNSFacade(properties);
 
         System.out.println(facade.getDnsServerName());
