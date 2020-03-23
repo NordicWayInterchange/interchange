@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #Fully Qualified Domain Name
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
     echo Illegal number of arguments.
-    echo "USAGE: $0 <client-identifier> <CA_DOMAIN_NAME>"
+    echo "USAGE: $0 <client-identifier> <client country identifier, eg NO, upper case> <CA_DOMAIN_NAME>"
     exit 1
 fi
 
@@ -12,14 +12,7 @@ if [ ! -d "ca/intermediate" ]; then
 	exit 1
 fi
 
-echo Enter an identifier for the client:
-#read ident
 ident=$1
-
-sed "s/FQDN/$FQDN/g" serverCert.tmpl > openssl_csr_san.cnf
-
-echo Enter DOMAINNAME for the intermediate CA you want to use:
-#read CADOMAINNAME
 CADOMAINNAME=$2
 
 if [ ! -f "ca/intermediate/certs/int.$CADOMAINNAME.crt.pem" ]; then 
@@ -29,7 +22,7 @@ fi
 
 sed "s/DOMAIN/$CADOMAINNAME/g" inter.tmpl > openssl_intermediate.cnf 
 
-openssl req -out ca/intermediate/csr/$ident.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$ident.key.pem -config openssl_csr_san.cnf -subj "/CN=$ident/O=Nordic Way/C=NO"
+openssl req -out ca/intermediate/csr/$ident.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$ident.key.pem -subj "/CN=$ident/O=Nordic Way/C=NO"
 openssl ca -config openssl_intermediate.cnf -extensions usr_cert -days 3750 -notext -md sha512 -in ca/intermediate/csr/$ident.csr.pem -out ca/intermediate/certs/$ident.crt.pem
 
 cat ca/intermediate/certs/$ident.crt.pem ca/intermediate/certs/chain.$CADOMAINNAME.crt.pem > ca/intermediate/certs/chain.$ident.crt.pem

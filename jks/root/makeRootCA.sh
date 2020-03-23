@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
     echo no domainname for the root ca
-    echo "USAGE: $0 <ca-domainname>"
+    echo "USAGE: $0 <ca-domainname> <country code (upper case)>"
     exit 1
 fi
 
@@ -21,11 +21,12 @@ cd ..
 
 echo Enter domain name for the rootCA:
 DOMAINNAME=$1
+COUNTRY_CODE=$2
 CA_PEM_FILE=ca.$DOMAINNAME.key.pem
 CSR_FILE=ca.$DOMAINNAME.crt.pem
 sed "s/DOMAINNAME/$DOMAINNAME/g" root.tmpl > openssl_root.cnf
 
 openssl genrsa -out ca/private/$CA_PEM_FILE 4096
-openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/$CA_PEM_FILE -out ca/certs/$CSR_FILE -days 3650 -set_serial 0 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=NO"
+openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/$CA_PEM_FILE -out ca/certs/$CSR_FILE -days 3650 -set_serial 0 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY_CODE}"
 
 
