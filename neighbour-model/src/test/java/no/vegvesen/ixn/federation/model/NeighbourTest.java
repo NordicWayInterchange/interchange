@@ -78,4 +78,28 @@ public class NeighbourTest {
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, fedIn);
 		Assertions.assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(now)).isFalse();
 	}
+
+	@Test
+	public void failedSubscriptionRequest_firstSetsStart() {
+		Neighbour neighbour = new Neighbour("the-best-neighbour-ever", null, null, null);
+		neighbour.failedSubscriptionRequest(2);
+		assertThat(neighbour.getBackoffStartTime()).isNotNull().isAfter(LocalDateTime.now().minusSeconds(3));
+		assertThat(neighbour.getBackoffAttempts()).isEqualTo(0);
+		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.FAILED);
+
+		neighbour.failedSubscriptionRequest(2);
+		assertThat(neighbour.getBackoffAttempts()).isEqualTo(1);
+		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.FAILED);
+
+		neighbour.failedSubscriptionRequest(2);
+		assertThat(neighbour.getBackoffAttempts()).isEqualTo(2);
+		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.FAILED);
+
+		neighbour.failedSubscriptionRequest(2);
+		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.UNREACHABLE);
+
+		neighbour.failedSubscriptionRequest(2);
+		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.UNREACHABLE);
+	}
+
 }

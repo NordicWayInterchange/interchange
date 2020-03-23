@@ -11,7 +11,6 @@ import javax.persistence.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoField;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -161,11 +160,6 @@ public class Neighbour implements Subscriber {
 		this.backoffAttempts = backoffAttempts;
 	}
 
-	public LocalDateTime getNextPostAttempt(int startIntervalLength, int randomShift) {
-		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, getBackoffAttempts()) * startIntervalLength) + randomShift;
-		return getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
-	}
-
 	public Set<Subscription> getSubscriptionsForPolling() {
 		Set<Subscription> subscriptionsForPolling = new HashSet<>();
 
@@ -258,5 +252,32 @@ public class Neighbour implements Subscriber {
 		return this.getFedIn() == null
 				|| this.getFedIn().getSuccessfulRequest() == null
 				|| this.getFedIn().getSuccessfulRequest().isBefore(localSubscriptionsUpdated);
+	}
+
+	public void failedSubscriptionRequest(int maxAttemptsBeforeUnreachable) {
+		if (this.getBackoffStartTime() == null) {
+			setFedInStatus(SubscriptionRequestStatus.FAILED);
+			this.backoffStart = LocalDateTime.now();
+			this.backoffAttempts = 0;
+			logger.warn("Starting backoff now {}", this.backoffStart);
+		} else {
+			this.backoffAttempts++;
+			logger.warn("Increasing backoff counter to {}", this.backoffAttempts);
+			if (this.getBackoffAttempts() > maxAttemptsBeforeUnreachable) {
+				setFedInStatus(SubscriptionRequestStatus.UNREACHABLE);
+				logger.warn("Unsuccessful in reestablishing contact with neighbour. Exceeded number of allowed post attempts.");
+				logger.warn("Number of allowed post attempts: {} Number of actual post attempts: {}", maxAttemptsBeforeUnreachable, this.getBackoffAttempts());
+				logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", this.getName());
+			}
+		}
+	}
+
+	void setFedInStatus(SubscriptionRequestStatus status) {
+		if (this.fedIn == null) {
+			this.fedIn = new SubscriptionRequest(status, new HashSet<>());
+		}
+		else {
+			this.fedIn.setStatus(status);
+		}
 	}
 }
