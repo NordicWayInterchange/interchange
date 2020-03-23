@@ -153,7 +153,7 @@ public class NeighbourDiscovererTest {
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 
-		neighbourDiscoverer.subscriptionRequest(Collections.singletonList(ericsson));
+		neighbourDiscoverer.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -210,10 +210,13 @@ public class NeighbourDiscovererTest {
 		when(neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.setBackoffStart(futureTime);
+		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
+		when(selfRepository.findByName(anyString())).thenReturn(self);
+		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
-		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
+		verify(neighbourRESTFacade, times(0)).postSubscriptionRequest(any(Self.class), any(Neighbour.class), any());
 	}
 
 	@Test
@@ -259,6 +262,9 @@ public class NeighbourDiscovererTest {
 		ericsson.setBackoffStart(pastTime);
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		doReturn(self).when(selfRepository).findByName(any(String.class));
+		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
+		when(selfRepository.findByName(anyString())).thenReturn(self);
+		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
 		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
 
@@ -440,7 +446,7 @@ public class NeighbourDiscovererTest {
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
 		when(selfRepository.findByName(anyString())).thenReturn(discoveringNode);
 
-		neighbourDiscoverer.subscriptionRequest(neighbours);
+		neighbourDiscoverer.evaluateAndPostSubscriptionRequest(neighbours);
 
 		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 	}
@@ -476,7 +482,7 @@ public class NeighbourDiscovererTest {
 
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 
-	    neighbourDiscoverer.subscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
+	    neighbourDiscoverer.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
 	    verify(neighbourRepository,times(2)).save(any(Neighbour.class));
     }
 
@@ -509,7 +515,7 @@ public class NeighbourDiscovererTest {
 
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 
-		neighbourDiscoverer.subscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
+		neighbourDiscoverer.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
 		verify(neighbourRepository).save(otherNeighbour);
 
     }

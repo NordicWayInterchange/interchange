@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -175,7 +176,8 @@ public class NeighbourDiscoverer {
 
 		logger.info("Calculating next allowed time to contact neighbour.");
 		int randomShift = new Random().nextInt(backoffProperties.getRandomShiftUpperLimit());
-		LocalDateTime nextPostAttempt = neighbour.getNextPostAttempt(backoffProperties.getStartIntervalLength(),randomShift);
+		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, neighbour.getBackoffAttempts()) * backoffProperties.getStartIntervalLength()) + randomShift;
+		LocalDateTime nextPostAttempt = neighbour.getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
 
 		logger.info("Next allowed post time: {}", nextPostAttempt.toString());
 		return nextPostAttempt;
@@ -233,47 +235,10 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
-
-		Self self = selfRepository.findByName(myName);
-		if (self == null) {
-			return;
-		}
-
 		List<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED);
-
-		for (Neighbour neighbour : neighboursWithFailedSubscriptionRequest) {
-			if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
-
-				NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
-				logger.info("Posting subscription request to neighbour {} in graceful backoff.", neighbour.getName());
-
-				try {
-					// Create representation of discovering Neighbour and calculate custom subscription for neighbour.
-					Set<Subscription> newSubscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour);
-					SubscriptionRequest postResponseSubscriptionRequest = neighbourRESTFacade.postSubscriptionRequest(self,neighbour,newSubscriptions);
-					neighbour.setBackoffAttempts(0);
-					neighbour.setFedIn(postResponseSubscriptionRequest);
-					logger.info("Successfully posted subscription request to neighbour in graceful backoff.");
-				} catch (SubscriptionRequestException e) {
-					neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
-					logger.error("Unsuccessful post of subscription request in backoff. Increasing number of backoff attempts to {}", neighbour.getBackoffAttempts());
-
-					if (neighbour.getBackoffAttempts() > backoffProperties.getNumberOfAttempts()) {
-						neighbour.getFedIn().setStatus(SubscriptionRequestStatus.UNREACHABLE);
-						logger.warn("Unsuccessful in reestablishing contact with neighbour. Exceeded number of allowed post attempts.");
-						logger.warn("Number of allowed post attempts: {} Number of actual post attempts: {}", backoffProperties.getNumberOfAttempts(), neighbour.getBackoffAttempts());
-						logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
-					}
-				} finally {
-					neighbour = neighbourRepository.save(neighbour);
-					logger.debug("Saving updated neighbour: {}", neighbour.toString());
-					NeighbourMDCUtil.removeLogVariables();
-				}
-			}
-		}
+		evaluateAndPostSubscriptionRequest(neighboursWithFailedSubscriptionRequest);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
@@ -281,10 +246,10 @@ public class NeighbourDiscoverer {
 		// Perform subscription request with all neighbours with capabilities KNOWN
 		logger.info("Checking for any Neighbours with KNOWN capabilities");
 		List<Neighbour> neighboursForSubscriptionRequest = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
-		subscriptionRequest(neighboursForSubscriptionRequest);
+		evaluateAndPostSubscriptionRequest(neighboursForSubscriptionRequest);
 	}
 
-	void subscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest) {
+	void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest) {
 		Self self = selfRepository.findByName(myName);
 		if(self == null){
 			logger.warn("No local capabilities nor subscriptions.");
@@ -330,7 +295,7 @@ public class NeighbourDiscoverer {
 						// Successful subscription request, update discovery state subscription request timestamp.
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("Exception when evaluating subscriptions for neighbour", e);
 				}
 			}
 			NeighbourMDCUtil.removeLogVariables();
@@ -338,21 +303,24 @@ public class NeighbourDiscoverer {
 	}
 
 	private void postUpdatedSubscriptions(Self self, Neighbour neighbour, Set<Subscription> calculatedSubscriptionForNeighbour)  {
-		SubscriptionRequest fedIn = neighbour.getFedIn();
 		try {
-			// Throws SubscriptionRequestException if unsuccessful
-			SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
-			neighbour.setFedIn(subscriptionRequestResponse);
-			neighbour.setBackoffAttempts(0);
-			logger.info("Successfully posted subscription request to neighbour.");
+			if (canPostToNeighbour(neighbour)) {
+				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
+				neighbour.setFedIn(subscriptionRequestResponse);
+				neighbour.setBackoffAttempts(0);
+				logger.info("Successfully posted subscription request to neighbour.");
+			} else {
+				logger.warn("Backoff limit is too soon to post subscriptions to neighbour");
+			}
 		} catch (SubscriptionRequestException e) {
-			fedIn.setStatus(SubscriptionRequestStatus.FAILED);
-			neighbour.setBackoffAttempts(0);
-			neighbour.setBackoffStart(LocalDateTime.now());
-
+			neighbour.failedSubscriptionRequest(backoffProperties.getNumberOfAttempts());
 			logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
 
 		}
+	}
+
+	private boolean canPostToNeighbour(Neighbour neighbour) {
+		return neighbour.getBackoffStartTime() == null || LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour));
 	}
 
 	//TODO this method is not directly tested!
