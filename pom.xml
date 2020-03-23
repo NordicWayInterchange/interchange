@@ -14,6 +14,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <spring-boot-dependencies.version>2.2.3.RELEASE</spring-boot-dependencies.version>
+        <picocli-version>4.2.0</picocli-version>
     </properties>
 
     <build>
@@ -133,7 +134,7 @@
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
-                <version>4.2.0</version>
+                <version>${picocli-version}</version>
             </dependency>
 
         </dependencies>

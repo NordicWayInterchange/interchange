@@ -9,9 +9,6 @@
         <artifactId>interchange-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <properties>
-        <picocli-version>4.2.0</picocli-version>
-    </properties>
     <artifactId>onboard-rest-client</artifactId>
 
     <dependencies>
