@@ -238,11 +238,6 @@ public class NeighbourRestController {
 			neighbourToUpdate.setCapabilities(incomingNeighbour.getCapabilities());
 		}
 
-		// Update status of capabilities to KNOWN, and set status of fedIn to EMPTY
-		// to trigger subscription request from client side.
-		neighbourToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		neighbourToUpdate.getFedIn().setStatus(SubscriptionRequestStatus.EMPTY);
-
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 

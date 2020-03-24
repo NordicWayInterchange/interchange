@@ -280,4 +280,32 @@ public class Neighbour implements Subscriber {
 			this.fedIn.setStatus(status);
 		}
 	}
+
+	public void failedCapabilityExchange(int maxAttemptsBeforeUnreachable) {
+		if (this.getBackoffStartTime() == null) {
+			setCabilitiesStatus(Capabilities.CapabilitiesStatus.FAILED);
+			this.backoffStart = LocalDateTime.now();
+			this.backoffAttempts = 0;
+			logger.warn("Starting backoff now {}", this.backoffStart);
+		}
+		else {
+			this.backoffAttempts++;
+			logger.warn("Increasing backoff counter to {}", this.backoffAttempts);
+			if (this.getBackoffAttempts() > maxAttemptsBeforeUnreachable) {
+				setCabilitiesStatus(Capabilities.CapabilitiesStatus.UNREACHABLE);
+				logger.warn("Unsuccessful in reestablishing contact with neighbour. Exceeded number of allowed post attempts.");
+				logger.warn("Number of allowed post attempts: {} Number of actual post attempts: {}", maxAttemptsBeforeUnreachable, this.getBackoffAttempts());
+				logger.warn("Setting status of neighbour to UNREACHABLE.");
+			}
+		}
+	}
+
+	private void setCabilitiesStatus(Capabilities.CapabilitiesStatus status) {
+		if (this.getCapabilities() == null) {
+			this.capabilities = new Capabilities(status, new HashSet<>());
+		}
+		else {
+			this.capabilities.setStatus(status);
+		}
+	}
 }

@@ -20,6 +20,16 @@ public class Capabilities {
 	@Column(name="cap_id")
 	private Integer cap_id;
 
+	private LocalDateTime lastCapabilityExchange;
+
+	public LocalDateTime getLastCapabilityExchange() {
+		return lastCapabilityExchange;
+	}
+
+	public void setLastCapabilityExchange(LocalDateTime lastCapabilityExchange) {
+		this.lastCapabilityExchange = lastCapabilityExchange;
+	}
+
 	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED, UNREACHABLE}
 
 	@Enumerated(EnumType.STRING)
