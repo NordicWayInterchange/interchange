@@ -141,7 +141,7 @@ public class NeighbourDiscovererTest {
 
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 
-		neighbourDiscoverer.capabilityExchange(Collections.singletonList(ericsson), self);
+		neighbourDiscoverer.capabilityExchange(Collections.singletonList(ericsson));
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -199,7 +199,7 @@ public class NeighbourDiscovererTest {
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.setBackoffStart(futureTime);
 
-		neighbourDiscoverer.gracefulBackoffPostCapabilities();
+		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
 
 		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 	}
@@ -237,7 +237,7 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPostOfCapabilitiesHappensIfAllowedPostTimeHasPassed(){
 		Neighbour ericsson = createNeighbour();
-		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByCapabilities_StatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 
 		DataType firstDataType = this.datexNo;
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
@@ -247,8 +247,9 @@ public class NeighbourDiscovererTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
 		doReturn(self).when(selfRepository).findByName(any(String.class));
+		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourDiscoverer.gracefulBackoffPostCapabilities();
+		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
 
 		verify(neighbourRESTFacade, times(1)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 	}
@@ -296,14 +297,15 @@ public class NeighbourDiscovererTest {
 	public void failedPostOfCapabilitiesInBackoffIncreasesNumberOfBackoffAttempts(){
 		Neighbour ericsson = createNeighbour();
 		ericsson.setBackoffAttempts(0);
-		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByCapabilities_StatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(5);
 
 		ericsson.setBackoffStart(pastTime);
 		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 		doReturn(self).when(selfRepository).findByName(any(String.class));
+		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourDiscoverer.gracefulBackoffPostCapabilities();
+		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
 
 		Assert.assertEquals(1, ericsson.getBackoffAttempts());
 	}
@@ -316,14 +318,15 @@ public class NeighbourDiscovererTest {
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(datexNo));
 		ericsson.setCapabilities(ericssonCapabilities);
 
-		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByCapabilities_StatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
 		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 
 		doReturn(self).when(selfRepository).findByName(any(String.class));
+		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourDiscoverer.gracefulBackoffPostCapabilities();
+		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
 
 		Assert.assertEquals(ericsson.getCapabilities().getStatus(), Capabilities.CapabilitiesStatus.UNREACHABLE);
 		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
