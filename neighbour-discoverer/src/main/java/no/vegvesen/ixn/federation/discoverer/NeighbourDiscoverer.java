@@ -84,9 +84,9 @@ public class NeighbourDiscoverer {
 	public void gracefulBackoffPollSubscriptions() {
 
 		// All neighbours with a failed subscription in fedIn
-		List<Neighbour> NeighboursWithFailedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
+		List<Neighbour> neighboursWithFailedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
 
-		for (Neighbour neighbour : NeighboursWithFailedSubscriptionsInFedIn) {
+		for (Neighbour neighbour : neighboursWithFailedSubscriptionsInFedIn) {
 			for (Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()) {
 
 				NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
@@ -127,10 +127,10 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void pollSubscriptions() {
 		// All Neighbours with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
-		List<Neighbour> NeighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
+		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
 
-		for (Neighbour neighbour : NeighboursToPoll) {
+		for (Neighbour neighbour : neighboursToPoll) {
 			for (Subscription subscription : neighbour.getSubscriptionsForPolling()) {
 
 				NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
