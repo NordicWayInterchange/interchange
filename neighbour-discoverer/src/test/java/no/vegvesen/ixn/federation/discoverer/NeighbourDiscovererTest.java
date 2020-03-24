@@ -11,7 +11,6 @@ import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -19,6 +18,7 @@ import org.mockito.Mockito;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class NeighbourDiscovererTest {
@@ -133,7 +133,7 @@ public class NeighbourDiscovererTest {
 	public void successfulCapabilitiesPostCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
 		Capabilities capabilities = new Capabilities();
-		Assert.assertTrue(capabilities.getDataTypes().isEmpty());
+		assertThat(capabilities.getDataTypes()).isEmpty();
 
 		doReturn(capabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
@@ -189,7 +189,7 @@ public class NeighbourDiscovererTest {
 
 		LocalDateTime result = neighbourDiscoverer.getNextPostAttemptTime(ericsson);
 
-		Assert.assertTrue(result.isAfter(lowerLimit) && result.isBefore(upperLimit));
+		assertThat(result).isBetween(lowerLimit, upperLimit);
 	}
 
 	@Test
@@ -307,7 +307,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
 
-		Assert.assertEquals(1, ericsson.getBackoffAttempts());
+		assertThat(ericsson.getBackoffAttempts()).isEqualTo(1);
 	}
 
 	@Test
@@ -328,7 +328,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
 
-		Assert.assertEquals(ericsson.getCapabilities().getStatus(), Capabilities.CapabilitiesStatus.UNREACHABLE);
+		assertThat(ericsson.getCapabilities().getStatus()).isEqualTo(Capabilities.CapabilitiesStatus.UNREACHABLE);
 		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
 
 	}
@@ -371,7 +371,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.pollSubscriptions();
 
-		Assert.assertEquals(spyNeighbour.getFedIn().getStatus(), SubscriptionRequestStatus.ESTABLISHED);
+		assertThat(spyNeighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.ESTABLISHED);
 
 	}
 
@@ -391,7 +391,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.pollSubscriptions();
 
-		Assert.assertEquals(spyNeighbour.getFedIn().getStatus(), SubscriptionRequestStatus.REJECTED);
+		assertThat(spyNeighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.REJECTED);
 	}
 
 	@Test
@@ -411,7 +411,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.pollSubscriptions();
 
-		Assert.assertEquals(spyNeighbour.getFedIn().getStatus(), SubscriptionRequestStatus.REQUESTED);
+		assertThat(spyNeighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.REQUESTED);
 	}
 
 	//TODO: test why local subscriptions for self must be different from subscription request for neighbours
@@ -473,9 +473,9 @@ public class NeighbourDiscovererTest {
 		Neighbour neighbour = new Neighbour("neighbour",new Capabilities(),subscriptionRequest,new SubscriptionRequest());
 
 		//just to test that I have set up the neighbour and self correctly for the actual test.
-		Assert.assertTrue(neighbour.hasEstablishedSubscriptions());
-		Assert.assertTrue(self.calculateCustomSubscriptionForNeighbour(neighbour).isEmpty());
-		Assert.assertTrue(neighbour.getFedIn().getSubscriptions().isEmpty());
+		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
+		assertThat(self.calculateCustomSubscriptionForNeighbour(neighbour)).isEmpty();
+		assertThat(neighbour.getFedIn().getSubscriptions()).isEmpty();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
 		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
@@ -505,10 +505,10 @@ public class NeighbourDiscovererTest {
 		neighbourFedInSubscription.add(new Subscription("originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED));
 		neighbour.setFedIn(new SubscriptionRequest(null,neighbourFedInSubscription));
 
-		Assert.assertTrue(neighbour.hasEstablishedSubscriptions());
+		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
 		Set<Subscription> subscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour);
-		Assert.assertFalse(subscriptions.isEmpty());
-		Assert.assertEquals(neighbour.getFedIn().getSubscriptions(), subscriptions);
+		assertThat(subscriptions.isEmpty()).isFalse();
+		assertThat(neighbour.getFedIn().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
 		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
