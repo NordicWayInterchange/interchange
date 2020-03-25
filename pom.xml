@@ -219,5 +219,6 @@
         <module>message-collector</module>
         <module>dns-client</module>
         <module>onboard-rest-client</module>
+        <module>quadtree-tool</module>
     </modules>
 </project>
