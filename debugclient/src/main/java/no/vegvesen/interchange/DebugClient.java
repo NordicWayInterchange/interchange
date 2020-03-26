@@ -143,7 +143,7 @@ public class DebugClient implements MessageListener {
 			message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Conditions");
 			message.setStringProperty(MessageProperty.LATITUDE.getName(), "63.0");
 			message.setStringProperty(MessageProperty.LONGITUDE.getName(), "10.0");
-			message.setStringProperty(MessageProperty.QUAD_TREE.getName(), QuadTreeTool.lonLatToQuadTree(10.0d,63.0d,14));
+			message.setStringProperty(MessageProperty.QUAD_TREE.getName(), QuadTreeTool.lonLatToQuadTree(10.0d,63.0d));
 			message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
 			message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
 			printWithColor(BROWN, " sending message");
