@@ -9,6 +9,7 @@ public class QuadTreeTool {
     public static final double MIN_LATITUDE = -85.05112878;
     public static final int MIN_LONGITUDE = -180;
     public static final int MAX_LONGITUDE = 180;
+    public static final double FOUR_PI = 4 * Math.PI;
 
     public static String lonLatToQuadTree(double lon, double lat, int zoom) {
         //lon lat to pixelXY
@@ -19,9 +20,7 @@ public class QuadTreeTool {
 
         double sinLatitude = Math.sin(latitude * Math.PI / 180);
 
-        double log = Math.log((1 + sinLatitude) / (1 - sinLatitude));
-        double fourPi = 4 * Math.PI;
-        double y = 0.5 - (log / fourPi);
+        double y = 0.5 - (Math.log((1 + sinLatitude) / (1 - sinLatitude)) / FOUR_PI);
 
         //256 * 2^zoom:
         int mapSize = 256 << zoom;

@@ -44,37 +44,6 @@ public class QuadTreeTest {
     }
 
     @Test
-    public void zoomLevel() {
-        System.out.println(256);
-        System.out.println(Integer.toBinaryString(256));
-        System.out.println(256 << 1);
-        System.out.println(256 * Math.pow(2,1));
-        System.out.println(Integer.toBinaryString(256 << 1));
-        System.out.println(256 << 14);
-        System.out.println(256 * Math.pow(2,14));
-        System.out.println(Integer.toBinaryString(256 << 14));
-    }
-
-    @Test
-    public void precedence() {
-        double one = 0.5 - (3.0 / 4.0);
-        double threeOverFour = 3.0 / 4.0;
-        double wrong = (0.5 - 3.0) / 4.0;
-        System.out.println(one);
-        System.out.println(threeOverFour);
-        System.out.println(wrong);
-        double two = (2 * 3) + 0.5;
-        double wrongTwo = 2 * (3 + 0.5);
-        System.out.println(two);
-        System.out.println(wrongTwo);
-    }
-
-    @Test
-    public void doubleOverInt() {
-        System.out.println(1.0 / 2);
-    }
-
-    @Test
     public void testClip() {
         Assertions.assertEquals(180d,QuadTreeTool.clip(185d,-180d,180d),0.001d);
     }
