@@ -1,3 +1,5 @@
+package no.vegvesen.interchange.quadtree;
+
 import no.vegvesen.interchange.quadtree.QuadTreeTool;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
