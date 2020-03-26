@@ -1,3 +1,5 @@
+package no.vegvesen.interchange.quadtree;
+
 /**
  * This class contains code that has been ported from the geotools project,
  * which has further based its implementation on <a

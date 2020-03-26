@@ -1,3 +1,4 @@
+import no.vegvesen.interchange.quadtree.QuadTreeTool;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
@@ -12,7 +13,7 @@ public class QuadTreeTest {
         double lat = 59.9304610;
         double lon = 10.7115718;
         int zoom = 14;
-        assertEquals("12002131122311",QuadTreeTool.lonLatToQuadTree(lon,lat,zoom));
+        assertEquals("12002131122311", QuadTreeTool.lonLatToQuadTree(lon,lat,zoom));
         //moomin world
         lat = 60.4732;
         lon = 22.0054;
