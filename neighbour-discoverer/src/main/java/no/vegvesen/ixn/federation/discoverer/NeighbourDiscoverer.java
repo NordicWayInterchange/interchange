@@ -82,94 +82,63 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPollSubscriptions() {
-
 		// All neighbours with a failed subscription in fedIn
 		List<Neighbour> neighboursWithFailedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
-
 		for (Neighbour neighbour : neighboursWithFailedSubscriptionsInFedIn) {
-			for (Subscription failedSubscription : neighbour.getFailedFedInSubscriptions()) {
-
-				NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
-				// Check if we can retry poll (Exponential back-off)
-				if (LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour))) {
-					try {
-						logger.warn("Polling subscription with path {} in graceful backoff.", failedSubscription.getPath());
-
-						// Throws SubscriptionPollException if poll is unsuccessful
-						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(failedSubscription, neighbour);
-
-						// Poll was successful
-						logger.info("Successfully re-established contact with neighbour in subscription polling graceful backoff.");
-						failedSubscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
-						neighbour.setBackoffAttempts(0); // Reset number of back-offs to 0 after contact is re-established.
-
-						neighbour.getFedIn().setStatusFromSubscriptionStatus();
-
-					} catch (SubscriptionPollException e) {
-						// Poll was not successful
-						neighbour.setBackoffAttempts(neighbour.getBackoffAttempts() + 1);
-						logger.error("Unsuccessful poll of subscription with id {} from neighbour {}.", failedSubscription.getId(), neighbour.getName());
-
-						if (neighbour.getBackoffAttempts() > backoffProperties.getNumberOfAttempts()) {
-							// We have exceeded allowed  number of tries
-							failedSubscription.setSubscriptionStatus(SubscriptionStatus.UNREACHABLE);
-							logger.warn("Unsuccessful in reestablishing contact with neighbour {}. Setting status of neighbour to UNREACHABLE.", neighbour.getName());
-						}
-					} finally {
-						neighbourRepository.save(neighbour);
-						NeighbourMDCUtil.removeLogVariables();
-					}
-				}
+			if (canPostToNeighbour(neighbour)) {
+				pollSubscriptionsOneNeighbour(neighbour, neighbour.getFailedFedInSubscriptions());
+			}
+			else {
+				logger.info("Too soon to poll subscriptions to neighbour when backing off");
 			}
 		}
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void pollSubscriptions() {
-		// All Neighbours with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
+		// All neighbours with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
 		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
-
 		for (Neighbour neighbour : neighboursToPoll) {
-			for (Subscription subscription : neighbour.getSubscriptionsForPolling()) {
-
-				NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
-				try {
-					// Check if we are allowed to poll the subscription
-					if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
-
-						logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
-
-						// Throws SubscriptionPollException if unsuccessful
-						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
-
-						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
-						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
-						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
-
-						neighbour.getFedIn().setStatusFromSubscriptionStatus();
-
-					} else {
-						// Number of poll attempts exceeds allowed number of poll attempts.
-						subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-						logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
-					}
-				} catch (SubscriptionPollException e) {
-
-					subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
-					neighbour.setBackoffAttempts(0);
-					neighbour.setBackoffStart(LocalDateTime.now());
-
-					logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.");
-				} finally {
-					logger.info("Saving updated neighbour: {}", neighbour.toString());
-					neighbourRepository.save(neighbour);
-					NeighbourMDCUtil.removeLogVariables();
-				}
-			}
+			pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
 		}
 	}
 
+	private void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions) {
+		try {
+			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
+			for (Subscription subscription : subscriptions) {
+				pollOneSubscription(neighbour, subscription);
+			}
+		} finally {
+			logger.info("Saving updated neighbour: {}", neighbour.toString());
+			neighbour.getFedIn().setStatusFromSubscriptionStatus();
+			neighbourRepository.save(neighbour);
+			NeighbourMDCUtil.removeLogVariables();
+		}
+	}
+
+	private void pollOneSubscription(Neighbour neighbour, Subscription subscription) {
+		try {
+			if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
+				logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
+
+				// Throws SubscriptionPollException if unsuccessful
+				Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
+
+				subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
+				subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
+				logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
+			} else {
+				// Number of poll attempts exceeds allowed number of poll attempts.
+				subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+				logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
+			}
+		} catch (SubscriptionPollException e) {
+			neighbour.failedSubscriptionPoll(backoffProperties.getNumberOfAttempts(), subscription);
+			logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.");
+		}
+	}
 
 	// Calculates next possible post attempt time, using exponential backoff
 	LocalDateTime getNextPostAttemptTime(Neighbour neighbour) {

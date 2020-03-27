@@ -269,9 +269,7 @@ public class Neighbour {
 	public void failedSubscriptionRequest(int maxAttemptsBeforeUnreachable) {
 		if (this.getBackoffStartTime() == null) {
 			setFedInStatus(SubscriptionRequestStatus.FAILED);
-			this.backoffStart = LocalDateTime.now();
-			this.backoffAttempts = 0;
-			logger.warn("Starting backoff now {}", this.backoffStart);
+			startBackoff();
 		} else {
 			this.backoffAttempts++;
 			logger.warn("Increasing backoff counter to {}", this.backoffAttempts);
@@ -296,9 +294,7 @@ public class Neighbour {
 	public void failedCapabilityExchange(int maxAttemptsBeforeUnreachable) {
 		if (this.getBackoffStartTime() == null) {
 			setCabilitiesStatus(Capabilities.CapabilitiesStatus.FAILED);
-			this.backoffStart = LocalDateTime.now();
-			this.backoffAttempts = 0;
-			logger.warn("Starting backoff now {}", this.backoffStart);
+			startBackoff();
 		}
 		else {
 			this.backoffAttempts++;
@@ -319,5 +315,29 @@ public class Neighbour {
 		else {
 			this.capabilities.setStatus(status);
 		}
+	}
+
+	public void failedSubscriptionPoll(int maxAttemptsBeforeUnreachable, Subscription subscription) {
+		if (this.getBackoffStartTime() == null) {
+			subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
+			startBackoff();
+		}
+		else {
+			this.backoffAttempts++;
+			logger.warn("Increasing backoff counter to {}", this.backoffAttempts);
+			if (this.getBackoffAttempts() > maxAttemptsBeforeUnreachable) {
+				subscription.setSubscriptionStatus(SubscriptionStatus.UNREACHABLE);
+				logger.warn("Unsuccessful in reestablishing contact with neighbour. Exceeded number of allowed post attempts.");
+				logger.warn("Number of allowed post attempts: {} Number of actual post attempts: {}", maxAttemptsBeforeUnreachable, this.getBackoffAttempts());
+				logger.warn("Setting status of neighbour to UNREACHABLE.");
+			}
+		}
+
+	}
+
+	private void startBackoff() {
+		this.backoffStart = LocalDateTime.now();
+		this.backoffAttempts = 0;
+		logger.warn("Starting backoff now {}", this.backoffStart);
 	}
 }
