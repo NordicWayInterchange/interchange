@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
@@ -38,7 +37,6 @@ public class NeighbourDiscoverer {
 
 	private NeighbourRepository neighbourRepository;
 	private SelfRepository selfRepository;
-	private DiscoveryStateRepository discoveryStateRepository;
 	private DNSFacade dnsFacade;
 	private Logger logger = LoggerFactory.getLogger(NeighbourDiscoverer.class);
 	private String myName;
@@ -52,7 +50,6 @@ public class NeighbourDiscoverer {
 	NeighbourDiscoverer(DNSFacade dnsFacade,
 						NeighbourRepository neighbourRepository,
 						SelfRepository selfRepository,
-						DiscoveryStateRepository discoveryStateRepository,
 						NeighbourRESTFacade neighbourRESTFacade,
 						@Value("${interchange.node-provider.name}") String myName,
 						GracefulBackoffProperties backoffProperties,
@@ -60,24 +57,11 @@ public class NeighbourDiscoverer {
 		this.dnsFacade = dnsFacade;
 		this.neighbourRepository = neighbourRepository;
 		this.selfRepository = selfRepository;
-		this.discoveryStateRepository = discoveryStateRepository;
 		this.myName = myName;
 		this.neighbourRESTFacade = neighbourRESTFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
 		NeighbourMDCUtil.setLogVariables(myName, null);
-	}
-
-
-	private DiscoveryState getDiscoveryState(){
-		DiscoveryState discoveryState = discoveryStateRepository.findByName(myName);
-
-		if(discoveryState == null) {
-			discoveryState = new DiscoveryState(myName);
-			discoveryStateRepository.save(discoveryState);
-		}
-
-		return discoveryState;
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
