@@ -80,27 +80,17 @@ public class NeighbourDiscoverer {
 		return discoveryState;
 	}
 
-	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
-	public void gracefulBackoffPollSubscriptions() {
-		// All neighbours with a failed subscription in fedIn
-		List<Neighbour> neighboursWithFailedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
-		for (Neighbour neighbour : neighboursWithFailedSubscriptionsInFedIn) {
-			if (canPostToNeighbour(neighbour)) {
-				pollSubscriptionsOneNeighbour(neighbour, neighbour.getFailedFedInSubscriptions());
-			}
-			else {
-				logger.info("Too soon to poll subscriptions to neighbour when backing off");
-			}
-		}
-	}
-
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void pollSubscriptions() {
 		// All neighbours with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
 		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
-				SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
+				SubscriptionStatus.REQUESTED,
+				SubscriptionStatus.ACCEPTED,
+				SubscriptionStatus.FAILED);
 		for (Neighbour neighbour : neighboursToPoll) {
-			pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
+			if (canPostToNeighbour(neighbour)) {
+				pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
+			}
 		}
 	}
 

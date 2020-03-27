@@ -13,6 +13,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Entity
@@ -161,15 +162,11 @@ public class Neighbour implements Subscriber {
 	}
 
 	public Set<Subscription> getSubscriptionsForPolling() {
-		Set<Subscription> subscriptionsForPolling = new HashSet<>();
-
-		for (Subscription subscription : this.getFedIn().getSubscriptions()) {
-			if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED) || subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED)) {
-				subscriptionsForPolling.add(subscription);
-			}
-		}
-
-		return subscriptionsForPolling;
+		return getFedIn().getSubscriptions().stream()
+				.filter(s -> SubscriptionStatus.REQUESTED.equals(s.getSubscriptionStatus()) ||
+						SubscriptionStatus.ACCEPTED.equals(s.getSubscriptionStatus()) ||
+						SubscriptionStatus.FAILED.equals(s.getSubscriptionStatus()))
+				.collect(Collectors.toSet());
 	}
 
 	public Set<Subscription> getFailedFedInSubscriptions() {
