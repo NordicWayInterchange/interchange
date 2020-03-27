@@ -206,6 +206,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.setBackoffStart(futureTime);
+		ericsson.setConnectionStatus(ConnectionStatus.FAILED);
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
@@ -326,7 +327,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
 
-		assertThat(ericsson.getCapabilities().getStatus()).isEqualTo(Capabilities.CapabilitiesStatus.UNREACHABLE);
+		assertThat(ericsson.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
 
 	}

@@ -72,7 +72,7 @@ public class NeighbourDiscoverer {
 				SubscriptionStatus.ACCEPTED,
 				SubscriptionStatus.FAILED);
 		for (Neighbour neighbour : neighboursToPoll) {
-			if (canPostToNeighbour(neighbour)) {
+			if (canContactNeighbour(neighbour)) {
 				pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
 			}
 		}
@@ -109,7 +109,8 @@ public class NeighbourDiscoverer {
 				logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
 			}
 		} catch (SubscriptionPollException e) {
-			neighbour.failedSubscriptionPoll(backoffProperties.getNumberOfAttempts(), subscription);
+			subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
+			neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
 			logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.");
 		}
 	}
@@ -195,7 +196,7 @@ public class NeighbourDiscoverer {
 
 	private void postUpdatedSubscriptions(Self self, Neighbour neighbour, Set<Subscription> calculatedSubscriptionForNeighbour)  {
 		try {
-			if (canPostToNeighbour(neighbour)) {
+			if (canContactNeighbour(neighbour)) {
 				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
 				neighbour.setFedIn(subscriptionRequestResponse);
 				neighbour.setBackoffAttempts(0);
@@ -204,14 +205,25 @@ public class NeighbourDiscoverer {
 				logger.info("Too soon to post subscription request to neighbour when backing off");
 			}
 		} catch (SubscriptionRequestException e) {
-			neighbour.failedSubscriptionRequest(backoffProperties.getNumberOfAttempts());
+			neighbour.getFedIn().setStatus(SubscriptionRequestStatus.FAILED);
+			neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
 			logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
 
 		}
 	}
 
-	private boolean canPostToNeighbour(Neighbour neighbour) {
-		return neighbour.getBackoffStartTime() == null || LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour));
+	private boolean canContactNeighbour(Neighbour neighbour) {
+		if (neighbour.getConnectionStatus() == ConnectionStatus.UNREACHABLE) {
+			return false;
+		}
+		if (neighbour.getConnectionStatus() == ConnectionStatus.CONNECTED) {
+			return true;
+		}
+
+		if (neighbour.getConnectionStatus() == ConnectionStatus.FAILED) {
+			return  neighbour.getBackoffStartTime() == null || LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour));
+		}
+		return true;
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
@@ -236,7 +248,7 @@ public class NeighbourDiscoverer {
 			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 			try {
-				if (canPostToNeighbour(neighbour)) {
+				if (canContactNeighbour(neighbour)) {
 					if (needsOurUpdatedCapabilities(self, neighbour)) {
 						Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
 						neighbour.setCapabilities(capabilities);
@@ -249,7 +261,8 @@ public class NeighbourDiscoverer {
 					logger.info("Too soon to post capabilities to neighbour when backing off");
 				}
 			} catch (CapabilityPostException e) {
-				neighbour.failedCapabilityExchange(backoffProperties.getNumberOfAttempts());
+				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
+				neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
 			} finally {
 				neighbour = neighbourRepository.save(neighbour);
 				logger.info("Saving updated neighbour: {}", neighbour.toString());
