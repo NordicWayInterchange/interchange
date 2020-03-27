@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.discoverer;
+package no.vegvesen.ixn.federation.model;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
