@@ -85,21 +85,21 @@ public class NeighbourTest {
 		neighbour.failedConnection(2);
 		assertThat(neighbour.getBackoffStartTime()).isNotNull().isAfter(LocalDateTime.now().minusSeconds(3));
 		assertThat(neighbour.getBackoffAttempts()).isEqualTo(0);
-		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.FAILED);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
 
 		neighbour.failedConnection(2);
 		assertThat(neighbour.getBackoffAttempts()).isEqualTo(1);
-		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.FAILED);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
 
 		neighbour.failedConnection(2);
 		assertThat(neighbour.getBackoffAttempts()).isEqualTo(2);
-		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.FAILED);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
 
 		neighbour.failedConnection(2);
-		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.UNREACHABLE);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 
 		neighbour.failedConnection(2);
-		assertThat(neighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.UNREACHABLE);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 	}
 
 }
