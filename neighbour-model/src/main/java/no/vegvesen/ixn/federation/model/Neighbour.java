@@ -220,7 +220,7 @@ public class Neighbour implements Subscriber {
 	}
 
 	public boolean hasCapabilities() {
-		return getCapabilities() != null && getCapabilities().getStatus() != Capabilities.CapabilitiesStatus.UNREACHABLE;
+		return getCapabilities() != null && getCapabilities().getStatus() == Capabilities.CapabilitiesStatus.KNOWN;
 	}
 
 	public void setDnsProperties(Neighbour dnsNeighbour) {
