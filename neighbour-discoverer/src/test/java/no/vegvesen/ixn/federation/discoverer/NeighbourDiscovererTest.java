@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -29,7 +28,6 @@ public class NeighbourDiscovererTest {
 	private NeighbourRESTFacade neighbourRESTFacade;
 	private NeighbourDiscovererProperties discovererProperties;
 	private SelfRepository selfRepository;
-	private DiscoveryStateRepository discoveryStateRepository;
 	private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
 	private String myName = "bouvet.itsinterchange.eu";
@@ -56,11 +54,9 @@ public class NeighbourDiscovererTest {
 		neighbourRESTFacade = mock(NeighbourRESTFacade.class);
 		discovererProperties = mock(NeighbourDiscovererProperties.class);
 		selfRepository = mock(SelfRepository.class);
-		discoveryStateRepository = mock(DiscoveryStateRepository.class);
 		neighbourDiscoverer = new NeighbourDiscoverer(dnsFacade,
 				neighbourRepository,
 				selfRepository,
-				discoveryStateRepository,
 				neighbourRESTFacade,
 				myName,
 				backoffProperties,
