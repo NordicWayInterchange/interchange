@@ -217,7 +217,7 @@ public class Neighbour {
 	}
 
 	public boolean hasCapabilities() {
-		return getCapabilities() != null && getCapabilities().getStatus() != Capabilities.CapabilitiesStatus.UNREACHABLE;
+		return getCapabilities() != null && getCapabilities().getStatus() == Capabilities.CapabilitiesStatus.KNOWN;
 	}
 
 	public Set<String> getUnwantedBindKeys(Set<String> existingBindKeys) {
