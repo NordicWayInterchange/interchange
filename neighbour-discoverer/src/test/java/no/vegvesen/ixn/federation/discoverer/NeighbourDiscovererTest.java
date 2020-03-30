@@ -147,6 +147,7 @@ public class NeighbourDiscovererTest {
 		Neighbour ericsson = createNeighbour();
 		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
+		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(new DataType(1, "messageType", "DATEX2"))));
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 
 		neighbourDiscoverer.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
