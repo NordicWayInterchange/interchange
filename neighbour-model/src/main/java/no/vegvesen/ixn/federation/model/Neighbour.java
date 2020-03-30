@@ -48,7 +48,6 @@ public class Neighbour implements Subscriber {
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
-	private LocalDateTime lastSeen;
 	private LocalDateTime backoffStart;
 	private int backoffAttempts = 0;
 	private String messageChannelPort;
@@ -118,16 +117,6 @@ public class Neighbour implements Subscriber {
 		this.fedIn = fedIn;
 	}
 
-	public LocalDateTime getLastSeen() {
-		return lastSeen;
-	}
-
-	@PreUpdate
-	@PrePersist
-	public void setLastSeen() {
-		this.lastSeen = LocalDateTime.now();
-	}
-
 	public String getMessageChannelPort() {
 		return messageChannelPort;
 	}
@@ -179,7 +168,6 @@ public class Neighbour implements Subscriber {
 				", subscriptionRequest=" + subscriptionRequest +
 				", fedIn=" + fedIn +
 				", lastUpdated=" + lastUpdated +
-				", lastSeen=" + lastSeen +
 				", backoffStart=" + backoffStart +
 				", backoffAttempts=" + backoffAttempts +
 				", messageChannelPort='" + messageChannelPort +
