@@ -85,6 +85,41 @@
       "defaultValue": "20000"
     },
     {
+      "name": "graceful-backoff.check-interval",
+      "type": "java.lang.String",
+      "description": "Time, in milliseconds, between each lookup of failed neighbours in the database.",
+      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
+      "defaultValue": "30000"
+    },
+    {
+      "name": "graceful-backoff.check-offset",
+      "type": "java.lang.String",
+      "description": "Time, in milliseconds, from application startup until lookup for failed neighbours in the database.",
+      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
+      "defaultValue": "60000"
+    },
+    {
+      "name": "graceful-backoff.number-of-attempts",
+      "type": "java.lang.Integer",
+      "description": "Number of times we are allowed to reattempt a POST or a GET to a failed neighbour.",
+      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
+      "defaultValue": 4
+    },
+    {
+      "name": "graceful-backoff.random-shift-upper-limit",
+      "type": "java.lang.Integer",
+      "description": "The upper limit, in milliseconds, of the random shift used in backoff POST and GET.",
+      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
+      "defaultValue": 60000
+    },
+    {
+      "name": "graceful-backoff.start-interval-length",
+      "type": "java.lang.Integer",
+      "description": "The length, in milliseconds, of the base waiting time of backoff.",
+      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
+      "defaultValue": 2000
+    },
+    {
       "name": "neighbour.ssl.key-password",
       "type": "java.lang.String",
       "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
