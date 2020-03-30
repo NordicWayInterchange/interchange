@@ -102,10 +102,6 @@ public class NeighbourTest {
 		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 	}
 
-	/**
-	 * Tests for graceful backoff algorithm
-	 */
-
 	@Test
 	public void calculatedNextPostAttemptTimeIsInCorrectInterval(){
 		Neighbour ericsson = new Neighbour();
@@ -125,7 +121,7 @@ public class NeighbourTest {
 		ericsson.setBackoffAttempts(0);
 		ericsson.setBackoffStart(now);
 
-		LocalDateTime result = ericsson.getNextPostAttemptTime(new GracefulBackoffProperties());
+		LocalDateTime result = ericsson.getNextPostAttemptTime(60000, 2000);
 
 		Assertions.assertThat(result).isBetween(lowerLimit, upperLimit);
 	}

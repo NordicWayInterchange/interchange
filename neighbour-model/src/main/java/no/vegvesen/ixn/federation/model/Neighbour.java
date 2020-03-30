@@ -257,7 +257,7 @@ public class Neighbour implements Subscriber {
 		return connectionStatus;
 	}
 
-	public boolean canBeContacted(GracefulBackoffProperties backoffProperties) {
+	public boolean canBeContacted(int randomShiftUpperLimit, int startIntervalLength) {
 		if (this.getConnectionStatus() == ConnectionStatus.UNREACHABLE) {
 			return false;
 		}
@@ -266,17 +266,17 @@ public class Neighbour implements Subscriber {
 		}
 
 		if (this.getConnectionStatus() == ConnectionStatus.FAILED) {
-			return  this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(backoffProperties));
+			return  this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(randomShiftUpperLimit, startIntervalLength));
 		}
 		return true;
 	}
 
 	// Calculates next possible post attempt time, using exponential backoff
-	LocalDateTime getNextPostAttemptTime(GracefulBackoffProperties backoffProperties) {
+	LocalDateTime getNextPostAttemptTime(int randomShiftUpperLimit, int startIntervalLength) {
 
 		logger.info("Calculating next allowed time to contact neighbour.");
-		int randomShift = new Random().nextInt(backoffProperties.getRandomShiftUpperLimit());
-		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, this.getBackoffAttempts()) * backoffProperties.getStartIntervalLength()) + randomShift;
+		int randomShift = new Random().nextInt(randomShiftUpperLimit);
+		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, this.getBackoffAttempts()) * startIntervalLength) + randomShift;
 		LocalDateTime nextPostAttempt = this.getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
 
 		logger.info("Next allowed post time: {}", nextPostAttempt.toString());

@@ -70,7 +70,7 @@ public class NeighbourDiscoverer {
 				SubscriptionStatus.ACCEPTED,
 				SubscriptionStatus.FAILED);
 		for (Neighbour neighbour : neighboursToPoll) {
-			if (neighbour.canBeContacted(backoffProperties)) {
+			if (neighbour.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
 				pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
 			}
 		}
@@ -160,7 +160,7 @@ public class NeighbourDiscoverer {
 
 	private void postUpdatedSubscriptions(Self self, Neighbour neighbour, Set<Subscription> calculatedSubscriptionForNeighbour)  {
 		try {
-			if (neighbour.canBeContacted(backoffProperties)) {
+			if (neighbour.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
 				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
 				neighbour.setFedIn(subscriptionRequestResponse);
 				neighbour.setBackoffAttempts(0);
@@ -200,7 +200,7 @@ public class NeighbourDiscoverer {
 			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 			try {
-				if (neighbour.canBeContacted(backoffProperties)) {
+				if (neighbour.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
 						Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
 						neighbour.setCapabilities(capabilities);
