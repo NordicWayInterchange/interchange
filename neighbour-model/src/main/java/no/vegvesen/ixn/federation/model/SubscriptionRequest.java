@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,15 +29,9 @@ public class SubscriptionRequest {
 	@JoinColumn(name = "subreq_id_sub", foreignKey = @ForeignKey(name = "fk_sub_subreq"))
 	private Set<Subscription> subscription = new HashSet<>();
 
-	@Column
-	@UpdateTimestamp
-	private LocalDateTime lastUpdated;
-
 	private LocalDateTime successfulRequest;
 
-
 	public SubscriptionRequest() {
-
 	}
 
 	public SubscriptionRequest(SubscriptionRequestStatus status, Set<Subscription> subscription) {
