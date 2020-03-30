@@ -201,7 +201,7 @@ public class NeighbourDiscoverer {
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 			try {
 				if (neighbour.canBeContacted(backoffProperties)) {
-					if (needsOurUpdatedCapabilities(self, neighbour)) {
+					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
 						Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
 						neighbour.setCapabilities(capabilities);
 						logger.info("Successfully completed capability exchange.");
@@ -221,12 +221,6 @@ public class NeighbourDiscoverer {
 				NeighbourMDCUtil.removeLogVariables();
 			}
 		}
-	}
-
-	private boolean needsOurUpdatedCapabilities(Self self, Neighbour neighbour) {
-		return neighbour.getCapabilities() == null
-				|| neighbour.getCapabilities().getLastCapabilityExchange() == null
-				|| self.getLastUpdatedLocalCapabilities().isAfter(neighbour.getCapabilities().getLastCapabilityExchange());
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.dns-lookup-interval}", initialDelayString = "${discoverer.dns-initial-start-delay}")

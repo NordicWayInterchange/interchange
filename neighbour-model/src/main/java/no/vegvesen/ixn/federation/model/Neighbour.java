@@ -284,4 +284,9 @@ public class Neighbour implements Subscriber {
 	}
 
 
+	public boolean needsOurUpdatedCapabilities(LocalDateTime localCapabilitiesUpdated) {
+		return this.getCapabilities() == null
+				|| this.getCapabilities().getLastCapabilityExchange() == null
+				|| localCapabilitiesUpdated.isAfter(this.getCapabilities().getLastCapabilityExchange());
+	}
 }
