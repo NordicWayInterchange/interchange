@@ -19,7 +19,6 @@ public class NeighbourDiscovererProperties {
 	private int subscriptionPollingNumberOfAttempts = 7;
 
 
-	//TODO: check usage
 	public String getDnsLookupInterval() {
 		return dnsLookupInterval;
 	}
