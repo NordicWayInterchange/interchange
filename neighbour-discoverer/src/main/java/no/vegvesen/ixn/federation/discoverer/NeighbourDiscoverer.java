@@ -143,34 +143,12 @@ public class NeighbourDiscoverer {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 						Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
-						if (calculatedSubscriptionForNeighbour.isEmpty()) {
-							// No overlap between neighbour capabilities and local service provider subscriptions.
-							// Setting neighbour fedIn status to NO_OVERLAP to prevent calculating a new subscription request
-							neighbour.getFedIn().setStatus(SubscriptionRequestStatus.NO_OVERLAP);
-							logger.info("The calculated subscription request for neighbour {} was empty. Setting Subscription status in fedIn to NO_OVERLAP", neighbour.getName());
-							if (fedInSubscriptions.isEmpty()) {
-								// No existing subscription to this neighbour, nothing to tear down
-								logger.info("Subscription to neighbour is empty. Nothing to tear down.");
-							} else {
-								// We have an existing subscription to the neighbour, tear it down. At this point, we already know that the calculated set of neighbours is empty!
-								logger.info("The calculated subscription request is empty, but we have an existing subscription to this neighbour. Posting empty subscription request to neighbour to tear down subscription.");
-								postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
-							}
-						} else {
-							// Calculated subscription is not empty, post as normal
-							if (calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
-								// The subscription request we want to post is the same as what we already subscribe to. Skip.
-								logger.info("The calculated subscription requests are the same as neighbour {}'s subscription. Skipping", neighbour.getName());
-								continue;
-							} else {
-								// The recalculated subscription is not the same as the existing subscription. Post to neighbour to update the subscription.
-								logger.info("The calculated subscription request for {} is not empty. Posting subscription request: {}", neighbour.getName(), calculatedSubscriptionForNeighbour);
-								postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
-							}
+						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
+							postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
+							// Successful subscription request, update discovery state subscription request timestamp.
+							neighbour = neighbourRepository.save(neighbour);
+							logger.info("Saving updated neighbour: {}", neighbour.toString());
 						}
-						neighbour = neighbourRepository.save(neighbour);
-						logger.info("Saving updated neighbour: {}", neighbour.toString());
-						// Successful subscription request, update discovery state subscription request timestamp.
 					}
 				} catch (Exception e) {
 					logger.error("Exception when evaluating subscriptions for neighbour", e);

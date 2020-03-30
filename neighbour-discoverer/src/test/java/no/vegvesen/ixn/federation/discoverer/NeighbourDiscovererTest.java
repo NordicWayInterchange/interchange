@@ -147,12 +147,17 @@ public class NeighbourDiscovererTest {
 		Neighbour ericsson = createNeighbour();
 		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
-		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(new DataType(1, "messageType", "DATEX2"))));
+		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSet("FI")));
+
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 
 		neighbourDiscoverer.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
+	}
+
+	private Set<DataType> getDataTypeSet(String originatingCountry) {
+		return Sets.newLinkedHashSet(new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry));
 	}
 
 	private SubscriptionRequest createFirstSubscriptionRequestResponse() {
@@ -439,29 +444,6 @@ public class NeighbourDiscovererTest {
 	}
 
 	@Test
-	public void twoNeighboursWhereOneHasNoOverlapBeforeAndAfterNewSubscriptionCalculationLetsSecondOneBeCalculated() {
-		Self self = new Self("self");
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
-		Neighbour neighbour = new Neighbour("neighbour",new Capabilities(),subscriptionRequest,new SubscriptionRequest());
-
-		//just to test that I have set up the neighbour and self correctly for the actual test.
-		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
-		assertThat(self.calculateCustomSubscriptionForNeighbour(neighbour)).isEmpty();
-		assertThat(neighbour.getFedIn().getSubscriptions()).isEmpty();
-		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
-
-		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
-				new Capabilities(),
-				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
-				new SubscriptionRequest());
-
-		when(selfRepository.findByName(anyString())).thenReturn(self);
-
-	    neighbourDiscoverer.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
-	    verify(neighbourRepository,times(2)).save(any(Neighbour.class));
-    }
-
-	@Test
 	public void calculatedSubscriptionRequestSameAsNeighbourSubscriptionsAllowsNextNeighbourToBeSaved() {
 		Self self = new Self("self");
 		Set<DataType> selfLocalSubscriptions = getDataTypeSetOriginatingCountry("NO");
@@ -471,7 +453,7 @@ public class NeighbourDiscovererTest {
 		DataType neighbourDataType = getDatexNoDataType();
 		Set<DataType> dataTypeSet = new HashSet<>();
 		dataTypeSet.add(neighbourDataType);
-		Capabilities neighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,dataTypeSet);
+		Capabilities neighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,dataTypeSet);
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilities,subscriptionRequest,new SubscriptionRequest());
 		Set<Subscription> neighbourFedInSubscription = new HashSet<>();
 		neighbourFedInSubscription.add(new Subscription("originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED));
@@ -484,7 +466,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
 		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
-				new Capabilities(),
+				new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSet("NO")),
 				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
 				new SubscriptionRequest());
 
