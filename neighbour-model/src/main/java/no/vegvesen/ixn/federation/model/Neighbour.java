@@ -296,4 +296,9 @@ public class Neighbour {
 	}
 
 
+	public boolean needsOurUpdatedCapabilities(LocalDateTime localCapabilitiesUpdated) {
+		return this.getCapabilities() == null
+				|| this.getCapabilities().getLastCapabilityExchange() == null
+				|| localCapabilitiesUpdated.isAfter(this.getCapabilities().getLastCapabilityExchange());
+	}
 }
