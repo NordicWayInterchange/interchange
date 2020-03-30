@@ -11,7 +11,9 @@ import javax.persistence.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -254,4 +256,32 @@ public class Neighbour implements Subscriber {
 	public ConnectionStatus getConnectionStatus() {
 		return connectionStatus;
 	}
+
+	public boolean canBeContacted(GracefulBackoffProperties backoffProperties) {
+		if (this.getConnectionStatus() == ConnectionStatus.UNREACHABLE) {
+			return false;
+		}
+		if (this.getConnectionStatus() == ConnectionStatus.CONNECTED) {
+			return true;
+		}
+
+		if (this.getConnectionStatus() == ConnectionStatus.FAILED) {
+			return  this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(backoffProperties));
+		}
+		return true;
+	}
+
+	// Calculates next possible post attempt time, using exponential backoff
+	LocalDateTime getNextPostAttemptTime(GracefulBackoffProperties backoffProperties) {
+
+		logger.info("Calculating next allowed time to contact neighbour.");
+		int randomShift = new Random().nextInt(backoffProperties.getRandomShiftUpperLimit());
+		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, this.getBackoffAttempts()) * backoffProperties.getStartIntervalLength()) + randomShift;
+		LocalDateTime nextPostAttempt = this.getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
+
+		logger.info("Next allowed post time: {}", nextPostAttempt.toString());
+		return nextPostAttempt;
+	}
+
+
 }

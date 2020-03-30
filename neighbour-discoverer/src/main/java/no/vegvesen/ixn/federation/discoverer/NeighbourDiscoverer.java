@@ -16,9 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoField;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 /***
@@ -72,7 +70,7 @@ public class NeighbourDiscoverer {
 				SubscriptionStatus.ACCEPTED,
 				SubscriptionStatus.FAILED);
 		for (Neighbour neighbour : neighboursToPoll) {
-			if (canContactNeighbour(neighbour)) {
+			if (neighbour.canBeContacted(backoffProperties)) {
 				pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
 			}
 		}
@@ -113,18 +111,6 @@ public class NeighbourDiscoverer {
 			neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
 			logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.");
 		}
-	}
-
-	// Calculates next possible post attempt time, using exponential backoff
-	LocalDateTime getNextPostAttemptTime(Neighbour neighbour) {
-
-		logger.info("Calculating next allowed time to contact neighbour.");
-		int randomShift = new Random().nextInt(backoffProperties.getRandomShiftUpperLimit());
-		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, neighbour.getBackoffAttempts()) * backoffProperties.getStartIntervalLength()) + randomShift;
-		LocalDateTime nextPostAttempt = neighbour.getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
-
-		logger.info("Next allowed post time: {}", nextPostAttempt.toString());
-		return nextPostAttempt;
 	}
 
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
@@ -196,7 +182,7 @@ public class NeighbourDiscoverer {
 
 	private void postUpdatedSubscriptions(Self self, Neighbour neighbour, Set<Subscription> calculatedSubscriptionForNeighbour)  {
 		try {
-			if (canContactNeighbour(neighbour)) {
+			if (neighbour.canBeContacted(backoffProperties)) {
 				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
 				neighbour.setFedIn(subscriptionRequestResponse);
 				neighbour.setBackoffAttempts(0);
@@ -212,19 +198,7 @@ public class NeighbourDiscoverer {
 		}
 	}
 
-	private boolean canContactNeighbour(Neighbour neighbour) {
-		if (neighbour.getConnectionStatus() == ConnectionStatus.UNREACHABLE) {
-			return false;
-		}
-		if (neighbour.getConnectionStatus() == ConnectionStatus.CONNECTED) {
-			return true;
-		}
 
-		if (neighbour.getConnectionStatus() == ConnectionStatus.FAILED) {
-			return  neighbour.getBackoffStartTime() == null || LocalDateTime.now().isAfter(getNextPostAttemptTime(neighbour));
-		}
-		return true;
-	}
 
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void performCapabilityExchangeWithNeighbours() {
@@ -248,7 +222,7 @@ public class NeighbourDiscoverer {
 			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 			try {
-				if (canContactNeighbour(neighbour)) {
+				if (neighbour.canBeContacted(backoffProperties)) {
 					if (needsOurUpdatedCapabilities(self, neighbour)) {
 						Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
 						neighbour.setCapabilities(capabilities);
