@@ -1,166 +1,60 @@
 {
-  "groups": [
-    {
-      "name": "discoverer",
-      "type": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties"
-    },
-    {
-      "name": "graceful-backoff",
-      "type": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
-      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties"
-    },
-    {
-      "name": "neighbour.ssl",
-      "type": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
-    }
-  ],
   "properties": [
     {
       "name": "discoverer.capabilities-update-interval",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, between each capability post to neighbours.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": "15000"
+      "description": "Time, in milliseconds, between each capability post to neighbours."
     },
     {
       "name": "discoverer.capability-post-initial-delay",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, from application start-up to first capability exchange.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": "3000"
-    },
-    {
-      "name": "discoverer.dns-initial-start-delay",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": "5000"
-    },
-    {
-      "name": "discoverer.dns-lookup-interval",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": "15000"
+      "description": "Time, in milliseconds, from application start-up to first capability exchange."
     },
     {
       "name": "discoverer.subscription-poll-initial-delay",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, from application start-up to first attempt at polling subscriptions.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": "20000"
+      "description": "Time, in milliseconds, from application start-up to first attempt at polling subscriptions."
     },
     {
       "name": "discoverer.subscription-poll-update-interval",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, between each attempt at polling a subscription.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": "15000"
+      "description": "Time, in milliseconds, between each attempt at polling a subscription."
     },
     {
       "name": "discoverer.subscription-polling-number-of-attempts",
-      "type": "java.lang.Integer",
-      "description": "Number of times we are allowed to poll one subscription.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": 7
+      "description": "Number of times we are allowed to poll one subscription."
     },
     {
       "name": "discoverer.subscription-request-initial-delay",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, from application start-up to subscription request.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": "10000"
+      "description": "Time, in milliseconds, from application start-up to subscription request."
     },
     {
       "name": "discoverer.subscription-request-update-interval",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, between each attempt at posting a subscription request.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": "15000"
-    },{
+      "description": "Time, in milliseconds, between each attempt at posting a subscription request."
+    },
+    {
       "name": "discoverer.updated-service-provider-check-interval",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, between each check for updated Service Providers.",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties",
-      "defaultValue": "20000"
+      "description": "Time, in milliseconds, between each check for updated Service Providers."
     },
     {
       "name": "graceful-backoff.check-interval",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, between each lookup of failed neighbours in the database.",
-      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
-      "defaultValue": "30000"
+      "description": "Time, in milliseconds, between each lookup of failed neighbours in the database."
     },
     {
       "name": "graceful-backoff.check-offset",
-      "type": "java.lang.String",
-      "description": "Time, in milliseconds, from application startup until lookup for failed neighbours in the database.",
-      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
-      "defaultValue": "60000"
+      "description": "Time, in milliseconds, from application startup until lookup for failed neighbours in the database."
     },
     {
       "name": "graceful-backoff.number-of-attempts",
-      "type": "java.lang.Integer",
-      "description": "Number of times we are allowed to reattempt a POST or a GET to a failed neighbour.",
-      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
-      "defaultValue": 4
+      "description": "Number of times we are allowed to reattempt a POST or a GET to a failed neighbour."
     },
     {
       "name": "graceful-backoff.random-shift-upper-limit",
-      "type": "java.lang.Integer",
-      "description": "The upper limit, in milliseconds, of the random shift used in backoff POST and GET.",
-      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
-      "defaultValue": 60000
+      "description": "The upper limit, in milliseconds, of the random shift used in backoff POST and GET."
     },
     {
       "name": "graceful-backoff.start-interval-length",
-      "type": "java.lang.Integer",
-      "description": "The length, in milliseconds, of the base waiting time of backoff.",
-      "sourceType": "no.vegvesen.ixn.federation.model.GracefulBackoffProperties",
-      "defaultValue": 2000
-    },
-    {
-      "name": "neighbour.ssl.key-password",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
-    },
-    {
-      "name": "neighbour.ssl.key-store",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
-    },
-    {
-      "name": "neighbour.ssl.key-store-password",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
-    },
-    {
-      "name": "neighbour.ssl.key-store-type",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties",
-      "defaultValue": "PKCS12"
-    },
-    {
-      "name": "neighbour.ssl.trust-store",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
-    },
-    {
-      "name": "neighbour.ssl.trust-store-password",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties"
-    },
-    {
-      "name": "neighbour.ssl.trust-store-type",
-      "type": "java.lang.String",
-      "sourceType": "no.vegvesen.ixn.federation.discoverer.NeighbourSSLProperties",
-      "defaultValue": "JKS"
+      "description": "The length, in milliseconds, of the base waiting time of backoff."
     },
     {
       "name": "interchange.node-provider.name",
-      "type": "java.lang.String",
       "description": "Provide the name of the running interchange node as registered in the DNS server."
     }
-  ],
-  "hints": []
+  ]
 }
