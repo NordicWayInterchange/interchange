@@ -139,7 +139,20 @@ public class NeighbourDiscoverer {
 						Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
-							postUpdatedSubscriptions(self, neighbour, calculatedSubscriptionForNeighbour);
+							try {
+								if (backoffProperties.canBeContacted(neighbour)) {
+									SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
+									neighbour.setFedIn(subscriptionRequestResponse);
+									neighbour.okConnection();
+									logger.info("Successfully posted subscription request to neighbour.");
+								} else {
+									logger.info("Too soon to post subscription request to neighbour when backing off");
+								}
+							} catch (SubscriptionRequestException e) {
+								neighbour.getFedIn().setStatus(SubscriptionRequestStatus.FAILED);
+								neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
+								logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
+							}
 							// Successful subscription request, update discovery state subscription request timestamp.
 							neighbour = neighbourRepository.save(neighbour);
 							logger.info("Saving updated neighbour: {}", neighbour.toString());
@@ -150,24 +163,6 @@ public class NeighbourDiscoverer {
 				}
 			}
 			NeighbourMDCUtil.removeLogVariables();
-		}
-	}
-
-	private void postUpdatedSubscriptions(Self self, Neighbour neighbour, Set<Subscription> calculatedSubscriptionForNeighbour)  {
-		try {
-			if (backoffProperties.canBeContacted(neighbour)) {
-				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
-				neighbour.setFedIn(subscriptionRequestResponse);
-				neighbour.okConnection();
-				logger.info("Successfully posted subscription request to neighbour.");
-			} else {
-				logger.info("Too soon to post subscription request to neighbour when backing off");
-			}
-		} catch (SubscriptionRequestException e) {
-			neighbour.getFedIn().setStatus(SubscriptionRequestStatus.FAILED);
-			neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
-			logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
-
 		}
 	}
 
