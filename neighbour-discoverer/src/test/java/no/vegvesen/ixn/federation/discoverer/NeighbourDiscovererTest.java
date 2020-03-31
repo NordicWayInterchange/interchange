@@ -470,10 +470,11 @@ public class NeighbourDiscovererTest {
 				new SubscriptionRequest());
 
 		when(selfRepository.findByName(anyString())).thenReturn(self);
+		when(neighbourRESTFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(mock(SubscriptionRequest.class));
 
 		neighbourDiscoverer.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
-		verify(neighbourRepository).save(otherNeighbour);
 
+		verify(neighbourRepository).save(otherNeighbour);
     }
 
 }

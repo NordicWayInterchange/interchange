@@ -141,6 +141,7 @@ public class NeighbourDiscoverer {
 							try {
 								if (backoffProperties.canBeContacted(neighbour)) {
 									SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
+									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
 									neighbour.setFedIn(subscriptionRequestResponse);
 									neighbour.okConnection();
 									logger.info("Successfully posted subscription request to neighbour.");
@@ -190,6 +191,7 @@ public class NeighbourDiscoverer {
 				if (backoffProperties.canBeContacted(neighbour)) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
 						Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
+						capabilities.setLastCapabilityExchange(LocalDateTime.now());
 						neighbour.setCapabilities(capabilities);
 						neighbour.okConnection();
 						logger.info("Successfully completed capability exchange.");

@@ -9,7 +9,6 @@ import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -65,9 +64,7 @@ public class SubscriptionRequestTransformer {
 	}
 
 	public SubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, SubscriptionRequestStatus status) {
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(status, convertAllSubscriptionApisToSubscriptions(subscriptionRequestApi.getSubscriptions()));
-		subscriptionRequest.setSuccessfulRequest(LocalDateTime.now());
-		return subscriptionRequest;
+		return new SubscriptionRequest(status, convertAllSubscriptionApisToSubscriptions(subscriptionRequestApi.getSubscriptions()));
 	}
 
 }

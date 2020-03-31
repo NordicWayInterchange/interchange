@@ -6,8 +6,6 @@ import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.Self;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Component
 public class CapabilityTransformer {
 
@@ -24,7 +22,6 @@ public class CapabilityTransformer {
 		Capabilities capabilities = new Capabilities();
 		capabilities.setDataTypes(dataTypeTransformer.dataTypeApiToDataType(capabilityApi.getCapabilities()));
 		capabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		capabilities.setLastCapabilityExchange(LocalDateTime.now());
 		return capabilities;
 	}
 

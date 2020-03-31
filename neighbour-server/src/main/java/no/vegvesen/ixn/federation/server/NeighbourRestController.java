@@ -26,6 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Set;
 
@@ -226,6 +227,8 @@ public class NeighbourRestController {
 
 		// Transform CapabilityApi to Neighbour to find posting neighbour in db
 		Neighbour incomingNeighbour = capabilityTransformer.capabilityApiToNeighbour(neighbourCapabilities);
+		Capabilities incomingCapabilities = incomingNeighbour.getCapabilities();
+		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
 		logger.info("Looking up neighbour in DB.");
 		Neighbour neighbourToUpdate = neighbourRepository.findByName(incomingNeighbour.getName());
@@ -237,7 +240,7 @@ public class NeighbourRestController {
 			neighbourToUpdate.setDnsProperties(dnsNeighbour);
 		} else {
 			logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
-			neighbourToUpdate.setCapabilities(incomingNeighbour.getCapabilities());
+			neighbourToUpdate.setCapabilities(incomingCapabilities);
 		}
 
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
