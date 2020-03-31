@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
@@ -51,9 +50,7 @@ public class NeighbourRESTFacade {
 		String controlChannelUrl = neighbour.getControlChannelUrl("/subscription");
 		String name = neighbour.getName();
 		SubscriptionRequestApi responseApi = neighbourRESTClient.doPostSubscriptionRequest(subscriptionRequestApi, controlChannelUrl, name);
-		SubscriptionRequest response = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(responseApi, SubscriptionRequestStatus.REQUESTED);
-		response.setSuccessfulRequest(LocalDateTime.now());
-		return response;
+		return subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(responseApi, SubscriptionRequestStatus.REQUESTED);
 	}
 
 	Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour) {
