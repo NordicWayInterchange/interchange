@@ -79,36 +79,32 @@ public class NeighbourDiscoverer {
 		try {
 			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			for (Subscription subscription : subscriptions) {
-				pollOneSubscription(neighbour, subscription);
+				try {
+					if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
+						logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
+
+						// Throws SubscriptionPollException if unsuccessful
+						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
+						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
+						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
+						neighbour.okConnection();
+						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
+					} else {
+						// Number of poll attempts exceeds allowed number of poll attempts.
+						subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+						logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
+					}
+				} catch (SubscriptionPollException e) {
+					subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
+					neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
+					logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.");
+				}
 			}
 		} finally {
 			logger.info("Saving updated neighbour: {}", neighbour.toString());
 			neighbour.getFedIn().setStatusFromSubscriptionStatus();
 			neighbourRepository.save(neighbour);
 			NeighbourMDCUtil.removeLogVariables();
-		}
-	}
-
-	private void pollOneSubscription(Neighbour neighbour, Subscription subscription) {
-		try {
-			if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
-				logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
-
-				// Throws SubscriptionPollException if unsuccessful
-				Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
-				subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
-				subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
-				neighbour.okConnection();
-				logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
-			} else {
-				// Number of poll attempts exceeds allowed number of poll attempts.
-				subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-				logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
-			}
-		} catch (SubscriptionPollException e) {
-			subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
-			neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
-			logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.");
 		}
 	}
 
