@@ -129,30 +129,32 @@ public class NeighbourRestController {
 		}
 
 		//Check if subscription request is empty or not
-		if (neighbourToUpdate.getSubscriptionRequest().getSubscriptions().isEmpty() && incomingSubscriptionRequestNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+		SubscriptionRequest persistentRequest = neighbourToUpdate.getSubscriptionRequest();
+		SubscriptionRequest incomingRequest = incomingSubscriptionRequestNeighbour.getSubscriptionRequest();
+		if (persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			logger.info("Neighbour with no existing subscription posted empty subscription request.");
 			logger.info("Returning empty subscription request.");
 			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
 
 			return new SubscriptionRequestApi(neighbourToUpdate.getName(), Collections.emptySet());
-		} else if (!neighbourToUpdate.getSubscriptionRequest().getSubscriptions().isEmpty() && incomingSubscriptionRequestNeighbour.getSubscriptionRequest().getSubscriptions().isEmpty()) {
+		} else if (!persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			// empty subscription request - tear down existing subscription.
 			logger.info("Received empty subscription request.");
-			logger.info("Neighbour has existing subscription: {}", neighbourToUpdate.getSubscriptionRequest().getSubscriptions().toString());
+			logger.info("Neighbour has existing subscription: {}", persistentRequest.getSubscriptions().toString());
 			logger.info("Setting status of subscription request to TEAR_DOWN.");
-			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.TEAR_DOWN);
-			neighbourToUpdate.getSubscriptionRequest().setSubscriptions(Collections.emptySet());
+			persistentRequest.setStatus(SubscriptionRequestStatus.TEAR_DOWN);
+			persistentRequest.setSubscriptions(Collections.emptySet());
 		} else {
 			// Subscription request is not empty
 			// validate the requested subscriptions and give each a status
 
 			logger.info("Received non-empty subscription request.");
 			logger.info("Processing subscription request...");
-			Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(incomingSubscriptionRequestNeighbour.getSubscriptionRequest().getSubscriptions());
-			neighbourToUpdate.getSubscriptionRequest().setSubscriptions(processedSubscriptionRequest);
-			neighbourToUpdate.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.REQUESTED);
+			Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
+			persistentRequest.setSubscriptions(processedSubscriptionRequest);
+			persistentRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
 
-			logger.info("Processed subscription request: {}", neighbourToUpdate.getSubscriptionRequest().toString());
+			logger.info("Processed subscription request: {}", persistentRequest.toString());
 
 			logger.info("Saving neighbour in DB to generate paths for the subscriptions.");
 			// Save neighbour in DB to generate subscription ids for subscription paths.
@@ -160,7 +162,7 @@ public class NeighbourRestController {
 
 			logger.info("Paths for requested subscriptions created.");
 			// Create a path for each subscription
-			for (Subscription subscription : neighbourToUpdate.getSubscriptionRequest().getSubscriptions()) {
+			for (Subscription subscription : persistentRequest.getSubscriptions()) {
 				String path = "/" + neighbourToUpdate.getName() + "/subscription/" + subscription.getId();
 				subscription.setPath(path);
 				logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
