@@ -102,7 +102,6 @@ public class NeighbourDiscoverer {
 			}
 		} finally {
 			logger.info("Saving updated neighbour: {}", neighbour.toString());
-			neighbour.getFedIn().setStatusFromSubscriptionStatus();
 			neighbourRepository.save(neighbour);
 			NeighbourMDCUtil.removeLogVariables();
 		}

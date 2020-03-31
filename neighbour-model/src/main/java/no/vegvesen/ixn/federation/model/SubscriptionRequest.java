@@ -67,22 +67,6 @@ public class SubscriptionRequest {
 				'}';
 	}
 
-	public void	setStatusFromSubscriptionStatus() {
-		if (getSubscriptions().stream().anyMatch(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED))) {
-			logger.info("At least one subscription in fedIn has status CREATED. Setting status of fedIn to ESTABLISHED");
-			this.status = SubscriptionRequestStatus.ESTABLISHED;
-		}
-		else if (getSubscriptions().stream().noneMatch(s -> s.getSubscriptionStatus() == SubscriptionStatus.CREATED
-				|| s.getSubscriptionStatus() == SubscriptionStatus.ACCEPTED
-				|| s.getSubscriptionStatus() == SubscriptionStatus.REQUESTED)) {
-			logger.info("All subscriptions in neighbour fedIn were rejected. Setting status of fedIn to REJECTED");
-			this.status = SubscriptionRequestStatus.REJECTED;
-		} else {
-			logger.info("Some subscriptions in neighbour fedIn do not have a final status or have not been rejected. Keeping status of fedIn REQUESTED");
-			this.status = SubscriptionRequestStatus.REQUESTED;
-		}
-	}
-
 	public Set<Subscription> getAcceptedSubscriptions() {
 		return getSubscriptions().stream()
 				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED))
