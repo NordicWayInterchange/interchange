@@ -64,13 +64,12 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void pollSubscriptions() {
-		// All neighbours with subscriptions in fedIn() with status REQUESTED or ACCEPTED.
 		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.REQUESTED,
 				SubscriptionStatus.ACCEPTED,
 				SubscriptionStatus.FAILED);
 		for (Neighbour neighbour : neighboursToPoll) {
-			if (neighbour.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
+			if (backoffProperties.canBeContacted(neighbour)) {
 				pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
 			}
 		}
@@ -160,7 +159,7 @@ public class NeighbourDiscoverer {
 
 	private void postUpdatedSubscriptions(Self self, Neighbour neighbour, Set<Subscription> calculatedSubscriptionForNeighbour)  {
 		try {
-			if (neighbour.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
+			if (backoffProperties.canBeContacted(neighbour)) {
 				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
 				neighbour.setFedIn(subscriptionRequestResponse);
 				neighbour.okConnection();
@@ -175,8 +174,6 @@ public class NeighbourDiscoverer {
 
 		}
 	}
-
-
 
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void performCapabilityExchangeWithNeighbours() {
@@ -200,7 +197,7 @@ public class NeighbourDiscoverer {
 			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 			try {
-				if (neighbour.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
+				if (backoffProperties.canBeContacted(neighbour)) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
 						Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
 						neighbour.setCapabilities(capabilities);
@@ -242,5 +239,4 @@ public class NeighbourDiscoverer {
 			NeighbourMDCUtil.removeLogVariables();
 		}
 	}
-
 }

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import no.vegvesen.ixn.federation.model.Neighbour;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -70,6 +71,10 @@ public class GracefulBackoffProperties {
 
 	public void setCheckOffset(String checkOffset) {
 		this.checkOffset = checkOffset;
+	}
+
+	public boolean canBeContacted(Neighbour neighbour) {
+		return neighbour.canBeContacted(this.randomShiftUpperLimit, this.startIntervalLength);
 	}
 
 	@Override
