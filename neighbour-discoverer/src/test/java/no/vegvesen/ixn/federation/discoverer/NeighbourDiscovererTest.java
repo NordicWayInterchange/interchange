@@ -348,8 +348,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.pollSubscriptions();
 
-		assertThat(spyNeighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.ESTABLISHED);
-
+		assertThat(spyNeighbour.getFedIn().getSubscriptions()).contains(createdSubscription);
 	}
 
 	@Test
@@ -368,7 +367,7 @@ public class NeighbourDiscovererTest {
 
 		neighbourDiscoverer.pollSubscriptions();
 
-		assertThat(spyNeighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.REJECTED);
+		assertThat(spyNeighbour.getFedIn().getAcceptedSubscriptions()).isEmpty();
 	}
 
 	@Test
