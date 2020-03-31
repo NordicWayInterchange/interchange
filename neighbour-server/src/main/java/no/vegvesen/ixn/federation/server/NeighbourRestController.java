@@ -223,23 +223,18 @@ public class NeighbourRestController {
 		checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.info("Common name of certificate matches Neighbour name in capability api object.");
 
-		// Transform CapabilityApi to Neighbour to find posting neighbour in db
-		Neighbour incomingNeighbour = capabilityTransformer.capabilityApiToNeighbour(neighbourCapabilities);
-		Capabilities incomingCapabilities = incomingNeighbour.getCapabilities();
+		Capabilities incomingCapabilities = capabilityTransformer.capabilityApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
 		logger.info("Looking up neighbour in DB.");
-		Neighbour neighbourToUpdate = neighbourRepository.findByName(incomingNeighbour.getName());
+		Neighbour neighbourToUpdate = neighbourRepository.findByName(neighbourCapabilities.getName());
 
 		if (neighbourToUpdate == null) {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
-			Neighbour dnsNeighbour = dnsFacade.findNeighbour(incomingNeighbour.getName());
-			neighbourToUpdate = incomingNeighbour;
-			neighbourToUpdate.setDnsProperties(dnsNeighbour);
-		} else {
-			logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
-			neighbourToUpdate.setCapabilities(incomingCapabilities);
+			neighbourToUpdate = dnsFacade.findNeighbour(neighbourCapabilities.getName());
 		}
+		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
+		neighbourToUpdate.setCapabilities(incomingCapabilities);
 
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
