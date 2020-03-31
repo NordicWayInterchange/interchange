@@ -118,26 +118,24 @@ public class NeighbourRestController {
 		checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 		logger.info("Common name of certificate matched name in API object.");
 
-		// Convert SubscriptionRequestApi object to Neighbour object.
-		Neighbour incomingSubscriptionRequestNeighbour = subscriptionRequestTransformer.subscriptionRequestApiToNeighbour(neighbourSubscriptionRequest);
-		logger.info("Converted incoming subscription request api to Neighbour representing neighbour {}.", incomingSubscriptionRequestNeighbour.getName());
+		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest, SubscriptionRequestStatus.REQUESTED);
+		logger.info("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
 		logger.info("Looking up neighbour in database.");
-		Neighbour neighbourToUpdate = neighbourRepository.findByName(incomingSubscriptionRequestNeighbour.getName());
+		Neighbour neighbour = neighbourRepository.findByName(neighbourSubscriptionRequest.getName());
 
-		if (neighbourToUpdate == null) {
+		if (neighbour == null) {
 			throw new SubscriptionRequestException("Neighbours can not request subscriptions before capabilities are exchanged.");
 		}
 
 		//Check if subscription request is empty or not
-		SubscriptionRequest persistentRequest = neighbourToUpdate.getSubscriptionRequest();
-		SubscriptionRequest incomingRequest = incomingSubscriptionRequestNeighbour.getSubscriptionRequest();
+		SubscriptionRequest persistentRequest = neighbour.getSubscriptionRequest();
 		if (persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			logger.info("Neighbour with no existing subscription posted empty subscription request.");
 			logger.info("Returning empty subscription request.");
 			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
 
-			return new SubscriptionRequestApi(neighbourToUpdate.getName(), Collections.emptySet());
+			return new SubscriptionRequestApi(neighbour.getName(), Collections.emptySet());
 		} else if (!persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			// empty subscription request - tear down existing subscription.
 			logger.info("Received empty subscription request.");
@@ -159,21 +157,21 @@ public class NeighbourRestController {
 
 			logger.info("Saving neighbour in DB to generate paths for the subscriptions.");
 			// Save neighbour in DB to generate subscription ids for subscription paths.
-			neighbourToUpdate = neighbourRepository.save(neighbourToUpdate);
+			neighbour = neighbourRepository.save(neighbour);
 
 			logger.info("Paths for requested subscriptions created.");
 			// Create a path for each subscription
 			for (Subscription subscription : persistentRequest.getSubscriptions()) {
-				String path = "/" + neighbourToUpdate.getName() + "/subscription/" + subscription.getId();
+				String path = "/" + neighbour.getName() + "/subscription/" + subscription.getId();
 				subscription.setPath(path);
 				logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
 			}
 		}
 
 		// Save neighbour again, with generated paths.
-		neighbourRepository.save(neighbourToUpdate);
-		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbourToUpdate);
+		neighbourRepository.save(neighbour);
+		logger.info("Saving updated Neighbour: {}", neighbour.toString());
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
 		NeighbourMDCUtil.removeLogVariables();
 		return subscriptionRequestApi;
 	}

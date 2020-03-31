@@ -4,6 +4,8 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -31,17 +33,16 @@ public class SubscriptionRequestTransformerTest {
 
 		// transform to subscriptionRequestApi object and back to neighbour
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
-		Neighbour transformed = subscriptionRequestTransformer.subscriptionRequestApiToNeighbour(subscriptionRequestApi);
+		SubscriptionRequest transformed = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(subscriptionRequestApi, SubscriptionRequestStatus.REQUESTED);
 
-		Subscription onlySubscription = transformed.getSubscriptionRequest().getSubscriptions().iterator().next();
+		Subscription onlySubscription = transformed.getSubscriptions().iterator().next();
 
-		assertThat(transformed.getSubscriptionRequest().getSubscriptions()).hasSize(1);
-		assertThat(transformed.getName()).isEqualTo(neighbour.getName());
+		assertThat(transformed.getSubscriptions()).hasSize(1);
 		assertThat(onlySubscription.getSelector()).isEqualTo(subscription.getSelector());
 	}
 
 	@Test
-	public void subscriptionRequestApiToneighbour(){
+	public void subscriptionRequestApiToSubscriptionRequest(){
 
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi();
 		subscriptionRequestApi.setName("Test 2");
@@ -53,15 +54,14 @@ public class SubscriptionRequestTransformerTest {
 
 		subscriptionRequestApi.setSubscriptions(subscriptionApiSet);
 
-		Neighbour neighbour = subscriptionRequestTransformer.subscriptionRequestApiToNeighbour(subscriptionRequestApi);
-		SubscriptionRequestApi transformed = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
+		SubscriptionRequest subscriptionRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(subscriptionRequestApi, SubscriptionRequestStatus.REQUESTED);
+		SubscriptionRequestApi transformed = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(subscriptionRequestApi.getName(), subscriptionRequest.getSubscriptions());
 
 		SubscriptionApi onlySubscription = transformed.getSubscriptions().iterator().next();
 
 		assertThat(transformed.getSubscriptions()).hasSize(1);
-		assertThat(transformed.getName()).isEqualTo(neighbour.getName());
+		assertThat(transformed.getName()).isEqualTo(subscriptionRequestApi.getName());
 		assertThat(onlySubscription.getSelector()).isEqualTo(subscription.getSelector());
-
 	}
 
 	@Test
@@ -71,9 +71,8 @@ public class SubscriptionRequestTransformerTest {
 		neighbour.setName("Test 3");
 
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
-		Neighbour transformed = subscriptionRequestTransformer.subscriptionRequestApiToNeighbour(subscriptionRequestApi);
+		SubscriptionRequest transformed = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(subscriptionRequestApi, SubscriptionRequestStatus.REQUESTED);
 
-		assertThat(transformed.getSubscriptionRequest().getSubscriptions()).hasSize(0);
-		assertThat(transformed.getName()).isEqualTo(neighbour.getName());
+		assertThat(transformed.getSubscriptions()).hasSize(0);
 	}
 }
