@@ -97,9 +97,9 @@ public class NeighbourDiscoverer {
 
 				// Throws SubscriptionPollException if unsuccessful
 				Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
-
 				subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 				subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
+				neighbour.okConnection();
 				logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
 			} else {
 				// Number of poll attempts exceeds allowed number of poll attempts.
@@ -163,7 +163,7 @@ public class NeighbourDiscoverer {
 			if (neighbour.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
 				SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
 				neighbour.setFedIn(subscriptionRequestResponse);
-				neighbour.setBackoffAttempts(0);
+				neighbour.okConnection();
 				logger.info("Successfully posted subscription request to neighbour.");
 			} else {
 				logger.info("Too soon to post subscription request to neighbour when backing off");
@@ -204,6 +204,7 @@ public class NeighbourDiscoverer {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
 						Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
 						neighbour.setCapabilities(capabilities);
+						neighbour.okConnection();
 						logger.info("Successfully completed capability exchange.");
 						logger.debug("Updated neighbour: {}", neighbour.toString());
 					} else {

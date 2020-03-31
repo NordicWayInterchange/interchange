@@ -100,6 +100,11 @@ public class NeighbourTest {
 
 		neighbour.failedConnection(2);
 		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
+
+		neighbour.okConnection();
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
+		assertThat(neighbour.getBackoffStartTime()).isNull();
+		assertThat(neighbour.getBackoffAttempts()).isEqualTo(0);
 	}
 
 	@Test

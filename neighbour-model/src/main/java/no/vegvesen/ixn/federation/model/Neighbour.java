@@ -301,4 +301,10 @@ public class Neighbour {
 				|| this.getCapabilities().getLastCapabilityExchange() == null
 				|| localCapabilitiesUpdated.isAfter(this.getCapabilities().getLastCapabilityExchange());
 	}
+
+	public void okConnection() {
+		this.setConnectionStatus(ConnectionStatus.CONNECTED);
+		this.backoffAttempts = 0;
+		this.backoffStart = null;
+	}
 }
