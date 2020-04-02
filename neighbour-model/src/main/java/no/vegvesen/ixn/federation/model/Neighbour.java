@@ -307,4 +307,25 @@ public class Neighbour {
 		this.backoffAttempts = 0;
 		this.backoffStart = null;
 	}
+
+	/**
+	 * Evaluates if the other object is the same neighbour, not that all member attributes are equal.
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Neighbour)) return false;
+
+		Neighbour neighbour = (Neighbour) o;
+
+		return name.equals(neighbour.name);
+	}
+
+	/**
+	 * Neighbour with same name will give the same result. Not using all member attributes.
+	 */
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
 }

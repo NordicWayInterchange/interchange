@@ -1,15 +1,17 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Self;
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.http.client.HttpClient;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.net.ssl.SSLContext;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,20 +64,77 @@ public class NeighbourDiscovererIT {
 	}
 
 	@Test
-	public void newUnknownNeighbourIsPickedUpInCapabilityExchange() {
-		mockNeighbours("neighbour-one", "neighbour-two");
-		discoverer.checkForNewNeighbours();
-		selfRepository.save(new Self(nodeName));
-		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()));
-		discoverer.performCapabilityExchangeWithNeighbours();
-		verify(mockNeighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
+	public void completeOptimisticControlChannelFlow() {
+		Self self = new Self(nodeName);
+		self.setLocalSubscriptions(Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
+		selfRepository.save(self);
+
+		Neighbour neighbour1 = new Neighbour();
+		neighbour1.setName("neighbour-one");
+		Neighbour neighbour2 = new Neighbour();
+		neighbour2.setName("neighbour-two");
+
+		Capabilities c1 = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
+		Capabilities c2 = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "FI")));
+		when(mockDnsFacade.getNeighbours()).thenReturn(Lists.list(neighbour1, neighbour2));
+
+		checkForNewNeighbours();
+		performCapabilityExchange(neighbour1, neighbour2, c1, c2);
+		Subscription requestedSubscription = performSubscriptionRequest(neighbour1, neighbour2, c1);
+		performSubscriptionPolling(neighbour1, requestedSubscription);
 	}
 
-	private void mockNeighbours(String n1, String n2) {
-		Neighbour neighbour1 = new Neighbour();
-		neighbour1.setName(n1);
-		Neighbour neighbour2 = new Neighbour();
-		neighbour2.setName(n2);
-		when(mockDnsFacade.getNeighbours()).thenReturn(Lists.list(neighbour1, neighbour2));
+	private void checkForNewNeighbours() {
+		discoverer.checkForNewNeighbours();
+
+		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
+		assertThat(unknown).hasSize(2);
 	}
+
+	private void performCapabilityExchange(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
+		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour1))).thenReturn(c1);
+		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour2))).thenReturn(c2);
+
+		discoverer.performCapabilityExchangeWithNeighbours();
+
+		verify(mockNeighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
+		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+		assertThat(known).hasSize(2);
+	}
+
+	private Subscription performSubscriptionRequest(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1) {
+		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, c1.getDataTypes().stream().map(dataType -> new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED)).collect(Collectors.toSet()));
+		when(mockNeighbourRESTFacade.postSubscriptionRequest(any(), any(), anySet())).thenReturn(subscriptionRequestResponse);
+
+		discoverer.performSubscriptionRequestWithKnownNeighbours();
+
+		verify(mockNeighbourRESTFacade, times(1)).postSubscriptionRequest(any(), eq(neighbour1), any());
+		verify(mockNeighbourRESTFacade, times(0)).postSubscriptionRequest(any(), eq(neighbour2), any());
+
+		Neighbour found1 = repository.findByName(neighbour1.getName());
+		assertThat(found1).isNotNull();
+		assertThat(found1.getSubscriptionRequest()).isNotNull();
+		assertThat(found1.getSubscriptionsForPolling()).hasSize(1);
+		return found1.getSubscriptionsForPolling().iterator().next();
+	}
+
+	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
+		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
+		discoverer.pollSubscriptions();
+		Neighbour found1 = repository.findByName(neighbour.getName());
+		assertThat(found1).isNotNull();
+		assertThat(found1.getFedIn()).isNotNull();
+		assertThat(found1.getFedIn().getSubscriptions()).hasSize(1);
+		assertThat(found1.getFedIn().getSubscriptions().iterator().next().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.CREATED);
+	}
+
+
+	@NotNull
+	private DataType getDataType(String messageType, String originatingCountry) {
+		DataType dataType = new DataType();
+		dataType.getValues().put(MessageProperty.MESSAGE_TYPE.getName(), messageType);
+		dataType.getValues().put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+		return dataType;
+	}
+
 }
