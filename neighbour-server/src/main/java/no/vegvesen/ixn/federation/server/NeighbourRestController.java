@@ -118,6 +118,12 @@ public class NeighbourRestController {
 		checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 		logger.info("Common name of certificate matched name in API object.");
 
+		SubscriptionRequestApi response = incomingSubscriptionRequest(neighbourSubscriptionRequest);
+		NeighbourMDCUtil.removeLogVariables();
+		return response;
+	}
+
+	private SubscriptionRequestApi incomingSubscriptionRequest(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest, SubscriptionRequestStatus.REQUESTED);
 		logger.info("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
@@ -171,9 +177,7 @@ public class NeighbourRestController {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
 		logger.info("Saving updated Neighbour: {}", neighbour.toString());
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
-		NeighbourMDCUtil.removeLogVariables();
-		return subscriptionRequestApi;
+		return subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
 	}
 
 	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -191,6 +195,10 @@ public class NeighbourRestController {
 		checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.info("Common name matches Neighbour name in path.");
 
+		return pollOneSubscription(ixnName, subscriptionId);
+	}
+
+	private SubscriptionApi pollOneSubscription(String ixnName, Integer subscriptionId) {
 		logger.info("Looking up polling Neighbour in DB.");
 		Neighbour Neighbour = neighbourRepository.findByName(ixnName);
 
@@ -223,6 +231,13 @@ public class NeighbourRestController {
 		checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.info("Common name of certificate matches Neighbour name in capability api object.");
 
+		CapabilityApi capabilityApiResponse = incomingCapabilities(neighbourCapabilities);
+		logger.info("Responding with local capabilities: {}", capabilityApiResponse.toString());
+		NeighbourMDCUtil.removeLogVariables();
+		return capabilityApiResponse;
+	}
+
+	private CapabilityApi incomingCapabilities(CapabilityApi neighbourCapabilities) {
 		Capabilities incomingCapabilities = capabilityTransformer.capabilityApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
@@ -239,11 +254,6 @@ public class NeighbourRestController {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		// Post response
-		Self self = getSelf();
-		CapabilityApi capabilityApiResponse = capabilityTransformer.selfToCapabilityApi(self);
-		logger.info("Responding with local capabilities: {}", capabilityApiResponse.toString());
-		NeighbourMDCUtil.removeLogVariables();
-		return capabilityApiResponse;
+		return capabilityTransformer.selfToCapabilityApi(getSelf());
 	}
 }
