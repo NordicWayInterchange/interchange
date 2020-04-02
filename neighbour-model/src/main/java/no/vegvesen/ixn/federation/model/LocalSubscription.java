@@ -45,6 +45,10 @@ public class LocalSubscription {
         return dataType;
     }
 
+    public String selector() {
+        return dataType.toSelector();
+    }
+
     //TODO lag et objekt av selector??
     public String bindKey() {
         return "" + dataType.toSelector().hashCode();

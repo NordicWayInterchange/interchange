@@ -132,8 +132,11 @@ public class RoutingConfigurer {
 			logger.debug("Setting up routing for service provider {}", serviceProviderName);
 			createQueue(serviceProviderName);
 			addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, serviceProviderName);
-			bindSubscriptions("nwEx", serviceProvider);
-			bindSubscriptions("fedEx", serviceProvider);
+			bindServiceProviderSubscriptions("nwEx", serviceProvider);
+			bindServiceProviderSubscriptions("fedEx", serviceProvider);
+			for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+				subscription.setStatus(LocalSubscriptionStatus.CREATED);
+			}
 			for (Subscription subscription : serviceProvider.getSubscriptionRequest().getSubscriptions()) {
 				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 			}
@@ -166,6 +169,24 @@ public class RoutingConfigurer {
 		for (String unwantedBindKey : unwantedBindKeys) {
 			qpidClient.unbindBindKey(name, unwantedBindKey, exchangeName);
 		}
+	}
+
+	private void bindServiceProviderSubscriptions(String exchange, ServiceProvider serviceProvider) {
+	    unbindOldUnwantedServiceProviderBindings(serviceProvider,exchange);
+	    for(LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+	    	if (subscription.isSubscriptionWanted()) {
+	    		qpidClient.addBinding(subscription.selector(),serviceProvider.getName(),subscription.bindKey(),exchange);
+			}
+		}
+	}
+
+	private void unbindOldUnwantedServiceProviderBindings(ServiceProvider serviceProvider,String exchangeName) {
+		Set<String> existingBindinKeys = qpidClient.getQueueBindKeys(serviceProvider.getName());
+		Set<String> unwantedBindings = serviceProvider.unwantedLocalBindings(existingBindinKeys);
+		for (String unwantedBinding : unwantedBindings) {
+			qpidClient.unbindBindKey(serviceProvider.getName(),unwantedBinding,exchangeName);
+		}
+
 	}
 
 	private void addSubscriberToGroup(String groupName, String subscriberName) {
