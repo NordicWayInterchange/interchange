@@ -219,12 +219,18 @@ public class OnboardRestControllerTest {
 
 		// The existing subscriptions of the Service Provider
 		LocalSubscriptionRequest serviceProviderSubscriptionRequest = new LocalSubscriptionRequest();
-		serviceProviderSubscriptionRequest.addLocalSubscription(new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE"));
-		serviceProviderSubscriptionRequest.addLocalSubscription(new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI"));
-		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
+		DataType se = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
+		LocalSubscription seSubs = new LocalSubscription(LocalSubscriptionStatus.CREATED,se);
+		DataType fi = new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
+		LocalSubscription fiSubs = new LocalSubscription(LocalSubscriptionStatus.CREATED,fi);
+		//serviceProviderSubscriptionRequest.addLocalSubscription(se);
+		//serviceProviderSubscriptionRequest.addLocalSubscription(fi);
+		//serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName(firstServiceProviderName);
-		firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
+		firstServiceProvider.addLocalSubscription(seSubs);
+		firstServiceProvider.addLocalSubscription(fiSubs);
+		//firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self
@@ -251,7 +257,9 @@ public class OnboardRestControllerTest {
 
 		// The existing subscriptions of the Service Provider
 		LocalSubscriptionRequest serviceProviderSubscriptionRequest = new LocalSubscriptionRequest();
-		serviceProviderSubscriptionRequest.addLocalSubscription(new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE"));
+		DataType se = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
+		LocalSubscription seSubs = new LocalSubscription(LocalSubscriptionStatus.CREATED,se);
+		serviceProviderSubscriptionRequest.addLocalSubscription(se);
 		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
 		firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);

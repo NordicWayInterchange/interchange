@@ -74,9 +74,11 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForServiceProvidersToSetupRoutingFor() {
 		logger.debug("Checking for new service providers to setup routing");
-		List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.REQUESTED);
+		//List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.REQUESTED);
+		List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.REQUESTED);
 		logger.debug("Found {} service providers to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
-		setupRouting(readyToSetupRouting);
+		//setupRouting(readyToSetupRouting);
+		setupServiceProviderRouting(readyToSetupRouting);
 
 		logger.debug("Checking for service providers to tear down routing");
 		List<ServiceProvider> readyToTearDownRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
@@ -92,17 +94,24 @@ public class RoutingConfigurer {
 		}
 	}
 
+	private void setupServiceProviderRouting(List<ServiceProvider> serviceProvidersToSetupRoutingFor) {
+		for (ServiceProvider serviceProvider : serviceProvidersToSetupRoutingFor) {
+			setupServiceProviderRouting(serviceProvider);
+		}
+
+	}
+
 	void setupSubscriberRouting(Subscriber subscriber) {
 		try {
 			logger.debug("Setting up routing for subscriber {}", subscriber.getName());
-			createQueue(subscriber);
+			createQueue(subscriber.getName());
 			if (subscriber instanceof ServiceProvider) {
-				addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber);
+				addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, subscriber.getName());
 				bindSubscriptions("nwEx", subscriber);
 				bindSubscriptions("fedEx", subscriber);
 			}
 			else if (subscriber instanceof Neighbour){
-				addSubscriberToGroup(FEDERATED_GROUP_NAME, subscriber);
+				addSubscriberToGroup(FEDERATED_GROUP_NAME, subscriber.getName());
 				bindSubscriptions("nwEx", subscriber);
 			}
 			for (Subscription subscription : subscriber.getSubscriptionRequest().getSubscriptions()) {
@@ -117,9 +126,30 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void createQueue(Subscriber subscriber) {
-		qpidClient.createQueue(subscriber.getName());
-		qpidClient.addReadAccess(subscriber.getName(), subscriber.getName());
+	void setupServiceProviderRouting(ServiceProvider serviceProvider) {
+		String serviceProviderName = serviceProvider.getName();
+		try {
+			logger.debug("Setting up routing for service provider {}", serviceProviderName);
+			createQueue(serviceProviderName);
+			addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, serviceProviderName);
+			bindSubscriptions("nwEx", serviceProvider);
+			bindSubscriptions("fedEx", serviceProvider);
+			for (Subscription subscription : serviceProvider.getSubscriptionRequest().getSubscriptions()) {
+				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+			}
+			serviceProvider.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+
+			saveSubscriber(serviceProvider);
+			logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", serviceProviderName);
+		} catch (Throwable e) {
+			logger.error("Could not set up routing for subscriber {}", serviceProviderName, e);
+		}
+	}
+
+	private void createQueue(String subscriberName) {
+		qpidClient.createQueue(subscriberName);
+		qpidClient.addReadAccess(subscriberName,subscriberName);
+
 	}
 
 	private void bindSubscriptions(String exchange, Subscriber subscriber) {
@@ -130,23 +160,24 @@ public class RoutingConfigurer {
 	}
 
 	private void unbindOldUnwantedBindings(Subscriber interchange, String exchangeName) {
-		Set<String> existingBindKeys = qpidClient.getQueueBindKeys(interchange.getName());
+		String name = interchange.getName();
+		Set<String> existingBindKeys = qpidClient.getQueueBindKeys(name);
 		Set<String> unwantedBindKeys = interchange.getUnwantedBindKeys(existingBindKeys);
 		for (String unwantedBindKey : unwantedBindKeys) {
-			qpidClient.unbindBindKey(interchange.getName(), unwantedBindKey, exchangeName);
+			qpidClient.unbindBindKey(name, unwantedBindKey, exchangeName);
 		}
 	}
 
-	private void addSubscriberToGroup(String groupName, Subscriber subscriber) {
+	private void addSubscriberToGroup(String groupName, String subscriberName) {
 		List<String> existingGroupMembers = qpidClient.getGroupMemberNames(groupName);
-		logger.debug("Attempting to add subscriber {} to the group {}", subscriber.getName(), groupName);
+		logger.debug("Attempting to add subscriber {} to the group {}", subscriberName, groupName);
 		logger.debug("Group {} contains the following members: {}", groupName, Arrays.toString(existingGroupMembers.toArray()));
-		if (!existingGroupMembers.contains(subscriber.getName())) {
-			logger.debug("Subscriber {} did not exist in the group {}. Adding...", subscriber, groupName);
-			qpidClient.addMemberToGroup(subscriber.getName(), groupName);
-			logger.info("Added subscriber {} to Qpid group {}", subscriber.getName(), groupName);
+		if (!existingGroupMembers.contains(subscriberName)) {
+			logger.debug("Subscriber {} did not exist in the group {}. Adding...", subscriberName, groupName);
+			qpidClient.addMemberToGroup(subscriberName, groupName);
+			logger.info("Added subscriber {} to Qpid group {}", subscriberName, groupName);
 		} else {
-			logger.warn("Subscriber {} already exists in the group {}", subscriber.getName(), groupName);
+			logger.warn("Subscriber {} already exists in the group {}", subscriberName, groupName);
 		}
 	}
 

@@ -29,7 +29,6 @@ public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final SelfRepository selfRepository;
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 

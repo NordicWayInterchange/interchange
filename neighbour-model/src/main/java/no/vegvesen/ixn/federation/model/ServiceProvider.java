@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -20,12 +21,16 @@ public class ServiceProvider implements Subscriber {
 	private String name;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "spr_id_cap", referencedColumnName = "cap_id", foreignKey = @ForeignKey(name = "fk_cap_spr"))
+	@JoinColumn(name = "spr_id_cap", foreignKey = @ForeignKey(name = "fk_cap_spr"))
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "local_sub_id", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_spr"))
 	private LocalSubscriptionRequest subscriptionRequest = new LocalSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "spr_locsub_id", foreignKey = @ForeignKey(name = "fk_spr_locsub"))
+	private Set<LocalSubscription> subscriptions = new HashSet<>();
 
 	public ServiceProvider() {
 	}
@@ -40,12 +45,14 @@ public class ServiceProvider implements Subscriber {
 		return name;
 	}
 
+	//TODO This has to be done in a different way, to be honest.
+	//It seems that it's being used for setting up queues in qpid.
+
 	@Override
 	public SubscriptionRequest getSubscriptionRequest() {
 		LocalSubscriptionRequest localSubscriptionRequest = getOrCreateLocalSubscriptionRequest();
 		return new SubscriptionRequest(localSubscriptionRequest.getStatus(), localSubscriptionRequest.getSubscriptions().stream().map(DataType::toSubscription).collect(Collectors.toSet()));
 	}
-
 	@Override
 	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
 		this.getOrCreateLocalSubscriptionRequest().setStatus(subscriptionRequestStatus);
@@ -71,6 +78,14 @@ public class ServiceProvider implements Subscriber {
 		this.capabilities = capabilities;
 	}
 
+	public Set<LocalSubscription> getSubscriptions() {
+		return subscriptions;
+	}
+
+	public void addLocalSubscription(LocalSubscription subscription) {
+		subscriptions.add(subscription);
+	}
+
 	public LocalSubscriptionRequest getLocalSubscriptionRequest() {
 		return subscriptionRequest;
 	}
@@ -84,6 +99,24 @@ public class ServiceProvider implements Subscriber {
 
 	public void setLocalSubscriptionRequest(LocalSubscriptionRequest subscriptionRequest) {
 		this.subscriptionRequest = subscriptionRequest;
+	}
+
+	//TODO gjør om til streams-basert
+	public Set<String> wantedLocalBindings() {
+		Set<String> wantedBindings = new HashSet<>();
+		for (LocalSubscription subscription : subscriptions) {
+			if (subscription.isSubscriptionWanted() ) {
+				wantedBindings.add(subscription.bindKey());
+			}
+		}
+		return wantedBindings;
+	}
+
+	public Set<String> unwantedLocalBindings(Set<String> existingKeys) {
+		Set<String> wantedBindKeys = this.wantedBindings();
+		Set<String> unwantedBindKeys = new HashSet<>(existingKeys);
+		unwantedBindKeys.removeAll(wantedBindKeys);
+		return unwantedBindKeys;
 	}
 
 	@Override
