@@ -8,12 +8,14 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -31,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
+@ComponentScan(basePackages = "no.vegvesen.ixn.federation")
 class NeighbourRestControllerTest {
 
 
@@ -48,10 +51,7 @@ class NeighbourRestControllerTest {
 	ServiceProviderRepository serviceProviderRepository;
 
 	@Autowired
-	private NeighbourRestController neighbourRestController = new NeighbourRestController(
-			neighbourRepository,
-			selfRepository,
-			dnsFacade );
+	private NeighbourRestController neighbourRestController;
 
 	private String subscriptionRequestPath = "/subscription";
 	private String capabilityExchangePath = "/capabilities";
@@ -62,6 +62,7 @@ class NeighbourRestControllerTest {
 	@BeforeEach
 	void setUp() {
 		mockMvc = MockMvcBuilders.standaloneSetup(neighbourRestController).setControllerAdvice(NeighbourServiceErrorAdvice.class).build();
+		neighbourRestController = new NeighbourRestController(new NeighbourService(neighbourRepository, selfRepository, dnsFacade));
 	}
 
 	private void mockCertificate(String commonName) {
