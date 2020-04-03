@@ -207,6 +207,7 @@
         <module>interchange-spring-security</module>
         <module>neighbour-dns</module>
         <module>neighbour-model</module>
+        <module>neighbour-rest-facade</module>
         <module>neighbour-service</module>
         <module>neighbour-server</module>
         <module>neighbour-discoverer</module>

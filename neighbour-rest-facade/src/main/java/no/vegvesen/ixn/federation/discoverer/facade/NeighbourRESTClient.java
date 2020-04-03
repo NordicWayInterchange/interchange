@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.discoverer;
+package no.vegvesen.ixn.federation.discoverer.facade;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
@@ -40,7 +40,7 @@ public class NeighbourRESTClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // Convert discovering Neighbour to CapabilityApi object and post to neighbour
-        HttpEntity<CapabilityApi> entity = new HttpEntity<CapabilityApi>(selfCapability, headers);
+        HttpEntity<CapabilityApi> entity = new HttpEntity<>(selfCapability, headers);
         logger.debug("Posting capability api object: {}", selfCapability.toString());
         logger.debug("Posting HttpEntity: {}", entity.toString());
         logger.debug("Posting Headers: {}", headers.toString());
@@ -86,7 +86,7 @@ public class NeighbourRESTClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<SubscriptionRequestApi>(subscriptionRequestApi, headers);
+        HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
         logger.debug("Posting Subscription request api object: {}", subscriptionRequestApi.toString());
         logger.debug("Posting HttpEntity: {}", entity.toString());
         logger.debug("Posting Headers: {}", headers.toString());

@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.discoverer;
+package no.vegvesen.ixn.federation.discoverer.facade;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -19,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.match.MockRestRequestMatchers;
+import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -27,10 +30,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 public class NeighbourRESTFacadeTest {
 
@@ -67,7 +66,7 @@ public class NeighbourRESTFacadeTest {
 	public void expectedUrlIsCreated() {
 		String expectedURL = "https://ericsson.itsinterchange.eu:8080/";
 		String actualURL = ericsson.getControlChannelUrl("/");
-		assertThat(expectedURL).isEqualTo(actualURL);
+		Assertions.assertThat(expectedURL).isEqualTo(actualURL);
 	}
 
 	@Test
@@ -78,20 +77,20 @@ public class NeighbourRESTFacadeTest {
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
 		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
 
-		assertThat(res.getDataTypes()).hasSize(1);
+		Assertions.assertThat(res.getDataTypes()).hasSize(1);
 
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType dataTypeInCapabilities = dataTypes.next();
 
-		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
+		Assertions.assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		Assertions.assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
 	}
 
 	@Test
@@ -101,21 +100,21 @@ public class NeighbourRESTFacadeTest {
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
 		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
 
-		assertThat(res.getDataTypes()).hasSize(1);
+		Assertions.assertThat(res.getDataTypes()).hasSize(1);
 
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType remoteServerResponse = dataTypes.next();
 
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo(dataType.getServiceType());
+		Assertions.assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		Assertions.assertThat(remoteServerResponse.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
+		Assertions.assertThat(remoteServerResponse.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo(dataType.getServiceType());
 	}
 
 	@Test
@@ -125,20 +124,20 @@ public class NeighbourRESTFacadeTest {
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
 		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
 
-		assertThat(res.getDataTypes()).hasSize(1);
+		Assertions.assertThat(res.getDataTypes()).hasSize(1);
 
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType remoteServerResponse = dataTypes.next();
 
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		assertThat(remoteServerResponse.getPropertyValueAsInteger(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIviType());
+		Assertions.assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		Assertions.assertThat(remoteServerResponse.getPropertyValueAsInteger(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIviType());
 	}
 
 	@Test
@@ -151,23 +150,23 @@ public class NeighbourRESTFacadeTest {
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionRequestApi);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
 		self.setName("ericsson.itsinterchange.eu");
 		Set<Subscription> subscriptionSet = Collections.emptySet();
 
 		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
 
-		assertThat(response.getSubscriptions()).hasSize(1);
+		Assertions.assertThat(response.getSubscriptions()).hasSize(1);
 
 		Iterator<Subscription> subscriptions = response.getSubscriptions().iterator();
 		Subscription subscriptionInSubscriptionRequest = subscriptions.next();
 
-		assertThat(subscriptionInSubscriptionRequest.getSelector()).isEqualTo(subscriptionApi.getSelector());
-		assertThat(subscriptionInSubscriptionRequest.getSubscriptionStatus()).isEqualTo(subscriptionApi.getStatus());
+		Assertions.assertThat(subscriptionInSubscriptionRequest.getSelector()).isEqualTo(subscriptionApi.getSelector());
+		Assertions.assertThat(subscriptionInSubscriptionRequest.getSubscriptionStatus()).isEqualTo(subscriptionApi.getStatus());
 	}
 
 	@Test
@@ -178,15 +177,15 @@ public class NeighbourRESTFacadeTest {
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscription/1"))
-				.andExpect(method(HttpMethod.GET))
-				.andRespond(withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscription/1"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
+				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
 		Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
 
-		assertThat(response.getSelector()).isEqualTo(subscription.getSelector());
-		assertThat(response.getPath()).isEqualTo(subscription.getPath());
-		assertThat(response.getSubscriptionStatus()).isEqualTo(subscription.getSubscriptionStatus());
+		Assertions.assertThat(response.getSelector()).isEqualTo(subscription.getSelector());
+		Assertions.assertThat(response.getPath()).isEqualTo(subscription.getPath());
+		Assertions.assertThat(response.getSubscriptionStatus()).isEqualTo(subscription.getSubscriptionStatus());
 	}
 
 	@Test(expected = CapabilityPostException.class)
@@ -195,10 +194,10 @@ public class NeighbourRESTFacadeTest {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Error error");
 		String errorDetailsJson = new ObjectMapper().writeValueAsString(errorDetails);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
 	}
@@ -209,10 +208,10 @@ public class NeighbourRESTFacadeTest {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Error error");
 		String errorDetailsJson = new ObjectMapper().writeValueAsString(errorDetails);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		Set<Subscription> subscriptionSet = Collections.emptySet();
 		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
@@ -230,10 +229,10 @@ public class NeighbourRESTFacadeTest {
 		SubscriptionRequestApi serverResponse = new SubscriptionRequestApi("remote server", new HashSet<>());
 		String errorDetailsJson = new ObjectMapper().writeValueAsString(serverResponse);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andRespond(withStatus(HttpStatus.OK).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 
 		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
@@ -249,9 +248,9 @@ public class NeighbourRESTFacadeTest {
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
 		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
 
@@ -264,9 +263,9 @@ public class NeighbourRESTFacadeTest {
 
 	    final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
 	    Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
 		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
@@ -283,8 +282,8 @@ public class NeighbourRESTFacadeTest {
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
 		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
 
-		server.expect(requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscription/1"))
-				.andExpect(method(HttpMethod.GET))
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscription/1"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
 				.andRespond((request) -> mock);
 
 		Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
