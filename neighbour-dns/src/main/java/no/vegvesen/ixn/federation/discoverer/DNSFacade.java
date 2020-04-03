@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.discoverer;
 
-import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,15 +91,4 @@ public class DNSFacade {
 		return this.dnsProperties.getDomainName();
 	}
 
-	public Neighbour findNeighbour(String neighbourName) {
-		return getNeighbours().stream()
-				.filter(n -> n.getName().equals(neighbourName))
-				.findFirst()
-				.orElseThrow(() ->
-						new InterchangeNotInDNSException(
-								String.format("Received capability post from neighbour %s, but could not find in DNS %s",
-										neighbourName,
-										getDnsServerName()))
-				);
-	}
 }

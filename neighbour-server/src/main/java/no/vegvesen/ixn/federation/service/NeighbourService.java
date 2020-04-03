@@ -6,10 +6,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
-import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
-import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
-import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
@@ -166,7 +163,7 @@ public class NeighbourService {
 
 		if (neighbourToUpdate == null) {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
-			neighbourToUpdate = dnsFacade.findNeighbour(neighbourCapabilities.getName());
+			neighbourToUpdate = findNeighbour(neighbourCapabilities.getName());
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
 		neighbourToUpdate.setCapabilities(incomingCapabilities);
@@ -175,5 +172,17 @@ public class NeighbourService {
 		neighbourRepository.save(neighbourToUpdate);
 
 		return capabilityTransformer.selfToCapabilityApi(getSelf());
+	}
+
+	Neighbour findNeighbour(String neighbourName) {
+		return dnsFacade.getNeighbours().stream()
+				.filter(n -> n.getName().equals(neighbourName))
+				.findFirst()
+				.orElseThrow(() ->
+						new InterchangeNotInDNSException(
+								String.format("Received capability post from neighbour %s, but could not find in DNS %s",
+										neighbourName,
+										dnsFacade.getDnsServerName()))
+				);
 	}
 }

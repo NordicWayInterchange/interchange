@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
+import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,12 +55,12 @@ class NeighbourServiceTest {
 		// Mock dns lookup
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
+		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
 		when(selfRepository.findByName(any())).thenReturn(new Self("bouvet"));
 
 		CapabilityApi response = neighbourService.incomingCapabilities(ericsson);
 
-		verify(dnsFacade, times(1)).findNeighbour(anyString());
+		verify(dnsFacade, times(1)).getNeighbours();
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 		assertThat(response.getName()).isEqualTo("bouvet");
 	}
@@ -100,11 +101,11 @@ class NeighbourServiceTest {
 		// Mock dns lookup
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
+		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
 
 		neighbourService.incomingCapabilities(ericsson);
 
-		verify(dnsFacade, times(1)).findNeighbour(anyString());
+		verify(dnsFacade, times(1)).getNeighbours();
 	}
 
 	@Test
@@ -114,12 +115,14 @@ class NeighbourServiceTest {
 		unknownNeighbour.setName("unknownNeighbour");
 		unknownNeighbour.setCapabilities(Collections.singleton(new Datex2DataTypeApi("NO")));
 
-		when(dnsFacade.findNeighbour(any())).thenThrow(InterchangeNotInDNSException.class);
+		Neighbour ericssonNeighbour = new Neighbour();
+		ericssonNeighbour.setName("ericsson");
+		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
 
 		Throwable thrown = catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour));
 
 		assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
-		verify(dnsFacade, times(1)).findNeighbour("unknownNeighbour");
+		verify(dnsFacade, times(1)).getNeighbours();
 	}
 
 	@Test
@@ -149,6 +152,20 @@ class NeighbourServiceTest {
 		verify(neighbourRepository, times(2)).save(any(Neighbour.class)); //saved twice because first save generates id, and second save saves the path derived from the ids
 		verify(neighbourRepository, times(1)).findByName(anyString());
 		verify(dnsFacade, times(0)).getNeighbours();
+	}
+
+	@Test
+	public void findBouvetExists() {
+		when(dnsFacade.getNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
+		Neighbour neighbour = neighbourService.findNeighbour("bouveta-fed.itsinterchange.eu");
+		assertThat(neighbour).isNotNull();
+	}
+
+	@Test
+	public void findNotDefinedDoesNotExists() {
+		when(dnsFacade.getNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
+		Throwable trown = catchThrowable(() -> neighbourService.findNeighbour("no-such-interchange.itsinterchange.eu"));
+		assertThat(trown).isInstanceOf(InterchangeNotInDNSException.class);
 	}
 
 }
