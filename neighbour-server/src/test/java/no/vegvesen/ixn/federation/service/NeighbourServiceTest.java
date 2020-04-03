@@ -10,6 +10,9 @@ import no.vegvesen.ixn.federation.repository.SelfRepository;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.Set;
@@ -20,18 +23,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-
+@ExtendWith(MockitoExtension.class)
 class NeighbourServiceTest {
-	private NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
-	private DNSFacade dnsFacade = mock(DNSFacade.class);
-	private SelfRepository selfRepository = mock(SelfRepository.class);
+	@Mock
+	NeighbourRepository neighbourRepository;
+	@Mock
+	DNSFacade dnsFacade;
+	@Mock
+	SelfRepository selfRepository;
 
 	NeighbourService neighbourService;
 
 	@BeforeEach
 	void setUp() {
 		neighbourService = new NeighbourService(neighbourRepository, selfRepository, dnsFacade);
-		when(selfRepository.findByName(any())).thenReturn(new Self("bouvet"));
 	}
 
 	@Test
@@ -50,6 +55,7 @@ class NeighbourServiceTest {
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
 		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
+		when(selfRepository.findByName(any())).thenReturn(new Self("bouvet"));
 
 		CapabilityApi response = neighbourService.incomingCapabilities(ericsson);
 
@@ -72,12 +78,9 @@ class NeighbourServiceTest {
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
 
-		doReturn(updatedNeighbour).when(neighbourRepository).save(any(Neighbour.class));
-
 		// Mock response from DNS facade on Server
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		doReturn(Collections.singletonList(ericssonNeighbour)).when(dnsFacade).getNeighbours();
 
 		Throwable thrown = catchThrowable(() -> neighbourService.incomingSubscriptionRequest(ericsson));
 
@@ -141,7 +144,6 @@ class NeighbourServiceTest {
 		// Mock response from DNS facade on Server
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		doReturn(Collections.singletonList(ericssonNeighbour)).when(dnsFacade).getNeighbours();
 
 		neighbourService.incomingSubscriptionRequest(ericsson);
 		verify(neighbourRepository, times(2)).save(any(Neighbour.class)); //saved twice because first save generates id, and second save saves the path derived from the ids
