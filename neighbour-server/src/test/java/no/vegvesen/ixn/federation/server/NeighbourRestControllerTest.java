@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -50,6 +50,9 @@ class NeighbourRestControllerTest {
 	@MockBean
 	ServiceProviderRepository serviceProviderRepository;
 
+	@MockBean
+	NeighbourService neighbourService;
+
 	@Autowired
 	private NeighbourRestController neighbourRestController;
 
@@ -62,7 +65,6 @@ class NeighbourRestControllerTest {
 	@BeforeEach
 	void setUp() {
 		mockMvc = MockMvcBuilders.standaloneSetup(neighbourRestController).setControllerAdvice(NeighbourServiceErrorAdvice.class).build();
-		neighbourRestController = new NeighbourRestController(new NeighbourService(neighbourRepository, selfRepository, dnsFacade));
 	}
 
 	private void mockCertificate(String commonName) {
@@ -76,7 +78,7 @@ class NeighbourRestControllerTest {
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
-	void postingDatexCapabilitiesReturnsStatusCreated() throws Exception {
+	void postingDatexCapabilitiesReturnsStatusOK() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
@@ -88,10 +90,8 @@ class NeighbourRestControllerTest {
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		// Mock dns lookup
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
-		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
+		CapabilityApi selfCapabilities = new CapabilityApi("bouvet", Sets.newLinkedHashSet());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -100,11 +100,10 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-		verify(dnsFacade,times(1)).findNeighbour(anyString());
 	}
 
 	@Test
-	void postingDenmCapabilitiesReturnsStatusCreated() throws Exception {
+	void postingDenmCapabilitiesReturnsStatusOK() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
@@ -118,10 +117,8 @@ class NeighbourRestControllerTest {
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		// Mock dns lookup
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
-		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
+		CapabilityApi selfCapabilities = new CapabilityApi("bouvet", Sets.newLinkedHashSet());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -130,11 +127,10 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-		verify(dnsFacade,times(1)).findNeighbour(anyString());
 	}
 
 	@Test
-	void postingIviCapabilitiesReturnsStatusCreated() throws Exception {
+	void postingIviCapabilitiesReturnsStatusOK() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
@@ -147,10 +143,8 @@ class NeighbourRestControllerTest {
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		// Mock dns lookup
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
-		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
+		CapabilityApi selfCapabilities = new CapabilityApi("bouvet", Sets.newLinkedHashSet());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -159,11 +153,10 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-		verify(dnsFacade,times(1)).findNeighbour(anyString());
 	}
 
 	@Test
-	public void postingCapabilitiesUnknownInDNSReturnsError() throws Exception {
+	public void postingCapabilitiesUnknownInDNSReturnsClientError() throws Exception {
 		// Mocking the incoming certificate
 		mockCertificate("unknownNeighbour");
 
@@ -173,7 +166,7 @@ class NeighbourRestControllerTest {
 		unknownNeighbour.setCapabilities(Collections.singleton(new Datex2DataTypeApi("NO")));
 
 		// Mock response from DNS facade on Server
-		doThrow(new InterchangeNotInDNSException("expected")).when(dnsFacade).findNeighbour(anyString());
+		doThrow(new InterchangeNotInDNSException("expected")).when(neighbourService).incomingCapabilities(any());
 
 		// Create capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(unknownNeighbour);
@@ -185,7 +178,6 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().is4xxClientError());
-		verify(dnsFacade,times(1)).findNeighbour("unknownNeighbour");
 	}
 
 	@Test
@@ -200,34 +192,19 @@ class NeighbourRestControllerTest {
 		// Convert to JSON
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		// Mock saving Neighbour to Neighbour repository
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
-		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
-		firstSubscription.setPath("/ericsson/subscription/1");
-		Set<Subscription> subscriptions = Sets.newLinkedHashSet(firstSubscription);
-		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
-		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
+		SubscriptionRequestApi response = new SubscriptionRequestApi(ericsson.getName(), Sets.newLinkedHashSet(new SubscriptionApi("originatingCountry = 'FI'", "/subscriptions/ericsson/1", SubscriptionStatus.ACCEPTED)));
 
-		doReturn(updatedNeighbour).when(neighbourRepository).save(any(Neighbour.class));
-		doReturn(updatedNeighbour).when(neighbourRepository).findByName(anyString());
-
-		// Mock response from DNS facade on Server
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
-		doReturn(Collections.singletonList(ericssonNeighbour)).when(dnsFacade).getNeighbours();
+		doReturn(response).when(neighbourService).incomingSubscriptionRequest(any());
 
 		mockMvc.perform(post(subscriptionRequestPath)
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(subscriptionRequestApiToServerJson))
 				.andExpect(status().isAccepted());
-		verify(neighbourRepository,times(2)).save(any(Neighbour.class)); //saved twice because first save generates id, and second save saves the path derived from the ids
-		verify(neighbourRepository,times(1)).findByName(anyString());
-		verify(dnsFacade, times(0)).getNeighbours();
 	}
 
 	@Test
-	void postingSubscriptionRequestFromUnseenNeighbourReturnsException() throws Exception {
+	void postingSubscriptionRequestFromUnseenNeighbourReturnsClientError() throws Exception {
 		mockCertificate("ericsson");
 
 		// Create incoming subscription request api objcet
@@ -237,32 +214,17 @@ class NeighbourRestControllerTest {
 
 		// Convert to JSON
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
-
-		// Mock saving Neighbour to Neighbour repository
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
-		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
-		firstSubscription.setPath("/ericsson/subscription/1");
-		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
-		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
-
-		doReturn(updatedNeighbour).when(neighbourRepository).save(any(Neighbour.class));
-
-		// Mock response from DNS facade on Server
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
-		doReturn(Collections.singletonList(ericssonNeighbour)).when(dnsFacade).getNeighbours();
+		doThrow(SubscriptionRequestException.class).when(neighbourService).incomingSubscriptionRequest(any());
 
 		mockMvc.perform(post(subscriptionRequestPath)
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(subscriptionRequestApiToServerJson))
 				.andExpect(status().is4xxClientError());
-		verify(neighbourRepository,times(1)).findByName(anyString());
-		verify(dnsFacade, times(0)).getNeighbours();
 	}
 
 	@Test
-	void postThrowsExceptionIfCommonNameOfCertificateIsNotTheSameAsNameInApiObject() throws Exception {
+	void postCommonNameOfCertificateIsNotTheSameAsNameInApiObjectReturnsClientError() throws Exception {
 		mockCertificate("bouvet");
 
 		// Create incoming capability api object.
@@ -283,7 +245,7 @@ class NeighbourRestControllerTest {
 	}
 
 	@Test
-	void postDatexDataTypeCapability() throws Exception {
+	void postDatexDataTypeCapabilityIsOK() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
@@ -295,10 +257,8 @@ class NeighbourRestControllerTest {
 		// Create JSON string of capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		// Mock dns lookup
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
-		doReturn(ericssonNeighbour).when(dnsFacade).findNeighbour(anyString());
+		CapabilityApi selfCapabilities = new CapabilityApi("bouvet", Sets.newLinkedHashSet());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -307,12 +267,10 @@ class NeighbourRestControllerTest {
 						.content(capabilityApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isOk());
-		verify(dnsFacade,times(1)).findNeighbour(anyString());
-		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
 
 	@Test
-	void postUnknownMessageTypeThrowsBadRequestException() throws Exception {
+	void postUnknownMessageTypeReturnsClientError() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
