@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -79,7 +78,7 @@ public class NeighbourService {
 		return neighbourSubscriptionRequest;
 	}
 
-	public SubscriptionRequestApi incomingSubscriptionRequest(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
+	public SubscriptionRequestApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
 		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest, SubscriptionRequestStatus.REQUESTED);
 		logger.info("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
