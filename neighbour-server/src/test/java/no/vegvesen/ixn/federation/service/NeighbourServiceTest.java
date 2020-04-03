@@ -7,38 +7,32 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
-import javax.persistence.EntityManagerFactory;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = NeighbourService.class)
+
 class NeighbourServiceTest {
-	@MockBean
-	NeighbourRepository neighbourRepository;
-	@MockBean
-	private DNSFacade dnsFacade;
+	private NeighbourRepository neighbourRepository = mock(NeighbourRepository.class);
+	private DNSFacade dnsFacade = mock(DNSFacade.class);
+	private SelfRepository selfRepository = mock(SelfRepository.class);
 
-	@MockBean
-	private ServiceProviderRepository mockServiceProviderRepository;
-	@MockBean
-	private SelfRepository selfRepository;
-	@MockBean
-	EntityManagerFactory entityManagerFactory;
-
-	@Autowired
 	NeighbourService neighbourService;
+
+	@BeforeEach
+	void setUp() {
+		neighbourService = new NeighbourService(neighbourRepository, selfRepository, dnsFacade);
+		when(selfRepository.findByName(any())).thenReturn(new Self("bouvet"));
+	}
 
 	@Test
 	void isAutowired() {
