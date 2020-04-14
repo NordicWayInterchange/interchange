@@ -151,7 +151,7 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		routingConfigurer.setupSubscriberRouting(king_gustaf);
+		routingConfigurer.setupServiceProviderRouting(king_gustaf);
 		SSLContext kingGustafSslContext = setUpTestSslContext("jks/king_gustaf.p12");
 		Sink readKingGustafQueue = new Sink(AMQPS_URL, "king_gustaf", kingGustafSslContext);
 		readKingGustafQueue.start();
@@ -210,13 +210,13 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 	}
 
 	@Test
-	public void subcriberToreDownWillBeRemovedFromSubscribFederatedInterchangesGroup() {
+	public void subscriberToreDownWillBeRemovedFromSubscribFederatedInterchangesGroup() {
 		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
 
-		routingConfigurer.setupSubscriberRouting(toreDownServiceProvider);
+		routingConfigurer.setupServiceProviderRouting(toreDownServiceProvider);
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
 
-		routingConfigurer.tearDownSubscriberRouting(toreDownServiceProvider);
+		routingConfigurer.tearDownServiceProviderRouting(toreDownServiceProvider);
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
 	}
 
