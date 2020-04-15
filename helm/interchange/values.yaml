@@ -2,10 +2,14 @@
 # external_name: test.nordic-way.io
 
 interchange:
-  image: eu.gcr.io/nordic-way-aad182cc/interchangenode:latest
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
+    tag: latest
 
 postgis:
-  image: eu.gcr.io/nordic-way-aad182cc/postgis:latest
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/postgis
+    tag: latest
 
 qpid:
   persistence:
