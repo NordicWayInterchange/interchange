@@ -46,8 +46,8 @@ public class RoutingConfigurer {
 		tearDownRouting(readyToTearDownRouting);
 	}
 
-	void tearDownRouting(List<? extends Subscriber> readyToTearDownRouting) {
-		for (Subscriber subscriber : readyToTearDownRouting) {
+	void tearDownRouting(List<Neighbour> readyToTearDownRouting) {
+		for (Neighbour subscriber : readyToTearDownRouting) {
 			tearDownSubscriberRouting(subscriber);
 		}
 	}
@@ -61,20 +61,16 @@ public class RoutingConfigurer {
 		}
 	}
 
-	void tearDownSubscriberRouting(Subscriber subscriber) {
+	void tearDownSubscriberRouting(Neighbour subscriber) {
 		String name = subscriber.getName();
 		try {
 			logger.debug("Removing routing for subscriber {}", name);
 			qpidClient.removeQueue(name);
-			if (subscriber instanceof ServiceProvider) {
-				removeSubscriberFromGroup(SERVICE_PROVIDERS_GROUP_NAME, name);
-			}
-			else if (subscriber instanceof Neighbour){
-				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
-			}
+			removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
 			logger.info("Removed routing for subscriber {}", name);
 			subscriber.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
-			saveSubscriber(subscriber);
+			saveNeighbour(subscriber);
+			//saveSubscriber(subscriber);
 			logger.debug("Saved subscriber {} with subscription request status EMPTY", name);
 		} catch (Exception e) {
 			logger.error("Could not remove routing for subscriber {}", name, e);
@@ -134,7 +130,7 @@ public class RoutingConfigurer {
 			}
 			subscriber.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
 
-			saveSubscriber(subscriber);
+			saveNeighbour(subscriber);
 			logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", subscriber.getName());
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for subscriber {}", subscriber.getName(), e);
@@ -181,7 +177,7 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void unbindOldUnwantedBindings(Subscriber interchange, String exchangeName) {
+	private void unbindOldUnwantedBindings(Neighbour interchange, String exchangeName) {
 		String name = interchange.getName();
 		Set<String> existingBindKeys = qpidClient.getQueueBindKeys(name);
 		Set<String> unwantedBindKeys = interchange.getUnwantedBindKeys(existingBindKeys);
@@ -232,16 +228,10 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void saveSubscriber(Subscriber subscriber) {
-		if (subscriber instanceof Neighbour)
-			neighbourRepository.save((Neighbour) subscriber);
-		else if (subscriber instanceof ServiceProvider) {
-			serviceProviderRepository.save((ServiceProvider) subscriber);
-		}
-		else {
-			logger.warn("Unknown type of subscriber for saving {}", subscriber.getClass());
-		}
+	private void saveNeighbour(Neighbour neighbour) {
+		neighbourRepository.save(neighbour);
 	}
+
 	private void saveServiceProvider(ServiceProvider subscriber) {
 		serviceProviderRepository.save(subscriber);
 	}

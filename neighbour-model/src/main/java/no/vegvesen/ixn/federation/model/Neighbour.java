@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "neighbours", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_neighbour_name"))
-public class Neighbour implements Subscriber {
+public class Neighbour {
 
 	private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
 	private static final String DEFAULT_CONTROL_CHANNEL_PROTOCOL = "https";
@@ -64,7 +64,6 @@ public class Neighbour implements Subscriber {
 		this.fedIn = fedIn;
 	}
 
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -84,7 +83,6 @@ public class Neighbour implements Subscriber {
 		this.capabilities = capabilities;
 	}
 
-	@Override
 	public SubscriptionRequest getSubscriptionRequest() {
 		return subscriptionRequest;
 	}
@@ -93,7 +91,6 @@ public class Neighbour implements Subscriber {
 		this.subscriptionRequest = subscriptionRequest;
 	}
 
-	@Override
 	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
 		this.subscriptionRequest.setStatus(subscriptionRequestStatus);
 	}
@@ -243,4 +240,18 @@ public class Neighbour implements Subscriber {
 		return getCapabilities() != null && getCapabilities().getStatus() != Capabilities.CapabilitiesStatus.UNREACHABLE;
 	}
 
+	public Set<String> getUnwantedBindKeys(Set<String> existingBindKeys) {
+		Set<String> wantedBindKeys = this.wantedBindings();
+		Set<String> unwantedBindKeys = new HashSet<>(existingBindKeys);
+		unwantedBindKeys.removeAll(wantedBindKeys);
+		return unwantedBindKeys;
+	}
+
+	Set<String> wantedBindings() {
+		Set<String> wantedBindings = new HashSet<>();
+		for (Subscription subscription : getSubscriptionRequest().getAcceptedSubscriptions()) {
+			wantedBindings.add(subscription.bindKey());
+		}
+		return wantedBindings;
+	}
 }

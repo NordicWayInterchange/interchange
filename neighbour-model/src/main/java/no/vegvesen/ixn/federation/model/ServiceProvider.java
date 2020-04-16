@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "service_providers", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_spr_name"))
-public class ServiceProvider implements Subscriber {
+public class ServiceProvider {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sp_generator")
@@ -40,7 +40,6 @@ public class ServiceProvider implements Subscriber {
 		this.name = name;
 	}
 
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -48,12 +47,11 @@ public class ServiceProvider implements Subscriber {
 	//TODO This has to be done in a different way, to be honest.
 	//It seems that it's being used for setting up queues in qpid.
 
-	@Override
 	public SubscriptionRequest getSubscriptionRequest() {
 		LocalSubscriptionRequest localSubscriptionRequest = getOrCreateLocalSubscriptionRequest();
 		return new SubscriptionRequest(localSubscriptionRequest.getStatus(), localSubscriptionRequest.getSubscriptions().stream().map(DataType::toSubscription).collect(Collectors.toSet()));
 	}
-	@Override
+
 	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
 		this.getOrCreateLocalSubscriptionRequest().setStatus(subscriptionRequestStatus);
 	}
@@ -113,7 +111,7 @@ public class ServiceProvider implements Subscriber {
 	}
 
 	public Set<String> unwantedLocalBindings(Set<String> existingKeys) {
-		Set<String> wantedBindKeys = this.wantedBindings();
+		Set<String> wantedBindKeys = this.wantedLocalBindings();
 		Set<String> unwantedBindKeys = new HashSet<>(existingKeys);
 		unwantedBindKeys.removeAll(wantedBindKeys);
 		return unwantedBindKeys;
