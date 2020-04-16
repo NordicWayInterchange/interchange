@@ -7,7 +7,6 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
 import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
@@ -31,6 +30,7 @@ public class OnboardRestController {
 	private final SelfRepository selfRepository;
 	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
+	private TypeTransformer typeTransformer = new TypeTransformer(dataTypeTransformer);
 
 	@Value("${interchange.node-provider.name}")
 	String nodeProviderName;
@@ -105,7 +105,7 @@ public class OnboardRestController {
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		LocalDataType localDataType = null;
 		if (dataTypeId != null) {
-			localDataType = transformToDataTypeApiId(dataTypeId);
+			localDataType = typeTransformer.transformToDataTypeApiId(dataTypeId);
 		}
 		OnboardMDCUtil.removeLogVariables();
 		return localDataType;
@@ -266,7 +266,7 @@ public class OnboardRestController {
 
 		updateSelfSubscriptions(previousSelfSubscriptions);
 
-		LocalDataType returning = transformToDataTypeApiId(newLocalSubscription);
+		LocalDataType returning = typeTransformer.transformToDataTypeApiId(newLocalSubscription);
 		OnboardMDCUtil.removeLogVariables();
 		return returning;
 	}
@@ -334,7 +334,7 @@ public class OnboardRestController {
 	public LocalDataTypeList getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
-		LocalDataTypeList localDataTypeList = transformToDataTypeIdList(serviceProvider.getCapabilities().getDataTypes());
+		LocalDataTypeList localDataTypeList = typeTransformer.transformToDataTypeIdList(serviceProvider.getCapabilities().getDataTypes());
 		OnboardMDCUtil.removeLogVariables();
 		return localDataTypeList;
 
@@ -353,21 +353,9 @@ public class OnboardRestController {
 	public LocalDataTypeList getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
-		LocalDataTypeList localDataTypeList = transformToDataTypeIdList(serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions());
+		LocalDataTypeList localDataTypeList = typeTransformer.transformToDataTypeIdList(serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions());
 		OnboardMDCUtil.removeLogVariables();
 		return localDataTypeList;
-	}
-
-	private LocalDataTypeList transformToDataTypeIdList(Set<DataType> dataTypes) {
-		List<LocalDataType> idDataTypes = new LinkedList<>();
-		for (DataType dataType : dataTypes) {
-			idDataTypes.add(transformToDataTypeApiId(dataType));
-		}
-		return new LocalDataTypeList(idDataTypes);
-	}
-
-	private LocalDataType transformToDataTypeApiId(DataType dataType) {
-		return new LocalDataType(dataType.getData_id(), dataTypeTransformer.dataTypeToApi(dataType));
 	}
 
 	// TODO: Remove
