@@ -176,15 +176,6 @@ data:
                 "NAME": "{{ .Values.external_name }}"
               }
             },
-            {
-              "objectType": "QUEUE",
-              "identity": "service-providers",
-              "operation": "CONSUME",
-              "outcome": "ALLOW_LOG",
-              "attributes": {
-                "NAME": "test-out"
-              }
-            },
             {{- range $i, $ex := .Values.qpid.users }}
             {
               "objectType": "QUEUE",
