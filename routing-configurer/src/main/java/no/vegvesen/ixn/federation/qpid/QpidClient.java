@@ -95,6 +95,7 @@ public class QpidClient {
 		JSONObject json = new JSONObject();
 		json.put("name", subscriber.getName());
 		json.put("durable", true);
+		json.put("maximumMessageTtl", 86400000);
 		String jsonString = json.toString();
 		postQpid(queuesURL, jsonString, "/");
 	}
