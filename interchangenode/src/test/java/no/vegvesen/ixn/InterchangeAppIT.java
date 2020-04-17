@@ -32,7 +32,7 @@ public class InterchangeAppIT extends DockerBaseIT {
     private static final String TRUSTSTORE_JKS = "jks/truststore.jks";
 
 
-    static class InterchangeInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+	static class InterchangeInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
@@ -64,10 +64,10 @@ public class InterchangeAppIT extends DockerBaseIT {
 	}
 
 	@Test
-    public void sendASingleDatex2Message() throws Exception {
+    public void messageIsRoutedViaInterchangeAppWithExpiration() throws Exception {
 	    String sendUrl = getQpidURI();
 
-	    try (Source source = new Source(sendUrl,"onramp",TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12,TRUSTSTORE_JKS))) {
+	    try (Source source = new Source(sendUrl,"onramp", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
             source.start();
             logger.debug("Sending message");
             JmsTextMessage textMessage = source.createTextMessage("Yo!");
@@ -79,14 +79,49 @@ public class InterchangeAppIT extends DockerBaseIT {
             textMessage.setStringProperty("longitude","63.0");
             textMessage.setStringProperty("publicationType","SituationPublication");
 
-            source.sendTextMessage(textMessage, 3_600_000L);
-            logger.debug("Message sendt");
+			long ttl = 2000L;
+			source.sendTextMessage(textMessage, ttl);
+			long expectedExpiration = System.currentTimeMillis() + ttl;
+			logger.debug("Message sendt");
             try (Sink sink = new Sink(getQpidURI(), "NO-out", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
                 logger.debug("Creating consumer");
                 MessageConsumer consumer = sink.createConsumer();
                 logger.debug("Starting receive");
-                Message message = consumer.receive(1000l);
+                Message message = consumer.receive(1000L);
                 assertThat(message).isNotNull();
+                assertThat(message.getJMSExpiration()).isNotNull();
+                assertThat(message.getJMSExpiration())
+						.isBetween(expectedExpiration-200, expectedExpiration + 200);
+            }
+        }
+    }
+
+	@Test
+    public void sendReceiveWithoutInterchangeAppKeepsJmsExpiration() throws Exception {
+	    String sendUrl = getQpidURI();
+
+	    try (Source source = new Source(sendUrl,"NO-private", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+            source.start();
+            logger.debug("Sending message");
+            JmsTextMessage textMessage = source.createTextMessage("Yo!");
+            textMessage.setStringProperty("messageType", "DATEX2");
+            textMessage.setStringProperty("publisherName","SVV");
+            textMessage.setStringProperty("originatingCountry","NO");
+            textMessage.setStringProperty("protocolVersion","DATEX2:1.0");
+            textMessage.setStringProperty("latitude","10.0");
+            textMessage.setStringProperty("longitude","63.0");
+            textMessage.setStringProperty("publicationType","SituationPublication");
+
+            source.sendTextMessage(textMessage, 9999L);
+            logger.debug("Message sendt");
+            try (Sink sink = new Sink(getQpidURI(), "NO-private", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+                logger.debug("Creating consumer");
+                MessageConsumer consumer = sink.createConsumer();
+                logger.debug("Starting receive");
+                Message message = consumer.receive(1000L);
+                assertThat(message).isNotNull();
+                assertThat(message.getJMSExpiration()).isNotNull();
+                assertThat(message.getJMSExpiration()).isGreaterThan(0);
             }
         }
     }

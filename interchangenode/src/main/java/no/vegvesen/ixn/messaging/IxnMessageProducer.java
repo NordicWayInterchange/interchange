@@ -20,12 +20,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.stereotype.Component;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
 
 @Component
 public class IxnMessageProducer {
+
+	final static long DEFAULT_TTL = 86_400_000L;
+	final static long MAX_TTL = 6_911_200_000L;
 
 	private final JmsTemplate jmsTemplate;
 
@@ -37,8 +42,31 @@ public class IxnMessageProducer {
 	}
 
 	public void sendMessage(String destination, final Message textMessage) {
+		long timeToLive = checkTimeToLive(textMessage);
+		this.jmsTemplate.setQosSettings(new QosSettings(this.jmsTemplate.getDeliveryMode(), this.jmsTemplate.getPriority(), timeToLive));
 		this.jmsTemplate.send(destination, session -> textMessage);
 	}
+
+	public static long checkTimeToLive(Message textMessage) {
+		long expiration;
+		try {
+			expiration = textMessage.getJMSExpiration();
+		} catch (JMSException e) {
+			return DEFAULT_TTL;
+		}
+		long currentTime = System.currentTimeMillis();
+		if (expiration <= 0) {
+			// expiration is absent or illegal - setting to default ttl (1 day)
+			return DEFAULT_TTL;
+		} else if (expiration > (MAX_TTL + currentTime)) {
+			// expiration is too high, setting to maximum ttl (8 days)
+			return MAX_TTL;
+		} else {
+			// expiration is in the valid range (more than 0, less than 8 days)
+			return expiration - currentTime;
+		}
+	}
+
 
 }
 
