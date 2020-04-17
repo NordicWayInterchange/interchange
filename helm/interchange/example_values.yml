@@ -26,7 +26,10 @@ qpid:                                                               # Apache Qpi
   persistence:                                                      # Configure persistence of queues in Qpid
     enabled: true
     storageClassName: standard
-    size: 3Gi
+    size: 10Gi
+  memorydump:
+    enabled: true                                                   # store a memory dump on persistent disk
+  java_mem: -Xmx1g -XX:MaxDirectMemorySize=3g                       # memory instructions for qpid
 interchange:                                                        # Java application that validates incoming messages to Qpid
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
