@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.forwarding.DockerBaseIT;
 import no.vegvesen.ixn.messaging.IxnMessageProducer;
 import no.vegvesen.ixn.messaging.TestOnrampMessageProducer;
 import no.vegvesen.ixn.model.IxnMessage;
+import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -181,4 +182,27 @@ public class QpidIT extends DockerBaseIT {
 		assertThat(noOutMessage).isNull();
 	}
 
+	@Test
+	public void sentMessageKeepsExpiryThroughInterchangeApp() throws JMSException, NamingException {
+		BasicAuthSource noSource = new BasicAuthSource(AMQP_URL, "onramp", "interchange", "12345678");
+		noSource.start();
+		JmsTextMessage message = noSource.createTextMessage("hi, norway");
+		message.setStringProperty("who", "Norwegian Public Roads Administration");
+		message.setStringProperty("how", "Datex2");
+		message.setStringProperty("what", "Conditions");
+		message.setStringProperty("lat", "63.0");
+		message.setStringProperty("lon", "10.0");
+		message.setStringProperty("where", "no");
+		noSource.sendTextMessage(message, 5000);
+		long expectedExpiry = System.currentTimeMillis() + 5000;
+
+		MessageConsumer consumer = createConsumer(NO_OUT);
+		Message receivedMessage = consumer.receive(RECEIVE_TIMEOUT);
+		// The queue should have one message
+		assertThat(receivedMessage).isNotNull();
+		//JmsExpiration should be defined
+		assertThat(receivedMessage.getJMSExpiration()).isNotEqualTo(0);
+		assertThat(receivedMessage.getJMSExpiration()).isBetween(expectedExpiry - 200, expectedExpiry + 200);
+		consumer.close();
+	}
 }
