@@ -24,9 +24,11 @@ public class ServiceProvider {
 	@JoinColumn(name = "spr_id_cap", foreignKey = @ForeignKey(name = "fk_cap_spr"))
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
+	/*
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "local_sub_id", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_spr"))
 	private LocalSubscriptionRequest subscriptionRequest = new LocalSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+*/
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "spr_locsub_id", foreignKey = @ForeignKey(name = "fk_spr_locsub"))
@@ -46,7 +48,7 @@ public class ServiceProvider {
 
 	//TODO This has to be done in a different way, to be honest.
 	//It seems that it's being used for setting up queues in qpid.
-
+/*
 	public SubscriptionRequest getSubscriptionRequest() {
 		LocalSubscriptionRequest localSubscriptionRequest = getOrCreateLocalSubscriptionRequest();
 		return new SubscriptionRequest(localSubscriptionRequest.getStatus(), localSubscriptionRequest.getSubscriptions().stream().map(DataType::toSubscription).collect(Collectors.toSet()));
@@ -55,7 +57,7 @@ public class ServiceProvider {
 	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
 		this.getOrCreateLocalSubscriptionRequest().setStatus(subscriptionRequestStatus);
 	}
-
+*/
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -84,10 +86,10 @@ public class ServiceProvider {
 		subscriptions.add(subscription);
 	}
 
+	/*
 	public LocalSubscriptionRequest getLocalSubscriptionRequest() {
 		return subscriptionRequest;
 	}
-
 	public LocalSubscriptionRequest getOrCreateLocalSubscriptionRequest() {
 		if (subscriptionRequest == null) {
 			subscriptionRequest = new LocalSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
@@ -98,6 +100,7 @@ public class ServiceProvider {
 	public void setLocalSubscriptionRequest(LocalSubscriptionRequest subscriptionRequest) {
 		this.subscriptionRequest = subscriptionRequest;
 	}
+*/
 
 	//TODO gjør om til streams-basert
 	public Set<String> wantedLocalBindings() {
@@ -138,7 +141,7 @@ public class ServiceProvider {
 				"id=" + id +
 				", name='" + name + '\'' +
 				", capabilities=" + capabilities +
-				", subscriptionRequest=" + subscriptionRequest +
+				//", subscriptionRequest=" + subscriptionRequest +
 				'}';
 	}
 

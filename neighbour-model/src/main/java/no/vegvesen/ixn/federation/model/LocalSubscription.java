@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 //TODO Equals and Hashcode!!!
 @Entity
@@ -28,6 +29,13 @@ public class LocalSubscription {
         this.dataType = dataType;
     }
 
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, DataType dataType) {
+        this.sub_id = id;
+        this.status = status;
+        this.dataType = dataType;
+    }
+
+
     public void setStatus(LocalSubscriptionStatus status) {
         this.status = status;
     }
@@ -52,5 +60,23 @@ public class LocalSubscription {
     //TODO lag et objekt av selector??
     public String bindKey() {
         return "" + dataType.toSelector().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LocalSubscription that = (LocalSubscription) o;
+        return status == that.status &&
+                Objects.equals(dataType, that.dataType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(status, dataType);
+    }
+
+    public Integer getSub_id() {
+        return sub_id;
     }
 }

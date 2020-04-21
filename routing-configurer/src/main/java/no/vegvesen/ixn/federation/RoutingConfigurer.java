@@ -48,7 +48,7 @@ public class RoutingConfigurer {
 
 	void tearDownRouting(List<Neighbour> readyToTearDownRouting) {
 		for (Neighbour subscriber : readyToTearDownRouting) {
-			tearDownSubscriberRouting(subscriber);
+			tearDownNeighbourRouting(subscriber);
 		}
 	}
 
@@ -61,19 +61,18 @@ public class RoutingConfigurer {
 		}
 	}
 
-	void tearDownSubscriberRouting(Neighbour subscriber) {
-		String name = subscriber.getName();
+	void tearDownNeighbourRouting(Neighbour neighbour) {
+		String name = neighbour.getName();
 		try {
-			logger.debug("Removing routing for subscriber {}", name);
+			logger.debug("Removing routing for neighbour {}", name);
 			qpidClient.removeQueue(name);
 			removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
-			logger.info("Removed routing for subscriber {}", name);
-			subscriber.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
-			saveNeighbour(subscriber);
-			//saveSubscriber(subscriber);
-			logger.debug("Saved subscriber {} with subscription request status EMPTY", name);
+			logger.info("Removed routing for neighbour {}", name);
+			neighbour.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
+			neighbourRepository.save(neighbour);
+			logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
 		} catch (Exception e) {
-			logger.error("Could not remove routing for subscriber {}", name, e);
+			logger.error("Could not remove routing for neighbour {}", name, e);
 		}
 	}
 
@@ -92,10 +91,8 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForServiceProvidersToSetupRoutingFor() {
 		logger.debug("Checking for new service providers to setup routing");
-		//List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.REQUESTED);
 		List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.REQUESTED);
 		logger.debug("Found {} service providers to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
-		//setupRouting(readyToSetupRouting);
 		setupServiceProviderRouting(readyToSetupRouting);
 
 		logger.debug("Checking for service providers to tear down routing");
@@ -119,21 +116,21 @@ public class RoutingConfigurer {
 
 	}
 
-	void setupSubscriberRouting(Neighbour subscriber) {
+	void setupSubscriberRouting(Neighbour neighbour) {
 		try {
-			logger.debug("Setting up routing for subscriber {}", subscriber.getName());
-			createQueue(subscriber.getName());
-			addSubscriberToGroup(FEDERATED_GROUP_NAME, subscriber.getName());
-			bindSubscriptions("nwEx", subscriber);
-			for (Subscription subscription : subscriber.getSubscriptionRequest().getSubscriptions()) {
+			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
+			createQueue(neighbour.getName());
+			addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
+			bindSubscriptions("nwEx", neighbour);
+			for (Subscription subscription : neighbour.getSubscriptionRequest().getSubscriptions()) {
 				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 			}
-			subscriber.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+			neighbour.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
 
-			saveNeighbour(subscriber);
-			logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", subscriber.getName());
+			neighbourRepository.save(neighbour);
+			logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
 		} catch (Throwable e) {
-			logger.error("Could not set up routing for subscriber {}", subscriber.getName(), e);
+			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
 		}
 	}
 
@@ -143,21 +140,12 @@ public class RoutingConfigurer {
 			logger.debug("Setting up routing for service provider {}", serviceProviderName);
 			createQueue(serviceProviderName);
 			addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, serviceProviderName);
-			//TODO this might have to be different. What if we can only set up one of several bindings?
 			bindServiceProviderSubscriptions("nwEx", serviceProvider);
 			bindServiceProviderSubscriptions("fedEx", serviceProvider);
 			for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
 				subscription.setStatus(LocalSubscriptionStatus.CREATED);
 			}
-			//TODO this should go
-			for (Subscription subscription : serviceProvider.getSubscriptionRequest().getSubscriptions()) {
-				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-			}
-			//TODO this should go
-			serviceProvider.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
-
-			//saveSubscriber(serviceProvider);
-			saveServiceProvider(serviceProvider);
+			serviceProviderRepository.save(serviceProvider);
 			logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", serviceProviderName);
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for subscriber {}", serviceProviderName, e);
@@ -170,17 +158,17 @@ public class RoutingConfigurer {
 
 	}
 
-	private void bindSubscriptions(String exchange, Neighbour subscriber) {
-		unbindOldUnwantedBindings(subscriber, exchange);
-		for (Subscription subscription : subscriber.getSubscriptionRequest().getAcceptedSubscriptions()) {
-			qpidClient.addBinding(subscription.getSelector(), subscriber.getName(), subscription.bindKey(), exchange);
+	private void bindSubscriptions(String exchange, Neighbour neighbour) {
+		unbindOldUnwantedBindings(neighbour, exchange);
+		for (Subscription subscription : neighbour.getSubscriptionRequest().getAcceptedSubscriptions()) {
+			qpidClient.addBinding(subscription.getSelector(), neighbour.getName(), subscription.bindKey(), exchange);
 		}
 	}
 
-	private void unbindOldUnwantedBindings(Neighbour interchange, String exchangeName) {
-		String name = interchange.getName();
+	private void unbindOldUnwantedBindings(Neighbour neighbour, String exchangeName) {
+		String name = neighbour.getName();
 		Set<String> existingBindKeys = qpidClient.getQueueBindKeys(name);
-		Set<String> unwantedBindKeys = interchange.getUnwantedBindKeys(existingBindKeys);
+		Set<String> unwantedBindKeys = neighbour.getUnwantedBindKeys(existingBindKeys);
 		for (String unwantedBindKey : unwantedBindKeys) {
 			qpidClient.unbindBindKey(name, unwantedBindKey, exchangeName);
 		}
@@ -226,14 +214,6 @@ public class RoutingConfigurer {
 		} else {
 			logger.warn("Subscriber {} does not exist in the group {} and cannot be removed.", subscriberName, groupName);
 		}
-	}
-
-	private void saveNeighbour(Neighbour neighbour) {
-		neighbourRepository.save(neighbour);
-	}
-
-	private void saveServiceProvider(ServiceProvider subscriber) {
-		serviceProviderRepository.save(subscriber);
 	}
 
 }

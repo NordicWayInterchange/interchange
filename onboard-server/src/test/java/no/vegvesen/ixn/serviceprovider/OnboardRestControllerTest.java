@@ -220,17 +220,17 @@ public class OnboardRestControllerTest {
 		// The existing subscriptions of the Service Provider
 		LocalSubscriptionRequest serviceProviderSubscriptionRequest = new LocalSubscriptionRequest();
 		DataType se = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
-		LocalSubscription seSubs = new LocalSubscription(LocalSubscriptionStatus.CREATED,se);
+		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se);
 		DataType fi = new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
-		LocalSubscription fiSubs = new LocalSubscription(LocalSubscriptionStatus.CREATED,fi);
-		serviceProviderSubscriptionRequest.addLocalSubscription(se);
-		serviceProviderSubscriptionRequest.addLocalSubscription(fi);
-		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
+		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi);
+		//serviceProviderSubscriptionRequest.addLocalSubscription(se);
+		//serviceProviderSubscriptionRequest.addLocalSubscription(fi);
+		//serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName(firstServiceProviderName);
 		firstServiceProvider.addLocalSubscription(seSubs);
 		firstServiceProvider.addLocalSubscription(fiSubs);
-		firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
+		//firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self
@@ -262,7 +262,7 @@ public class OnboardRestControllerTest {
 		serviceProviderSubscriptionRequest.addLocalSubscription(se);
 		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
-		firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
+		//firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		// Subscription request api posted to the server
@@ -355,13 +355,13 @@ public class OnboardRestControllerTest {
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
-		firstServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubA);
-		firstServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubB);
+		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubA));
+		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubB));
 
 		ServiceProvider secondServiceProvider = new ServiceProvider();
 		secondServiceProvider.setName("Second Service Provider");
-		secondServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubB);
-		secondServiceProvider.getLocalSubscriptionRequest().addLocalSubscription(localSubC);
+		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubB));
+		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubC));
 
 		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 

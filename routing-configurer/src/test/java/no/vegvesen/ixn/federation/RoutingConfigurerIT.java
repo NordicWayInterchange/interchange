@@ -205,7 +205,7 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 		routingConfigurer.setupSubscriberRouting(toreDownNeighbour);
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).contains(toreDownNeighbour.getName());
 
-		routingConfigurer.tearDownSubscriberRouting(toreDownNeighbour);
+		routingConfigurer.tearDownNeighbourRouting(toreDownNeighbour);
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).doesNotContain(toreDownNeighbour.getName());
 	}
 

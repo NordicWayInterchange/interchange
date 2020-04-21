@@ -13,10 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -66,6 +63,10 @@ public class ServiceProviderRepositoryIT {
 
 		ServiceProvider volvoFromRepository = repository.findByName("Volvo");
 		assertThat(volvoFromRepository.getSubscriptions()).size().isEqualTo(1);
+		Optional<LocalSubscription> first = volvoFromRepository.getSubscriptions().stream().findFirst();
+		LocalSubscription savedSubscription = first.orElseThrow(() -> new AssertionError("Could not locate subscription"));
+		assertThat(savedSubscription.getSub_id()).isNotNull();
+
 	}
 
 	@Test
