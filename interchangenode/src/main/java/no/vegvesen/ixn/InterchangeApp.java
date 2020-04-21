@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
 
 @SuppressWarnings("WeakerAccess")
@@ -34,18 +35,18 @@ public class InterchangeApp{
 
 
 	@JmsListener(destination = "onramp")
-	public void receiveMessage(Message message) {
+	public void receiveMessage(Message message) throws JMSException {
 		try {
 			MDCUtil.setLogVariables(message);
 			if (messageValidator.isValid(message)) {
-				producer.sendMessage(NWEXCHANGE, message);
+				producer.sendMessage(message);
 			} else {
 				logger.warn("Sending bad message to dead letter queue. Invalid message.");
-				producer.sendMessage(DLQUEUE, message);
+				producer.toDlQueue(message);
 			}
 		} catch (Exception e) {
 			logger.error("Exception when processing message, sending bad message to dead letter queue. Invalid message.", e);
-			producer.sendMessage(DLQUEUE, message);
+			producer.toDlQueue(message);
 		} finally {
 			MDCUtil.removeLogVariables();
 		}

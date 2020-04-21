@@ -16,57 +16,48 @@
  */
 package no.vegvesen.ixn.messaging;
 
+import no.vegvesen.ixn.IxnContext;
+import no.vegvesen.ixn.MessageForwardUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.support.QosSettings;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
+import javax.jms.*;
+import javax.naming.NamingException;
 
 @Component
 public class IxnMessageProducer {
 
-	final static long DEFAULT_TTL = 86_400_000L;
-	final static long MAX_TTL = 6_911_200_000L;
-
-	private final JmsTemplate jmsTemplate;
-
 	private static Logger logger = LoggerFactory.getLogger(IxnMessageProducer.class);
+	private MessageProducer nwExProducer;
+	private MessageProducer dlQueueProducer;
 
 	@Autowired
-	public IxnMessageProducer(JmsTemplate jmsTemplate) {
-		this.jmsTemplate = jmsTemplate;
+	public IxnMessageProducer(@Value("${amqphub.amqp10jms.remote-url}") String amqpUrl,
+							  @Value("${amqphub.amqp10jms.username}") String username,
+							  @Value("${amqphub.amqp10jms.password}") String password
+	) throws JMSException, NamingException {
+		nwExProducer = createProducer("nwEx", amqpUrl, username, password);
+		dlQueueProducer = createProducer("dlqueue", amqpUrl, username, password);
 	}
 
-	public void sendMessage(String destination, final Message textMessage) {
-		long timeToLive = checkTimeToLive(textMessage);
-		this.jmsTemplate.setQosSettings(new QosSettings(this.jmsTemplate.getDeliveryMode(), this.jmsTemplate.getPriority(), timeToLive));
-		this.jmsTemplate.send(destination, session -> textMessage);
+	private MessageProducer createProducer(String destination, String amqpUrl, String username, String password) throws NamingException, JMSException {
+		IxnContext writeContext = new IxnContext(amqpUrl, destination, null);
+		Destination writeDestination = writeContext.getSendQueue();
+		Connection writeConnection = writeContext.createConnection(username, password);
+		Session writeSession = writeConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		return writeSession.createProducer(writeDestination);
 	}
 
-	public static long checkTimeToLive(Message textMessage) {
-		long expiration;
-		try {
-			expiration = textMessage.getJMSExpiration();
-		} catch (JMSException e) {
-			return DEFAULT_TTL;
-		}
-		long currentTime = System.currentTimeMillis();
-		if (expiration <= 0) {
-			// expiration is absent or illegal - setting to default ttl (1 day)
-			return DEFAULT_TTL;
-		} else if (expiration > (MAX_TTL + currentTime)) {
-			// expiration is too high, setting to maximum ttl (8 days)
-			return MAX_TTL;
-		} else {
-			// expiration is in the valid range (more than 0, less than 8 days)
-			return expiration - currentTime;
-		}
+	public void sendMessage(final Message textMessage) throws JMSException {
+		MessageForwardUtil.send(nwExProducer, textMessage);
 	}
 
+	public void toDlQueue(final Message textMessage) throws JMSException {
+		MessageForwardUtil.send(dlQueueProducer, textMessage);
+	}
 
 }
 
