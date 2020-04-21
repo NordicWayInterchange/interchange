@@ -44,7 +44,7 @@ public class InterchangeAppIT extends DockerBaseIT {
         }
     }
 
-    //Only do this to have the interchangeApp running on the local machine. This gives better logging.
+    //InterchangeApp consumes messages sent to the queue onramp and is not triggered explicitly from the tests
     @Autowired
     private InterchangeApp interchangeApp;
 
