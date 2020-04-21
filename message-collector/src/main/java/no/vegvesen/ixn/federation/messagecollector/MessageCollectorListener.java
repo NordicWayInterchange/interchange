@@ -1,15 +1,10 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
+import no.vegvesen.ixn.MessageForwardUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.DeliveryMode;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
+import javax.jms.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MessageCollectorListener implements MessageListener, ExceptionListener {
@@ -30,7 +25,7 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
         if (running.get()) {
             try {
                 log.debug("Sending message!");
-                producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+				MessageForwardUtil.send(producer, message);
                 log.debug("Message sendt!");
             } catch (JMSException e) {
                 log.error("Problem receiving message", e);

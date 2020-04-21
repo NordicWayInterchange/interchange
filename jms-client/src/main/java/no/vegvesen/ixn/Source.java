@@ -129,4 +129,17 @@ public class Source implements AutoCloseable {
 		return (JmsTextMessage) session.createTextMessage(msg);
 	}
 
+	public void send(String messageText, String originatingCountry, long timeToLive) throws JMSException {
+		JmsTextMessage message = createTextMessage(messageText);
+		message.getFacade().setUserId("localhost");
+		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
+		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
+		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
+		message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
+		message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
+		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
+		sendTextMessage(message, timeToLive);
+	}
 }
