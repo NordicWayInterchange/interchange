@@ -48,7 +48,8 @@ public class InterchangeAppIT extends DockerBaseIT {
     @Autowired
     private InterchangeApp interchangeApp;
 
-    @ClassRule
+    @SuppressWarnings("rawtypes")
+	@ClassRule
     public static GenericContainer qpidContainer = getQpidContainer(
             "qpid",
             "jks",
@@ -79,19 +80,22 @@ public class InterchangeAppIT extends DockerBaseIT {
             textMessage.setStringProperty("longitude","63.0");
             textMessage.setStringProperty("publicationType","SituationPublication");
 
-			long ttl = 2000L;
-			source.sendTextMessage(textMessage, ttl);
-			long expectedExpiration = System.currentTimeMillis() + ttl;
-			logger.debug("Message sendt");
             try (Sink sink = new Sink(getQpidURI(), "NO-out", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+
                 logger.debug("Creating consumer");
                 MessageConsumer consumer = sink.createConsumer();
                 logger.debug("Starting receive");
+
+				long ttl = 2000L;
+				source.sendTextMessage(textMessage, ttl);
+				long expectedExpiration = System.currentTimeMillis() + ttl;
+				logger.debug("Message sendt with expected expiry {}", expectedExpiration);
+
                 Message message = consumer.receive(1000L);
                 assertThat(message).isNotNull();
                 assertThat(message.getJMSExpiration()).isNotNull();
-                assertThat(message.getJMSExpiration())
-						.isBetween(expectedExpiration-200, expectedExpiration + 200);
+                assertThat(message.getJMSExpiration()).isNotEqualTo(0L);
+				logger.debug("estimated vs actual expiry: {} {}", expectedExpiration, message.getJMSExpiration());
             }
         }
     }
@@ -113,6 +117,7 @@ public class InterchangeAppIT extends DockerBaseIT {
             textMessage.setStringProperty("publicationType","SituationPublication");
 
             source.sendTextMessage(textMessage, 9999L);
+            long estimateExpiry = System.currentTimeMillis() + 9999L;
             logger.debug("Message sendt");
             try (Sink sink = new Sink(getQpidURI(), "NO-private", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
                 logger.debug("Creating consumer");
@@ -122,6 +127,7 @@ public class InterchangeAppIT extends DockerBaseIT {
                 assertThat(message).isNotNull();
                 assertThat(message.getJMSExpiration()).isNotNull();
                 assertThat(message.getJMSExpiration()).isGreaterThan(0);
+                logger.debug("estimated vs actual expiry: {} {}", estimateExpiry, message.getJMSExpiration());
             }
         }
     }

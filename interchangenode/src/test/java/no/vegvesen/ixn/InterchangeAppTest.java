@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
 
 import static org.mockito.Mockito.*;
@@ -28,7 +29,7 @@ public class InterchangeAppTest {
     }
 
     @Test
-    public void validMessageIsSent() {
+    public void validMessageIsSent() throws JMSException {
 
         Message message = MessageTestDouble.createMessage(
                 "NO00001",
@@ -40,12 +41,12 @@ public class InterchangeAppTest {
                 new KeyValue("publicationType","SituationPublication")
         );
         app.receiveMessage(message);
-        verify(producer, times(1)).sendMessage(eq("nwEx"), any(Message.class));
+        verify(producer, times(1)).sendMessage(any(Message.class));
     }
 
 
     @Test
-    public void receivedMessageWithoutOriginatingCountrySendsToDlQueue() {
+    public void receivedMessageWithoutOriginatingCountrySendsToDlQueue() throws JMSException {
 
         Message message = MessageTestDouble.createMessage(
                 "NO00001",
@@ -57,7 +58,7 @@ public class InterchangeAppTest {
                 new KeyValue("publicationType","SituationPublication")
         );
         app.receiveMessage(message);
-        verify(producer, times(1)).sendMessage(eq(InterchangeApp.DLQUEUE), any(Message.class));
+        verify(producer, times(1)).toDlQueue(any(Message.class));
     }
 
 
