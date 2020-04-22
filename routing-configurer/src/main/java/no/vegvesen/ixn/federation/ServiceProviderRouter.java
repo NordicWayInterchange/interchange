@@ -38,29 +38,20 @@ public class ServiceProviderRouter {
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders) {
         List<String> groupMemberNames = qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
         for (ServiceProvider serviceProvider : serviceProviders) {
-            //Set<String> existingBindKeys = qpidClient.getQueueBindKeys(serviceProvider.getName());
             Set<LocalSubscription> subscriptionsToRemove = new HashSet<>();
             String name = serviceProvider.getName();
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
                 switch (subscription.getStatus()) {
                     case REQUESTED:
-                        //	Check whether or not the user exists, if not, create it
                         setupServiceProviderRouting(groupMemberNames, name, subscription);
                         subscription.setStatus(LocalSubscriptionStatus.CREATED);
                         repository.save(serviceProvider);
                         break;
                     case CREATED:
-                        //	Check whether or not the user exists, if not, create it
                         setupServiceProviderRouting(groupMemberNames, name, subscription);
                         break;
                     case TEAR_DOWN:
-                        //	Check that the binding exist, if so, delete it
-                        if (qpidClient.queueExists(name)) {
-                            if (qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
-                                qpidClient.unbindBindKey(name, subscription.bindKey(), "nwEx");
-                                qpidClient.unbindBindKey(name, subscription.bindKey(), "fedEx");
-                            }
-                        }
+                        unbindBindings(name, subscription);
                         //	signal that the subscriptions should be removed from the service provider
                         subscriptionsToRemove.add(subscription);
                         break;
@@ -84,7 +75,18 @@ public class ServiceProviderRouter {
         }
     }
 
+    public void unbindBindings(String name, LocalSubscription subscription) {
+        //	Check that the binding exist, if so, delete it
+        if (qpidClient.queueExists(name)) {
+            if (qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
+                qpidClient.unbindBindKey(name, subscription.bindKey(), "nwEx");
+                qpidClient.unbindBindKey(name, subscription.bindKey(), "fedEx");
+            }
+        }
+    }
+
     public void setupServiceProviderRouting(List<String> groupMemberNames, String name, LocalSubscription subscription) {
+        //	Check whether or not the user exists, if not, create it
         if (!groupMemberNames.contains(name)) {
             qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
         }
