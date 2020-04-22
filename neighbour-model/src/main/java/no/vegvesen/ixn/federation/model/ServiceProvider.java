@@ -26,6 +26,7 @@ public class ServiceProvider {
 	@JoinColumn(name = "spr_id_cap", foreignKey = @ForeignKey(name = "fk_cap_spr"))
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "spr_locsub_id", foreignKey = @ForeignKey(name = "fk_spr_locsub"))
 	private Set<LocalSubscription> subscriptions = new HashSet<>();
 
