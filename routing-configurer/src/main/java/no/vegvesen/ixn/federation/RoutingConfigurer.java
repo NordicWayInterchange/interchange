@@ -4,7 +4,6 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
-import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 
 @Component
 public class RoutingConfigurer {
@@ -24,14 +22,14 @@ public class RoutingConfigurer {
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
 	private final NeighbourRepository neighbourRepository;
-	private final ServiceProviderRepository serviceProviderRepository;
 	private final QpidClient qpidClient;
+	private final ServiceProviderRouter serviceProviderRouter;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, QpidClient qpidClient) {
+	public RoutingConfigurer(NeighbourRepository neighbourRepository, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter) {
 		this.neighbourRepository = neighbourRepository;
-		this.serviceProviderRepository = serviceProviderRepository;
 		this.qpidClient = qpidClient;
+		this.serviceProviderRouter = serviceProviderRouter;
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -52,15 +50,6 @@ public class RoutingConfigurer {
 		}
 	}
 
-	void tearDownServiceProviderRouting(List<ServiceProvider> readyToTearDown) {
-		List<String> groupMemberNames = qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
-		for (ServiceProvider serviceProvider : readyToTearDown) {
-		    if (groupMemberNames.contains(serviceProvider.getName())) {
-				tearDownServiceProviderRouting(serviceProvider);
-			}
-		}
-	}
-
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
 		try {
@@ -76,47 +65,16 @@ public class RoutingConfigurer {
 		}
 	}
 
-	void tearDownServiceProviderRouting(ServiceProvider serviceProvider) {
-		String name = serviceProvider.getName();
-		try {
-			logger.debug("Removing routing for subscriber {}", name);
-			qpidClient.removeQueue(name);
-			removeSubscriberFromGroup(SERVICE_PROVIDERS_GROUP_NAME, name);
-			logger.info("Removed routing for subscriber {}", name);
-		} catch (Exception e) {
-			logger.error("Could not remove routing for subscriber {}", name, e);
-		}
-	}
-
-	@Scheduled(fixedRateString = "${routing-configurer.interval}")
-	public void checkForServiceProvidersToSetupRoutingFor() {
-		logger.debug("Checking for new service providers to setup routing");
-		List<ServiceProvider> readyToSetupRouting = serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.REQUESTED);
-		logger.debug("Found {} service providers to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
-		setupServiceProviderRouting(readyToSetupRouting);
-
-		logger.debug("Checking for service providers to tear down routing");
-		List<ServiceProvider> readyToTearDownRouting = serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.TEAR_DOWN);
-		tearDownServiceProviderRouting(readyToTearDownRouting);
-	}
-
 	//Both neighbour and service providers binds to nwEx to receive local messages
 	//Service provider also binds to fedEx to receive messages from neighbours
 	//This avoids loop of messages
 	private void setupRouting(List<Neighbour> readyToSetupRouting) {
 		for (Neighbour subscriber : readyToSetupRouting) {
-			setupSubscriberRouting(subscriber);
+			setupNeighbourRouting(subscriber);
 		}
 	}
 
-	private void setupServiceProviderRouting(List<ServiceProvider> serviceProvidersToSetupRoutingFor) {
-		for (ServiceProvider serviceProvider : serviceProvidersToSetupRoutingFor) {
-			setupServiceProviderRouting(serviceProvider);
-		}
-
-	}
-
-	void setupSubscriberRouting(Neighbour neighbour) {
+	void setupNeighbourRouting(Neighbour neighbour) {
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			createQueue(neighbour.getName());
@@ -132,30 +90,6 @@ public class RoutingConfigurer {
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
 		}
-	}
-
-	void setupServiceProviderRouting(ServiceProvider serviceProvider) {
-		String serviceProviderName = serviceProvider.getName();
-		try {
-			logger.debug("Setting up routing for service provider {}", serviceProviderName);
-			createQueue(serviceProviderName);
-			addSubscriberToGroup(SERVICE_PROVIDERS_GROUP_NAME, serviceProviderName);
-			bindServiceProviderSubscriptions("nwEx", serviceProvider);
-			bindServiceProviderSubscriptions("fedEx", serviceProvider);
-			for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-				subscription.setStatus(LocalSubscriptionStatus.CREATED);
-			}
-			serviceProviderRepository.save(serviceProvider);
-			logger.debug("Saved subscriber {} with subscription request status ESTABLISHED", serviceProviderName);
-		} catch (Throwable e) {
-			logger.error("Could not set up routing for subscriber {}", serviceProviderName, e);
-		}
-	}
-
-	private void createQueue(String subscriberName) {
-		qpidClient.createQueue(subscriberName);
-		qpidClient.addReadAccess(subscriberName,subscriberName);
-
 	}
 
 	private void bindSubscriptions(String exchange, Neighbour neighbour) {
@@ -174,21 +108,17 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void bindServiceProviderSubscriptions(String exchange, ServiceProvider serviceProvider) {
-	    unbindOldUnwantedServiceProviderBindings(serviceProvider,exchange);
-	    for(LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-	    	if (subscription.isSubscriptionWanted()) {
-	    		qpidClient.addBinding(subscription.selector(),serviceProvider.getName(),subscription.bindKey(),exchange);
-			}
-		}
+	@Scheduled(fixedRateString = "${routing-configurer.interval}")
+	public void checkForServiceProvidersToSetupRoutingFor() {
+		logger.debug("Checking for new service providers to setup routing");
+		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
+		serviceProviderRouter.syncServiceProviders(serviceProviders);
 	}
 
-	private void unbindOldUnwantedServiceProviderBindings(ServiceProvider serviceProvider,String exchangeName) {
-		Set<String> existingBindinKeys = qpidClient.getQueueBindKeys(serviceProvider.getName());
-		Set<String> unwantedBindings = serviceProvider.unwantedLocalBindings(existingBindinKeys);
-		for (String unwantedBinding : unwantedBindings) {
-			qpidClient.unbindBindKey(serviceProvider.getName(),unwantedBinding,exchangeName);
-		}
+
+	private void createQueue(String subscriberName) {
+		qpidClient.createQueue(subscriberName);
+		qpidClient.addReadAccess(subscriberName,subscriberName);
 
 	}
 

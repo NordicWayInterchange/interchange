@@ -79,4 +79,13 @@ public class LocalSubscription {
     public Integer getSub_id() {
         return sub_id;
     }
+
+    @Override
+    public String toString() {
+        return "LocalSubscription{" +
+                "sub_id=" + sub_id +
+                ", status=" + status +
+                ", dataType=" + dataType +
+                '}';
+    }
 }
