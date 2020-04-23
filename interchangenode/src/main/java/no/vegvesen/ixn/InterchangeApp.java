@@ -18,8 +18,6 @@ import javax.jms.Message;
 @SpringBootApplication
 @EnableJms
 public class InterchangeApp{
-	public static final String DLQUEUE = "dlqueue";
-	public static final String NWEXCHANGE = "nwEx";
 
 	private static Logger logger =LoggerFactory.getLogger(InterchangeApp.class);
 
