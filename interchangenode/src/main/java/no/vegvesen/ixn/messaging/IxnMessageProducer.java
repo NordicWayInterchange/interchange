@@ -31,6 +31,9 @@ import javax.naming.NamingException;
 public class IxnMessageProducer {
 
 	private static Logger logger = LoggerFactory.getLogger(IxnMessageProducer.class);
+	private final String amqpUrl;
+	private final String username;
+	private final String password;
 	private MessageProducer nwExProducer;
 	private MessageProducer dlQueueProducer;
 
@@ -39,6 +42,9 @@ public class IxnMessageProducer {
 							  @Value("${amqphub.amqp10jms.username}") String username,
 							  @Value("${amqphub.amqp10jms.password}") String password
 	) throws JMSException, NamingException {
+		this.amqpUrl = amqpUrl;
+		this.username = username;
+		this.password = password;
 		nwExProducer = createProducer("nwEx", amqpUrl, username, password);
 		dlQueueProducer = createProducer("dlqueue", amqpUrl, username, password);
 	}
@@ -51,12 +57,25 @@ public class IxnMessageProducer {
 		return writeSession.createProducer(writeDestination);
 	}
 
-	public void sendMessage(final Message textMessage) throws JMSException {
-		MessageForwardUtil.send(nwExProducer, textMessage);
+	public void sendMessage(final Message textMessage) throws JMSException, NamingException {
+		try {
+			nwExProducer
+			MessageForwardUtil.send(nwExProducer, textMessage);
+		} catch (JMSException e) {
+			logger.warn("Trying to re-establish connection to produce message to nwEx", e);
+			nwExProducer = createProducer("nwEx", amqpUrl, username, password);
+			MessageForwardUtil.send(nwExProducer, textMessage);
+		}
 	}
 
-	public void toDlQueue(final Message textMessage) throws JMSException {
-		MessageForwardUtil.send(dlQueueProducer, textMessage);
+	public void toDlQueue(final Message textMessage) throws JMSException, NamingException {
+		try {
+			MessageForwardUtil.send(dlQueueProducer, textMessage);
+		} catch (JMSException e) {
+			logger.warn("Trying to re-establish connection to produce message to dlqueue", e);
+			nwExProducer = createProducer("dlqueue", amqpUrl, username, password);
+			MessageForwardUtil.send(dlQueueProducer, textMessage);
+		}
 	}
 
 }
