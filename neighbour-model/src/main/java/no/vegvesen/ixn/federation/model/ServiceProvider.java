@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "service_providers", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_spr_name"))
@@ -70,24 +68,6 @@ public class ServiceProvider {
 		subscriptions.add(subscription);
 	}
 
-	//TODO gjør om til streams-basert
-	public Set<String> wantedLocalBindings() {
-		Set<String> wantedBindings = new HashSet<>();
-		for (LocalSubscription subscription : subscriptions) {
-			if (subscription.isSubscriptionWanted() ) {
-				wantedBindings.add(subscription.bindKey());
-			}
-		}
-		return wantedBindings;
-	}
-
-	public Set<String> unwantedLocalBindings(Set<String> existingKeys) {
-		Set<String> wantedBindKeys = this.wantedLocalBindings();
-		Set<String> unwantedBindKeys = new HashSet<>(existingKeys);
-		unwantedBindKeys.removeAll(wantedBindKeys);
-		return unwantedBindKeys;
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -113,7 +93,4 @@ public class ServiceProvider {
 				'}';
 	}
 
-	public void setSubscriptions(Set<LocalSubscription> subscriptions) {
-	    this.subscriptions = subscriptions;
-	}
 }

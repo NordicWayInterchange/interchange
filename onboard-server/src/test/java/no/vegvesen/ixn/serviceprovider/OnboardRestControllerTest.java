@@ -223,14 +223,10 @@ public class OnboardRestControllerTest {
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se);
 		DataType fi = new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi);
-		//serviceProviderSubscriptionRequest.addLocalSubscription(se);
-		//serviceProviderSubscriptionRequest.addLocalSubscription(fi);
-		//serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName(firstServiceProviderName);
 		firstServiceProvider.addLocalSubscription(seSubs);
 		firstServiceProvider.addLocalSubscription(fiSubs);
-		//firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self
@@ -262,7 +258,6 @@ public class OnboardRestControllerTest {
 		serviceProviderSubscriptionRequest.addLocalSubscription(se);
 		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
-		//firstServiceProvider.setLocalSubscriptionRequest(serviceProviderSubscriptionRequest);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		// Subscription request api posted to the server

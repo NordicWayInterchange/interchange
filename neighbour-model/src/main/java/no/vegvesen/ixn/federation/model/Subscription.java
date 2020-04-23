@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 
 import javax.persistence.*;
 
-//TODO selector til egen klasse?
 @Entity
 @Table(name = "subscriptions")
 public class Subscription {
