@@ -52,6 +52,14 @@ spec:
           value: /config/groups
         - name: PASSWD_FILE
           value: /config/passwd
+        {{- if .Values.qpid.java_mem }}
+        - name: QPID_JAVA_MEM
+          value: {{ .Values.qpid.java_mem }}
+        {{- end }}
+        {{- if .Values.qpid.memorydump.enabled }}
+        - name: JAVA_OPTS
+          value: -XX:HeapDumpPath=/work/memorydump/
+        {{- end }}
         volumeMounts:
         - name: config
           mountPath: /config
@@ -63,6 +71,11 @@ spec:
         - name: storage
           mountPath: /work/{{ required "must provide .Values.external_name" .Values.external_name }}
           subPath: {{ required "must provide .Values.external_name" .Values.external_name }}
+        {{- if .Values.qpid.memorydump.enabled }}
+        - name: storage
+          mountPath: /work/memorydump
+          subPath: memorydump
+        {{- end }}
         readinessProbe:
           initialDelaySeconds: 5
           tcpSocket:
@@ -80,4 +93,4 @@ spec:
           claimName: {{ .Release.Name }}-qpid
       {{- else }}
         emptyDir: {}
-      {{- end -}}
+      {{- end }}

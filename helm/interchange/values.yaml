@@ -2,16 +2,23 @@
 # external_name: test.nordic-way.io
 
 interchange:
-  image: eu.gcr.io/nordic-way-aad182cc/interchangenode:latest
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
+    tag: latest
 
 postgis:
-  image: eu.gcr.io/nordic-way-aad182cc/postgis:latest
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/postgis
+    tag: latest
 
 qpid:
   persistence:
     enabled: false
     storageClassName: standard
     size: 10Gi
+
+  memorydump:
+    enabled: false
 
   ## whether or not to expose amqps (5671) on public internet
   ## creates a public loadbalancer for the qpid-secure service
