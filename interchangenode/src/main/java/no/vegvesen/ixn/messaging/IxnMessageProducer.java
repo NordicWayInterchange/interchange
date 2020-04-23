@@ -57,23 +57,33 @@ public class IxnMessageProducer {
 		return writeSession.createProducer(writeDestination);
 	}
 
-	public void sendMessage(final Message textMessage) throws JMSException, NamingException {
+	public void sendMessage(final Message textMessage) throws JMSException {
 		try {
 			MessageForwardUtil.send(nwExProducer, textMessage);
 		} catch (JMSException e) {
 			logger.warn("Trying to re-establish connection to produce message to nwEx", e);
-			nwExProducer = createProducer("nwEx", amqpUrl, username, password);
-			MessageForwardUtil.send(nwExProducer, textMessage);
+			try {
+				nwExProducer = createProducer("nwEx", amqpUrl, username, password);
+				MessageForwardUtil.send(nwExProducer, textMessage);
+			} catch (NamingException ex) {
+				logger.error("can not connect to qpid to make producer for nwEx", ex);
+				throw new RuntimeException(ex);
+			}
 		}
 	}
 
-	public void toDlQueue(final Message textMessage) throws JMSException, NamingException {
+	public void toDlQueue(final Message textMessage) throws JMSException {
 		try {
 			MessageForwardUtil.send(dlQueueProducer, textMessage);
 		} catch (JMSException e) {
 			logger.warn("Trying to re-establish connection to produce message to dlqueue", e);
-			nwExProducer = createProducer("dlqueue", amqpUrl, username, password);
-			MessageForwardUtil.send(dlQueueProducer, textMessage);
+			try {
+				nwExProducer = createProducer("dlqueue", amqpUrl, username, password);
+				MessageForwardUtil.send(dlQueueProducer, textMessage);
+			} catch (NamingException ex) {
+				logger.error("can not connect to qpid to make producer for dlqueue", ex);
+				throw new RuntimeException(ex);
+			}
 		}
 	}
 
