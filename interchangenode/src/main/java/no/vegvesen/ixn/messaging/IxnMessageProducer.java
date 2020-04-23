@@ -59,7 +59,6 @@ public class IxnMessageProducer {
 
 	public void sendMessage(final Message textMessage) throws JMSException, NamingException {
 		try {
-			nwExProducer
 			MessageForwardUtil.send(nwExProducer, textMessage);
 		} catch (JMSException e) {
 			logger.warn("Trying to re-establish connection to produce message to nwEx", e);
