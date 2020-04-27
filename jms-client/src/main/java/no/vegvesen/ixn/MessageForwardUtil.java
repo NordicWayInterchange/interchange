@@ -36,8 +36,9 @@ public class MessageForwardUtil {
 	public static void send(MessageProducer producer, Message message) throws JMSException {
 		if (!isExpired(message)) {
 			long remainingTimeToLive = getRemainingTimeToLive(message);
-			logger.debug("Sending message with remaining time to live {}", remainingTimeToLive);
+			logger.debug("Sending message with remaining time to live {} to {}", remainingTimeToLive, producer.getDestination());
 			producer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, remainingTimeToLive);
+			logger.debug("Sent message");
 		}
 	}
 
