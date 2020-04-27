@@ -38,11 +38,11 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
     }
 
     public void teardown()  {
+		try {
+			messageConsumer.close();
+		} catch (JMSException ignore) {
+		}
         try {
-			try {
-				messageConsumer.close();
-			} catch (JMSException ignore) {
-			}
 			producer.close();
         } catch (JMSException ignore) {
         } finally {
@@ -53,6 +53,7 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
     @Override
     public void onException(JMSException e) {
         log.error("Exception caught",e);
+        this.teardown();
         running.set(false);
     }
 
