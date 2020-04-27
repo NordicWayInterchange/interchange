@@ -38,6 +38,7 @@ public class MessageForwardUtil {
 		if (!isExpired(message)) {
 			long remainingTimeToLive = getRemainingTimeToLive(message);
 			logger.debug("Sending message with remaining time to live {} to {}", remainingTimeToLive, producer.getDestination());
+			logger.trace("Message body {}", message.getBody(String.class));
 			producer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, remainingTimeToLive);
 			logger.debug("Sent message");
 		}
