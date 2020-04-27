@@ -66,14 +66,14 @@ public class IxnMessageProducer implements ExceptionListener {
 	}
 
 	public void sendMessage(final Message textMessage) throws JMSException {
-		sendWithReconnect(textMessage, nwExProducer, NWEXCHANGE);
+		send(textMessage, nwExProducer, NWEXCHANGE);
 	}
 
 	public void toDlQueue(final Message textMessage) throws JMSException {
-		sendWithReconnect(textMessage, dlQueueProducer, DLQUEUE);
+		send(textMessage, dlQueueProducer, DLQUEUE);
 	}
 
-	private void sendWithReconnect(Message textMessage, MessageProducer messageProducer, String destinationName) throws JMSException {
+	private void send(Message textMessage, MessageProducer messageProducer, String destinationName) throws JMSException {
 		try {
 			if (!running.get()) {
 				logger.warn("Reconnecting");
@@ -82,16 +82,26 @@ public class IxnMessageProducer implements ExceptionListener {
 			MessageForwardUtil.send(messageProducer, textMessage);
 		} catch (JMSException e) {
 			logger.error("Exception occurred when sending message {}, reconnecting to {}", textMessage.getJMSMessageID(), destinationName, e);
-			connect();
-			MessageForwardUtil.send(messageProducer, textMessage);
-			logger.info("Successfully sent message after reconnect");
+			onException(e);
+			throw e;
 		}
 	}
 
 	@Override
 	public void onException(JMSException exception) {
 		logger.error("Exception listener triggered by exception", exception);
+		teardown();
 		this.running.set(false);
+	}
+
+	public void teardown()  {
+		try {
+			nwExProducer.close();
+			dlQueueProducer.close();
+		} catch (JMSException ignore) {
+		} finally {
+			running.set(false);
+		}
 	}
 
 	private void connect() {
