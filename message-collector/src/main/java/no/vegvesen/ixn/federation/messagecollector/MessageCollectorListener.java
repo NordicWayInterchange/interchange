@@ -32,6 +32,7 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
             }
         } else {
             log.debug("Got message, but listener is not running");
+            this.teardown();
             throw new MessageCollectorException("Not running!");
         }
     }
