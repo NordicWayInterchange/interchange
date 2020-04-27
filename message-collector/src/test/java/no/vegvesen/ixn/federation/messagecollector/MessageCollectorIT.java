@@ -73,7 +73,6 @@ public class MessageCollectorIT extends DockerBaseIT {
 		Source source = createSource(producerPort, "localhost", "jks/sp_producer.p12");
 		source.start();
 		source.send("fishy fishy", "SE", 8000L);
-		System.out.println(String.format("HTTP port is %s", producerContainer.getMappedPort(8080).toString()));
 
 		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "jks/sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
@@ -105,9 +104,8 @@ public class MessageCollectorIT extends DockerBaseIT {
 		Source source = createSource(producerPort, "localhost", "jks/sp_producer.p12");
 		source.start();
 		source.send("fishy fishy", "SE", 1000L);
-		System.out.println(String.format("HTTP port is %s", producerContainer.getMappedPort(8080).toString()));
 
-		Thread.sleep(1000); // wait for the message to expire
+		Thread.sleep(2000); // wait for the message to expire with extra margin
 
 		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "jks/sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
