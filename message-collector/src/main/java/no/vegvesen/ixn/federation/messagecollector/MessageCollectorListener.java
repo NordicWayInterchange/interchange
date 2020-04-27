@@ -24,11 +24,7 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
         log.debug("Message received!");
         if (running.get()) {
             try {
-				log.debug("Calculating ttl");
-				long remainingTimeToLive = MessageForwardUtil.getRemainingTimeToLive(message);
-				log.debug("Sending message with ttl {} !", remainingTimeToLive);
-				producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, remainingTimeToLive);
-                log.debug("Message sendt!");
+				MessageForwardUtil.send(producer, message);
             } catch (JMSException e) {
                 log.error("Problem receiving message", e);
                 teardown();
