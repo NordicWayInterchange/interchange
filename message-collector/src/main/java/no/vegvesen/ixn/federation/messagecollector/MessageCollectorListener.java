@@ -39,8 +39,11 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
 
     public void teardown()  {
         try {
-            producer.close();
-            messageConsumer.close();
+			try {
+				messageConsumer.close();
+			} catch (JMSException ignore) {
+			}
+			producer.close();
         } catch (JMSException ignore) {
         } finally {
             running.set(false);
