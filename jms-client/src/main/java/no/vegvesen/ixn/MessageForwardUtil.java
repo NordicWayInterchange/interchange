@@ -18,17 +18,18 @@ public class MessageForwardUtil {
 		try {
 			expiration = textMessage.getJMSExpiration();
 		} catch (JMSException e) {
+			logger.warn("Could not get remaining ttl for message, returning default ttl {}", DEFAULT_TTL, e);
 			return DEFAULT_TTL;
 		}
 		long currentTime = System.currentTimeMillis();
 		if (expiration <= 0) {
-			// expiration is absent or illegal - setting to default ttl (1 day)
+			logger.debug("expiration {} is absent or illegal - setting to default ttl (1 day)", expiration);
 			return DEFAULT_TTL;
 		} else if (expiration > (MAX_TTL + currentTime)) {
-			// expiration is too high, setting to maximum ttl (8 days)
+			logger.debug("expiration {} is too high, setting to maximum ttl (8 days)", expiration);
 			return MAX_TTL;
 		} else {
-			// expiration is in the valid range (more than 0, less than 8 days)
+			logger.debug("expiration {} is in the valid range (more than 0, less than 8 days)", expiration);
 			return expiration - currentTime;
 		}
 	}
