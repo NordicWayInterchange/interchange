@@ -95,8 +95,12 @@ public class IxnMessageProducer implements ExceptionListener {
 	}
 
 	public void teardown()  {
+		logger.info("Closing producers");
 		try {
 			nwExProducer.close();
+		} catch (JMSException ignore) {
+		}
+		try {
 			dlQueueProducer.close();
 		} catch (JMSException ignore) {
 		} finally {
