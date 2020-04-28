@@ -31,7 +31,7 @@ public class InterchangeApp {
 	@Scheduled(fixedRate = 30000L)
 	public void checkConsumer() throws NamingException, JMSException {
 		logger.debug("checking if consumer is running");
-		if (!this.consumer.isRunning()) {
+		if (this.consumer == null || !this.consumer.isRunning()) {
 			consumer = consumerCreator.setupConsumer();
 		}
 	}
