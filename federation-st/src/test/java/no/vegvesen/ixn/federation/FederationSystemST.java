@@ -14,15 +14,13 @@ import javax.net.ssl.SSLContext;
 import java.util.LongSummaryStatistics;
 import java.util.stream.LongStream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class FederationSystemST {
 
 	SSLContext spOneSslContext = TestKeystoreHelper.sslContext("jks/sp-one.p12", "jks/truststore.jks");
 	SSLContext spTwoSslContext = TestKeystoreHelper.sslContext("jks/sp-two.p12", "jks/truststore.jks");
 
 	@Test
-	public void localMessageGetsForwardedAfterServiceDiscovery() throws JMSException, NamingException {
+	public void localMessageGetsForwardedAfterServiceDiscovery() throws JMSException, NamingException, InterruptedException {
 		Sink sinkSpTwo = new Sink("amqps://bouvet-two.bouvetinterchange.no", "sp-two.bouvetinterchange.no", spTwoSslContext);
 		MessageConsumer consumer = sinkSpTwo.createConsumer();
 		//noinspection StatementWithEmptyBody
@@ -30,16 +28,43 @@ public class FederationSystemST {
 
 		Source sourceSpOne = new Source("amqps://bouvet-one.bouvetinterchange.no", "onramp", spOneSslContext);
 		sourceSpOne.start();
-		LongStream.Builder latBuilder = LongStream.builder();
-		for (int i = 0; i < 20; i++) {
+		LongStream.Builder latencyStatisticsBuilder = LongStream.builder();
+		for (int i = 0; i < 2000; i++) {
 			long start = System.currentTimeMillis();
-			sourceSpOne.send("beste fisken i verden", "NO", null);
+			long timeToLive = 60000L;
+			try {
+				sourceSpOne.send("beste fisken i verden - " + i, "NO", timeToLive);
+			} catch (JMSException e) {
+				System.out.println("Reconnecting to onramp in 30 seconds");
+				Thread.sleep(30000);
+				sourceSpOne.start();
+				sourceSpOne.send("beste fisken i verden (resend) - " + i, "NO", timeToLive);
+			}
+			long expectedExpiry = System.currentTimeMillis() + timeToLive;
 
-			Message receive = consumer.receive(2000);
-			latBuilder.add(System.currentTimeMillis() - start);
-			assertThat(receive).isNotNull();
+			Message receive = null;
+			try {
+				receive = consumer.receive((5 * 60000));
+			} catch (JMSException e) {
+				System.out.println("Reconnecting to sp-two queue in 30 seconds");
+				Thread.sleep(30000);
+				consumer = sinkSpTwo.createConsumer();
+				System.out.println("Reconnected to sp-two queue");
+				receive = consumer.receive(60000);
+			}
+			if (receive == null) {
+				System.out.println("ERROR: lost message " + i);
+			} else {
+				System.out.printf("Got message %d: %s with expiration %d vs expected %d (%d) %n",
+						i,
+						receive.getBody(String.class),
+						receive.getJMSExpiration(),
+						expectedExpiry,
+						expectedExpiry - receive.getJMSExpiration());
+				latencyStatisticsBuilder.add(System.currentTimeMillis() - start);
+			}
 		}
-		LongStream latencies = latBuilder.build();
+		LongStream latencies = latencyStatisticsBuilder.build();
 		LongSummaryStatistics stats = latencies.summaryStatistics();
 
 		System.out.println("max " + stats.getMax());

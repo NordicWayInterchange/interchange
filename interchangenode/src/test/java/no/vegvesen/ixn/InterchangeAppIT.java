@@ -1,6 +1,7 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.messaging.IxnMessageConsumerCreator;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -44,11 +45,10 @@ public class InterchangeAppIT extends DockerBaseIT {
         }
     }
 
-    //InterchangeApp consumes messages sent to the queue onramp and is not triggered explicitly from the tests
     @Autowired
-    private InterchangeApp interchangeApp;
+	private IxnMessageConsumerCreator consumerCreator;
 
-    @SuppressWarnings("rawtypes")
+	@SuppressWarnings("rawtypes")
 	@ClassRule
     public static GenericContainer qpidContainer = getQpidContainer(
             "qpid",
@@ -66,6 +66,7 @@ public class InterchangeAppIT extends DockerBaseIT {
 
 	@Test
     public void messageIsRoutedViaInterchangeAppWithExpiration() throws Exception {
+		consumerCreator.setupConsumer();
 	    String sendUrl = getQpidURI();
 
 	    try (Source source = new Source(sendUrl,"onramp", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {

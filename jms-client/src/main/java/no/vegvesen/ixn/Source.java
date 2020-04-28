@@ -66,8 +66,10 @@ public class Source implements AutoCloseable {
     protected Connection connection;
     private Session session;
     private Destination queueS;
+	private MessageProducer producer;
 
-    public Source(String url, String sendQueue, SSLContext context) {
+
+	public Source(String url, String sendQueue, SSLContext context) {
         this.url = url;
         this.sendQueue = sendQueue;
         this.sslContext = context;
@@ -77,8 +79,9 @@ public class Source implements AutoCloseable {
         IxnContext context = new IxnContext(url, sendQueue, null);
         createConnection(context);
         queueS = context.getSendQueue();
-        connection.start();
-        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		connection.start();
+		session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		producer = session.createProducer(queueS);
     }
 
 	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
@@ -110,7 +113,6 @@ public class Source implements AutoCloseable {
     }
 
 	public void sendTextMessage(JmsTextMessage message, long timeToLive) throws JMSException {
-		MessageProducer producer = session.createProducer(queueS);
 		producer.send(message,  DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
 	}
 
@@ -141,5 +143,14 @@ public class Source implements AutoCloseable {
 		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
 		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
 		sendTextMessage(message, timeToLive);
+	}
+
+	public MessageProducer createProducer() throws JMSException, NamingException {
+    	this.start();
+    	return this.session.createProducer(this.queueS);
+	}
+
+	public void setExceptionListener(ExceptionListener exceptionListener) throws JMSException {
+		this.connection.setExceptionListener(exceptionListener);
 	}
 }

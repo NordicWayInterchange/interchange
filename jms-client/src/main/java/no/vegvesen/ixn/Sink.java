@@ -4,6 +4,8 @@ import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
 import javax.naming.NamingException;
@@ -15,6 +17,7 @@ import static no.vegvesen.ixn.Source.getProperties;
 
 public class Sink implements MessageListener, AutoCloseable {
 
+	private static Logger logger = LoggerFactory.getLogger(Sink.class);
 
     public static void main(String[] args) throws Exception {
 		Properties props = getProperties(args, "/sink.properties");
@@ -107,4 +110,13 @@ public class Sink implements MessageListener, AutoCloseable {
         }
 
     }
+
+	public void setExceptionListener(ExceptionListener exceptionListener) {
+		try {
+			this.connection.setExceptionListener(exceptionListener);
+		} catch (JMSException e) {
+			logger.error("Could not set exceptionListener {}", exceptionListener, e);
+			throw new RuntimeException(e);
+		}
+	}
 }
