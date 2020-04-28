@@ -59,7 +59,6 @@ public class IxnMessageProducer implements ExceptionListener {
 		writeConnection.setExceptionListener(this);
 		logger.debug("Connection established");
 		Session writeSession = writeConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		writeConnection.setExceptionListener(this);
 		MessageProducer producer = writeSession.createProducer(writeDestination);
 		logger.info("Created producer for {}", destination);
 		return producer;
