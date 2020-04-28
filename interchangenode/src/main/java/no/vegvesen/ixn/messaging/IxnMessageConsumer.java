@@ -31,7 +31,7 @@ public class IxnMessageConsumer implements MessageListener, ExceptionListener {
 	private final MessageConsumer onrampConsumer;
 	private final MessageProducer nwExProducer;
 	private final MessageProducer dlQueueProducer;
-	private AtomicBoolean running = new AtomicBoolean(false);
+	private AtomicBoolean running;
 	private final MessageValidator messageValidator;
 
 	public IxnMessageConsumer(MessageConsumer onrampConsumer,
@@ -42,6 +42,7 @@ public class IxnMessageConsumer implements MessageListener, ExceptionListener {
 		this.nwExProducer = nwExProducer;
 		this.dlQueueProducer = dlQueueProducer;
 		this.messageValidator = messageValidator;
+		this.running = new AtomicBoolean(true);
 	}
 
 	public void teardown() {
