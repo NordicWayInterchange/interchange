@@ -72,4 +72,12 @@ public class SourceSinkIT extends DockerBaseIT {
 		assertThat(receive).isNull();
 	}
 
+	@Test
+	public void sourceCloseIsClosed() throws JMSException, NamingException {
+		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		source.start();
+		assertThat(source.isConnected()).isTrue();
+		source.close();
+		assertThat(source.isConnected()).isFalse();
+	}
 }

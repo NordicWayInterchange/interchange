@@ -118,6 +118,11 @@ public class Source implements AutoCloseable {
 
     @Override
     public void close() {
+		try {
+			session.close();
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
+		}
         if (connection != null) {
             try {
                 connection.close();
@@ -125,7 +130,16 @@ public class Source implements AutoCloseable {
                 throw new RuntimeException(e);
             }
         }
-    }
+		try {
+			producer.close();
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
+		}
+		connection = null;
+		session = null;
+		producer = null;
+		queueS = null;
+	}
 
 	public JmsTextMessage createTextMessage(String msg) throws JMSException {
 		return (JmsTextMessage) session.createTextMessage(msg);
@@ -152,5 +166,9 @@ public class Source implements AutoCloseable {
 
 	public void setExceptionListener(ExceptionListener exceptionListener) throws JMSException {
 		this.connection.setExceptionListener(exceptionListener);
+	}
+
+	public boolean isConnected() {
+		return connection != null;
 	}
 }
