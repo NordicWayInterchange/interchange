@@ -34,7 +34,7 @@ public class CollectorCreator {
         this.writeQueue = writequeue;
     }
 
-    MessageCollectorListener setupCollection(Neighbour ixn) throws JMSException, NamingException {
+    MessageCollectorListener setupCollection(Neighbour ixn) {
         String writeUrl = String.format("amqps://%s:%s", localIxnDomainName, localIxnFederationPort);
         logger.debug("Write URL: {}, queue {}", writeUrl, writeQueue);
         Source writeSource = new Source(writeUrl, writeQueue, sslContext);
@@ -44,11 +44,15 @@ public class CollectorCreator {
 		Sink readSink = new Sink(readUrl, readQueue, sslContext);
 
         MessageCollectorListener listener = new MessageCollectorListener(readSink, writeSource);
-        readSink.start(listener);
-
-		writeSource.start();
-        writeSource.setExceptionListener(listener);
-        readSink.setExceptionListener(listener);
+		try {
+			writeSource.start();
+			writeSource.setExceptionListener(listener);
+			readSink.start(listener);
+			readSink.setExceptionListener(listener);
+		} catch (NamingException | JMSException e) {
+			listener.teardown();
+			throw new MessageCollectorException("Tried to set up a new MessageCollectorListener, tearing down.", e);
+		}
         return listener;
     }
 
