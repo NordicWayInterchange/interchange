@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.MessageForwardUtil;
+import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,13 +11,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MessageCollectorListener implements MessageListener, ExceptionListener {
     private AtomicBoolean running;
-    private final MessageConsumer messageConsumer;
-    private final MessageProducer producer;
+    private final Sink sink;
+    private final Source source;
     private Logger log = LoggerFactory.getLogger(MessageCollectorListener.class);
 
-    MessageCollectorListener(MessageConsumer messageConsumer, MessageProducer producer) {
-        this.messageConsumer = messageConsumer;
-        this.producer = producer;
+    MessageCollectorListener(Sink sink, Source source) {
+        this.sink = sink;
+        this.source = source;
         this.running = new AtomicBoolean(true);
     }
 
@@ -24,7 +26,7 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
         log.debug("Message received!");
         if (running.get()) {
             try {
-				MessageForwardUtil.send(producer, message);
+				MessageForwardUtil.send(source.getProducer(), message);
             } catch (JMSException e) {
                 log.error("Problem receiving message", e);
                 teardown();
@@ -39,12 +41,12 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
 
     public void teardown()  {
 		try {
-			messageConsumer.close();
-		} catch (JMSException ignore) {
+			sink.close();
+		} catch (Exception ignore) {
 		}
         try {
-			producer.close();
-        } catch (JMSException ignore) {
+			source.close();
+        } catch (Exception ignore) {
         } finally {
             running.set(false);
         }

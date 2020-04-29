@@ -1,15 +1,14 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
+import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.junit.Test;
 
 import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
 import javax.naming.NamingException;
-
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,9 +26,10 @@ public class MessageForwarderTest {
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
         when(collectorCreator.setupCollection(one)).thenThrow(new JMSException("Expected exception"));
 
-        MessageProducer producer = mock(MessageProducer.class);
-        MessageConsumer consumer = mock(MessageConsumer.class);
-        when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(consumer,producer));
+        Source source = mock(Source.class);
+        Sink sink = mock(Sink.class);
+
+        when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(sink,source));
 
         MessageCollector forwarder = new MessageCollector(neighbourFetcher, collectorCreator);
         forwarder.runSchedule();

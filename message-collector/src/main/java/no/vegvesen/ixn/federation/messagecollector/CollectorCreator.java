@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
-import no.vegvesen.ixn.IxnContext;
+import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.jms.*;
+import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 
@@ -36,30 +37,19 @@ public class CollectorCreator {
     MessageCollectorListener setupCollection(Neighbour ixn) throws JMSException, NamingException {
         String writeUrl = String.format("amqps://%s:%s", localIxnDomainName, localIxnFederationPort);
         logger.debug("Write URL: {}, queue {}", writeUrl, writeQueue);
-        IxnContext writeContext = new IxnContext(writeUrl, writeQueue,null);
-        Destination writeDestination = writeContext.getSendQueue();
-        Connection writeConnection = writeContext.createConnection(sslContext);
-        Session writeSession = writeConnection.createSession(false,Session.AUTO_ACKNOWLEDGE);
-        MessageProducer producer = writeSession.createProducer(writeDestination);
+        Source writeSource = new Source(writeUrl, writeQueue, sslContext);
 
         String readUrl = ixn.getMessageChannelUrl();
         String readQueue = this.localIxnDomainName;
-        IxnContext readContext = new IxnContext(readUrl,null, readQueue);
-        logger.debug("Read URL: {}, queue {}",readUrl, readQueue);
-        Destination readDestination = readContext.getReceiveQueue();
-        Connection readConnection = readContext.createConnection(sslContext);
-        Session readSession = readConnection.createSession(false,Session.AUTO_ACKNOWLEDGE);
+		Sink readSink = new Sink(readUrl, readQueue, sslContext);
 
-        MessageConsumer consumer = readSession.createConsumer(readDestination);
-        MessageCollectorListener listener = new MessageCollectorListener(consumer,producer);
-        consumer.setMessageListener(listener);
+        MessageCollectorListener listener = new MessageCollectorListener(readSink, writeSource);
+        readSink.start(listener);
 
-        writeConnection.setExceptionListener(listener);
-        readConnection.setExceptionListener(listener);
-        readConnection.start();
-        writeConnection.start();
+		writeSource.start();
+        writeSource.setExceptionListener(listener);
+        readSink.setExceptionListener(listener);
         return listener;
-
     }
 
 
