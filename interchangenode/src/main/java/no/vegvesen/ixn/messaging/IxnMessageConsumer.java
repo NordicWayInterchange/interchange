@@ -19,6 +19,7 @@ package no.vegvesen.ixn.messaging;
 import no.vegvesen.ixn.MessageForwardUtil;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.exception.InterchangeException;
 import no.vegvesen.ixn.model.MessageValidator;
 import no.vegvesen.ixn.util.MDCUtil;
 import org.slf4j.Logger;
@@ -78,6 +79,10 @@ public class IxnMessageConsumer implements MessageListener, ExceptionListener {
 
 	@Override
 	public void onMessage(Message message) {
+		if (!isRunning()) {
+			teardown();
+			throw new InterchangeException("Still listening for messages when not running, tearing down.");
+		}
 		try {
 			MDCUtil.setLogVariables(message);
 			if (messageValidator.isValid(message)) {
@@ -86,18 +91,15 @@ public class IxnMessageConsumer implements MessageListener, ExceptionListener {
 				logger.warn("Sending bad message to dead letter queue. Invalid message.");
 				MessageForwardUtil.send(dlQueueProducer.getProducer(), message);
 			}
-		} catch (Exception e) {
-			logger.error("Exception when processing message, sending bad message to dead letter queue. Invalid message.", e);
-			try {
-				MessageForwardUtil.send(dlQueueProducer.getProducer(), message);
-			} catch (JMSException ex) {
-				logger.error("Can not send bad message to dead letter queue.", ex);
-			}
+		} catch (JMSException e) {
+			teardown();
+			throw new InterchangeException("Exception when processing message, sending bad message to dead letter queue. Invalid message.", e);
 		} finally {
 			MDCUtil.removeLogVariables();
 		}
 	}
 
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean isRunning() {
 		return running.get();
 	}
