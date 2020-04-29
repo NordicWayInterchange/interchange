@@ -152,7 +152,6 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
 	}
 
-
 	private static String getFilePathFromClasspathResource(String classpathResource) {
 		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
 		if (resource != null) {
@@ -201,7 +200,7 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("jks/localhost.p12");
 		Sink neighbourSink = new Sink(AMQPS_URL, neighbourQueue, localhostSslContext);
-		neighbourSink.start();
+		neighbourSink.start(neighbourSink);
 	}
 
 	public SSLContext setUpTestSslContext(String s) {

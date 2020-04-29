@@ -171,4 +171,8 @@ public class Source implements AutoCloseable {
 	public boolean isConnected() {
 		return connection != null;
 	}
+
+	public MessageProducer getProducer() {
+		return producer;
+	}
 }

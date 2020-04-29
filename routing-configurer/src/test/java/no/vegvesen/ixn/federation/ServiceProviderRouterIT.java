@@ -113,12 +113,12 @@ public class ServiceProviderRouterIT extends DockerBaseIT {
 
 		SSLContext kingGustafSslContext = setUpTestSslContext("jks/king_gustaf.p12");
 		Sink readKingGustafQueue = new Sink(AMQPS_URL, "king_gustaf", kingGustafSslContext);
-		readKingGustafQueue.start();
+		readKingGustafQueue.start(readKingGustafQueue);
 		Source writeOnrampQueue = new Source(AMQPS_URL, "onramp", kingGustafSslContext);
 		writeOnrampQueue.start();
 		try {
 			Sink readDlqueue = new Sink(AMQPS_URL, "onramp", kingGustafSslContext);
-			readDlqueue.start();
+			readDlqueue.start(readDlqueue);
 			fail("Should not allow king_gustaf to read from queue not granted access on (onramp)");
 		} catch (Exception ignore) {
 		}

@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
 import javax.naming.NamingException;
 
 @Component
@@ -44,13 +42,12 @@ public class IxnMessageConsumerCreator {
     	Source dlQueue = new BasicAuthSource(amqpUrl, DLQUEUE, username, password);
     	Source nwEx = new BasicAuthSource(amqpUrl, NWEXCHANGE, username, password);
 		Sink onramp = new BasicAuthSink(amqpUrl, ONRAMP, username, password);
-		MessageConsumer onrampConsumer = onramp.createConsumer();
-		MessageProducer nwExProducer = nwEx.createProducer();
-		MessageProducer dlQueueProducer = dlQueue.createProducer();
-		IxnMessageConsumer consumer = new IxnMessageConsumer(onrampConsumer, nwExProducer, dlQueueProducer, messageValidator);
-		onrampConsumer.setMessageListener(consumer);
+		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, nwEx, dlQueue, messageValidator);
+		onramp.start(consumer);
 		onramp.setExceptionListener(consumer);
+		dlQueue.start();
 		dlQueue.setExceptionListener(consumer);
+		nwEx.start();
 		nwEx.setExceptionListener(consumer);
 		return consumer;
     }

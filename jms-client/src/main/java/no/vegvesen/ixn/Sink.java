@@ -40,7 +40,7 @@ public class Sink implements MessageListener, AutoCloseable {
 
         Sink sink = new Sink(url,receiveQueue,sslContext);
 		System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
-        sink.start();
+        sink.start(sink);
     }
 
     protected final String url;
@@ -55,9 +55,9 @@ public class Sink implements MessageListener, AutoCloseable {
     }
 
 
-    public void start() throws JMSException, NamingException {
+    public void start(MessageListener listener) throws JMSException, NamingException {
 		MessageConsumer consumer = createConsumer();
-		consumer.setMessageListener(this);
+		consumer.setMessageListener(listener);
     }
 
 	public MessageConsumer createConsumer() throws NamingException, JMSException {
@@ -118,5 +118,8 @@ public class Sink implements MessageListener, AutoCloseable {
 			logger.error("Could not set exceptionListener {}", exceptionListener, e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void setMessageListener(MessageListener messageListener) {
 	}
 }

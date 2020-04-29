@@ -16,8 +16,7 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InterchangeAppTest {
@@ -29,11 +28,20 @@ public class InterchangeAppTest {
 	@Mock
 	MessageConsumer onrampConsumer;
 
+    @Mock
+	Source nwEx;
+    @Mock
+	Source dlQueue;
+	@Mock
+	Sink onramp;
+
     IxnMessageConsumer consumer;
 
     @Before
     public void setUp() {
-        consumer = new IxnMessageConsumer(onrampConsumer, nwExProducer, dlQueueProducer,  new MessageValidator());
+    	when(nwEx.getProducer()).thenReturn(nwExProducer);
+    	when(dlQueue.getProducer()).thenReturn(dlQueueProducer);
+        consumer = new IxnMessageConsumer(onramp, nwEx, dlQueue,  new MessageValidator());
     }
 
     @Test
@@ -50,7 +58,6 @@ public class InterchangeAppTest {
         consumer.onMessage(message);
         verify(nwExProducer, times(1)).send(any(Message.class), anyInt(), anyInt(), anyLong());
     }
-
 
     @Test
     public void receivedMessageWithoutOriginatingCountrySendsToDlQueue() throws JMSException {
