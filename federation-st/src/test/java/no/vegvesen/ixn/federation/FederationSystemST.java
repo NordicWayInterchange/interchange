@@ -40,7 +40,7 @@ public class FederationSystemST {
 			sendOneMessageReconnect(sourceSpOne, i, timeToLive);
 			long expectedExpiry = System.currentTimeMillis() + timeToLive;
 
-			Message receive = null;
+			Message receive;
 			try {
 				receive = consumer.receive((5 * 60000));
 			} catch (JMSException e) {
@@ -50,8 +50,8 @@ public class FederationSystemST {
 			if (receive == null) {
 				System.out.println("ERROR: lost message " + i);
 			} else {
-				if (i % 100 == 0) {
-					System.out.printf("*");
+				if (i % 1000 == 0) {
+					System.out.println("Received message number " + i);
 				}
 				long expiryOffset = expectedExpiry - receive.getJMSExpiration();
 				ttlOffsetBuilder.add(expiryOffset);
@@ -74,7 +74,7 @@ public class FederationSystemST {
 		System.out.println("latencies " + stats);
 		System.out.println("ttlOffsets " + ttlOffsetBuilder.build().summaryStatistics());
 		System.out.printf("Number of reconnects producer %d, consumer %d %n", this.reconnectsProducer, this.reconnectsConsumer);
-		long numberOfMessagesReceived = latencies.summaryStatistics().getCount();
+		long numberOfMessagesReceived = stats.getCount();
 		System.out.printf("Number of messages received %d, lost %d %n", numberOfMessagesReceived, numberOfMessagesToSend - numberOfMessagesReceived);
 	}
 
@@ -107,12 +107,12 @@ public class FederationSystemST {
 		try {
 			sourceSpOne.send("beste fisken i verden - " + i, "NO", timeToLive);
 		} catch (JMSException e) {
-			sourceSpOne = reconnectProducer(sourceSpOne);
+			reconnectProducer(sourceSpOne);
 			sourceSpOne.send("beste fisken i verden (resend) - " + i, "NO", timeToLive);
 		}
 	}
 
-	private Source reconnectProducer(Source sourceSpOne) throws InterruptedException, NamingException, JMSException {
+	private void reconnectProducer(Source sourceSpOne) throws InterruptedException, NamingException, JMSException {
 		System.out.println("Reconnecting to onramp in 30 seconds");
 		try {
 			sourceSpOne.close();
@@ -128,7 +128,6 @@ public class FederationSystemST {
 			System.exit(-2);
 		}
 		reconnectsProducer++;
-		return sourceSpOne;
 	}
 
 
