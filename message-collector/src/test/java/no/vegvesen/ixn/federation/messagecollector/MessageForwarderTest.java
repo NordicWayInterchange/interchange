@@ -7,8 +7,6 @@ import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.junit.Test;
 
-import javax.jms.JMSException;
-import javax.naming.NamingException;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,14 +15,14 @@ import static org.mockito.Mockito.*;
 public class MessageForwarderTest {
 
     @Test
-    public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() throws NamingException, JMSException {
+    public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() {
         Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
         Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
 
         NeighbourFetcher neighbourFetcher = mock(NeighbourFetcher.class);
         when(neighbourFetcher.listNeighboursToConsumeFrom()).thenReturn(Arrays.asList(one,two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
-        when(collectorCreator.setupCollection(one)).thenThrow(new JMSException("Expected exception"));
+        when(collectorCreator.setupCollection(one)).thenThrow(new MessageCollectorException("Expected exception"));
 
         Source source = mock(Source.class);
         Sink sink = mock(Sink.class);
