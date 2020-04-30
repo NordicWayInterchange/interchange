@@ -88,4 +88,12 @@ public class LocalSubscription {
                 ", dataType=" + dataType +
                 '}';
     }
+
+    public LocalSubscription withStatus(LocalSubscriptionStatus newStatus) {
+        if (newStatus.equals(this.status)) {
+            return this;
+        } else {
+            return new LocalSubscription(sub_id,newStatus,dataType);
+        }
+    }
 }

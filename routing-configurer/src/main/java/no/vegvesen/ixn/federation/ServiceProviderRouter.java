@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 
@@ -38,58 +40,65 @@ public class ServiceProviderRouter {
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders) {
         List<String> groupMemberNames = qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
         for (ServiceProvider serviceProvider : serviceProviders) {
-            Set<LocalSubscription> subscriptionsToRemove = new HashSet<>();
             String name = serviceProvider.getName();
-            if (!groupMemberNames.contains(name)) {
-            	qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
-			}
-			if (!qpidClient.queueExists(name)) {
-				logger.info("Creating queue {}", name);
-				qpidClient.createQueue(name);
-				qpidClient.addReadAccess(name, name);
-			}
-			Set<String> queueBindKeys = qpidClient.getQueueBindKeys(name);
-			for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-                switch (subscription.getStatus()) {
-                    case REQUESTED:
-                        setupServiceProviderRouting(name, subscription);
-                        subscription.setStatus(LocalSubscriptionStatus.CREATED);
-                        repository.save(serviceProvider);
-                        break;
-                    case CREATED:
-						if (!queueBindKeys.contains(subscription.bindKey())) {
-							setupServiceProviderRouting(name, subscription);
-						}
-                        break;
-                    case TEAR_DOWN:
-                        unbindBindings(name, subscription);
-                        //	signal that the subscriptions should be removed from the service provider
-                        subscriptionsToRemove.add(subscription);
-                        break;
-                    default:
-                        throw new IllegalStateException("Unknown subscription status encountered");
-                }
+            Set<LocalSubscription> newSubscriptions = new HashSet<>();
+            for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+
+                Optional<LocalSubscription> newSubscription = processSubscription(groupMemberNames, name, subscription);
+                newSubscription.ifPresent(localSubscription -> newSubscriptions.add(localSubscription));
             }
-            if (!subscriptionsToRemove.isEmpty()) {
-                serviceProvider.getSubscriptions().removeAll(subscriptionsToRemove);
-                logger.debug("Removed one or more subscriptions");
-                repository.save(serviceProvider);
-            }
-            if (serviceProvider.getSubscriptions().isEmpty()) {
+            //remove the queue and group member if we have no more subscriptions
+            if (newSubscriptions.isEmpty()) {
+                //note that qpidClient.queueExists will be called twice for a tear down of a serviceProvider.
                 if (qpidClient.queueExists(name)) {
                     qpidClient.removeQueue(name);
-					logger.info("Removed queue for service provider {}", serviceProvider.getName());
-				}
+                    logger.info("Removed queue for service provider {}", serviceProvider.getName());
+                }
                 if (groupMemberNames.contains(name)) {
-					logger.debug("Removing queue for service provider {}", serviceProvider.getName());
+                    logger.debug("Removing queue for service provider {}", serviceProvider.getName());
                     qpidClient.removeMemberFromGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
                 }
+            }
+            //save if it has changed from the initial
+            if (! newSubscriptions.equals(serviceProvider.getSubscriptions())) {
+                serviceProvider.setSubscriptions(newSubscriptions);
+                repository.save(serviceProvider);
             }
         }
     }
 
-    public void unbindBindings(String name, LocalSubscription subscription) {
-        //	Check that the binding exist, if so, delete it
+    public Optional<LocalSubscription> processSubscription(List<String> groupMemberNames, String name, LocalSubscription subscription) {
+        Optional<LocalSubscription> newSubscription;
+        switch (subscription.getStatus()) {
+            case REQUESTED:
+                newSubscription = onRequested(groupMemberNames, name, subscription);
+                break;
+            case CREATED:
+                newSubscription = onRequested(groupMemberNames, name, subscription);
+                break;
+            case TEAR_DOWN:
+                //	Check that the binding exist, if so, delete it
+                newSubscription = onTearDown(name, subscription);
+                break;
+            default:
+                throw new IllegalStateException("Unknown subscription status encountered");
+        }
+        return newSubscription;
+    }
+
+    public Optional<LocalSubscription> onTearDown(String name, LocalSubscription subscription) {
+        removeBindingIfExists(name, subscription);
+        return Optional.empty();
+    }
+
+    private Optional<LocalSubscription> onRequested(List<String> groupMemberNames, String name, LocalSubscription subscription) {
+        optionallyAddServiceProviderToGroup(groupMemberNames, name);
+        optionallyCreateQueue(name);
+        optionallyAddQueueBindings(name, subscription);
+        return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
+    }
+
+    public void removeBindingIfExists(String name, LocalSubscription subscription) {
         if (qpidClient.queueExists(name)) {
             if (qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
                 qpidClient.unbindBindKey(name, subscription.bindKey(), "nwEx");
@@ -98,10 +107,26 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void setupServiceProviderRouting(String name, LocalSubscription subscription) {
-        logger.debug("Adding bindings to the queue {}", name);
-		qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "nwEx");
-		qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "fedEx");
+    public void optionallyAddQueueBindings(String name, LocalSubscription subscription) {
+        if (!qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
+            logger.debug("Adding bindings to the queue {}", name);
+            qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "nwEx");
+            qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "fedEx");
+        }
+    }
+
+    public void optionallyCreateQueue(String name) {
+        if (!qpidClient.queueExists(name)) {
+            logger.info("Creating queue {}", name);
+            qpidClient.createQueue(name);
+            qpidClient.addReadAccess(name, name);
+        }
+    }
+
+    public void optionallyAddServiceProviderToGroup(List<String> groupMemberNames, String name) {
+        if (!groupMemberNames.contains(name)) {
+            qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
+        }
     }
 
 }

@@ -68,6 +68,10 @@ public class ServiceProvider {
 		subscriptions.add(subscription);
 	}
 
+	public void setSubscriptions(Set<LocalSubscription> subscriptions) {
+		this.subscriptions = subscriptions;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

@@ -37,6 +37,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.fail;
@@ -123,7 +124,6 @@ public class ServiceProviderRouterIT extends DockerBaseIT {
 		}
 	}
 
-	//TODO this test exposes a problem in our code. When we make a HashSet, and mutates its members, we change the hashcode!
 	@Test
 	public void subscriberToreDownWillBeRemovedFromSubscribFederatedInterchangesGroup() {
 		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
@@ -133,14 +133,17 @@ public class ServiceProviderRouterIT extends DockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
 		assertThat(subscription.getStatus().equals(LocalSubscriptionStatus.CREATED));
+		assertThat(client.queueExists(toreDownServiceProvider.getName())).isTrue();
 
-		toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
-		subscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, new DataType());
-		toreDownServiceProvider.addLocalSubscription(subscription);
+		toreDownServiceProvider.setSubscriptions(
+				toreDownServiceProvider.getSubscriptions().stream()
+						.map(localSubscription -> localSubscription.withStatus(LocalSubscriptionStatus.TEAR_DOWN))
+						.collect(Collectors.toSet()));
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
+		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
+		assertThat(client.queueExists(toreDownServiceProvider.getName())).isFalse();
 	}
-
 
 
    	public SSLContext setUpTestSslContext(String s) {

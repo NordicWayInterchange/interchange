@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -131,6 +132,51 @@ public class ServiceProviderRepositoryIT {
 		ServiceProvider retrieved = repository.findByName("bentley");
 		assertThat(retrieved).isNotNull();
 		assertThat(retrieved.getSubscriptions()).hasSize(1);
+	}
+
+
+	@Test
+	public void testChangingLocalSubscriptionsWithNewSetAnSeeIfWeGetDeletedOneThatIsRemoved() {
+		String name = "serviceProvider";
+		ServiceProvider serviceProvider = new ServiceProvider(name);
+		DataType datex2 = new DataType(Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2"));
+		DataType denm = new DataType(Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DENM"));
+		LocalSubscription datexSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,datex2);
+		LocalSubscription denmSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN,denm);
+		serviceProvider.setSubscriptions(new HashSet<>(Arrays.asList(datexSubscription,denmSubscription)));
+		repository.save(serviceProvider);
+
+		serviceProvider = repository.findByName(name);
+		assertThat(serviceProvider.getSubscriptions()).hasSize(2);
+
+		//Now, filter out the TEAR_DOWN subscription, and see if it is removed from the database
+		Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions()
+				.stream()
+				.filter(subscription -> subscription.getStatus() != LocalSubscriptionStatus.TEAR_DOWN)
+				.collect(Collectors.toSet());
+		serviceProvider.setSubscriptions(localSubscriptions);
+		serviceProvider = repository.save(serviceProvider);
+
+		//so we should only have 1 subscription, with status REQUESTED
+		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
+		assertThat(serviceProvider.getSubscriptions()).allMatch(subscription -> subscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED));
+
+		//Update the REQUESTED to CREATED
+		Set<LocalSubscription> updated = serviceProvider.getSubscriptions()
+				.stream()
+				.filter(localSubscription -> localSubscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED))
+				.map(localSubscription -> localSubscription.withStatus(LocalSubscriptionStatus.CREATED))
+				.collect(Collectors.toSet());
+
+		serviceProvider.setSubscriptions(updated);
+		serviceProvider = repository.save(serviceProvider);
+
+		//So should have 1 subscription, status CREATED
+		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
+		assertThat(serviceProvider.getSubscriptions()).allMatch(subscription -> subscription.getStatus().equals(LocalSubscriptionStatus.CREATED));
+
+
+
 	}
 
 	private DataType getDataTypeOriginatingCountry(String originatingCountry) {

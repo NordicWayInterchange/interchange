@@ -28,7 +28,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -225,8 +227,7 @@ public class OnboardRestControllerTest {
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi);
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName(firstServiceProviderName);
-		firstServiceProvider.addLocalSubscription(seSubs);
-		firstServiceProvider.addLocalSubscription(fiSubs);
+		firstServiceProvider.setSubscriptions(new HashSet<>(Arrays.asList(seSubs,fiSubs)));
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self

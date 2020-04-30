@@ -248,7 +248,6 @@ public class OnboardRestController {
 		}
 
 		logger.info("Service provider {} Incoming subscription post: {}", serviceProviderName, dataTypeApi.toString());
-		DataType newLocalSubscription = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
 		serviceProviderRepository.findByName(serviceProviderName);
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
@@ -256,7 +255,8 @@ public class OnboardRestController {
 		Set<DataType> previousSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, newLocalSubscription);
+		DataType newDataType = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, newDataType);
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
