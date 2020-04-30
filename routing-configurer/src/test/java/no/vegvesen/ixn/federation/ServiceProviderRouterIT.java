@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -32,20 +33,23 @@ import org.testcontainers.containers.GenericContainer;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
+@SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = {ServiceProviderRouterIT.Initializer.class})
 public class ServiceProviderRouterIT extends DockerBaseIT {
 
-    @ClassRule
+    @SuppressWarnings("rawtypes")
+	@ClassRule
     public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
@@ -76,8 +80,30 @@ public class ServiceProviderRouterIT extends DockerBaseIT {
  		router = new ServiceProviderRouter(mock(ServiceProviderRepository.class),client);
 	}
 
+	@Test
+	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
+		ServiceProvider nordea = new ServiceProvider("nordea");
+		nordea.addLocalSubscription(createSubscription("DATEX2", "NO"));
+		router.syncServiceProviders(Arrays.asList(nordea));
+		Set<String> nordeaBindKeys = client.getQueueBindKeys("nordea");
+		assertThat(nordeaBindKeys).hasSize(1);
 
- 	@Test
+		nordea.addLocalSubscription(createSubscription("DATEX2", "FI"));
+		router.syncServiceProviders(Arrays.asList(nordea));
+		nordeaBindKeys = client.getQueueBindKeys("nordea");
+		assertThat(nordeaBindKeys).hasSize(2);
+	}
+
+	private LocalSubscription createSubscription(String messageType, String originatingCountry) {
+		DataType dataType = new DataType();
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), messageType);
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+		dataType.setValues(values);
+		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, dataType);
+	}
+
+	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,new DataType()));
