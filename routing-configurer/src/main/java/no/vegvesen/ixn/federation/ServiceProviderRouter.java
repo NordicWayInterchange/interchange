@@ -48,6 +48,7 @@ public class ServiceProviderRouter {
 				qpidClient.createQueue(name);
 				qpidClient.addReadAccess(name, name);
 			}
+			Set<String> queueBindKeys = qpidClient.getQueueBindKeys(name);
 			for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
                 switch (subscription.getStatus()) {
                     case REQUESTED:
@@ -56,7 +57,9 @@ public class ServiceProviderRouter {
                         repository.save(serviceProvider);
                         break;
                     case CREATED:
-                        setupServiceProviderRouting(name, subscription);
+						if (!queueBindKeys.contains(subscription.bindKey())) {
+							setupServiceProviderRouting(name, subscription);
+						}
                         break;
                     case TEAR_DOWN:
                         unbindBindings(name, subscription);
