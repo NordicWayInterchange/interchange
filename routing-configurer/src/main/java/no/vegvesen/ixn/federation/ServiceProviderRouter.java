@@ -40,7 +40,7 @@ public class ServiceProviderRouter {
         for (ServiceProvider serviceProvider : serviceProviders) {
             Set<LocalSubscription> subscriptionsToRemove = new HashSet<>();
             String name = serviceProvider.getName();
-            if (groupMemberNames.contains(name)) {
+            if (!groupMemberNames.contains(name)) {
             	qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
 			}
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
