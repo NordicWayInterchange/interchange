@@ -32,7 +32,7 @@ public class ServiceProviderRouter {
 
 
     public Iterable<ServiceProvider> findServiceProviders() {
-        return repository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.REQUESTED, LocalSubscriptionStatus.TEAR_DOWN);
+		return repository.findAll();
     }
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders) {
