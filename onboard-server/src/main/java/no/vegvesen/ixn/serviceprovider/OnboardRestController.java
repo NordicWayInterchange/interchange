@@ -155,7 +155,7 @@ public class OnboardRestController {
 		updateSelfCapabilities(previousSelfCapabilities);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
-		RedirectView redirectView = new RedirectView("{serviceProviderName}/capabilities");
+		RedirectView redirectView = new RedirectView("/{serviceProviderName}/capabilities");
 		OnboardMDCUtil.removeLogVariables();
 		return redirectView;
 	}
