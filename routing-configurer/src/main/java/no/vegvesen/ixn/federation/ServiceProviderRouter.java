@@ -40,6 +40,9 @@ public class ServiceProviderRouter {
         for (ServiceProvider serviceProvider : serviceProviders) {
             Set<LocalSubscription> subscriptionsToRemove = new HashSet<>();
             String name = serviceProvider.getName();
+            if (groupMemberNames.contains(name)) {
+            	qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
+			}
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
                 switch (subscription.getStatus()) {
                     case REQUESTED:
@@ -88,10 +91,6 @@ public class ServiceProviderRouter {
     }
 
     public void setupServiceProviderRouting(List<String> groupMemberNames, String name, LocalSubscription subscription) {
-        //	Check whether or not the user exists, if not, create it
-        if (!groupMemberNames.contains(name)) {
-            qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
-        }
         //	create the queue
         if (!qpidClient.queueExists(name)) {
 			logger.info("Creating queue {}", name);
