@@ -83,6 +83,7 @@ public class RoutingConfigurer {
 			for (Subscription subscription : neighbour.getSubscriptionRequest().getSubscriptions()) {
 				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 			}
+			logger.info("Set up routing for neighbour {}", neighbour.getName());
 			neighbour.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
 
 			neighbourRepository.save(neighbour);

@@ -67,8 +67,10 @@ public class ServiceProviderRouter {
             if (serviceProvider.getSubscriptions().isEmpty()) {
                 if (qpidClient.queueExists(name)) {
                     qpidClient.removeQueue(name);
-                }
+					logger.info("Removed queue for service provider {}", serviceProvider.getName());
+				}
                 if (groupMemberNames.contains(name)) {
+					logger.debug("Removing queue for service provider {}", serviceProvider.getName());
                     qpidClient.removeMemberFromGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
                 }
             }
@@ -92,6 +94,7 @@ public class ServiceProviderRouter {
         }
         //	create the queue
         if (!qpidClient.queueExists(name)) {
+			logger.info("Creating queue {}", name);
             qpidClient.createQueue(name);
             qpidClient.addReadAccess(name, name);
             qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "nwEx");
