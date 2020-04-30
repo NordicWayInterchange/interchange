@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 
@@ -63,11 +62,14 @@ public class ServiceProviderRouter {
             if (! newSubscriptions.equals(serviceProvider.getSubscriptions())) {
                 serviceProvider.setSubscriptions(newSubscriptions);
                 repository.save(serviceProvider);
+                logger.debug("Saved updated service provider {}",serviceProvider);
+            } else {
+                logger.debug("Service provider not changed, {}", serviceProvider);
             }
         }
     }
 
-    public Optional<LocalSubscription> processSubscription(List<String> groupMemberNames, String name, LocalSubscription subscription) {
+    private Optional<LocalSubscription> processSubscription(List<String> groupMemberNames, String name, LocalSubscription subscription) {
         Optional<LocalSubscription> newSubscription;
         switch (subscription.getStatus()) {
             case REQUESTED:
@@ -86,7 +88,7 @@ public class ServiceProviderRouter {
         return newSubscription;
     }
 
-    public Optional<LocalSubscription> onTearDown(String name, LocalSubscription subscription) {
+    private Optional<LocalSubscription> onTearDown(String name, LocalSubscription subscription) {
         removeBindingIfExists(name, subscription);
         return Optional.empty();
     }
@@ -98,7 +100,7 @@ public class ServiceProviderRouter {
         return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
     }
 
-    public void removeBindingIfExists(String name, LocalSubscription subscription) {
+    private void removeBindingIfExists(String name, LocalSubscription subscription) {
         if (qpidClient.queueExists(name)) {
             if (qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
                 qpidClient.unbindBindKey(name, subscription.bindKey(), "nwEx");
@@ -107,7 +109,7 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void optionallyAddQueueBindings(String name, LocalSubscription subscription) {
+    private void optionallyAddQueueBindings(String name, LocalSubscription subscription) {
         if (!qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
             logger.debug("Adding bindings to the queue {}", name);
             qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "nwEx");
@@ -115,7 +117,7 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void optionallyCreateQueue(String name) {
+    private void optionallyCreateQueue(String name) {
         if (!qpidClient.queueExists(name)) {
             logger.info("Creating queue {}", name);
             qpidClient.createQueue(name);
@@ -123,7 +125,7 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void optionallyAddServiceProviderToGroup(List<String> groupMemberNames, String name) {
+    private void optionallyAddServiceProviderToGroup(List<String> groupMemberNames, String name) {
         if (!groupMemberNames.contains(name)) {
             qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
         }
