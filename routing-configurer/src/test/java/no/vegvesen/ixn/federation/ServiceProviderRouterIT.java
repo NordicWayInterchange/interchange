@@ -54,6 +54,7 @@ public class ServiceProviderRouterIT extends DockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
     private static String AMQPS_URL;
+
  	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -68,9 +69,8 @@ public class ServiceProviderRouterIT extends DockerBaseIT {
 					"qpid.rest.api.vhost=localhost"
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
-
-
 	}
+
 	@Autowired
 	QpidClient client;
 	ServiceProviderRouter router;

@@ -43,7 +43,12 @@ public class ServiceProviderRouter {
             if (!groupMemberNames.contains(name)) {
             	qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
 			}
-            for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+			if (!qpidClient.queueExists(name)) {
+				logger.info("Creating queue {}", name);
+				qpidClient.createQueue(name);
+				qpidClient.addReadAccess(name, name);
+			}
+			for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
                 switch (subscription.getStatus()) {
                     case REQUESTED:
                         setupServiceProviderRouting(name, subscription);
@@ -91,17 +96,9 @@ public class ServiceProviderRouter {
     }
 
     public void setupServiceProviderRouting(String name, LocalSubscription subscription) {
-        //	create the queue
-        if (!qpidClient.queueExists(name)) {
-			logger.info("Creating queue {}", name);
-			qpidClient.createQueue(name);
-			qpidClient.addReadAccess(name, name);
-		}
         logger.debug("Adding bindings to the queue {}", name);
 		qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "nwEx");
 		qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "fedEx");
-
-
     }
 
 }
