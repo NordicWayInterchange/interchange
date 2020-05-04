@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
 import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
+import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionApi;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -117,7 +118,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
             DataTypeApi subscription = mapper.readValue(file,DataTypeApi.class);
-            LocalDataType result = client.addSubscription(subscription);
+            LocalSubscriptionApi result = client.addSubscription(subscription);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }

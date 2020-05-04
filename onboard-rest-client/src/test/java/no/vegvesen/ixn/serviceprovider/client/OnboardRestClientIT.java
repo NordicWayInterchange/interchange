@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,7 +21,11 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import javax.net.ssl.SSLContext;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.filter;
 
 @SuppressWarnings("rawtypes")
 public class OnboardRestClientIT extends DockerBaseIT {
@@ -104,35 +107,42 @@ public class OnboardRestClientIT extends DockerBaseIT {
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
 		client.addSubscription(new Datex2DataTypeApi("NO"));
 
-        LocalDataTypeList localSubscriptions = client.getServiceProviderSubscriptionRequest();
+        LocalSubscriptionListApi localSubscriptions = client.getServiceProviderSubscription();
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(localSubscriptions));
 
         assertThat(localSubscriptions).isNotNull();
-        assertThat(localSubscriptions.getDataTypes()).isNotNull().hasSize(1);
-        LocalDataType idSubToDelete = localSubscriptions.getDataTypes().iterator().next();
+        List<LocalSubscriptionApi> filtered = filterOutTearDownSubscriptions(localSubscriptions.getSubscritions());
+        assertThat(filtered).isNotNull().hasSize(1);
+        LocalSubscriptionApi idSubToDelete = filtered.get(0);
 
         client.deleteSubscriptions(idSubToDelete.getId());
-		LocalDataTypeList afterDelete = client.getServiceProviderSubscriptionRequest();
-		assertThat(afterDelete.getDataTypes()).hasSize(0);
+		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscription();
+		List<LocalSubscriptionApi> filteredAfterDelete = filterOutTearDownSubscriptions(afterDelete.getSubscritions());
+        assertThat(filteredAfterDelete).hasSize(0);
 	}
 
     @Test
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-		LocalDataType addedSubscription = client.addSubscription(new Datex2DataTypeApi("NO"));
+		LocalSubscriptionApi addedSubscription = client.addSubscription(new Datex2DataTypeApi("NO"));
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
         LocalDataTypeList capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
-		LocalDataTypeList serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptionRequest();
-		for (LocalDataType subscription : serviceProviderSubscriptionRequest.getDataTypes()) {
+		LocalSubscriptionListApi serviceProviderSubscriptionRequest = client.getServiceProviderSubscription();
+		for (LocalSubscriptionApi subscription : serviceProviderSubscriptionRequest.getSubscritions()) {
 			System.out.println("deleting subscription " + subscription.getId());
 			client.deleteSubscriptions(subscription.getId());
 		}
-		LocalDataTypeList afterDelete = client.getServiceProviderSubscriptionRequest();
-		assertThat(afterDelete.getDataTypes()).hasSize(0);
+		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscription();
+		assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscritions())).hasSize(0);
+    }
+
+
+    private List<LocalSubscriptionApi> filterOutTearDownSubscriptions(List<LocalSubscriptionApi> subscriptions) {
+        return subscriptions.stream().filter(sub -> !sub.getStatus().equals(LocalSubscriptionStatusApi.TEAR_DOWN)).collect(Collectors.toList());
     }
 
 }

@@ -56,7 +56,6 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
 	private static String AMQPS_URL;
-
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -71,9 +70,13 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 					"qpid.rest.api.vhost=localhost"
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
+
 	}
 
 	RoutingConfigurer routingConfigurer;
+	private ServiceProviderRepository serviceProviderRepository;
+
+
 
 	@Autowired
 	QpidClient client;
@@ -83,87 +86,72 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 
 	@Before
 	public void setUp() {
-		routingConfigurer = new RoutingConfigurer(mock(NeighbourRepository.class), mock(ServiceProviderRepository.class), client);
+		serviceProviderRepository = mock(ServiceProviderRepository.class);
+		routingConfigurer = new RoutingConfigurer(mock(NeighbourRepository.class), client, mock(ServiceProviderRouter.class));
 	}
 
 	@Test
-	public void interchangeWithOneBindingIsCreated() {
+	public void neighbourWithOneBindingIsCreated() {
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		routingConfigurer.setupSubscriberRouting(flounder);
+		routingConfigurer.setupNeighbourRouting(flounder);
 		assertThat(client.queueExists(flounder.getName())).isTrue();
 	}
 
 	@Test
-	public void interchangeWithTwoBindingsIsCreated() {
+	public void neighbourWithTwoBindingsIsCreated() {
 		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED);
 		Subscription s2 = new Subscription("b = c", SubscriptionStatus.ACCEPTED);
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		routingConfigurer.setupSubscriberRouting(halibut);
+		routingConfigurer.setupNeighbourRouting(halibut);
 		assertThat(client.queueExists(halibut.getName())).isTrue();
 	}
 
 	@Test
-	public void interchangeWithTwoBindingsAndOnlyOneIsAcceptedIsCreated() {
+	public void neighbourWithTwoBindingsAndOnlyOneIsAcceptedIsCreated() {
 		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED);
 		Subscription s2 = new Subscription("b = c", SubscriptionStatus.REJECTED);
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour salmon = new Neighbour("salmon", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		routingConfigurer.setupSubscriberRouting(salmon);
+		routingConfigurer.setupNeighbourRouting(salmon);
 		assertThat(client.queueExists(salmon.getName())).isTrue();
 		Set<String> queueBindKeys = client.getQueueBindKeys(salmon.getName());
 		assertThat(queueBindKeys).hasSize(1);
 	}
 
 	@Test
-	public void interchangeIsBothCreatedAndUpdated() {
+	public void neighbourIsBothCreatedAndUpdated() {
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		routingConfigurer.setupSubscriberRouting(seabass);
+		routingConfigurer.setupNeighbourRouting(seabass);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
-		routingConfigurer.setupSubscriberRouting(seabass);
+		routingConfigurer.setupNeighbourRouting(seabass);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
 	}
 
 	@Test
-	public void interchangeCanUnbindSubscription() {
+	public void neighbourCanUnbindSubscription() {
 		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED);
 		Subscription s2 = new Subscription("b = c", SubscriptionStatus.ACCEPTED);
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-		routingConfigurer.setupSubscriberRouting(trout);
+		routingConfigurer.setupNeighbourRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
 		subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED));
 		subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		routingConfigurer.setupSubscriberRouting(trout);
+		routingConfigurer.setupNeighbourRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
 	}
 
-	@Test
-	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
-		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		routingConfigurer.setupSubscriberRouting(king_gustaf);
-		SSLContext kingGustafSslContext = setUpTestSslContext("jks/king_gustaf.p12");
-		Sink readKingGustafQueue = new Sink(AMQPS_URL, "king_gustaf", kingGustafSslContext);
-		readKingGustafQueue.start();
-		Source writeOnrampQueue = new Source(AMQPS_URL, "onramp", kingGustafSslContext);
-		writeOnrampQueue.start();
-		try {
-			Sink readDlqueue = new Sink(AMQPS_URL, "onramp", kingGustafSslContext);
-			readDlqueue.start();
-			fail("Should not allow king_gustaf to read from queue not granted access on (onramp)");
-		} catch (Exception ignore) {
-		}
-	}
 
 	private static String getFilePathFromClasspathResource(String classpathResource) {
 		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
@@ -178,7 +166,7 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 		HashSet<Subscription> subscriptions = new HashSet<>();
 		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED));
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions), null);
-		routingConfigurer.setupSubscriberRouting(nordea);
+		routingConfigurer.setupNeighbourRouting(nordea);
 		SSLContext nordeaSslContext = setUpTestSslContext("jks/nordea.p12");
 		try {
 			Source writeFedExExchange = new Source(AMQPS_URL, "fedEx", nordeaSslContext);
@@ -202,22 +190,11 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 	public void neighbourToreDownWillBeRemovedFromFederatedInterchangesGroup() {
 		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, emptySubscriptionRequest, emptySubscriptionRequest);
 
-		routingConfigurer.setupSubscriberRouting(toreDownNeighbour);
+		routingConfigurer.setupNeighbourRouting(toreDownNeighbour);
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).contains(toreDownNeighbour.getName());
 
-		routingConfigurer.tearDownSubscriberRouting(toreDownNeighbour);
+		routingConfigurer.tearDownNeighbourRouting(toreDownNeighbour);
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).doesNotContain(toreDownNeighbour.getName());
-	}
-
-	@Test
-	public void subcriberToreDownWillBeRemovedFromSubscribFederatedInterchangesGroup() {
-		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
-
-		routingConfigurer.setupSubscriberRouting(toreDownServiceProvider);
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
-
-		routingConfigurer.tearDownSubscriberRouting(toreDownServiceProvider);
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
 	}
 
 

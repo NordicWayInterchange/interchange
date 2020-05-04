@@ -7,10 +7,11 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
 import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
+import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionApi;
+import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionListApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,15 +24,16 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final SelfRepository selfRepository;
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
+	private TypeTransformer typeTransformer = new TypeTransformer();
 
 	@Value("${interchange.node-provider.name}")
 	String nodeProviderName;
@@ -106,7 +108,7 @@ public class OnboardRestController {
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		LocalDataType localDataType = null;
 		if (dataTypeId != null) {
-			localDataType = transformToDataTypeApiId(dataTypeId);
+			localDataType = typeTransformer.transformToDataTypeApiId(dataTypeId);
 		}
 		OnboardMDCUtil.removeLogVariables();
 		return localDataType;
@@ -153,7 +155,7 @@ public class OnboardRestController {
 		updateSelfCapabilities(previousSelfCapabilities);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
-		RedirectView redirectView = new RedirectView("{serviceProviderName}/capabilities");
+		RedirectView redirectView = new RedirectView("/{serviceProviderName}/capabilities");
 		OnboardMDCUtil.removeLogVariables();
 		return redirectView;
 	}
@@ -221,7 +223,12 @@ public class OnboardRestController {
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
 			logger.info("Service provider name: {}", serviceProvider.getName());
-			Set<DataType> serviceProviderSubscriptions = serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions();
+			//Set<DataType> serviceProviderSubscriptions = serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions();
+			Set<DataType> serviceProviderSubscriptions = serviceProvider
+					.getSubscriptions()
+					.stream()
+					.map(LocalSubscription::getDataType)
+					.collect(Collectors.toSet());
 			logger.info("Service Provider Subscriptions: {}", serviceProviderSubscriptions.toString());
 			localSubscriptions.addAll(serviceProviderSubscriptions);
 		}
@@ -230,7 +237,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
-	public LocalDataType addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
+	public LocalSubscriptionApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -241,7 +248,6 @@ public class OnboardRestController {
 		}
 
 		logger.info("Service provider {} Incoming subscription post: {}", serviceProviderName, dataTypeApi.toString());
-		DataType newLocalSubscription = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
 		serviceProviderRepository.findByName(serviceProviderName);
 
 		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
@@ -249,27 +255,28 @@ public class OnboardRestController {
 		Set<DataType> previousSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
+		DataType newDataType = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, newDataType);
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
-			serviceProviderToUpdate.setLocalSubscriptionRequest(new LocalSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, newLocalSubscription));
-		} else {
-			// Add the subscriptions to the Service Provider subscription request.
-			LocalSubscriptionRequest localSubscriptionRequest = serviceProviderToUpdate.getOrCreateLocalSubscriptionRequest();
-			localSubscriptionRequest.addLocalSubscription(newLocalSubscription);
-			// Flip Service Provider Subscription request to REQUESTED so it will be picked up the the routing configurer.
-			localSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
+			//serviceProviderToUpdate.setLocalSubscriptionRequest(new LocalSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, newLocalSubscription));
 		}
+		serviceProviderToUpdate.addLocalSubscription(localSubscription);
 
 		// Save updated Service Provider in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 
 		updateSelfSubscriptions(previousSelfSubscriptions);
-
-		LocalDataType returning = transformToDataTypeApiId(newLocalSubscription);
+		LocalSubscription returning = null;
+		for (LocalSubscription ls : saved.getSubscriptions()) {
+			if (ls.equals(localSubscription)) {
+				returning = ls;
+			}
+		}
 		OnboardMDCUtil.removeLogVariables();
-		return returning;
+		return typeTransformer.transformLocalSubecriptionToLocalSubscriptionApi(returning);
 	}
 
 	// Get the self representation from the database. If it doesn't exist, create it.
@@ -298,29 +305,18 @@ public class OnboardRestController {
 		if (serviceProviderToUpdate == null) {
 			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
 		}
-		LocalSubscriptionRequest localSubscriptionRequest = serviceProviderToUpdate.getOrCreateLocalSubscriptionRequest();
-		Set<DataType> currentServiceProviderSubscriptions = localSubscriptionRequest.getSubscriptions();
-		if (currentServiceProviderSubscriptions.isEmpty()) {
-			throw new SubscriptionRequestException("The Service Provider trying to delete a subscription has no existing subscriptions. Nothing to delete.");
-		}
-		Optional<DataType> subscriptionToDelete = currentServiceProviderSubscriptions
+		//LocalSubscriptionRequest localSubscriptionRequest = serviceProviderToUpdate.getOrCreateLocalSubscriptionRequest();
+		Set<LocalSubscription> subscriptions = serviceProviderToUpdate.getSubscriptions();
+		Optional<LocalSubscription> optionalLocalSubscription = subscriptions
 				.stream()
-				.filter(dataType -> dataType.getData_id().equals(dataTypeId))
+				.filter(subscription -> subscription.getSub_id().equals(dataTypeId))
 				.findFirst();
-		DataType dataTypeToDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that don't exist."));
-		currentServiceProviderSubscriptions.remove(dataTypeToDelete);
-
-		if (currentServiceProviderSubscriptions.isEmpty()) {
-			// Subscription is now empty, notify Routing Configurer to tear down the queue.
-			logger.info("Service Provider subscriptions are now empty. Setting status to TEAR_DOWN.");
-			localSubscriptionRequest.setStatus(SubscriptionRequestStatus.TEAR_DOWN);
-		} else {
-			// Flip status to REQUESTED to notify Routing Configurer to change the queue filter.
-			logger.info("Service Provider subscriptions were updated, but are not empty. Setting status to REQUESTED");
-			localSubscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
-		}
-
-		// Save updated Service Provider
+		LocalSubscription subscriptionToDelete = optionalLocalSubscription.
+				orElseThrow(
+						() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that don't exist.")
+				);
+		subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+		// Save updated Service Providerset it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 
@@ -335,7 +331,7 @@ public class OnboardRestController {
 	public LocalDataTypeList getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
-		LocalDataTypeList localDataTypeList = transformToDataTypeIdList(serviceProvider.getCapabilities().getDataTypes());
+		LocalDataTypeList localDataTypeList = typeTransformer.transformToDataTypeIdList(serviceProvider.getCapabilities().getDataTypes());
 		OnboardMDCUtil.removeLogVariables();
 		return localDataTypeList;
 
@@ -351,24 +347,12 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-	public LocalDataTypeList getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
+	public LocalSubscriptionListApi getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
-		LocalDataTypeList localDataTypeList = transformToDataTypeIdList(serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions());
+		LocalSubscriptionListApi localDataTypeList = typeTransformer.transformLocalSubscriptionListToLocalSubscriptionListApi(serviceProvider.getSubscriptions());
 		OnboardMDCUtil.removeLogVariables();
 		return localDataTypeList;
-	}
-
-	private LocalDataTypeList transformToDataTypeIdList(Set<DataType> dataTypes) {
-		List<LocalDataType> idDataTypes = new LinkedList<>();
-		for (DataType dataType : dataTypes) {
-			idDataTypes.add(transformToDataTypeApiId(dataType));
-		}
-		return new LocalDataTypeList(idDataTypes);
-	}
-
-	private LocalDataType transformToDataTypeApiId(DataType dataType) {
-		return new LocalDataType(dataType.getData_id(), dataTypeTransformer.dataTypeToApi(dataType));
 	}
 
 	// TODO: Remove

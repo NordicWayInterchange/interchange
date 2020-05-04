@@ -133,7 +133,7 @@ public class QuadTreeFilteringIT extends DockerBaseIT {
 
 	private Message sendReceiveMessageServiceProvider(String messageQuadTreeTiles, DataType subscription) throws Exception {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		king_gustaf.setLocalSubscriptionRequest(new LocalSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscription));
+		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,subscription));
 		qpidClient.createQueue(king_gustaf.getName());
 		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());
 		qpidClient.addBinding(subscription.toSelector(), king_gustaf.getName(), ""+subscription.toSelector().hashCode(), "nwEx");
