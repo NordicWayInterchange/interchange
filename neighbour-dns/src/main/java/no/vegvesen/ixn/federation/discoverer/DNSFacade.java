@@ -26,6 +26,7 @@ public class DNSFacade {
 			if (dnsProperties.getDomainName() == null || dnsProperties.getDomainName().isEmpty()) {
 				throw new RuntimeException("DNS lookup with no domain");
 			}
+			System.setProperty("dns.search", dnsProperties.getDomainName());
 			Map<String, String> messageChannelPorts = getSrvRecords("_ixn._tcp.");
 			Map<String, String> controlChannelPorts = new HashMap<>();
 			try {
