@@ -10,24 +10,24 @@ import javax.jms.MessageProducer;
 
 public class MessageForwardUtil {
 	private static Logger logger = LoggerFactory.getLogger(MessageForwardUtil.class);
-	public final static long DEFAULT_TTL = 86_400_000L;
-	public final static long MAX_TTL = 6_911_200_000L;
+	public final static long DEFAULT_TTL_1_DAY = 86_400_000L;
+	public final static long MAX_TTL_8_DAYS = 691_200_000L;
 
 	public static long getRemainingTimeToLive(Message textMessage) {
 		long expiration;
 		try {
 			expiration = textMessage.getJMSExpiration();
 		} catch (JMSException e) {
-			logger.warn("Could not get remaining ttl for message, returning default ttl {}", DEFAULT_TTL, e);
-			return DEFAULT_TTL;
+			logger.warn("Could not get remaining ttl for message, returning default ttl {}", DEFAULT_TTL_1_DAY, e);
+			return DEFAULT_TTL_1_DAY;
 		}
 		long currentTime = System.currentTimeMillis();
 		if (expiration <= 0) {
 			logger.debug("expiration {} is absent or illegal - setting to default ttl (1 day)", expiration);
-			return DEFAULT_TTL;
-		} else if (expiration > (MAX_TTL + currentTime)) {
+			return DEFAULT_TTL_1_DAY;
+		} else if (expiration > (MAX_TTL_8_DAYS + currentTime)) {
 			logger.debug("expiration {} is too high, setting to maximum ttl (8 days)", expiration);
-			return MAX_TTL;
+			return MAX_TTL_8_DAYS;
 		} else {
 			logger.debug("expiration {} is in the valid range (more than 0, less than 8 days)", expiration);
 			return expiration - currentTime;
