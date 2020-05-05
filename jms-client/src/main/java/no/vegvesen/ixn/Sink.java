@@ -136,7 +136,4 @@ public class Sink implements MessageListener, AutoCloseable {
 			throw new RuntimeException(e);
 		}
 	}
-
-	public void setMessageListener(MessageListener messageListener) {
-	}
 }
