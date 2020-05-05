@@ -52,6 +52,10 @@ spec:
           value: /config/groups
         - name: PASSWD_FILE
           value: /config/passwd
+        {{- if .Values.qpid.java_mem }}
+        - name: QPID_JAVA_MEM
+          value: {{ .Values.qpid.java_mem }}
+        {{- end }}
         {{- if .Values.qpid.memorydump.enabled }}
         - name: JAVA_OPTS
           value: -XX:HeapDumpPath=/work/memorydump/
