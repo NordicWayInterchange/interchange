@@ -22,6 +22,8 @@ public class QpidClient {
 
 	public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
 	public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
+	public final static long MAX_TTL_8_DAYS = 691_200_000L;
+
 
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
 	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s";
@@ -97,7 +99,7 @@ public class QpidClient {
 		JSONObject json = new JSONObject();
 		json.put("name", queueName);
 		json.put("durable", true);
-		json.put("maximumMessageTtl", 86400000);
+		json.put("maximumMessageTtl", MAX_TTL_8_DAYS);
 		String jsonString = json.toString();
 		postQpid(queuesURL, jsonString, "/");
 	}
