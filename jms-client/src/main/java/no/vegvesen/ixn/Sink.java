@@ -19,7 +19,7 @@ public class Sink implements MessageListener, AutoCloseable {
 
 	private static Logger logger = LoggerFactory.getLogger(Sink.class);
 
-    public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		Properties props = getProperties(args, "/sink.properties");
 
 		String url = props.getProperty("sink.url");
@@ -40,13 +40,14 @@ public class Sink implements MessageListener, AutoCloseable {
 
         Sink sink = new Sink(url,receiveQueue,sslContext);
 		System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
-        sink.start(sink);
+        sink.start();
     }
 
     protected final String url;
     private final String queueName;
     private final SSLContext sslContext;
     protected Connection connection;
+	private MessageConsumer consumer;
 
     public Sink(String url, String queueName, SSLContext sslContext) {
         this.url = url;
@@ -54,10 +55,24 @@ public class Sink implements MessageListener, AutoCloseable {
         this.sslContext = sslContext;
     }
 
+	public void startWithMessageListener(MessageListener newListener) throws JMSException, NamingException {
+    	if (this.consumer != null) {
+			try {
+				this.consumer.close();
+				logger.debug("Closed message consumer before creating new consumer");
+			} catch (JMSException ignore) {
+			}
+		}
+		this.consumer = createConsumer();
+		this.consumer.setMessageListener(newListener);
+		logger.debug("Consuming messages from {} with listener {}", this.queueName, newListener);
+	}
 
-    public void start(MessageListener listener) throws JMSException, NamingException {
-		MessageConsumer consumer = createConsumer();
-		consumer.setMessageListener(listener);
+
+    public void start() throws JMSException, NamingException {
+		this.consumer = createConsumer();
+		consumer.setMessageListener(this);
+		logger.debug("Consuming messages from {} with listener {}", this.queueName, this);
     }
 
 	public MessageConsumer createConsumer() throws NamingException, JMSException {
@@ -66,7 +81,9 @@ public class Sink implements MessageListener, AutoCloseable {
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		return session.createConsumer(destination);
+		MessageConsumer consumer = session.createConsumer(destination);
+		logger.debug("Created message consumer for {}", this.queueName);
+		return consumer;
 	}
 
 	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
@@ -85,7 +102,7 @@ public class Sink implements MessageListener, AutoCloseable {
 				System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
 			}
 			System.out.println("** Message received **");
-			Enumeration messageNames =  message.getPropertyNames();
+			@SuppressWarnings("rawtypes") Enumeration messageNames =  message.getPropertyNames();
 
 			while (messageNames.hasMoreElements()) {
 				String messageName = (String) messageNames.nextElement();

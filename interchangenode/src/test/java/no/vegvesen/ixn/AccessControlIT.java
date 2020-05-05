@@ -33,6 +33,7 @@ public class AccessControlIT extends DockerBaseIT {
 	private static final String NW_EX = "nwEx";
 	private static final String TEST_OUT = "test-out";
 
+	@SuppressWarnings("rawtypes")
 	@ClassRule
 	public static GenericContainer localContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 
@@ -45,19 +46,19 @@ public class AccessControlIT extends DockerBaseIT {
 	@Test(expected = JMSSecurityException.class)
 	public void testKingHaraldCanNotConsumeSE_OUT() throws Exception {
 		Sink seOut = new Sink(getQpidURI(), SE_OUT, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		seOut.start(seOut);
+		seOut.start();
 	}
 
 	@Test(expected = JMSSecurityException.class)
 	public void testKingGustafCanNotConsumeNO_OUT() throws Exception {
 		Sink noOut = new Sink(getQpidURI(), NO_OUT, TestKeystoreHelper.sslContext(JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS));
-		noOut.start(noOut);
+		noOut.start();
 	}
 
 	@Test(expected = JMSSecurityException.class)
 	public void KingHaraldCanNotConsumeFromOnramp() throws Exception {
 		Sink onramp = new Sink(getQpidURI(), ONRAMP, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		onramp.start(onramp);
+		onramp.start();
 	}
 
 	@Test(expected = JMSException.class)
@@ -70,13 +71,13 @@ public class AccessControlIT extends DockerBaseIT {
 	@Test(expected = JMSException.class)
 	public void userWithInvalidCertificateCannotConnect() throws Exception {
 		Sink testOut = new Sink(getQpidURI(), TEST_OUT, TestKeystoreHelper.sslContext(JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		testOut.start(testOut);
+		testOut.start();
 	}
 
 	@Test
 	public void userWithValidCertificateCanConnect() throws Exception {
 		Sink noOut = new Sink(getQpidURI(), NO_OUT, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		noOut.start(noOut);
+		noOut.start();
 		MessageConsumer consumer = noOut.createConsumer();
 		assertThat(consumer).isNotNull();
 	}

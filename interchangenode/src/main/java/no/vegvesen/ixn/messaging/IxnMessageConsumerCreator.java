@@ -43,7 +43,7 @@ public class IxnMessageConsumerCreator {
     	Source nwEx = new BasicAuthSource(amqpUrl, NWEXCHANGE, username, password);
 		Sink onramp = new BasicAuthSink(amqpUrl, ONRAMP, username, password);
 		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, nwEx, dlQueue, messageValidator);
-		onramp.start(consumer);
+		onramp.startWithMessageListener(consumer);
 		onramp.setExceptionListener(consumer);
 		dlQueue.start();
 		dlQueue.setExceptionListener(consumer);
