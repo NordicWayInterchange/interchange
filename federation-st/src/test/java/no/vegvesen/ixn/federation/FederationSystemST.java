@@ -12,6 +12,7 @@ import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.util.LongSummaryStatistics;
+import java.util.Random;
 import java.util.stream.LongStream;
 
 public class FederationSystemST {
@@ -27,7 +28,7 @@ public class FederationSystemST {
 		Sink sinkSpTwo = new Sink("amqps://bouvet-two.bouvetinterchange.no", "sp-two.bouvetinterchange.no", spTwoSslContext);
 		MessageConsumer consumer = sinkSpTwo.createConsumer();
 		//noinspection StatementWithEmptyBody
-		while(consumer.receive(200) != null); //drain out queue
+		while (consumer.receive(200) != null) ; //drain out queue
 
 		Source sourceSpOne = new Source("amqps://bouvet-one.bouvetinterchange.no", "onramp", spOneSslContext);
 		sourceSpOne.start();
@@ -85,7 +86,7 @@ public class FederationSystemST {
 			consumer = null;
 		} catch (JMSException ignore) {
 		}
-		for (int y=0; y < 10 && consumer == null; y++) {
+		for (int y = 0; y < 10 && consumer == null; y++) {
 			try {
 				Thread.sleep(30000);
 				System.out.printf("Reconnect attempt %d %n", y);
@@ -104,11 +105,12 @@ public class FederationSystemST {
 	}
 
 	private void sendOneMessageReconnect(Source sourceSpOne, int i, long timeToLive) throws InterruptedException, NamingException, JMSException {
+		String messageText = "message " + i + " " + randomString(1024 * 200);
 		try {
-			sourceSpOne.send("beste fisken i verden - " + i, "NO", timeToLive);
+			sourceSpOne.send(messageText, "NO", timeToLive);
 		} catch (JMSException e) {
 			reconnectProducer(sourceSpOne);
-			sourceSpOne.send("beste fisken i verden (resend) - " + i, "NO", timeToLive);
+			sourceSpOne.send(messageText, "NO", timeToLive);
 		}
 	}
 
@@ -119,7 +121,7 @@ public class FederationSystemST {
 		} catch (Exception ignore) {
 		}
 		Thread.sleep(30000);
-		for (int y=0; y < 10 && !sourceSpOne.isConnected(); y++) {
+		for (int y = 0; y < 10 && !sourceSpOne.isConnected(); y++) {
 			System.out.printf("Reconnect source attempt %d %n", y);
 			sourceSpOne.start();
 		}
@@ -130,5 +132,14 @@ public class FederationSystemST {
 		reconnectsProducer++;
 	}
 
-
+	public String randomString(int length) {
+		int leftLimit = 48; // numeral '0'
+		int rightLimit = 122; // letter 'z'
+		Random random = new Random();
+		return random.ints(leftLimit, rightLimit + 1)
+				.filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+				.limit(length)
+				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+				.toString();
+	}
 }
