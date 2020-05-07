@@ -10,6 +10,21 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>Github NordicWayInterchange Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
+        </repository>
+    </distributionManagement>
+
     <artifactId>message-collector</artifactId>
 
     <dependencies>

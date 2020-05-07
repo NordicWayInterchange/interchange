@@ -9,6 +9,12 @@ jobs:
           command: |
             mvn verify -PIT -PPKG -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - run:
+          branch: my_build_branch
+          name: Push maven build
+          command: |
+            echo mvn deploy
+            echo git tag ... mvn version
+      - run:
           name: Push containers
           command: |
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
