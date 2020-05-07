@@ -16,6 +16,10 @@ data:
     federated-interchanges.users=
     administrators.users={{ .Values.qpid.admin_user }},{{ .Values.external_name }}
   default.json: |
+    {{- $userlen := len .Values.qpid.users }}
+    {{- $additionallen := len .Values.qpid.additional_queues }}
+    {{- $additionallen_i := sub $additionallen 1 }}
+    {{- $totallen := add $userlen $additionallen }}
     {
       "type": "BDB",
       "name": "{{ .Values.external_name }}",
@@ -26,31 +30,24 @@ data:
           "type" : "headers",
           "durable" : true,
           "durableBindings": [
-            {{- range .Values.qpid.users }}
+            {{- range $i, $ex := .Values.qpid.users }}
             {
               "arguments": {
                 "x-filter-jms-selector": "{{ .binding }}"
               },
               "bindingKey": "binding_key",
               "destination": "{{ .name }}"
-            },
+            }{{ if gt $totallen $i }},{{ end}}
             {{- end }}
-            {{- range .Values.qpid.additional_queues }}
+            {{- range $i, $el := .Values.qpid.additional_queues }}
             {
               "arguments": {
-                "x-filter-jms-selector": "{{ .binding }}"
-              },
+                "x-filter-jms-selector": "{{ $el.binding }}"
+              }
               "bindingKey": "binding_key",
-              "destination": "{{ .name }}"
-            },
+              "destination": "{{ $el.name }}"
+            }{{if lt $i $additionallen_i }},{{end}}
             {{- end }}
-            {
-              "arguments": {
-                "x-filter-jms-selector": "originatingCountry LIKE '%'"
-              },
-              "bindingKey": "binding_key",
-              "destination": "test-out"
-            }
           ]
         },
         {
@@ -58,46 +55,28 @@ data:
           "type": "headers",
           "durable": true,
           "durableBindings": [
-            {{- range .Values.qpid.users }}
+            {{- range $i, $ex := .Values.qpid.users }}
             {
               "arguments": {
-                "x-filter-jms-selector": "{{ .binding }}"
+                "x-filter-jms-selector": "{{ $ex.binding }}"
               },
               "bindingKey": "binding_key",
-              "destination": "{{ .name }}"
-            },
+              "destination": "{{ $ex.name }}"
+            }{{ if gt $totallen $i }},{{ end}}
             {{- end }}
-            {{- range .Values.qpid.additional_queues }}
+            {{- range $i, $ex := .Values.qpid.additional_queues }}
             {
               "arguments": {
-                "x-filter-jms-selector": "{{ .binding }}"
+                "x-filter-jms-selector": "{{ $ex.binding }}"
               },
               "bindingKey": "binding_key",
-              "destination": "{{ .name }}"
-            },
+              "destination": "{{ $ex.name }}"
+            }{{if lt $i $additionallen_i }},{{end}}
             {{- end }}
-            {
-              "arguments": {
-                "x-filter-jms-selector": "originatingCountry LIKE '%'"
-              },
-              "bindingKey": "binding_key",
-              "destination": "test-out"
-            }
           ]
         }
       ],
       "queues": [
-        {
-          "id": "7C1F3C61-AA9F-4339-A8DF-C0FDB6930D45",
-          "name": "test-out",
-          "type": "standard",
-          "durable": true,
-          "holdOnPublishEnabled": false,
-          "messageDurability": "ALWAYS",
-          "owner": null,
-          "lastUpdatedBy": "interchange",
-          "createdBy": "interchange"
-        },
         {
           "id": "0EF5AA55-E3A8-4DD6-A394-46E1F6AED77A",
           "name": "dlqueue",
@@ -109,12 +88,12 @@ data:
           "lastUpdatedBy": "interchange",
           "createdBy": "interchange"
         },
-        {{- range .Values.qpid.users }}
+        {{- range $i, $ex := .Values.qpid.users }}
         {
-          {{- if .uuid }}
-          "id": "{{ .uuid}}",
+          {{- if $ex.uuid }}
+          "id": "{{ $ex.uuid}}",
           {{- end }}
-          "name": "{{ .name }}",
+          "name": "{{ $ex.name }}",
           "type": "standard",
           "durable": true,
           "holdOnPublishEnabled": false,
@@ -122,7 +101,7 @@ data:
           "owner": null,
           "lastUpdatedBy": "interchange",
           "createdBy": "interchange"
-        },
+        }{{ if gt $totallen $i }},{{ end}}
         {{- end }}
         {{- range .Values.qpid.additional_queues }}
         {
@@ -197,25 +176,16 @@ data:
                 "NAME": "{{ .Values.external_name }}"
               }
             },
+            {{- range $i, $ex := .Values.qpid.users }}
             {
               "objectType": "QUEUE",
-              "identity": "service-providers",
+              "identity": "{{ $ex.name }}",
               "operation": "CONSUME",
               "outcome": "ALLOW_LOG",
               "attributes": {
-                "NAME": "test-out"
+                "NAME": "{{ $ex.name }}"
               }
-            },
-            {{- range .Values.qpid.users }}
-            {
-              "objectType": "QUEUE",
-              "identity": "{{ .name }}",
-              "operation": "CONSUME",
-              "outcome": "ALLOW_LOG",
-              "attributes": {
-                "NAME": "{{ .name }}"
-              }
-            },
+            }{{ if gt $totallen $i }},{{ end}}
             {{- end }}
             {{- range .Values.qpid.additional_queues }}
             {

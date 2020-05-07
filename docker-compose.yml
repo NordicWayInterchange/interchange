@@ -29,7 +29,7 @@ services:
     depends_on:
       - gen_keys
     ports:
-    - 8081:8080
+    - 8080:8080
     - 5671:5671
     - 5672:5672
     volumes:
@@ -40,33 +40,8 @@ services:
       CA_CERTIFICATE_FILE: "/jks/keys/my_ca.crt"
       SERVER_CERTIFICATE_FILE: "/jks/keys/qpid.test.io.crt"
       SERVER_PRIVATE_KEY_FILE: "/jks/keys/qpid.test.io.key"
-      VHOST_FILE: "/config/vhost.json"
-      GROUPS_FILE: "/config/groups"
+      VHOST_FILE: /work/default/config/default.json
+      STATIC_VHOST_FILE: /config/vhost.json
+      GROUPS_FILE: /work/default/config/groups
+      STATIC_GROUPS_FILE: /config/groups
       PASSWD_FILE: "/config/passwd"
-
-  postgis:
-    build: ./postgis
-    environment:
-    - POSTGRES_USER=geolookup
-    - POSTGRES_PASSWORD=geolookup
-    - POSTGRES_DB=geolookup
-    container_name: postgis
-    hostname: postgis
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "geolookup"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    expose:
-    - "5432"
-
-  federation_db:
-    image: postgres:9.6
-    container_name: federation_db
-    hostname: federation_db
-    ports:
-    - 7070:5432
-    environment:
-      - POSTGRES_USER=federation
-      - POSTGRES_PASSWORD=federation
-      - POSTGRES_DB=federation

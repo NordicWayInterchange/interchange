@@ -81,6 +81,13 @@
       "durable": true,
       "holdOnPublishEnabled": false,
       "owner": null
+    },
+    {
+      "name": "NO-private",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
     }
   ],
   "virtualhostaccesscontrolproviders": [
@@ -212,6 +219,25 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "king_gustaf"
+          }
+        },
+        {
+          "objectType": "EXCHANGE",
+          "identity": "king_harald",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "ROUTING_KEY": "NO-private",
+            "NAME": ""
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "king_harald",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "NO-private"
           }
         },
         {

@@ -1,26 +1,23 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
+import no.vegvesen.ixn.MessageForwardUtil;
+import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.DeliveryMode;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
+import javax.jms.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MessageCollectorListener implements MessageListener, ExceptionListener {
     private AtomicBoolean running;
-    private final MessageConsumer messageConsumer;
-    private final MessageProducer producer;
+    private final Sink sink;
+    private final Source source;
     private Logger log = LoggerFactory.getLogger(MessageCollectorListener.class);
 
-    MessageCollectorListener(MessageConsumer messageConsumer, MessageProducer producer) {
-        this.messageConsumer = messageConsumer;
-        this.producer = producer;
+    MessageCollectorListener(Sink sink, Source source) {
+        this.sink = sink;
+        this.source = source;
         this.running = new AtomicBoolean(true);
     }
 
@@ -29,9 +26,7 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
         log.debug("Message received!");
         if (running.get()) {
             try {
-                log.debug("Sending message!");
-                producer.send(message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-                log.debug("Message sendt!");
+				MessageForwardUtil.send(source.getProducer(), message);
             } catch (JMSException e) {
                 log.error("Problem receiving message", e);
                 teardown();
@@ -39,15 +34,19 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
             }
         } else {
             log.debug("Got message, but listener is not running");
+            this.teardown();
             throw new MessageCollectorException("Not running!");
         }
     }
 
     public void teardown()  {
+		try {
+			sink.close();
+		} catch (Exception ignore) {
+		}
         try {
-            producer.close();
-            messageConsumer.close();
-        } catch (JMSException ignore) {
+			source.close();
+        } catch (Exception ignore) {
         } finally {
             running.set(false);
         }
@@ -56,7 +55,7 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
     @Override
     public void onException(JMSException e) {
         log.error("Exception caught",e);
-        running.set(false);
+        this.teardown();
     }
 
 

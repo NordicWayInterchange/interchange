@@ -102,6 +102,7 @@ services:
       - "./qpid/local:/config"
       - "./tmp:/jks"
       - "./qpid/messages/local:/work/local/messages"
+      - "./tmp/dump:/dump"
     environment:
       - CA_CERTIFICATE_FILE=/jks/keys/ca.itsinterchange.eu.crt
       - SERVER_CERTIFICATE_FILE=/jks/keys/local.itsinterchange.eu.crt
@@ -111,6 +112,7 @@ services:
       - GROUPS_FILE=/work/default/config/groups
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
+      - JAVA_OPTS=-XX:HeapDumpPath=/dump/
     networks:
     - testing_net
 

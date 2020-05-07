@@ -152,7 +152,6 @@ public class RoutingConfigurerIT extends DockerBaseIT {
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
 	}
 
-
 	private static String getFilePathFromClasspathResource(String classpathResource) {
 		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
 		if (resource != null) {

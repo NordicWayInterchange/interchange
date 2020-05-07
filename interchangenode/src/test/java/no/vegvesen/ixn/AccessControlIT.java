@@ -33,6 +33,7 @@ public class AccessControlIT extends DockerBaseIT {
 	private static final String NW_EX = "nwEx";
 	private static final String TEST_OUT = "test-out";
 
+	@SuppressWarnings("rawtypes")
 	@ClassRule
 	public static GenericContainer localContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 

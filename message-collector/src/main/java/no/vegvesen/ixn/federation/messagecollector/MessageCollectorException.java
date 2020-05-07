@@ -8,4 +8,8 @@ public class MessageCollectorException extends RuntimeException {
     public MessageCollectorException(String cause) {
         super(cause);
     }
+
+	public MessageCollectorException(String cause, Exception e) {
+		super(cause, e);
+	}
 }

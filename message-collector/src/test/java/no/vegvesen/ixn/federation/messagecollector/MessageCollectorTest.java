@@ -1,44 +1,42 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
+import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import org.junit.Test;
-
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.naming.NamingException;
 
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class MessageForwarderTest {
+public class MessageCollectorTest {
 
     @Test
-    public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() throws NamingException, JMSException {
+    public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() {
         Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
         Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
 
         NeighbourFetcher neighbourFetcher = mock(NeighbourFetcher.class);
         when(neighbourFetcher.listNeighboursToConsumeFrom()).thenReturn(Arrays.asList(one,two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
-        when(collectorCreator.setupCollection(one)).thenThrow(new JMSException("Expected exception"));
+        when(collectorCreator.setupCollection(one)).thenThrow(new MessageCollectorException("Expected exception"));
 
-        MessageProducer producer = mock(MessageProducer.class);
-        MessageConsumer consumer = mock(MessageConsumer.class);
-        when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(consumer,producer));
+        Source source = mock(Source.class);
+        Sink sink = mock(Sink.class);
 
-        MessageCollector forwarder = new MessageCollector(neighbourFetcher, collectorCreator);
-        forwarder.runSchedule();
+        when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(sink,source));
+
+        MessageCollector collector = new MessageCollector(neighbourFetcher, collectorCreator);
+        collector.runSchedule();
 
         verify(neighbourFetcher).listNeighboursToConsumeFrom();
         verify(collectorCreator,times(2)).setupCollection(any());
 
-        assertThat(forwarder.getListeners()).size().isEqualTo(1);
-        assertThat(forwarder.getListeners()).containsKeys("two");
+        assertThat(collector.getListeners()).size().isEqualTo(1);
+        assertThat(collector.getListeners()).containsKeys("two");
 
     }
 

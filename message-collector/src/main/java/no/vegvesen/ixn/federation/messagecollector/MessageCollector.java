@@ -7,13 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.jms.JMSException;
-import javax.naming.NamingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 @Service
@@ -36,7 +30,7 @@ public class MessageCollector {
     }
 
     @Scheduled(fixedRateString = "${collector.fixeddelay}")
-    public void runSchedule() throws NamingException {
+    public void runSchedule() {
         checkListenerList();
         setupConnectionsToNewNeighbours();
     }
@@ -54,7 +48,7 @@ public class MessageCollector {
 
     }
 
-    public void setupConnectionsToNewNeighbours() throws NamingException {
+    public void setupConnectionsToNewNeighbours() {
         List<Neighbour> interchanges = neighbourFetcher.listNeighboursToConsumeFrom();
         List<String> interchangeNames = new ArrayList<>();
         for (Neighbour ixn : interchanges) {
@@ -65,7 +59,7 @@ public class MessageCollector {
                     logger.info("Setting up collection from ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
                     MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
                     listeners.put(name, messageListener);
-                } catch (JMSException e) {
+                } catch (MessageCollectorException e) {
                     logger.warn("Tried to create connection to {}, but failed with exception.",name,e);
                 }
             } else {
@@ -76,17 +70,20 @@ public class MessageCollector {
                 }
             }
         }
-        List<MessageCollectorListener> listenersToRemove = new ArrayList<>();
+        List<String> listenerKeysToRemove = new ArrayList<>();
         for (String ixnName : listeners.keySet()) {
             if (! interchangeNames.contains(ixnName)) {
                 logger.info("Listener for {} is now being removed",ixnName);
+
                 MessageCollectorListener toRemove = listeners.get(ixnName);
+                logger.info("Tearing down {}", ixnName);
                 toRemove.teardown();
-                listenersToRemove.add(toRemove);
+                listenerKeysToRemove.add(ixnName);
             }
         }
-        for (MessageCollectorListener listener : listenersToRemove) {
-            listeners.remove(listener);
+        for (String ixnName : listenerKeysToRemove) {
+        	logger.debug("Removing {} from listeners", ixnName);
+            listeners.remove(ixnName);
         }
     }
 
