@@ -12,7 +12,7 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class MessageForwarderTest {
+public class MessageCollectorTest {
 
     @Test
     public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() {
@@ -29,14 +29,14 @@ public class MessageForwarderTest {
 
         when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(sink,source));
 
-        MessageCollector forwarder = new MessageCollector(neighbourFetcher, collectorCreator);
-        forwarder.runSchedule();
+        MessageCollector collector = new MessageCollector(neighbourFetcher, collectorCreator);
+        collector.runSchedule();
 
         verify(neighbourFetcher).listNeighboursToConsumeFrom();
         verify(collectorCreator,times(2)).setupCollection(any());
 
-        assertThat(forwarder.getListeners()).size().isEqualTo(1);
-        assertThat(forwarder.getListeners()).containsKeys("two");
+        assertThat(collector.getListeners()).size().isEqualTo(1);
+        assertThat(collector.getListeners()).containsKeys("two");
 
     }
 
