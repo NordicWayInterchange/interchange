@@ -169,7 +169,7 @@ public class Source implements AutoCloseable {
 	}
 
 	public boolean isConnected() {
-		return connection != null;
+		return connection != null && this.producer != null;
 	}
 
 	public MessageProducer getProducer() {
