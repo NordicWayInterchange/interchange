@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.discoverer;
+package no.vegvesen.ixn.federation.discoverer.facade;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
@@ -36,7 +36,7 @@ public class NeighbourRESTFacade {
 	}
 
 
-	Capabilities postCapabilitiesToCapabilities(Self self, Neighbour neighbour) {
+	public Capabilities postCapabilitiesToCapabilities(Self self, Neighbour neighbour) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.debug("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
@@ -45,7 +45,7 @@ public class NeighbourRESTFacade {
 		return capabilityTransformer.capabilityApiToCapabilities(result);
 	}
 
-	SubscriptionRequest postSubscriptionRequest(Self self, Neighbour neighbour, Set<Subscription> subscriptions) {
+	public SubscriptionRequest postSubscriptionRequest(Self self, Neighbour neighbour, Set<Subscription> subscriptions) {
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(self.getName(), subscriptions);
 		String controlChannelUrl = neighbour.getControlChannelUrl("/subscription");
 		String name = neighbour.getName();
@@ -53,7 +53,7 @@ public class NeighbourRESTFacade {
 		return subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(responseApi, SubscriptionRequestStatus.REQUESTED);
 	}
 
-	Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour) {
+	public Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour) {
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
 		String name = neighbour.getName();
 		logger.debug("Polling subscription to {} with URL: {}", name, url);

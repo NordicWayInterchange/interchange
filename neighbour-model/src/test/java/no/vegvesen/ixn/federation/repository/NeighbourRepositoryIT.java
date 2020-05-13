@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.assertj.core.util.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -184,5 +186,26 @@ public class NeighbourRepositoryIT {
 			datexHeaders.put(MessageProperty.PUBLICATION_SUB_TYPE.getName(), publicationSubType);
 		}
 		return datexHeaders;
+	}
+
+	@Test
+	public void subscriptionRequestSuccessfulDateTimeCanBeStored() {
+		SubscriptionRequest fedIn = new SubscriptionRequest();
+		SubscriptionRequest subscriptions = new SubscriptionRequest();
+		subscriptions.setSuccessfulRequest(LocalDateTime.now());
+		Neighbour neighbour = new Neighbour("nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
+		Neighbour saved = repository.save(neighbour);
+		assertThat(saved).isNotNull();
+		assertThat(saved.getSubscriptionRequest().getSuccessfulRequest()).isNotNull();
+	}
+
+	@Test
+	public void subscriptionRequestWithNoSuccessfulDateTimeCanBeStored() {
+		SubscriptionRequest fedIn = new SubscriptionRequest();
+		SubscriptionRequest subscriptions = new SubscriptionRequest();
+		Neighbour neighbour = new Neighbour("another-nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
+		Neighbour saved = repository.save(neighbour);
+		assertThat(saved).isNotNull();
+		assertThat(saved.getSubscriptionRequest().getSuccessfulRequest()).isNull();
 	}
 }

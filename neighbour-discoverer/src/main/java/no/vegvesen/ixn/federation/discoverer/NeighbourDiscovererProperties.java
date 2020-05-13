@@ -7,19 +7,49 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix ="discoverer")
 public class NeighbourDiscovererProperties {
 
+	/**
+	 * Time, in milliseconds, between each capability post to neighbours.
+	 */
 	private String capabilitiesUpdateInterval = "15000";
+
+	/**
+	 * Time, in milliseconds, from application start-up to first attempt at polling subscriptions."
+	 */
 	private String capabilityPostInitialDelay = "3000";
+
+	/**
+	 * Time, in milliseconds, between each attempt at posting a subscription request.
+	 */
 	private String subscriptionRequestUpdateInterval = "15000";
+
+	/**
+	 * Time, in milliseconds, from application start-up to subscription request.
+	 */
 	private String subscriptionRequestInitialDelay = "10000";
+
+	/**
+	 * Time, in milliseconds, between each attempt at polling a subscription.
+	 */
 	private String subscriptionPollUpdateInterval = "15000";
+
+	/**
+	 * Time, in milliseconds, from application start-up to first attempt at polling subscriptions.
+	 */
 	private String subscriptionPollInitialDelay = "20000";
+
+	/**
+	 * Time, in milliseconds, between each check for updated Service Providers.
+	 */
 	private String updatedServiceProviderCheckInterval = "20000";
 	private String dnsLookupInterval = "15000";
 	private String dnsInitialStartDelay = "5000";
+
+	/**
+	 * Number of times we are allowed to poll one subscription.
+	 */
 	private int subscriptionPollingNumberOfAttempts = 7;
 
 
-	//TODO: check usage
 	public String getDnsLookupInterval() {
 		return dnsLookupInterval;
 	}

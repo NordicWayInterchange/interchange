@@ -32,7 +32,7 @@ public class DNSFacade {
 			try {
 				controlChannelPorts = getSrvRecords("_ixc._tcp.");
 			} catch (RuntimeException e) {
-				logger.warn("No control channel ports found in DNS",e);
+				logger.warn("No control channel ports found in DNS", e);
 			}
 
 			List<Neighbour> neighbours = new LinkedList<>();
@@ -47,8 +47,7 @@ public class DNSFacade {
 							neighbour.getMessageChannelPort(),
 							neighbour.getControlChannelPort(),
 							neighbour.getName());
-				}
-				else {
+				} else {
 					neighbour.setControlChannelPort(dnsProperties.getControlChannelPort());
 					logger.debug("DNS server {} has only message channel port {} for node, using standard port for control channel {} for node {}",
 							getDnsServerName(),
@@ -91,4 +90,5 @@ public class DNSFacade {
 	public String getDnsServerName() {
 		return this.dnsProperties.getDomainName();
 	}
+
 }

@@ -13,7 +13,9 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Entity
@@ -48,11 +50,11 @@ public class Neighbour {
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
-	private LocalDateTime lastSeen;
 	private LocalDateTime backoffStart;
 	private int backoffAttempts = 0;
 	private String messageChannelPort;
 	private String controlChannelPort;
+	private ConnectionStatus connectionStatus = ConnectionStatus.CONNECTED;
 
 	public Neighbour() {
 	}
@@ -114,16 +116,6 @@ public class Neighbour {
 		this.fedIn = fedIn;
 	}
 
-	public LocalDateTime getLastSeen() {
-		return lastSeen;
-	}
-
-	@PreUpdate
-	@PrePersist
-	public void setLastSeen() {
-		this.lastSeen = LocalDateTime.now();
-	}
-
 	public String getMessageChannelPort() {
 		return messageChannelPort;
 	}
@@ -158,33 +150,12 @@ public class Neighbour {
 		this.backoffAttempts = backoffAttempts;
 	}
 
-	public LocalDateTime getNextPostAttempt(int startIntervalLength,int randomShift) {
-		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, getBackoffAttempts()) * startIntervalLength) + randomShift;
-		return getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
-	}
-
 	public Set<Subscription> getSubscriptionsForPolling() {
-		Set<Subscription> subscriptionsForPolling = new HashSet<>();
-
-		for (Subscription subscription : this.getFedIn().getSubscriptions()) {
-			if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED) || subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED)) {
-				subscriptionsForPolling.add(subscription);
-			}
-		}
-
-		return subscriptionsForPolling;
-	}
-
-	public Set<Subscription> getFailedFedInSubscriptions() {
-		Set<Subscription> subscriptionsWithStatusFailed = new HashSet<>();
-
-		for (Subscription subscription : this.getFedIn().getSubscriptions()) {
-			if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.FAILED)) {
-				subscriptionsWithStatusFailed.add(subscription);
-			}
-		}
-
-		return subscriptionsWithStatusFailed;
+		return getFedIn().getSubscriptions().stream()
+				.filter(s -> SubscriptionStatus.REQUESTED.equals(s.getSubscriptionStatus()) ||
+						SubscriptionStatus.ACCEPTED.equals(s.getSubscriptionStatus()) ||
+						SubscriptionStatus.FAILED.equals(s.getSubscriptionStatus()))
+				.collect(Collectors.toSet());
 	}
 
 	@Override
@@ -196,7 +167,6 @@ public class Neighbour {
 				", subscriptionRequest=" + subscriptionRequest +
 				", fedIn=" + fedIn +
 				", lastUpdated=" + lastUpdated +
-				", lastSeen=" + lastSeen +
 				", backoffStart=" + backoffStart +
 				", backoffAttempts=" + backoffAttempts +
 				", messageChannelPort='" + messageChannelPort +
@@ -237,7 +207,7 @@ public class Neighbour {
 	}
 
 	public boolean hasCapabilities() {
-		return getCapabilities() != null && getCapabilities().getStatus() != Capabilities.CapabilitiesStatus.UNREACHABLE;
+		return getCapabilities() != null && getCapabilities().getStatus() == Capabilities.CapabilitiesStatus.KNOWN;
 	}
 
 	public Set<String> getUnwantedBindKeys(Set<String> existingBindKeys) {
@@ -253,5 +223,109 @@ public class Neighbour {
 			wantedBindings.add(subscription.bindKey());
 		}
 		return wantedBindings;
+	}
+
+	public void setDnsProperties(Neighbour dnsNeighbour) {
+		assert dnsNeighbour.getName().equals(this.getName());
+		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}, message {}",
+				this.getName(),
+				dnsNeighbour.getControlChannelPort(),
+				dnsNeighbour.getMessageChannelPort());
+		this.setControlChannelPort(dnsNeighbour.getControlChannelPort());
+		this.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
+
+	}
+
+	public boolean shouldCheckSubscriptionRequestsForUpdates(LocalDateTime localSubscriptionsUpdated) {
+		return this.getFedIn() == null
+				|| this.getFedIn().getSuccessfulRequest() == null
+				|| this.getFedIn().getSuccessfulRequest().isBefore(localSubscriptionsUpdated);
+	}
+
+	public void failedConnection(int maxAttemptsBeforeUnreachable) {
+		if (this.getBackoffStartTime() == null) {
+			this.setConnectionStatus(ConnectionStatus.FAILED);
+			this.backoffStart = LocalDateTime.now();
+			this.backoffAttempts = 0;
+			logger.warn("Starting backoff now {}", this.backoffStart);
+		}
+		else {
+			this.backoffAttempts++;
+			logger.warn("Increasing backoff counter to {}", this.backoffAttempts);
+			if (this.getBackoffAttempts() > maxAttemptsBeforeUnreachable) {
+				this.setConnectionStatus(ConnectionStatus.UNREACHABLE);
+				logger.warn("Unsuccessful in reestablishing contact with neighbour. Exceeded number of allowed connection attempts.");
+				logger.warn("Number of allowed connection attempts: {} Number of actual connection attempts: {}", maxAttemptsBeforeUnreachable, this.getBackoffAttempts());
+				logger.warn("Setting status of neighbour to UNREACHABLE.");
+			}
+		}
+	}
+
+	public void setConnectionStatus(ConnectionStatus connectionStatus) {
+		this.connectionStatus = connectionStatus;
+	}
+
+	public ConnectionStatus getConnectionStatus() {
+		return connectionStatus;
+	}
+
+	public boolean canBeContacted(int randomShiftUpperLimit, int startIntervalLength) {
+		if (this.getConnectionStatus() == ConnectionStatus.UNREACHABLE) {
+			return false;
+		}
+		if (this.getConnectionStatus() == ConnectionStatus.CONNECTED) {
+			return true;
+		}
+
+		if (this.getConnectionStatus() == ConnectionStatus.FAILED) {
+			return  this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(randomShiftUpperLimit, startIntervalLength));
+		}
+		return true;
+	}
+
+	// Calculates next possible post attempt time, using exponential backoff
+	LocalDateTime getNextPostAttemptTime(int randomShiftUpperLimit, int startIntervalLength) {
+
+		logger.info("Calculating next allowed time to contact neighbour.");
+		int randomShift = new Random().nextInt(randomShiftUpperLimit);
+		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, this.getBackoffAttempts()) * startIntervalLength) + randomShift;
+		LocalDateTime nextPostAttempt = this.getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
+
+		logger.info("Next allowed post time: {}", nextPostAttempt.toString());
+		return nextPostAttempt;
+	}
+
+
+	public boolean needsOurUpdatedCapabilities(LocalDateTime localCapabilitiesUpdated) {
+		return this.getCapabilities() == null
+				|| this.getCapabilities().getLastCapabilityExchange() == null
+				|| localCapabilitiesUpdated.isAfter(this.getCapabilities().getLastCapabilityExchange());
+	}
+
+	public void okConnection() {
+		this.setConnectionStatus(ConnectionStatus.CONNECTED);
+		this.backoffAttempts = 0;
+		this.backoffStart = null;
+	}
+
+	/**
+	 * Evaluates if the other object is the same neighbour, not that all member attributes are equal.
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Neighbour)) return false;
+
+		Neighbour neighbour = (Neighbour) o;
+
+		return name.equals(neighbour.name);
+	}
+
+	/**
+	 * Neighbour with same name will give the same result. Not using all member attributes.
+	 */
+	@Override
+	public int hashCode() {
+		return name.hashCode();
 	}
 }

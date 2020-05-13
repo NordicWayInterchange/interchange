@@ -14,7 +14,7 @@ public class PostgresTestcontainerInitializer {
 			.withUsername(FEDERATION)
 			.withPassword(FEDERATION);
 
-	static class Initializer
+	public static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 			postgresContainer.start();

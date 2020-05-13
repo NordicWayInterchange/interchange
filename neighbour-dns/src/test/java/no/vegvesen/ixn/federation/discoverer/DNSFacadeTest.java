@@ -48,6 +48,6 @@ public class DNSFacadeTest {
 		assertThat(bouvet).isNotNull();
 		assertThat(bouvet.getControlChannelUrl("/")).isNotNull();
 		assertThat(bouvet.getMessageChannelPort()).isNotNull().isEqualTo("5671");
-
 	}
+
 }

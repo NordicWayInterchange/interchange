@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import no.vegvesen.ixn.federation.model.Neighbour;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -7,11 +8,29 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix ="graceful-backoff")
 public class GracefulBackoffProperties {
 
+	/**
+	 * The length, in milliseconds, of the base waiting time of backoff.
+	 */
 	private int startIntervalLength = 2000;
+
+	/**
+	 * Number of times we are allowed to reattempt a POST or a GET to a failed neighbour.
+	 */
 	private int numberOfAttempts = 4;
+
+	/**
+	 * The upper limit, in milliseconds, of the random shift used in backoff POST and GET.
+	 */
 	private int randomShiftUpperLimit = 60000;
 
+	/**
+	 * Time, in milliseconds, between each lookup of failed neighbours in the database.
+	 */
 	private String checkInterval = "30000";
+
+	/**
+	 * Time, in milliseconds, from application startup until lookup for failed neighbours in the database.
+	 */
 	private String checkOffset = "60000";
 
 	public int getStartIntervalLength() {
@@ -52,6 +71,10 @@ public class GracefulBackoffProperties {
 
 	public void setCheckOffset(String checkOffset) {
 		this.checkOffset = checkOffset;
+	}
+
+	public boolean canBeContacted(Neighbour neighbour) {
+		return neighbour.canBeContacted(this.randomShiftUpperLimit, this.startIntervalLength);
 	}
 
 	@Override

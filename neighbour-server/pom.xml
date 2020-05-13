@@ -35,6 +35,12 @@
             <artifactId>interchange-spring-security</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>neighbour-service</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -68,7 +74,7 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
-            <scope>compile</scope>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -99,6 +105,9 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

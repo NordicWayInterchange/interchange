@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
+
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -59,4 +62,74 @@ public class NeighbourTest {
 		fullDomainName.setControlChannelPort("1234");
 		assertThat(fullDomainName.getControlChannelUrl("/thePath")).isEqualTo("https://my-host:1234/thePath");
 	}
+
+	@Test
+	public void neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
+		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
+		LocalDateTime localSubscriptionsUpdatedNow = LocalDateTime.now();
+		Assertions.assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionsUpdatedNow)).isTrue();
+	}
+
+	@Test
+	public void neighbourJustHadSubscriptionRequestShouldNotCheckSubscriptionRequest() {
+		SubscriptionRequest fedIn = new SubscriptionRequest();
+		LocalDateTime now = LocalDateTime.now();
+		fedIn.setSuccessfulRequest(now);
+		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, fedIn);
+		Assertions.assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(now)).isFalse();
+	}
+
+	@Test
+	public void failedSubscriptionRequest_firstSetsStart() {
+		Neighbour neighbour = new Neighbour("the-best-neighbour-ever", null, null, null);
+		neighbour.failedConnection(2);
+		assertThat(neighbour.getBackoffStartTime()).isNotNull().isAfter(LocalDateTime.now().minusSeconds(3));
+		assertThat(neighbour.getBackoffAttempts()).isEqualTo(0);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
+
+		neighbour.failedConnection(2);
+		assertThat(neighbour.getBackoffAttempts()).isEqualTo(1);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
+
+		neighbour.failedConnection(2);
+		assertThat(neighbour.getBackoffAttempts()).isEqualTo(2);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
+
+		neighbour.failedConnection(2);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
+
+		neighbour.failedConnection(2);
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
+
+		neighbour.okConnection();
+		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
+		assertThat(neighbour.getBackoffStartTime()).isNull();
+		assertThat(neighbour.getBackoffAttempts()).isEqualTo(0);
+	}
+
+	@Test
+	public void calculatedNextPostAttemptTimeIsInCorrectInterval(){
+		Neighbour ericsson = new Neighbour();
+		LocalDateTime now = LocalDateTime.now();
+
+		// Mocking the first backoff attempt, where the exponential is 0.
+		double exponential = 0;
+		long expectedBackoff = (long) Math.pow(2, exponential)*2; //
+
+		System.out.println("LocalDataTime now: "+ now.toString());
+		LocalDateTime lowerLimit = now.plusSeconds(expectedBackoff);
+		LocalDateTime upperLimit = now.plusSeconds(expectedBackoff+60);
+
+		System.out.println("Lower limit: " + lowerLimit.toString());
+		System.out.println("Upper limit: " + upperLimit.toString());
+
+		ericsson.setBackoffAttempts(0);
+		ericsson.setBackoffStart(now);
+
+		LocalDateTime result = ericsson.getNextPostAttemptTime(60000, 2000);
+
+		Assertions.assertThat(result).isBetween(lowerLimit, upperLimit);
+	}
+
+
 }

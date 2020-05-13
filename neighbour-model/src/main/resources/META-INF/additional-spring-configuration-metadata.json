@@ -1,0 +1,14 @@
+{
+  "groups": [
+    {
+      "name": "interchange"
+    }
+  ],
+  "properties": [
+    {
+      "name": "interchange.node-provider.name",
+      "type": "java.lang.String",
+      "description": "Name of the running node."
+    }
+  ]
+}

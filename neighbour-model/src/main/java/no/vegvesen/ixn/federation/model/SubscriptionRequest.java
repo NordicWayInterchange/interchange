@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +29,9 @@ public class SubscriptionRequest {
 	@JoinColumn(name = "subreq_id_sub", foreignKey = @ForeignKey(name = "fk_sub_subreq"))
 	private Set<Subscription> subscription = new HashSet<>();
 
-	@Column
-	@UpdateTimestamp
-	private LocalDateTime lastUpdated;
-
+	private LocalDateTime successfulRequest;
 
 	public SubscriptionRequest() {
-
 	}
 
 	public SubscriptionRequest(SubscriptionRequestStatus status, Set<Subscription> subscription) {
@@ -72,26 +67,17 @@ public class SubscriptionRequest {
 				'}';
 	}
 
-	public void	setStatusFromSubscriptionStatus() {
-		if (getSubscriptions().stream().anyMatch(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED))) {
-			logger.info("At least one subscription in fedIn has status CREATED. Setting status of fedIn to ESTABLISHED");
-			this.status = SubscriptionRequestStatus.ESTABLISHED;
-		}
-		else if (getSubscriptions().stream().noneMatch(s -> s.getSubscriptionStatus() == SubscriptionStatus.CREATED
-				|| s.getSubscriptionStatus() == SubscriptionStatus.ACCEPTED
-				|| s.getSubscriptionStatus() == SubscriptionStatus.REQUESTED)) {
-			logger.info("All subscriptions in neighbour fedIn were rejected. Setting status of fedIn to REJECTED");
-			this.status = SubscriptionRequestStatus.REJECTED;
-		} else {
-			logger.info("Some subscriptions in neighbour fedIn do not have a final status or have not been rejected. Keeping status of fedIn REQUESTED");
-			this.status = SubscriptionRequestStatus.REQUESTED;
-		}
-	}
-
 	public Set<Subscription> getAcceptedSubscriptions() {
 		return getSubscriptions().stream()
 				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED))
 				.collect(Collectors.toSet());
 	}
 
+	public LocalDateTime getSuccessfulRequest() {
+		return successfulRequest;
+	}
+
+	public void setSuccessfulRequest(LocalDateTime successfulRequest) {
+		this.successfulRequest = successfulRequest;
+	}
 }

@@ -6,7 +6,6 @@ import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.DiscoveryStateRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -59,8 +58,6 @@ public class OnboardRestControllerTest {
 
 	//Unfortunately we have to mock beans not used in the class under test
 	//because the spring test wires up all jpa repositories not mocked
-	@MockBean
-	private DiscoveryStateRepository discoveryStateRepository;
 	@MockBean
 	private NeighbourRepository neighbourRepository;
 
