@@ -95,11 +95,9 @@
                                 </goals>
                             </execution>
                         </executions>
-                        <!--
                         <configuration>
                            <classifier>exec</classifier>
                         </configuration>
-                        -->
                     </plugin>
                 </plugins>
             </build>
