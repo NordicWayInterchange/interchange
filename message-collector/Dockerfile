@@ -1,7 +1,7 @@
 FROM java:8-alpine
 RUN apk add --no-cache bash
 
-COPY target/message-collector-1.0-SNAPSHOT-exec.jar message-collector.jar
+COPY target/message-collector-1.0.1-SNAPSHOT-exec.jar message-collector.jar
 
 ADD entrypoint.sh /
 RUN chmod +x /entrypoint.sh
