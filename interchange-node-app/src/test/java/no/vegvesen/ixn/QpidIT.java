@@ -2,7 +2,6 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.properties.MessageProperty;
-import no.vegvesen.ixn.util.KeyValue;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -19,11 +18,16 @@ import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Verifies that the InterchangeApp routes messages from the onramp via the exchange and further to the out-queues.
  * The tests must receive messages from all the queues messages gets routed to in order to avoid bleeding between tests.
+ * TODO this test should have a different, more describing name, since it tests the entire
+ * chain including the actual InterchangeApp.
  */
 
 @RunWith(SpringRunner.class)
@@ -66,6 +70,8 @@ public class QpidIT extends DockerBaseIT {
 
 	public void sendMessageOneCountry(String messageId, String country, float lat, float lon, String publicationType) throws JMSException {
 		long timeToLive = 3_600_000; // 5 hrs
+		HashMap<String,String> publicationTypeentry = new HashMap<>();
+		publicationTypeentry.put("publicationType", publicationType);
 
 		sendMessage("NO00001",
 				country,
@@ -75,10 +81,10 @@ public class QpidIT extends DockerBaseIT {
 				lon,
 				String.format("This is a datex2 message - %s", messageId),
 				timeToLive,
-				new KeyValue("publicationType", publicationType));
+				publicationTypeentry);
 	}
 
-	private void sendMessage(String publisher, String originatingCountry, String protocolVersion, String messageType, float latitude, float longitude, String body, long timeToLive, KeyValue... additionalValues) throws JMSException{
+	private void sendMessage(String publisher, String originatingCountry, String protocolVersion, String messageType, float latitude, float longitude, String body, long timeToLive, Map<String,String> additionalValues) throws JMSException {
 		JmsTextMessage outgoingMessage = producer.createTextMessage(body);
 		outgoingMessage.setFloatProperty("latitude", latitude);
 		outgoingMessage.setFloatProperty("longitude", longitude);
@@ -86,13 +92,14 @@ public class QpidIT extends DockerBaseIT {
 		outgoingMessage.setStringProperty("originatingCountry", originatingCountry);
 		outgoingMessage.setStringProperty("protocolVersion", protocolVersion);
 		outgoingMessage.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), messageType);
-		for (KeyValue kv : additionalValues) {
-			outgoingMessage.setStringProperty(kv.getKey(), kv.getValue());
+		for (Map.Entry<String,String> entry : additionalValues.entrySet()) {
+			outgoingMessage.setStringProperty(entry.getKey(), entry.getValue());
+
 		}
 		outgoingMessage.setText(body);
 		producer.sendTextMessage(outgoingMessage, timeToLive);
-	}
 
+	}
 	public void sendBadMessage(String messageId, String country, float lat, float lon) throws JMSException {
 		long systemTime = System.currentTimeMillis();
 		long timeToLive = 3_600_000;
@@ -106,7 +113,7 @@ public class QpidIT extends DockerBaseIT {
 				lat,
 				lon,
 				String.format("This is a datex2 message - %s", messageId),
-				expiration);
+				expiration,new HashMap<>());
 	}
 
 	@Test

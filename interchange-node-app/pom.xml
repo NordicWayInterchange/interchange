@@ -17,7 +17,7 @@
         <version>1.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>interchange-node</artifactId>
+    <artifactId>interchange-node-app</artifactId>
     <version>1.0.1-SNAPSHOT</version>
 
     <distributionManagement>
@@ -29,18 +29,10 @@
     </distributionManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>api-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>jms-client</artifactId>
+            <artifactId>interchange-node</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -50,6 +42,7 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -62,7 +55,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-<!--
+
     <profiles>
         <profile>
             <id>PKG</id>
@@ -86,7 +79,7 @@
             </build>
         </profile>
     </profiles>
--->
+
     <repositories>
         <repository>
             <id>repository.springframework.maven.snapshots</id>

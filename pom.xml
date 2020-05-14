@@ -238,5 +238,6 @@
         <module>dns-client</module>
         <module>onboard-rest-client</module>
         <module>quadtree-tool</module>
+        <module>interchange-node-app</module>
     </modules>
 </project>

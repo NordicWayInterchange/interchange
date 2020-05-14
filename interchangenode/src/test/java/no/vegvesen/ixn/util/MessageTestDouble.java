@@ -10,6 +10,7 @@ import javax.jms.Message;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("RedundantThrows")
 public class MessageTestDouble implements Message {
@@ -310,6 +311,24 @@ public class MessageTestDouble implements Message {
         for (KeyValue kv : additionalProperties) {
             properties.put(kv.getKey(),kv.getValue());
         }
+        return new MessageTestDouble(properties);
+    }
+
+    public static Message createMessage(String publisher,
+                                        String originatingCountry,
+                                        String protocolVersion,
+                                        String messageType,
+                                        String latitude,
+                                        String longitude,
+                                        Map<String,String> additionalProperties) {
+        Map<String, String> properties = new HashMap<>();
+        properties.put(MessageProperty.PUBLISHER_NAME.getName(),publisher);
+        properties.put(MessageProperty.ORIGINATING_COUNTRY.getName(),originatingCountry);
+        properties.put(MessageProperty.PROTOCOL_VERSION.getName(),protocolVersion);
+        properties.put(MessageProperty.MESSAGE_TYPE.getName(),messageType);
+        properties.put(MessageProperty.LATITUDE.getName(),latitude);
+        properties.put(MessageProperty.LONGITUDE.getName(),longitude);
+        properties.putAll(additionalProperties);
         return new MessageTestDouble(properties);
     }
 

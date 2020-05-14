@@ -38,7 +38,7 @@ public class InterchangeAppIT extends DockerBaseIT {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             TestPropertyValues.of(
-                    String.format("amqphub.amqp10jms.remote-url=amqp://localhost:%d",qpidContainer.getMappedPort(AMQP_PORT)),
+                    String.format("amqphub.amqp10jms.remote-url=amqp://localhost:%d",qpidContainer.getMappedPort(DockerBaseIT.AMQP_PORT)),
                     "amqphub.amqp10jms.username=interchange",
                     "amqphub.amqp10jms.password=12345678"
             ).applyTo(configurableApplicationContext.getEnvironment());
@@ -50,7 +50,7 @@ public class InterchangeAppIT extends DockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@ClassRule
-    public static GenericContainer qpidContainer = getQpidContainer(
+    public static GenericContainer qpidContainer = DockerBaseIT.getQpidContainer(
             "qpid",
             "jks",
             "localhost.crt",
@@ -59,7 +59,7 @@ public class InterchangeAppIT extends DockerBaseIT {
     );
 
 	private String getQpidURI() {
-		String url = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		String url = "amqps://localhost:" + qpidContainer.getMappedPort(DockerBaseIT.AMQPS_PORT);
 		logger.info("connection string to local message broker {}", url);
 		return url;
 	}
