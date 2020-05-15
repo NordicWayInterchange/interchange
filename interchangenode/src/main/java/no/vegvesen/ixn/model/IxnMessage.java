@@ -10,7 +10,7 @@ import static no.vegvesen.ixn.MessageProperties.*;
 
 public class IxnMessage {
     final static long DEFAULT_TTL = 86_400_000L;
-    final static long MAX_TTL = 6_911_200_000L;
+    final static long MAX_TTL = 691_200_000L;
     private final String who;
     private final String userID;
     private long expiration;
