@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
@@ -29,11 +30,13 @@ public class NeighbourDiscovererTest {
 	private NeighbourRESTFacade neighbourRESTFacade;
 	private NeighbourDiscovererProperties discovererProperties;
 	private SelfRepository selfRepository;
+
 	private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
 	private String myName = "bouvet.itsinterchange.eu";
 
 	private NeighbourDiscoverer neighbourDiscoverer;
+	private NeighbourService neighbourService;
 
 	// Objects used in testing
 	private DataType datexNo = getDatexNoDataType();
@@ -46,7 +49,6 @@ public class NeighbourDiscovererTest {
 		return new DataType(datexDataTypeHeaders);
 	}
 
-
 	@Before
 	public void before(){
 		self = createSelf();
@@ -55,13 +57,10 @@ public class NeighbourDiscovererTest {
 		neighbourRESTFacade = mock(NeighbourRESTFacade.class);
 		discovererProperties = mock(NeighbourDiscovererProperties.class);
 		selfRepository = mock(SelfRepository.class);
-		neighbourDiscoverer = new NeighbourDiscoverer(dnsFacade,
-				neighbourRepository,
-				selfRepository,
-				neighbourRESTFacade,
+		neighbourService = new NeighbourService(neighbourRepository, selfRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName);
+		neighbourDiscoverer = new NeighbourDiscoverer(
 				myName,
-				backoffProperties,
-				discovererProperties);
+				neighbourService);
 	}
 
 	private Neighbour createNeighbour() {
@@ -91,7 +90,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRepository.findByName(any(String.class))).thenReturn(null);
 		when(neighbourRepository.save(any(Neighbour.class))).thenReturn(mock(Neighbour.class));
 
-		neighbourDiscoverer.checkForNewNeighbours();
+		neighbourDiscoverer.scheduleCheckForNewNeighbours();
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -102,7 +101,7 @@ public class NeighbourDiscovererTest {
 		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(ericsson));
 		when(neighbourRepository.findByName(any(String.class))).thenReturn(ericsson);
 
-		neighbourDiscoverer.checkForNewNeighbours();
+		neighbourDiscoverer.scheduleCheckForNewNeighbours();
 
 		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
 	}
@@ -114,7 +113,7 @@ public class NeighbourDiscovererTest {
 		discoveringNode.setName(self.getName());
 		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(discoveringNode));
 
-		neighbourDiscoverer.checkForNewNeighbours();
+		neighbourDiscoverer.scheduleCheckForNewNeighbours();
 
 		verify(neighbourRepository,times(1)).findByName(myName);
 		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
@@ -138,7 +137,7 @@ public class NeighbourDiscovererTest {
 
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 
-		neighbourDiscoverer.capabilityExchange(Collections.singletonList(ericsson));
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -152,7 +151,7 @@ public class NeighbourDiscovererTest {
 
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 
-		neighbourDiscoverer.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
+		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -205,7 +204,7 @@ public class NeighbourDiscovererTest {
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
 		ericsson.setBackoffStart(LocalDateTime.now().plusSeconds(10));
-		neighbourDiscoverer.pollSubscriptions();
+		neighbourDiscoverer.schedulePollSubscriptions();
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		verify(neighbourRESTFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
@@ -266,7 +265,7 @@ public class NeighbourDiscovererTest {
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.pollSubscriptions();
+		neighbourDiscoverer.schedulePollSubscriptions();
 
 		verify(neighbourRESTFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
@@ -327,7 +326,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.pollSubscriptions();
+		neighbourDiscoverer.schedulePollSubscriptions();
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -347,7 +346,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.pollSubscriptions();
+		neighbourDiscoverer.schedulePollSubscriptions();
 
 		assertThat(spyNeighbour.getFedIn().getSubscriptions()).contains(createdSubscription);
 	}
@@ -366,7 +365,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.pollSubscriptions();
+		neighbourDiscoverer.schedulePollSubscriptions();
 
 		assertThat(spyNeighbour.getFedIn().getAcceptedSubscriptions()).isEmpty();
 	}
@@ -386,7 +385,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.pollSubscriptions();
+		neighbourDiscoverer.schedulePollSubscriptions();
 
 		assertThat(spyNeighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.REQUESTED);
 	}
@@ -426,7 +425,7 @@ public class NeighbourDiscovererTest {
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
 		when(selfRepository.findByName(anyString())).thenReturn(discoveringNode);
 
-		neighbourDiscoverer.evaluateAndPostSubscriptionRequest(neighbours);
+		neighbourService.evaluateAndPostSubscriptionRequest(neighbours);
 
 		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 	}
@@ -473,7 +472,7 @@ public class NeighbourDiscovererTest {
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 		when(neighbourRESTFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(mock(SubscriptionRequest.class));
 
-		neighbourDiscoverer.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
+		neighbourService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
 
 		verify(neighbourRepository).save(otherNeighbour);
     }

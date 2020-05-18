@@ -89,7 +89,7 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void checkForNewNeighbours() {
-		discoverer.checkForNewNeighbours();
+		discoverer.scheduleCheckForNewNeighbours();
 
 		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 		assertThat(unknown).hasSize(2);
@@ -123,8 +123,8 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
-		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(),any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
-		discoverer.pollSubscriptions();
+		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
+		discoverer.schedulePollSubscriptions();
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
 		assertThat(found1.getFedIn()).isNotNull();
