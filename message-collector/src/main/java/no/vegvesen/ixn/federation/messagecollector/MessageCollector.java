@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import java.util.*;
 @Service
 public class MessageCollector {
 
-    private NeighbourFetcher neighbourFetcher;
+    private NeighbourService neighbourService;
     private final CollectorCreator collectorCreator;
 
     //NOTE: This is implicitly thread safe. If more than one thread can access the listeners map, the implementation of the listener Map will have to change.
@@ -22,8 +23,8 @@ public class MessageCollector {
 
 
     @Autowired
-    public MessageCollector(NeighbourFetcher fetcher, CollectorCreator collectorCreator) {
-        this.neighbourFetcher = fetcher;
+    public MessageCollector(NeighbourService service, CollectorCreator collectorCreator) {
+        this.neighbourService = service;
         this.collectorCreator = collectorCreator;
         this.listeners = new HashMap<>();
 
@@ -49,7 +50,7 @@ public class MessageCollector {
     }
 
     public void setupConnectionsToNewNeighbours() {
-        List<Neighbour> interchanges = neighbourFetcher.listNeighboursToConsumeFrom();
+        List<Neighbour> interchanges = neighbourService.listNeighboursToConsumeMessagesFrom();
         List<String> interchangeNames = new ArrayList<>();
         for (Neighbour ixn : interchanges) {
             String name = ixn.getName();

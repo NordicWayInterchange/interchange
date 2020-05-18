@@ -361,4 +361,8 @@ public class NeighbourService {
 		}
 	}
 
+	public List<Neighbour> listNeighboursToConsumeMessagesFrom() {
+		return neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
+	}
+
 }

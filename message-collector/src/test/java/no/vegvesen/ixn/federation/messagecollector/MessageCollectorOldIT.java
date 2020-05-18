@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
+import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.Ignore;
@@ -62,13 +63,13 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 		Neighbour localNeighbour = mockNeighbour(localContainer,"localhost");
 
 		Neighbour remoteNeighbour = mockNeighbour(remoteContainer, "remote");
-		NeighbourFetcher fetcher = mock(NeighbourFetcher.class);
+		NeighbourService neighbourService = mock(NeighbourService.class);
 		//when(fetcher.listNeighbourCandidates()).thenReturn(Collections.singletonList(remoteNeighbour));
-		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Collections.singletonList(remoteNeighbour));
+		when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Collections.singletonList(remoteNeighbour));
 
 		//the forwarder runs on the "remote" node
 		CollectorCreator collectorCreator = new CollectorCreator(localSslContext(), "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
-		MessageCollector messageForwarder = new MessageCollector(fetcher, collectorCreator);
+		MessageCollector messageForwarder = new MessageCollector(neighbourService, collectorCreator);
 		messageForwarder.runSchedule();
 
 		String sendUrl = String.format("amqps://localhost:%s", remoteContainer.getMappedPort(AMQPS_PORT).toString());
@@ -86,7 +87,7 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 		qpidClient.removeQueue("localhost");
 
 
-		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Collections.emptyList());
+		when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Collections.emptyList());
 		messageForwarder.runSchedule();
 
 
@@ -96,7 +97,7 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 		qpidClient.addReadAccess(remoteNeighbour.getName(), remoteNeighbour.getName());
 		qpidClient.addMemberToGroup(remoteNeighbour.getName(), QpidClient.FEDERATED_GROUP_NAME);
 
-		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Collections.singletonList(remoteNeighbour));
+		when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Collections.singletonList(remoteNeighbour));
 		messageForwarder.runSchedule();
 
 		source.start();
@@ -111,10 +112,10 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 
 		Neighbour remoteNeighbourOne = mockNeighbour(remoteContainer, "remote");
 		Neighbour remoteNeighbourTwo = mockNeighbour(remoteContainerTwo, "remote-two");
-		NeighbourFetcher fetcher = mock(NeighbourFetcher.class);
-		when(fetcher.listNeighboursToConsumeFrom()).thenReturn(Arrays.asList(remoteNeighbourOne, remoteNeighbourTwo));
+		NeighbourService neighbourService = mock(NeighbourService.class);
+		when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Arrays.asList(remoteNeighbourOne, remoteNeighbourTwo));
 		CollectorCreator collectorCreator = new CollectorCreator(localSslContext(), "localhost", localMessagePort.toString(), "fedEx");
-		MessageCollector messageForwarder = new MessageCollector(fetcher, collectorCreator);
+		MessageCollector messageForwarder = new MessageCollector(neighbourService, collectorCreator);
 		messageForwarder.runSchedule();
 
 		String remoteMessagingUrl = String.format("amqps://localhost:%s", remoteContainer.getMappedPort(AMQPS_PORT).toString());
