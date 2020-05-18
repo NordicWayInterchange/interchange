@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.stereotype.Component;
 
 import javax.jms.TextMessage;
@@ -41,6 +42,8 @@ public class IxnMessageProducer {
 
 	// Duplicates message for each country and situation record type.
 	public void sendMessage(String destination, final IxnMessage message) {
+		long ttl = message.getExpiration() - System.currentTimeMillis();
+		jmsTemplate.setQosSettings(new QosSettings(jmsTemplate.getDeliveryMode(), jmsTemplate.getPriority(), ttl));
 
 		for (String country : message.getCountries()) {
 			for (String situationRecordType : message.getWhat()) {
