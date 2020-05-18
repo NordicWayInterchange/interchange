@@ -4,6 +4,7 @@ import no.vegvesen.ixn.docker.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
 import org.jetbrains.annotations.NotNull;
