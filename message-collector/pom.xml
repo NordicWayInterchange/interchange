@@ -82,7 +82,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
+<!--
     <profiles>
         <profile>
             <id>PKG</id>
@@ -106,5 +106,5 @@
             </build>
         </profile>
     </profiles>
-
+-->
 </project>
