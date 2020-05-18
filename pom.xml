@@ -240,5 +240,6 @@
         <module>quadtree-tool</module>
         <module>interchange-node-app</module>
         <module>message-collector-app</module>
+        <module>neighbour-discoverer-app</module>
     </modules>
 </project>

@@ -12,7 +12,6 @@ import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.http.client.HttpClient;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +119,7 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
-		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
+		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(),any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
 		discoverer.pollSubscriptions();
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
@@ -130,7 +129,6 @@ public class NeighbourDiscovererIT {
 	}
 
 
-	@NotNull
 	private DataType getDataType(String messageType, String originatingCountry) {
 		DataType dataType = new DataType();
 		dataType.getValues().put(MessageProperty.MESSAGE_TYPE.getName(), messageType);

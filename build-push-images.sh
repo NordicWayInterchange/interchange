@@ -3,7 +3,7 @@
 REGISTRY=eu.gcr.io/nordic-way-aad182cc
 TAG="$(git rev-parse --short HEAD)"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-IMAGES="interchange-node-app qpid message-collector-app neighbour-discoverer neighbour-server routing-configurer onboard-server"
+IMAGES="interchange-node-app qpid message-collector-app neighbour-discoverer-app neighbour-server routing-configurer onboard-server"
 BRANCH_TAG="${BRANCH//[^a-zA-Z_0-9]/_}"
 
 for image in ${IMAGES}; do
