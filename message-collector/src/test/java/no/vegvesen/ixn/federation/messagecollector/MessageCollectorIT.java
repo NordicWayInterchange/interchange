@@ -5,6 +5,7 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.assertj.core.util.Lists;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,8 +59,8 @@ public class MessageCollectorIT extends DockerBaseIT {
 		neighbour.setName("localhost");
 		neighbour.setMessageChannelPort(producerPort.toString());
 
-		NeighbourFetcher neighbourFetcher = mock(NeighbourFetcher.class);
-		when(neighbourFetcher.listNeighboursToConsumeFrom()).thenReturn(Lists.list(neighbour));
+		NeighbourService neighbourService = mock(NeighbourService.class);
+		when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Lists.list(neighbour));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -67,7 +68,7 @@ public class MessageCollectorIT extends DockerBaseIT {
 				"localhost",
 				localIxnFederationPort,
 				"fedEx");
-		MessageCollector forwarder = new MessageCollector(neighbourFetcher, collectorCreator);
+		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "jks/sp_producer.p12");
@@ -89,8 +90,8 @@ public class MessageCollectorIT extends DockerBaseIT {
 		neighbour.setName("localhost");
 		neighbour.setMessageChannelPort(producerPort.toString());
 
-		NeighbourFetcher neighbourFetcher = mock(NeighbourFetcher.class);
-		when(neighbourFetcher.listNeighboursToConsumeFrom()).thenReturn(Lists.list(neighbour));
+		NeighbourService neighbourService = mock(NeighbourService.class);
+		when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Lists.list(neighbour));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -98,7 +99,7 @@ public class MessageCollectorIT extends DockerBaseIT {
 				"localhost",
 				localIxnFederationPort,
 				"fedEx");
-		MessageCollector forwarder = new MessageCollector(neighbourFetcher, collectorCreator);
+		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "jks/sp_producer.p12");

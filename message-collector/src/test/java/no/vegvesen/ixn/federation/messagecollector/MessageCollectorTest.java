@@ -5,6 +5,7 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -19,8 +20,8 @@ public class MessageCollectorTest {
         Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
         Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
 
-        NeighbourFetcher neighbourFetcher = mock(NeighbourFetcher.class);
-        when(neighbourFetcher.listNeighboursToConsumeFrom()).thenReturn(Arrays.asList(one,two));
+        NeighbourService neighbourService = mock(NeighbourService.class);
+        when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Arrays.asList(one,two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
         when(collectorCreator.setupCollection(one)).thenThrow(new MessageCollectorException("Expected exception"));
 
@@ -29,10 +30,10 @@ public class MessageCollectorTest {
 
         when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(sink,source));
 
-        MessageCollector collector = new MessageCollector(neighbourFetcher, collectorCreator);
+        MessageCollector collector = new MessageCollector(neighbourService, collectorCreator);
         collector.runSchedule();
 
-        verify(neighbourFetcher).listNeighboursToConsumeFrom();
+        verify(neighbourService).listNeighboursToConsumeMessagesFrom();
         verify(collectorCreator,times(2)).setupCollection(any());
 
         assertThat(collector.getListeners()).size().isEqualTo(1);
