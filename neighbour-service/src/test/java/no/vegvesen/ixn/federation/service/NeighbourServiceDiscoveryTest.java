@@ -14,8 +14,8 @@ import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
@@ -50,7 +50,7 @@ public class NeighbourServiceDiscoveryTest {
 		return new DataType(datexDataTypeHeaders);
 	}
 
-	@Before
+	@BeforeEach
 	public void before(){
 		self = createSelf();
 		neighbourRepository = mock(NeighbourRepository.class);
