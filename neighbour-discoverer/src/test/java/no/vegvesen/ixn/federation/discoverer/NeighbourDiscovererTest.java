@@ -35,7 +35,6 @@ public class NeighbourDiscovererTest {
 
 	private String myName = "bouvet.itsinterchange.eu";
 
-	private NeighbourDiscoverer neighbourDiscoverer;
 	private NeighbourService neighbourService;
 
 	// Objects used in testing
@@ -58,9 +57,6 @@ public class NeighbourDiscovererTest {
 		discovererProperties = mock(NeighbourDiscovererProperties.class);
 		selfRepository = mock(SelfRepository.class);
 		neighbourService = new NeighbourService(neighbourRepository, selfRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName);
-		neighbourDiscoverer = new NeighbourDiscoverer(
-				myName,
-				neighbourService);
 	}
 
 	private Neighbour createNeighbour() {
@@ -90,7 +86,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRepository.findByName(any(String.class))).thenReturn(null);
 		when(neighbourRepository.save(any(Neighbour.class))).thenReturn(mock(Neighbour.class));
 
-		neighbourDiscoverer.scheduleCheckForNewNeighbours();
+		neighbourService.checkForNewNeighbours();
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -101,7 +97,7 @@ public class NeighbourDiscovererTest {
 		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(ericsson));
 		when(neighbourRepository.findByName(any(String.class))).thenReturn(ericsson);
 
-		neighbourDiscoverer.scheduleCheckForNewNeighbours();
+		neighbourService.checkForNewNeighbours();
 
 		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
 	}
@@ -113,7 +109,7 @@ public class NeighbourDiscovererTest {
 		discoveringNode.setName(self.getName());
 		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(discoveringNode));
 
-		neighbourDiscoverer.scheduleCheckForNewNeighbours();
+		neighbourService.checkForNewNeighbours();
 
 		verify(neighbourRepository,times(1)).findByName(myName);
 		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
@@ -169,11 +165,10 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPostOfCapabilityDoesNotHappenBeforeAllowedPostTime(){
 		Neighbour ericsson = createNeighbour();
-		when(neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.setBackoffStart(futureTime);
 
-		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
 
 		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 	}
@@ -181,7 +176,6 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPostOfSubscriptionRequestDoesNotHappenBeforeAllowedTime(){
 		Neighbour ericsson = createNeighbour();
-		when(neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.setBackoffStart(futureTime);
 		ericsson.setConnectionStatus(ConnectionStatus.FAILED);
@@ -189,7 +183,7 @@ public class NeighbourDiscovererTest {
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
+		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
 
 		verify(neighbourRESTFacade, times(0)).postSubscriptionRequest(any(Self.class), any(Neighbour.class), any());
 	}
@@ -204,7 +198,7 @@ public class NeighbourDiscovererTest {
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
 		ericsson.setBackoffStart(LocalDateTime.now().plusSeconds(10));
-		neighbourDiscoverer.schedulePollSubscriptions();
+		neighbourService.pollSubscriptions();
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		verify(neighbourRESTFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
@@ -213,7 +207,6 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPostOfCapabilitiesHappensIfAllowedPostTimeHasPassed(){
 		Neighbour ericsson = createNeighbour();
-		when(neighbourRepository.findByCapabilities_StatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 
 		DataType firstDataType = this.datexNo;
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
@@ -225,7 +218,7 @@ public class NeighbourDiscovererTest {
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
 
 		verify(neighbourRESTFacade, times(1)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 	}
@@ -233,7 +226,6 @@ public class NeighbourDiscovererTest {
 	@Test
 	public void gracefulBackoffPostOfSubscriptionRequestHappensIfAllowedPostTimeHasPassed(){
 		Neighbour ericsson = createNeighbour();
-		when(neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED)).thenReturn(Collections.singletonList(ericsson));
 		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
@@ -243,7 +235,7 @@ public class NeighbourDiscovererTest {
 		when(selfRepository.findByName(anyString())).thenReturn(self);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neighbourDiscoverer.gracefulBackoffPostSubscriptionRequest();
+		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
 
 		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 	}
@@ -265,7 +257,7 @@ public class NeighbourDiscovererTest {
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.schedulePollSubscriptions();
+		neighbourService.pollSubscriptions();
 
 		verify(neighbourRESTFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
@@ -274,7 +266,6 @@ public class NeighbourDiscovererTest {
 	public void failedPostOfCapabilitiesInBackoffIncreasesNumberOfBackoffAttempts(){
 		Neighbour ericsson = createNeighbour();
 		ericsson.setBackoffAttempts(0);
-		when(neighbourRepository.findByCapabilities_StatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(5);
 
 		ericsson.setBackoffStart(pastTime);
@@ -282,7 +273,7 @@ public class NeighbourDiscovererTest {
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
 
 		assertThat(ericsson.getBackoffAttempts()).isEqualTo(1);
 	}
@@ -295,7 +286,6 @@ public class NeighbourDiscovererTest {
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(datexNo));
 		ericsson.setCapabilities(ericssonCapabilities);
 
-		when(neighbourRepository.findByCapabilities_StatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
 		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
@@ -303,7 +293,7 @@ public class NeighbourDiscovererTest {
 		doReturn(self).when(selfRepository).findByName(any(String.class));
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourDiscoverer.performCapabilityExchangeWithNeighbours();
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
 
 		assertThat(ericsson.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
@@ -326,7 +316,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.schedulePollSubscriptions();
+		neighbourService.pollSubscriptions();
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -346,7 +336,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.schedulePollSubscriptions();
+		neighbourService.pollSubscriptions();
 
 		assertThat(spyNeighbour.getFedIn().getSubscriptions()).contains(createdSubscription);
 	}
@@ -365,7 +355,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.schedulePollSubscriptions();
+		neighbourService.pollSubscriptions();
 
 		assertThat(spyNeighbour.getFedIn().getAcceptedSubscriptions()).isEmpty();
 	}
@@ -385,7 +375,7 @@ public class NeighbourDiscovererTest {
 		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourDiscoverer.schedulePollSubscriptions();
+		neighbourService.pollSubscriptions();
 
 		assertThat(spyNeighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.REQUESTED);
 	}
