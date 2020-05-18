@@ -1,14 +1,16 @@
-package no.vegvesen.ixn.federation.discoverer;
+package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.discoverer.DNSFacade;
+import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
+import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
-import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
@@ -22,7 +24,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class NeighbourDiscovererTest {
+public class NeighbourServiceDiscoveryTest {
 
 	// Mocks
 	private NeighbourRepository neighbourRepository;
