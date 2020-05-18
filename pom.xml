@@ -241,5 +241,6 @@
         <module>interchange-node-app</module>
         <module>message-collector-app</module>
         <module>neighbour-discoverer-app</module>
+        <module>neighbour-server-app</module>
     </modules>
 </project>
