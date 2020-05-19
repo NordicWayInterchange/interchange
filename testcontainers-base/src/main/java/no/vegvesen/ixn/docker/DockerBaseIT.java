@@ -58,8 +58,7 @@ public class DockerBaseIT {
 				.withEnv("CA_CERTIFICATE_FILE", "/jks/" + caCertFile)
 				.withEnv("SERVER_CERTIFICATE_FILE", "/jks/" + serverCertFile)
 				.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/" + serverKeyFile)
-				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080)
-				.waitingFor(Wait.forHealthcheck());
+				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
 	}
 
 }
