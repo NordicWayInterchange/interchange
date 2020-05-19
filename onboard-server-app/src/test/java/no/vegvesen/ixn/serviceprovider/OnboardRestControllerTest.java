@@ -12,7 +12,6 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -331,7 +330,6 @@ public class OnboardRestControllerTest {
 		assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
 	}
 
-	@NotNull
 	private DataType getDatex(String se) {
 		HashMap<String, String> datexHeaders = new HashMap<>();
 		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);

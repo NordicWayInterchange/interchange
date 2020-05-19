@@ -242,5 +242,7 @@
         <module>message-collector-app</module>
         <module>neighbour-discoverer-app</module>
         <module>neighbour-server-app</module>
+        <module>routing-configurer-app</module>
+        <module>onboard-server-app</module>
     </modules>
 </project>
