@@ -201,13 +201,14 @@ public class NeighbourService {
 				);
 	}
 
-	public List<Neighbour> findNeighboursToExhangeCapabilities() {
-		return neighbourRepository.findByCapabilities_StatusIn(
+	public void capabilityExchangeWithNeighbours() {
+		logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
+		List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
 				Capabilities.CapabilitiesStatus.UNKNOWN,
 				Capabilities.CapabilitiesStatus.KNOWN,
 				Capabilities.CapabilitiesStatus.FAILED);
+		capabilityExchange(neighboursForCapabilityExchange);
 	}
-
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
 		return neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
@@ -235,7 +236,7 @@ public class NeighbourService {
 		}
 	}
 
-	public void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
+	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
 		Self self = selfRepository.findByName(myName);
 		if (self == null) {
 			logger.info("No representation of self. Skipping.");

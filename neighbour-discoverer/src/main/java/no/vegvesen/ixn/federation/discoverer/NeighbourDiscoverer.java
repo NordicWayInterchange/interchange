@@ -58,11 +58,9 @@ public class NeighbourDiscoverer {
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
-	public void performCapabilityExchangeWithNeighbours() {
+	public void scheduleCapabilityExchangeWithNeighbours() {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
-		logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
-		List<Neighbour> neighboursForCapabilityExchange = neighbourService.findNeighboursToExhangeCapabilities();
-		neighbourService.capabilityExchange(neighboursForCapabilityExchange);
+		neighbourService.capabilityExchangeWithNeighbours();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.dns-lookup-interval}", initialDelayString = "${discoverer.dns-initial-start-delay}")
