@@ -42,11 +42,12 @@ public class FederationSystemST {
 			long expectedExpiry = System.currentTimeMillis() + timeToLive;
 
 			Message receive;
+			int timeoutOneMinute = 60000;
 			try {
-				receive = consumer.receive((5 * 60000));
+				receive = consumer.receive(timeoutOneMinute);
 			} catch (JMSException e) {
 				consumer = reconnectConsumer(sinkSpTwo, consumer);
-				receive = consumer.receive(60000);
+				receive = consumer.receive(timeoutOneMinute);
 			}
 			if (receive == null) {
 				System.out.println("ERROR: lost message " + i);
