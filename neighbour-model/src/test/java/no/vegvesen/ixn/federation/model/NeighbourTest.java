@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Sets;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
@@ -131,5 +133,31 @@ public class NeighbourTest {
 		Assertions.assertThat(result).isBetween(lowerLimit, upperLimit);
 	}
 
+	@Test
+	public void needsOurUpdatedCapabilitiesIfLocalCapabilitiesAreNeverComputedAndNeighbourNeverSeen() {
+		Neighbour neverSeen = new Neighbour();
+		neverSeen.setName("never-seen");
+		assertThat(neverSeen.needsOurUpdatedCapabilities(null)).isTrue();
+	}
 
+	@Test
+	public void doesNotNeedsOurCapabilitiesIfLocalCapabilitiesAreNeverComputedAndNeighbourSeen() {
+		Neighbour seenYesterday = neighbourSeenYesterday();
+		assertThat(seenYesterday.needsOurUpdatedCapabilities(null)).isFalse();
+	}
+
+	@Test
+	public void needsOurUpdatedCapabilitiesIfLocalCapabilitiesAreNewer() {
+		Neighbour seenYesterday = neighbourSeenYesterday();
+		assertThat(seenYesterday.needsOurUpdatedCapabilities(LocalDateTime.now().minusHours(1))).isTrue();
+	}
+
+	@NotNull
+	private Neighbour neighbourSeenYesterday() {
+		Neighbour seenYesterday = new Neighbour();
+		seenYesterday.setName("seen-yesterday");
+		seenYesterday.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newHashSet()));
+		seenYesterday.getCapabilities().setLastCapabilityExchange(LocalDateTime.now().minusDays(1));
+		return seenYesterday;
+	}
 }
