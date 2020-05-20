@@ -24,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import sun.net.www.http.HttpClient;
 
 import javax.net.ssl.SSLContext;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
+@Transactional
 public class NeighbourDiscovererIT {
 
 	@MockBean
@@ -69,7 +71,8 @@ public class NeighbourDiscovererIT {
 	}
 
 	@Test
-	public void completeOptimisticControlChannelFlow() {
+	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
+		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
 		Self self = new Self(nodeName);
 		self.setLocalSubscriptions(Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
 		selfRepository.save(self);
@@ -87,20 +90,33 @@ public class NeighbourDiscovererIT {
 		performCapabilityExchange(neighbour1, neighbour2, c1, c2);
 		Subscription requestedSubscription = performSubscriptionRequest(neighbour1, neighbour2, c1);
 		performSubscriptionPolling(neighbour1, requestedSubscription);
+
+		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
+		assertThat(toConsumeMessagesFrom).hasSize(1);
+		assertThat(toConsumeMessagesFrom).contains(neighbour1);
+	}
+
+	@Test
+	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraCapabilityExchange() {
+		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
+
+		neighbourService.capabilityExchangeWithNeighbours();
+		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
+		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
 
 	private void checkForNewNeighbours() {
 		neighbourService.checkForNewNeighbours();
-
 		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 		assertThat(unknown).hasSize(2);
+		assertThat(repository.findAll()).hasSize(2);
 	}
 
 	private void performCapabilityExchange(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
 		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour1))).thenReturn(c1);
 		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour2))).thenReturn(c2);
 
-		neighbourService.capabilityExchange(Lists.newArrayList(neighbour1, neighbour2));
+		neighbourService.capabilityExchangeWithNeighbours();
 
 		verify(mockNeighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
