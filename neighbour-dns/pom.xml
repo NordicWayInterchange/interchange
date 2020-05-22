@@ -8,7 +8,7 @@
     <parent>
         <artifactId>interchange-parent</artifactId>
         <groupId>net.nordicway.interchange</groupId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.2-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-model</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.2-SNAPSHOT</version>
         </dependency>
 
         <dependency>
