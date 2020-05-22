@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NeighbourServiceTest {
@@ -111,6 +113,7 @@ class NeighbourServiceTest {
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
 		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
+		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		neighbourService.incomingCapabilities(ericsson);
 

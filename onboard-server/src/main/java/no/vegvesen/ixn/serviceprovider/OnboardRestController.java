@@ -162,7 +162,7 @@ public class OnboardRestController {
 
 	private void updateSelfCapabilities(Set<DataType> previousCapabilities) {
 		// Recalculate Self capabilities now that we updated a Service Provider.
-		Self self = selfRepository.findByName(nodeProviderName);
+		Self self = fetchSelf();
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 		Set<DataType> updatedCapabilities = calculateSelfCapabilities(serviceProviders);
 
@@ -198,7 +198,7 @@ public class OnboardRestController {
 
 	private void updateSelfSubscriptions(Set<DataType> previousSubscriptions) {
 		// Get the current Self subscriptions. Recalculate the Self subscriptions now that a Service Provider has been updated.
-		Self self = selfRepository.findByName(nodeProviderName);
+		Self self = fetchSelf();
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 		Set<DataType> updatedSubscriptions = calculateSelfSubscriptions(serviceProviders);
 
@@ -284,7 +284,7 @@ public class OnboardRestController {
 		Self self = selfRepository.findByName(nodeProviderName);
 		if (self == null) {
 			self = new Self(nodeProviderName);
-			selfRepository.save(self);
+			return selfRepository.save(self);
 		}
 		return self;
 	}

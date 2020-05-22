@@ -66,11 +66,17 @@ public class NeighbourService {
 
 		if (self == null) {
 			self = new Self(myName);
+			return selfRepository.save(self);
+		} else {
+			return self;
 		}
+	}
 
-		return self;
-	}// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
+	public Self saveSelf(Self self) {
+		return selfRepository.save(self);
+	}
 
+	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
 	public Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
 		// Process the subscription request
@@ -237,12 +243,7 @@ public class NeighbourService {
 	}
 
 	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
-		Self self = selfRepository.findByName(myName);
-		if (self == null) {
-			logger.info("No representation of self. Skipping.");
-			return;
-		}
-
+		Self self = getSelf();
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
@@ -274,11 +275,7 @@ public class NeighbourService {
 	}
 
 	public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest) {
-		Self self = selfRepository.findByName(myName);
-		if (self == null) {
-			logger.warn("No local capabilities nor subscriptions.");
-			return; // We have nothing to post to our neighbour
-		}
+		Self self = getSelf();
 		LocalDateTime lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
 
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {

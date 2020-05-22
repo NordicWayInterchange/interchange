@@ -97,6 +97,7 @@ public class OnboardRestControllerTest {
 		String capabilitiesPath = String.format("/%s/capabilities", firstServiceProvider);
 
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(capabilitiesPath)
@@ -123,6 +124,7 @@ public class OnboardRestControllerTest {
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
+		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -164,6 +166,7 @@ public class OnboardRestControllerTest {
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -256,6 +259,7 @@ public class OnboardRestControllerTest {
 		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
+		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 
@@ -275,6 +279,7 @@ public class OnboardRestControllerTest {
 
 		// The existing subscriptions of the Service Provider
 		doReturn(null).when(serviceProviderRepository).findByName(any(String.class));
+		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 
