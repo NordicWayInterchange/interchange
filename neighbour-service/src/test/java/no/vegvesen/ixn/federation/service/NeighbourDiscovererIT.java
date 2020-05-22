@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.discoverer;
+package no.vegvesen.ixn.federation.service;
 
 
 import no.vegvesen.ixn.docker.PostgresTestcontainerInitializer;
@@ -25,6 +25,7 @@ import sun.net.www.http.HttpClient;
 
 import javax.net.ssl.SSLContext;
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,9 +74,9 @@ public class NeighbourDiscovererIT {
 	@Test
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
-		Self self = new Self(nodeName);
+		Self self = neighbourService.getSelf();
 		self.setLocalSubscriptions(Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
-		selfRepository.save(self);
+		neighbourService.saveSelf(self);
 
 		Neighbour neighbour1 = new Neighbour();
 		neighbour1.setName("neighbour-one");
@@ -87,7 +88,7 @@ public class NeighbourDiscovererIT {
 		when(mockDnsFacade.getNeighbours()).thenReturn(Lists.list(neighbour1, neighbour2));
 
 		checkForNewNeighbours();
-		performCapabilityExchange(neighbour1, neighbour2, c1, c2);
+		performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(neighbour1, neighbour2, c1, c2);
 		Subscription requestedSubscription = performSubscriptionRequest(neighbour1, neighbour2, c1);
 		performSubscriptionPolling(neighbour1, requestedSubscription);
 
@@ -100,7 +101,21 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
+		Self self = neighbourService.getSelf();
+		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
+
 		neighbourService.capabilityExchangeWithNeighbours();
+		verify(mockNeighbourRESTFacade, times(4)).postCapabilitiesToCapabilities(any(), any());
+
+		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
+		assertThat(toConsumeMessagesFrom).hasSize(1);
+	}
+
+	@Test
+	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
+		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
+
+		neighbourService.incomingCapabilities(new CapabilityApi("neighbour-one", Sets.newLinkedHashSet(new Datex2DataTypeApi("NO"))));
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -112,7 +127,7 @@ public class NeighbourDiscovererIT {
 		assertThat(repository.findAll()).hasSize(2);
 	}
 
-	private void performCapabilityExchange(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
+	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
 		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour1))).thenReturn(c1);
 		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour2))).thenReturn(c2);
 
