@@ -169,6 +169,8 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour ericsson = createNeighbour();
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.setBackoffStart(futureTime);
+		ericsson.setConnectionStatus(ConnectionStatus.FAILED);
+		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
 
