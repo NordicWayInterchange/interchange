@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 import java.util.List;
@@ -33,6 +34,9 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class NeighbourDiscovererIT {
+
+	@MockBean
+	RestTemplate restTemplate;
 
 	@MockBean
 	SSLContext mockedSSL;

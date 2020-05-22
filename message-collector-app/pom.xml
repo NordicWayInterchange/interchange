@@ -17,14 +17,6 @@
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>Github NordicWayInterchange Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
-        </repository>
-    </distributionManagement>
-
     <artifactId>message-collector-app</artifactId>
 
     <dependencies>
@@ -36,28 +28,25 @@
 
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>PKG</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>repackage</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <classifier>exec</classifier>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <!--
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
+                -->
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

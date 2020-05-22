@@ -17,14 +17,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>Github NordicWayInterchange Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
-        </repository>
-    </distributionManagement>
-
     <artifactId>debugclient</artifactId>
 
     <build>
@@ -49,6 +41,8 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
+                            <finalName>${project.build.finalName}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                 </executions>

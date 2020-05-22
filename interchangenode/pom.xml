@@ -20,14 +20,6 @@
     <artifactId>interchange-node</artifactId>
     <version>1.0.1-SNAPSHOT</version>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>Github NordicWayInterchange Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
-        </repository>
-    </distributionManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -19,14 +19,6 @@
         <start-class>no.vegvesen.ixn.federation.RoutingConfigurerApplication</start-class>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>Github NordicWayInterchange Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
-        </repository>
-    </distributionManagement>
-
     <artifactId>routing-configurer</artifactId>
 
     <dependencies>

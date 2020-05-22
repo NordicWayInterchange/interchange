@@ -17,14 +17,6 @@
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>Github NordicWayInterchange Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
-        </repository>
-    </distributionManagement>
-
     <artifactId>onboard-rest-client</artifactId>
 
     <dependencies>
@@ -138,6 +130,8 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
+                            <finalName>${project.build.finalName}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                 </executions>

@@ -20,14 +20,6 @@
     <artifactId>interchange-node-app</artifactId>
     <version>1.0.1-SNAPSHOT</version>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>Github NordicWayInterchange Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
-        </repository>
-    </distributionManagement>
-
     <dependencies>
 
         <dependency>
@@ -56,29 +48,26 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>PKG</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>repackage</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <classifier>exec</classifier>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <!--
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
+                -->
+            </plugin>
+        </plugins>
+    </build>
 
     <repositories>
         <repository>

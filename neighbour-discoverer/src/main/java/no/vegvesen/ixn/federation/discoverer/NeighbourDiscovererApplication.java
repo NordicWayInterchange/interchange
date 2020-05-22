@@ -10,14 +10,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 
-@SpringBootApplication(scanBasePackages = "no.vegvesen.ixn.federation")
-@EnableScheduling
-@EnableJpaRepositories(basePackages={"no.vegvesen.ixn.federation.repository"})
-@EntityScan(basePackages={"no.vegvesen.ixn.federation.model"})
+@Component
 public class NeighbourDiscovererApplication {
 
 
@@ -41,7 +40,4 @@ public class NeighbourDiscovererApplication {
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(createHttpClient()));
 	}
 
-	public static void main(String[] args){
-		SpringApplication.run(NeighbourDiscovererApplication.class);
-	}
 }
