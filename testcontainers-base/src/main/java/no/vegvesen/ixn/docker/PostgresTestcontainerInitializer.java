@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.repository;
+package no.vegvesen.ixn.docker;
 
 import org.junit.ClassRule;
 import org.springframework.boot.test.util.TestPropertyValues;

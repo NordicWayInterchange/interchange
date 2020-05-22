@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.nordicway.interchange</groupId>
         <artifactId>interchange-parent</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -88,7 +88,7 @@
             <artifactId>httpclient</artifactId>
             <scope>compile</scope>
         </dependency>
-
+<!--
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-model</artifactId>
@@ -96,11 +96,16 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
+-->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>testcontainers-base</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
