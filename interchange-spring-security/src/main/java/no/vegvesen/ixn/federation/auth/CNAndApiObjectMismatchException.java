@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.exceptions;
+package no.vegvesen.ixn.federation.auth;
 
 public class CNAndApiObjectMismatchException extends RuntimeException{
 
