@@ -9,11 +9,10 @@ jobs:
           command: |
             mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - run:
-          branch: mven-deploy-test
+          branch: federation-master
           name: Push maven build
           command: |
             mvn -s .circleci.settings.xml deploy
-            echo git tag ... mvn version
       - run:
           name: Push containers
           command: |
