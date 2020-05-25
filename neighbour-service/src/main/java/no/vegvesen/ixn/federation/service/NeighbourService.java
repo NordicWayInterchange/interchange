@@ -12,11 +12,11 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
+import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,11 +30,11 @@ import java.util.Set;
 @Component
 public class NeighbourService {
 	private static Logger logger = LoggerFactory.getLogger(NeighbourService.class);
+	private final SelfService selfService;
 
 	private String myName;
 
 	private NeighbourRepository neighbourRepository;
-	private SelfRepository selfRepository;
 	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
@@ -46,14 +46,14 @@ public class NeighbourService {
 
 
 	public NeighbourService(NeighbourRepository neighbourRepository,
-							SelfRepository selfRepository,
 							DNSFacade dnsFacade,
 							GracefulBackoffProperties backoffProperties,
 							NeighbourDiscovererProperties discovererProperties,
 							NeighbourRESTFacade neighbourRESTFacade,
-							@Value("${interchange.node-provider.name}") String myName) {
+							@Value("${interchange.node-provider.name}") String myName,
+							SelfService selfService) {
 		this.neighbourRepository = neighbourRepository;
-		this.selfRepository = selfRepository;
+		this.selfService = selfService;
 		this.dnsFacade = dnsFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
@@ -61,20 +61,6 @@ public class NeighbourService {
 		this.myName = myName;
 	}
 
-	public Self getSelf() {
-		Self self = selfRepository.findByName(myName);
-
-		if (self == null) {
-			self = new Self(myName);
-			return selfRepository.save(self);
-		} else {
-			return self;
-		}
-	}
-
-	public Self saveSelf(Self self) {
-		return selfRepository.save(self);
-	}
 
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
@@ -192,7 +178,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilityTransformer.selfToCapabilityApi(getSelf());
+		return capabilityTransformer.selfToCapabilityApi(selfService.fetchSelf());
 	}
 
 	Neighbour findNeighbour(String neighbourName) {
@@ -243,7 +229,7 @@ public class NeighbourService {
 	}
 
 	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
-		Self self = getSelf();
+		Self self = selfService.fetchSelf();
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
@@ -275,7 +261,7 @@ public class NeighbourService {
 	}
 
 	public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest) {
-		Self self = getSelf();
+		Self self = selfService.fetchSelf();
 		LocalDateTime lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
 
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
