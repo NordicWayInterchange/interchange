@@ -233,6 +233,7 @@
         <module>neighbour-service</module>
         <module>neighbour-server</module>
         <module>neighbour-discoverer</module>
+        <module>onboard-service</module>
         <module>onboard-rest-api</module>
         <module>onboard-server</module>
         <module>routing-configurer</module>
