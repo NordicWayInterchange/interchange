@@ -1,15 +1,14 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
 import org.junit.Rule;
@@ -19,6 +18,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -43,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = OnboardRestController.class)
+@Import(CertService.class)
 public class OnboardRestControllerTest {
 
 	@Rule
@@ -55,16 +56,8 @@ public class OnboardRestControllerTest {
 	@MockBean
 	private SelfRepository selfRepository;
 
-	//Unfortunately we have to mock beans not used in the class under test
-	//because the spring test wires up all jpa repositories not mocked
-	@MockBean
-	private NeighbourRepository neighbourRepository;
-
-	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
-
 	@Autowired
 	private OnboardRestController onboardRestController;
-
 
 	@BeforeEach
 	void setUp() {

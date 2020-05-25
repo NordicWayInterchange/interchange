@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -31,6 +29,7 @@ public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final SelfRepository selfRepository;
+	private final CertService certService;
 	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
@@ -40,28 +39,17 @@ public class OnboardRestController {
 
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
-								 SelfRepository selfRepository) {
+								 SelfRepository selfRepository,
+								 CertService certService) {
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.selfRepository = selfRepository;
-	}
-
-
-	private void checkIfCommonNameMatchesNameInApiObject(String apiName) {
-
-		Authentication principal = SecurityContextHolder.getContext().getAuthentication();
-		String commonName = principal.getName();
-
-		if (!commonName.equals(apiName)) {
-			logger.error("Received capability post from neighbour {}, but CN on certificate was {}. Rejecting...", apiName, commonName);
-			String errorMessage = "Received capability post from neighbour %s, but CN on certificate was %s. Rejecting...";
-			throw new CNAndApiObjectMismatchException(String.format(errorMessage, apiName, commonName));
-		}
+		this.certService = certService;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	public LocalDataType addCapabilities(@PathVariable String serviceProviderName, @RequestBody DataTypeApi capabilityDataType) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
-		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Capabilities - Received POST from Service Provider: {}", serviceProviderName);
 
@@ -117,7 +105,7 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/capabilities/{capabilityId}")
 	public RedirectView deleteCapability(@PathVariable String serviceProviderName, @PathVariable Integer capabilityId ) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
-		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Capabilities - Received DELETE from Service Provider: {}", serviceProviderName);
 
@@ -239,7 +227,7 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
 	public LocalSubscriptionApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
-		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
 
@@ -292,7 +280,7 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscriptions/{dataTypeId}")
 	public RedirectView deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) throws NotFoundException {
 		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
-		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
 
@@ -338,7 +326,7 @@ public class OnboardRestController {
 	}
 
 	private ServiceProvider checkAndGetServiceProvider(@PathVariable String serviceProviderName) {
-		checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProvider == null) {
 			throw new NotFoundException("The requesting Service Provider does not exist in the database.");
