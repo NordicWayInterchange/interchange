@@ -10,7 +10,7 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
@@ -31,7 +31,7 @@ public class NeighbourServiceDiscoveryTest {
 	private DNSFacade dnsFacade;
 	private NeighbourRESTFacade neighbourRESTFacade;
 	private NeighbourDiscovererProperties discovererProperties;
-	private SelfRepository selfRepository;
+	private SelfService selfService;
 
 	private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -57,8 +57,8 @@ public class NeighbourServiceDiscoveryTest {
 		dnsFacade = mock(DNSFacade.class);
 		neighbourRESTFacade = mock(NeighbourRESTFacade.class);
 		discovererProperties = mock(NeighbourDiscovererProperties.class);
-		selfRepository = mock(SelfRepository.class);
-		neighbourService = new NeighbourService(neighbourRepository, selfRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName);
+		selfService = mock(SelfService.class);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName, selfService);
 	}
 
 	private Neighbour createNeighbour() {
@@ -133,7 +133,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 
-		doReturn(self).when(selfRepository).findByName(any(String.class));
+		doReturn(self).when(selfService).fetchSelf();
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
 
@@ -147,7 +147,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSet("FI")));
 
-		when(selfRepository.findByName(anyString())).thenReturn(self);
+		doReturn(self).when(selfService).fetchSelf();
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
 
@@ -184,7 +184,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.setBackoffStart(futureTime);
 		ericsson.setConnectionStatus(ConnectionStatus.FAILED);
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
-		when(selfRepository.findByName(anyString())).thenReturn(self);
+		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
@@ -219,7 +219,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
-		doReturn(self).when(selfRepository).findByName(any(String.class));
+		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
@@ -234,9 +234,8 @@ public class NeighbourServiceDiscoveryTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
-		doReturn(self).when(selfRepository).findByName(any(String.class));
+		doReturn(self).when(selfService).fetchSelf();
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
-		when(selfRepository.findByName(anyString())).thenReturn(self);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
@@ -274,7 +273,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		ericsson.setBackoffStart(pastTime);
 		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
-		doReturn(self).when(selfRepository).findByName(any(String.class));
+		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
@@ -294,7 +293,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.setBackoffStart(pastTime);
 		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 
-		doReturn(self).when(selfRepository).findByName(any(String.class));
+		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
@@ -417,7 +416,7 @@ public class NeighbourServiceDiscoveryTest {
 		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("NO");
 
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
-		when(selfRepository.findByName(anyString())).thenReturn(discoveringNode);
+		when(selfService.fetchSelf()).thenReturn(discoveringNode);
 
 		neighbourService.evaluateAndPostSubscriptionRequest(neighbours);
 
@@ -463,7 +462,7 @@ public class NeighbourServiceDiscoveryTest {
 				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
 				new SubscriptionRequest());
 
-		when(selfRepository.findByName(anyString())).thenReturn(self);
+		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRESTFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(mock(SubscriptionRequest.class));
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour));

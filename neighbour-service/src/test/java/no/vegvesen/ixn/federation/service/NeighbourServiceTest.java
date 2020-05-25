@@ -9,7 +9,7 @@ import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.onboard.SelfService;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +34,7 @@ class NeighbourServiceTest {
 	@Mock
 	DNSFacade dnsFacade;
 	@Mock
-	SelfRepository selfRepository;
+	SelfService selfService;
 	@Mock
 	NeighbourRESTFacade neighbourRESTFacade;
 
@@ -48,7 +47,7 @@ class NeighbourServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		neighbourService = new NeighbourService(neighbourRepository, selfRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName, selfService);
 	}
 
 	@Test
@@ -67,7 +66,7 @@ class NeighbourServiceTest {
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
 		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
-		Mockito.when(selfRepository.findByName(ArgumentMatchers.any())).thenReturn(new Self("bouvet"));
+		Mockito.when(selfService.fetchSelf()).thenReturn(new Self("bouvet"));
 
 		CapabilityApi response = neighbourService.incomingCapabilities(ericsson);
 
@@ -113,7 +112,7 @@ class NeighbourServiceTest {
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
 		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
-		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
+		when(selfService.fetchSelf()).thenReturn(new Self(myName));
 
 		neighbourService.incomingCapabilities(ericsson);
 

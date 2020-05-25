@@ -7,8 +7,8 @@ import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
 import org.junit.Rule;
@@ -49,7 +49,7 @@ public class OnboardRestControllerTest {
 	@MockBean
 	private ServiceProviderRepository serviceProviderRepository;
 	@MockBean
-	private SelfRepository selfRepository;
+	private SelfService selfService;
 
 	@Autowired
 	private OnboardRestController onboardRestController;
@@ -85,7 +85,8 @@ public class OnboardRestControllerTest {
 		String capabilitiesPath = String.format("/%s/capabilities", firstServiceProvider);
 
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(capabilitiesPath)
@@ -112,7 +113,8 @@ public class OnboardRestControllerTest {
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
-		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -154,7 +156,8 @@ public class OnboardRestControllerTest {
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
-		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -220,7 +223,7 @@ public class OnboardRestControllerTest {
 		//Self
 		Self self = new Self("this-server-name");
 		self.setLocalSubscriptions(serviceProviderSubscriptionRequest.getSubscriptions());//same subscriptions as the service provider
-		doReturn(self).when(selfRepository).findByName(any(String.class));
+		doReturn(self).when(selfService).fetchSelf();
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
 		// Subscription request api posted to the server
@@ -247,7 +250,8 @@ public class OnboardRestControllerTest {
 		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
-		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 
@@ -267,7 +271,8 @@ public class OnboardRestControllerTest {
 
 		// The existing subscriptions of the Service Provider
 		doReturn(null).when(serviceProviderRepository).findByName(any(String.class));
-		when(selfRepository.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 

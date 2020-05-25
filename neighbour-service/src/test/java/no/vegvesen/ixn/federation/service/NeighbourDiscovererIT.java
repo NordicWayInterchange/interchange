@@ -8,7 +8,7 @@ import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Lists;
@@ -41,9 +41,6 @@ import static org.mockito.Mockito.*;
 public class NeighbourDiscovererIT {
 
 	@MockBean
-	RestTemplate restTemplate;
-
-	@MockBean
 	SSLContext mockedSSL;
 
 	@MockBean
@@ -55,8 +52,11 @@ public class NeighbourDiscovererIT {
 	@MockBean
 	NeighbourRESTFacade mockNeighbourRESTFacade;
 
+	@MockBean
+	RestTemplate restTemplate;
+
 	@Autowired
-	SelfRepository selfRepository;
+	SelfService selfService;
 
 	@Autowired
 	NeighbourService neighbourService;
@@ -75,9 +75,9 @@ public class NeighbourDiscovererIT {
 	@Test
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
-		Self self = neighbourService.getSelf();
+		Self self = selfService.fetchSelf();
 		self.setLocalSubscriptions(Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
-		neighbourService.saveSelf(self);
+		selfService.save(self);
 
 		Neighbour neighbour1 = new Neighbour();
 		neighbour1.setName("neighbour-one");
@@ -102,7 +102,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		Self self = neighbourService.getSelf();
+		Self self = selfService.fetchSelf();
 		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 
 		neighbourService.capabilityExchangeWithNeighbours();

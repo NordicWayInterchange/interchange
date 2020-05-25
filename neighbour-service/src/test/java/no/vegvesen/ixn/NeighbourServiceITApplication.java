@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation;
+package no.vegvesen.ixn;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
