@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.docker.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
