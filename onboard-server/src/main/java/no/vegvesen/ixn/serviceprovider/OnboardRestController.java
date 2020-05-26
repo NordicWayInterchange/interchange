@@ -46,7 +46,7 @@ public class OnboardRestController {
 	}
 
 
-	private void checkIfCommonNameMatchesNameInApiObject(String apiName) {
+	private void checkIfComAccmonNameMatchesNameInApiObject(String apiName) {
 
 		Authentication principal = SecurityContextHolder.getContext().getAuthentication();
 		String commonName = principal.getName();

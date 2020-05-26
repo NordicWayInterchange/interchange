@@ -7,11 +7,11 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -176,7 +176,7 @@ public class NeighbourRepositoryIT {
 		assertThat(foundNeighbour.getCapabilities().getDataTypes()).hasSize(2);
 	}
 
-	@NotNull
+	@NonNull
 	private HashMap<String, String> getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType) {
 		HashMap<String, String> datexHeaders = new HashMap<>();
 		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);

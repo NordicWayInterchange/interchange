@@ -3,8 +3,8 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Sets;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 
@@ -152,7 +152,7 @@ public class NeighbourTest {
 		assertThat(seenYesterday.needsOurUpdatedCapabilities(LocalDateTime.now().minusHours(1))).isTrue();
 	}
 
-	@NotNull
+	@NonNull
 	private Neighbour neighbourSeenYesterday() {
 		Neighbour seenYesterday = new Neighbour();
 		seenYesterday.setName("seen-yesterday");
