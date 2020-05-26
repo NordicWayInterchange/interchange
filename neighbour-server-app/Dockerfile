@@ -1,7 +1,7 @@
 FROM java:8-alpine
 RUN apk add --no-cache bash
 
-COPY target/routing-configurer-1.0-SNAPSHOT-exec.jar routing-configurer.jar
+COPY target/neighbour-server-app-1.0.3-SNAPSHOT.jar neighbour-server.jar
 
 ADD entrypoint.sh /
 RUN chmod +x /entrypoint.sh

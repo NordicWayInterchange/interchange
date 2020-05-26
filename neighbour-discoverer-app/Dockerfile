@@ -1,7 +1,7 @@
 FROM java:8-alpine
 RUN apk add --no-cache bash
 
-COPY target/onboard-server-1.0-SNAPSHOT-exec.jar onboard-server.jar
+COPY target/neighbour-discoverer-app-1.0.3-SNAPSHOT.jar neighbour-discoverer.jar
 
 ADD entrypoint.sh /
 RUN chmod +x /entrypoint.sh

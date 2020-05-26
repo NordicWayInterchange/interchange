@@ -1,10 +1,9 @@
 package no.vegvesen.ixn.federation.repository;
 
+import no.vegvesen.ixn.docker.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
-import org.assertj.core.util.Sets;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

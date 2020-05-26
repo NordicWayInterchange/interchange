@@ -7,7 +7,12 @@ jobs:
       - run:
           name: run integration tests
           command: |
-            mvn verify -PIT -PPKG -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+      - run:
+          branch: federation-master
+          name: Push maven build
+          command: |
+            mvn -s .circleci.settings.xml deploy
       - run:
           name: Push containers
           command: |

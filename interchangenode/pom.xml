@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>net.nordicway.interchange</groupId>
         <artifactId>interchange-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <groupId>net.nordicway.interchange</groupId>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>interchange-node</artifactId>
@@ -47,28 +47,14 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>PKG</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>repackage</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <classifier>exec</classifier>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
+    <repositories>
+        <repository>
+            <id>repository.springframework.maven.snapshots</id>
+            <name>Spring Framework Repository Including Snapshots</name>
+            <url>https://repo.spring.io/libs-snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

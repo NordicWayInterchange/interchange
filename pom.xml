@@ -6,7 +6,7 @@
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <properties>
@@ -16,6 +16,14 @@
         <spring-boot-dependencies.version>2.2.3.RELEASE</spring-boot-dependencies.version>
         <picocli-version>4.2.0</picocli-version>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>Github NordicWayInterchange Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/NordicWayInterchange/interchange</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <pluginManagement>
@@ -52,6 +60,13 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot-dependencies.version}</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8</version>
+                    <configuration>
+                    </configuration>
                 </plugin>
 
             </plugins>
@@ -221,5 +236,11 @@
         <module>dns-client</module>
         <module>onboard-rest-client</module>
         <module>quadtree-tool</module>
+        <module>interchange-node-app</module>
+        <module>message-collector-app</module>
+        <module>neighbour-discoverer-app</module>
+        <module>neighbour-server-app</module>
+        <module>routing-configurer-app</module>
+        <module>onboard-server-app</module>
     </modules>
 </project>

@@ -9,12 +9,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
-@EnableScheduling
-@SpringBootApplication
+@Service
 public class InterchangeApp {
 
 	private static Logger logger = LoggerFactory.getLogger(InterchangeApp.class);
@@ -35,8 +35,9 @@ public class InterchangeApp {
 			consumer = consumerCreator.setupConsumer();
 		}
 	}
-
+/*
 	public static void main(String[] args) {
 		SpringApplication.run(InterchangeApp.class, args);
 	}
+	*/
 }

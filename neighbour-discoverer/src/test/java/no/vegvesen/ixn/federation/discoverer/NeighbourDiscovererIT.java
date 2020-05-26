@@ -1,18 +1,17 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 
+import no.vegvesen.ixn.docker.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.http.client.HttpClient;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 import java.util.List;
@@ -34,6 +34,9 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class NeighbourDiscovererIT {
+
+	@MockBean
+	RestTemplate restTemplate;
 
 	@MockBean
 	SSLContext mockedSSL;
@@ -120,7 +123,7 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
-		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
+		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(),any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
 		discoverer.pollSubscriptions();
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
@@ -130,7 +133,6 @@ public class NeighbourDiscovererIT {
 	}
 
 
-	@NotNull
 	private DataType getDataType(String messageType, String originatingCountry) {
 		DataType dataType = new DataType();
 		dataType.getValues().put(MessageProperty.MESSAGE_TYPE.getName(), messageType);
