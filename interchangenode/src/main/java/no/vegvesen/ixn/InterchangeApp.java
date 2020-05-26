@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
-//@EnableScheduling
-//@SpringBootApplication
 @Service
 public class InterchangeApp {
 
