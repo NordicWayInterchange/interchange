@@ -13,30 +13,10 @@
     <artifactId>interchange-node-app</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>interchange-node</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>test-ssl-utils</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>testcontainers-base</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
