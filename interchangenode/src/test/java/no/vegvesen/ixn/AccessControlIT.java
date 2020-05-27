@@ -1,6 +1,6 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Verifies access control lists where username comes from the common name (CN) of the user certificate.
  */
 @Testcontainers
-public class AccessControlIT extends DockerBaseIT {
+public class AccessControlIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(AccessControlIT.class);
 

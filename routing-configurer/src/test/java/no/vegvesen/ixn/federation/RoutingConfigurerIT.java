@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
 @Testcontainers
-public class RoutingConfigurerIT extends DockerBaseIT {
+public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Container
 	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
 @Testcontainers
-public class QpidClientIT extends DockerBaseIT {
+public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Container
 	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");

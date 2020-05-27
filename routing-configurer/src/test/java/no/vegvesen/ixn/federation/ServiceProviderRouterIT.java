@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {ServiceProviderRouterIT.Initializer.class})
 @Testcontainers
-public class ServiceProviderRouterIT extends DockerBaseIT {
+public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
     @SuppressWarnings("rawtypes")
 	@Container
