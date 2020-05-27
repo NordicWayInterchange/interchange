@@ -156,6 +156,11 @@
                 <artifactId>picocli</artifactId>
                 <version>${picocli-version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.stephenc.jcip</groupId>
+                <artifactId>jcip-annotations</artifactId>
+                <version>1.0-1</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
