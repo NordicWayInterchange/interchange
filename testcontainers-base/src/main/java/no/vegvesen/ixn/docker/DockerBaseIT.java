@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.docker;
 
+import net.jcip.annotations.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -9,6 +10,7 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@NotThreadSafe
 public class DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(DockerBaseIT.class);
 	protected static final int HTTPS_PORT = 443;
@@ -44,6 +46,7 @@ public class DockerBaseIT {
 		throw new RuntimeException("Could not resolve path to docker folder " + dockerFolderName + " in parent folder of " + run.toString());
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected static GenericContainer getQpidContainer(String configPathFromClasspath, String jksPathFromClasspath, final String caCertFile, final String serverCertFile, final String serverKeyFile) {
 		return new GenericContainer(
 				new ImageFromDockerfile().withFileFromPath(".", getFolderPath("qpid")))
