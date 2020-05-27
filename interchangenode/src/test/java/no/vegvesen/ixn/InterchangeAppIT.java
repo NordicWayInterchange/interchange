@@ -1,6 +1,6 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.messaging.IxnMessageConsumerCreator;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.ClassRule;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {InterchangeAppIT.InterchangeInitializer.class})
-public class InterchangeAppIT extends DockerBaseIT {
+public class InterchangeAppIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(InterchangeAppIT.class);
 

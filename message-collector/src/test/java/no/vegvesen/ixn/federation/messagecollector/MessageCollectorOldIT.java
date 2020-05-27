@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.messagecollector;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 @Ignore
 @SuppressWarnings("rawtypes")
-public class MessageCollectorOldIT extends DockerBaseIT {
+public class MessageCollectorOldIT extends QpidDockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(MessageCollectorOldIT.class);
 
 	private RestTemplate restTemplate() {
@@ -166,3 +166,4 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 
 
 }
+

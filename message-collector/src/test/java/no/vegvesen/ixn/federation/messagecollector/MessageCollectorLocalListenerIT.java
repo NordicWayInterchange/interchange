@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MessageCollectorLocalListenerIT extends DockerBaseIT {
+public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
     private static final SSLContext SSL_CONTEXT = TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks");
 	private static Logger logger = LoggerFactory.getLogger(MessageCollectorLocalListenerIT.class);
 

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import javax.net.ssl.SSLContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SourceSinkIT extends DockerBaseIT {
+public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");

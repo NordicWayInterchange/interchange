@@ -3,8 +3,8 @@ package no.vegvesen.ixn.federation.qpid;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = {QuadTreeFilteringIT.Initializer.class})
-public class QuadTreeFilteringIT extends DockerBaseIT {
+public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(QuadTreeFilteringIT.class);
 

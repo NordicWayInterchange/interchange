@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
 @RunWith(SpringRunner.class)
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
-public class QpidClientIT extends DockerBaseIT {
+public class QpidClientIT extends QpidDockerBaseIT {
 
 	@ClassRule
 	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");

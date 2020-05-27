@@ -1,6 +1,6 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.ClassRule;
@@ -17,7 +17,6 @@ import org.testcontainers.containers.GenericContainer;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {QpidIT.Initializer.class})
-public class QpidIT extends DockerBaseIT {
+public class QpidIT extends QpidDockerBaseIT {
 
 	private static final long RECEIVE_TIMEOUT = 2000;
 	private static final String NO_OUT = "NO-out";
