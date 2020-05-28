@@ -11,8 +11,8 @@ import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.http.HttpMethod;
@@ -30,6 +30,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NeighbourRESTFacadeTest {
 
@@ -50,7 +52,7 @@ public class NeighbourRESTFacadeTest {
 
 	private MockRestServiceServer server;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		ericsson = new Neighbour();
 		ericsson.setName("ericsson.itsinterchange.eu");
@@ -188,7 +190,7 @@ public class NeighbourRESTFacadeTest {
 		Assertions.assertThat(response.getSubscriptionStatus()).isEqualTo(subscription.getSubscriptionStatus());
 	}
 
-	@Test(expected = CapabilityPostException.class)
+	@Test
 	public void unsuccessfulPostOfCapabilitiesThrowsCapabilityPostException() throws Exception {
 
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Error error");
@@ -199,10 +201,12 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+		assertThrows(CapabilityPostException.class, () -> {
+			neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+		});
 	}
 
-	@Test(expected = SubscriptionRequestException.class)
+	@Test
 	public void unsuccessfulPostOfSubscriptionRequestThrowsSubscriptionRequestException() throws Exception{
 
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Error error");
@@ -214,10 +218,13 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		Set<Subscription> subscriptionSet = Collections.emptySet();
-		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
+
+		assertThrows(SubscriptionRequestException.class, () -> {
+			neighbourRESTFacade.postSubscriptionRequest(self, ericsson, subscriptionSet);
+		});
 	}
 
-	@Test(expected = SubscriptionRequestException.class)
+	@Test
 	public void clientSubscriptionRequestNotEmptyButServerResponseEmptySubscriptionRequest() throws Exception{
 
 		// Subscription request posted to neighbour has non empty subscription set.
@@ -235,10 +242,12 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 
-		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
+		assertThrows(SubscriptionRequestException.class, () -> {
+			neighbourRESTFacade.postSubscriptionRequest(self, ericsson, subscriptionSet);
+		});
 	}
 
-	@Test(expected = SubscriptionRequestException.class)
+	@Test
 	public void serverClosesConnectionUnexpectedlyOnSubscriptionRequestPost() throws Exception {
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
@@ -253,12 +262,12 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
-
-
-		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptions);
+		assertThrows(SubscriptionRequestException.class, () -> {
+			neighbourRESTFacade.postSubscriptionRequest(self, ericsson, subscriptions);
+		});
 	}
 
-	@Test(expected = CapabilityPostException.class)
+	@Test
 	public void capabilitiesPostServerUnexpectedlyClosesConnection() throws IOException {
 
 	    final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
@@ -268,10 +277,12 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
-		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+		assertThrows(CapabilityPostException.class, () -> {
+			neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+		});
 	}
 
-	@Test(expected = SubscriptionPollException.class)
+	@Test
 	public void test() throws IOException {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
@@ -286,7 +297,9 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
 				.andRespond((request) -> mock);
 
-		Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
+		assertThrows(SubscriptionPollException.class, () -> {
+			Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
+		});
 
 	}
 }

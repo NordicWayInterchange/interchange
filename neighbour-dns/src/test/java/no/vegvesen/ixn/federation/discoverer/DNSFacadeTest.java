@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.model.Neighbour;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class DNSFacadeTest {
 	@Test
 	public void testNumberOfNeighbours(){
 		List<Neighbour> neighbours = dnsFacade.getNeighbours();
-		Assert.assertTrue("Number of known Neighbours in the actual dns is less than two", neighbours.size() >= 2);
+		Assertions.assertTrue(neighbours.size() >= 2, "Number of known Neighbours in the actual dns is less than two");
 	}
 
 	@Test

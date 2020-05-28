@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.repository;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.internal.util.collections.Sets;
@@ -52,7 +52,7 @@ public class NeighbourRepositorySelectorIT {
 
 		List<Neighbour> volvoInList = Collections.singletonList(volvo);
 
-		Assert.assertTrue(interchangeInList("Volvo", volvoInList));
+		Assertions.assertTrue(interchangeInList("Volvo", volvoInList));
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class NeighbourRepositorySelectorIT {
 
 		List<Neighbour> volvoNotInList = Collections.singletonList(tesla);
 
-		Assert.assertFalse(interchangeInList("Volvo", volvoNotInList));
+		Assertions.assertFalse(interchangeInList("Volvo", volvoNotInList));
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class NeighbourRepositorySelectorIT {
 
 		List<Neighbour> getInterchangeForSubscriptionRequest = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeForSubscriptionRequest));
+		Assertions.assertTrue(interchangeInList(ericsson.getName(), getInterchangeForSubscriptionRequest));
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class NeighbourRepositorySelectorIT {
 
 		List<Neighbour> getInterchangesForCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesForCapabilityExchange));
+		Assertions.assertTrue(interchangeInList(ericsson.getName(), getInterchangesForCapabilityExchange));
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class NeighbourRepositorySelectorIT {
 
 		List<Neighbour> getInterchangesWithFailedFedIn = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED);
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedFedIn ));
+		Assertions.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedFedIn ));
 	}
 
 	@Test
@@ -103,7 +103,7 @@ public class NeighbourRepositorySelectorIT {
 
 		List<Neighbour> getInterchangesWithFailedCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedCapabilityExchange));
+		Assertions.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedCapabilityExchange));
 	}
 
 
@@ -128,8 +128,8 @@ public class NeighbourRepositorySelectorIT {
 		List<Neighbour> getInterchangeWithRequestedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.ACCEPTED, SubscriptionStatus.REQUESTED);
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangeWithRequestedSubscriptionsInFedIn));
-		Assert.assertTrue(interchangeInList(ericssonA.getName(), getInterchangeWithRequestedSubscriptionsInFedIn));
+		Assertions.assertTrue(interchangeInList(ericsson.getName(), getInterchangeWithRequestedSubscriptionsInFedIn));
+		Assertions.assertTrue(interchangeInList(ericssonA.getName(), getInterchangeWithRequestedSubscriptionsInFedIn));
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class NeighbourRepositorySelectorIT {
 
 		List<Neighbour> getInterchangesWithFailedSubscriptionInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedSubscriptionInFedIn));
+		Assertions.assertTrue(interchangeInList(ericsson.getName(), getInterchangesWithFailedSubscriptionInFedIn));
 	}
 
 	@Test
@@ -163,7 +163,7 @@ public class NeighbourRepositorySelectorIT {
 		List<Neighbour> interchangeWithFedInRequested = neighbourRepository.findByFedIn_StatusIn(
 				SubscriptionRequestStatus.REQUESTED, SubscriptionRequestStatus.ESTABLISHED);
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInRequested));
+		Assertions.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInRequested));
 	}
 
 	@Test
@@ -180,7 +180,7 @@ public class NeighbourRepositorySelectorIT {
 		List<Neighbour> interchangeWithFedInEstablished = neighbourRepository.findByFedIn_StatusIn(
 				SubscriptionRequestStatus.REQUESTED, SubscriptionRequestStatus.ESTABLISHED);
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInEstablished));
+		Assertions.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInEstablished));
 	}
 
 	@Test
@@ -196,7 +196,7 @@ public class NeighbourRepositorySelectorIT {
 
 		List<Neighbour> interchangeWithFedInRejected = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.REJECTED);
 
-		Assert.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInRejected));
+		Assertions.assertTrue(interchangeInList(ericsson.getName(), interchangeWithFedInRejected));
 	}
 
 }

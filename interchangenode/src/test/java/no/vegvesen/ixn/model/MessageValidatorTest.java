@@ -2,7 +2,7 @@ package no.vegvesen.ixn.model;
 
 import no.vegvesen.ixn.util.KeyValue;
 import no.vegvesen.ixn.util.MessageTestDouble;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.jms.Message;
 

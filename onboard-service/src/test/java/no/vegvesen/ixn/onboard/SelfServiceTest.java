@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.lang.NonNull;
@@ -73,8 +73,8 @@ class SelfServiceTest {
 
 		Set<DataType> selfCapabilities = selfService.calculateSelfCapabilities(serviceProviders);
 
-		Assert.assertEquals(selfCapabilities.size(), 3);
-		Assert.assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
+		Assertions.assertEquals(selfCapabilities.size(), 3);
+		Assertions.assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
 	}
 
 	@NonNull

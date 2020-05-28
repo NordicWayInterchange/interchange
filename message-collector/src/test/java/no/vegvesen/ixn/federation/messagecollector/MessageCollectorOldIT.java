@@ -11,9 +11,7 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -32,9 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Ignore
 @SuppressWarnings("rawtypes")
-public class MessageCollectorOldIT extends DockerBaseIT {
+public abstract class MessageCollectorOldIT extends DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(MessageCollectorOldIT.class);
 
 	private RestTemplate restTemplate() {
@@ -42,13 +39,10 @@ public class MessageCollectorOldIT extends DockerBaseIT {
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
 	}
 
-	@Rule
 	public GenericContainer localContainer = getQpidContainer("docker/consumer", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
-	@Rule
 	public GenericContainer remoteContainer = getQpidContainer("docker/producer", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
-	@Rule
 	public GenericContainer remoteContainerTwo = getQpidContainer("docker/producer", "jks", "my_ca.crt", "localhost.crt", "localhost.key");
 
 	private SSLContext localSslContext() {

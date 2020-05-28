@@ -4,48 +4,37 @@ import no.vegvesen.ixn.messaging.IxnMessageConsumer;
 import no.vegvesen.ixn.model.MessageValidator;
 import no.vegvesen.ixn.util.KeyValue;
 import no.vegvesen.ixn.util.MessageTestDouble;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class InterchangeAppTest {
 
     @Mock
 	MessageProducer nwExProducer;
     @Mock
 	MessageProducer dlQueueProducer;
-	@Mock
-	MessageConsumer onrampConsumer;
 
     @Mock
 	Source nwEx;
     @Mock
 	Source dlQueue;
-	@Mock
+    @Mock
 	Sink onramp;
-
-    IxnMessageConsumer consumer;
-
-    @Before
-    public void setUp() {
-    	when(nwEx.getProducer()).thenReturn(nwExProducer);
-    	when(dlQueue.getProducer()).thenReturn(dlQueueProducer);
-        consumer = new IxnMessageConsumer(onramp, nwEx, dlQueue,  new MessageValidator());
-    }
 
     @Test
     public void validMessageIsSent() throws JMSException {
+		when(nwEx.getProducer()).thenReturn(nwExProducer);
+		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, nwEx, dlQueue,  new MessageValidator());
         Message message = MessageTestDouble.createMessage(
                 "NO00001",
                 "NO",
@@ -61,6 +50,8 @@ public class InterchangeAppTest {
 
     @Test
     public void receivedMessageWithoutOriginatingCountrySendsToDlQueue() throws JMSException {
+		when(dlQueue.getProducer()).thenReturn(dlQueueProducer);
+		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, nwEx, dlQueue,  new MessageValidator());
         Message message = MessageTestDouble.createMessage(
                 "NO00001",
                 null,

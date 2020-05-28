@@ -6,10 +6,10 @@ import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -40,7 +40,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     public static GenericContainer onboardServer;
 
-    @BeforeClass
+    @BeforeAll
     public static void startUp() {
         Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
         network = Network.newNetwork();
@@ -68,7 +68,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         onboardServer.followOutput(logConsumer);
     }
 
-    @AfterClass
+    @AfterAll
     public static void shutdown() {
         onboardServer.stop();
         dbContainer.stop();
@@ -78,7 +78,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
     private final SSLContext sslContext = TestKeystoreHelper.sslContext("jks/client/onboard.p12", "jks/client/truststore.jks");
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"onboard");
     }

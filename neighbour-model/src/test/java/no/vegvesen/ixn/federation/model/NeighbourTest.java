@@ -3,12 +3,13 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Sets;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NeighbourTest {
 
@@ -46,9 +47,11 @@ public class NeighbourTest {
 		assertThat(expectedURL).isEqualTo(actualURL);
 	}
 
-	@Test(expected = DiscoveryException.class)
+	@Test
 	public void serverNameEndWithoutDot() {
-		Neighbour ericsson = new Neighbour("ericsson.", null, null, null);
+		assertThrows(DiscoveryException.class, () -> {
+			new Neighbour("ericsson.", null, null, null);
+		});
 	}
 
 	@Test
