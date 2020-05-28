@@ -13,7 +13,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	public static GenericContainer getQpidContainer(String configPathFromClasspath, String jksPathFromClasspath, final String caCertFile, final String serverCertFile, final String serverKeyFile) {
-		return new GenericContainer(
+		GenericContainer qpidContainer = new GenericContainer(
 				new ImageFromDockerfile().withFileFromPath(".", getFolderPath("qpid")))
 				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
 				.withClasspathResourceMapping(jksPathFromClasspath, "/jks", BindMode.READ_ONLY)
@@ -26,5 +26,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				.withEnv("SERVER_CERTIFICATE_FILE", "/jks/" + serverCertFile)
 				.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/" + serverKeyFile)
 				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
+		qpidContainer.start();
+		return qpidContainer;
 	}
 }

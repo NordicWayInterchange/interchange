@@ -23,7 +23,6 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@Before
 	public void setUp() {
-		qpidContainer.start();
 		Integer mappedPort = qpidContainer.getMappedPort(5671);
 		URL = String.format("amqps://localhost:%s/", mappedPort);
 		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext("jks/king_harald.p12", "jks/truststore.jks");
