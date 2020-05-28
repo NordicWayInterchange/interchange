@@ -3,9 +3,8 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.messaging.IxnMessageConsumerCreator;
 import org.apache.qpid.jms.message.JmsTextMessage;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +13,20 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {InterchangeAppIT.InterchangeInitializer.class})
+@Testcontainers
 public class InterchangeAppIT extends DockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(InterchangeAppIT.class);
@@ -49,7 +51,7 @@ public class InterchangeAppIT extends DockerBaseIT {
 	private IxnMessageConsumerCreator consumerCreator;
 
 	@SuppressWarnings("rawtypes")
-	@ClassRule
+	@Container
     public static GenericContainer qpidContainer = getQpidContainer(
             "qpid",
             "jks",

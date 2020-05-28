@@ -3,21 +3,21 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsTextMessage;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,9 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * chain including the actual InterchangeApp.
  */
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {QpidIT.Initializer.class})
+@Testcontainers
 public class QpidIT extends DockerBaseIT {
 
 	private static final long RECEIVE_TIMEOUT = 2000;
@@ -47,8 +48,8 @@ public class QpidIT extends DockerBaseIT {
 
 	private static Source producer;
 
-	@ClassRule
-	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+	@Container
+	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
