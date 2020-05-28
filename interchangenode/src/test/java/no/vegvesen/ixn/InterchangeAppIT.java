@@ -52,7 +52,7 @@ public class InterchangeAppIT extends DockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-    public static GenericContainer qpidContainer = getQpidContainer(
+    public static final GenericContainer qpidContainer = getQpidContainer(
             "qpid",
             "jks",
             "localhost.crt",

@@ -7,9 +7,10 @@ import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.assertj.core.util.Lists;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -20,11 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@Testcontainers
 public class MessageCollectorIT extends DockerBaseIT {
 
-
 	@SuppressWarnings("rawtypes")
-	@Rule
+	@Container
+	//Container is not static and is not reused between tests
 	public GenericContainer consumerContainer = getQpidContainer("docker/consumer",
 			"jks",
 			"my_ca.crt",
@@ -32,7 +34,8 @@ public class MessageCollectorIT extends DockerBaseIT {
 			"localhost.key");
 
 	@SuppressWarnings("rawtypes")
-	@Rule
+	@Container
+	//Container is not static and is not reused between tests
 	public GenericContainer producerContainer = getQpidContainer("docker/producer",
 			"jks",
 			"my_ca.crt",
