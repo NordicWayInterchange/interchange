@@ -35,7 +35,8 @@ workflows:
     jobs:
       - build
       - docker-push:
-          requires: build
+          requires:
+          - build
       - maven-deploy:
           filters:
             branches:
