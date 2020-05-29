@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.server;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
+import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;

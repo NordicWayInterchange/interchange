@@ -1,9 +1,8 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +11,11 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -22,15 +23,17 @@ import java.util.List;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SuppressWarnings("rawtypes")
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
-public class QpidClientIT extends DockerBaseIT {
+@Testcontainers
+public class QpidClientIT extends QpidDockerBaseIT {
 
-	@ClassRule
-	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+	@Container
+	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 	private static Integer MAPPED_HTTPS_PORT;
@@ -67,10 +70,14 @@ public class QpidClientIT extends DockerBaseIT {
 		client.createQueue("findus");
 	}
 
-	@Test(expected = Exception.class)
+	@Test
 	public void createQueueWithIllegalCharactersInIdFails() {
 		client._createQueue("torsk");
-		client._createQueue("torsk"); //create some queue that already exists
+
+		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+			client._createQueue("torsk"); //create some queue that already exists
+			//
+		});
 	}
 
 	@Test
@@ -137,7 +144,7 @@ public class QpidClientIT extends DockerBaseIT {
 		LinkedList<String> newAcl = new LinkedList<>(client.addOneConsumeRuleBeforeLastRule("king_harald", "king_harald", acl));
 		assertThat(acl.getFirst()).isEqualTo(newAcl.getFirst());
 		assertThat(acl.getLast()).isEqualTo(newAcl.getLast());
-		assertThat(newAcl.get(newAcl.size()-2)).contains("king_harald");
+		assertThat(newAcl.get(newAcl.size() - 2)).contains("king_harald");
 	}
 
 	@Test

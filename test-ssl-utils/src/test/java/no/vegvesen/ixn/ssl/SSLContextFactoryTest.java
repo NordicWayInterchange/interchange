@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.ssl;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class SSLContextFactoryTest {
 
@@ -10,7 +12,7 @@ public class SSLContextFactoryTest {
 		TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks");
 	}
 
-	@Test(expected = SSLContextFactory.InvalidSSLConfig.class)
+	@Test
 	public void sslContextFromKeyAndTrustStoresWrongKeystoreTypeFails() {
 		String keystoreFile = TestKeystoreHelper.getFilePath("jks/localhost.p12");
 		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.JKS, "password");
@@ -18,10 +20,12 @@ public class SSLContextFactoryTest {
 		String filePath = TestKeystoreHelper.getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.PKCS12);
 
-		SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, truststoreDetails);
+		assertThatExceptionOfType(SSLContextFactory.InvalidSSLConfig.class).isThrownBy(() -> {
+			SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, truststoreDetails);
+		});
 	}
 
-	@Test(expected = SSLContextFactory.InvalidSSLConfig.class)
+	@Test
 	public void sslContextFromKeyAndTrustStoresNonExistingFileFails() {
 		String keystoreFile = "/non/existing/file/foobar.p12";
 		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.PKCS12, "password");
@@ -29,7 +33,9 @@ public class SSLContextFactoryTest {
 		String filePath = TestKeystoreHelper.getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.JKS);
 
-		SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, truststoreDetails);
+		assertThatExceptionOfType(SSLContextFactory.InvalidSSLConfig.class).isThrownBy(() -> {
+			SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, truststoreDetails);
+		});
 	}
 
 

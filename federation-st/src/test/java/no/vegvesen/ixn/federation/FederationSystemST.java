@@ -4,7 +4,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.jms.JMSException;
 import javax.jms.Message;

@@ -1,27 +1,26 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.docker.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class NeighbourRepositoryIT {
@@ -84,8 +83,8 @@ public class NeighbourRepositoryIT {
 		repository.save(update);
 		Neighbour updatedInterchange = repository.findByName("Third Neighbour");
 
-		assertNotNull(thirdInterchange.getCapabilities());
-		assertNotNull(updatedInterchange.getCapabilities());
+		assertThat(thirdInterchange.getCapabilities()).isNotNull();
+		assertThat(updatedInterchange.getCapabilities()).isNotNull();
 	}
 
 	@Test
@@ -175,7 +174,7 @@ public class NeighbourRepositoryIT {
 		assertThat(foundNeighbour.getCapabilities().getDataTypes()).hasSize(2);
 	}
 
-	@NotNull
+	@NonNull
 	private HashMap<String, String> getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType) {
 		HashMap<String, String> datexHeaders = new HashMap<>();
 		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);

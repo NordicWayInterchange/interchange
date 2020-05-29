@@ -4,11 +4,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.exceptions.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
@@ -18,8 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
@@ -29,6 +27,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES
 public class NeighbourRestController {
 
 	private final NeighbourService neighbourService;
+	private final CertService certService;
 
 	@Value("${interchange.node-provider.name}")
 	private String myName;
@@ -36,20 +35,10 @@ public class NeighbourRestController {
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
 	@Autowired
-	public NeighbourRestController(NeighbourService neighbourService) {
+	public NeighbourRestController(NeighbourService neighbourService,
+								   CertService certService) {
 		this.neighbourService = neighbourService;
-	}
-
-	private void checkIfCommonNameMatchesNameInApiObject(String apiName) {
-
-		Authentication principal = SecurityContextHolder.getContext().getAuthentication();
-		String commonName = principal.getName();
-
-		if (!commonName.equals(apiName)) {
-			logger.error("Received capability post from neighbour {}, but CN on certificate was {}. Rejecting...", apiName, commonName);
-			String errorMessage = "Received capability post from neighbour %s, but CN on certificate was %s. Rejecting...";
-			throw new CNAndApiObjectMismatchException(String.format(errorMessage, apiName, commonName));
-		}
+		this.certService = certService;
 	}
 
 	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -63,7 +52,7 @@ public class NeighbourRestController {
 		logger.info("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
-		checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
+		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 		logger.info("Common name of certificate matched name in API object.");
 
 		SubscriptionRequestApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
@@ -83,7 +72,7 @@ public class NeighbourRestController {
 		logger.info("Received poll of subscription from neighbour {}.", ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
-		checkIfCommonNameMatchesNameInApiObject(ixnName);
+		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.info("Common name matches Neighbour name in path.");
 
 		return neighbourService.pollOneSubscription(ixnName, subscriptionId);
@@ -102,7 +91,7 @@ public class NeighbourRestController {
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
-		checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
+		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.info("Common name of certificate matches Neighbour name in capability api object.");
 
 		CapabilityApi capabilityApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities);

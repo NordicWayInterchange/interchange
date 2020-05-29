@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
@@ -15,10 +15,9 @@ import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +26,10 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
@@ -40,18 +41,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {ServiceProviderRouterIT.Initializer.class})
-public class ServiceProviderRouterIT extends DockerBaseIT {
+@Testcontainers
+public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
     @SuppressWarnings("rawtypes")
-	@ClassRule
-    public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+	@Container
+    public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
     private static String AMQPS_URL;
@@ -76,7 +78,7 @@ public class ServiceProviderRouterIT extends DockerBaseIT {
 	QpidClient client;
 	ServiceProviderRouter router;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
  		router = new ServiceProviderRouter(mock(ServiceProviderRepository.class),client);
 	}

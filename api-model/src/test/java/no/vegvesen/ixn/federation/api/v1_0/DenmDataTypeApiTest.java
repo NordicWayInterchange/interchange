@@ -3,14 +3,14 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class DenmDataTypeApiTest {
 	ObjectMapper mapper = new ObjectMapper();
@@ -22,11 +22,12 @@ public class DenmDataTypeApiTest {
 		assertThat(denmDataTypeApi).isNotNull();
 	}
 
-	@Test(expected = UnrecognizedPropertyException.class)
+	@Test
 	public void parseInvalidJson() throws IOException {
-		mapper.readValue("{\"messageType\":\"DENM\",\"noSuchProperty\":\"anyValue\"}", DenmDataTypeApi.class);
+		assertThatExceptionOfType(UnrecognizedPropertyException.class).isThrownBy(() -> {
+			mapper.readValue("{\"messageType\":\"DENM\",\"noSuchProperty\":\"anyValue\"}", DenmDataTypeApi.class);
+		});
 	}
-
 
 	@Test
 	public void printValidJson() throws JsonProcessingException {

@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.docker;
+package no.vegvesen.ixn.postgresinit;
 
 import org.junit.ClassRule;
 import org.springframework.boot.test.util.TestPropertyValues;

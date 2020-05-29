@@ -10,9 +10,8 @@ import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.properties.MessageProperty;
-import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.http.HttpMethod;
@@ -30,6 +29,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class NeighbourRESTFacadeTest {
 
@@ -50,7 +52,7 @@ public class NeighbourRESTFacadeTest {
 
 	private MockRestServiceServer server;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		ericsson = new Neighbour();
 		ericsson.setName("ericsson.itsinterchange.eu");
@@ -66,7 +68,7 @@ public class NeighbourRESTFacadeTest {
 	public void expectedUrlIsCreated() {
 		String expectedURL = "https://ericsson.itsinterchange.eu:8080/";
 		String actualURL = ericsson.getControlChannelUrl("/");
-		Assertions.assertThat(expectedURL).isEqualTo(actualURL);
+		assertThat(expectedURL).isEqualTo(actualURL);
 	}
 
 	@Test
@@ -84,13 +86,13 @@ public class NeighbourRESTFacadeTest {
 
 		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
 
-		Assertions.assertThat(res.getDataTypes()).hasSize(1);
+		assertThat(res.getDataTypes()).hasSize(1);
 
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType dataTypeInCapabilities = dataTypes.next();
 
-		Assertions.assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		Assertions.assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
+		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
 	}
 
 	@Test
@@ -107,14 +109,14 @@ public class NeighbourRESTFacadeTest {
 
 		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
 
-		Assertions.assertThat(res.getDataTypes()).hasSize(1);
+		assertThat(res.getDataTypes()).hasSize(1);
 
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType remoteServerResponse = dataTypes.next();
 
-		Assertions.assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		Assertions.assertThat(remoteServerResponse.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
-		Assertions.assertThat(remoteServerResponse.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo(dataType.getServiceType());
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo(dataType.getServiceType());
 	}
 
 	@Test
@@ -131,13 +133,13 @@ public class NeighbourRESTFacadeTest {
 
 		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
 
-		Assertions.assertThat(res.getDataTypes()).hasSize(1);
+		assertThat(res.getDataTypes()).hasSize(1);
 
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType remoteServerResponse = dataTypes.next();
 
-		Assertions.assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		Assertions.assertThat(remoteServerResponse.getPropertyValueAsInteger(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIviType());
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
+		assertThat(remoteServerResponse.getPropertyValueAsInteger(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIviType());
 	}
 
 	@Test
@@ -160,13 +162,13 @@ public class NeighbourRESTFacadeTest {
 
 		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
 
-		Assertions.assertThat(response.getSubscriptions()).hasSize(1);
+		assertThat(response.getSubscriptions()).hasSize(1);
 
 		Iterator<Subscription> subscriptions = response.getSubscriptions().iterator();
 		Subscription subscriptionInSubscriptionRequest = subscriptions.next();
 
-		Assertions.assertThat(subscriptionInSubscriptionRequest.getSelector()).isEqualTo(subscriptionApi.getSelector());
-		Assertions.assertThat(subscriptionInSubscriptionRequest.getSubscriptionStatus()).isEqualTo(subscriptionApi.getStatus());
+		assertThat(subscriptionInSubscriptionRequest.getSelector()).isEqualTo(subscriptionApi.getSelector());
+		assertThat(subscriptionInSubscriptionRequest.getSubscriptionStatus()).isEqualTo(subscriptionApi.getStatus());
 	}
 
 	@Test
@@ -183,12 +185,12 @@ public class NeighbourRESTFacadeTest {
 
 		Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
 
-		Assertions.assertThat(response.getSelector()).isEqualTo(subscription.getSelector());
-		Assertions.assertThat(response.getPath()).isEqualTo(subscription.getPath());
-		Assertions.assertThat(response.getSubscriptionStatus()).isEqualTo(subscription.getSubscriptionStatus());
+		assertThat(response.getSelector()).isEqualTo(subscription.getSelector());
+		assertThat(response.getPath()).isEqualTo(subscription.getPath());
+		assertThat(response.getSubscriptionStatus()).isEqualTo(subscription.getSubscriptionStatus());
 	}
 
-	@Test(expected = CapabilityPostException.class)
+	@Test
 	public void unsuccessfulPostOfCapabilitiesThrowsCapabilityPostException() throws Exception {
 
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Error error");
@@ -199,10 +201,12 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
+			neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+		});
 	}
 
-	@Test(expected = SubscriptionRequestException.class)
+	@Test
 	public void unsuccessfulPostOfSubscriptionRequestThrowsSubscriptionRequestException() throws Exception{
 
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Error error");
@@ -214,10 +218,13 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		Set<Subscription> subscriptionSet = Collections.emptySet();
-		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
+
+		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
+			neighbourRESTFacade.postSubscriptionRequest(self, ericsson, subscriptionSet);
+		});
 	}
 
-	@Test(expected = SubscriptionRequestException.class)
+	@Test
 	public void clientSubscriptionRequestNotEmptyButServerResponseEmptySubscriptionRequest() throws Exception{
 
 		// Subscription request posted to neighbour has non empty subscription set.
@@ -235,10 +242,12 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 
-		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
+		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
+			neighbourRESTFacade.postSubscriptionRequest(self, ericsson, subscriptionSet);
+		});
 	}
 
-	@Test(expected = SubscriptionRequestException.class)
+	@Test
 	public void serverClosesConnectionUnexpectedlyOnSubscriptionRequestPost() throws Exception {
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
@@ -253,12 +262,12 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
-
-
-		neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptions);
+		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
+			neighbourRESTFacade.postSubscriptionRequest(self, ericsson, subscriptions);
+		});
 	}
 
-	@Test(expected = CapabilityPostException.class)
+	@Test
 	public void capabilitiesPostServerUnexpectedlyClosesConnection() throws IOException {
 
 	    final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
@@ -268,10 +277,12 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
 
-		neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
+			neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+		});
 	}
 
-	@Test(expected = SubscriptionPollException.class)
+	@Test
 	public void test() throws IOException {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
@@ -286,7 +297,9 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
 				.andRespond((request) -> mock);
 
-		Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
+		assertThatExceptionOfType(SubscriptionPollException.class).isThrownBy(() -> {
+			Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
+		});
 
 	}
 }

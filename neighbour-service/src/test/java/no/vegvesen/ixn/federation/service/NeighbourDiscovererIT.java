@@ -1,28 +1,32 @@
-package no.vegvesen.ixn.federation.discoverer;
+package no.vegvesen.ixn.federation.service;
 
 
-import no.vegvesen.ixn.docker.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.onboard.SelfService;
+import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
-import org.apache.http.client.HttpClient;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
+import sun.net.www.http.HttpClient;
 
 import javax.net.ssl.SSLContext;
+import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,13 +34,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
+@Transactional
 public class NeighbourDiscovererIT {
-
-	@MockBean
-	RestTemplate restTemplate;
 
 	@MockBean
 	SSLContext mockedSSL;
@@ -50,11 +52,14 @@ public class NeighbourDiscovererIT {
 	@MockBean
 	NeighbourRESTFacade mockNeighbourRESTFacade;
 
-	@Autowired
-	SelfRepository selfRepository;
+	@MockBean
+	RestTemplate restTemplate;
 
 	@Autowired
-	NeighbourDiscoverer discoverer;
+	SelfService selfService;
+
+	@Autowired
+	NeighbourService neighbourService;
 
 	@Autowired
 	NeighbourRepository repository;
@@ -64,14 +69,15 @@ public class NeighbourDiscovererIT {
 
 	@Test
 	public void discovererIsAutowired() {
-		assertThat(discoverer).isNotNull();
+		assertThat(neighbourService).isNotNull();
 	}
 
 	@Test
-	public void completeOptimisticControlChannelFlow() {
-		Self self = new Self(nodeName);
+	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
+		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
+		Self self = selfService.fetchSelf();
 		self.setLocalSubscriptions(Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
-		selfRepository.save(self);
+		selfService.save(self);
 
 		Neighbour neighbour1 = new Neighbour();
 		neighbour1.setName("neighbour-one");
@@ -83,23 +89,50 @@ public class NeighbourDiscovererIT {
 		when(mockDnsFacade.getNeighbours()).thenReturn(Lists.list(neighbour1, neighbour2));
 
 		checkForNewNeighbours();
-		performCapabilityExchange(neighbour1, neighbour2, c1, c2);
+		performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(neighbour1, neighbour2, c1, c2);
 		Subscription requestedSubscription = performSubscriptionRequest(neighbour1, neighbour2, c1);
 		performSubscriptionPolling(neighbour1, requestedSubscription);
+
+		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
+		assertThat(toConsumeMessagesFrom).hasSize(1);
+		assertThat(toConsumeMessagesFrom).contains(neighbour1);
+	}
+
+	@Test
+	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraCapabilityExchange() {
+		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
+
+		Self self = selfService.fetchSelf();
+		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
+
+		neighbourService.capabilityExchangeWithNeighbours();
+		verify(mockNeighbourRESTFacade, times(4)).postCapabilitiesToCapabilities(any(), any());
+
+		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
+		assertThat(toConsumeMessagesFrom).hasSize(1);
+	}
+
+	@Test
+	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
+		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
+
+		neighbourService.incomingCapabilities(new CapabilityApi("neighbour-one", Sets.newLinkedHashSet(new Datex2DataTypeApi("NO"))));
+		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
+		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
 
 	private void checkForNewNeighbours() {
-		discoverer.checkForNewNeighbours();
-
+		neighbourService.checkForNewNeighbours();
 		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 		assertThat(unknown).hasSize(2);
+		assertThat(repository.findAll()).hasSize(2);
 	}
 
-	private void performCapabilityExchange(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
+	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
 		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour1))).thenReturn(c1);
 		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour2))).thenReturn(c2);
 
-		discoverer.performCapabilityExchangeWithNeighbours();
+		neighbourService.capabilityExchangeWithNeighbours();
 
 		verify(mockNeighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
@@ -110,7 +143,7 @@ public class NeighbourDiscovererIT {
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, c1.getDataTypes().stream().map(dataType -> new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED)).collect(Collectors.toSet()));
 		when(mockNeighbourRESTFacade.postSubscriptionRequest(any(), any(), anySet())).thenReturn(subscriptionRequestResponse);
 
-		discoverer.performSubscriptionRequestWithKnownNeighbours();
+		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2));
 
 		verify(mockNeighbourRESTFacade, times(1)).postSubscriptionRequest(any(), eq(neighbour1), any());
 		verify(mockNeighbourRESTFacade, times(0)).postSubscriptionRequest(any(), eq(neighbour2), any());
@@ -123,8 +156,8 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
-		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(),any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
-		discoverer.pollSubscriptions();
+		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
+		neighbourService.pollSubscriptions();
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
 		assertThat(found1.getFedIn()).isNotNull();

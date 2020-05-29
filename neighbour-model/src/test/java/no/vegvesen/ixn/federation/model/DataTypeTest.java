@@ -5,9 +5,8 @@ import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
 
 import java.util.*;
 
@@ -22,13 +21,13 @@ public class DataTypeTest {
 	@Test
 	public void dataTypeInCapabilitiesReturnsTrue() {
 		Set<DataType> testCapabilities = Collections.singleton(firstDataType);
-		Assert.assertTrue(firstDataType.isContainedInSet(testCapabilities));
+		assertThat(testCapabilities).contains(firstDataType);
 	}
 
 	@Test
 	public void dataTypeNotInCapabilitiesReturnsFalse() {
 		Set<DataType> testCapabilities = Collections.singleton(secondDataType);
-		Assert.assertFalse(firstDataType.isContainedInSet(testCapabilities));
+		assertThat(testCapabilities).doesNotContain(firstDataType);
 	}
 
 	private HashMap<String, String> getDatexHeaders(String originatingCountry) {
@@ -259,7 +258,7 @@ public class DataTypeTest {
 		assertThat(s123.matches(s456)).isFalse();
 	}
 
-	@NotNull
+	@NonNull
 	private static DataType datexDataType(String originatingCountry, String publicationType, Set<String> publicationSubTypes) {
 		HashMap<String, String> values = new HashMap<>();
 		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
@@ -269,7 +268,7 @@ public class DataTypeTest {
 		return new DataType(values);
 	}
 
-	@NotNull
+	@NonNull
 	private static DataType getDatexWithQuadTree(String originatingCountry, Set<String> quadTreeTiles) {
 		HashMap<String, String> values = new HashMap<>();
 		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
@@ -278,7 +277,7 @@ public class DataTypeTest {
 		return new DataType(values);
 	}
 
-	@NotNull
+	@NonNull
 	private static String toQuadTreeStringWithInitialDelimiter(Set<String> quadTreeTiles) {
 		return quadTreeTiles.isEmpty() ? "" : "," + String.join(",", quadTreeTiles);
 	}

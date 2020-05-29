@@ -5,17 +5,14 @@ import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
+import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
+import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,18 +20,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -42,29 +35,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = OnboardRestController.class)
-public class OnboardRestControllerTest {
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
+@WebMvcTest(controllers = OnboardRestController.class)
+@ContextConfiguration(classes = {CertService.class, OnboardRestController.class})
+public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;
 
 	@MockBean
 	private ServiceProviderRepository serviceProviderRepository;
 	@MockBean
-	private SelfRepository selfRepository;
-
-	//Unfortunately we have to mock beans not used in the class under test
-	//because the spring test wires up all jpa repositories not mocked
-	@MockBean
-	private NeighbourRepository neighbourRepository;
-
-	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
+	private SelfService selfService;
 
 	@Autowired
 	private OnboardRestController onboardRestController;
-
 
 	@BeforeEach
 	void setUp() {
@@ -97,6 +81,8 @@ public class OnboardRestControllerTest {
 		String capabilitiesPath = String.format("/%s/capabilities", firstServiceProvider);
 
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(capabilitiesPath)
@@ -123,6 +109,8 @@ public class OnboardRestControllerTest {
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -164,6 +152,8 @@ public class OnboardRestControllerTest {
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -229,7 +219,7 @@ public class OnboardRestControllerTest {
 		//Self
 		Self self = new Self("this-server-name");
 		self.setLocalSubscriptions(serviceProviderSubscriptionRequest.getSubscriptions());//same subscriptions as the service provider
-		doReturn(self).when(selfRepository).findByName(any(String.class));
+		doReturn(self).when(selfService).fetchSelf();
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
 		// Subscription request api posted to the server
@@ -256,6 +246,8 @@ public class OnboardRestControllerTest {
 		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 
@@ -275,6 +267,8 @@ public class OnboardRestControllerTest {
 
 		// The existing subscriptions of the Service Provider
 		doReturn(null).when(serviceProviderRepository).findByName(any(String.class));
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 
@@ -303,63 +297,6 @@ public class OnboardRestControllerTest {
 						.content(subscriptionRequestApiToServerJson))
 				.andDo(print())
 				.andExpect(status().isForbidden());
-	}
-
-	@Test
-	void calculateSelfCapabilitiesTest() {
-
-		DataType a = getDatex("SE");
-		DataType b = getDatex("FI");
-		DataType c = getDatex("NO");
-
-		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setName("First Service Provider");
-		Capabilities firstServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(a, b).collect(Collectors.toSet()));
-		firstServiceProvider.setCapabilities(firstServiceProviderCapabilities);
-
-		ServiceProvider secondServiceProvider = new ServiceProvider();
-		secondServiceProvider.setName("Second Service Provider");
-		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(b, c).collect(Collectors.toSet()));
-		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
-
-		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
-
-		Set<DataType> selfCapabilities = onboardRestController.calculateSelfCapabilities(serviceProviders);
-
-		assertEquals(selfCapabilities.size(), 3);
-		assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
-	}
-
-	private DataType getDatex(String se) {
-		HashMap<String, String> datexHeaders = new HashMap<>();
-		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-		datexHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), se);
-		return new DataType(datexHeaders);
-	}
-
-	@Test
-	void calculateSelfSubscriptionsTest() {
-
-		DataType localSubA = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
-		DataType localSubB = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
-		DataType localSubC = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
-
-		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setName("First Service Provider");
-		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubA));
-		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubB));
-
-		ServiceProvider secondServiceProvider = new ServiceProvider();
-		secondServiceProvider.setName("Second Service Provider");
-		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubB));
-		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubC));
-
-		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
-
-		Set<DataType> selfSubscriptions = onboardRestController.calculateSelfSubscriptions(serviceProviders);
-
-		assertEquals(selfSubscriptions.size(), 3);
-		assertTrue(selfSubscriptions.containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet())));
 	}
 
 	@Test

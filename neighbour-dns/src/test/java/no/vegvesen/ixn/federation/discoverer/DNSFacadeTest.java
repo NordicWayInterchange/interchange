@@ -1,20 +1,19 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.model.Neighbour;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {DNSFacade.class, DNSProperties.class})
 @EnableConfigurationProperties
 public class DNSFacadeTest {
@@ -25,7 +24,9 @@ public class DNSFacadeTest {
 	@Test
 	public void testNumberOfNeighbours(){
 		List<Neighbour> neighbours = dnsFacade.getNeighbours();
-		Assert.assertTrue("Number of known Neighbours in the actual dns is less than two", neighbours.size() >= 2);
+		assertThat(neighbours)
+				.withFailMessage("Number of known Neighbours in the actual dns is less than two")
+				.hasSizeGreaterThan(2);
 	}
 
 	@Test

@@ -1,11 +1,13 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class NeighbourTest {
@@ -44,9 +46,11 @@ public class NeighbourTest {
 		assertThat(expectedURL).isEqualTo(actualURL);
 	}
 
-	@Test(expected = DiscoveryException.class)
+	@Test
 	public void serverNameEndWithoutDot() {
-		Neighbour ericsson = new Neighbour("ericsson.", null, null, null);
+		assertThatExceptionOfType(DiscoveryException.class).isThrownBy(() -> {
+			new Neighbour("ericsson.", null, null, null);
+		});
 	}
 
 	@Test
@@ -67,7 +71,7 @@ public class NeighbourTest {
 	public void neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
 		LocalDateTime localSubscriptionsUpdatedNow = LocalDateTime.now();
-		Assertions.assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionsUpdatedNow)).isTrue();
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionsUpdatedNow)).isTrue();
 	}
 
 	@Test
@@ -76,7 +80,7 @@ public class NeighbourTest {
 		LocalDateTime now = LocalDateTime.now();
 		fedIn.setSuccessfulRequest(now);
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, fedIn);
-		Assertions.assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(now)).isFalse();
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(now)).isFalse();
 	}
 
 	@Test
@@ -128,8 +132,34 @@ public class NeighbourTest {
 
 		LocalDateTime result = ericsson.getNextPostAttemptTime(60000, 2000);
 
-		Assertions.assertThat(result).isBetween(lowerLimit, upperLimit);
+		assertThat(result).isBetween(lowerLimit, upperLimit);
 	}
 
+	@Test
+	public void needsOurUpdatedCapabilitiesIfLocalCapabilitiesAreNeverComputedAndNeighbourNeverSeen() {
+		Neighbour neverSeen = new Neighbour();
+		neverSeen.setName("never-seen");
+		assertThat(neverSeen.needsOurUpdatedCapabilities(null)).isTrue();
+	}
 
+	@Test
+	public void doesNotNeedsOurCapabilitiesIfLocalCapabilitiesAreNeverComputedAndNeighbourSeen() {
+		Neighbour seenYesterday = neighbourSeenYesterday();
+		assertThat(seenYesterday.needsOurUpdatedCapabilities(null)).isFalse();
+	}
+
+	@Test
+	public void needsOurUpdatedCapabilitiesIfLocalCapabilitiesAreNewer() {
+		Neighbour seenYesterday = neighbourSeenYesterday();
+		assertThat(seenYesterday.needsOurUpdatedCapabilities(LocalDateTime.now().minusHours(1))).isTrue();
+	}
+
+	@NonNull
+	private Neighbour neighbourSeenYesterday() {
+		Neighbour seenYesterday = new Neighbour();
+		seenYesterday.setName("seen-yesterday");
+		seenYesterday.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newHashSet()));
+		seenYesterday.getCapabilities().setLastCapabilityExchange(LocalDateTime.now().minusDays(1));
+		return seenYesterday;
+	}
 }

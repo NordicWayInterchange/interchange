@@ -80,6 +80,7 @@ public class Capabilities {
 				"cap_id=" + cap_id +
 				", status=" + status +
 				", dataTypes=" + dataTypes +
+				", lastCapabilityExchange=" + lastCapabilityExchange +
 				'}';
 	}
 }

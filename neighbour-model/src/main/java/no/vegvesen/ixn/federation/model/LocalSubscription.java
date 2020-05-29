@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.model;
 import javax.persistence.*;
 import java.util.Objects;
 
-//TODO Equals and Hashcode!!!
 @Entity
 @Table(name = "local_subscriptions")
 public class LocalSubscription {

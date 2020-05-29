@@ -92,6 +92,10 @@
                         <artifactId>android-json</artifactId>
                         <groupId>com.vaadin.external.google</groupId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.junit.vintage</groupId>
+                        <artifactId>junit-vintage-engine</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
 
@@ -138,17 +142,34 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
-                <version>1.12.5</version>
+                <version>1.14.2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jetbrains</groupId>
+                        <artifactId>annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
+
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>1.12.5</version>
+                <version>1.14.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>1.14.2</version>
             </dependency>
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
                 <version>${picocli-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.stephenc.jcip</groupId>
+                <artifactId>jcip-annotations</artifactId>
+                <version>1.0-1</version>
             </dependency>
 
         </dependencies>
@@ -216,6 +237,7 @@
     <modules>
         <module>ssl-utils</module>
         <module>testcontainers-base</module>
+        <module>testcontainers-init-postgres</module>
         <module>jms-client</module>
         <module>test-ssl-utils</module>
         <module>api-model</module>
@@ -226,6 +248,7 @@
         <module>neighbour-service</module>
         <module>neighbour-server</module>
         <module>neighbour-discoverer</module>
+        <module>onboard-service</module>
         <module>onboard-rest-api</module>
         <module>onboard-server</module>
         <module>routing-configurer</module>

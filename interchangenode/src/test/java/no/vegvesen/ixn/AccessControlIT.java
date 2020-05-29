@@ -1,22 +1,25 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
-import org.junit.ClassRule;
-import org.junit.Test;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.jms.MessageConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Verifies access control lists where username comes from the common name (CN) of the user certificate.
  */
-public class AccessControlIT extends DockerBaseIT {
+@Testcontainers
+public class AccessControlIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(AccessControlIT.class);
 
@@ -34,8 +37,8 @@ public class AccessControlIT extends DockerBaseIT {
 	private static final String TEST_OUT = "test-out";
 
 	@SuppressWarnings("rawtypes")
-	@ClassRule
-	public static GenericContainer localContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+	@Container
+	public static final GenericContainer localContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 
 	private String getQpidURI() {
 		String url = "amqps://localhost:" + localContainer.getMappedPort(AMQPS_PORT);
@@ -43,35 +46,35 @@ public class AccessControlIT extends DockerBaseIT {
 		return url;
 	}
 
-	@Test(expected = JMSSecurityException.class)
-	public void testKingHaraldCanNotConsumeSE_OUT() throws Exception {
+	@Test
+	public void testKingHaraldCanNotConsumeSE_OUT(){
 		Sink seOut = new Sink(getQpidURI(), SE_OUT, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		seOut.start();
+		assertThatExceptionOfType(JMSSecurityException.class).isThrownBy(seOut::start);
 	}
 
-	@Test(expected = JMSSecurityException.class)
+	@Test
 	public void testKingGustafCanNotConsumeNO_OUT() throws Exception {
 		Sink noOut = new Sink(getQpidURI(), NO_OUT, TestKeystoreHelper.sslContext(JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS));
-		noOut.start();
+		assertThatExceptionOfType(JMSSecurityException.class).isThrownBy(noOut::start);
 	}
 
-	@Test(expected = JMSSecurityException.class)
+	@Test
 	public void KingHaraldCanNotConsumeFromOnramp() throws Exception {
 		Sink onramp = new Sink(getQpidURI(), ONRAMP, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		onramp.start();
+		assertThatExceptionOfType(JMSSecurityException.class).isThrownBy(onramp::start);
 	}
 
-	@Test(expected = JMSException.class)
+	@Test
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
 		Source nwEx = new Source(getQpidURI(), NW_EX, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		nwEx.start();
-		nwEx.send("Not allowed");
+		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> {nwEx.send("Not allowed"); });
 	}
 
-	@Test(expected = JMSException.class)
+	@Test
 	public void userWithInvalidCertificateCannotConnect() throws Exception {
 		Sink testOut = new Sink(getQpidURI(), TEST_OUT, TestKeystoreHelper.sslContext(JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		testOut.start();
+		assertThatExceptionOfType(JMSException.class).isThrownBy(testOut::start);
 	}
 
 	@Test

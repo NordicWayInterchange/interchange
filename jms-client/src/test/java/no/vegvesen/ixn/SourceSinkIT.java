@@ -1,10 +1,12 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.apache.qpid.jms.message.JmsTextMessage;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -14,16 +16,17 @@ import javax.net.ssl.SSLContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SourceSinkIT extends DockerBaseIT {
+@Testcontainers
+public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
-	public static GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+	@Container
+	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
 	private static String URL;
 	private static SSLContext KING_HARALD_SSL_CONTEXT;
 
-	@Before
-	public void setUp() {
-		qpidContainer.start();
+	@BeforeAll
+	public static void setUp() {
 		Integer mappedPort = qpidContainer.getMappedPort(5671);
 		URL = String.format("amqps://localhost:%s/", mappedPort);
 		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext("jks/king_harald.p12", "jks/truststore.jks");
