@@ -3,6 +3,7 @@ version: 2.1
 executors:
   my-machine:
     machine: true
+    working_directory: ~/interchange
 
 jobs:
   build:
@@ -13,9 +14,14 @@ jobs:
           name: run integration tests
           command: |
             mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+      - persist_to_workspace:
+          root: ~/interchange
+
   maven-deploy:
     executor: my-machine
     steps:
+      - attach_workspace:
+          at: ~/interchange
       - run:
           branch: federation-master
           name: Push maven build
@@ -24,6 +30,8 @@ jobs:
   docker-push:
       executor: my-machine
       steps:
+      - attach_workspace:
+          at: ~/interchange
       - run:
           name: Push containers
           command: |
