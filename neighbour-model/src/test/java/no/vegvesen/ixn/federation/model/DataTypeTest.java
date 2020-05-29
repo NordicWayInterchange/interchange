@@ -21,7 +21,7 @@ public class DataTypeTest {
 	@Test
 	public void dataTypeInCapabilitiesReturnsTrue() {
 		Set<DataType> testCapabilities = Collections.singleton(firstDataType);
-		assertThat(testCapabilities).containsSequence(firstDataType);
+		assertThat(testCapabilities).contains(firstDataType);
 	}
 
 	@Test
