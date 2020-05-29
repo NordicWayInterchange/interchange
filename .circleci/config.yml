@@ -1,7 +1,12 @@
 version: 2.1
+
+executors:
+  my-machine:
+    machine: true
+
 jobs:
   build:
-    machine: true
+    executor: my-machine
     steps:
       - checkout
       - run:
@@ -9,7 +14,7 @@ jobs:
           command: |
             mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
   maven-deploy:
-    machine: true
+    executor: my-machine
     steps:
       - run:
           branch: federation-master
@@ -17,7 +22,7 @@ jobs:
           command: |
             mvn -s .circleci.settings.xml deploy
   docker-push:
-      machine: true
+      executor: my-machine
       steps:
       - run:
           name: Push containers
