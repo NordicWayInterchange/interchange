@@ -8,11 +8,17 @@ jobs:
           name: run integration tests
           command: |
             mvn verify -PIT -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+  maven-deploy:
+    machine: true
+    steps:
       - run:
           branch: federation-master
           name: Push maven build
           command: |
             mvn -s .circleci.settings.xml deploy
+  docker-push:
+      machine: true
+      steps:
       - run:
           name: Push containers
           command: |
@@ -22,3 +28,18 @@ jobs:
             gcloud docker --authorize-only
             chmod +x build-push-images.sh
             ./build-push-images.sh
+
+workflows:
+  version: 2.1
+  build_and_docker_push:
+    jobs:
+      - build
+      - docker-push:
+          requires: build
+      - maven-deploy:
+          filters:
+            branches:
+              only:
+                - federation-master
+          requires:
+            - docker-push
