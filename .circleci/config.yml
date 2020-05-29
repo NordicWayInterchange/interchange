@@ -17,7 +17,7 @@ jobs:
       - persist_to_workspace:
           root: ~/interchange
           paths:
-            - *
+            - ./*
 
   maven-deploy:
     executor: my-machine
