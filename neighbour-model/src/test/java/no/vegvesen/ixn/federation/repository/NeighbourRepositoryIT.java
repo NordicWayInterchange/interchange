@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 @ExtendWith(SpringExtension.class)
@@ -84,8 +83,8 @@ public class NeighbourRepositoryIT {
 		repository.save(update);
 		Neighbour updatedInterchange = repository.findByName("Third Neighbour");
 
-		assertNotNull(thirdInterchange.getCapabilities());
-		assertNotNull(updatedInterchange.getCapabilities());
+		assertThat(thirdInterchange.getCapabilities()).isNotNull();
+		assertThat(updatedInterchange.getCapabilities()).isNotNull();
 	}
 
 	@Test

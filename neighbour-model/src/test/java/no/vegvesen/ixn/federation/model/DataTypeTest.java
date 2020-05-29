@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.lang.NonNull;
 
@@ -22,13 +21,13 @@ public class DataTypeTest {
 	@Test
 	public void dataTypeInCapabilitiesReturnsTrue() {
 		Set<DataType> testCapabilities = Collections.singleton(firstDataType);
-		Assertions.assertTrue(firstDataType.isContainedInSet(testCapabilities));
+		assertThat(testCapabilities).containsSequence(firstDataType);
 	}
 
 	@Test
 	public void dataTypeNotInCapabilitiesReturnsFalse() {
 		Set<DataType> testCapabilities = Collections.singleton(secondDataType);
-		Assertions.assertFalse(firstDataType.isContainedInSet(testCapabilities));
+		assertThat(testCapabilities).doesNotContain(firstDataType);
 	}
 
 	private HashMap<String, String> getDatexHeaders(String originatingCountry) {

@@ -1,15 +1,14 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NeighbourTest {
 
@@ -49,7 +48,7 @@ public class NeighbourTest {
 
 	@Test
 	public void serverNameEndWithoutDot() {
-		assertThrows(DiscoveryException.class, () -> {
+		assertThatExceptionOfType(DiscoveryException.class).isThrownBy(() -> {
 			new Neighbour("ericsson.", null, null, null);
 		});
 	}
@@ -72,7 +71,7 @@ public class NeighbourTest {
 	public void neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
 		LocalDateTime localSubscriptionsUpdatedNow = LocalDateTime.now();
-		Assertions.assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionsUpdatedNow)).isTrue();
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionsUpdatedNow)).isTrue();
 	}
 
 	@Test
@@ -81,7 +80,7 @@ public class NeighbourTest {
 		LocalDateTime now = LocalDateTime.now();
 		fedIn.setSuccessfulRequest(now);
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, fedIn);
-		Assertions.assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(now)).isFalse();
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(now)).isFalse();
 	}
 
 	@Test
@@ -133,7 +132,7 @@ public class NeighbourTest {
 
 		LocalDateTime result = ericsson.getNextPostAttemptTime(60000, 2000);
 
-		Assertions.assertThat(result).isBetween(lowerLimit, upperLimit);
+		assertThat(result).isBetween(lowerLimit, upperLimit);
 	}
 
 	@Test

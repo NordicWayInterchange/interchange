@@ -1,7 +1,6 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.DockerBaseIT;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +11,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.jms.MessageConsumer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Verifies access control lists where username comes from the common name (CN) of the user certificate.
@@ -47,32 +49,32 @@ public class AccessControlIT extends DockerBaseIT {
 	@Test
 	public void testKingHaraldCanNotConsumeSE_OUT(){
 		Sink seOut = new Sink(getQpidURI(), SE_OUT, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		Assertions.assertThrows(JMSSecurityException.class, seOut::start);
+		assertThatExceptionOfType(JMSSecurityException.class).isThrownBy(seOut::start);
 	}
 
 	@Test
 	public void testKingGustafCanNotConsumeNO_OUT() throws Exception {
 		Sink noOut = new Sink(getQpidURI(), NO_OUT, TestKeystoreHelper.sslContext(JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS));
-		Assertions.assertThrows(JMSSecurityException.class, noOut::start);
+		assertThatExceptionOfType(JMSSecurityException.class).isThrownBy(noOut::start);
 	}
 
 	@Test
 	public void KingHaraldCanNotConsumeFromOnramp() throws Exception {
 		Sink onramp = new Sink(getQpidURI(), ONRAMP, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		Assertions.assertThrows(JMSSecurityException.class, onramp::start);
+		assertThatExceptionOfType(JMSSecurityException.class).isThrownBy(onramp::start);
 	}
 
 	@Test
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
 		Source nwEx = new Source(getQpidURI(), NW_EX, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		nwEx.start();
-		Assertions.assertThrows(JMSException.class, () -> {nwEx.send("Not allowed"); });
+		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> {nwEx.send("Not allowed"); });
 	}
 
 	@Test
 	public void userWithInvalidCertificateCannotConnect() throws Exception {
 		Sink testOut = new Sink(getQpidURI(), TEST_OUT, TestKeystoreHelper.sslContext(JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		Assertions.assertThrows(JMSException.class, testOut::start);
+		assertThatExceptionOfType(JMSException.class).isThrownBy(testOut::start);
 	}
 
 	@Test
@@ -80,6 +82,6 @@ public class AccessControlIT extends DockerBaseIT {
 		Sink noOut = new Sink(getQpidURI(), NO_OUT, TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		noOut.start();
 		MessageConsumer consumer = noOut.createConsumer();
-		Assertions.assertNotNull(consumer);
+		assertThat(consumer).isNotNull();
 	}
 }

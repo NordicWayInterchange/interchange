@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.lang.NonNull;
@@ -16,8 +15,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 class SelfServiceTest {
 
@@ -47,8 +46,8 @@ class SelfServiceTest {
 
 		Set<DataType> selfSubscriptions = selfService.calculateSelfSubscriptions(serviceProviders);
 
-		assertEquals(selfSubscriptions.size(), 3);
-		assertTrue(selfSubscriptions.containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet())));
+		assertThat(selfSubscriptions).hasSize(3);
+		assertThat(selfSubscriptions).containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet()));
 	}
 
 
@@ -73,8 +72,8 @@ class SelfServiceTest {
 
 		Set<DataType> selfCapabilities = selfService.calculateSelfCapabilities(serviceProviders);
 
-		Assertions.assertEquals(selfCapabilities.size(), 3);
-		Assertions.assertTrue(selfCapabilities.containsAll(Stream.of(a, b, c).collect(Collectors.toSet())));
+		assertThat(selfCapabilities).hasSize(3);
+		assertThat(selfCapabilities).containsAll(Stream.of(a, b, c).collect(Collectors.toSet()));
 	}
 
 	@NonNull

@@ -1,9 +1,10 @@
 package no.vegvesen.ixn.ssl;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class SSLContextFactoryTest {
 
@@ -26,7 +27,7 @@ public class SSLContextFactoryTest {
 		String filePath = getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.PKCS12);
 
-		Assertions.assertThrows(SSLContextFactory.InvalidSSLConfig.class, () -> {
+		assertThatExceptionOfType(SSLContextFactory.InvalidSSLConfig.class).isThrownBy(() -> {
 			SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, truststoreDetails);
 		});
 	}
@@ -39,7 +40,7 @@ public class SSLContextFactoryTest {
 		String filePath = getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.JKS);
 
-		Assertions.assertThrows(SSLContextFactory.InvalidSSLConfig.class, () -> {
+		assertThatExceptionOfType(SSLContextFactory.InvalidSSLConfig.class).isThrownBy(() -> {
 			SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, truststoreDetails);
 		});
 	}

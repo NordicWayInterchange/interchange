@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.docker.DockerBaseIT;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -24,6 +23,7 @@ import java.util.List;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SuppressWarnings("rawtypes")
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
@@ -74,7 +74,7 @@ public class QpidClientIT extends DockerBaseIT {
 	public void createQueueWithIllegalCharactersInIdFails() {
 		client._createQueue("torsk");
 
-		Assertions.assertThrows(Exception.class, () -> {
+		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
 			client._createQueue("torsk"); //create some queue that already exists
 			//
 		});
