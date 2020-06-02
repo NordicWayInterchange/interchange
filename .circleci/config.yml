@@ -28,7 +28,7 @@ jobs:
           branch: federation-master
           name: Push maven build
           command: |
-            mvn -s .circleci.settings.xml deploy
+            mvn -DskipTests=true -s .circleci.settings.xml deploy
   docker-push:
       executor: my-machine
       steps:
