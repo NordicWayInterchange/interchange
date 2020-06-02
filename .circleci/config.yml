@@ -28,7 +28,7 @@ jobs:
           branch: federation-master
           name: Push maven build
           command: |
-            mvn -DskipTests=true -s .circleci.settings.xml deploy
+            mvn -DskipTests=true -s .circleci.settings.xml deploy -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
   docker-push:
       executor: my-machine
       steps:
