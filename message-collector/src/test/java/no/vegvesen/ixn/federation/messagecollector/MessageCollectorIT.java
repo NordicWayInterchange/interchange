@@ -7,6 +7,7 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -55,6 +56,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	@Order(1)
 	public void testMessagesCollected() throws NamingException, JMSException {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
@@ -88,6 +90,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	@Order(2)
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
