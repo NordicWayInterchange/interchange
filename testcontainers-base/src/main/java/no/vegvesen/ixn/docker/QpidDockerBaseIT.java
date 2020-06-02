@@ -14,7 +14,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 	@SuppressWarnings("rawtypes")
 	public static GenericContainer getQpidContainer(String configPathFromClasspath, String jksPathFromClasspath, final String caCertFile, final String serverCertFile, final String serverKeyFile) {
 		return new GenericContainer(
-				new ImageFromDockerfile().withFileFromPath(".", getFolderPath("qpid")))
+				new ImageFromDockerfile("qpid-it", false).withFileFromPath(".", getFolderPath("qpid")))
 				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
 				.withClasspathResourceMapping(jksPathFromClasspath, "/jks", BindMode.READ_ONLY)
 				.withEnv("PASSWD_FILE", "/config/passwd")
