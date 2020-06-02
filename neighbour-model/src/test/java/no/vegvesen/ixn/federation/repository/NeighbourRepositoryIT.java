@@ -208,4 +208,15 @@ public class NeighbourRepositoryIT {
 		assertThat(saved).isNotNull();
 		assertThat(saved.getSubscriptionRequest().getSuccessfulRequest()).isNull();
 	}
+
+	@Test
+	void connectionStatusCanBeQueried() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("some-neighbour");
+		neighbour.setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		repository.save(neighbour);
+
+		assertThat(repository.findByConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
+		assertThat(repository.findByConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
+	}
 }

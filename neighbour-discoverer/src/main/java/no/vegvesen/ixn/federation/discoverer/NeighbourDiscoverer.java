@@ -67,4 +67,9 @@ public class NeighbourDiscoverer {
 	public void scheduleCheckForNewNeighbours() {
 		neighbourService.checkForNewNeighbours();
 	}
+
+	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
+	public void scheduleUnreachableRetry() {
+		neighbourService.retryUnreachable();
+	}
 }
