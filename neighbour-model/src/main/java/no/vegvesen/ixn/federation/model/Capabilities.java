@@ -30,7 +30,7 @@ public class Capabilities {
 		this.lastCapabilityExchange = lastCapabilityExchange;
 	}
 
-	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED, UNREACHABLE}
+	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
 
 	@Enumerated(EnumType.STRING)
 	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
