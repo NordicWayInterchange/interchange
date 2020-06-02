@@ -472,7 +472,7 @@ public class NeighbourServiceDiscoveryTest {
     }
 
 	@Test
-	void unreachableNeighboursWillReceiveCapabilityExchange() {
+	void unreachableNeighboursWillReceiveCapabilityExchangeWhenRetryingUnreachableNeighbours() {
 		Neighbour n1 = new Neighbour();
 		n1.setName("neighbour-one");
 		n1.setConnectionStatus(ConnectionStatus.UNREACHABLE);
