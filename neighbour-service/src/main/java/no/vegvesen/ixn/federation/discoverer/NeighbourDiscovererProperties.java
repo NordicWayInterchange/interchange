@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix ="discoverer")
 public class NeighbourDiscovererProperties {
 
+	private static final String ONE_DAY = "86400000";
 	/**
 	 * Time, in milliseconds, between each capability post to neighbours.
 	 */
@@ -48,6 +49,11 @@ public class NeighbourDiscovererProperties {
 	 * Number of times we are allowed to poll one subscription.
 	 */
 	private int subscriptionPollingNumberOfAttempts = 7;
+
+	/**
+	 * How often we retry communication to a node that has become unreachable
+	 */
+	private String unreachableRetryInterval = ONE_DAY;
 
 
 	public String getDnsLookupInterval() {
@@ -144,5 +150,13 @@ public class NeighbourDiscovererProperties {
 				", dnsInitialStartDelay='" + dnsInitialStartDelay + '\'' +
 				", subscriptionPollingNumberOfAttempts=" + subscriptionPollingNumberOfAttempts +
 				'}';
+	}
+
+	public String getUnreachableRetryInterval() {
+		return unreachableRetryInterval;
+	}
+
+	public void setUnreachableRetryInterval(String unreachableRetryInterval) {
+		this.unreachableRetryInterval = unreachableRetryInterval;
 	}
 }

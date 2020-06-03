@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class NeighbourService {
@@ -51,7 +52,7 @@ public class NeighbourService {
 							NeighbourDiscovererProperties discovererProperties,
 							NeighbourRESTFacade neighbourRESTFacade,
 							@Value("${interchange.node-provider.name}") String myName,
-							SelfService selfService) {
+							@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") SelfService selfService) {
 		this.neighbourRepository = neighbourRepository;
 		this.selfService = selfService;
 		this.dnsFacade = dnsFacade;
@@ -232,32 +233,39 @@ public class NeighbourService {
 		Self self = selfService.fetchSelf();
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
-			logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 			try {
+				logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 				if (backoffProperties.canBeContacted(neighbour)) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
-						Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
-						capabilities.setLastCapabilityExchange(LocalDateTime.now());
-						neighbour.setCapabilities(capabilities);
-						neighbour.okConnection();
-						logger.info("Successfully completed capability exchange.");
-						logger.debug("Updated neighbour: {}", neighbour.toString());
+						postCapabilities(self, neighbour);
 					} else {
 						logger.debug("Neighbour has our last capabilities");
 					}
 				} else {
 					logger.info("Too soon to post capabilities to neighbour when backing off");
 				}
-			} catch (CapabilityPostException e) {
-				neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
-				neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
+			} catch (Exception ignore) {
 			} finally {
-				neighbour = neighbourRepository.save(neighbour);
-				logger.info("Saving updated neighbour: {}", neighbour.toString());
 				NeighbourMDCUtil.removeLogVariables();
 			}
 		}
+	}
 
+	private void postCapabilities(Self self, Neighbour neighbour) {
+		try {
+			Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
+			capabilities.setLastCapabilityExchange(LocalDateTime.now());
+			neighbour.setCapabilities(capabilities);
+			neighbour.okConnection();
+			logger.info("Successfully completed capability exchange.");
+			logger.debug("Updated neighbour: {}", neighbour.toString());
+		} catch (CapabilityPostException e) {
+			neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
+			neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
+		} finally {
+			neighbour = neighbourRepository.save(neighbour);
+			logger.info("Saving updated neighbour: {}", neighbour.toString());
+		}
 	}
 
 	public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest) {
@@ -349,4 +357,20 @@ public class NeighbourService {
 		return neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
 	}
 
+	public void retryUnreachable() {
+		List<Neighbour> unreachableNeighbours = neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE);
+		if (!unreachableNeighbours.isEmpty()) {
+			logger.info("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
+			for (Neighbour neighbour : unreachableNeighbours) {
+				try {
+					NeighbourMDCUtil.setLogVariables(this.myName, neighbour.getName());
+					postCapabilities(selfService.fetchSelf(), neighbour);
+				} catch (Exception e) {
+					logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
+				} finally {
+					NeighbourMDCUtil.removeLogVariables();
+				}
+			}
+		}
+	}
 }

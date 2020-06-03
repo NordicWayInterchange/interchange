@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.assertj.core.util.Lists;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -470,4 +471,23 @@ public class NeighbourServiceDiscoveryTest {
 		verify(neighbourRepository).save(otherNeighbour);
     }
 
+	@Test
+	void unreachableNeighboursWillReceiveCapabilityExchangeWhenRetryingUnreachableNeighbours() {
+		Neighbour n1 = new Neighbour();
+		n1.setName("neighbour-one");
+		n1.setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		n1.setBackoffStart(LocalDateTime.now().minusDays(2));
+
+		Neighbour n2 = new Neighbour();
+		n2.setName("neighbour-two");
+		n2.setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		n2.setBackoffStart(LocalDateTime.now().minusDays(2));
+
+		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
+		when(neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
+
+		neighbourService.retryUnreachable();
+
+		verify(neighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
+	}
 }
