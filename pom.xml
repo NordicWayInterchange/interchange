@@ -10,6 +10,7 @@
 
     <packaging>pom</packaging>
     <properties>
+        <license.licenseName>mit</license.licenseName>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
@@ -28,6 +29,17 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>2.0.0</version>
+                    <configuration>
+                        <inceptionYear>2019</inceptionYear>
+                        <organizationName>Nordic Way 3</organizationName>
+                        <licenseName>mit</licenseName>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
