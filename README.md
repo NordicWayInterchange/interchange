@@ -3,7 +3,18 @@ Interchange node under the Nordic Way project
 
 ### License
 See full MIT license text [here](license.md).
-  
+
+####Third-party licenses
+To get a list of the third-party licenses used in the project, run (in bash):
+```
+mvn license:add-third-party
+```
+
+followed by:
+```
+find . -name THIRD-PARTY.txt -exec cat {} \; | sort | uniq 
+``` 
+
 ### Introduction
 The Nordic Way Interchange Node (NWIXN) is a message broker that
 enables crowdsourcing of traffic data. Nordic Way partners send traffic information
@@ -11,7 +22,7 @@ to the broker in the form of AMQP messages. These messages are distributed to su
 
 ### Contact
 For any questions please contact
-* Christian Berg Skjente: christian.berg.skjetne@vegvesen.no
+* Christian Berg Skjetne: christian.berg.skjetne@vegvesen.no
 * Roger Martinsen : roger.martinsen@bouvet.no
 
 ## Getting Started
