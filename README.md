@@ -38,19 +38,32 @@ each commit. Each component in the system has its own registry.
 
 All the images are tagged with git commit hash, and branch name. Branch "federation-master" is considered to be the stable branch.
 
-The module "federation-it" is created to demonstrate how to start a set of containers for test using docker-compose.  
+The module "federation-st" is created to demonstrate how to start a set of containers for test using docker-compose.  
 
 ### Running the Tests
-Unit tests are run by default, for instance when running `mvn clean install`.
+Unit tests are run in the maven 'test' stage, and integration tests are run in the 'verify' stage.
 
-To run the integration tests, activate the integration test profile (IT): 
-`mvn clean install -PIT`
+The profile "IT" separates the unit tests from the integration tests by ensuring the integration tests are run in the 'verify' stage. 
+The profile "IT" is defined in the top pom and is always activated.
 
-To start the docker containers for integration tests from maven so you can run the integration tests from your IDE:
-`mvn docker:start -PIT`    
+#### Docker containers in tests
+Docker containers needed in the integration tests are started automatically by using the org.testcontainers framework.
+Tests can be run from maven and the IDE with no extra configuration.
 
-To stop the docker containers for integration tests from maven: 
-`mvn docker:stop -PIT`
+https://www.testcontainers.org/
+
+#### Test framework
+We use junit5 in our tests.
+Version 1.x of the org.testcontainers has a dependency on junit4, so when writing a new test be sure to import test annontations from 'org.junit.jupiter.api' to avoid mixing junit 4 and 5 tests.
+Version 2.x will probably support junit5.
+ 
+https://junit.org/junit5/
+
+#### Assertions
+Fluent assertions from assertj-core shall be used. We use the version of assertj-core defined by spring-boot-starter-test.
+
+https://assertj.github.io/doc/
+
 
 ### Deploy to kubernetes 
 #### Helm
