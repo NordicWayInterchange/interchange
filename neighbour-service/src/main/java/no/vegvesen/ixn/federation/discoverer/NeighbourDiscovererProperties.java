@@ -50,6 +50,9 @@ public class NeighbourDiscovererProperties {
 	 */
 	private int subscriptionPollingNumberOfAttempts = 7;
 
+	/**
+	 * How often we retry communication to a node that has become unreachable
+	 */
 	private String unreachableRetryInterval = ONE_DAY;
 
 
