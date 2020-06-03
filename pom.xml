@@ -4,6 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <organization>
+        <name>Nordic Way 3</name>
+        <url>https://www.nordicway.net/</url>
+    </organization>
+
+    <inceptionYear>2019</inceptionYear>
+
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
     <version>1.0.3-SNAPSHOT</version>
