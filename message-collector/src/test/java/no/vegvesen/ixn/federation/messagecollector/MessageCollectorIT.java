@@ -7,6 +7,7 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -55,6 +56,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	@Order(1)
 	public void testMessagesCollected() throws NamingException, JMSException {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
@@ -76,16 +78,19 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		Source source = createSource(producerPort, "localhost", "jks/sp_producer.p12");
 		source.start();
-		source.send("fishy fishy", "SE", 8000L);
 
 		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "jks/sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
-		Message message = consumer.receive(1000);
+
+		source.send("fishy fishy", "SE", 8000L);
+
+		Message message = consumer.receive(2000);
 		assertThat(message).withFailMessage("Expected message is not routed").isNotNull();
 		assertThat(message.getJMSExpiration()).withFailMessage("Routed message has noe expiry specified").isNotEqualTo(0L);
 	}
 
 	@Test
+	@Order(2)
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
