@@ -14,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class NeighbourServiceIT {
 
 	@MockBean
 	RestTemplate restTemplate;
+
+	@MockBean
+	SSLContext sslContext;
 
 	@Autowired
 	private NeighbourRepository repository;
