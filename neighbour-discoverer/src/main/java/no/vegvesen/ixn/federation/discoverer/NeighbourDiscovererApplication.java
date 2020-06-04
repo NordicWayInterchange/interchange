@@ -21,7 +21,6 @@ public class NeighbourDiscovererApplication {
 		this.sslContext = sslContext;
 	}
 
-	@Bean
 	HttpClient createHttpClient() {
 		return HttpClients.custom().setSSLContext(sslContext).build();
 	}
