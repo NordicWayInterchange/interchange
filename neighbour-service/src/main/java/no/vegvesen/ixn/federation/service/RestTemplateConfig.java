@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.discoverer;
+package no.vegvesen.ixn.federation.service;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -11,13 +11,13 @@ import org.springframework.web.client.RestTemplate;
 import javax.net.ssl.SSLContext;
 
 @Component
-public class NeighbourDiscovererApplication {
+public class RestTemplateConfig {
 
 
 	private SSLContext sslContext;
 
 	@Autowired
-	public NeighbourDiscovererApplication(SSLContext sslContext) {
+	public RestTemplateConfig(SSLContext sslContext) {
 		this.sslContext = sslContext;
 	}
 

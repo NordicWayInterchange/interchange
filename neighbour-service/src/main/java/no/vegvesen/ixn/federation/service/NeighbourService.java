@@ -19,6 +19,7 @@ import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 @Component
 public class NeighbourService {
 	private static Logger logger = LoggerFactory.getLogger(NeighbourService.class);
-	private final SelfService selfService;
+	private final SelfService selfService; //TODO: move out, use parameter Self where used
 
 	private String myName;
 
@@ -45,7 +46,7 @@ public class NeighbourService {
 	private NeighbourDiscovererProperties discovererProperties;
 	private NeighbourRESTFacade neighbourRESTFacade;
 
-
+	@Autowired
 	public NeighbourService(NeighbourRepository neighbourRepository,
 							DNSFacade dnsFacade,
 							GracefulBackoffProperties backoffProperties,
