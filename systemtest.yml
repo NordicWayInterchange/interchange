@@ -17,7 +17,7 @@ services:
       testing_net:
         ipv4_address: 172.28.1.1
         aliases:
-          - dsn.itsinterchange.eu
+          - dns.bouvetinterchange.eu
 
   local_db:
     image: postgres:9.6
@@ -44,12 +44,12 @@ services:
     - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
-      - SERVER_NAME=local.itsinterchange.eu
-      - DOMAIN_NAME=itsinterchange.eu
+      - SERVER_NAME=local.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
       - SP_CHNL_PORT=8797
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE=/jks/keys/local.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
       - testing_net
@@ -60,9 +60,9 @@ services:
     container_name: local_interchange_app
     hostname: local_interchange_app
     links:
-    - "local_qpid:local.itsinterchange.eu"
+    - "local_qpid:local.bouvetinterchange.eu"
     environment:
-      AMQP_URI: amqp://local.itsinterchange.eu
+      AMQP_URI: amqp://local.bouvetinterchange.eu
       AMQP_USER: interchange
       AMQP_PASSWORD: "12345678"
     depends_on:
@@ -84,9 +84,9 @@ services:
       - "./qpid/messages/local:/work/local/messages"
       - "./tmp/dump:/dump"
     environment:
-      - CA_CERTIFICATE_FILE=/jks/keys/ca.itsinterchange.eu.crt
-      - SERVER_CERTIFICATE_FILE=/jks/keys/local.itsinterchange.eu.crt
-      - SERVER_PRIVATE_KEY_FILE=/jks/keys/local.itsinterchange.eu.key
+      - CA_CERTIFICATE_FILE=/jks/keys/ca.bouvetinterchange.eu.crt
+      - SERVER_CERTIFICATE_FILE=/jks/keys/local.bouvetinterchange.eu.crt
+      - SERVER_PRIVATE_KEY_FILE=/jks/keys/local.bouvetinterchange.eu.key
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
       - GROUPS_FILE=/work/default/config/groups
@@ -107,12 +107,12 @@ services:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
-      - SERVER_NAME=local.itsinterchange.eu
-      - DOMAIN_NAME=itsinterchange.eu
+      - SERVER_NAME=local.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE=/jks/keys/local.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
     - testing_net
@@ -124,16 +124,16 @@ services:
     depends_on:
       - local_db
     links:
-      - "local_qpid:local.itsinterchange.eu"
+      - "local_qpid:local.bouvetinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
-      - BASE_URL=https://local.itsinterchange.eu
-      - SERVER_NAME=local.itsinterchange.eu
+      - BASE_URL=https://local.bouvetinterchange.eu
+      - SERVER_NAME=local.bouvetinterchange.eu
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE=/jks/keys/local.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
     networks:
@@ -145,17 +145,17 @@ services:
     depends_on:
       - local_db
     links:
-     - "remote_neighbour_server:remote.itsinterchange.eu"
+     - "remote_neighbour_server:remote.bouvetinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
-      - SERVER_NAME=local.itsinterchange.eu
-      - DOMAIN_NAME=itsinterchange.eu
+      - SERVER_NAME=local.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+      - KEY_STORE=/jks/keys/local.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
     dns: 172.28.1.1
@@ -168,19 +168,19 @@ services:
     depends_on:
     - local_db
     links:
-    - "local_qpid:local.itsinterchange.eu"
-    - "remote_qpid:remote.itsinterchange.eu"
+    - "local_qpid:local.bouvetinterchange.eu"
+    - "remote_qpid:remote.bouvetinterchange.eu"
     volumes:
     - "./tmp:/jks"
     environment:
     - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
-    - KEY_STORE=/jks/keys/local.itsinterchange.eu.p12
+    - KEY_STORE=/jks/keys/local.bouvetinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
     - TRUST_STORE=/jks/keys/truststore.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
-    - SERVER_NAME=local.itsinterchange.eu
+    - SERVER_NAME=local.bouvetinterchange.eu
     networks:
     - testing_net
 
@@ -209,12 +209,12 @@ services:
     - "./tmp:/jks"
     environment:
     - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-    - SERVER_NAME=remote.itsinterchange.eu
-    - DOMAIN_NAME=itsinterchange.eu
+    - SERVER_NAME=remote.bouvetinterchange.eu
+    - DOMAIN_NAME=bouvetinterchange.eu
     - SP_CHNL_PORT=8696
     - TRUST_STORE=/jks/keys/truststore.jks
     - TRUST_STORE_PASSWORD=password
-    - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
+    - KEY_STORE=/jks/keys/remote.bouvetinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
     networks:
     - testing_net
@@ -224,9 +224,9 @@ services:
     container_name: remote_interchange_app
     hostname: remote_interchange_app
     links:
-    - "remote_qpid:remote.itsinterchange.eu"
+    - "remote_qpid:remote.bouvetinterchange.eu"
     environment:
-      AMQP_URI: amqp://remote.itsinterchange.eu
+      AMQP_URI: amqp://remote.bouvetinterchange.eu
       AMQP_USER: interchange
       AMQP_PASSWORD: "12345678"
     depends_on:
@@ -245,12 +245,12 @@ services:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - SERVER_NAME=remote.itsinterchange.eu
-      - DOMAIN_NAME=itsinterchange.eu
+      - SERVER_NAME=remote.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
+      - KEY_STORE=/jks/keys/remote.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
       - testing_net
@@ -262,18 +262,18 @@ services:
     depends_on:
       - remote_db
     links:
-      - "local_neighbour_server:local.itsinterchange.eu"
+      - "local_neighbour_server:local.bouvetinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - SERVER_NAME=remote.itsinterchange.eu
-      #- NODE_PROVIDER_NAME=remote.itsinterchange.eu # "my name"
-      - DOMAIN_NAME=itsinterchange.eu
+      - SERVER_NAME=remote.bouvetinterchange.eu
+      #- NODE_PROVIDER_NAME=remote.bouvetinterchange.eu # "my name"
+      - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
+      - KEY_STORE=/jks/keys/remote.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
     networks:
@@ -293,9 +293,9 @@ services:
       - "./tmp:/jks"
       - "./qpid/messages/remote:/work/remote/messages"
     environment:
-      - CA_CERTIFICATE_FILE=/jks/keys/ca.itsinterchange.eu.crt
-      - SERVER_CERTIFICATE_FILE=/jks/keys/remote.itsinterchange.eu.crt
-      - SERVER_PRIVATE_KEY_FILE=/jks/keys/remote.itsinterchange.eu.key
+      - CA_CERTIFICATE_FILE=/jks/keys/ca.bouvetinterchange.eu.crt
+      - SERVER_CERTIFICATE_FILE=/jks/keys/remote.bouvetinterchange.eu.crt
+      - SERVER_PRIVATE_KEY_FILE=/jks/keys/remote.bouvetinterchange.eu.key
       - VHOST_FILE=/work/default/config/default.json
       - STATIC_VHOST_FILE=/config/vhost.json
       - GROUPS_FILE=/work/default/config/groups
@@ -310,16 +310,16 @@ services:
     depends_on:
       - remote_db
     links:
-      - "remote_qpid:remote.itsinterchange.eu"
+      - "remote_qpid:remote.bouvetinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - BASE_URL=https://remote.itsinterchange.eu
-      - SERVER_NAME=remote.itsinterchange.eu
+      - BASE_URL=https://remote.bouvetinterchange.eu
+      - SERVER_NAME=remote.bouvetinterchange.eu
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
+      - KEY_STORE=/jks/keys/remote.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
     networks:
@@ -331,19 +331,19 @@ services:
     depends_on:
       - remote_db
     links:
-      - "local_qpid:local.itsinterchange.eu"
-      - "remote_qpid:remote.itsinterchange.eu"
+      - "local_qpid:local.bouvetinterchange.eu"
+      - "remote_qpid:remote.bouvetinterchange.eu"
     volumes:
       - "./tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://remote_db:5432/federation
-      - KEY_STORE=/jks/keys/remote.itsinterchange.eu.p12
+      - KEY_STORE=/jks/keys/remote.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_STORE_TYPE=PKCS12
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
-      - SERVER_NAME=remote.itsinterchange.eu
+      - SERVER_NAME=remote.bouvetinterchange.eu
     networks:
     - testing_net
 
