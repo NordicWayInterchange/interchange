@@ -49,6 +49,12 @@
         </dependency>
 
         <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>interchange-spring-security-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
