@@ -6,15 +6,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import javax.annotation.PostConstruct;
 
 @SpringBootApplication
-public class TestSslAppOnly {
+public class SslJavaxSettingsApp {
 
 	final
 	TestSslSystemSettingsConfig testSslConfig;
 
-	public TestSslAppOnly(TestSslSystemSettingsConfig testSslConfig) {
+	public SslJavaxSettingsApp(TestSslSystemSettingsConfig testSslConfig) {
 		this.testSslConfig = testSslConfig;
 	}
-
 
 	@PostConstruct
 	void postConstruct(){
@@ -22,6 +21,6 @@ public class TestSslAppOnly {
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(TestSslAppOnly.class, args);
+		SpringApplication.run(SslJavaxSettingsApp.class, args);
 	}
 }

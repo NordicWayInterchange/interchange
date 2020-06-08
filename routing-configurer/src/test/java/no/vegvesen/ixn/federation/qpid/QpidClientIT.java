@@ -1,11 +1,14 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
+import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -26,9 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
+@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
+@ConfigurationPropertiesScan
 @Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
 
@@ -56,6 +60,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Autowired
 	QpidClient client;
+
+	@Autowired
+	TestSSLProperties sslProperties;
 
 	@Autowired
 	RestTemplate restTemplate;
