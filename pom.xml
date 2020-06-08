@@ -251,6 +251,7 @@
         <module>test-ssl-utils</module>
         <module>api-model</module>
         <module>interchange-spring-security</module>
+        <module>interchange-spring-security-client</module>
         <module>neighbour-dns</module>
         <module>neighbour-model</module>
         <module>neighbour-rest-facade</module>
