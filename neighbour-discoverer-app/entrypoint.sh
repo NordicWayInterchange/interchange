@@ -7,11 +7,13 @@ LOG_LEVELS=${LOG_LEVELS:-" "}
 java -Dspring.datasource.url=${POSTGRES_URI} \
      -Ddns.domain-name=${DOMAIN_NAME}\
      -Ddns.control-channel-port=${CTRL_CHNL_PORT} \
-     -Dneighbour.ssl.trust-store-password=${TRUST_STORE_PASSWORD} \
-     -Dneighbour.ssl.trust-store=${TRUST_STORE} \
-     -Dneighbour.ssl.key-store=${KEY_STORE} \
-     -Dneighbour.ssl.key-store-password=${KEY_STORE_PASSWORD}\
-     -Dneighbour.ssl.key-password=${KEY_PASSWORD} \
+     -Djavax.net.ssl.trustStore=${TRUST_STORE} \
+     -Djavax.net.ssl.trustStorePassword=${TRUST_STORE_PASSWORD} \
+     -Djavax.net.ssl.trustStoreType=JKS \
+     -Djavax.net.ssl.keyStore=${KEY_STORE} \
+     -Djavax.net.ssl.keyStoreType=pkcs12 \
+     -Djavax.net.ssl.keyStorePassword=${KEY_STORE_PASSWORD} \
+     -Djavax.net.ssl.keyPassword=${KEY_PASSWORD} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
      ${LOG_LEVELS} \
      -jar neighbour-discoverer.jar
