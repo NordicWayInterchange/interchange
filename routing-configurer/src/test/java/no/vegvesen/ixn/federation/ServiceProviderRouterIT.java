@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -46,7 +47,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfig.class, TestSSLProperties.class})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {ServiceProviderRouterIT.Initializer.class})
 @Testcontainers

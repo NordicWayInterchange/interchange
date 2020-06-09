@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -43,7 +44,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
 @Testcontainers
