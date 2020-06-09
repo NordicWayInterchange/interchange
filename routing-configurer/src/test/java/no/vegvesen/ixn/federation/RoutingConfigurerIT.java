@@ -14,7 +14,6 @@ import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.util.Sets;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -22,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -41,11 +41,10 @@ import java.util.Set;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
 
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
 @ConfigurationPropertiesScan
@@ -76,15 +75,20 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	}
 
+	@MockBean
+	NeighbourRepository neighbourRepository;
+
+	@MockBean
+	ServiceProviderRouter serviceProviderRouter;
+
+	@Autowired
 	RoutingConfigurer routingConfigurer;
 
 	@Autowired
 	QpidClient client;
 
-	@BeforeEach
-	public void setUp() {
-		routingConfigurer = new RoutingConfigurer(mock(NeighbourRepository.class), client, mock(ServiceProviderRouter.class));
-	}
+	@Autowired
+	TestSSLContextConfig sslContextConfig;
 
 	@Test
 	public void neighbourWithOneBindingIsCreated() {
