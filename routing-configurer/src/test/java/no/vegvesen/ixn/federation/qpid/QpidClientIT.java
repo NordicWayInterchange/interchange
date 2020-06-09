@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfig.class, TestSSLProperties.class})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
 @Testcontainers
@@ -49,8 +49,8 @@ public class QpidClientIT extends QpidDockerBaseIT {
 			logger.info("server url: " + httpsUrl);
 			logger.info("server url: " + httpUrl);
 			TestPropertyValues.of(
-					"qpid.rest.api.baseUrl=" + httpsUrl,
-					"qpid.rest.api.vhost=localhost"
+					"routing-configurer.baseUrl=" + httpsUrl,
+					"routing-configurer.vhost=localhost"
 			).applyTo(configurableApplicationContext.getEnvironment());
 			MAPPED_HTTPS_PORT = qpidContainer.getMappedPort(HTTPS_PORT);
 		}

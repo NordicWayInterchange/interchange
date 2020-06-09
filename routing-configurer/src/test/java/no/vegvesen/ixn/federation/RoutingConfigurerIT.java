@@ -66,8 +66,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			logger.info("server url: " + httpUrl);
 			AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
 			TestPropertyValues.of(
-					"qpid.rest.api.baseUrl=" + httpsUrl,
-					"qpid.rest.api.vhost=localhost"
+					"routing-configurer.baseUrl=" + httpsUrl,
+					"routing-configurer.vhost=localhost"
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 

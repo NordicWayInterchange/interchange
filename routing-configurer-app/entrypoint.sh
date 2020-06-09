@@ -5,8 +5,8 @@ echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 LOG_LEVELS=${LOG_LEVELS:-" "}
 
 java -Dspring.datasource.url=${POSTGRES_URI} \
-     -Dqpid.rest.api.baseUrl=${BASE_URL} \
-     -Dqpid.rest.api.vhost=${SERVER_NAME} \
+     -Drouting-configurer.baseUrl=${BASE_URL} \
+     -Drouting-configurer.vhost=${SERVER_NAME} \
      -Djavax.net.ssl.trustStore=${TRUST_STORE} \
      -Djavax.net.ssl.trustStorePassword=${TRUST_STORE_PASSWORD} \
      -Djavax.net.ssl.trustStoreType=JKS \
