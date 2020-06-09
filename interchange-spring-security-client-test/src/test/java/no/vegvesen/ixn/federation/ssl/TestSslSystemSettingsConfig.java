@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.ssl;
 
 
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * The javax.net.ssl system settings will be used in docker containers when operating as an ssl client.
  */
 @Configuration
+@ConfigurationPropertiesScan
 public class TestSslSystemSettingsConfig {
 
 	final TestSSLProperties properties;

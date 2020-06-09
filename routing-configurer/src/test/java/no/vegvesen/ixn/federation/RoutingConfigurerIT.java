@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -47,7 +46,6 @@ import static org.assertj.core.api.Assertions.fail;
 @SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
-@ConfigurationPropertiesScan
 @Testcontainers
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 

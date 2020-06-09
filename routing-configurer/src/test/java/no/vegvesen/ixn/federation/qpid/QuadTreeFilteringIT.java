@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -40,7 +39,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {QuadTreeFilteringIT.Initializer.class})
-@ConfigurationPropertiesScan
 @Testcontainers
 public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
