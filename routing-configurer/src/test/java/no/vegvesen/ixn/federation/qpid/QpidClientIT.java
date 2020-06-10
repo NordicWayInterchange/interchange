@@ -60,9 +60,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	QpidClient client;
 
 	@Autowired
-	TestSSLProperties sslProperties;
-
-	@Autowired
 	RestTemplate restTemplate;
 
 	@Test
