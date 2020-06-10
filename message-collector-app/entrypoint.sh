@@ -15,6 +15,5 @@ java -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLD
      -Djavax.net.ssl.keyStore=${KEY_STORE} \
      -Djavax.net.ssl.keyStoreType=${KEY_STORE_TYPE} \
      -Djavax.net.ssl.keyStorePassword=${KEY_STORE_PASSWORD} \
-     -Djavax.net.ssl.keyPassword=${KEY_PASSWORD} \
      ${LOG_LEVELS} \
      -jar message-collector.jar

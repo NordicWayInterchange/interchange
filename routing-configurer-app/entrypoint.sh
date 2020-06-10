@@ -13,6 +13,5 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Djavax.net.ssl.keyStore=${KEY_STORE} \
      -Djavax.net.ssl.keyStoreType=pkcs12 \
      -Djavax.net.ssl.keyStorePassword=${KEY_STORE_PASSWORD} \
-     -Djavax.net.ssl.keyPassword=${KEY_PASSWORD} \
      ${LOG_LEVELS} \
      -jar routing-configurer.jar
