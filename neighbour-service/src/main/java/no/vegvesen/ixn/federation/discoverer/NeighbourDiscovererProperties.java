@@ -10,39 +10,56 @@ public class NeighbourDiscovererProperties {
 	private static final String ONE_DAY = "86400000";
 	/**
 	 * Time, in milliseconds, between each capability post to neighbours.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
-	private String capabilitiesUpdateInterval = "15000";
+	private String capabilitiesUpdateInterval;
 
 	/**
 	 * Time, in milliseconds, from application start-up to first attempt at polling subscriptions."
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
-	private String capabilityPostInitialDelay = "3000";
+	private String capabilityPostInitialDelay;
 
 	/**
 	 * Time, in milliseconds, between each attempt at posting a subscription request.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
-	private String subscriptionRequestUpdateInterval = "15000";
+	private String subscriptionRequestUpdateInterval;
 
 	/**
 	 * Time, in milliseconds, from application start-up to subscription request.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
-	private String subscriptionRequestInitialDelay = "10000";
+	private String subscriptionRequestInitialDelay;
 
 	/**
 	 * Time, in milliseconds, between each attempt at polling a subscription.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
-	private String subscriptionPollUpdateInterval = "15000";
+	private String subscriptionPollUpdateInterval;
 
 	/**
 	 * Time, in milliseconds, from application start-up to first attempt at polling subscriptions.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
-	private String subscriptionPollInitialDelay = "20000";
+	private String subscriptionPollInitialDelay;
 
 	/**
 	 * Time, in milliseconds, between each check for updated Service Providers.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
-	private String updatedServiceProviderCheckInterval = "20000";
-	private String dnsLookupInterval = "15000";
+	private String updatedServiceProviderCheckInterval;
+
+	/**
+	 * Time, in milleseconds, between each check for new entries in DNS.
+ 	 * Is used in scheduling settings, and must be provided as an application property, no default value.
+	 */
+	private String dnsLookupInterval;
+
+	/**
+	 * Time, in milliseconds, from application start-up to first attempt at looking up entries in DNS.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
+	 */
 	private String dnsInitialStartDelay = "5000";
 
 	/**

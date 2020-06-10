@@ -21,9 +21,10 @@ public class CollectorProperties {
 	private String writequeue = "fedEx";
 
 	/**
-	 * how often the message collector service will look for new or existing neighbours to connect or reconnect to
+	 * Time, in milliseconds, how often the message collector service will look for new or existing neighbours to connect or reconnect to.<br/>
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
-	private String fixeddelay = "30000";
+	private String fixeddelay;
 
 	public CollectorProperties() {
 	}

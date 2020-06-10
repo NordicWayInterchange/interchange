@@ -8,9 +8,11 @@ import org.springframework.stereotype.Component;
 public class RoutingConfigurerProperties {
 
 	/**
-	 * how often the routing configurer will run, interval in milliseconds
+	 * Time, in milliseconds,the routing configurer will run.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
-	Integer interval = 10000;
+	Integer interval;
+
 	/**
 	 * base url for the QPID rest api starting with protocol. Example https://bouveta-fed.itsinterchange.eu
 	 */
