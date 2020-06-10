@@ -17,13 +17,13 @@ import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -44,10 +44,9 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfig.class, TestSSLProperties.class})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {ServiceProviderRouterIT.Initializer.class})
 @Testcontainers
@@ -76,14 +75,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		}
 	}
 
+	@MockBean
+	ServiceProviderRepository serviceProviderRepository;
+
 	@Autowired
 	QpidClient client;
-	ServiceProviderRouter router;
 
-	@BeforeEach
-	public void setUp() {
- 		router = new ServiceProviderRouter(mock(ServiceProviderRepository.class),client);
-	}
+ 	@Autowired
+	ServiceProviderRouter router;
 
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
