@@ -16,7 +16,6 @@ import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -45,7 +43,6 @@ import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("rawtypes")
 @SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
 @Testcontainers
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
