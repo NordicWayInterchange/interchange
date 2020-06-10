@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
+@ConfigurationPropertiesScan
 public class NeighbourService {
 	private static Logger logger = LoggerFactory.getLogger(NeighbourService.class);
 	private final SelfService selfService; //TODO: move out, use parameter Self where used
@@ -53,7 +55,7 @@ public class NeighbourService {
 							NeighbourDiscovererProperties discovererProperties,
 							NeighbourRESTFacade neighbourRESTFacade,
 							@Value("${interchange.node-provider.name}") String myName,
-							@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") SelfService selfService) {
+							SelfService selfService) {
 		this.neighbourRepository = neighbourRepository;
 		this.selfService = selfService;
 		this.dnsFacade = dnsFacade;
