@@ -16,7 +16,6 @@ import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
-import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,6 @@ import java.util.stream.Collectors;
 @ConfigurationPropertiesScan
 public class NeighbourService {
 	private static Logger logger = LoggerFactory.getLogger(NeighbourService.class);
-	private final SelfService selfService; //TODO: move out, use parameter Self where used
 
 	private String myName;
 
@@ -54,10 +52,8 @@ public class NeighbourService {
 							GracefulBackoffProperties backoffProperties,
 							NeighbourDiscovererProperties discovererProperties,
 							NeighbourRESTFacade neighbourRESTFacade,
-							@Value("${interchange.node-provider.name}") String myName,
-							SelfService selfService) {
+							@Value("${interchange.node-provider.name}") String myName) {
 		this.neighbourRepository = neighbourRepository;
-		this.selfService = selfService;
 		this.dnsFacade = dnsFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
@@ -165,7 +161,7 @@ public class NeighbourService {
 		}
 	}
 
-	public CapabilityApi incomingCapabilities(CapabilityApi neighbourCapabilities) {
+	public CapabilityApi incomingCapabilities(CapabilityApi neighbourCapabilities, Self self) {
 		Capabilities incomingCapabilities = capabilityTransformer.capabilityApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
@@ -182,7 +178,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilityTransformer.selfToCapabilityApi(selfService.fetchSelf());
+		return capabilityTransformer.selfToCapabilityApi(self);
 	}
 
 	Neighbour findNeighbour(String neighbourName) {
@@ -197,13 +193,13 @@ public class NeighbourService {
 				);
 	}
 
-	public void capabilityExchangeWithNeighbours() {
+	public void capabilityExchangeWithNeighbours(Self self) {
 		logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
 		List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
 				Capabilities.CapabilitiesStatus.UNKNOWN,
 				Capabilities.CapabilitiesStatus.KNOWN,
 				Capabilities.CapabilitiesStatus.FAILED);
-		capabilityExchange(neighboursForCapabilityExchange);
+		capabilityExchange(neighboursForCapabilityExchange, self);
 	}
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
@@ -232,8 +228,7 @@ public class NeighbourService {
 		}
 	}
 
-	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange) {
-		Self self = selfService.fetchSelf();
+	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self) {
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			NeighbourMDCUtil.setLogVariables(myName, neighbour.getName());
 			try {
@@ -271,8 +266,7 @@ public class NeighbourService {
 		}
 	}
 
-	public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest) {
-		Self self = selfService.fetchSelf();
+	public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self) {
 		LocalDateTime lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
 
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
@@ -360,14 +354,14 @@ public class NeighbourService {
 		return neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
 	}
 
-	public void retryUnreachable() {
+	public void retryUnreachable(Self self) {
 		List<Neighbour> unreachableNeighbours = neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE);
 		if (!unreachableNeighbours.isEmpty()) {
 			logger.info("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
 			for (Neighbour neighbour : unreachableNeighbours) {
 				try {
 					NeighbourMDCUtil.setLogVariables(this.myName, neighbour.getName());
-					postCapabilities(selfService.fetchSelf(), neighbour);
+					postCapabilities(self, neighbour);
 				} catch (Exception e) {
 					logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
 				} finally {

@@ -74,7 +74,7 @@ public class NeighbourDiscovererIT {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
 		Self self = selfService.fetchSelf();
 		self.setLocalSubscriptions(Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
-		selfService.save(self);
+		selfService.save(selfService.fetchSelf());
 
 		Neighbour neighbour1 = new Neighbour();
 		neighbour1.setName("neighbour-one");
@@ -102,7 +102,7 @@ public class NeighbourDiscovererIT {
 		Self self = selfService.fetchSelf();
 		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 
-		neighbourService.capabilityExchangeWithNeighbours();
+		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf());
 		verify(mockNeighbourRESTFacade, times(4)).postCapabilitiesToCapabilities(any(), any());
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
@@ -113,7 +113,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilityApi("neighbour-one", Sets.newLinkedHashSet(new Datex2DataTypeApi("NO"))));
+		neighbourService.incomingCapabilities(new CapabilityApi("neighbour-one", Sets.newLinkedHashSet(new Datex2DataTypeApi("NO"))), selfService.fetchSelf());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -129,7 +129,7 @@ public class NeighbourDiscovererIT {
 		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour1))).thenReturn(c1);
 		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(any(), eq(neighbour2))).thenReturn(c2);
 
-		neighbourService.capabilityExchangeWithNeighbours();
+		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf());
 
 		verify(mockNeighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
@@ -140,7 +140,7 @@ public class NeighbourDiscovererIT {
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, c1.getDataTypes().stream().map(dataType -> new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED)).collect(Collectors.toSet()));
 		when(mockNeighbourRESTFacade.postSubscriptionRequest(any(), any(), anySet())).thenReturn(subscriptionRequestResponse);
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2));
+		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf());
 
 		verify(mockNeighbourRESTFacade, times(1)).postSubscriptionRequest(any(), eq(neighbour1), any());
 		verify(mockNeighbourRESTFacade, times(0)).postSubscriptionRequest(any(), eq(neighbour2), any());

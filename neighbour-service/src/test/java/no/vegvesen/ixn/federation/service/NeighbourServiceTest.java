@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NeighbourServiceTest {
@@ -47,7 +46,7 @@ class NeighbourServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName, selfService);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName);
 	}
 
 	@Test
@@ -66,9 +65,8 @@ class NeighbourServiceTest {
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
 		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
-		Mockito.when(selfService.fetchSelf()).thenReturn(new Self("bouvet"));
 
-		CapabilityApi response = neighbourService.incomingCapabilities(ericsson);
+		CapabilityApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
 
 		Mockito.verify(dnsFacade, Mockito.times(1)).getNeighbours();
 		Mockito.verify(neighbourRepository, Mockito.times(1)).save(ArgumentMatchers.any(Neighbour.class));
@@ -112,9 +110,8 @@ class NeighbourServiceTest {
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
 		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
-		when(selfService.fetchSelf()).thenReturn(new Self(myName));
 
-		neighbourService.incomingCapabilities(ericsson);
+		neighbourService.incomingCapabilities(ericsson, new Self(myName));
 
 		Mockito.verify(dnsFacade, Mockito.times(1)).getNeighbours();
 	}
@@ -130,7 +127,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
 
-		Throwable thrown = Assertions.catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour));
+		Throwable thrown = Assertions.catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, new Self("some-node-name")));
 
 		Assertions.assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 		Mockito.verify(dnsFacade, Mockito.times(1)).getNeighbours();
