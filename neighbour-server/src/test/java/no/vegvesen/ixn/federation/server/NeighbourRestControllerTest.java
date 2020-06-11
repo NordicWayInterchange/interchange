@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.onboard.SelfService;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ class NeighbourRestControllerTest {
 
 	@MockBean
 	NeighbourService neighbourService;
+
+	@MockBean
+	SelfService selfService;
 
 	@Autowired
 	private NeighbourRestController neighbourRestController;
@@ -75,7 +79,7 @@ class NeighbourRestControllerTest {
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		CapabilityApi selfCapabilities = new CapabilityApi("bouvet", Sets.newLinkedHashSet());
-		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -102,7 +106,7 @@ class NeighbourRestControllerTest {
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		CapabilityApi selfCapabilities = new CapabilityApi("bouvet", Sets.newLinkedHashSet());
-		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -128,7 +132,7 @@ class NeighbourRestControllerTest {
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		CapabilityApi selfCapabilities = new CapabilityApi("bouvet", Sets.newLinkedHashSet());
-		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)
@@ -150,7 +154,7 @@ class NeighbourRestControllerTest {
 		unknownNeighbour.setCapabilities(Collections.singleton(new Datex2DataTypeApi("NO")));
 
 		// Mock response from DNS facade on Server
-		doThrow(new InterchangeNotInDNSException("expected")).when(neighbourService).incomingCapabilities(any());
+		doThrow(new InterchangeNotInDNSException("expected")).when(neighbourService).incomingCapabilities(any(), any());
 
 		// Create capability api object to send to the server
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(unknownNeighbour);
@@ -242,7 +246,7 @@ class NeighbourRestControllerTest {
 		String capabilityApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		CapabilityApi selfCapabilities = new CapabilityApi("bouvet", Sets.newLinkedHashSet());
-		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any());
+		doReturn(selfCapabilities).when(neighbourService).incomingCapabilities(any(), any());
 
 		mockMvc.perform(
 				post(capabilityExchangePath)

@@ -6,7 +6,7 @@ import no.vegvesen.ixn.federation.model.Neighbour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import javax.jms.JMSException;
@@ -14,6 +14,7 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 
 @Component
+@ConfigurationPropertiesScan(basePackages = "no.vegvesen.ixn")
 public class CollectorCreator {
 
 
@@ -23,18 +24,25 @@ public class CollectorCreator {
     private String localIxnFederationPort;
     private String writeQueue;
 
-    @Autowired
-    public CollectorCreator(SSLContext sslContext,
-                            @Value("${collector.localIxnDomainName}") String localIxnDomainName,
-                            @Value("${collector.localIxnFederationPort}") String localIxnFederationPort,
-                            @Value("${collector.writequeue}") String writequeue) {
+    CollectorCreator(SSLContext sslContext,
+                            String localIxnDomainName,
+                            String localIxnFederationPort,
+                            String writequeue) {
         this.sslContext = sslContext;
         this.localIxnDomainName = localIxnDomainName;
         this.localIxnFederationPort = localIxnFederationPort;
         this.writeQueue = writequeue;
     }
 
-    MessageCollectorListener setupCollection(Neighbour ixn) {
+    @Autowired
+	public CollectorCreator(SSLContext sslContext, CollectorProperties collectorProperties) {
+		this.sslContext = sslContext;
+		this.localIxnDomainName = collectorProperties.getLocalIxnDomainName();
+		this.localIxnFederationPort = collectorProperties.getLocalIxnFederationPort();
+		this.writeQueue = collectorProperties.getWritequeue();
+	}
+
+	MessageCollectorListener setupCollection(Neighbour ixn) {
         String writeUrl = String.format("amqps://%s:%s", localIxnDomainName, localIxnFederationPort);
         logger.debug("Write URL: {}, queue {}", writeUrl, writeQueue);
         Source writeSource = new Source(writeUrl, writeQueue, sslContext);

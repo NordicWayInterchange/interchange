@@ -59,7 +59,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbourRESTFacade = mock(NeighbourRESTFacade.class);
 		discovererProperties = mock(NeighbourDiscovererProperties.class);
 		selfService = mock(SelfService.class);
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName, selfService);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName);
 	}
 
 	private Neighbour createNeighbour() {
@@ -136,7 +136,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		doReturn(self).when(selfService).fetchSelf();
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -150,7 +150,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		doReturn(self).when(selfService).fetchSelf();
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
+		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -173,7 +173,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.setConnectionStatus(ConnectionStatus.FAILED);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
 		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 	}
@@ -188,7 +188,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
+		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
 
 		verify(neighbourRESTFacade, times(0)).postSubscriptionRequest(any(Self.class), any(Neighbour.class), any());
 	}
@@ -223,7 +223,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
 		verify(neighbourRESTFacade, times(1)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
 	}
@@ -239,7 +239,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson));
+		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
 
 		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
 	}
@@ -277,7 +277,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
 		assertThat(ericsson.getBackoffAttempts()).isEqualTo(1);
 	}
@@ -297,7 +297,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson));
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
 		assertThat(ericsson.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
@@ -417,11 +417,10 @@ public class NeighbourServiceDiscoveryTest {
 		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("NO");
 
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
-		when(selfService.fetchSelf()).thenReturn(discoveringNode);
 
-		neighbourService.evaluateAndPostSubscriptionRequest(neighbours);
+		neighbourService.evaluateAndPostSubscriptionRequest(neighbours, discoveringNode);
 
-		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
+		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(eq(discoveringNode), any(Neighbour.class),anySet());
 	}
 
 	private SubscriptionRequest getEmptySR() {
@@ -466,7 +465,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRESTFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(mock(SubscriptionRequest.class));
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour));
+		neighbourService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), self);
 
 		verify(neighbourRepository).save(otherNeighbour);
     }
@@ -486,7 +485,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 		when(neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
 
-		neighbourService.retryUnreachable();
+		neighbourService.retryUnreachable(self);
 
 		verify(neighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 	}

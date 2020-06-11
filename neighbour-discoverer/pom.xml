@@ -50,8 +50,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
             <scope>compile</scope>
         </dependency>
 
@@ -65,6 +65,13 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-rest-facade</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>interchange-spring-security-client</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

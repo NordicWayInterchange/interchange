@@ -9,11 +9,11 @@ java -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLD
      -Dcollector.localIxnDomainName=${SERVER_NAME} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
      -Dcollector.localIxnFederationPort=5671 \
-     -Dcollector.keystorepath=${KEY_STORE} \
-     -Dcollector.keystorepassword=${KEY_STORE_PASSWORD} \
-     -Dcollector.keystoretype=${KEY_STORE_TYPE} \
-     -Dcollector.truststorepath=${TRUST_STORE} \
-     -Dcollector.truststorepassword=${TRUST_STORE_PASSWORD} \
-     -Dcollector.truststoretype=${TRUST_STORE_TYPE} \
+     -Djavax.net.ssl.trustStore=${TRUST_STORE} \
+     -Djavax.net.ssl.trustStorePassword=${TRUST_STORE_PASSWORD} \
+     -Djavax.net.ssl.trustStoreType=${TRUST_STORE_TYPE} \
+     -Djavax.net.ssl.keyStore=${KEY_STORE} \
+     -Djavax.net.ssl.keyStoreType=${KEY_STORE_TYPE} \
+     -Djavax.net.ssl.keyStorePassword=${KEY_STORE_PASSWORD} \
      ${LOG_LEVELS} \
      -jar message-collector.jar
