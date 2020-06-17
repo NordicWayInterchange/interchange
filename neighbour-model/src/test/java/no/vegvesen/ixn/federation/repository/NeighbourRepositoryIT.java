@@ -216,4 +216,5 @@ public class NeighbourRepositoryIT {
 		assertThat(repository.findByConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
 		assertThat(repository.findByConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
 	}
+
 }

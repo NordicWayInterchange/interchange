@@ -93,9 +93,11 @@ public class OnboardRestClientIT extends DockerBaseIT {
         ObjectMapper objectMapper = new ObjectMapper();
         LocalDataTypeList newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
+        assertThat(newCapabilities.getDataTypes()).hasSize(1);
 
 		LocalDataType localDataType = newCapabilities.getDataTypes().iterator().next();
-		client.deleteCapability(localDataType.getId());
+        Integer id = localDataType.getId();
+        client.deleteCapability(id);
 
         newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));

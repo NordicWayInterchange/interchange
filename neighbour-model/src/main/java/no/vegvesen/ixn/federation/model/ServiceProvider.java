@@ -71,6 +71,10 @@ public class ServiceProvider {
 		this.subscriptions = subscriptions;
 	}
 
+	public boolean removeSubscription(LocalSubscription subscription) {
+		return subscriptions.remove(subscription);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

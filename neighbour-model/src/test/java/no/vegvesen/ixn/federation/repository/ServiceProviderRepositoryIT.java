@@ -175,6 +175,28 @@ public class ServiceProviderRepositoryIT {
 		assertThat(serviceProvider.getSubscriptions()).allMatch(subscription -> subscription.getStatus().equals(LocalSubscriptionStatus.CREATED));
 
 
+	}
+
+	@Test
+	public void testThatWeCanDeleteALocalSubcriptionForAServiceProvider() {
+		String name = "serviceProvider";
+		ServiceProvider serviceProvider = new ServiceProvider(name);
+		DataType datex2 = new DataType(Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2"));
+		LocalSubscription datexSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,datex2);
+		serviceProvider.setSubscriptions(new HashSet<>(Arrays.asList(datexSubscription)));
+		repository.save(serviceProvider);
+
+		serviceProvider = repository.findByName(name);
+		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
+		LocalSubscription subscription = serviceProvider
+				.getSubscriptions()
+				.stream()
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("could not find first subscription"));
+		serviceProvider.removeSubscription(subscription);
+		repository.save(serviceProvider);
+		serviceProvider = repository.findByName(name);
+		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 
 	}
 

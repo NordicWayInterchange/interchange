@@ -20,13 +20,15 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
-	private final SelfService selfService;
 	private final CertService certService;
 	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
@@ -40,7 +42,6 @@ public class OnboardRestController {
 								 CertService certService,
 								 SelfService selfService) {
 		this.serviceProviderRepository = serviceProviderRepository;
-		this.selfService = selfService;
 		this.certService = certService;
 	}
 
@@ -55,8 +56,6 @@ public class OnboardRestController {
 			throw new CapabilityPostException("Bad api object. The posted DataTypeApi object had no capabilities. Nothing to add.");
 		}
 
-		Self selfBeforeUpdate = selfService.fetchSelf();
-		Set<DataType> currentSelfCapabilities = selfBeforeUpdate.getLocalCapabilities();
 
 		DataType newLocalCapability = dataTypeTransformer.dataTypeApiToDataType(capabilityDataType);
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
@@ -89,8 +88,6 @@ public class OnboardRestController {
 			}
 		}
 
-		selfService.updateSelfCapabilities(currentSelfCapabilities, serviceProviderRepository.findAll());
-
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		LocalDataType localDataType = null;
 		if (dataTypeId != null) {
@@ -107,10 +104,6 @@ public class OnboardRestController {
 
 		logger.info("Capabilities - Received DELETE from Service Provider: {}", serviceProviderName);
 
-		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
-		Self previousSelfRepresentation = selfService.fetchSelf();
-		// Get previous Self capabilities to compare with the updated capabilities.
-		Set<DataType> previousSelfCapabilities = new HashSet<>(previousSelfRepresentation.getLocalCapabilities());
 
 		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
@@ -137,8 +130,6 @@ public class OnboardRestController {
 
 		// Save the updated Service Provider representation in the database.
 		serviceProviderRepository.save(serviceProviderToUpdate);
-		List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-		selfService.updateSelfCapabilities(previousSelfCapabilities, serviceProviders);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
 		RedirectView redirectView = new RedirectView("/{serviceProviderName}/capabilities");
@@ -158,11 +149,7 @@ public class OnboardRestController {
 		}
 
 		logger.info("Service provider {} Incoming subscription post: {}", serviceProviderName, dataTypeApi.toString());
-		serviceProviderRepository.findByName(serviceProviderName);
 
-		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
-		Self self = selfService.fetchSelf();
-		Set<DataType> previousSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 		DataType newDataType = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
@@ -170,7 +157,6 @@ public class OnboardRestController {
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
-			//serviceProviderToUpdate.setLocalSubscriptionRequest(new LocalSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, newLocalSubscription));
 		}
 		serviceProviderToUpdate.addLocalSubscription(localSubscription);
 
@@ -178,15 +164,17 @@ public class OnboardRestController {
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 
-		selfService.updateSelfSubscriptions(previousSelfSubscriptions, serviceProviderRepository.findAll());
-		LocalSubscription returning = null;
-		for (LocalSubscription ls : saved.getSubscriptions()) {
-			if (ls.equals(localSubscription)) {
-				returning = ls;
-			}
-		}
+
+		//find the newly saved subscription from the database
+		LocalSubscription savedSubscription= saved
+				.getSubscriptions()
+				.stream()
+				.filter(subscription -> subscription.equals(localSubscription))
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("Something went wrondg. Could not find localSubscription after saving"));
+
 		OnboardMDCUtil.removeLogVariables();
-		return typeTransformer.transformLocalSubecriptionToLocalSubscriptionApi(returning);
+		return typeTransformer.transformLocalSubecriptionToLocalSubscriptionApi(savedSubscription);
 	}
 
 
@@ -197,16 +185,12 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
 
-		// Get the representation of self - if it doesnt exist in the database call the method that creates it.
-		Self self = selfService.fetchSelf();
 
-		Set<DataType> currentSelfSubscriptions = new HashSet<>(self.getLocalSubscriptions());
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProviderToUpdate == null) {
 			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
 		}
-		//LocalSubscriptionRequest localSubscriptionRequest = serviceProviderToUpdate.getOrCreateLocalSubscriptionRequest();
 		Set<LocalSubscription> subscriptions = serviceProviderToUpdate.getSubscriptions();
 		Optional<LocalSubscription> optionalLocalSubscription = subscriptions
 				.stream()
@@ -220,8 +204,6 @@ public class OnboardRestController {
 		// Save updated Service Providerset it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
-
-		selfService.updateSelfSubscriptions(currentSelfSubscriptions, serviceProviderRepository.findAll());
 
 		RedirectView redirect = new RedirectView("/{serviceProviderName}/subscriptions/");
 		OnboardMDCUtil.removeLogVariables();
@@ -269,12 +251,6 @@ public class OnboardRestController {
 		}
 
 		return returnServiceProviders;
-	}
-
-	// TODO: Remove
-	@RequestMapping(method = RequestMethod.GET, path = "/getSelfRepresentation", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Self getSelfRepresentation() {
-		return selfService.fetchSelf();
 	}
 
 }
