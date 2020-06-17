@@ -178,7 +178,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilityTransformer.selfToCapabilityApi(self);
+		return capabilityTransformer.selfToCapabilityApi(self.getName(), self.getLocalCapabilities());
 	}
 
 	Neighbour findNeighbour(String neighbourName) {
@@ -251,7 +251,7 @@ public class NeighbourService {
 
 	private void postCapabilities(Self self, Neighbour neighbour) {
 		try {
-			Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(self, neighbour);
+			Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(neighbour, self.getName(), self.getLocalCapabilities());
 			capabilities.setLastCapabilityExchange(LocalDateTime.now());
 			neighbour.setCapabilities(capabilities);
 			neighbour.okConnection();
@@ -275,12 +275,12 @@ public class NeighbourService {
 				try {
 					if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
-						Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
+						Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 							try {
 								if (backoffProperties.canBeContacted(neighbour)) {
-									SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(self, neighbour, calculatedSubscriptionForNeighbour);
+									SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(neighbour, calculatedSubscriptionForNeighbour, self.getName());
 									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
 									neighbour.setFedIn(subscriptionRequestResponse);
 									neighbour.okConnection();

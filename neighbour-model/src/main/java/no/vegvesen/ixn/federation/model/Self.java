@@ -86,7 +86,7 @@ public class Self {
 		this.lastUpdatedLocalSubscriptions = lastUpdatedLocalSubscriptions;
 	}
 
-	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour) {
+	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
 		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)

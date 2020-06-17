@@ -84,7 +84,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
 
 		assertThat(res.getDataTypes()).hasSize(1);
 
@@ -107,7 +107,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
 
 		assertThat(res.getDataTypes()).hasSize(1);
 
@@ -131,7 +131,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(self,ericsson);
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
 
 		assertThat(res.getDataTypes()).hasSize(1);
 
@@ -160,7 +160,7 @@ public class NeighbourRESTFacadeTest {
 		self.setName("ericsson.itsinterchange.eu");
 		Set<Subscription> subscriptionSet = Collections.emptySet();
 
-		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(self,ericsson,subscriptionSet);
+		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(ericsson,subscriptionSet, self.getName());
 
 		assertThat(response.getSubscriptions()).hasSize(1);
 
@@ -202,7 +202,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
 		});
 	}
 
@@ -220,7 +220,7 @@ public class NeighbourRESTFacadeTest {
 		Set<Subscription> subscriptionSet = Collections.emptySet();
 
 		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postSubscriptionRequest(self, ericsson, subscriptionSet);
+			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, self.getName());
 		});
 	}
 
@@ -243,7 +243,7 @@ public class NeighbourRESTFacadeTest {
 
 
 		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postSubscriptionRequest(self, ericsson, subscriptionSet);
+			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, self.getName());
 		});
 	}
 
@@ -263,7 +263,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond((request) -> mock);
 
 		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postSubscriptionRequest(self, ericsson, subscriptions);
+			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptions, self.getName());
 		});
 	}
 
@@ -278,7 +278,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond((request) -> mock);
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postCapabilitiesToCapabilities(self, ericsson);
+			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
 		});
 	}
 

@@ -130,7 +130,7 @@ public class NeighbourServiceDiscoveryTest {
 		Capabilities capabilities = new Capabilities();
 		assertThat(capabilities.getDataTypes()).isEmpty();
 
-		doReturn(capabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
+		doReturn(capabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 
@@ -144,7 +144,7 @@ public class NeighbourServiceDiscoveryTest {
 	@Test
 	public void successfulSubscriptionRequestCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
-		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
+		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSet("FI")));
 
@@ -175,7 +175,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
+		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
 	}
 
 	@Test
@@ -186,11 +186,15 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.setConnectionStatus(ConnectionStatus.FAILED);
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
 		doReturn(self).when(selfService).fetchSelf();
-		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
+		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(invocationOnMock -> {
+			Neighbour answer = invocationOnMock.getArgument(0);
+			answer.setNeighbour_id(1);
+			return answer;
+		});
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(0)).postSubscriptionRequest(any(Self.class), any(Neighbour.class), any());
+		verify(neighbourRESTFacade, times(0)).postSubscriptionRequest(any(), anySet(), anyString());
 	}
 
 	@Test
@@ -216,7 +220,7 @@ public class NeighbourServiceDiscoveryTest {
 		DataType firstDataType = this.datexNo;
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
 
-		doReturn(ericssonCapabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
+		doReturn(ericssonCapabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
@@ -225,13 +229,13 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(1)).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
+		verify(neighbourRESTFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
 	}
 
 	@Test
 	public void gracefulBackoffPostOfSubscriptionRequestHappensIfAllowedPostTimeHasPassed(){
 		Neighbour ericsson = createNeighbour();
-		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
+		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString() );
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
@@ -241,7 +245,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Self.class), any(Neighbour.class),anySet());
+		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
 
 	@Test
@@ -273,7 +277,7 @@ public class NeighbourServiceDiscoveryTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(5);
 
 		ericsson.setBackoffStart(pastTime);
-		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
+		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
@@ -292,7 +296,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class), any(Neighbour.class));
+		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
 
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
@@ -300,7 +304,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
 		assertThat(ericsson.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
-		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Self.class),any(Neighbour.class));
+		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
 
 	}
 
@@ -404,9 +408,9 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
-		when(neighbourRESTFacade.postSubscriptionRequest(any(Self.class), eq(neighbourA),anySet())).thenReturn(getReturnedSubscriptionRequest());
-		when(neighbourRESTFacade.postSubscriptionRequest(any(Self.class), eq(neighbourB),anySet())).thenThrow(new SubscriptionRequestException("time-out"));
-		when(neighbourRESTFacade.postSubscriptionRequest(any(Self.class), eq(neighbourC),anySet())).thenReturn(getReturnedSubscriptionRequest());
+		when(neighbourRESTFacade.postSubscriptionRequest(eq(neighbourA),anySet(), anyString())).thenReturn(getReturnedSubscriptionRequest());
+		when(neighbourRESTFacade.postSubscriptionRequest(eq(neighbourB),anySet(), anyString())).thenThrow(new SubscriptionRequestException("time-out"));
+		when(neighbourRESTFacade.postSubscriptionRequest(eq(neighbourC),anySet(), anyString())).thenReturn(getReturnedSubscriptionRequest());
 
 		// Self setup
 		Self discoveringNode = new Self("d");
@@ -420,7 +424,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.evaluateAndPostSubscriptionRequest(neighbours, discoveringNode);
 
-		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(eq(discoveringNode), any(Neighbour.class),anySet());
+		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
 
 	private SubscriptionRequest getEmptySR() {
@@ -452,7 +456,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbour.setFedIn(new SubscriptionRequest(null,neighbourFedInSubscription));
 
 		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
-		Set<Subscription> subscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour);
+		Set<Subscription> subscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getFedIn().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
@@ -487,6 +491,6 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.retryUnreachable(self);
 
-		verify(neighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
+		verify(neighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
 	}
 }

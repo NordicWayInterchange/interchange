@@ -36,17 +36,17 @@ public class NeighbourRESTFacade {
 	}
 
 
-	public Capabilities postCapabilitiesToCapabilities(Self self, Neighbour neighbour) {
+	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<DataType> localCapabilities) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.debug("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
-		CapabilityApi selfCapability = capabilityTransformer.selfToCapabilityApi(self);
+		CapabilityApi selfCapability = capabilityTransformer.selfToCapabilityApi(selfName, localCapabilities);
 		CapabilityApi result = neighbourRESTClient.doPostCapabilities(controlChannelUrl, name, selfCapability);
 		return capabilityTransformer.capabilityApiToCapabilities(result);
 	}
 
-	public SubscriptionRequest postSubscriptionRequest(Self self, Neighbour neighbour, Set<Subscription> subscriptions) {
-		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(self.getName(), subscriptions);
+	public SubscriptionRequest postSubscriptionRequest(Neighbour neighbour, Set<Subscription> subscriptions, String selfName) {
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(selfName, subscriptions);
 		String controlChannelUrl = neighbour.getControlChannelUrl("/subscription");
 		String name = neighbour.getName();
 		SubscriptionRequestApi responseApi = neighbourRESTClient.doPostSubscriptionRequest(subscriptionRequestApi, controlChannelUrl, name);

@@ -2,8 +2,10 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.Self;
+import no.vegvesen.ixn.federation.model.DataType;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Component
 public class CapabilityTransformer {
@@ -17,10 +19,10 @@ public class CapabilityTransformer {
 		return capabilities;
 	}
 
-	public CapabilityApi selfToCapabilityApi(Self self) {
+	public CapabilityApi selfToCapabilityApi(String selfName, Set<DataType> localCapabilities) {
 		CapabilityApi capabilityApi = new CapabilityApi();
-		capabilityApi.setName(self.getName());
-		capabilityApi.setCapabilities(dataTypeTransformer.dataTypesToDataTypeApis(self.getLocalCapabilities()));
+		capabilityApi.setName(selfName);
+		capabilityApi.setCapabilities(dataTypeTransformer.dataTypesToDataTypeApis(localCapabilities));
 		return capabilityApi;
 	}
 
