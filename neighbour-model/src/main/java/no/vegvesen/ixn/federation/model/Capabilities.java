@@ -16,7 +16,7 @@ public class Capabilities {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_seq")
-	@Column(name="cap_id")
+	@Column(name="id")
 	private Integer cap_id;
 
 	private LocalDateTime lastCapabilityExchange;
@@ -35,7 +35,7 @@ public class Capabilities {
 	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "cap_id_dat", foreignKey = @ForeignKey(name="fk_dat_cap"))
+	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
 	private Set<DataType> dataTypes = new HashSet<>();
 
 	@Column
