@@ -25,7 +25,7 @@ public class SubscriptionRequest {
 	private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "subreq_id_sub", foreignKey = @ForeignKey(name = "fk_sub_subreq"))
+	@JoinColumn(name = "sub_id", foreignKey = @ForeignKey(name = "fk_sub_subreq"))
 	private Set<Subscription> subscription = new HashSet<>();
 
 	private LocalDateTime successfulRequest;
