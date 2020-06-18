@@ -16,8 +16,7 @@ public class Capabilities {
 	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_seq")
-	@Column(name="id")
-	private Integer cap_id;
+	private Integer id;
 
 	private LocalDateTime lastCapabilityExchange;
 
@@ -76,7 +75,7 @@ public class Capabilities {
 	@Override
 	public String toString() {
 		return "Capabilities{" +
-				"cap_id=" + cap_id +
+				"id=" + id +
 				", status=" + status +
 				", dataTypes=" + dataTypes +
 				", lastCapabilityExchange=" + lastCapabilityExchange +
