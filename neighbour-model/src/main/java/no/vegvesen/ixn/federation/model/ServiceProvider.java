@@ -13,8 +13,7 @@ import java.util.Set;
 public class ServiceProvider {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sp_generator")
-	@SequenceGenerator(name = "spr_generator", sequenceName = "spr_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "spr_seq")
 	@Column(name = "spr_id")
 	private Integer id;
 

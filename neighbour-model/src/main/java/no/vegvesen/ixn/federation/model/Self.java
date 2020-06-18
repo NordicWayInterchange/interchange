@@ -18,8 +18,7 @@ public class Self {
 	private static Logger logger = LoggerFactory.getLogger(Self.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "self_generator")
-	@SequenceGenerator(name = "self_generator", sequenceName = "self_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "self_seq")
 	@Column(name = "self_id")
 	private Integer self_id;
 	

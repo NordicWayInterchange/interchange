@@ -20,8 +20,7 @@ public class DataType {
 	private static Logger logger = LoggerFactory.getLogger(DataType.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_generator")
-	@SequenceGenerator(name = "dat_generator", sequenceName = "dat_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_seq")
 	@Column(name = "dat_id")
 	private Integer data_id;
 

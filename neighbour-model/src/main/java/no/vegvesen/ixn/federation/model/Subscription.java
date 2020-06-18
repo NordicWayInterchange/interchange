@@ -10,8 +10,7 @@ import javax.persistence.*;
 public class Subscription {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
-	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_seq")
 	@Column(name = "sub_id")
 	private Integer sub_id;
 

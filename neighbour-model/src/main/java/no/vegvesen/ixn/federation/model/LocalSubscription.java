@@ -7,8 +7,7 @@ import java.util.Objects;
 @Table(name = "local_subscriptions")
 public class LocalSubscription {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsub_generator")
-    @SequenceGenerator(name="locsub_generator", sequenceName = "locsub_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsub_seq")
     @Column(name="locsub_id")
     private Integer sub_id;
 

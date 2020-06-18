@@ -29,8 +29,7 @@ public class Neighbour {
 	private static Logger logger = LoggerFactory.getLogger(Neighbour.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neighbour_generator")
-	@SequenceGenerator(name = "neighbour_generator", sequenceName = "neighbour_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neighbour_seq")
 	@Column(name = "neighbour_id")
 	private Integer neighbour_id;
 

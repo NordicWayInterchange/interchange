@@ -13,8 +13,7 @@ import java.util.Set;
 public class LocalSubscriptionRequest {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsubreq_generator")
-	@SequenceGenerator(name="locsubreq_generator", sequenceName = "locsubreq_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsubreq_seq")
 	@Column(name="subreq_id")
 	private Integer subreq_id;
 
