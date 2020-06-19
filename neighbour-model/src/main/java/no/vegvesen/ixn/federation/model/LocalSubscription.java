@@ -1,6 +1,9 @@
 package no.vegvesen.ixn.federation.model;
 
+import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -17,6 +20,10 @@ public class LocalSubscription {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "dat_id", foreignKey = @ForeignKey(name = "fk_locsub_dat"))
     private DataType dataType;
+
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime lastUpdated;
 
     public LocalSubscription() {
 

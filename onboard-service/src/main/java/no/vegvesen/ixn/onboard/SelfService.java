@@ -1,11 +1,8 @@
 package no.vegvesen.ixn.onboard;
 
 
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.Self;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,26 +18,27 @@ import java.util.stream.Collectors;
 @Service
 public class SelfService {
 	private static Logger logger = LoggerFactory.getLogger(SelfService.class);
-	SelfRepository selfRepository;
 	private String nodeProviderName;
+	ServiceProviderRepository repository;
 
 	@Autowired
-	public SelfService(SelfRepository selfRepository, @Value("${interchange.node-provider.name}") String nodeProviderName) {
-		this.selfRepository = selfRepository;
+	public SelfService(@Value("${interchange.node-provider.name}") String nodeProviderName, ServiceProviderRepository repository) {
 		this.nodeProviderName = nodeProviderName;
+		this.repository = repository;
 	}
 
 	// Get the self representation from the database. If it doesn't exist, create it.
 	public Self fetchSelf() {
-		Self self = selfRepository.findByName(nodeProviderName);
-		if (self == null) {
-			self = new Self(nodeProviderName);
-			return selfRepository.save(self);
-		}
-		return self;
+		List<ServiceProvider> serviceProviders = repository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED);
+		Self self = new Self(nodeProviderName);
+		self.setLocalCapabilities(calculateSelfCapabilities(serviceProviders));
+		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
+		//TODO also have to remember LastUpdated....
+        return self;
+
 	}
 
-
+/*
 	public void updateSelfCapabilities(Set<DataType> previousCapabilities, List<ServiceProvider> serviceProviders) {
 		// Recalculate Self capabilities now that we updated a Service Provider.
 		Self self = fetchSelf();
@@ -60,7 +58,7 @@ public class SelfService {
 			logger.info("Capabilities have not changed. Keeping the current representation of self.");
 		}
 	}
-
+*/
 	Set<DataType> calculateSelfCapabilities(Iterable<ServiceProvider> serviceProviders) {
 		logger.info("Calculating Self capabilities...");
 		Set<DataType> localCapabilities = new HashSet<>();
@@ -116,7 +114,11 @@ public class SelfService {
 
 
 
+	//TODO go through uses of this, and remove the calls.
 	public Self save(Self self) {
+		/*
 		return selfRepository.save(self);
+		*/
+		throw new IllegalStateException("You really shouldn't save!");
 	}
 }

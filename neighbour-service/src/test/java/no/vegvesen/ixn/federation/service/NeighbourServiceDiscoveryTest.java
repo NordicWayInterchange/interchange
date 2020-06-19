@@ -456,7 +456,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbour.setFedIn(new SubscriptionRequest(null,neighbourFedInSubscription));
 
 		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
-		Set<Subscription> subscriptions = self.calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
+		Set<Subscription> subscriptions = Self.calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getFedIn().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in

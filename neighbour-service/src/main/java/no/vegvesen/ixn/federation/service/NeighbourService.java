@@ -251,7 +251,9 @@ public class NeighbourService {
 
 	private void postCapabilities(Self self, Neighbour neighbour) {
 		try {
-			Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(neighbour, self.getName(), self.getLocalCapabilities());
+			String name = self.getName();
+			Set<DataType> localCapabilities = self.getLocalCapabilities();
+			Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(neighbour, name, localCapabilities);
 			capabilities.setLastCapabilityExchange(LocalDateTime.now());
 			neighbour.setCapabilities(capabilities);
 			neighbour.okConnection();
@@ -275,7 +277,8 @@ public class NeighbourService {
 				try {
 					if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
-						Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
+						Set<DataType> localSubscriptions = self.getLocalSubscriptions();
+						Set<Subscription> calculatedSubscriptionForNeighbour = Self.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 							try {

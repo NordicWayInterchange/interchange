@@ -3,10 +3,8 @@ package no.vegvesen.ixn.onboard;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.lang.NonNull;
 
 import java.util.HashMap;
@@ -20,10 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SelfServiceTest {
 
-	@MockBean
-	SelfRepository selfRepository;
-
-	SelfService selfService = new SelfService(selfRepository, "myName");
+	SelfService selfService = new SelfService("myName", null);
 
 	@Test
 	void calculateSelfSubscriptionsTest() {

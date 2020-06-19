@@ -52,7 +52,7 @@ public class NeighbourDiscovererIT {
 	@MockBean
 	RestTemplate restTemplate;
 
-	@Autowired
+	@MockBean
 	SelfService selfService;
 
 	@Autowired
@@ -72,9 +72,9 @@ public class NeighbourDiscovererIT {
 	@Test
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
-		Self self = selfService.fetchSelf();
+		Self self = new Self(nodeName);
 		self.setLocalSubscriptions(Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
-		selfService.save(selfService.fetchSelf());
+		when(selfService.fetchSelf()).thenReturn(self);
 
 		Neighbour neighbour1 = new Neighbour();
 		neighbour1.setName("neighbour-one");
