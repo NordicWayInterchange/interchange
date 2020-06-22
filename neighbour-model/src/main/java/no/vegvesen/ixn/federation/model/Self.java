@@ -19,7 +19,7 @@ public class Self {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "self_seq")
-	@Column(name = "self_id")
+	@Column(name = "id")
 	private Integer self_id;
 	
 	private String name;
