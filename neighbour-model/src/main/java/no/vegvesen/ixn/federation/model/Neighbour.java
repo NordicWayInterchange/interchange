@@ -30,7 +30,7 @@ public class Neighbour {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neighbour_seq")
-	@Column(name = "neighbour_id")
+	@Column(name = "id")
 	private Integer neighbour_id;
 
 	private String name;
