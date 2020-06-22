@@ -25,11 +25,11 @@ public class Self {
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "self_id_dat", foreignKey = @ForeignKey(name="fk_dat_self"))
+	@JoinColumn(name = "self_cap_dat_id", foreignKey = @ForeignKey(name="fk_dat_self_cap"))
 	private Set<DataType> localCapabilities = new HashSet<>();
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "self_id_sub", foreignKey = @ForeignKey(name="fk_sub_self"))
+	@JoinColumn(name = "self_sub_dat_id", foreignKey = @ForeignKey(name="fk_dat_self_sub"))
 	private Set<DataType> localSubscriptions = new HashSet<>();
 
 	private LocalDateTime lastUpdatedLocalCapabilities;

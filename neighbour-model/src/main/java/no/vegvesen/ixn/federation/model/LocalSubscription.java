@@ -15,7 +15,7 @@ public class LocalSubscription {
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "locsub_dat_id", referencedColumnName = "dat_id", foreignKey = @ForeignKey(name = "fk_locsub_dat"))
+    @JoinColumn(name = "dat_id", foreignKey = @ForeignKey(name = "fk_locsub_dat"))
     private DataType dataType;
 
     public LocalSubscription() {

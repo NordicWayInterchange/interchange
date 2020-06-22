@@ -21,7 +21,7 @@ public class DataType {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_seq")
-	@Column(name = "dat_id")
+	@Column(name = "id")
 	private Integer data_id;
 
 	@ElementCollection(fetch = FetchType.EAGER)

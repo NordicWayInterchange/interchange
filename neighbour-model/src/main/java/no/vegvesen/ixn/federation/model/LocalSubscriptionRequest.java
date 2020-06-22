@@ -21,7 +21,7 @@ public class LocalSubscriptionRequest {
 	private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "subreq_id", foreignKey = @ForeignKey(name="fk_dat_subreq"))
+	@JoinColumn(name = "locsubreq_dat_id", foreignKey = @ForeignKey(name="fk_dat_locsubreq"))
 	private Set<DataType> subscription = new HashSet<>();
 
 	@Column
