@@ -8,7 +8,7 @@ import java.util.Objects;
 public class LocalSubscription {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsub_seq")
-    @Column(name="locsub_id")
+    @Column(name="id")
     private Integer sub_id;
 
     @Enumerated(EnumType.STRING)

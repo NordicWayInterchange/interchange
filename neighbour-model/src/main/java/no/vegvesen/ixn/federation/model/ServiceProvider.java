@@ -14,7 +14,7 @@ public class ServiceProvider {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "spr_seq")
-	@Column(name = "spr_id")
+	@Column(name = "id")
 	private Integer id;
 
 	private String name;
@@ -24,7 +24,7 @@ public class ServiceProvider {
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "spr_locsub_id", foreignKey = @ForeignKey(name = "fk_spr_locsub"))
+	@JoinColumn(name = "spr_id", foreignKey = @ForeignKey(name = "fk_locsub_spr"))
 	private Set<LocalSubscription> subscriptions = new HashSet<>();
 
 	public ServiceProvider() {
