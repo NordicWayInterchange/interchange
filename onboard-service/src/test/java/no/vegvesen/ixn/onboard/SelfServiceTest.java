@@ -7,9 +7,8 @@ import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.jupiter.api.Test;
 import org.springframework.lang.NonNull;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,6 +44,40 @@ class SelfServiceTest {
 		assertThat(selfSubscriptions).containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet()));
 	}
 
+	@Test
+	void calculateLastUpdatedSubscriptionsEmpty() {
+		ServiceProvider serviceProvider = new ServiceProvider();
+		LocalDateTime lastUpdatedSubscriptions = selfService.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider));
+		assertThat(lastUpdatedSubscriptions).isNull();
+	}
+
+	@Test
+	void calculateLastUpdatedSubscriptionOneSub() {
+		ServiceProvider serviceProvider = new ServiceProvider();
+		LocalDateTime lastUpdated = LocalDateTime.now();
+		LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, getDatex("no"), lastUpdated);
+		serviceProvider.addLocalSubscription(subscription);
+
+		assertThat(selfService.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider))).isEqualTo(lastUpdated);
+	}
+
+	@Test
+	void calculateLastUpdateCapabilitiesEmpty() {
+		ServiceProvider serviceProvider = new ServiceProvider();
+
+		LocalDateTime localDateTime = selfService.calculateLastUpdatedCapabilties(Arrays.asList(serviceProvider));
+		assertThat(localDateTime).isNull();
+	}
+
+	@Test
+	void calculateLastUpdatedCapabiltiesOneCap() {
+		ServiceProvider serviceProvider = new ServiceProvider();
+		LocalDateTime lastUpdated = LocalDateTime.now();
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,setOf(getDatex("NO")),lastUpdated);
+		serviceProvider.setCapabilities(capabilities);
+		LocalDateTime result = selfService.calculateLastUpdatedCapabilties(Arrays.asList(serviceProvider));
+		assertThat(result).isEqualTo(lastUpdated);
+	}
 
 	@Test
 	void calculateSelfCapabilitiesTest() {
@@ -79,5 +112,8 @@ class SelfServiceTest {
 		return new DataType(datexHeaders);
 	}
 
+	private <T> Set<T> setOf(T ... instances) {
+		return Stream.of(instances).collect(Collectors.toSet());
+	}
 
 }

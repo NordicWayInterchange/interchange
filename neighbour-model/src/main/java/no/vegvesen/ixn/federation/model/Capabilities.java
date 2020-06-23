@@ -28,6 +28,10 @@ public class Capabilities {
 		this.lastCapabilityExchange = lastCapabilityExchange;
 	}
 
+	public LocalDateTime getLastUpdated() {
+		return lastUpdated;
+	}
+
 	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
 
 	@Enumerated(EnumType.STRING)
@@ -47,6 +51,12 @@ public class Capabilities {
 	public Capabilities(CapabilitiesStatus status, Set<DataType> capabilities) {
 		this.status = status;
 		this.dataTypes = capabilities;
+	}
+
+	public Capabilities(CapabilitiesStatus status, Set<DataType> capabilties, LocalDateTime lastUpdated) {
+		this.status = status;
+		this.dataTypes = capabilties;
+		this.lastUpdated = lastUpdated;
 	}
 
 	public CapabilitiesStatus getStatus() {

@@ -40,6 +40,13 @@ public class LocalSubscription {
         this.dataType = dataType;
     }
 
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, DataType dataType, LocalDateTime lastUpdated) {
+        this.sub_id = id;
+        this.status = status;
+        this.dataType = dataType;
+        this.lastUpdated = lastUpdated;
+    }
+
 
     public void setStatus(LocalSubscriptionStatus status) {
         this.status = status;
@@ -100,5 +107,9 @@ public class LocalSubscription {
         } else {
             return new LocalSubscription(sub_id,newStatus,dataType);
         }
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
     }
 }
