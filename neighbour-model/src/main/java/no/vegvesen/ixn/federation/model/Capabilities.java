@@ -15,10 +15,8 @@ public class Capabilities {
 
 	@JsonIgnore
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_generator")
-	@SequenceGenerator(name="cap_generator", sequenceName = "cap_seq")
-	@Column(name="cap_id")
-	private Integer cap_id;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_seq")
+	private Integer id;
 
 	private LocalDateTime lastCapabilityExchange;
 
@@ -36,7 +34,7 @@ public class Capabilities {
 	private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "cap_id_dat", foreignKey = @ForeignKey(name="fk_dat_cap"))
+	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
 	private Set<DataType> dataTypes = new HashSet<>();
 
 	@Column
@@ -77,7 +75,7 @@ public class Capabilities {
 	@Override
 	public String toString() {
 		return "Capabilities{" +
-				"cap_id=" + cap_id +
+				"id=" + id +
 				", status=" + status +
 				", dataTypes=" + dataTypes +
 				", lastCapabilityExchange=" + lastCapabilityExchange +

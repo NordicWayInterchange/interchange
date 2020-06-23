@@ -18,19 +18,18 @@ public class Self {
 	private static Logger logger = LoggerFactory.getLogger(Self.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "self_generator")
-	@SequenceGenerator(name = "self_generator", sequenceName = "self_seq")
-	@Column(name = "self_id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "self_seq")
+	@Column(name = "id")
 	private Integer self_id;
 	
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "self_id_dat", foreignKey = @ForeignKey(name="fk_dat_self"))
+	@JoinColumn(name = "self_id_cap", foreignKey = @ForeignKey(name="fk_dat_self_cap"))
 	private Set<DataType> localCapabilities = new HashSet<>();
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "self_id_sub", foreignKey = @ForeignKey(name="fk_sub_self"))
+	@JoinColumn(name = "self_id_sub", foreignKey = @ForeignKey(name="fk_dat_self_sub"))
 	private Set<DataType> localSubscriptions = new HashSet<>();
 
 	private LocalDateTime lastUpdatedLocalCapabilities;
