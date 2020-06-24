@@ -107,7 +107,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
 		client.addSubscription(new Datex2DataTypeApi("NO"));
 
-        LocalSubscriptionListApi localSubscriptions = client.getServiceProviderSubscription();
+        LocalSubscriptionListApi localSubscriptions = client.getServiceProviderSubscriptions();
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(localSubscriptions));
 
@@ -117,7 +117,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         LocalSubscriptionApi idSubToDelete = filtered.get(0);
 
         client.deleteSubscriptions(idSubToDelete.getId());
-		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscription();
+		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
 		List<LocalSubscriptionApi> filteredAfterDelete = filterOutTearDownSubscriptions(afterDelete.getSubscritions());
         assertThat(filteredAfterDelete).hasSize(0);
 	}
@@ -131,12 +131,12 @@ public class OnboardRestClientIT extends DockerBaseIT {
         LocalDataTypeList capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
-		LocalSubscriptionListApi serviceProviderSubscriptionRequest = client.getServiceProviderSubscription();
+		LocalSubscriptionListApi serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptions();
 		for (LocalSubscriptionApi subscription : serviceProviderSubscriptionRequest.getSubscritions()) {
 			System.out.println("deleting subscription " + subscription.getId());
 			client.deleteSubscriptions(subscription.getId());
 		}
-		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscription();
+		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
 		assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscritions())).hasSize(0);
     }
 

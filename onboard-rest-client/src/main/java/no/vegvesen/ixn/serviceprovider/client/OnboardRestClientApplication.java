@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
 import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
 import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionApi;
+import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionListApi;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -97,9 +98,9 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalDataTypeList capabilities = client.getServiceProviderCapabilities();
+            LocalSubscriptionListApi subscriptions = client.getServiceProviderSubscriptions();
             ObjectMapper mapper = new ObjectMapper();
-            System.out.println(mapper.writeValueAsString(capabilities));
+            System.out.println(mapper.writeValueAsString(subscriptions));
             return 0;
         }
     }
