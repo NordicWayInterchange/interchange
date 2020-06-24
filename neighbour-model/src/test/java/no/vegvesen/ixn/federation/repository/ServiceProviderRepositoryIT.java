@@ -196,7 +196,10 @@ public class ServiceProviderRepositoryIT {
 		subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
 		repository.save(serviceProvider);
 		serviceProvider = repository.findByName(name);
-		assertThat(serviceProvider.getSubscriptions()).isEmpty();
+		assertThat(serviceProvider
+				.getSubscriptions()
+				.stream()
+				.filter(s -> s.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN))).hasSize(1);
 
 	}
 
