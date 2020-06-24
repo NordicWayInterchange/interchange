@@ -60,7 +60,6 @@ public class SelfService {
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
 			logger.info("Service provider name: {}", serviceProvider.getName());
-			//Set<DataType> serviceProviderSubscriptions = serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions();
 			Set<DataType> serviceProviderSubscriptions = serviceProvider
 					.getSubscriptions()
 					.stream()

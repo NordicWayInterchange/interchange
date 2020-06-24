@@ -278,7 +278,7 @@ public class NeighbourService {
 					if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 						Set<DataType> localSubscriptions = self.getLocalSubscriptions();
-						Set<Subscription> calculatedSubscriptionForNeighbour = Self.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
+						Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 							try {

@@ -22,7 +22,7 @@ public class SelfTest {
 
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newLinkedHashSet(getDatexNoDataType()));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(),new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = Self.calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
+		Set<Subscription> calculatedSubscription = self.calculateCustomSubscriptionForNeighbour(neighbour);
 
 		assertThat(calculatedSubscription).hasSize(1);
 		assertThat(calculatedSubscription.iterator().next().getSelector()).isEqualTo("originatingCountry = 'NO'");
@@ -33,7 +33,7 @@ public class SelfTest {
 		Self self = new Self("self");
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,Sets.newLinkedHashSet(getDatexNoDataType()));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(),new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = Self.calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
+		Set<Subscription> calculatedSubscription = self.calculateCustomSubscriptionForNeighbour(neighbour);
 		assertThat(calculatedSubscription).hasSize(0);
 	}
 
