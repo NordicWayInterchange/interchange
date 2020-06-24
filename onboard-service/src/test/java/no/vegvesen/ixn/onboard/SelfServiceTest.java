@@ -3,21 +3,34 @@ package no.vegvesen.ixn.onboard;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.time.Month;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
-
+@SpringBootTest(classes = {SelfService.class})
 class SelfServiceTest {
+	@MockBean
+	ServiceProviderRepository serviceProviderRepository;
 
-	SelfService selfService = new SelfService("myName", null);
+	@Autowired
+	SelfService selfService;
 
 	@Test
 	void calculateSelfSubscriptionsTest() {
@@ -102,6 +115,52 @@ class SelfServiceTest {
 
 		assertThat(selfCapabilities).hasSize(3);
 		assertThat(selfCapabilities).containsAll(Stream.of(a, b, c).collect(Collectors.toSet()));
+	}
+
+	@Test
+	void fetchSelfCalculatesGetLastUpdatedLocalSubscriptions() {
+		LocalSubscription localSubscription = getLocalSubscription(getDatex("SE"), LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 1));
+		ServiceProvider aServiceProvider = new ServiceProvider();
+		aServiceProvider.setSubscriptions(Sets.newLinkedHashSet(localSubscription));
+
+		LocalSubscription b1LocalSubscription = getLocalSubscription(getDatex("SE"), LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2));
+		LocalSubscription b2LocalSubscription = getLocalSubscription(getDatex("SE"), LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0));
+		ServiceProvider bServiceProvider = new ServiceProvider();
+		bServiceProvider.setSubscriptions(Sets.newLinkedHashSet(b1LocalSubscription, b2LocalSubscription));
+
+		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
+		when(serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED)).thenReturn(serviceProviders);
+
+		Self self = selfService.fetchSelf();
+
+		assertThat(self.getLastUpdatedLocalSubscriptions()).isEqualTo(b1LocalSubscription.getLastUpdated());
+		assertThat(self.getLastUpdatedLocalCapabilities()).isNull();
+	}
+
+	@Test
+	void fetchSelfCalculatesGetLastUpdatedLocalCapabilities() {
+		LocalDateTime aCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
+		DataType aCap1 = getDatex("SE");
+		DataType aCap2 = getDatex("SE");
+		ServiceProvider aServiceProvider = new ServiceProvider();
+		aServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(aCap1, aCap2), aCapDate));
+
+		LocalDateTime bCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
+		DataType bCap1 = getDatex("SE");
+		DataType bCap2 = getDatex("SE");
+		ServiceProvider bServiceProvider = new ServiceProvider();
+		bServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
+
+		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
+		when(serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED)).thenReturn(serviceProviders);
+
+		Self self = selfService.fetchSelf();
+
+		assertThat(self.getLastUpdatedLocalCapabilities()).isEqualTo(bCapDate);
+	}
+
+	private LocalSubscription getLocalSubscription(DataType dataType, LocalDateTime lastUpdated) {
+		return new LocalSubscription(-1, LocalSubscriptionStatus.CREATED, dataType, lastUpdated);
 	}
 
 	@NonNull
