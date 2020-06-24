@@ -5,31 +5,19 @@ import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Entity
-@Table(name="self", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_self_name"))
 public class Self {
 
 	private static Logger logger = LoggerFactory.getLogger(Self.class);
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "self_seq")
-	@Column(name = "id")
-	private Integer self_id;
-	
 	private String name;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "self_id_cap", foreignKey = @ForeignKey(name="fk_dat_self_cap"))
 	private Set<DataType> localCapabilities = new HashSet<>();
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "self_id_sub", foreignKey = @ForeignKey(name="fk_dat_self_sub"))
 	private Set<DataType> localSubscriptions = new HashSet<>();
 
 	private LocalDateTime lastUpdatedLocalCapabilities;
@@ -100,7 +88,6 @@ public class Self {
 	@Override
 	public String toString() {
 		return "Self{" +
-				"self_id=" + self_id +
 				", name='" + name + '\'' +
 				", localCapabilities=" + localCapabilities +
 				", localSubscriptions=" + localSubscriptions +

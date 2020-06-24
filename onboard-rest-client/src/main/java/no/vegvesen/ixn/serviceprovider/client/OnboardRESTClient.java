@@ -47,7 +47,7 @@ public class OnboardRESTClient {
     }
 
 
-    public LocalSubscriptionListApi getServiceProviderSubscription() {
+    public LocalSubscriptionListApi getServiceProviderSubscriptions() {
 		String url = String.format("%s/%s/subscriptions/", server, user);
 		return restTemplate.getForEntity(url, LocalSubscriptionListApi.class).getBody();
     }

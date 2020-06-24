@@ -334,4 +334,8 @@ public class Neighbour {
 	public int hashCode() {
 		return name.hashCode();
 	}
+
+	public void setNeighbour_id(Integer neighbour_id) {
+		this.neighbour_id = neighbour_id;
+	}
 }

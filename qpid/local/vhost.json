@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "local.itsinterchange.eu",
+  "name": "local.bouvetinterchange.eu",
   "modelVersion": "7.0",
   "exchanges": [
     {
@@ -70,7 +70,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "local.itsinterchange.eu"
+            "NAME": "local.bouvetinterchange.eu"
           }
         },
         {
@@ -79,7 +79,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "local.itsinterchange.eu"
+            "NAME": "local.bouvetinterchange.eu"
           }
         },
         {

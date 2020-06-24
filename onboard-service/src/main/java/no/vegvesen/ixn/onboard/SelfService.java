@@ -1,11 +1,8 @@
 package no.vegvesen.ixn.onboard;
 
 
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.Self;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.repository.SelfRepository;
+import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,44 +18,26 @@ import java.util.stream.Collectors;
 @Service
 public class SelfService {
 	private static Logger logger = LoggerFactory.getLogger(SelfService.class);
-	SelfRepository selfRepository;
 	private String nodeProviderName;
+	ServiceProviderRepository repository;
 
 	@Autowired
-	public SelfService(SelfRepository selfRepository, @Value("${interchange.node-provider.name}") String nodeProviderName) {
-		this.selfRepository = selfRepository;
+	public SelfService(@Value("${interchange.node-provider.name}") String nodeProviderName, ServiceProviderRepository repository) {
 		this.nodeProviderName = nodeProviderName;
+		this.repository = repository;
 	}
 
-	// Get the self representation from the database. If it doesn't exist, create it.
+	// Get the self representation from the database.
+    //this could, of course, be a lot more efficient :-)
 	public Self fetchSelf() {
-		Self self = selfRepository.findByName(nodeProviderName);
-		if (self == null) {
-			self = new Self(nodeProviderName);
-			return selfRepository.save(self);
-		}
-		return self;
-	}
+		List<ServiceProvider> serviceProviders = repository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED);
+		Self self = new Self(nodeProviderName);
+		self.setLocalCapabilities(calculateSelfCapabilities(serviceProviders));
+		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
+		self.setLastUpdatedLocalSubscriptions(calculateLastUpdatedSubscriptions(serviceProviders));
+		self.setLastUpdatedLocalCapabilities(calculateLastUpdatedCapabilties(serviceProviders));
+        return self;
 
-
-	public void updateSelfCapabilities(Set<DataType> previousCapabilities, List<ServiceProvider> serviceProviders) {
-		// Recalculate Self capabilities now that we updated a Service Provider.
-		Self self = fetchSelf();
-		Set<DataType> updatedCapabilities = calculateSelfCapabilities(serviceProviders);
-
-		// If old version and updated version of the capabilities are not equal, then we update the timestamp
-		logger.info("Previous capabilities: {}", previousCapabilities);
-		logger.info("Updated capabilities:  {}", updatedCapabilities);
-
-		if (!previousCapabilities.equals(updatedCapabilities)) {
-			logger.info("Capabilities have changed. Updating representation of self.");
-			self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
-			self.setLocalCapabilities(updatedCapabilities);
-			selfRepository.save(self);
-			logger.info("Updated Self: {}", self.toString());
-		} else {
-			logger.info("Capabilities have not changed. Keeping the current representation of self.");
-		}
 	}
 
 	Set<DataType> calculateSelfCapabilities(Iterable<ServiceProvider> serviceProviders) {
@@ -75,33 +54,12 @@ public class SelfService {
 		return localCapabilities;
 	}
 
-	public void updateSelfSubscriptions(Set<DataType> previousSubscriptions, List<ServiceProvider> serviceProviders) {
-		// Get the current Self subscriptions. Recalculate the Self subscriptions now that a Service Provider has been updated.
-		Self self = fetchSelf();
-		Set<DataType> updatedSubscriptions = calculateSelfSubscriptions(serviceProviders);
-
-		if (!previousSubscriptions.equals(updatedSubscriptions)) {
-			logger.debug("Subscriptions have changed from {} to {}. Updating representation of self.",
-					previousSubscriptions.toString(),
-					updatedSubscriptions.toString());
-			self.setLocalSubscriptions(updatedSubscriptions);
-			self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
-			self = save(self);
-			logger.info("Updated Self: {}", self.toString());
-		} else {
-			logger.debug("Subscriptions have not changed from {} to {}. No self update.",
-					previousSubscriptions.toString(),
-					updatedSubscriptions.toString());
-		}
-	}
-
 	Set<DataType> calculateSelfSubscriptions(List<ServiceProvider> serviceProviders) {
 		logger.info("Calculating Self subscriptions...");
 		Set<DataType> localSubscriptions = new HashSet<>();
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
 			logger.info("Service provider name: {}", serviceProvider.getName());
-			//Set<DataType> serviceProviderSubscriptions = serviceProvider.getOrCreateLocalSubscriptionRequest().getSubscriptions();
 			Set<DataType> serviceProviderSubscriptions = serviceProvider
 					.getSubscriptions()
 					.stream()
@@ -114,9 +72,36 @@ public class SelfService {
 		return localSubscriptions;
 	}
 
+	LocalDateTime calculateLastUpdatedSubscriptions(List<ServiceProvider> serviceProviders) {
+	    LocalDateTime result = null;
+		for (ServiceProvider serviceProvider : serviceProviders) {
+		    for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+				LocalDateTime lastUpdated = subscription.getLastUpdated();
+				if (lastUpdated != null) {
+					if (result == null || lastUpdated.isAfter(result)) {
+						result = lastUpdated;
+					}
+				}
+			}
 
+		}
+	    return result;
 
-	public Self save(Self self) {
-		return selfRepository.save(self);
 	}
+
+
+	LocalDateTime calculateLastUpdatedCapabilties(List<ServiceProvider> serviceProviders) {
+	    LocalDateTime result = null;
+		for (ServiceProvider serviceProvider : serviceProviders) {
+		    Capabilities capabilities = serviceProvider.getCapabilities();
+			LocalDateTime lastUpdated = capabilities.getLastUpdated();
+			if (lastUpdated != null) {
+				if (result == null || lastUpdated.isAfter(result)) {
+					result = lastUpdated;
+				}
+			}
+		}
+	    return result;
+	}
+
 }

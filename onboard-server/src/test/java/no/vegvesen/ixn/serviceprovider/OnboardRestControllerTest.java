@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -82,7 +83,6 @@ public class OnboardRestControllerTest {
 
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(capabilitiesPath)
@@ -110,7 +110,6 @@ public class OnboardRestControllerTest {
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -153,7 +152,6 @@ public class OnboardRestControllerTest {
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -242,7 +240,6 @@ public class OnboardRestControllerTest {
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 
@@ -263,7 +260,6 @@ public class OnboardRestControllerTest {
 		// The existing subscriptions of the Service Provider
 		doReturn(null).when(serviceProviderRepository).findByName(any(String.class));
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 

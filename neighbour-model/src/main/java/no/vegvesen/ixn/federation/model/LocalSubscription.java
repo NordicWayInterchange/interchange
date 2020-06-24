@@ -1,6 +1,9 @@
 package no.vegvesen.ixn.federation.model;
 
+import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -18,6 +21,10 @@ public class LocalSubscription {
     @JoinColumn(name = "dat_id", foreignKey = @ForeignKey(name = "fk_locsub_dat"))
     private DataType dataType;
 
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime lastUpdated;
+
     public LocalSubscription() {
 
     }
@@ -31,6 +38,13 @@ public class LocalSubscription {
         this.sub_id = id;
         this.status = status;
         this.dataType = dataType;
+    }
+
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, DataType dataType, LocalDateTime lastUpdated) {
+        this.sub_id = id;
+        this.status = status;
+        this.dataType = dataType;
+        this.lastUpdated = lastUpdated;
     }
 
 
@@ -93,5 +107,9 @@ public class LocalSubscription {
         } else {
             return new LocalSubscription(sub_id,newStatus,dataType);
         }
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
     }
 }
