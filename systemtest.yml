@@ -34,7 +34,9 @@ services:
     - testing_net
 
   local_onboard_server:
-    image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
+    build:
+      context: onboard-server-app
     container_name: local_onboard_server
     depends_on:
       - local_db
@@ -56,7 +58,9 @@ services:
 
 
   local_interchange_app:
-    image: eu.gcr.io/nordic-way-aad182cc/interchange-node-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/interchange-node-app:${BRANCH_TAG}
+    build:
+      context: interchange-node-app
     container_name: local_interchange_app
     hostname: local_interchange_app
     links:
@@ -97,7 +101,9 @@ services:
     - testing_net
 
   local_neighbour_server:
-    image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
+    build:
+      context: neighbour-server-app
     container_name: local_neighbour_server
     depends_on:
       - local_db
@@ -119,7 +125,9 @@ services:
     dns: 172.28.1.1
 
   local_routing_configurer:
-    image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
+    build:
+      context: routing-configurer-app
     container_name: local_routing_configurer
     depends_on:
       - local_db
@@ -140,7 +148,9 @@ services:
     - testing_net
 
   local_neighbour_discoverer:
-    image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
+    build:
+      context: neighbour-discoverer-app
     container_name: local_neighbour_discoverer
     depends_on:
       - local_db
@@ -163,7 +173,9 @@ services:
     - testing_net
 
   local_message_collector_app:
-    image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
+    build:
+      context: message-collector-app
     container_name: local_message_collector_app
     depends_on:
     - local_db
@@ -199,7 +211,9 @@ services:
     - testing_net
 
   remote_onboard_server:
-    image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
+    build:
+      context: onboard-server-app
     container_name: remote_onboard_server
     depends_on:
     - remote_db
@@ -220,7 +234,9 @@ services:
     - testing_net
 
   remote_interchange_app:
-    image: eu.gcr.io/nordic-way-aad182cc/interchange-node-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/interchange-node-app:${BRANCH_TAG}
+    build:
+      context: interchange-node-app
     container_name: remote_interchange_app
     hostname: remote_interchange_app
     links:
@@ -235,7 +251,9 @@ services:
     - testing_net
 
   remote_neighbour_server:
-    image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
+    build:
+      context: neighbour-server-app
     container_name: remote_neighbour_server
     depends_on:
       - remote_db
@@ -257,7 +275,9 @@ services:
     dns: 172.28.1.1
 
   remote_neighbour_discoverer:
-    image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
+    build:
+      context: neighbour-discoverer-app
     container_name: remote_neighbour_discoverer
     depends_on:
       - remote_db
@@ -305,7 +325,9 @@ services:
     - testing_net
 
   remote_routing_configurer:
-    image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
+    build:
+      context: routing-configurer-app
     container_name: remote_routing_configurer
     depends_on:
       - remote_db
@@ -326,7 +348,9 @@ services:
     - testing_net
 
   remote_message_collector_app:
-    image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
+    #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
+    build:
+      context: message-collector-app
     container_name: remote_message_collector_app
     depends_on:
       - remote_db
