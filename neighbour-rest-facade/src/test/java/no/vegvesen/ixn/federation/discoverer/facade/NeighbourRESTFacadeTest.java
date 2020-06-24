@@ -84,7 +84,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self );
 
 		assertThat(res.getDataTypes()).hasSize(1);
 
@@ -107,7 +107,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
 
 		assertThat(res.getDataTypes()).hasSize(1);
 
@@ -131,7 +131,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
 
 		assertThat(res.getDataTypes()).hasSize(1);
 
@@ -202,7 +202,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
+			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
 		});
 	}
 
@@ -278,7 +278,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond((request) -> mock);
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self.getName(), self.getLocalCapabilities());
+			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
 		});
 	}
 

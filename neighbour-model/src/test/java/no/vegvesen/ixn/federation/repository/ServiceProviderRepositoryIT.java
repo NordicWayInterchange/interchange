@@ -193,7 +193,7 @@ public class ServiceProviderRepositoryIT {
 				.stream()
 				.findFirst()
 				.orElseThrow(() -> new AssertionError("could not find first subscription"));
-		serviceProvider.removeSubscription(subscription);
+		subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
 		repository.save(serviceProvider);
 		serviceProvider = repository.findByName(name);
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();

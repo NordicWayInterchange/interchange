@@ -178,7 +178,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilityTransformer.selfToCapabilityApi(self.getName(), self.getLocalCapabilities());
+		return capabilityTransformer.selfToCapabilityApi(self);
 	}
 
 	Neighbour findNeighbour(String neighbourName) {
@@ -251,9 +251,7 @@ public class NeighbourService {
 
 	private void postCapabilities(Self self, Neighbour neighbour) {
 		try {
-			String name = self.getName();
-			Set<DataType> localCapabilities = self.getLocalCapabilities();
-			Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(neighbour, name, localCapabilities);
+			Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(neighbour, self);
 			capabilities.setLastCapabilityExchange(LocalDateTime.now());
 			neighbour.setCapabilities(capabilities);
 			neighbour.okConnection();

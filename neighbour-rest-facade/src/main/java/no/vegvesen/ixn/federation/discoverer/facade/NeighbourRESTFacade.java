@@ -36,11 +36,11 @@ public class NeighbourRESTFacade {
 	}
 
 
-	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<DataType> localCapabilities) {
+	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, Self self) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.debug("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
-		CapabilityApi selfCapability = capabilityTransformer.selfToCapabilityApi(selfName, localCapabilities);
+		CapabilityApi selfCapability = capabilityTransformer.selfToCapabilityApi(self);
 		CapabilityApi result = neighbourRESTClient.doPostCapabilities(controlChannelUrl, name, selfCapability);
 		return capabilityTransformer.capabilityApiToCapabilities(result);
 	}

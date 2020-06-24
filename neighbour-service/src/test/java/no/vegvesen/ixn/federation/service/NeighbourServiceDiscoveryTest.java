@@ -130,7 +130,7 @@ public class NeighbourServiceDiscoveryTest {
 		Capabilities capabilities = new Capabilities();
 		assertThat(capabilities.getDataTypes()).isEmpty();
 
-		doReturn(capabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
+		doReturn(capabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 
@@ -175,7 +175,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
+		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
 	}
 
 	@Test
@@ -220,7 +220,7 @@ public class NeighbourServiceDiscoveryTest {
 		DataType firstDataType = this.datexNo;
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
 
-		doReturn(ericssonCapabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
+		doReturn(ericssonCapabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
@@ -229,7 +229,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
+		verify(neighbourRESTFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 	}
 
 	@Test
@@ -277,7 +277,7 @@ public class NeighbourServiceDiscoveryTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(5);
 
 		ericsson.setBackoffStart(pastTime);
-		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
+		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
@@ -296,7 +296,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
+		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
@@ -304,7 +304,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
 		assertThat(ericsson.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
-		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), anyString(), anySet());
+		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 
 	}
 
@@ -491,6 +491,6 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.retryUnreachable(self);
 
-		verify(neighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
+		verify(neighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 	}
 }
