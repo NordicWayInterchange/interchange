@@ -159,6 +159,18 @@ class SelfServiceTest {
 		assertThat(self.getLastUpdatedLocalCapabilities()).isEqualTo(bCapDate);
 	}
 
+	@Test
+	void calculateLocalSubscriptionsShouldOnlyReturnDataTypesFromCreatedSubs() {
+		LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,getDatex("FI"));
+		LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,getDatex("NO"));
+		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
+		serviceProvider.setSubscriptions(setOf(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
+		Set<DataType> dataTypes = selfService.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
+		assertThat(dataTypes)
+				.hasSize(1).
+				allMatch(dataType -> dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY).equals("NO"));
+	}
+
 	private LocalSubscription getLocalSubscription(DataType dataType, LocalDateTime lastUpdated) {
 		return new LocalSubscription(-1, LocalSubscriptionStatus.CREATED, dataType, lastUpdated);
 	}

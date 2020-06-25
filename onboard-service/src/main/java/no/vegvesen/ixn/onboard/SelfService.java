@@ -63,6 +63,7 @@ public class SelfService {
 			Set<DataType> serviceProviderSubscriptions = serviceProvider
 					.getSubscriptions()
 					.stream()
+					.filter(subscription -> LocalSubscriptionStatus.CREATED.equals(subscription.getStatus()))
 					.map(LocalSubscription::getDataType)
 					.collect(Collectors.toSet());
 			logger.info("Service Provider Subscriptions: {}", serviceProviderSubscriptions.toString());
