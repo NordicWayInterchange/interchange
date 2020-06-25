@@ -8,7 +8,14 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix ="dns")
 public class DNSProperties {
 
+	/**
+	 * When discovery of neighbours only finds message port in DNS, this port is selected as the control channel port
+	 */
 	private String controlChannelPort = "443";
+
+	/**
+	 * The domain name where to look for neighbours in the DNS.
+	 */
 	private String domainName;
 
 
