@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.messagecollector;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class CollectorCreator {
 
 
     private final SSLContext sslContext;
-    private Logger logger = LoggerFactory.getLogger(CollectorCreator.class);
+	private Logger logger = LoggerFactory.getLogger(CollectorCreator.class);
     private String localIxnDomainName;
     private String localIxnFederationPort;
     private String writeQueue;
@@ -35,9 +36,9 @@ public class CollectorCreator {
     }
 
     @Autowired
-	public CollectorCreator(SSLContext sslContext, CollectorProperties collectorProperties) {
+	public CollectorCreator(SSLContext sslContext, CollectorProperties collectorProperties, InterchangeNodeProperties interchangeNodeProperties) {
 		this.sslContext = sslContext;
-		this.localIxnDomainName = collectorProperties.getLocalIxnDomainName();
+		this.localIxnDomainName = interchangeNodeProperties.getName();
 		this.localIxnFederationPort = collectorProperties.getLocalIxnFederationPort();
 		this.writeQueue = collectorProperties.getWritequeue();
 	}
