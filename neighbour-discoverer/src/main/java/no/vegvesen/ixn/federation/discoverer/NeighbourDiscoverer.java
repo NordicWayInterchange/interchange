@@ -7,7 +7,6 @@ import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -34,12 +33,11 @@ public class NeighbourDiscoverer {
 
 
 	@Autowired
-	NeighbourDiscoverer(@Value("${interchange.node-provider.name}") String myName,
-						NeighbourService neighbourService,
+	NeighbourDiscoverer(NeighbourService neighbourService,
 						SelfService selfService) {
 		this.neighbourService = neighbourService;
 		this.selfService = selfService;
-		NeighbourMDCUtil.setLogVariables(myName, null);
+		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), null);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")

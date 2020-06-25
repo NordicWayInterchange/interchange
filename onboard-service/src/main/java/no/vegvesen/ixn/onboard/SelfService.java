@@ -105,4 +105,7 @@ public class SelfService {
 	    return result;
 	}
 
+	public String getNodeProviderName() {
+		return nodeProviderName;
+	}
 }
