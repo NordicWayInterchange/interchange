@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -82,7 +83,6 @@ public class OnboardRestControllerTest {
 
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(capabilitiesPath)
@@ -110,7 +110,6 @@ public class OnboardRestControllerTest {
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -153,7 +152,6 @@ public class OnboardRestControllerTest {
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -206,7 +204,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProviderName);
 
 		// The existing subscriptions of the Service Provider
-		LocalSubscriptionRequest serviceProviderSubscriptionRequest = new LocalSubscriptionRequest();
+		Set<DataType> serviceProviderSubscriptionRequest = new HashSet<>();
 		DataType se = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se);
 		DataType fi = new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
@@ -218,7 +216,7 @@ public class OnboardRestControllerTest {
 
 		//Self
 		Self self = new Self("this-server-name");
-		self.setLocalSubscriptions(serviceProviderSubscriptionRequest.getSubscriptions());//same subscriptions as the service provider
+		self.setLocalSubscriptions(serviceProviderSubscriptionRequest);//same subscriptions as the service provider
 		doReturn(self).when(selfService).fetchSelf();
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
@@ -239,15 +237,9 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProviderName);
 
 		// The existing subscriptions of the Service Provider
-		LocalSubscriptionRequest serviceProviderSubscriptionRequest = new LocalSubscriptionRequest();
-		DataType se = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
-		LocalSubscription seSubs = new LocalSubscription(LocalSubscriptionStatus.CREATED,se);
-		serviceProviderSubscriptionRequest.addLocalSubscription(se);
-		serviceProviderSubscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 
@@ -268,7 +260,6 @@ public class OnboardRestControllerTest {
 		// The existing subscriptions of the Service Provider
 		doReturn(null).when(serviceProviderRepository).findByName(any(String.class));
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
-		when(selfService.save(any(Self.class))).thenAnswer(a -> a.getArgument(0));
 
 		// Subscription request api posted to the server
 

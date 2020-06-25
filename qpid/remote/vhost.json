@@ -1,6 +1,6 @@
 {
   "type": "BDB",
-  "name": "remote.itsinterchange.eu",
+  "name": "remote.bouvetinterchange.eu",
   "modelVersion": "7.0",
   "exchanges": [
     {
@@ -70,7 +70,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-           "NAME": "remote.itsinterchange.eu"
+           "NAME": "remote.bouvetinterchange.eu"
           }
         },
         {
@@ -79,16 +79,16 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-           "NAME": "remote.itsinterchange.eu"
+           "NAME": "remote.bouvetinterchange.eu"
           }
         },
         {
           "objectType": "QUEUE",
-          "identity": "king_gustaf.itsinterchange.eu",
+          "identity": "king_gustaf.bouvetinterchange.eu",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "king_gustaf.itsinterchange.eu"
+            "NAME": "king_gustaf.bouvetinterchange.eu"
           }
         },
         {

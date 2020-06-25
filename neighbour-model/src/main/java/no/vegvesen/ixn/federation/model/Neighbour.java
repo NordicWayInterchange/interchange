@@ -29,23 +29,22 @@ public class Neighbour {
 	private static Logger logger = LoggerFactory.getLogger(Neighbour.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neighbour_generator")
-	@SequenceGenerator(name = "neighbour_generator", sequenceName = "neighbour_seq")
-	@Column(name = "neighbour_id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "neighbour_seq")
+	@Column(name = "id")
 	private Integer neighbour_id;
 
 	private String name;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "neighbour_id_cap", referencedColumnName = "cap_id", foreignKey = @ForeignKey(name = "fk_cap_neighbour"))
+	@JoinColumn(name = "cap_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_cap"))
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "neighbour_id_sub_out", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_neighbour_sub_out"))
+	@JoinColumn(name = "sub_out", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_sub_out"))
 	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "neighbour_id_fed_in", referencedColumnName = "subreq_id", foreignKey = @ForeignKey(name = "fk_subreq_neighbour_fed_in"))
+	@JoinColumn(name = "fed_in", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_fed_in"))
 	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@UpdateTimestamp
@@ -334,5 +333,9 @@ public class Neighbour {
 	@Override
 	public int hashCode() {
 		return name.hashCode();
+	}
+
+	public void setNeighbour_id(Integer neighbour_id) {
+		this.neighbour_id = neighbour_id;
 	}
 }

@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
+import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES
 public class NeighbourRestController {
 
 	private final NeighbourService neighbourService;
+	private final SelfService selfService;
 	private final CertService certService;
 
 	@Value("${interchange.node-provider.name}")
@@ -36,9 +38,11 @@ public class NeighbourRestController {
 
 	@Autowired
 	public NeighbourRestController(NeighbourService neighbourService,
-								   CertService certService) {
+								   CertService certService,
+								   SelfService selfService) {
 		this.neighbourService = neighbourService;
 		this.certService = certService;
+		this.selfService = selfService;
 	}
 
 	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -94,7 +98,7 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.info("Common name of certificate matches Neighbour name in capability api object.");
 
-		CapabilityApi capabilityApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities);
+		CapabilityApi capabilityApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, selfService.fetchSelf());
 		logger.info("Responding with local capabilities: {}", capabilityApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();
 		return capabilityApiResponse;

@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -18,6 +18,7 @@ import java.net.URI;
 import java.util.*;
 
 @Service
+@ConfigurationPropertiesScan
 public class QpidClient {
 
 	public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
@@ -39,9 +40,8 @@ public class QpidClient {
 	private final RestTemplate restTemplate;
 	private final String aclRulesUrl;
 
-	@Autowired
-	public QpidClient(@Value("${qpid.rest.api.baseUrl}") String baseUrl,
-					  @Value("${qpid.rest.api.vhost}") String vhostName,
+	public QpidClient(String baseUrl,
+					  String vhostName,
 					  RestTemplate restTemplate) {
 		this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
 		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
@@ -49,6 +49,11 @@ public class QpidClient {
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
 		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
 		this.restTemplate = restTemplate;
+	}
+
+	@Autowired
+	public QpidClient(RestTemplate restTemplate, RoutingConfigurerProperties routingConfigurerProperties) {
+		this(routingConfigurerProperties.getBaseUrl(), routingConfigurerProperties.getVhost(), restTemplate);
 	}
 
 	int ping() {

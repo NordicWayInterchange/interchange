@@ -1,8 +1,9 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
+import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -26,8 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfig.class})
-@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfig.class, TestSSLProperties.class})
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
 @Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
@@ -47,8 +46,8 @@ public class QpidClientIT extends QpidDockerBaseIT {
 			logger.info("server url: " + httpsUrl);
 			logger.info("server url: " + httpUrl);
 			TestPropertyValues.of(
-					"qpid.rest.api.baseUrl=" + httpsUrl,
-					"qpid.rest.api.vhost=localhost"
+					"routing-configurer.baseUrl=" + httpsUrl,
+					"routing-configurer.vhost=localhost"
 			).applyTo(configurableApplicationContext.getEnvironment());
 			MAPPED_HTTPS_PORT = qpidContainer.getMappedPort(HTTPS_PORT);
 		}

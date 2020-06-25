@@ -10,10 +10,8 @@ import javax.persistence.*;
 public class Subscription {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_generator")
-	@SequenceGenerator(name = "sub_generator", sequenceName = "sub_seq")
-	@Column(name = "sub_id")
-	private Integer sub_id;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sub_seq")
+	private Integer id;
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;
@@ -49,7 +47,7 @@ public class Subscription {
 	}
 
 	public Integer getId() {
-		return sub_id;
+		return id;
 	}
 
 	public String getPath() {
@@ -87,7 +85,7 @@ public class Subscription {
 	@Override
 	public String toString() {
 		return "Subscription{" +
-				"sub_id=" + sub_id +
+				"sub_id=" + id +
 				", subscriptionStatus=" + subscriptionStatus +
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +

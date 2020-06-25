@@ -1,36 +1,21 @@
 package no.vegvesen.ixn.federation.model;
 
 
-import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-@Entity
-@Table(name="self", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_self_name"))
 public class Self {
 
 	private static Logger logger = LoggerFactory.getLogger(Self.class);
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "self_generator")
-	@SequenceGenerator(name = "self_generator", sequenceName = "self_seq")
-	@Column(name = "self_id")
-	private Integer self_id;
-	
 	private String name;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "self_id_dat", foreignKey = @ForeignKey(name="fk_dat_self"))
 	private Set<DataType> localCapabilities = new HashSet<>();
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "self_id_sub", foreignKey = @ForeignKey(name="fk_sub_self"))
 	private Set<DataType> localSubscriptions = new HashSet<>();
 
 	private LocalDateTime lastUpdatedLocalCapabilities;
@@ -87,21 +72,9 @@ public class Self {
 		this.lastUpdatedLocalSubscriptions = lastUpdatedLocalSubscriptions;
 	}
 
-	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour) {
-		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
-		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
-		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)
-				.stream()
-				.map(DataType::toSubscription)
-				.collect(Collectors.toSet());
-		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
-		return calculatedSubscriptions;
-	}
-
 	@Override
 	public String toString() {
 		return "Self{" +
-				"self_id=" + self_id +
 				", name='" + name + '\'' +
 				", localCapabilities=" + localCapabilities +
 				", localSubscriptions=" + localSubscriptions +

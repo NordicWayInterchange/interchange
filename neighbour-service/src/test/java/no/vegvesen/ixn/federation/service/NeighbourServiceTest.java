@@ -10,8 +10,10 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
+import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +24,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NeighbourServiceTest {
@@ -47,7 +50,7 @@ class NeighbourServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName, selfService);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName);
 	}
 
 	@Test
@@ -66,9 +69,8 @@ class NeighbourServiceTest {
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
 		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
-		Mockito.when(selfService.fetchSelf()).thenReturn(new Self("bouvet"));
 
-		CapabilityApi response = neighbourService.incomingCapabilities(ericsson);
+		CapabilityApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
 
 		Mockito.verify(dnsFacade, Mockito.times(1)).getNeighbours();
 		Mockito.verify(neighbourRepository, Mockito.times(1)).save(ArgumentMatchers.any(Neighbour.class));
@@ -112,9 +114,8 @@ class NeighbourServiceTest {
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
 		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
-		when(selfService.fetchSelf()).thenReturn(new Self(myName));
 
-		neighbourService.incomingCapabilities(ericsson);
+		neighbourService.incomingCapabilities(ericsson, new Self(myName));
 
 		Mockito.verify(dnsFacade, Mockito.times(1)).getNeighbours();
 	}
@@ -130,7 +131,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
 
-		Throwable thrown = Assertions.catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour));
+		Throwable thrown = Assertions.catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, new Self("some-node-name")));
 
 		Assertions.assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 		Mockito.verify(dnsFacade, Mockito.times(1)).getNeighbours();
@@ -177,6 +178,38 @@ class NeighbourServiceTest {
 		Mockito.when(dnsFacade.getNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
 		Throwable trown = Assertions.catchThrowable(() -> neighbourService.findNeighbour("no-such-interchange.itsinterchange.eu"));
 		Assertions.assertThat(trown).isInstanceOf(InterchangeNotInDNSException.class);
+	}
+
+	@Test
+	public void calculateCustomSubscriptionForNeighbour_localSubscriptionOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
+		Set<DataType> localSubscriptions = getDataTypeSetOriginatingCountry("NO");
+
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newLinkedHashSet(getDatexNoDataType()));
+		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(),new SubscriptionRequest());
+		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
+
+		assertThat(calculatedSubscription).hasSize(1);
+		assertThat(calculatedSubscription.iterator().next().getSelector()).isEqualTo("originatingCountry = 'NO'");
+	}
+
+	@Test
+	public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
+		Self selfWithNoSubscriptions = new Self("self");
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,Sets.newLinkedHashSet(getDatexNoDataType()));
+		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(),new SubscriptionRequest());
+		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, selfWithNoSubscriptions.getLocalSubscriptions());
+		assertThat(calculatedSubscription).hasSize(0);
+	}
+
+	private Set<DataType> getDataTypeSetOriginatingCountry(String country) {
+		return Sets.newLinkedHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
+	}
+
+	private DataType getDatexNoDataType() {
+		Map<String, String> datexDataTypeHeaders = new HashMap<>();
+		datexDataTypeHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		datexDataTypeHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		return new DataType(datexDataTypeHeaders);
 	}
 
 }

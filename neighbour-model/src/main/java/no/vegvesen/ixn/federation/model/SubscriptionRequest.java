@@ -17,16 +17,15 @@ public class SubscriptionRequest {
 	private static Logger logger = LoggerFactory.getLogger(SubscriptionRequest.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subreq_generator")
-	@SequenceGenerator(name = "subreq_generator", sequenceName = "subreq_seq")
-	@Column(name = "subreq_id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subreq_seq")
+	@Column(name = "id")
 	private Integer subreq_id;
 
 	@Enumerated(EnumType.STRING)
 	private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "subreq_id_sub", foreignKey = @ForeignKey(name = "fk_sub_subreq"))
+	@JoinColumn(name = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_subreq"))
 	private Set<Subscription> subscription = new HashSet<>();
 
 	private LocalDateTime successfulRequest;

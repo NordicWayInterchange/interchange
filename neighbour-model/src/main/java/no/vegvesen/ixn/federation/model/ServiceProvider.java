@@ -13,19 +13,18 @@ import java.util.Set;
 public class ServiceProvider {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sp_generator")
-	@SequenceGenerator(name = "spr_generator", sequenceName = "spr_seq")
-	@Column(name = "spr_id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "spr_seq")
+	@Column(name = "id")
 	private Integer id;
 
 	private String name;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "spr_id_cap", foreignKey = @ForeignKey(name = "fk_cap_spr"))
+	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name = "fk_spr_cap"))
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "spr_locsub_id", foreignKey = @ForeignKey(name = "fk_spr_locsub"))
+	@JoinColumn(name = "spr_id", foreignKey = @ForeignKey(name = "fk_locsub_spr"))
 	private Set<LocalSubscription> subscriptions = new HashSet<>();
 
 	public ServiceProvider() {
