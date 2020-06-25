@@ -6,7 +6,6 @@ LOG_LEVELS=${LOG_LEVELS:-" "}
 
 java -Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect \
      -Dspring.datasource.url=${POSTGRES_URI} \
-     -Dcollector.localIxnDomainName=${SERVER_NAME} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
      -Dcollector.localIxnFederationPort=5671 \
      -Djavax.net.ssl.trustStore=${TRUST_STORE} \

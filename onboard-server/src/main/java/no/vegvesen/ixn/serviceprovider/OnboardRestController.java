@@ -15,7 +15,6 @@ import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionListApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
@@ -30,12 +29,10 @@ public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final CertService certService;
+	private final SelfService selfService;
 	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
-
-	@Value("${interchange.node-provider.name}")
-	String nodeProviderName;
 
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
@@ -43,11 +40,12 @@ public class OnboardRestController {
 								 SelfService selfService) {
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.certService = certService;
+		this.selfService = selfService;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	public LocalDataType addCapabilities(@PathVariable String serviceProviderName, @RequestBody DataTypeApi capabilityDataType) {
-		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Capabilities - Received POST from Service Provider: {}", serviceProviderName);
@@ -99,7 +97,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/capabilities/{capabilityId}")
 	public RedirectView deleteCapability(@PathVariable String serviceProviderName, @PathVariable Integer capabilityId ) {
-		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Capabilities - Received DELETE from Service Provider: {}", serviceProviderName);
@@ -139,7 +137,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
 	public LocalSubscriptionApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
-		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
@@ -180,7 +178,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscriptions/{dataTypeId}")
 	public RedirectView deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) throws NotFoundException {
-		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
@@ -212,7 +210,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	public LocalDataTypeList getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
-		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		LocalDataTypeList localDataTypeList = typeTransformer.transformToDataTypeIdList(serviceProvider.getCapabilities().getDataTypes());
 		OnboardMDCUtil.removeLogVariables();
@@ -231,7 +229,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	public LocalSubscriptionListApi getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
-		OnboardMDCUtil.setLogVariables(this.nodeProviderName, serviceProviderName);
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		LocalSubscriptionListApi localDataTypeList = typeTransformer.transformLocalSubscriptionListToLocalSubscriptionListApi(serviceProvider.getSubscriptions());
 		OnboardMDCUtil.removeLogVariables();

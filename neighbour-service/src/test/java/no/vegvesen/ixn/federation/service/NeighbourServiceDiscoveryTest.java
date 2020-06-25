@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -58,8 +59,9 @@ public class NeighbourServiceDiscoveryTest {
 		dnsFacade = mock(DNSFacade.class);
 		neighbourRESTFacade = mock(NeighbourRESTFacade.class);
 		discovererProperties = mock(NeighbourDiscovererProperties.class);
+		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName);
 		selfService = mock(SelfService.class);
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, interchangeNodeProperties);
 	}
 
 	private Neighbour createNeighbour() {

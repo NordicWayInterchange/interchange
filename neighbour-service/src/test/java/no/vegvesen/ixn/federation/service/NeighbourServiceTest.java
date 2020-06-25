@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -50,7 +51,7 @@ class NeighbourServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, myName);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, new InterchangeNodeProperties(myName));
 	}
 
 	@Test

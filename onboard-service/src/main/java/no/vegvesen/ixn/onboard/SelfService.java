@@ -2,11 +2,12 @@ package no.vegvesen.ixn.onboard;
 
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,14 +17,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@ConfigurationPropertiesScan
 public class SelfService {
 	private static Logger logger = LoggerFactory.getLogger(SelfService.class);
-	private String nodeProviderName;
 	ServiceProviderRepository repository;
+	InterchangeNodeProperties interchangeNodeProperties;
+
 
 	@Autowired
-	public SelfService(@Value("${interchange.node-provider.name}") String nodeProviderName, ServiceProviderRepository repository) {
-		this.nodeProviderName = nodeProviderName;
+	public SelfService(InterchangeNodeProperties interchangeNodeProperties, ServiceProviderRepository repository) {
+		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.repository = repository;
 	}
 
@@ -31,7 +34,7 @@ public class SelfService {
     //this could, of course, be a lot more efficient :-)
 	public Self fetchSelf() {
 		List<ServiceProvider> serviceProviders = repository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED);
-		Self self = new Self(nodeProviderName);
+		Self self = new Self(interchangeNodeProperties.getName());
 		self.setLocalCapabilities(calculateSelfCapabilities(serviceProviders));
 		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
 		self.setLastUpdatedLocalSubscriptions(calculateLastUpdatedSubscriptions(serviceProviders));
@@ -105,4 +108,8 @@ public class SelfService {
 	    return result;
 	}
 
+	//TODO: decide if centralize to the Properties class, or the service
+	public String getNodeProviderName() {
+		return interchangeNodeProperties.getName();
+	}
 }

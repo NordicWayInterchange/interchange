@@ -3,6 +3,7 @@ package no.vegvesen.ixn.onboard;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
@@ -24,7 +25,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {SelfService.class})
+@SpringBootTest(classes = {SelfService.class, InterchangeNodeProperties.class})
 class SelfServiceTest {
 	@MockBean
 	ServiceProviderRepository serviceProviderRepository;
@@ -169,6 +170,11 @@ class SelfServiceTest {
 		assertThat(dataTypes)
 				.hasSize(1).
 				allMatch(dataType -> dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY).equals("NO"));
+	}
+
+	@Test
+	void interchangeNodeNameIsPickedUpFromPropertiesFile() {
+		assertThat(selfService.getNodeProviderName()).isEqualTo("my-interchange");
 	}
 
 	private LocalSubscription getLocalSubscription(DataType dataType, LocalDateTime lastUpdated) {

@@ -4,18 +4,17 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
@@ -30,9 +29,6 @@ public class NeighbourRestController {
 	private final NeighbourService neighbourService;
 	private final SelfService selfService;
 	private final CertService certService;
-
-	@Value("${interchange.node-provider.name}")
-	private String myName;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
@@ -52,7 +48,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/subscription", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionRequestApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
-		NeighbourMDCUtil.setLogVariables(this.myName, neighbourSubscriptionRequest.getName());
+		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), neighbourSubscriptionRequest.getName());
 		logger.info("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
@@ -72,7 +68,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscription/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
-		NeighbourMDCUtil.setLogVariables(this.myName, ixnName);
+		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), ixnName);
 		logger.info("Received poll of subscription from neighbour {}.", ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
@@ -90,7 +86,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public CapabilityApi updateCapabilities(@RequestBody CapabilityApi neighbourCapabilities) {
-		NeighbourMDCUtil.setLogVariables(this.myName, neighbourCapabilities.getName());
+		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), neighbourCapabilities.getName());
 
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
 

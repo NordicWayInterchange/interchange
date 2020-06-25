@@ -8,10 +8,6 @@ import org.springframework.stereotype.Component;
 public class CollectorProperties {
 
 	/**
-	 * Name of the running interchange node. Collects messages from neighbours on a queue with this name.
-	 */
-	private String localIxnDomainName;
-	/**
 	 * Amqp message port on the local node. Collector will connect to this port to write messages on the writequeue (specified in separate property "writequeue".
 	 */
 	private String localIxnFederationPort = "5671";
@@ -27,14 +23,6 @@ public class CollectorProperties {
 	private String fixeddelay;
 
 	public CollectorProperties() {
-	}
-
-	public String getLocalIxnDomainName() {
-		return localIxnDomainName;
-	}
-
-	public void setLocalIxnDomainName(String localIxnDomainName) {
-		this.localIxnDomainName = localIxnDomainName;
 	}
 
 	public String getLocalIxnFederationPort() {
@@ -64,7 +52,6 @@ public class CollectorProperties {
 	@Override
 	public String toString() {
 		return "CollectorProperties{" +
-				"localIxnDomainName='" + localIxnDomainName + '\'' +
 				", localIxnFederationPort='" + localIxnFederationPort + '\'' +
 				", writequeue='" + writequeue + '\'' +
 				", fixeddelay='" + fixeddelay + '\'' +
