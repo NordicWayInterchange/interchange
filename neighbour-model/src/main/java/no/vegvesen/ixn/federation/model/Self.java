@@ -1,14 +1,12 @@
 package no.vegvesen.ixn.federation.model;
 
 
-import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Self {
 
@@ -72,17 +70,6 @@ public class Self {
 
 	public void setLastUpdatedLocalSubscriptions(LocalDateTime lastUpdatedLocalSubscriptions) {
 		this.lastUpdatedLocalSubscriptions = lastUpdatedLocalSubscriptions;
-	}
-
-	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour) {
-		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
-		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
-		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)
-				.stream()
-				.map(DataType::toSubscription)
-				.collect(Collectors.toSet());
-		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
-		return calculatedSubscriptions;
 	}
 
 	@Override

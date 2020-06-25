@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
@@ -275,8 +276,7 @@ public class NeighbourService {
 				try {
 					if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
-						Set<DataType> localSubscriptions = self.getLocalSubscriptions();
-						Set<Subscription> calculatedSubscriptionForNeighbour = self.calculateCustomSubscriptionForNeighbour(neighbour);
+						Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 							try {
@@ -305,6 +305,17 @@ public class NeighbourService {
 			}
 			NeighbourMDCUtil.removeLogVariables();
 		}
+	}
+
+	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
+		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
+		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
+		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)
+				.stream()
+				.map(DataType::toSubscription)
+				.collect(Collectors.toSet());
+		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
+		return calculatedSubscriptions;
 	}
 
 	public void pollSubscriptions() {
