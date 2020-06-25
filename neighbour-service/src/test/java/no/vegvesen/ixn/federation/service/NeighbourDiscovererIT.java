@@ -72,7 +72,7 @@ public class NeighbourDiscovererIT {
 	@Test
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
-		Self self = new Self(nodeName);
+		Self self = new Self(nodeProperties.getName());
 		self.setLocalSubscriptions(Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
 		when(selfService.fetchSelf()).thenReturn(self);
 
