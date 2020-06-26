@@ -490,6 +490,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 		when(neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
+		when(neighbourRESTFacade.postCapabilitiesToCapabilities(any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
 
 		neighbourService.retryUnreachable(self);
 
