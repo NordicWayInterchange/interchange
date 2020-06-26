@@ -143,7 +143,7 @@ public class NeighbourService {
 		return subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
 	}
 
-	public SubscriptionApi pollOneSubscription(String ixnName, Integer subscriptionId) {
+	public SubscriptionApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
 		logger.info("Looking up polling Neighbour in DB.");
 		Neighbour Neighbour = neighbourRepository.findByName(ixnName);
 
