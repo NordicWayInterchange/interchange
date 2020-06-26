@@ -64,7 +64,7 @@ public class NeighbourService {
 
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
-	public Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
+	private Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
 		// Process the subscription request
 		for (Subscription neighbourSubscription : neighbourSubscriptionRequest) {
 			try {
@@ -310,7 +310,7 @@ public class NeighbourService {
 		}
 	}
 
-	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
+	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
 		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)
@@ -341,7 +341,7 @@ public class NeighbourService {
 		}
 	}
 
-	public void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions) {
+	private void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions) {
 		try {
 			for (Subscription subscription : subscriptions) {
 				try {
