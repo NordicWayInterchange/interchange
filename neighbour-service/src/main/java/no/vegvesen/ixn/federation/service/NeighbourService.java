@@ -64,7 +64,7 @@ public class NeighbourService {
 
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
-	public Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
+	private Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
 		// Process the subscription request
 		for (Subscription neighbourSubscription : neighbourSubscriptionRequest) {
 			try {
@@ -143,7 +143,7 @@ public class NeighbourService {
 		return subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
 	}
 
-	public SubscriptionApi pollOneSubscription(String ixnName, Integer subscriptionId) {
+	public SubscriptionApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
 		logger.info("Looking up polling Neighbour in DB.");
 		Neighbour Neighbour = neighbourRepository.findByName(ixnName);
 
@@ -230,8 +230,8 @@ public class NeighbourService {
 
 	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self) {
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
-			NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
 			try {
+				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
 				logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 				if (backoffProperties.canBeContacted(neighbour)) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
@@ -242,7 +242,8 @@ public class NeighbourService {
 				} else {
 					logger.info("Too soon to post capabilities to neighbour when backing off");
 				}
-			} catch (Exception ignore) {
+			} catch (Exception e) {
+				logger.error("Unknown exception while exchanging capabilities with neighbour", e);
 			} finally {
 				NeighbourMDCUtil.removeLogVariables();
 			}
@@ -258,6 +259,7 @@ public class NeighbourService {
 			logger.info("Successfully completed capability exchange.");
 			logger.debug("Updated neighbour: {}", neighbour.toString());
 		} catch (CapabilityPostException e) {
+			logger.error("capability post failed", e);
 			neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
 			neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
 		} finally {
@@ -270,9 +272,9 @@ public class NeighbourService {
 		LocalDateTime lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
 
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
-			NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-			if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
-				try {
+			try {
+				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
+				if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
 					if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 						Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
@@ -291,22 +293,24 @@ public class NeighbourService {
 							} catch (SubscriptionRequestException e) {
 								neighbour.getFedIn().setStatus(SubscriptionRequestStatus.FAILED);
 								neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
-								logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.\n", e);
+								logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
 							}
 							// Successful subscription request, update discovery state subscription request timestamp.
 							neighbour = neighbourRepository.save(neighbour);
 							logger.info("Saving updated neighbour: {}", neighbour.toString());
 						}
 					}
-				} catch (Exception e) {
-					logger.error("Exception when evaluating subscriptions for neighbour", e);
 				}
+			} catch (Exception e) {
+				logger.error("Exception when evaluating subscriptions for neighbour", e);
 			}
-			NeighbourMDCUtil.removeLogVariables();
+			finally {
+				NeighbourMDCUtil.removeLogVariables();
+			}
 		}
 	}
 
-	public Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
+	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
 		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)
@@ -323,15 +327,22 @@ public class NeighbourService {
 				SubscriptionStatus.ACCEPTED,
 				SubscriptionStatus.FAILED);
 		for (Neighbour neighbour : neighboursToPoll) {
-			if (backoffProperties.canBeContacted(neighbour)) {
-				pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
+			try {
+				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
+				if (backoffProperties.canBeContacted(neighbour)) {
+					pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
+				}
+			} catch (Exception e) {
+				logger.error("Unknown error while polling subscriptions for one neighbour");
+			}
+			finally {
+				NeighbourMDCUtil.removeLogVariables();
 			}
 		}
 	}
 
-	public void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions) {
+	private void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions) {
 		try {
-			NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
 			for (Subscription subscription : subscriptions) {
 				try {
 					if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
@@ -351,13 +362,12 @@ public class NeighbourService {
 				} catch (SubscriptionPollException e) {
 					subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
 					neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
-					logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.");
+					logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
 				}
 			}
 		} finally {
 			logger.info("Saving updated neighbour: {}", neighbour.toString());
 			neighbourRepository.save(neighbour);
-			NeighbourMDCUtil.removeLogVariables();
 		}
 	}
 

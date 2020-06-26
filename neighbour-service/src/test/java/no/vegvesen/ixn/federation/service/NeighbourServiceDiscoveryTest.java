@@ -19,6 +19,9 @@ import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -26,23 +29,26 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest(classes = {NeighbourService.class, InterchangeNodeProperties.class, GracefulBackoffProperties.class})
 public class NeighbourServiceDiscoveryTest {
 
-	// Mocks
+	@MockBean
 	private NeighbourRepository neighbourRepository;
+	@MockBean
 	private DNSFacade dnsFacade;
+	@MockBean
 	private NeighbourRESTFacade neighbourRESTFacade;
+	@MockBean
 	private NeighbourDiscovererProperties discovererProperties;
+	@MockBean
 	private SelfService selfService;
 
-	private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+	@Autowired
+	InterchangeNodeProperties interchangeNodeProperties;
 
-	private String myName = "bouvet.itsinterchange.eu";
-
+	@Autowired
 	private NeighbourService neighbourService;
 
-	// Objects used in testing
-	private DataType datexNo = getDatexNoDataType();
 	private Self self;
 
 	private DataType getDatexNoDataType() {
@@ -55,13 +61,6 @@ public class NeighbourServiceDiscoveryTest {
 	@BeforeEach
 	public void before(){
 		self = createSelf();
-		neighbourRepository = mock(NeighbourRepository.class);
-		dnsFacade = mock(DNSFacade.class);
-		neighbourRESTFacade = mock(NeighbourRESTFacade.class);
-		discovererProperties = mock(NeighbourDiscovererProperties.class);
-		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName);
-		selfService = mock(SelfService.class);
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourRESTFacade, interchangeNodeProperties);
 	}
 
 	private Neighbour createNeighbour() {
@@ -73,7 +72,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	private Self createSelf() {
 		// Self setup
-		self = new Self(myName);
+		self = new Self(interchangeNodeProperties.getName());
 		Set<DataType> selfCapabilities = Collections.singleton(getDatexNoDataType());
 		self.setLocalCapabilities(selfCapabilities);
 		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("FI");
@@ -112,11 +111,12 @@ public class NeighbourServiceDiscoveryTest {
 		// Mocking finding ourselves in the DNS lookup.
 		Neighbour discoveringNode = new Neighbour();
 		discoveringNode.setName(self.getName());
+		assertThat(self.getName()).isNotNull();
 		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(discoveringNode));
 
 		neighbourService.checkForNewNeighbours();
 
-		verify(neighbourRepository,times(1)).findByName(myName);
+		verify(neighbourRepository,times(1)).findByName(interchangeNodeProperties.getName());
 		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
 	}
 
@@ -219,7 +219,7 @@ public class NeighbourServiceDiscoveryTest {
 	public void gracefulBackoffPostOfCapabilitiesHappensIfAllowedPostTimeHasPassed(){
 		Neighbour ericsson = createNeighbour();
 
-		DataType firstDataType = this.datexNo;
+		DataType firstDataType = getDatexNoDataType();
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
 
 		doReturn(ericssonCapabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
@@ -293,7 +293,7 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour ericsson = createNeighbour();
 		ericsson.setBackoffAttempts(4);
 
-		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(datexNo));
+		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(getDatexNoDataType()));
 		ericsson.setCapabilities(ericssonCapabilities);
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
@@ -340,6 +340,7 @@ public class NeighbourServiceDiscoveryTest {
 		subscription.setNumberOfPolls(0);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		spyNeighbour.setFedIn(subscriptionRequest);
+		spyNeighbour.setName("neighbour-name");
 		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour));
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED);
@@ -359,6 +360,7 @@ public class NeighbourServiceDiscoveryTest {
 		subscription.setNumberOfPolls(0);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		spyNeighbour.setFedIn(subscriptionRequest);
+		spyNeighbour.setName("neighbour-name");
 		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour));
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REJECTED);
@@ -490,6 +492,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 		when(neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
+		when(neighbourRESTFacade.postCapabilitiesToCapabilities(any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
 
 		neighbourService.retryUnreachable(self);
 
