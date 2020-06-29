@@ -2,9 +2,11 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.model.*;
+import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+@Component
 public class DummyNeighbourFacade implements NeighbourFacade {
 
 	@Override
