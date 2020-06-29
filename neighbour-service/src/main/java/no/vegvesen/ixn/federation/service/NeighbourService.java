@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
+import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
@@ -44,20 +45,20 @@ public class NeighbourService {
 	private GracefulBackoffProperties backoffProperties;
 	private NeighbourDiscovererProperties discovererProperties;
 	private InterchangeNodeProperties interchangeNodeProperties;
-	private NeighbourRESTFacade neighbourRESTFacade;
+	private NeighbourFacade neighbourFacade;
 
 	@Autowired
 	public NeighbourService(NeighbourRepository neighbourRepository,
 							DNSFacade dnsFacade,
 							GracefulBackoffProperties backoffProperties,
 							NeighbourDiscovererProperties discovererProperties,
-							NeighbourRESTFacade neighbourRESTFacade,
+							NeighbourRESTFacade neighbourFacade,
 							InterchangeNodeProperties interchangeNodeProperties) {
 		this.neighbourRepository = neighbourRepository;
 		this.dnsFacade = dnsFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
-		this.neighbourRESTFacade = neighbourRESTFacade;
+		this.neighbourFacade = neighbourFacade;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 	}
 
@@ -252,7 +253,7 @@ public class NeighbourService {
 
 	private void postCapabilities(Self self, Neighbour neighbour) {
 		try {
-			Capabilities capabilities = neighbourRESTFacade.postCapabilitiesToCapabilities(neighbour, self);
+			Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, self);
 			capabilities.setLastCapabilityExchange(LocalDateTime.now());
 			neighbour.setCapabilities(capabilities);
 			neighbour.okConnection();
@@ -282,7 +283,7 @@ public class NeighbourService {
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 							try {
 								if (backoffProperties.canBeContacted(neighbour)) {
-									SubscriptionRequest subscriptionRequestResponse = neighbourRESTFacade.postSubscriptionRequest(neighbour, calculatedSubscriptionForNeighbour, self.getName());
+									SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, calculatedSubscriptionForNeighbour, self.getName());
 									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
 									neighbour.setFedIn(subscriptionRequestResponse);
 									neighbour.okConnection();
@@ -349,7 +350,7 @@ public class NeighbourService {
 						logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
 
 						// Throws SubscriptionPollException if unsuccessful
-						Subscription polledSubscription = neighbourRESTFacade.pollSubscriptionStatus(subscription, neighbour);
+						Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
 						neighbour.okConnection();
