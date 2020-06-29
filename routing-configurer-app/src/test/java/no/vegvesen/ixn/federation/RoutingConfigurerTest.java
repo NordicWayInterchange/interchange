@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -17,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RoutingConfigurerTest {
 
 	@MockBean
+	@Qualifier("qpidRestTemplate")
 	RestTemplate restTemplate;
 
 	@MockBean
