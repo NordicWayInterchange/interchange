@@ -59,9 +59,7 @@ public class NeighbourRESTClient {
             }
 
         } catch (HttpServerErrorException | HttpClientErrorException e) {
-
-
-            logger.error("Failed post of capabilities to neighbour. Server returned error code: {}", e.getStatusCode().toString());
+            logger.error("Failed post of capabilities to neighbour with url {}\nRequest body: {} \nServer returned error code: {}", controlChannelUrl, entity.toString(), e.getStatusCode().toString());
 
             byte[] errorResponse = e.getResponseBodyAsByteArray();
 
@@ -71,7 +69,7 @@ public class NeighbourRESTClient {
                 throw new CapabilityPostException("Error in posting capabilities to neighbour " + name + ". Received error response: " + errorDetails.toString());
             } catch (IOException ioe) {
                 logger.error("Unable to cast error response as ErrorDetails object.", ioe);
-                throw new CapabilityPostException("Error in posting capabilities to neighbour " + name + ". Could not map server response to ErrorDetailsobject.");
+                throw new CapabilityPostException("Error in posting capabilities to neighbour " + name + ". Could not map server response to ErrorDetails object.");
             }
         } catch (RestClientException e) {
             logger.error("Failed post of capabilities to neighbour, network layer error", e);
@@ -117,7 +115,7 @@ public class NeighbourRESTClient {
         } catch (HttpClientErrorException | HttpServerErrorException e) {
 
             HttpStatus status = e.getStatusCode();
-            logger.error("Failed post of subscription request to neighbour. Server returned error code: {}", status.toString());
+            logger.error("Failed post of subscription request to neighbour with url {} \nRequest body: {} \nServer returned error code: {}", controlChannelUrl, entity.toString(), status.toString());
 
             byte[] errorResponse = e.getResponseBodyAsByteArray();
 
