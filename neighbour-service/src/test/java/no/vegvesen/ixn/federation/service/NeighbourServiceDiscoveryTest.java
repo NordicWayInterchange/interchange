@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
+import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
@@ -37,7 +37,7 @@ public class NeighbourServiceDiscoveryTest {
 	@MockBean
 	private DNSFacade dnsFacade;
 	@MockBean
-	private NeighbourRESTFacade neighbourRESTFacade;
+	private NeighbourFacade neighbourFacade;
 	@MockBean
 	private NeighbourDiscovererProperties discovererProperties;
 	@MockBean
@@ -132,7 +132,7 @@ public class NeighbourServiceDiscoveryTest {
 		Capabilities capabilities = new Capabilities();
 		assertThat(capabilities.getDataTypes()).isEmpty();
 
-		doReturn(capabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
+		doReturn(capabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 
@@ -146,7 +146,7 @@ public class NeighbourServiceDiscoveryTest {
 	@Test
 	public void successfulSubscriptionRequestCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
-		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
+		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourFacade).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSet("FI")));
 
@@ -177,7 +177,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
+		verify(neighbourFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
 	}
 
 	@Test
@@ -196,7 +196,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(0)).postSubscriptionRequest(any(), anySet(), anyString());
+		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(), anySet(), anyString());
 	}
 
 	@Test
@@ -212,7 +212,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbourService.pollSubscriptions();
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		verify(neighbourRESTFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
+		verify(neighbourFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
 
 	@Test
@@ -222,7 +222,7 @@ public class NeighbourServiceDiscoveryTest {
 		DataType firstDataType = getDatexNoDataType();
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
 
-		doReturn(ericssonCapabilities).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
+		doReturn(ericssonCapabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
@@ -231,13 +231,13 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), any());
+		verify(neighbourFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 	}
 
 	@Test
 	public void gracefulBackoffPostOfSubscriptionRequestHappensIfAllowedPostTimeHasPassed(){
 		Neighbour ericsson = createNeighbour();
-		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourRESTFacade).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString() );
+		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourFacade).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString() );
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
@@ -247,7 +247,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
 
-		verify(neighbourRESTFacade, times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
+		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
 
 	@Test
@@ -260,7 +260,7 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription ericssonSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
-		doReturn(ericssonSubscription).when(neighbourRESTFacade).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
+		doReturn(ericssonSubscription).when(neighbourFacade).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
@@ -269,7 +269,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.pollSubscriptions();
 
-		verify(neighbourRESTFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
+		verify(neighbourFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
 
 	@Test
@@ -279,7 +279,7 @@ public class NeighbourServiceDiscoveryTest {
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(5);
 
 		ericsson.setBackoffStart(pastTime);
-		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
+		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
@@ -298,7 +298,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.setBackoffStart(pastTime);
-		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
+		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
@@ -306,7 +306,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
 
 		assertThat(ericsson.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
-		verify(neighbourRESTFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
+		verify(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 
 	}
 
@@ -323,7 +323,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(ericsson));
 
 		Subscription polledSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED);
-		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
+		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neighbourService.pollSubscriptions();
@@ -344,7 +344,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour));
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED);
-		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
+		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neighbourService.pollSubscriptions();
@@ -364,7 +364,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour));
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REJECTED);
-		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
+		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neighbourService.pollSubscriptions();
@@ -384,7 +384,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.ACCEPTED)).thenReturn(Collections.singletonList(spyNeighbour));
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED);
-		when(neighbourRESTFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
+		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neighbourService.pollSubscriptions();
@@ -412,9 +412,9 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
-		when(neighbourRESTFacade.postSubscriptionRequest(eq(neighbourA),anySet(), anyString())).thenReturn(getReturnedSubscriptionRequest());
-		when(neighbourRESTFacade.postSubscriptionRequest(eq(neighbourB),anySet(), anyString())).thenThrow(new SubscriptionRequestException("time-out"));
-		when(neighbourRESTFacade.postSubscriptionRequest(eq(neighbourC),anySet(), anyString())).thenReturn(getReturnedSubscriptionRequest());
+		when(neighbourFacade.postSubscriptionRequest(eq(neighbourA),anySet(), anyString())).thenReturn(getReturnedSubscriptionRequest());
+		when(neighbourFacade.postSubscriptionRequest(eq(neighbourB),anySet(), anyString())).thenThrow(new SubscriptionRequestException("time-out"));
+		when(neighbourFacade.postSubscriptionRequest(eq(neighbourC),anySet(), anyString())).thenReturn(getReturnedSubscriptionRequest());
 
 		// Self setup
 		Self discoveringNode = new Self("d");
@@ -428,7 +428,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.evaluateAndPostSubscriptionRequest(neighbours, discoveringNode);
 
-		verify(neighbourRESTFacade, times(3)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
+		verify(neighbourFacade, times(3)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
 
 	private SubscriptionRequest getEmptySR() {
@@ -471,7 +471,7 @@ public class NeighbourServiceDiscoveryTest {
 				new SubscriptionRequest());
 
 		doReturn(self).when(selfService).fetchSelf();
-		when(neighbourRESTFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(mock(SubscriptionRequest.class));
+		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(mock(SubscriptionRequest.class));
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), self);
 
@@ -492,10 +492,10 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 		when(neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
-		when(neighbourRESTFacade.postCapabilitiesToCapabilities(any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
+		when(neighbourFacade.postCapabilitiesToCapabilities(any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
 
 		neighbourService.retryUnreachable(self);
 
-		verify(neighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
+		verify(neighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 	}
 }

@@ -10,7 +10,6 @@ import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -52,7 +51,7 @@ public class NeighbourService {
 							DNSFacade dnsFacade,
 							GracefulBackoffProperties backoffProperties,
 							NeighbourDiscovererProperties discovererProperties,
-							NeighbourRESTFacade neighbourFacade,
+							NeighbourFacade neighbourFacade,
 							InterchangeNodeProperties interchangeNodeProperties) {
 		this.neighbourRepository = neighbourRepository;
 		this.dnsFacade = dnsFacade;
