@@ -35,13 +35,24 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForNeighboursToSetupRoutingFor() {
 		logger.debug("Checking for new neighbours to setup routing");
-		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequestStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
-		logger.debug("Found {} neighbours to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
+		List<Neighbour> readyToSetupRouting = _findNeighboursToSetupRoutingFor();
 		setupRouting(readyToSetupRouting);
 
 		logger.debug("Checking for neighbours to tear down routing");
-		List<Neighbour> readyToTearDownRouting = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
+		List<Neighbour> readyToTearDownRouting = _findNeighboursToTearDownRoutingFor();
 		tearDownRouting(readyToTearDownRouting);
+	}
+
+	private List<Neighbour> _findNeighboursToTearDownRoutingFor() {
+		List<Neighbour> tearDownRoutingList = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
+		logger.debug("Found {} neighbours to set up routing for {}", tearDownRoutingList.size(), tearDownRoutingList);
+		return tearDownRoutingList;
+	}
+
+	private List<Neighbour> _findNeighboursToSetupRoutingFor() {
+		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequestStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
+		logger.debug("Found {} neighbours to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
+		return readyToSetupRouting;
 	}
 
 	void tearDownRouting(List<Neighbour> readyToTearDownRouting) {
@@ -57,12 +68,16 @@ public class RoutingConfigurer {
 			qpidClient.removeQueue(name);
 			removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
 			logger.info("Removed routing for neighbour {}", name);
-			neighbour.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
-			neighbourRepository.save(neighbour);
-			logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
+			_saveTearDownRouting(neighbour, name);
 		} catch (Exception e) {
 			logger.error("Could not remove routing for neighbour {}", name, e);
 		}
+	}
+
+	private void _saveTearDownRouting(Neighbour neighbour, String name) {
+		neighbour.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
+		neighbourRepository.save(neighbour);
+		logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
 	}
 
 	//Both neighbour and service providers binds to nwEx to receive local messages
@@ -84,13 +99,17 @@ public class RoutingConfigurer {
 				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 			}
 			logger.info("Set up routing for neighbour {}", neighbour.getName());
-			neighbour.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
-
-			neighbourRepository.save(neighbour);
-			logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
+			_saveSetupRouting(neighbour);
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
 		}
+	}
+
+	private void _saveSetupRouting(Neighbour neighbour) {
+		neighbour.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+
+		neighbourRepository.save(neighbour);
+		logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
 	}
 
 	private void bindSubscriptions(String exchange, Neighbour neighbour) {
