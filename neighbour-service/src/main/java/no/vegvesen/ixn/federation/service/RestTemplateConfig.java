@@ -26,7 +26,7 @@ public class RestTemplateConfig {
 	}
 
 	@Bean
-	public RestTemplate restTemplate() {
+	public RestTemplate neighbourRestTemplate() {
 
 		// TODO: set custom timeout on rest template
 

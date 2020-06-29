@@ -31,7 +31,7 @@ public class QpidClientConfig {
 	}
 
 	@Bean
-	public RestTemplate restTemplate() throws SSLContextFactory.InvalidSSLConfig {
+	public RestTemplate qpidRestTemplate() throws SSLContextFactory.InvalidSSLConfig {
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpsClient()));
 	}
 }

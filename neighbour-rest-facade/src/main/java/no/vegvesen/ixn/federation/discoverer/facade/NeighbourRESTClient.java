@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -28,7 +29,7 @@ public class NeighbourRESTClient {
     ObjectMapper mapper;
 
     @Autowired
-    public NeighbourRESTClient(RestTemplate template,ObjectMapper mapper) {
+    public NeighbourRESTClient(@Qualifier(value = "neighbourRestTemplate") RestTemplate template, ObjectMapper mapper) {
         this.restTemplate = template;
         this.mapper = mapper;
     }
