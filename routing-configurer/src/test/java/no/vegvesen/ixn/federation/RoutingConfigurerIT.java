@@ -8,7 +8,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
-import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
@@ -72,7 +72,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@MockBean
-	NeighbourRepository neighbourRepository;
+	NeighbourService neighbourService;
 
 	@MockBean
 	ServiceProviderRouter serviceProviderRouter;

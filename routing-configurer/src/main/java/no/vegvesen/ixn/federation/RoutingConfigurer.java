@@ -1,9 +1,11 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +23,13 @@ public class RoutingConfigurer {
 
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
-	private final NeighbourRepository neighbourRepository;
+	private final NeighbourService neighbourService;
 	private final QpidClient qpidClient;
 	private final ServiceProviderRouter serviceProviderRouter;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourRepository neighbourRepository, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter) {
-		this.neighbourRepository = neighbourRepository;
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter) {
+		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 	}
@@ -35,14 +37,14 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForNeighboursToSetupRoutingFor() {
 		logger.debug("Checking for new neighbours to setup routing");
-		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequestStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
-		logger.debug("Found {} neighbours to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
+		List<Neighbour> readyToSetupRouting = neighbourService.findNeighboursToSetupRoutingFor();
 		setupRouting(readyToSetupRouting);
 
 		logger.debug("Checking for neighbours to tear down routing");
-		List<Neighbour> readyToTearDownRouting = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
+		List<Neighbour> readyToTearDownRouting = neighbourService.findNeighboursToTearDownRoutingFor();
 		tearDownRouting(readyToTearDownRouting);
 	}
+
 
 	void tearDownRouting(List<Neighbour> readyToTearDownRouting) {
 		for (Neighbour subscriber : readyToTearDownRouting) {
@@ -57,9 +59,7 @@ public class RoutingConfigurer {
 			qpidClient.removeQueue(name);
 			removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
 			logger.info("Removed routing for neighbour {}", name);
-			neighbour.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
-			neighbourRepository.save(neighbour);
-			logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
+			neighbourService.saveTearDownRouting(neighbour, name);
 		} catch (Exception e) {
 			logger.error("Could not remove routing for neighbour {}", name, e);
 		}
@@ -84,10 +84,7 @@ public class RoutingConfigurer {
 				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 			}
 			logger.info("Set up routing for neighbour {}", neighbour.getName());
-			neighbour.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
-
-			neighbourRepository.save(neighbour);
-			logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
+			neighbourService.saveSetupRouting(neighbour);
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
 		}
@@ -115,7 +112,6 @@ public class RoutingConfigurer {
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 		serviceProviderRouter.syncServiceProviders(serviceProviders);
 	}
-
 
 	private void createQueue(String subscriberName) {
 		qpidClient.createQueue(subscriberName);

@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
-import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +20,7 @@ class RoutingConfigurerTest {
 	RestTemplate restTemplate;
 
 	@MockBean
-	NeighbourRepository neighbourRepository;
+	NeighbourService neighbourService;
 
 	@MockBean
 	ServiceProviderRouter serviceProviderRouter;
@@ -28,9 +28,17 @@ class RoutingConfigurerTest {
 	@Autowired
 	RoutingConfigurer routingConfigurer;
 
+	@Autowired
+	RoutingConfigurerProperties routingConfigurerProperties;
+
 	@Test
 	void routingConfigurerIsAutowired() {
 		assertThat(routingConfigurer).isNotNull();
+	}
+
+	@Test
+	void routingConfigurerPropertyFromMainIsRead() {
+		assertThat(routingConfigurerProperties.getInterval()).isNotNull().isEqualTo(10000);
 	}
 
 }

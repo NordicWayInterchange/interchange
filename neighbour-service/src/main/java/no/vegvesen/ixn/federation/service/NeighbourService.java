@@ -391,4 +391,32 @@ public class NeighbourService {
 			}
 		}
 	}
+
+
+	public List<Neighbour> findNeighboursToTearDownRoutingFor() {
+		List<Neighbour> tearDownRoutingList = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
+		logger.debug("Found {} neighbours to set up routing for {}", tearDownRoutingList.size(), tearDownRoutingList);
+		return tearDownRoutingList;
+	}
+
+	public List<Neighbour> findNeighboursToSetupRoutingFor() {
+		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequestStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
+		logger.debug("Found {} neighbours to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
+		return readyToSetupRouting;
+	}
+
+	public void saveTearDownRouting(Neighbour neighbour, String name) {
+		neighbour.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
+		neighbourRepository.save(neighbour);
+		logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
+	}
+
+	public void saveSetupRouting(Neighbour neighbour) {
+		neighbour.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+
+		neighbourRepository.save(neighbour);
+		logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
+	}
+
+
 }

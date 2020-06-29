@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>neighbour-model</artifactId>
+            <artifactId>neighbour-service</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
