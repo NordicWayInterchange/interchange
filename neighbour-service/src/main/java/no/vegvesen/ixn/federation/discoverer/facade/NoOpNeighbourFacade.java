@@ -1,13 +1,12 @@
-package no.vegvesen.ixn.federation.service;
+package no.vegvesen.ixn.federation.discoverer.facade;
 
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 @Component
-public class DummyNeighbourFacade implements NeighbourFacade {
+public class NoOpNeighbourFacade implements NeighbourFacade {
 
 	@Override
 	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, Self self) {

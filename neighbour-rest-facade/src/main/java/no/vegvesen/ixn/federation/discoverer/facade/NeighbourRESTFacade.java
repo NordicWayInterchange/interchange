@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -17,6 +18,7 @@ import java.util.Set;
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 
 @Component
+@Primary
 public class NeighbourRESTFacade implements NeighbourFacade {
 
     private NeighbourRESTClient neighbourRESTClient;
