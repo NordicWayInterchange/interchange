@@ -371,15 +371,6 @@ services:
     networks:
     - testing_net
 
-  #execute_test:
-   # build: ./federation-st
-    #volumes:
-    #- "./tmp:/jks"
-    #depends_on:
-    #- remote_message_forwarder_app
-    #networks:
-    #  - testing_net
-
 networks:
   testing_net:
     ipam:

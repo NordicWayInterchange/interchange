@@ -1,3 +1,3 @@
 federated-interchanges.users=
-administrators.users=qpid-admin,remote.itsinterchange.eu
-service-providers.users=king_gustaf.itsinterchange.eu
+administrators.users=qpid-admin,remote.bouvetinterchange.eu
+service-providers.users=king_gustaf.bouvetinterchange.eu
