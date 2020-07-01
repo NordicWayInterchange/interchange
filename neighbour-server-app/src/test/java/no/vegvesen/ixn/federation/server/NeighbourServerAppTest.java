@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.server;
 
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
-import no.vegvesen.ixn.federation.discoverer.facade.NoOpNeighbourFacade;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Test;
@@ -21,14 +19,9 @@ public class NeighbourServerAppTest {
 	@Autowired
 	private NeighbourRestController neighbourRestController;
 
-	@Autowired
-	NeighbourFacade neighbourFacade;
-
 	@Test
 	void neighbourServiceIsAutowired() {
 		assertThat(neighbourService).isNotNull();
 		assertThat(neighbourRestController).isNotNull();
-		assertThat(neighbourFacade).isNotNull();
-		assertThat(neighbourFacade).isExactlyInstanceOf(NoOpNeighbourFacade.class);
 	}
 }
