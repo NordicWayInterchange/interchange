@@ -51,7 +51,7 @@ class NeighbourServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, neighbourFacade, new InterchangeNodeProperties(myName));
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, new InterchangeNodeProperties(myName));
 	}
 
 	@Test
