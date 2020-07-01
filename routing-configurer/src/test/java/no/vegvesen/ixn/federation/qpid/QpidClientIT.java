@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.crt", "localhost.crt", "localhost.key");
+	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.p12", "password", "truststore.jks", "password");
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 	private static Integer MAPPED_HTTPS_PORT;
