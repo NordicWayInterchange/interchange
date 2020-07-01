@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
+import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.web.client.RestTemplate;
-import sun.net.www.http.HttpClient;
 
 import javax.net.ssl.SSLContext;
 import javax.transaction.Transactional;
@@ -41,16 +39,10 @@ public class NeighbourDiscovererIT {
 	SSLContext mockedSSL;
 
 	@MockBean
-	HttpClient mockedHttpClient;
-
-	@MockBean
 	DNSFacade mockDnsFacade;
 
 	@MockBean
-	NeighbourRESTFacade mockNeighbourRESTFacade;
-
-	@MockBean
-	RestTemplate restTemplate;
+	NeighbourFacade mockNeighbourFacade;
 
 	@MockBean
 	SelfService selfService;
@@ -103,7 +95,7 @@ public class NeighbourDiscovererIT {
 		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 
 		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf());
-		verify(mockNeighbourRESTFacade, times(4)).postCapabilitiesToCapabilities(any(), any() );
+		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any() );
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
@@ -126,24 +118,24 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
-		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(eq(neighbour1), any())).thenReturn(c1);
-		when(mockNeighbourRESTFacade.postCapabilitiesToCapabilities(eq(neighbour2), any() )).thenReturn(c2);
+		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any())).thenReturn(c1);
+		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any() )).thenReturn(c2);
 
 		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf());
 
-		verify(mockNeighbourRESTFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
+		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
 		assertThat(known).hasSize(2);
 	}
 
 	private Subscription performSubscriptionRequest(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1) {
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, c1.getDataTypes().stream().map(dataType -> new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED)).collect(Collectors.toSet()));
-		when(mockNeighbourRESTFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptionRequestResponse);
+		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptionRequestResponse);
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf());
 
-		verify(mockNeighbourRESTFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
-		verify(mockNeighbourRESTFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
+		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
+		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
 
 		Neighbour found1 = repository.findByName(neighbour1.getName());
 		assertThat(found1).isNotNull();
@@ -153,7 +145,7 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
-		when(mockNeighbourRESTFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
 		neighbourService.pollSubscriptions();
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();

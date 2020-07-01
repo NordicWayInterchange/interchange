@@ -12,13 +12,22 @@
     <artifactId>neighbour-server-app</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-server</artifactId>
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>testcontainers-init-postgres</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

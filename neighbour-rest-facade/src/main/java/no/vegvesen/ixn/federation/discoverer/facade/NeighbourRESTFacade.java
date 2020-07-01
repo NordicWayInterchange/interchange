@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -17,7 +18,8 @@ import java.util.Set;
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 
 @Component
-public class NeighbourRESTFacade {
+@Primary
+public class NeighbourRESTFacade implements NeighbourFacade {
 
     private NeighbourRESTClient neighbourRESTClient;
     private Logger logger = LoggerFactory.getLogger(NeighbourRESTFacade.class);
@@ -36,6 +38,7 @@ public class NeighbourRESTFacade {
 	}
 
 
+	@Override
 	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, Self self) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
@@ -45,6 +48,7 @@ public class NeighbourRESTFacade {
 		return capabilityTransformer.capabilityApiToCapabilities(result);
 	}
 
+	@Override
 	public SubscriptionRequest postSubscriptionRequest(Neighbour neighbour, Set<Subscription> subscriptions, String selfName) {
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(selfName, subscriptions);
 		String controlChannelUrl = neighbour.getControlChannelUrl("/subscription");
@@ -53,6 +57,7 @@ public class NeighbourRESTFacade {
 		return subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(responseApi, SubscriptionRequestStatus.REQUESTED);
 	}
 
+	@Override
 	public Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour) {
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
 		String name = neighbour.getName();

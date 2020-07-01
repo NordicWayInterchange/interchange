@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.service;
+package no.vegvesen.ixn.federation.discoverer;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
