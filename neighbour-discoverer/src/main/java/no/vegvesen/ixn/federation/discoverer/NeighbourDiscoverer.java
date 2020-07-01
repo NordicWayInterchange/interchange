@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer;
 
+import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
@@ -30,25 +31,28 @@ public class NeighbourDiscoverer {
 
 	private final NeighbourService neighbourService;
 	private final SelfService selfService;
+	private final NeighbourRESTFacade neighbourFacade;
 
 
 	@Autowired
 	NeighbourDiscoverer(NeighbourService neighbourService,
-						SelfService selfService) {
+						SelfService selfService,
+						NeighbourRESTFacade neighbourFacade) {
 		this.neighbourService = neighbourService;
 		this.selfService = selfService;
+		this.neighbourFacade = neighbourFacade;
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), null);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void schedulePollSubscriptions() {
-		neighbourService.pollSubscriptions();
+		neighbourService.pollSubscriptions(neighbourFacade);
 	}
 
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
 		List<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourService.getNeighboursFailedSubscriptionRequest();
-		neighbourService.evaluateAndPostSubscriptionRequest(neighboursWithFailedSubscriptionRequest, selfService.fetchSelf());
+		neighbourService.evaluateAndPostSubscriptionRequest(neighboursWithFailedSubscriptionRequest, selfService.fetchSelf(), neighbourFacade);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
@@ -56,13 +60,13 @@ public class NeighbourDiscoverer {
 		// Perform subscription request with all neighbours with capabilities KNOWN
 		logger.info("Checking for any Neighbours with KNOWN capabilities");
 		List<Neighbour> neighboursForSubscriptionRequest = neighbourService.findNeighboursWithKnownCapabilities();
-		neighbourService.evaluateAndPostSubscriptionRequest(neighboursForSubscriptionRequest, selfService.fetchSelf());
+		neighbourService.evaluateAndPostSubscriptionRequest(neighboursForSubscriptionRequest, selfService.fetchSelf(), neighbourFacade);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void scheduleCapabilityExchangeWithNeighbours() {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
-		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf());
+		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), neighbourFacade);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.dns-lookup-interval}", initialDelayString = "${discoverer.dns-initial-start-delay}")
@@ -72,6 +76,6 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
 	public void scheduleUnreachableRetry() {
-		neighbourService.retryUnreachable(selfService.fetchSelf());
+		neighbourService.retryUnreachable(selfService.fetchSelf(), neighbourFacade);
 	}
 }

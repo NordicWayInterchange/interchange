@@ -94,7 +94,7 @@ public class NeighbourDiscovererIT {
 		Self self = selfService.fetchSelf();
 		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 
-		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf());
+		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
 		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any() );
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
@@ -121,7 +121,7 @@ public class NeighbourDiscovererIT {
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any())).thenReturn(c1);
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any() )).thenReturn(c2);
 
-		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf());
+		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
@@ -132,7 +132,7 @@ public class NeighbourDiscovererIT {
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, c1.getDataTypes().stream().map(dataType -> new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED)).collect(Collectors.toSet()));
 		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptionRequestResponse);
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf());
+		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf(), mockNeighbourFacade);
 
 		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
 		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
@@ -146,7 +146,7 @@ public class NeighbourDiscovererIT {
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
 		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
-		neighbourService.pollSubscriptions();
+		neighbourService.pollSubscriptions(mockNeighbourFacade);
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
 		assertThat(found1.getFedIn()).isNotNull();

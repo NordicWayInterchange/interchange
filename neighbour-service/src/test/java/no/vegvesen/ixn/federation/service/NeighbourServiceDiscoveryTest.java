@@ -138,7 +138,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		doReturn(self).when(selfService).fetchSelf();
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -152,7 +152,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		doReturn(self).when(selfService).fetchSelf();
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
+		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -175,7 +175,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.setConnectionStatus(ConnectionStatus.FAILED);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		verify(neighbourFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
 	}
@@ -194,7 +194,7 @@ public class NeighbourServiceDiscoveryTest {
 			return answer;
 		});
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
+		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(), anySet(), anyString());
 	}
@@ -209,7 +209,7 @@ public class NeighbourServiceDiscoveryTest {
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
 		ericsson.setBackoffStart(LocalDateTime.now().plusSeconds(10));
-		neighbourService.pollSubscriptions();
+		neighbourService.pollSubscriptions(neighbourFacade);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		verify(neighbourFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
@@ -229,7 +229,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		verify(neighbourFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 	}
@@ -245,7 +245,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self);
+		neighbourService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
@@ -267,7 +267,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourService.pollSubscriptions();
+		neighbourService.pollSubscriptions(neighbourFacade);
 
 		verify(neighbourFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
@@ -283,7 +283,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		assertThat(ericsson.getBackoffAttempts()).isEqualTo(1);
 	}
@@ -303,7 +303,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self);
+		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		assertThat(ericsson.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 		verify(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
@@ -326,7 +326,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourService.pollSubscriptions();
+		neighbourService.pollSubscriptions(neighbourFacade);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -347,7 +347,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourService.pollSubscriptions();
+		neighbourService.pollSubscriptions(neighbourFacade);
 
 		assertThat(spyNeighbour.getFedIn().getSubscriptions()).contains(createdSubscription);
 	}
@@ -367,7 +367,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourService.pollSubscriptions();
+		neighbourService.pollSubscriptions(neighbourFacade);
 
 		assertThat(spyNeighbour.getFedIn().getAcceptedSubscriptions()).isEmpty();
 	}
@@ -387,7 +387,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neighbourService.pollSubscriptions();
+		neighbourService.pollSubscriptions(neighbourFacade);
 
 		assertThat(spyNeighbour.getFedIn().getStatus()).isEqualTo(SubscriptionRequestStatus.REQUESTED);
 	}
@@ -426,7 +426,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
 
-		neighbourService.evaluateAndPostSubscriptionRequest(neighbours, discoveringNode);
+		neighbourService.evaluateAndPostSubscriptionRequest(neighbours, discoveringNode, neighbourFacade);
 
 		verify(neighbourFacade, times(3)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
@@ -473,7 +473,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(mock(SubscriptionRequest.class));
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), self);
+		neighbourService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), self, neighbourFacade);
 
 		verify(neighbourRepository).save(otherNeighbour);
     }
@@ -494,7 +494,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
 		when(neighbourFacade.postCapabilitiesToCapabilities(any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
 
-		neighbourService.retryUnreachable(self);
+		neighbourService.retryUnreachable(self, neighbourFacade);
 
 		verify(neighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 	}

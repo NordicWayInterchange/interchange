@@ -44,20 +44,17 @@ public class NeighbourService {
 	private GracefulBackoffProperties backoffProperties;
 	private NeighbourDiscovererProperties discovererProperties;
 	private InterchangeNodeProperties interchangeNodeProperties;
-	private NeighbourFacade neighbourFacade;
 
 	@Autowired
 	public NeighbourService(NeighbourRepository neighbourRepository,
 							DNSFacade dnsFacade,
 							GracefulBackoffProperties backoffProperties,
 							NeighbourDiscovererProperties discovererProperties,
-							NeighbourFacade neighbourFacade,
 							InterchangeNodeProperties interchangeNodeProperties) {
 		this.neighbourRepository = neighbourRepository;
 		this.dnsFacade = dnsFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
-		this.neighbourFacade = neighbourFacade;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 	}
 
@@ -193,13 +190,13 @@ public class NeighbourService {
 				);
 	}
 
-	public void capabilityExchangeWithNeighbours(Self self) {
+	public void capabilityExchangeWithNeighbours(Self self, NeighbourFacade neighbourFacade) {
 		logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
 		List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
 				Capabilities.CapabilitiesStatus.UNKNOWN,
 				Capabilities.CapabilitiesStatus.KNOWN,
 				Capabilities.CapabilitiesStatus.FAILED);
-		capabilityExchange(neighboursForCapabilityExchange, self);
+		capabilityExchange(neighboursForCapabilityExchange, self, neighbourFacade);
 	}
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
@@ -228,14 +225,14 @@ public class NeighbourService {
 		}
 	}
 
-	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self) {
+	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self, NeighbourFacade neighbourFacade) {
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
 				logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 				if (backoffProperties.canBeContacted(neighbour)) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
-						postCapabilities(self, neighbour);
+						postCapabilities(self, neighbour, neighbourFacade);
 					} else {
 						logger.debug("Neighbour has our last capabilities");
 					}
@@ -250,7 +247,7 @@ public class NeighbourService {
 		}
 	}
 
-	private void postCapabilities(Self self, Neighbour neighbour) {
+	private void postCapabilities(Self self, Neighbour neighbour, NeighbourFacade neighbourFacade) {
 		try {
 			Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, self);
 			capabilities.setLastCapabilityExchange(LocalDateTime.now());
@@ -268,7 +265,7 @@ public class NeighbourService {
 		}
 	}
 
-	public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self) {
+	public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self, NeighbourFacade neighbourFacade) {
 		LocalDateTime lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
 
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
@@ -321,7 +318,7 @@ public class NeighbourService {
 		return calculatedSubscriptions;
 	}
 
-	public void pollSubscriptions() {
+	public void pollSubscriptions(NeighbourFacade neighbourFacade) {
 		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.REQUESTED,
 				SubscriptionStatus.ACCEPTED,
@@ -330,7 +327,7 @@ public class NeighbourService {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
 				if (backoffProperties.canBeContacted(neighbour)) {
-					pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling());
+					pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling(), neighbourFacade);
 				}
 			} catch (Exception e) {
 				logger.error("Unknown error while polling subscriptions for one neighbour");
@@ -341,7 +338,7 @@ public class NeighbourService {
 		}
 	}
 
-	private void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions) {
+	private void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
 		try {
 			for (Subscription subscription : subscriptions) {
 				try {
@@ -375,14 +372,14 @@ public class NeighbourService {
 		return neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
 	}
 
-	public void retryUnreachable(Self self) {
+	public void retryUnreachable(Self self, NeighbourFacade neighbourFacade) {
 		List<Neighbour> unreachableNeighbours = neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE);
 		if (!unreachableNeighbours.isEmpty()) {
 			logger.info("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
 			for (Neighbour neighbour : unreachableNeighbours) {
 				try {
 					NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-					postCapabilities(self, neighbour);
+					postCapabilities(self, neighbour, neighbourFacade);
 				} catch (Exception e) {
 					logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
 				} finally {
