@@ -1,9 +1,9 @@
 #!/bin/bash -eu
 
 extractCommonName() {
-  local subjects="$(echo $1 | cut -d ':' -f2)"
-  IFS=',' read -ra ADDR <<< "$subjects"
-  for subject in "${ADDR[@]}"; do
+  local subjects="${1//subject=/}" # remove the prefix 'subject=' from the subject line
+  IFS=',' read -ra SUBJS <<< "$subjects" # split each subject to elements in an array
+  for subject in "${SUBJS[@]}"; do
     local subject_key=$(echo $subject | cut -d '=' -f1)
     local subject_key_trim=${subject_key// /}
 
@@ -13,9 +13,8 @@ extractCommonName() {
   done
 }
 
-
-svinz="$(extractCommonName 'Subject: CN = svinz, O = Nordic Way, C = NO')"
-sintef="$(extractCommonName 'Subject: C = no, ST = oslo, L = oslo, O = sintef, CN = sintef')"
+svinz="$(extractCommonName 'subject=CN = svinz, O = Nordic Way, C = NO')"
+sintef="$(extractCommonName 'subject=C = no, ST = oslo, L = oslo, O = sintef, CN = sintef')"
 
 echo "svinz = '${svinz}'"
 echo "sintef = '${sintef}'"
