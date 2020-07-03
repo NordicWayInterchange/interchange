@@ -16,5 +16,9 @@ extractCommonName() {
 svinz="$(extractCommonName 'subject=CN = svinz, O = Nordic Way, C = NO')"
 sintef="$(extractCommonName 'subject=C = no, ST = oslo, L = oslo, O = sintef, CN = sintef')"
 
+bouvetSubjectLine="subject=C = no, ST = oslo, L = oslo, O = bouvet, CN = bouveta-fed.itsinterchange.eu"
+bouvetaFed="$(extractCommonName "$bouvetSubjectLine")"
+
 echo "svinz = '${svinz}'"
 echo "sintef = '${sintef}'"
+echo "bouvetaFed = '${bouvetaFed}'"
