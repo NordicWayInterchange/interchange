@@ -15,9 +15,29 @@ if [ ! -f "$CSR_FILE" ]; then
 	exit 1
 fi
 
-CSR_SUBJECT_LINE=$(keytool -printcertreq -file $CSR_FILE | grep Subject:)
-BEFORE_FIRST_COMMA="${CSR_SUBJECT_LINE//,*/}"
-ident="${BEFORE_FIRST_COMMA//*CN\=/}"
+extractCommonName() {
+  local subjects="${1//subject=/}" # remove the prefix 'subject=' from the subject line
+
+  local separator="," # check which separator is used
+  if [[ "$subjects" == *\/* ]]
+  then
+    separator="\/"
+  fi
+
+  IFS="$separator" read -ra SUBJS <<< "$subjects" # split each subject to elements in an array
+  for subject in "${SUBJS[@]}"; do
+    local subject_key=$(echo $subject | cut -d '=' -f1)
+    local subject_key_trim=${subject_key// /}
+
+    if [[ ${subject_key_trim} == 'CN' ]]
+    then
+      echo $(echo $subject | cut -d '=' -f2)
+    fi
+  done
+}
+
+CSR_SUBJECT_LINE=$(openssl req -noout -subject -in $CSR_FILE)
+ident="$(extractCommonName "$CSR_SUBJECT_LINE")"
 
 if [ -z "$ident" ]; then
   echo "Could not extract the common name (CN) from the subject line of the CSR"

@@ -2,7 +2,7 @@ version: '3'
 services:
 
   interchangenode:
-    build: ./interchangenode
+    build: ./interchange-node-app
     container_name: interchangenode
     hostname: interchangenode
     depends_on:
