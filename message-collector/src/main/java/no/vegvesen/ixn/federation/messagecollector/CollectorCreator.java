@@ -51,6 +51,7 @@ public class CollectorCreator {
         String readUrl = ixn.getMessageChannelUrl();
         String readQueue = this.localIxnDomainName;
 		Sink readSink = new Sink(readUrl, readQueue, sslContext);
+		logger.info("Fetching messages from {}, write to {}",readUrl,writeUrl);
 
         MessageCollectorListener listener = new MessageCollectorListener(readSink, writeSource);
 		try {

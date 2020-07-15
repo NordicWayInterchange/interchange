@@ -44,7 +44,7 @@ public class Source implements AutoCloseable {
 
         try( Source s = new Source(url,sendQueue,sslContext)) {
             s.start();
-            s.send("Yo!", "NO", "someukquadtile");
+            s.send("Yo!", "NO", ",someukquadtile");
         }
     }
 
