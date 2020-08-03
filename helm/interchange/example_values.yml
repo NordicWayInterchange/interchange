@@ -17,10 +17,6 @@ qpid:                                                               # Apache Qpi
     repository: eu.gcr.io/nordic-way-aad182cc/qpid                  # Public container registry for Nordic Way where the docker images are located
     tag: "074e6bd"                                                  # Image tag for the Qpid-image
   expose_amqps: true                                                # Expose the AMPQS port for incoming messages.
-  tls_secret_name: example-node                                     # The name of the kubernetes secret containing the keys and certificates
-  server_private_key_file: example-node.itsinterchange.eu.key       # Name of the server private key file
-  server_certificate_file: example-node.itsinterchange.eu.crt       # Name of the server certificate file
-  ca_certificate_file: example-ca.itsinterchange.eu.no.crt          # Name of the ca certificate file
   interchange_password: not-a-secure-password                       # Password for the user that the interchange app uses to validate messages arriving on Qpid
   admin_password: not-a-secure-password                             # Password for a Qpid administrative user
   persistence:                                                      # Configure persistence of queues in Qpid
