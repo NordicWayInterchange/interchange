@@ -294,8 +294,8 @@ public class Neighbour {
 		return nextPostAttempt;
 	}
 
-
 	public boolean needsOurUpdatedCapabilities(LocalDateTime localCapabilitiesUpdated) {
+		logger.debug("Local capabilities updated {}, last neighbour capability exchange {}", localCapabilitiesUpdated, this.getCapabilities().getLastCapabilityExchange());
 		if (localCapabilitiesUpdated != null) {
 			return capabilitiesNeverSeen()
 					|| this.getCapabilities().getLastCapabilityExchange().isBefore(localCapabilitiesUpdated);
