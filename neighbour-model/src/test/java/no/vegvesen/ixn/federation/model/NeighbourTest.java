@@ -84,6 +84,12 @@ public class NeighbourTest {
 	}
 
 	@Test
+	void shouldCheckSubscriptionRequestsForUpdates_noLocalSubscriptions_shouldNotCheck() {
+		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(null)).isFalse();
+	}
+
+	@Test
 	public void failedSubscriptionRequest_firstSetsStart() {
 		Neighbour neighbour = new Neighbour("the-best-neighbour-ever", null, null, null);
 		neighbour.failedConnection(2);
