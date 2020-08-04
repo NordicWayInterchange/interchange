@@ -32,6 +32,10 @@ public class Capabilities {
 		return lastUpdated;
 	}
 
+	public void setLastUpdated(LocalDateTime lastUpdated) {
+		this.lastUpdated = lastUpdated;
+	}
+
 	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
 
 	@Enumerated(EnumType.STRING)

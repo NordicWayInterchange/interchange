@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -77,6 +78,7 @@ public class OnboardRestController {
 		if (serviceProviderToUpdate.getCapabilities().hasDataTypes()) {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		}
+		serviceProviderToUpdate.getCapabilities().setLastUpdated(LocalDateTime.now());
 		// Save the Service Provider representation in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		DataType dataTypeId = null;
@@ -125,6 +127,7 @@ public class OnboardRestController {
 		} else {
 			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		}
+		serviceProviderToUpdate.getCapabilities().setLastUpdated(LocalDateTime.now());
 
 		// Save the updated Service Provider representation in the database.
 		serviceProviderRepository.save(serviceProviderToUpdate);
