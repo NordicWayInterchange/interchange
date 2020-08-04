@@ -24,10 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -185,8 +182,8 @@ class NeighbourServiceTest {
 	public void calculateCustomSubscriptionForNeighbour_localSubscriptionOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
 		Set<DataType> localSubscriptions = getDataTypeSetOriginatingCountry("NO");
 
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newLinkedHashSet(getDatexNoDataType()));
-		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(),new SubscriptionRequest());
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newLinkedHashSet(getDatex2NorwayDataType()));
+		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
 
 		assertThat(calculatedSubscription).hasSize(1);
@@ -194,10 +191,26 @@ class NeighbourServiceTest {
 	}
 
 	@Test
+	public void calculateCustomSubscriptionForNeighbour_localSubscriptionMessageTypeAndOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
+		Set<DataType> localSubscriptions = new HashSet<>();
+		localSubscriptions.add(getDatex2NorwayDataType());
+
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newLinkedHashSet(getDatex2NorwayDataType()));
+		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
+		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
+
+		assertThat(calculatedSubscription).hasSize(1);
+		assertThat(calculatedSubscription.iterator().next().getSelector())
+				.contains("originatingCountry = 'NO'")
+				.contains(" AND ")
+				.contains("messageType = 'DATEX2'");
+	}
+
+	@Test
 	public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
 		Self selfWithNoSubscriptions = new Self("self");
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,Sets.newLinkedHashSet(getDatexNoDataType()));
-		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(),new SubscriptionRequest());
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newLinkedHashSet(getDatex2NorwayDataType()));
+		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, selfWithNoSubscriptions.getLocalSubscriptions());
 		assertThat(calculatedSubscription).hasSize(0);
 	}
@@ -206,7 +219,7 @@ class NeighbourServiceTest {
 		return Sets.newLinkedHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
 	}
 
-	private DataType getDatexNoDataType() {
+	private DataType getDatex2NorwayDataType() {
 		Map<String, String> datexDataTypeHeaders = new HashMap<>();
 		datexDataTypeHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		datexDataTypeHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
