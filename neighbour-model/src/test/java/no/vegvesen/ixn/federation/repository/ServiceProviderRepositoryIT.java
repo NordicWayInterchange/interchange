@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
+import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,8 +112,7 @@ public class ServiceProviderRepositoryIT {
 		fiat = spListRequested.get(0);
 		Set<LocalSubscription> subscriptions = fiat.getSubscriptions();
 		assertThat(subscriptions).hasSize(1);
-		//TODO probably better to use orElseThrow.
-		LocalSubscription subscription = subscriptions.stream().findFirst().get();
+		LocalSubscription subscription = subscriptions.stream().findFirst().orElseThrow(() -> new NotFoundException("already asserted subscription not present"));
 		subscription.setStatus(LocalSubscriptionStatus.CREATED);
 		repository.save(fiat);
 
