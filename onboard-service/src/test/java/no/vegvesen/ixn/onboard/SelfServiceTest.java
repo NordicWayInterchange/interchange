@@ -121,14 +121,13 @@ class SelfServiceTest {
 
 	@Test
 	void fetchSelfCalculatesGetLastUpdatedLocalSubscriptions() {
-		LocalSubscription localSubscription = getLocalSubscription(getDatex("SE"), LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 1));
-		ServiceProvider aServiceProvider = new ServiceProvider();
-		aServiceProvider.updateSubscriptions(Sets.newLinkedHashSet(localSubscription));
+		LocalDateTime aprilNano1 = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 1);
+		ServiceProvider aServiceProvider = mock(ServiceProvider.class);
+		when(aServiceProvider.getSubscriptionUpdated()).thenReturn(aprilNano1);
 
-		LocalSubscription b1LocalSubscription = getLocalSubscription(getDatex("SE"), LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2));
-		LocalSubscription b2LocalSubscription = getLocalSubscription(getDatex("SE"), LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0));
-		ServiceProvider bServiceProvider = new ServiceProvider();
-		bServiceProvider.updateSubscriptions(Sets.newLinkedHashSet(b1LocalSubscription, b2LocalSubscription));
+		ServiceProvider bServiceProvider = mock(ServiceProvider.class);
+		LocalDateTime aprilNano2 = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
+		when(bServiceProvider.getSubscriptionUpdated()).thenReturn(aprilNano2);
 
 		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
 		when(serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED)).thenReturn(serviceProviders);
