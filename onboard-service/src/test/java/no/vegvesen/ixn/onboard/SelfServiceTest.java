@@ -154,7 +154,13 @@ class SelfServiceTest {
 		ServiceProvider bServiceProvider = new ServiceProvider();
 		bServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
 
-		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
+		LocalDateTime cCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
+		DataType cCap1 = getDatex("FI");
+		DataType cCap2 = getDatex("FI");
+		ServiceProvider cServiceProvider = new ServiceProvider();
+		cServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cCap1, cCap2), cCapDate));
+
+		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider, cServiceProvider).collect(Collectors.toList());
 		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
 
 		Self self = selfService.fetchSelf();
