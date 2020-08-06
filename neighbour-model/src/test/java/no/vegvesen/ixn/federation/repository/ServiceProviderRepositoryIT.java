@@ -142,7 +142,7 @@ public class ServiceProviderRepositoryIT {
 		DataType denm = new DataType(Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DENM"));
 		LocalSubscription datexSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,datex2);
 		LocalSubscription denmSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN,denm);
-		serviceProvider.setSubscriptions(new HashSet<>(Arrays.asList(datexSubscription,denmSubscription)));
+		serviceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(datexSubscription,denmSubscription)));
 		repository.save(serviceProvider);
 
 		serviceProvider = repository.findByName(name);
@@ -153,7 +153,7 @@ public class ServiceProviderRepositoryIT {
 				.stream()
 				.filter(subscription -> subscription.getStatus() != LocalSubscriptionStatus.TEAR_DOWN)
 				.collect(Collectors.toSet());
-		serviceProvider.setSubscriptions(localSubscriptions);
+		serviceProvider.updateSubscriptions(localSubscriptions);
 		serviceProvider = repository.save(serviceProvider);
 
 		//so we should only have 1 subscription, with status REQUESTED
@@ -167,7 +167,7 @@ public class ServiceProviderRepositoryIT {
 				.map(localSubscription -> localSubscription.withStatus(LocalSubscriptionStatus.CREATED))
 				.collect(Collectors.toSet());
 
-		serviceProvider.setSubscriptions(updated);
+		serviceProvider.updateSubscriptions(updated);
 		serviceProvider = repository.save(serviceProvider);
 
 		//So should have 1 subscription, status CREATED
@@ -183,7 +183,7 @@ public class ServiceProviderRepositoryIT {
 		ServiceProvider serviceProvider = new ServiceProvider(name);
 		DataType datex2 = new DataType(Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2"));
 		LocalSubscription datexSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,datex2);
-		serviceProvider.setSubscriptions(new HashSet<>(Arrays.asList(datexSubscription)));
+		serviceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(datexSubscription)));
 		repository.save(serviceProvider);
 
 		serviceProvider = repository.findByName(name);

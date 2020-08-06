@@ -122,12 +122,12 @@ class SelfServiceTest {
 	void fetchSelfCalculatesGetLastUpdatedLocalSubscriptions() {
 		LocalSubscription localSubscription = getLocalSubscription(getDatex("SE"), LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 1));
 		ServiceProvider aServiceProvider = new ServiceProvider();
-		aServiceProvider.setSubscriptions(Sets.newLinkedHashSet(localSubscription));
+		aServiceProvider.updateSubscriptions(Sets.newLinkedHashSet(localSubscription));
 
 		LocalSubscription b1LocalSubscription = getLocalSubscription(getDatex("SE"), LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2));
 		LocalSubscription b2LocalSubscription = getLocalSubscription(getDatex("SE"), LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0));
 		ServiceProvider bServiceProvider = new ServiceProvider();
-		bServiceProvider.setSubscriptions(Sets.newLinkedHashSet(b1LocalSubscription, b2LocalSubscription));
+		bServiceProvider.updateSubscriptions(Sets.newLinkedHashSet(b1LocalSubscription, b2LocalSubscription));
 
 		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
 		when(serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED)).thenReturn(serviceProviders);
