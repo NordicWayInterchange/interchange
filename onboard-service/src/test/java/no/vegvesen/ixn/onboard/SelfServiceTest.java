@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {SelfService.class, InterchangeNodeProperties.class})
@@ -68,9 +69,9 @@ class SelfServiceTest {
 	@Test
 	void calculateLastUpdatedSubscriptionOneSub() {
 		ServiceProvider serviceProvider = new ServiceProvider();
-		LocalDateTime lastUpdated = LocalDateTime.now();
-		LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, getDatex("no"), lastUpdated);
+		LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, getDatex("no"));
 		serviceProvider.addLocalSubscription(subscription);
+		LocalDateTime lastUpdated = serviceProvider.getSubscriptionUpdated();
 
 		assertThat(selfService.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider))).isEqualTo(lastUpdated);
 	}
@@ -132,9 +133,11 @@ class SelfServiceTest {
 		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
 		when(serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED)).thenReturn(serviceProviders);
 
+		when(aServiceProvider.getCapabilities()).thenReturn(new Capabilities());
+		when(bServiceProvider.getCapabilities()).thenReturn(new Capabilities());
 		Self self = selfService.fetchSelf();
 
-		assertThat(self.getLastUpdatedLocalSubscriptions()).isEqualTo(b1LocalSubscription.getLastUpdated());
+		assertThat(self.getLastUpdatedLocalSubscriptions()).isEqualTo(aprilNano2);
 		assertThat(self.getLastUpdatedLocalCapabilities()).isNull();
 	}
 
