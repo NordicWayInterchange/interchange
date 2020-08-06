@@ -79,18 +79,14 @@ public class SelfService {
 	LocalDateTime calculateLastUpdatedSubscriptions(List<ServiceProvider> serviceProviders) {
 	    LocalDateTime result = null;
 		for (ServiceProvider serviceProvider : serviceProviders) {
-		    for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-				LocalDateTime lastUpdated = subscription.getLastUpdated();
-				if (lastUpdated != null) {
-					if (result == null || lastUpdated.isAfter(result)) {
-						result = lastUpdated;
-					}
+			LocalDateTime lastUpdated = serviceProvider.getSubscriptionUpdated();
+			if (lastUpdated != null) {
+				if (result == null || lastUpdated.isAfter(result)) {
+					result = lastUpdated;
 				}
 			}
-
 		}
 	    return result;
-
 	}
 
 

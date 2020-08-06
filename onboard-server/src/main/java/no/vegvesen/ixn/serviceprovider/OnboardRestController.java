@@ -24,8 +24,6 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @RestController
 public class OnboardRestController {
@@ -167,17 +165,9 @@ public class OnboardRestController {
 		if (serviceProviderToUpdate == null) {
 			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
 		}
-		Set<LocalSubscription> subscriptions = serviceProviderToUpdate.getSubscriptions();
-		Optional<LocalSubscription> optionalLocalSubscription = subscriptions
-				.stream()
-				.filter(subscription -> subscription.getSub_id().equals(dataTypeId))
-				.findFirst();
-		LocalSubscription subscriptionToDelete = optionalLocalSubscription.
-				orElseThrow(
-						() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that don't exist.")
-				);
-		subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-		// Save updated Service Providerset it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
+		serviceProviderToUpdate.removeLocalSubscription(dataTypeId);
+
+		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 

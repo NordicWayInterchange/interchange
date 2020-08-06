@@ -2,8 +2,10 @@ package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import no.vegvesen.ixn.serviceprovider.NotFoundException;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +28,8 @@ public class ServiceProvider {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "spr_id", foreignKey = @ForeignKey(name = "fk_locsub_spr"))
 	private Set<LocalSubscription> subscriptions = new HashSet<>();
+
+	private LocalDateTime subscriptionUpdated;
 
 	public ServiceProvider() {
 	}
@@ -65,10 +69,32 @@ public class ServiceProvider {
 
 	public void addLocalSubscription(LocalSubscription subscription) {
 		subscriptions.add(subscription);
+		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
 	public void setSubscriptions(Set<LocalSubscription> subscriptions) {
 		this.subscriptions = subscriptions;
+	}
+
+	public LocalDateTime getSubscriptionUpdated() {
+		return subscriptionUpdated;
+	}
+
+	public void removeLocalSubscription(Integer dataTypeId) {
+		LocalSubscription subscriptionToDelete = subscriptions
+				.stream()
+				.filter(subscription -> subscription.getSub_id().equals(dataTypeId))
+				.findFirst()
+				.orElseThrow(
+						() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that don't exist.")
+				);
+		subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
+	public void updateSubscriptions(Set<LocalSubscription> newSubscriptions) {
+		this.setSubscriptions(newSubscriptions);
+		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
 	@Override
