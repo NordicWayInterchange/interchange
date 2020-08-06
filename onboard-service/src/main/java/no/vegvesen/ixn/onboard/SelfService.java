@@ -33,7 +33,7 @@ public class SelfService {
 	// Get the self representation from the database.
     //this could, of course, be a lot more efficient :-)
 	public Self fetchSelf() {
-		List<ServiceProvider> serviceProviders = repository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED);
+		List<ServiceProvider> serviceProviders = repository.findAll();
 		Self self = new Self(interchangeNodeProperties.getName());
 		self.setLocalCapabilities(calculateSelfCapabilities(serviceProviders));
 		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
