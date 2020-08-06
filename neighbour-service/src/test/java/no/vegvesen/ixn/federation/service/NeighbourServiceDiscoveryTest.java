@@ -77,6 +77,7 @@ public class NeighbourServiceDiscoveryTest {
 		self.setLocalCapabilities(selfCapabilities);
 		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("FI");
 		self.setLocalSubscriptions(selfSubscriptions);
+		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 		return self;
 	}
 
@@ -423,6 +424,7 @@ public class NeighbourServiceDiscoveryTest {
 		discoveringNode.setLocalCapabilities(selfCapabilities);
 
 		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("NO");
+		discoveringNode.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
 
@@ -448,6 +450,7 @@ public class NeighbourServiceDiscoveryTest {
 		Self self = new Self("self");
 		Set<DataType> selfLocalSubscriptions = getDataTypeSetOriginatingCountry("NO");
 		self.setLocalSubscriptions(selfLocalSubscriptions);
+		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
 		DataType neighbourDataType = getDatexNoDataType();
