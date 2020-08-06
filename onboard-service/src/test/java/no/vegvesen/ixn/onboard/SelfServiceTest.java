@@ -130,7 +130,7 @@ class SelfServiceTest {
 		when(bServiceProvider.getSubscriptionUpdated()).thenReturn(aprilNano2);
 
 		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
-		when(serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED)).thenReturn(serviceProviders);
+		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
 
 		when(aServiceProvider.getCapabilities()).thenReturn(new Capabilities());
 		when(bServiceProvider.getCapabilities()).thenReturn(new Capabilities());
@@ -155,7 +155,7 @@ class SelfServiceTest {
 		bServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
 
 		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
-		when(serviceProviderRepository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.CREATED)).thenReturn(serviceProviders);
+		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
 
 		Self self = selfService.fetchSelf();
 
