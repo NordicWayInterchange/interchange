@@ -229,9 +229,9 @@ public class NeighbourService {
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 				if (backoffProperties.canBeContacted(neighbour)) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
+						logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 						postCapabilities(self, neighbour, neighbourFacade);
 					} else {
 						logger.debug("Neighbour has our last capabilities");
@@ -296,7 +296,13 @@ public class NeighbourService {
 							neighbour = neighbourRepository.save(neighbour);
 							logger.info("Saving updated neighbour: {}", neighbour.toString());
 						}
+						else {
+							logger.info("Neighbour has our last subscription request");
+						}
+
 					}
+				} else {
+					logger.debug("No need to calculateCustomSubscriptionForNeighbour");
 				}
 			} catch (Exception e) {
 				logger.error("Exception when evaluating subscriptions for neighbour", e);
