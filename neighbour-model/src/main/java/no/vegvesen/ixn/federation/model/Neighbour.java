@@ -235,16 +235,40 @@ public class Neighbour {
 
 	}
 
+	/**
+	 * The basis of the subscription calculations are Self.local subscriptions and capabilities of the neighbour.
+	 * Should calculate new subscriptions if the localSubscriptionsUpdated time or the lastCapabilityExchange for
+	 * this neighbour is after the last time we calculated subscriptions and sent request to the neighbour.
+	 *
+	 * @param localSubscriptionsUpdated when are the last local subscriptions updated
+	 * @return true if the localSubscriptionsUpdated time or the getLastCapabilityExchange is after the last time we
+	 * calculated and sent subscription request to the neighbour
+	 */
 	public boolean shouldCheckSubscriptionRequestsForUpdates(LocalDateTime localSubscriptionsUpdated) {
-		return localSubscriptionsUpdated != null &&
-				(previousSubscriptionRequestIsBeforeLocalUpdate(localSubscriptionsUpdated)
-						|| previousCapabilityExchangeIsAfterLocalUpdate(localSubscriptionsUpdated));
-	}
+		logger.debug("Local subscription updated {}", localSubscriptionsUpdated);
+		if (localSubscriptionsUpdated == null) {
+			logger.debug("No local subscriptions established, should not check for subscription requests");
+			return false;
+		}
 
-	private boolean previousCapabilityExchangeIsAfterLocalUpdate(LocalDateTime localSubscriptionsUpdated) {
-		return this.getCapabilities() != null
-				&& this.getCapabilities().getLastCapabilityExchange() != null
-				&& this.getCapabilities().getLastCapabilityExchange().isAfter(localSubscriptionsUpdated);
+		LocalDateTime maxUpdateDate;
+		if (getCapabilities() != null && this.getCapabilities().getLastCapabilityExchange() != null && this.getCapabilities().getLastCapabilityExchange().isAfter(localSubscriptionsUpdated)) {
+			maxUpdateDate = this.getCapabilities().getLastCapabilityExchange();
+			logger.debug("Max update date is capabilities exchange date {}", this.getCapabilities().getLastCapabilityExchange());
+		}
+		else {
+			maxUpdateDate = localSubscriptionsUpdated;
+			logger.debug("Max update date is local subscription updated {}", localSubscriptionsUpdated);
+		}
+
+		boolean shouldCheckSubscriptionRequestForUpdates = previousSubscriptionRequestIsBeforeLocalUpdate(maxUpdateDate);
+		logger.debug("shouldCheckSubscriptionRequestForUpdates {}: localSubscriptionsUpdated {}, successfulRequest {}, lastCapabilityExchange {}, maxUpdateDate {}",
+				shouldCheckSubscriptionRequestForUpdates,
+				localSubscriptionsUpdated,
+				this.getFedIn() != null ? this.getFedIn().getSuccessfulRequest() : null,
+				this.getCapabilities() != null ? this.getCapabilities().getLastCapabilityExchange() : null,
+				maxUpdateDate);
+		return shouldCheckSubscriptionRequestForUpdates;
 	}
 
 	private boolean previousSubscriptionRequestIsBeforeLocalUpdate(LocalDateTime localSubscriptionsUpdated) {
@@ -259,8 +283,7 @@ public class Neighbour {
 			this.backoffStart = LocalDateTime.now();
 			this.backoffAttempts = 0;
 			logger.warn("Starting backoff now {}", this.backoffStart);
-		}
-		else {
+		} else {
 			this.backoffAttempts++;
 			logger.warn("Increasing backoff counter to {}", this.backoffAttempts);
 			if (this.getBackoffAttempts() > maxAttemptsBeforeUnreachable) {
@@ -289,7 +312,7 @@ public class Neighbour {
 		}
 
 		if (this.getConnectionStatus() == ConnectionStatus.FAILED) {
-			return  this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(randomShiftUpperLimit, startIntervalLength));
+			return this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(randomShiftUpperLimit, startIntervalLength));
 		}
 		return true;
 	}

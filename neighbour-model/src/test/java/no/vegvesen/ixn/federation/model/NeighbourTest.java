@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -48,9 +49,8 @@ public class NeighbourTest {
 
 	@Test
 	public void serverNameEndWithoutDot() {
-		assertThatExceptionOfType(DiscoveryException.class).isThrownBy(() -> {
-			new Neighbour("ericsson.", null, null, null);
-		});
+		assertThatExceptionOfType(DiscoveryException.class).isThrownBy(() ->
+				new Neighbour("ericsson.", null, null, null));
 	}
 
 	@Test
@@ -66,16 +66,16 @@ public class NeighbourTest {
 		fullDomainName.setControlChannelPort("1234");
 		assertThat(fullDomainName.getControlChannelUrl("/thePath")).isEqualTo("https://my-host:1234/thePath");
 	}
-
+//----------------
 	@Test
-	public void neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
+	public void shouldCheckSubscriptionRequestsForUpdates_neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
 		LocalDateTime localSubscriptionsUpdatedNow = LocalDateTime.now();
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionsUpdatedNow)).isTrue();
 	}
 
 	@Test
-	public void neighbourJustHadSubscriptionRequestShouldNotCheckSubscriptionRequest() {
+	public void shouldCheckSubscriptionRequestsForUpdates_neighbourJustHadSubscriptionRequestShouldNotCheckSubscriptionRequest() {
 		SubscriptionRequest fedIn = new SubscriptionRequest();
 		LocalDateTime now = LocalDateTime.now();
 		fedIn.setSuccessfulRequest(now);
@@ -84,9 +84,34 @@ public class NeighbourTest {
 	}
 
 	@Test
+	public void shouldCheckSubscriptionRequestsForUpdates_neighbourJustHadCapabilityExchangeShouldNotCheckSubscriptionRequest() {
+		SubscriptionRequest fedIn = new SubscriptionRequest();
+		LocalDateTime capabilityExchangeTimeNow = LocalDateTime.now();
+		LocalDateTime localSubscriptionUpdateTimeBefore = capabilityExchangeTimeNow.minusSeconds(1);
+		fedIn.setSuccessfulRequest(capabilityExchangeTimeNow);
+		Capabilities capabilities = new Capabilities();
+		capabilities.setLastCapabilityExchange(capabilityExchangeTimeNow);
+		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn);
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionUpdateTimeBefore)).isFalse();
+	}
+
+	@Test
 	void shouldCheckSubscriptionRequestsForUpdates_noLocalSubscriptions_shouldNotCheck() {
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(null)).isFalse();
+	}
+
+	@Test
+	public void shouldCheckSubscriptionRequestsForUpdates_neighbourWithNewCapabilityPostShouldCheckSubscriptionRequest() {
+		SubscriptionRequest fedIn = new SubscriptionRequest();
+		LocalDateTime capabilityExchangeTimeNow = LocalDateTime.now();
+		LocalDateTime localSubscriptionUpdateTimeBeforeCapabilityPost = capabilityExchangeTimeNow.minusSeconds(1);
+		LocalDateTime successfulSubscriptionRequestTimeBeforeCapabilityPost = capabilityExchangeTimeNow.minusSeconds(2);
+		fedIn.setSuccessfulRequest(successfulSubscriptionRequestTimeBeforeCapabilityPost);
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>());
+		capabilities.setLastCapabilityExchange(capabilityExchangeTimeNow);
+		Neighbour neighbourWithNewerCapabilitiesThanSubscriptionRequest = new Neighbour("nice-neighbour", capabilities, null, fedIn);
+		assertThat(neighbourWithNewerCapabilitiesThanSubscriptionRequest.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionUpdateTimeBeforeCapabilityPost)).isTrue();
 	}
 
 	@Test
