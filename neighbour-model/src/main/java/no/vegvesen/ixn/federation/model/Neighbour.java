@@ -237,9 +237,20 @@ public class Neighbour {
 
 	public boolean shouldCheckSubscriptionRequestsForUpdates(LocalDateTime localSubscriptionsUpdated) {
 		return localSubscriptionsUpdated != null &&
-				(this.getFedIn() == null
-						|| this.getFedIn().getSuccessfulRequest() == null
-						|| this.getFedIn().getSuccessfulRequest().isBefore(localSubscriptionsUpdated));
+				(previousSubscriptionRequestIsBeforeLocalUpdate(localSubscriptionsUpdated)
+						|| previousCapabilityExchangeIsAfterLocalUpdate(localSubscriptionsUpdated));
+	}
+
+	private boolean previousCapabilityExchangeIsAfterLocalUpdate(LocalDateTime localSubscriptionsUpdated) {
+		return this.getCapabilities() != null
+				&& this.getCapabilities().getLastCapabilityExchange() != null
+				&& this.getCapabilities().getLastCapabilityExchange().isAfter(localSubscriptionsUpdated);
+	}
+
+	private boolean previousSubscriptionRequestIsBeforeLocalUpdate(LocalDateTime localSubscriptionsUpdated) {
+		return this.getFedIn() == null
+				|| this.getFedIn().getSuccessfulRequest() == null
+				|| this.getFedIn().getSuccessfulRequest().isBefore(localSubscriptionsUpdated);
 	}
 
 	public void failedConnection(int maxAttemptsBeforeUnreachable) {
