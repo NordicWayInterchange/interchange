@@ -66,7 +66,7 @@ public class NeighbourTest {
 		fullDomainName.setControlChannelPort("1234");
 		assertThat(fullDomainName.getControlChannelUrl("/thePath")).isEqualTo("https://my-host:1234/thePath");
 	}
-//----------------
+
 	@Test
 	public void shouldCheckSubscriptionRequestsForUpdates_neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
