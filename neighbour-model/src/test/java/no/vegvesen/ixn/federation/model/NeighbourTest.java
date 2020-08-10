@@ -7,6 +7,7 @@ import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -71,7 +72,7 @@ public class NeighbourTest {
 	public void shouldCheckSubscriptionRequestsForUpdates_neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
 		LocalDateTime localSubscriptionsUpdatedNow = LocalDateTime.now();
-		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionsUpdatedNow)).isTrue();
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(localSubscriptionsUpdatedNow))).isTrue();
 	}
 
 	@Test
@@ -80,7 +81,7 @@ public class NeighbourTest {
 		LocalDateTime now = LocalDateTime.now();
 		fedIn.setSuccessfulRequest(now);
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, fedIn);
-		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(now)).isFalse();
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(now))).isFalse();
 	}
 
 	@Test
@@ -92,13 +93,13 @@ public class NeighbourTest {
 		Capabilities capabilities = new Capabilities();
 		capabilities.setLastCapabilityExchange(capabilityExchangeTimeNow);
 		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn);
-		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionUpdateTimeBefore)).isFalse();
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(localSubscriptionUpdateTimeBefore))).isFalse();
 	}
 
 	@Test
 	void shouldCheckSubscriptionRequestsForUpdates_noLocalSubscriptions_shouldNotCheck() {
 		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
-		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(null)).isFalse();
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.empty())).isFalse();
 	}
 
 	@Test
@@ -111,7 +112,7 @@ public class NeighbourTest {
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>());
 		capabilities.setLastCapabilityExchange(capabilityExchangeTimeNow);
 		Neighbour neighbourWithNewerCapabilitiesThanSubscriptionRequest = new Neighbour("nice-neighbour", capabilities, null, fedIn);
-		assertThat(neighbourWithNewerCapabilitiesThanSubscriptionRequest.shouldCheckSubscriptionRequestsForUpdates(localSubscriptionUpdateTimeBeforeCapabilityPost)).isTrue();
+		assertThat(neighbourWithNewerCapabilitiesThanSubscriptionRequest.shouldCheckSubscriptionRequestsForUpdates(Optional.of(localSubscriptionUpdateTimeBeforeCapabilityPost))).isTrue();
 	}
 
 	@Test
@@ -170,19 +171,19 @@ public class NeighbourTest {
 	public void needsOurUpdatedCapabilitiesIfLocalCapabilitiesAreNeverComputedAndNeighbourNeverSeen() {
 		Neighbour neverSeen = new Neighbour();
 		neverSeen.setName("never-seen");
-		assertThat(neverSeen.needsOurUpdatedCapabilities(null)).isTrue();
+		assertThat(neverSeen.needsOurUpdatedCapabilities(Optional.empty())).isTrue();
 	}
 
 	@Test
 	public void doesNotNeedsOurCapabilitiesIfLocalCapabilitiesAreNeverComputedAndNeighbourSeen() {
 		Neighbour seenYesterday = neighbourSeenYesterday();
-		assertThat(seenYesterday.needsOurUpdatedCapabilities(null)).isFalse();
+		assertThat(seenYesterday.needsOurUpdatedCapabilities(Optional.empty())).isFalse();
 	}
 
 	@Test
 	public void needsOurUpdatedCapabilitiesIfLocalCapabilitiesAreNewer() {
 		Neighbour seenYesterday = neighbourSeenYesterday();
-		assertThat(seenYesterday.needsOurUpdatedCapabilities(LocalDateTime.now().minusHours(1))).isTrue();
+		assertThat(seenYesterday.needsOurUpdatedCapabilities(Optional.of(LocalDateTime.now().minusHours(1)))).isTrue();
 	}
 
 	@NonNull

@@ -19,6 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.transaction.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,8 +57,8 @@ public class OnboardRestControllerIT {
 
         LocalDataType saved = serviceProviderCapabilities.getDataTypes().get(0);
         restController.deleteCapability(serviceProviderName, saved.getId());
-
     }
+
     @Test
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
@@ -69,12 +70,34 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderSubscriptions.getSubscritions()).hasSize(1);
 
 		ServiceProvider afterAddSubscription = serviceProviderRepository.findByName(serviceProviderName);
-		assertThat(afterAddSubscription.getSubscriptionUpdated()).isAfter(beforeDeleteTime);
+		assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
 		LocalSubscriptionApi subscriptionApi = serviceProviderSubscriptions.getSubscritions().get(0);
         restController.deleteSubscription(serviceProviderName,subscriptionApi.getId());
 
 		ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
-		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isAfter(beforeDeleteTime);
+		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
+	}
+
+	@Test
+	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
+		LocalDateTime beforeDeleteTime = LocalDateTime.now();
+		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
+		Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
+		restController.addSubscriptions(serviceProviderName, datexNO);
+
+		LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+		assertThat(serviceProviderSubscriptions.getSubscritions()).hasSize(1);
+		ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
+		Optional<LocalDateTime> subscriptionUpdated = savedSP.getSubscriptionUpdated();
+		assertThat(subscriptionUpdated).isPresent();
+
+		try {
+			restController.deleteSubscription(serviceProviderName, -1);
+		} catch (NotFoundException ignore) {
+		}
+		ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);
+
+		assertThat(savedSPAfterDelete.getSubscriptionUpdated()).isEqualTo(subscriptionUpdated);
 	}
 }

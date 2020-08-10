@@ -15,10 +15,7 @@ import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,16 +68,16 @@ class SelfServiceTest {
 		ServiceProvider serviceProvider = new ServiceProvider();
 		LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, getDatex("no"));
 		serviceProvider.addLocalSubscription(subscription);
-		LocalDateTime lastUpdated = serviceProvider.getSubscriptionUpdated();
-
-		assertThat(selfService.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider))).isEqualTo(lastUpdated);
+		Optional<LocalDateTime> lastUpdated = serviceProvider.getSubscriptionUpdated();
+		assertThat(lastUpdated).isPresent();
+		assertThat(selfService.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider))).isEqualTo(lastUpdated.get());
 	}
 
 	@Test
 	void calculateLastUpdateCapabilitiesEmpty() {
 		ServiceProvider serviceProvider = new ServiceProvider();
 
-		LocalDateTime localDateTime = selfService.calculateLastUpdatedCapabilties(Arrays.asList(serviceProvider));
+		LocalDateTime localDateTime = selfService.calculateLastUpdatedCapabilities(Arrays.asList(serviceProvider));
 		assertThat(localDateTime).isNull();
 	}
 
@@ -90,7 +87,7 @@ class SelfServiceTest {
 		LocalDateTime lastUpdated = LocalDateTime.now();
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,setOf(getDatex("NO")),lastUpdated);
 		serviceProvider.setCapabilities(capabilities);
-		LocalDateTime result = selfService.calculateLastUpdatedCapabilties(Arrays.asList(serviceProvider));
+		LocalDateTime result = selfService.calculateLastUpdatedCapabilities(Arrays.asList(serviceProvider));
 		assertThat(result).isEqualTo(lastUpdated);
 	}
 
@@ -123,11 +120,11 @@ class SelfServiceTest {
 	void fetchSelfCalculatesGetLastUpdatedLocalSubscriptions() {
 		LocalDateTime aprilNano1 = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 1);
 		ServiceProvider aServiceProvider = mock(ServiceProvider.class);
-		when(aServiceProvider.getSubscriptionUpdated()).thenReturn(aprilNano1);
+		when(aServiceProvider.getSubscriptionUpdated()).thenReturn(Optional.of(aprilNano1));
 
 		ServiceProvider bServiceProvider = mock(ServiceProvider.class);
 		LocalDateTime aprilNano2 = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
-		when(bServiceProvider.getSubscriptionUpdated()).thenReturn(aprilNano2);
+		when(bServiceProvider.getSubscriptionUpdated()).thenReturn(Optional.of(aprilNano2));
 
 		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
 		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
@@ -136,8 +133,8 @@ class SelfServiceTest {
 		when(bServiceProvider.getCapabilities()).thenReturn(new Capabilities());
 		Self self = selfService.fetchSelf();
 
-		assertThat(self.getLastUpdatedLocalSubscriptions()).isEqualTo(aprilNano2);
-		assertThat(self.getLastUpdatedLocalCapabilities()).isNull();
+		assertThat(self.getLastUpdatedLocalSubscriptions()).isEqualTo(Optional.of(aprilNano2));
+		assertThat(self.getLastUpdatedLocalCapabilities()).isEmpty();
 	}
 
 	@Test
@@ -165,7 +162,7 @@ class SelfServiceTest {
 
 		Self self = selfService.fetchSelf();
 
-		assertThat(self.getLastUpdatedLocalCapabilities()).isEqualTo(bCapDate);
+		assertThat(self.getLastUpdatedLocalCapabilities()).isEqualTo(Optional.of(bCapDate));
 	}
 
 	@Test

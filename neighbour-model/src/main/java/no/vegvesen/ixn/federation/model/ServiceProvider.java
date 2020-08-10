@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Entity
@@ -76,8 +77,8 @@ public class ServiceProvider {
 		this.subscriptions = subscriptions;
 	}
 
-	public LocalDateTime getSubscriptionUpdated() {
-		return subscriptionUpdated;
+	public Optional<LocalDateTime> getSubscriptionUpdated() {
+		return Optional.ofNullable(subscriptionUpdated);
 	}
 
 	public void removeLocalSubscription(Integer dataTypeId) {

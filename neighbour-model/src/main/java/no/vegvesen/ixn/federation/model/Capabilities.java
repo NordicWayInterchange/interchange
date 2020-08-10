@@ -31,8 +31,8 @@ public class Capabilities {
 		this.lastCapabilityExchange = lastCapabilityExchange;
 	}
 
-	public LocalDateTime getLastUpdated() {
-		return lastUpdated;
+	public Optional<LocalDateTime> getLastUpdated() {
+		return Optional.ofNullable(lastUpdated);
 	}
 
 	public void setLastUpdated(LocalDateTime lastUpdated) {

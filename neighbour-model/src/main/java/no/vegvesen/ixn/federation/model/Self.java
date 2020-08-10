@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class Self {
@@ -56,16 +57,16 @@ public class Self {
 		}
 	}
 
-	public LocalDateTime getLastUpdatedLocalCapabilities() {
-		return lastUpdatedLocalCapabilities;
+	public Optional<LocalDateTime> getLastUpdatedLocalCapabilities() {
+		return Optional.ofNullable(lastUpdatedLocalCapabilities);
 	}
 
 	public void setLastUpdatedLocalCapabilities(LocalDateTime lastUpdatedLocalCapabilities) {
 		this.lastUpdatedLocalCapabilities = lastUpdatedLocalCapabilities;
 	}
 
-	public LocalDateTime getLastUpdatedLocalSubscriptions() {
-		return lastUpdatedLocalSubscriptions;
+	public Optional<LocalDateTime> getLastUpdatedLocalSubscriptions() {
+		return Optional.ofNullable(lastUpdatedLocalSubscriptions);
 	}
 
 	public void setLastUpdatedLocalSubscriptions(LocalDateTime lastUpdatedLocalSubscriptions) {

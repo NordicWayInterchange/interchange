@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class SelfService {
 		self.setLocalCapabilities(calculateSelfCapabilities(serviceProviders));
 		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
 		self.setLastUpdatedLocalSubscriptions(calculateLastUpdatedSubscriptions(serviceProviders));
-		self.setLastUpdatedLocalCapabilities(calculateLastUpdatedCapabilties(serviceProviders));
+		self.setLastUpdatedLocalCapabilities(calculateLastUpdatedCapabilities(serviceProviders));
         return self;
 
 	}
@@ -79,25 +80,24 @@ public class SelfService {
 	LocalDateTime calculateLastUpdatedSubscriptions(List<ServiceProvider> serviceProviders) {
 	    LocalDateTime result = null;
 		for (ServiceProvider serviceProvider : serviceProviders) {
-			LocalDateTime lastUpdated = serviceProvider.getSubscriptionUpdated();
-			if (lastUpdated != null) {
-				if (result == null || lastUpdated.isAfter(result)) {
-					result = lastUpdated;
+			Optional<LocalDateTime> lastUpdated = serviceProvider.getSubscriptionUpdated();
+			if (lastUpdated.isPresent()) {
+				if (result == null || lastUpdated.get().isAfter(result)) {
+					result = lastUpdated.get();
 				}
 			}
 		}
 	    return result;
 	}
 
-
-	LocalDateTime calculateLastUpdatedCapabilties(List<ServiceProvider> serviceProviders) {
+	LocalDateTime calculateLastUpdatedCapabilities(List<ServiceProvider> serviceProviders) {
 	    LocalDateTime result = null;
 		for (ServiceProvider serviceProvider : serviceProviders) {
 		    Capabilities capabilities = serviceProvider.getCapabilities();
-			LocalDateTime lastUpdated = capabilities.getLastUpdated();
-			if (lastUpdated != null) {
-				if (result == null || lastUpdated.isAfter(result)) {
-					result = lastUpdated;
+			Optional<LocalDateTime> lastUpdated = capabilities.getLastUpdated();
+			if (lastUpdated.isPresent()) {
+				if (result == null || lastUpdated.get().isAfter(result)) {
+					result = lastUpdated.get();
 				}
 			}
 		}
