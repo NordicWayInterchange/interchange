@@ -70,7 +70,9 @@ public class NeighbourTest {
 
 	@Test
 	public void shouldCheckSubscriptionRequestsForUpdates_neighbourNeverHadSubscriptionRequestShouldCheckSubscriptionRequest() {
-		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, null);
+		Capabilities capabilities = new Capabilities();
+		capabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
+		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, null);
 		LocalDateTime localSubscriptionsUpdatedNow = LocalDateTime.now();
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(localSubscriptionsUpdatedNow))).isTrue();
 	}
@@ -80,7 +82,9 @@ public class NeighbourTest {
 		SubscriptionRequest fedIn = new SubscriptionRequest();
 		LocalDateTime now = LocalDateTime.now();
 		fedIn.setSuccessfulRequest(now);
-		Neighbour neighbour = new Neighbour("nice-neighbour", null, null, fedIn);
+		Capabilities capabilities = new Capabilities();
+		capabilities.setLastCapabilityExchange(now.minusHours(1));
+		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn);
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(now))).isFalse();
 	}
 

@@ -272,8 +272,8 @@ public class NeighbourService {
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
-					if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
+				if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
+					if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 						Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
@@ -296,14 +296,14 @@ public class NeighbourService {
 							// Successful subscription request, update discovery state subscription request timestamp.
 							neighbour = neighbourRepository.save(neighbour);
 							logger.info("Saving updated neighbour: {}", neighbour.toString());
-						}
-						else {
+						} else {
 							logger.info("Neighbour has our last subscription request");
 						}
-
+					} else {
+						logger.debug("No need to calculateCustomSubscriptionForNeighbour based on timestamps on local subscriptions, neighbour capabilities, last subscription request");
 					}
 				} else {
-					logger.debug("No need to calculateCustomSubscriptionForNeighbour");
+					logger.warn("Neighbour has neither capabilities nor subscriptions");
 				}
 			} catch (Exception e) {
 				logger.error("Exception when evaluating subscriptions for neighbour", e);

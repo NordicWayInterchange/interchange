@@ -240,6 +240,8 @@ public class Neighbour {
 	 * The basis of the subscription calculations are Self.local subscriptions and capabilities of the neighbour.
 	 * Should calculate new subscriptions if the localSubscriptionsUpdated time or the lastCapabilityExchange for
 	 * this neighbour is after the last time we calculated subscriptions and sent request to the neighbour.
+	 * <p>
+	 * Only neighbours with known capabilities are candidates for subscription request.
 	 *
 	 * @param localSubscriptionsUpdated when are the last local subscriptions updated, optionally
 	 * @return true if the localSubscriptionsUpdated time or the getLastCapabilityExchange is after the last time we
@@ -247,36 +249,32 @@ public class Neighbour {
 	 */
 	public boolean shouldCheckSubscriptionRequestsForUpdates(Optional<LocalDateTime> localSubscriptionsUpdated) {
 		if (!localSubscriptionsUpdated.isPresent()) {
-			logger.debug("Local subscriptions never established for any service provider, should not check for subscription requests");
+			logger.debug("Local subscriptions never established for any service provider, should not check for subscription requests for any neighbour");
 			return false;
 		}
 		LocalDateTime localSubscriptionsUpdatedTime = localSubscriptionsUpdated.get();
-		logger.debug("Local subscription updated {}", localSubscriptionsUpdatedTime);
 
-		LocalDateTime maxUpdateDate;
-		if (getCapabilities() != null && this.getCapabilities().getLastCapabilityExchange() != null && this.getCapabilities().getLastCapabilityExchange().isAfter(localSubscriptionsUpdatedTime)) {
-			maxUpdateDate = this.getCapabilities().getLastCapabilityExchange();
-			logger.debug("Max update date is capabilities exchange date {}", this.getCapabilities().getLastCapabilityExchange());
+		if (hasCapabilities() && getCapabilities().getLastCapabilityExchange() == null) {
+			logger.warn("Should not check subscription for neighbour with no capabilities exchange");
+			return false;
 		}
-		else {
-			maxUpdateDate = localSubscriptionsUpdatedTime;
-			logger.debug("Max update date is local subscription updated {}", localSubscriptionsUpdatedTime);
+		LocalDateTime capabilityPostDate = this.getCapabilities().getLastCapabilityExchange();
+
+		if (this.getFedIn() == null || !this.getFedIn().getSuccessfulRequest().isPresent()) {
+			logger.debug("Should check subscription for neighbour with no previous subscription request");
+			return true;
 		}
 
-		boolean shouldCheckSubscriptionRequestForUpdates = previousSubscriptionRequestIsBeforeLocalUpdate(maxUpdateDate);
-		logger.debug("shouldCheckSubscriptionRequestForUpdates {}: localSubscriptionsUpdated {}, successfulRequest {}, lastCapabilityExchange {}, maxUpdateDate {}",
+		LocalDateTime neighbourSubscriptionRequestTime = this.getFedIn().getSuccessfulRequest().get();
+
+		boolean shouldCheckSubscriptionRequestForUpdates = neighbourSubscriptionRequestTime.isBefore(localSubscriptionsUpdatedTime)
+				|| neighbourSubscriptionRequestTime.isBefore(capabilityPostDate);
+		logger.debug("shouldCheckSubscriptionRequestForUpdates {}: localSubscriptionsUpdated {}, successfulRequest {}, lastCapabilityExchange {}",
 				shouldCheckSubscriptionRequestForUpdates,
 				localSubscriptionsUpdatedTime,
-				this.getFedIn() != null ? this.getFedIn().getSuccessfulRequest() : null,
-				this.getCapabilities() != null ? this.getCapabilities().getLastCapabilityExchange() : null,
-				maxUpdateDate);
+				neighbourSubscriptionRequestTime,
+				capabilityPostDate);
 		return shouldCheckSubscriptionRequestForUpdates;
-	}
-
-	private boolean previousSubscriptionRequestIsBeforeLocalUpdate(LocalDateTime localSubscriptionsUpdated) {
-		return this.getFedIn() == null
-				|| this.getFedIn().getSuccessfulRequest() == null
-				|| this.getFedIn().getSuccessfulRequest().isBefore(localSubscriptionsUpdated);
 	}
 
 	public void failedConnection(int maxAttemptsBeforeUnreachable) {

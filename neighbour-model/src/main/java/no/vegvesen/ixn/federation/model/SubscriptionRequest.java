@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -72,8 +73,8 @@ public class SubscriptionRequest {
 				.collect(Collectors.toSet());
 	}
 
-	public LocalDateTime getSuccessfulRequest() {
-		return successfulRequest;
+	public Optional<LocalDateTime> getSuccessfulRequest() {
+		return Optional.ofNullable(successfulRequest);
 	}
 
 	public void setSuccessfulRequest(LocalDateTime successfulRequest) {

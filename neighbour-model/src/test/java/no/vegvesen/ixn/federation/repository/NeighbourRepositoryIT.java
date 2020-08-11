@@ -209,7 +209,7 @@ public class NeighbourRepositoryIT {
 		Neighbour neighbour = new Neighbour("another-nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
 		Neighbour saved = repository.save(neighbour);
 		assertThat(saved).isNotNull();
-		assertThat(saved.getSubscriptionRequest().getSuccessfulRequest()).isNull();
+		assertThat(saved.getSubscriptionRequest().getSuccessfulRequest()).isEmpty();
 	}
 
 	@Test
