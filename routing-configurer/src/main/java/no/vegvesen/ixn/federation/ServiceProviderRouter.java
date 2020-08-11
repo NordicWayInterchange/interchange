@@ -73,12 +73,10 @@ public class ServiceProviderRouter {
         Optional<LocalSubscription> newSubscription;
         switch (subscription.getStatus()) {
             case REQUESTED:
-                newSubscription = onRequested(groupMemberNames, name, subscription);
+			case CREATED:
+				newSubscription = onRequested(groupMemberNames, name, subscription);
                 break;
-            case CREATED:
-                newSubscription = onRequested(groupMemberNames, name, subscription);
-                break;
-            case TEAR_DOWN:
+			case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
                 newSubscription = onTearDown(name, subscription);
                 break;
