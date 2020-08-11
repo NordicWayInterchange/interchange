@@ -13,6 +13,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -235,10 +236,45 @@ public class Neighbour {
 
 	}
 
-	public boolean shouldCheckSubscriptionRequestsForUpdates(LocalDateTime localSubscriptionsUpdated) {
-		return this.getFedIn() == null
-				|| this.getFedIn().getSuccessfulRequest() == null
-				|| this.getFedIn().getSuccessfulRequest().isBefore(localSubscriptionsUpdated);
+	/**
+	 * The basis of the subscription calculations are Self.local subscriptions and capabilities of the neighbour.
+	 * Should calculate new subscriptions if the localSubscriptionsUpdated time or the lastCapabilityExchange for
+	 * this neighbour is after the last time we calculated subscriptions and sent request to the neighbour.
+	 * <p>
+	 * Only neighbours with known capabilities are candidates for subscription request.
+	 *
+	 * @param localSubscriptionsUpdated when are the last local subscriptions updated, optionally
+	 * @return true if the localSubscriptionsUpdated time or the getLastCapabilityExchange is after the last time we
+	 * calculated and sent subscription request to the neighbour
+	 */
+	public boolean shouldCheckSubscriptionRequestsForUpdates(Optional<LocalDateTime> localSubscriptionsUpdated) {
+		if (!localSubscriptionsUpdated.isPresent()) {
+			logger.debug("Local subscriptions never established for any service provider, should not check for subscription requests for any neighbour");
+			return false;
+		}
+		LocalDateTime localSubscriptionsUpdatedTime = localSubscriptionsUpdated.get();
+
+		if (hasCapabilities() && getCapabilities().getLastCapabilityExchange() == null) {
+			logger.warn("Should not check subscription for neighbour with no capabilities exchange");
+			return false;
+		}
+		LocalDateTime capabilityPostDate = this.getCapabilities().getLastCapabilityExchange();
+
+		if (this.getFedIn() == null || !this.getFedIn().getSuccessfulRequest().isPresent()) {
+			logger.debug("Should check subscription for neighbour with no previous subscription request");
+			return true;
+		}
+
+		LocalDateTime neighbourSubscriptionRequestTime = this.getFedIn().getSuccessfulRequest().get();
+
+		boolean shouldCheckSubscriptionRequestForUpdates = neighbourSubscriptionRequestTime.isBefore(localSubscriptionsUpdatedTime)
+				|| neighbourSubscriptionRequestTime.isBefore(capabilityPostDate);
+		logger.debug("shouldCheckSubscriptionRequestForUpdates {}: localSubscriptionsUpdated {}, successfulRequest {}, lastCapabilityExchange {}",
+				shouldCheckSubscriptionRequestForUpdates,
+				localSubscriptionsUpdatedTime,
+				neighbourSubscriptionRequestTime,
+				capabilityPostDate);
+		return shouldCheckSubscriptionRequestForUpdates;
 	}
 
 	public void failedConnection(int maxAttemptsBeforeUnreachable) {
@@ -247,8 +283,7 @@ public class Neighbour {
 			this.backoffStart = LocalDateTime.now();
 			this.backoffAttempts = 0;
 			logger.warn("Starting backoff now {}", this.backoffStart);
-		}
-		else {
+		} else {
 			this.backoffAttempts++;
 			logger.warn("Increasing backoff counter to {}", this.backoffAttempts);
 			if (this.getBackoffAttempts() > maxAttemptsBeforeUnreachable) {
@@ -277,7 +312,7 @@ public class Neighbour {
 		}
 
 		if (this.getConnectionStatus() == ConnectionStatus.FAILED) {
-			return  this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(randomShiftUpperLimit, startIntervalLength));
+			return this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(randomShiftUpperLimit, startIntervalLength));
 		}
 		return true;
 	}
@@ -294,13 +329,13 @@ public class Neighbour {
 		return nextPostAttempt;
 	}
 
-
-	public boolean needsOurUpdatedCapabilities(LocalDateTime localCapabilitiesUpdated) {
-		if (localCapabilitiesUpdated != null) {
-			return capabilitiesNeverSeen()
-					|| this.getCapabilities().getLastCapabilityExchange().isBefore(localCapabilitiesUpdated);
+	public boolean needsOurUpdatedCapabilities(Optional<LocalDateTime> localCapabilitiesUpdated) {
+		if (localCapabilitiesUpdated.isPresent()) {
+			logger.debug("Local capabilities updated {}, last neighbour capability exchange {}", localCapabilitiesUpdated, this.getCapabilities().getLastCapabilityExchange());
+			return this.capabilitiesNeverSeen()
+					|| this.getCapabilities().getLastCapabilityExchange().isBefore(localCapabilitiesUpdated.get());
 		} else {
-			return capabilitiesNeverSeen();
+			return this.capabilitiesNeverSeen();
 		}
 	}
 

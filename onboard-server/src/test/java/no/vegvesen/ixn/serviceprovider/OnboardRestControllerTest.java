@@ -27,7 +27,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -211,7 +210,7 @@ public class OnboardRestControllerTest {
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi);
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName(firstServiceProviderName);
-		firstServiceProvider.setSubscriptions(new HashSet<>(Arrays.asList(seSubs,fiSubs)));
+		firstServiceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(seSubs,fiSubs)));
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self

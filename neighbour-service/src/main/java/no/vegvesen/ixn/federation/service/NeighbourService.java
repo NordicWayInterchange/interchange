@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -229,9 +230,9 @@ public class NeighbourService {
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 				if (backoffProperties.canBeContacted(neighbour)) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
+						logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 						postCapabilities(self, neighbour, neighbourFacade);
 					} else {
 						logger.debug("Neighbour has our last capabilities");
@@ -266,13 +267,13 @@ public class NeighbourService {
 	}
 
 	public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self, NeighbourFacade neighbourFacade) {
-		LocalDateTime lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
+		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
 
 		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
-					if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
+				if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
+					if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 						Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
@@ -295,8 +296,14 @@ public class NeighbourService {
 							// Successful subscription request, update discovery state subscription request timestamp.
 							neighbour = neighbourRepository.save(neighbour);
 							logger.info("Saving updated neighbour: {}", neighbour.toString());
+						} else {
+							logger.info("Neighbour has our last subscription request");
 						}
+					} else {
+						logger.debug("No need to calculateCustomSubscriptionForNeighbour based on timestamps on local subscriptions, neighbour capabilities, last subscription request");
 					}
+				} else {
+					logger.warn("Neighbour has neither capabilities nor subscriptions");
 				}
 			} catch (Exception e) {
 				logger.error("Exception when evaluating subscriptions for neighbour", e);
@@ -310,6 +317,8 @@ public class NeighbourService {
 	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
+		logger.debug("Neighbour capabilities {}", neighbourCapsDataTypes);
+		logger.debug("Local subscriptions {}", localSubscriptions);
 		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)
 				.stream()
 				.map(DataType::toSubscription)

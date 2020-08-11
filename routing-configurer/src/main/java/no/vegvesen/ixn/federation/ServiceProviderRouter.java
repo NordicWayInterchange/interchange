@@ -44,7 +44,7 @@ public class ServiceProviderRouter {
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
 
                 Optional<LocalSubscription> newSubscription = processSubscription(groupMemberNames, name, subscription);
-                newSubscription.ifPresent(localSubscription -> newSubscriptions.add(localSubscription));
+                newSubscription.ifPresent(newSubscriptions::add);
             }
             //remove the queue and group member if we have no more subscriptions
             if (newSubscriptions.isEmpty()) {
@@ -60,7 +60,7 @@ public class ServiceProviderRouter {
             }
             //save if it has changed from the initial
             if (! newSubscriptions.equals(serviceProvider.getSubscriptions())) {
-                serviceProvider.setSubscriptions(newSubscriptions);
+                serviceProvider.updateSubscriptions(newSubscriptions);
                 repository.save(serviceProvider);
                 logger.debug("Saved updated service provider {}",serviceProvider);
             } else {

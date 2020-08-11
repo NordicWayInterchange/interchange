@@ -45,12 +45,6 @@ public class NeighbourDiscovererProperties {
 	private String subscriptionPollInitialDelay;
 
 	/**
-	 * Time, in milliseconds, between each check for updated Service Providers.
-	 * Is used in scheduling settings, and must be provided as an application property, no default value.
-	 */
-	private String updatedServiceProviderCheckInterval;
-
-	/**
 	 * Time, in milleseconds, between each check for new entries in DNS.
  	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
@@ -145,14 +139,6 @@ public class NeighbourDiscovererProperties {
 		this.subscriptionPollInitialDelay = subscriptionPollInitialDelay;
 	}
 
-	public String getUpdatedServiceProviderCheckInterval() {
-		return updatedServiceProviderCheckInterval;
-	}
-
-	public void setUpdatedServiceProviderCheckInterval(String updatedServiceProviderCheckInterval) {
-		this.updatedServiceProviderCheckInterval = updatedServiceProviderCheckInterval;
-	}
-
 	@Override
 	public String toString() {
 		return "NeighbourDiscovererProperties{" +
@@ -162,7 +148,6 @@ public class NeighbourDiscovererProperties {
 				", subscriptionRequestInitialDelay='" + subscriptionRequestInitialDelay + '\'' +
 				", subscriptionPollUpdateInterval='" + subscriptionPollUpdateInterval + '\'' +
 				", subscriptionPollInitialDelay='" + subscriptionPollInitialDelay + '\'' +
-				", updatedServiceProviderCheckInterval='" + updatedServiceProviderCheckInterval + '\'' +
 				", dnsLookupInterval='" + dnsLookupInterval + '\'' +
 				", dnsInitialStartDelay='" + dnsInitialStartDelay + '\'' +
 				", subscriptionPollingNumberOfAttempts=" + subscriptionPollingNumberOfAttempts +

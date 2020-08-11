@@ -4,7 +4,10 @@ import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.DataType;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.onboard.SelfService;
@@ -21,8 +24,6 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @RestController
 public class OnboardRestController {
@@ -62,21 +63,10 @@ public class OnboardRestController {
 			logger.info("The posting Service Provider is new. Converting incoming API object to Service Provider");
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
 		}
-		// Add the incoming capabilities to the capabilities of the Service Provider.
-		Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
 
-		if (currentServiceProviderCapabilities.contains(newLocalCapability)) {
-			throw new CapabilityPostException("The posted capability already exist in the Service Provider capabilities. Nothing to add.");
-		}
-
-		currentServiceProviderCapabilities.add(newLocalCapability);
-
+		serviceProviderToUpdate.getCapabilities().addDataType(newLocalCapability);
 		logger.info("Service provider to update: {}", serviceProviderToUpdate.toString());
 
-		//TODO this could be done in one method in Capabilities.
-		if (serviceProviderToUpdate.getCapabilities().hasDataTypes()) {
-			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		}
 		// Save the Service Provider representation in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		DataType dataTypeId = null;
@@ -109,22 +99,8 @@ public class OnboardRestController {
 			logger.warn("The Service Provider trying to delete a capability is new. No capabilities to delete. Rejecting...");
 			throw new NotFoundException("The Service Provider trying to delete a capability does not exist in the database. Rejecting...");
 		}
-
-		// Service provider  exists. Remove the incoming capabilities from the Service Provider capabilities.
-		Set<DataType> currentServiceProviderCapabilities = serviceProviderToUpdate.getCapabilities().getDataTypes();
-
-		Optional<DataType> subscriptionToDelete = currentServiceProviderCapabilities
-				.stream()
-				.filter(dataType -> dataType.getData_id().equals(capabilityId))
-				.findFirst();
-		DataType toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
-		currentServiceProviderCapabilities.remove(toDelete);
-
-		if (currentServiceProviderCapabilities.size() == 0) {
-			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-		} else {
-			serviceProviderToUpdate.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		}
+		// Service provider exists. Remove the incoming capabilities from the Service Provider capabilities.
+		serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
 
 		// Save the updated Service Provider representation in the database.
 		serviceProviderRepository.save(serviceProviderToUpdate);
@@ -189,17 +165,9 @@ public class OnboardRestController {
 		if (serviceProviderToUpdate == null) {
 			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
 		}
-		Set<LocalSubscription> subscriptions = serviceProviderToUpdate.getSubscriptions();
-		Optional<LocalSubscription> optionalLocalSubscription = subscriptions
-				.stream()
-				.filter(subscription -> subscription.getSub_id().equals(dataTypeId))
-				.findFirst();
-		LocalSubscription subscriptionToDelete = optionalLocalSubscription.
-				orElseThrow(
-						() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that don't exist.")
-				);
-		subscriptionToDelete.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-		// Save updated Service Providerset it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
+		serviceProviderToUpdate.removeLocalSubscription(dataTypeId);
+
+		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 

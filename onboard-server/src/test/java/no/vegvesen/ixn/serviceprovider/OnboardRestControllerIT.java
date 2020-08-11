@@ -2,6 +2,7 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -16,6 +17,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,10 +57,11 @@ public class OnboardRestControllerIT {
 
         LocalDataType saved = serviceProviderCapabilities.getDataTypes().get(0);
         restController.deleteCapability(serviceProviderName, saved.getId());
-
     }
+
     @Test
     public void testDeletingSubscription() {
+		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
         Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
         restController.addSubscriptions(serviceProviderName, datexNO);
@@ -64,9 +69,35 @@ public class OnboardRestControllerIT {
         LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscritions()).hasSize(1);
 
-        LocalSubscriptionApi subscriptionApi = serviceProviderSubscriptions.getSubscritions().get(0);
+		ServiceProvider afterAddSubscription = serviceProviderRepository.findByName(serviceProviderName);
+		assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
+
+		LocalSubscriptionApi subscriptionApi = serviceProviderSubscriptions.getSubscritions().get(0);
         restController.deleteSubscription(serviceProviderName,subscriptionApi.getId());
 
+		ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
+		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
+	}
 
-    }
+	@Test
+	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
+		LocalDateTime beforeDeleteTime = LocalDateTime.now();
+		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
+		Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
+		restController.addSubscriptions(serviceProviderName, datexNO);
+
+		LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+		assertThat(serviceProviderSubscriptions.getSubscritions()).hasSize(1);
+		ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
+		Optional<LocalDateTime> subscriptionUpdated = savedSP.getSubscriptionUpdated();
+		assertThat(subscriptionUpdated).isPresent();
+
+		try {
+			restController.deleteSubscription(serviceProviderName, -1);
+		} catch (NotFoundException ignore) {
+		}
+		ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);
+
+		assertThat(savedSPAfterDelete.getSubscriptionUpdated()).isEqualTo(subscriptionUpdated);
+	}
 }
