@@ -24,13 +24,13 @@ extractCommonName() {
 }
 
 verifyExternalName() {
-    if [[ ! -f ${SERVER_CERTIFICATE_FILE} ]]; then
-        echo "file does not exist ${SERVER_CERTIFICATE_FILE}"
+    if [[ ! -f ${KEY_STORE} ]]; then
+        echo "file does not exist ${KEY_STORE}"
         return 2
     fi
     echo "verifying that vhost name and certificate CN match..."
     local vhost_name="$(jq -r '.name' < ${VHOST_FILE})"
-    local subject_line="$(openssl x509 -noout -subject -in ${SERVER_CERTIFICATE_FILE})"
+    local subject_line="$(openssl pkcs12 -nodes -passin pass:"${KEY_STORE_PASSWORD}" -nokeys -in ${KEY_STORE}| openssl x509 -noout -subject )"
     echo "Subjectline: '${subject_line}'"
     local cert_cn=$(extractCommonName "$subject_line")
 
@@ -59,7 +59,7 @@ fi
 
 verifyExternalName
 
-echo "${VHOST_FILE} ${SERVER_PRIVATE_KEY_FILE} ${SERVER_CERTIFICATE_FILE} ${CA_CERTIFICATE_FILE} ${PASSWD_FILE} ${GROUPS_FILE}" > /dev/null
+echo "${VHOST_FILE} ${KEY_STORE} ${KEY_STORE_PASSWORD} ${TRUST_STORE} ${PASSWD_FILE} ${GROUPS_FILE}" > /dev/null
 
 for file in $(find ${QPID_WORK} -name *.lck); do
     set -x

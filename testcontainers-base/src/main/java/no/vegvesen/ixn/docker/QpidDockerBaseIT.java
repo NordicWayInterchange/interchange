@@ -12,7 +12,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 	public static final int AMQP_PORT = 5672;
 
 	@SuppressWarnings("rawtypes")
-	public static GenericContainer getQpidContainer(String configPathFromClasspath, String jksPathFromClasspath, final String caCertFile, final String serverCertFile, final String serverKeyFile) {
+	public static GenericContainer getQpidContainer(String configPathFromClasspath, String jksPathFromClasspath, final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword) {
 		return new GenericContainer(
 				new ImageFromDockerfile("qpid-it", false).withFileFromPath(".", getFolderPath("qpid")))
 				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
@@ -22,9 +22,10 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				.withEnv("STATIC_VHOST_FILE", "/config/vhost.json")
 				.withEnv("VHOST_FILE", "/work/default/config/default.json")
 				.withEnv("GROUPS_FILE", "/work/default/config/groups")
-				.withEnv("CA_CERTIFICATE_FILE", "/jks/" + caCertFile)
-				.withEnv("SERVER_CERTIFICATE_FILE", "/jks/" + serverCertFile)
-				.withEnv("SERVER_PRIVATE_KEY_FILE", "/jks/" + serverKeyFile)
+				.withEnv("KEY_STORE", "/jks/" + keyStore)
+				.withEnv("KEY_STORE_PASSWORD", keyStorePassword)
+				.withEnv("TRUST_STORE", "/jks/" + trustStore)
+				.withEnv("TRUST_STORE_PASSWORD", trustStorePassword)
 				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
 	}
 }

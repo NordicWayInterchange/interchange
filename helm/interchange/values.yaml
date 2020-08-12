@@ -19,14 +19,6 @@ qpid:
   ## creates a public loadbalancer for the qpid-secure service
   expose_amqps: false
 
-  ## must provide the name of a k8s secret (in the same namespace)
-  ## which includes a private key and a signed certificate.
-  ## the cert must have the same CN as .Values.external_name
-  # tls_secret_name: qpid-certs
-  server_private_key_file: server.key
-  server_certificate_file: server.crt
-  ca_certificate_file: ca.crt
-
   ## credentials used by the interchange server(s)
   interchange_user: interchange
   interchange_password: c81b984cd23adb8bada75135ee6bb3e9

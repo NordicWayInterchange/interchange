@@ -28,9 +28,9 @@
   "keystores": [
     {
     "name" : "default",
-    "type" : "NonJavaKeyStore",
-    "certificateUrl" : "${SERVER_CERTIFICATE_FILE}",
-    "privateKeyUrl" : "${SERVER_PRIVATE_KEY_FILE}"
+    "type" : "FileKeyStore",
+    "storeUrl" : "${KEY_STORE}",
+    "password" : "${KEY_STORE_PASSWORD}"
     }
   ],
   "plugins": [
@@ -116,10 +116,11 @@
   "truststores": [
     {
       "name": "default",
-      "type": "NonJavaTrustStore",
+      "type": "FileTrustStore",
       "exposedAsMessageSource": false,
       "trustAnchorValidityEnforced": false,
-      "certificatesUrl": "${CA_CERTIFICATE_FILE}"
+      "storeUrl": "${TRUST_STORE}",
+      "password": "${TRUST_STORE_PASSWORD}"
     }
   ],
   "virtualhostnodes": [
