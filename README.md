@@ -1,4 +1,4 @@
-Interchange node under the Nordic Way project
+7Interchange node under the Nordic Way project
 ====
 
 ### License
@@ -28,9 +28,9 @@ For any questions please contact
 ## Getting Started
 
 ### Prerequisites
-* Maven 3.5.4
+* Maven 3.5.x or later
 * Java 8
-* Docker Engine 18.06.1-ce and Docker Compose 1.22.0
+* Docker Engine 18.06.1-ce and Docker Compose 1.22.0 or later
 
 ### Building the project with Maven
 Make sure to build the project with Maven before running docker compose.
