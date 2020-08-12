@@ -49,8 +49,6 @@ each commit. Each component in the system has its own registry.
 
 All the images are tagged with git commit hash, and branch name. Branch "federation-master" is considered to be the stable branch.
 
-The module "federation-st" is created to demonstrate how to start a set of containers for test using docker-compose.  
-
 ### Running the Tests
 Unit tests are run in the maven 'test' stage, and integration tests are run in the 'verify' stage.
 
