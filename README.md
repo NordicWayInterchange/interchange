@@ -70,7 +70,7 @@ https://www.testcontainers.org/
 #### Test framework
 We use junit5 in our tests.
 Version 1.x of the org.testcontainers has a dependency on junit4, so when writing a new test be sure to import test annontations from 'org.junit.jupiter.api' to avoid mixing junit 4 and 5 tests.
-Version 2.x will probably support junit5.
+Version 2.x of org.testcontainers will probably support junit5.
  
 https://junit.org/junit5/
 
