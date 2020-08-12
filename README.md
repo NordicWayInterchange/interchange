@@ -28,9 +28,9 @@ For any questions please contact
 ## Getting Started
 
 ### Prerequisites
-* Maven 3.5.4
+* Maven 3.5.x or later
 * Java 8
-* Docker Engine 18.06.1-ce and Docker Compose 1.22.0
+* Docker Engine 18.06.1-ce and Docker Compose 1.22.0 or later
 
 ### Building the project with Maven
 Make sure to build the project with Maven before running docker compose.
@@ -38,22 +38,16 @@ Maven starts temporary instances of the containers for integration
 testing, and so the container ports will already be in use.
 
 ### Development environment
-- Run `qpid/generate-keys.sh` to get keys and certs necessary for simulating a
-  client/server relationship. These will be generated in `tmp/keys/`.
-- run `docker-compose up --build` to start the environment.
-- make sure you've run `mvn clean install` in `debugclient` so the jar is available for your test-client below.
-- use `test-client.sh` to run the debugclient with all your generated keys.
-  Adding a command line argument will modify the server name being used (default
-  is localhost).
-
+Run `systemtest.sh` to start up two federated nodes with docker-compose.
+Keys are generated before the docker images is built and started by docker-compose.
+ 
+ 
 ### Federation docker images
 All the docker images specified in the github https://github.com/NordicWayInterchange/interchange/ 
 is automatically built by CircleCI and published to the container registry eu.gcr.io/nordic-way-aad182cc/ on 
 each commit. Each component in the system has its own registry.
 
 All the images are tagged with git commit hash, and branch name. Branch "federation-master" is considered to be the stable branch.
-
-The module "federation-st" is created to demonstrate how to start a set of containers for test using docker-compose.  
 
 ### Running the Tests
 Unit tests are run in the maven 'test' stage, and integration tests are run in the 'verify' stage.
@@ -70,7 +64,7 @@ https://www.testcontainers.org/
 #### Test framework
 We use junit5 in our tests.
 Version 1.x of the org.testcontainers has a dependency on junit4, so when writing a new test be sure to import test annontations from 'org.junit.jupiter.api' to avoid mixing junit 4 and 5 tests.
-Version 2.x will probably support junit5.
+Version 2.x of org.testcontainers will probably support junit5.
  
 https://junit.org/junit5/
 
@@ -108,7 +102,10 @@ Source and Sink reads keystore and truststore instructions from property files.
 
 Make sure you have Git, Java and Maven installed.
 Download and install docker as documented here: https://docs.docker.com/v17.09/docker-for-windows/install/#download-docker-for-windows
-Note that the physical box you are running needs to have virtualisation and Hyper-V enabled (see the section [What to know before you install](https://docs.docker.com/v17.09/docker-for-windows/install/#what-to-know-before-you-install) )
+
+Note that Windows Subsystem for Linux 1 (WSL 1) needs to have virtualisation and Hyper-V enabled (see the section [What to know before you install](https://docs.docker.com/v17.09/docker-for-windows/install/#what-to-know-before-you-install) )
+
+With WSL 2 there is no need to enable Hyper-V. When running a mix of WSL 1 and 2 Hyper-V can be enabled.
 
 The actual start-up instructions are the same as for *nix systems:
 - make sure docker is up and running
