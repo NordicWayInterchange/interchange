@@ -40,6 +40,7 @@ public class ServiceProviderRouter {
         List<String> groupMemberNames = qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
+            logger.debug("Checking service provider {}",name);
             Set<LocalSubscription> newSubscriptions = new HashSet<>();
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
 
@@ -125,6 +126,7 @@ public class ServiceProviderRouter {
 
     private void optionallyAddServiceProviderToGroup(List<String> groupMemberNames, String name) {
         if (!groupMemberNames.contains(name)) {
+            logger.debug("Adding member {} to group {}", name,SERVICE_PROVIDERS_GROUP_NAME);
             qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
         }
     }
