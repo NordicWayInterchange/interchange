@@ -108,7 +108,10 @@ Source and Sink reads keystore and truststore instructions from property files.
 
 Make sure you have Git, Java and Maven installed.
 Download and install docker as documented here: https://docs.docker.com/v17.09/docker-for-windows/install/#download-docker-for-windows
-Note that the physical box you are running needs to have virtualisation and Hyper-V enabled (see the section [What to know before you install](https://docs.docker.com/v17.09/docker-for-windows/install/#what-to-know-before-you-install) )
+
+Note that Windows Subsystem for Linux 1 (WSL 1) needs to have virtualisation and Hyper-V enabled (see the section [What to know before you install](https://docs.docker.com/v17.09/docker-for-windows/install/#what-to-know-before-you-install) )
+
+With WSL 2 there is no need to enable Hyper-V. When running a mix of WSL 1 and 2 Hyper-V can be enabled.
 
 The actual start-up instructions are the same as for *nix systems:
 - make sure docker is up and running
