@@ -38,14 +38,10 @@ Maven starts temporary instances of the containers for integration
 testing, and so the container ports will already be in use.
 
 ### Development environment
-- Run `qpid/generate-keys.sh` to get keys and certs necessary for simulating a
-  client/server relationship. These will be generated in `tmp/keys/`.
-- run `docker-compose up --build` to start the environment.
-- make sure you've run `mvn clean install` in `debugclient` so the jar is available for your test-client below.
-- use `test-client.sh` to run the debugclient with all your generated keys.
-  Adding a command line argument will modify the server name being used (default
-  is localhost).
-
+Run `systemtest.sh` to start up two federated nodes with docker-compose.
+Keys are generated before the docker images is built and started by docker-compose.
+ 
+ 
 ### Federation docker images
 All the docker images specified in the github https://github.com/NordicWayInterchange/interchange/ 
 is automatically built by CircleCI and published to the container registry eu.gcr.io/nordic-way-aad182cc/ on 
