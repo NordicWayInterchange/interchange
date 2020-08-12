@@ -1,4 +1,4 @@
-7Interchange node under the Nordic Way project
+Interchange node under the Nordic Way project
 ====
 
 ### License
