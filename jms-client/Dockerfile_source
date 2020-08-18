@@ -1,7 +1,0 @@
-FROM java:8-alpine
-RUN apk add --no-cache bash
-
-COPY target/jms-client-1.0.3-SNAPSHOT.jar jms-client.jar
-COPY src/main/resources/source.properties source.properties
-ENTRYPOINT ["java","-cp","jms-client.jar","no.vegvesen.ixn.Source","source.properties"]
-#ENTRYPOINT "/bin/bash"

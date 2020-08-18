@@ -276,5 +276,7 @@
         <module>routing-configurer-app</module>
         <module>onboard-server-app</module>
         <module>onboard-rest-client</module>
+        <module>jms-client-source</module>
+        <module>jms-client-sink</module>
     </modules>
 </project>
