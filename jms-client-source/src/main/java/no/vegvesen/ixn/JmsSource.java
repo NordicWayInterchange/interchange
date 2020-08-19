@@ -20,8 +20,8 @@ public class JmsSource {
      * @param args name-of-properties-file (optional)
      */
     public static void main(String[] args) throws NamingException, JMSException, IOException {
-		Properties props = JmsProperties.getProperties(args, "/source.properties");
-		String url = props.getProperty("source.url");
+        Properties props = JmsProperties.getProperties(args, "/source.properties");
+        String url = props.getProperty("source.url");
         String sendQueue = props.getProperty("source.sendQueue");
         String keystorePath = props.getProperty("source.keyStorepath") ;
         String keystorePassword = props.getProperty("source.keyStorepass");
