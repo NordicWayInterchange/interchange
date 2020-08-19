@@ -20,15 +20,15 @@ public class CollectorCreator {
 
 
     private final SSLContext sslContext;
-	private Logger logger = LoggerFactory.getLogger(CollectorCreator.class);
+    private Logger logger = LoggerFactory.getLogger(CollectorCreator.class);
     private String localIxnDomainName;
     private String localIxnFederationPort;
     private String writeQueue;
 
     CollectorCreator(SSLContext sslContext,
-                            String localIxnDomainName,
-                            String localIxnFederationPort,
-                            String writequeue) {
+                     String localIxnDomainName,
+                     String localIxnFederationPort,
+                     String writequeue) {
         this.sslContext = sslContext;
         this.localIxnDomainName = localIxnDomainName;
         this.localIxnFederationPort = localIxnFederationPort;
@@ -36,33 +36,33 @@ public class CollectorCreator {
     }
 
     @Autowired
-	public CollectorCreator(SSLContext sslContext, CollectorProperties collectorProperties, InterchangeNodeProperties interchangeNodeProperties) {
-		this.sslContext = sslContext;
-		this.localIxnDomainName = interchangeNodeProperties.getName();
-		this.localIxnFederationPort = collectorProperties.getLocalIxnFederationPort();
-		this.writeQueue = collectorProperties.getWritequeue();
-	}
+    public CollectorCreator(SSLContext sslContext, CollectorProperties collectorProperties, InterchangeNodeProperties interchangeNodeProperties) {
+        this.sslContext = sslContext;
+        this.localIxnDomainName = interchangeNodeProperties.getName();
+        this.localIxnFederationPort = collectorProperties.getLocalIxnFederationPort();
+        this.writeQueue = collectorProperties.getWritequeue();
+    }
 
-	MessageCollectorListener setupCollection(Neighbour ixn) {
+    MessageCollectorListener setupCollection(Neighbour ixn) {
         String writeUrl = String.format("amqps://%s:%s", localIxnDomainName, localIxnFederationPort);
         logger.debug("Write URL: {}, queue {}", writeUrl, writeQueue);
         Source writeSource = new Source(writeUrl, writeQueue, sslContext);
 
         String readUrl = ixn.getMessageChannelUrl();
         String readQueue = this.localIxnDomainName;
-		Sink readSink = new Sink(readUrl, readQueue, sslContext);
-		logger.info("Fetching messages from {}, write to {}",readUrl,writeUrl);
+        Sink readSink = new Sink(readUrl, readQueue, sslContext);
+        logger.info("Fetching messages from {}, write to {}",readUrl,writeUrl);
 
         MessageCollectorListener listener = new MessageCollectorListener(readSink, writeSource);
-		try {
-			writeSource.start();
-			writeSource.setExceptionListener(listener);
-			readSink.startWithMessageListener(listener);
-			readSink.setExceptionListener(listener);
-		} catch (NamingException | JMSException e) {
-			listener.teardown();
-			throw new MessageCollectorException("Tried to set up a new MessageCollectorListener, tearing down.", e);
-		}
+        try {
+            writeSource.start();
+            writeSource.setExceptionListener(listener);
+            readSink.startWithMessageListener(listener);
+            readSink.setExceptionListener(listener);
+        } catch (NamingException | JMSException e) {
+            listener.teardown();
+            throw new MessageCollectorException("Tried to set up a new MessageCollectorListener, tearing down.", e);
+        }
         return listener;
     }
 
