@@ -8,10 +8,11 @@ import javax.net.ssl.SSLContext;
 import java.util.Properties;
 
 public class JmsSink {
-    	public static void main(String[] args) throws Exception {
-		Properties props = JmsProperties.getProperties(args, "/sink.properties");
+    public static void main(String[] args) throws Exception {
 
-		String url = props.getProperty("sink.url");
+        Properties props = JmsProperties.getProperties(args, "/sink.properties");
+
+        String url = props.getProperty("sink.url");
         String receiveQueue = props.getProperty("sink.receiveQueue");
         String keystorePath = props.getProperty("sink.keyStorepath");
         String keystorePassword = props.getProperty("sink.keyStorepass");
@@ -28,7 +29,7 @@ public class JmsSink {
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
 
         Sink sink = new Sink(url,receiveQueue,sslContext);
-		System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
+        System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
         sink.start();
     }
 
