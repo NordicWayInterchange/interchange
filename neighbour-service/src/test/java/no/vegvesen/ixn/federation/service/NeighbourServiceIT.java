@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -12,6 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,11 +39,17 @@ public class NeighbourServiceIT {
 		Neighbour interchangeA = new Neighbour("interchangeA",
 				new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
 				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet()),
-				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Sets.newLinkedHashSet(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED))));
+				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,
+						Sets.newLinkedHashSet(
+								new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED))));
 		Neighbour interchangeB = new Neighbour("interchangeB",
 				new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
-				new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newLinkedHashSet(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED))),
-				new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newLinkedHashSet(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED))));
+				new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED,
+						Sets.newLinkedHashSet(
+								new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED))),
+				new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED,
+						Sets.newLinkedHashSet(
+								new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED))));
 		repository.save(interchangeA);
 		repository.save(interchangeB);
 
@@ -47,5 +57,22 @@ public class NeighbourServiceIT {
 		assertThat(interchanges).size().isEqualTo(1);
 	}
 
+	@Test
+	public void incomingSubscriptionRequestReturnsPathForSubscription() {
+		Neighbour neighbour = new Neighbour("myNeighbour",
+				new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,Collections.emptySet()),
+				new SubscriptionRequest(SubscriptionRequestStatus.EMPTY,Collections.emptySet()),
+				new SubscriptionRequest(SubscriptionRequestStatus.EMPTY,Collections.emptySet()));
+		repository.save(neighbour);
+
+		SubscriptionRequestApi subscriptionRequestApi = service.incomingSubscriptionRequest(
+				new SubscriptionRequestApi("myNeighbour",
+						Collections.singleton(
+								new SubscriptionApi("originatingCountry = 'NO'", null, SubscriptionStatus.REQUESTED))));
+		Set<SubscriptionApi> subscriptions = subscriptionRequestApi.getSubscriptions();
+		assertThat(subscriptions.size()).isEqualTo(1);
+		SubscriptionApi subscriptionApi = subscriptions.stream().findFirst().get();
+		assertThat(subscriptionApi.getPath()).isNotNull();
+	}
 
 }
