@@ -17,6 +17,11 @@
             <artifactId>jms-client</artifactId>
             <version>${project.version}</version>
         </dependency>
+       <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -35,14 +40,4 @@
         </plugins>
     </build>
 
-    <repositories>
-        <repository>
-            <id>repository.springframework.maven.snapshots</id>
-            <name>Spring Framework Repository Including Snapshots</name>
-            <url>https://repo.spring.io/libs-snapshot</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 </project>
