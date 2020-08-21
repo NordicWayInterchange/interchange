@@ -3,34 +3,41 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.net.ssl.SSLContext;
-import java.util.Properties;
 
-public class JmsSink {
-    public static void main(String[] args) throws Exception {
+@SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
+public class JmsSink implements CommandLineRunner {
 
-        Properties props = JmsProperties.getProperties(args, "/sink.properties");
+    public static void main(String[] args) {
+        System.out.println("My main method");
+        SpringApplication.run(JmsSink.class);
+    }
 
-        String url = props.getProperty("sink.url");
-        String receiveQueue = props.getProperty("sink.receiveQueue");
-        String keystorePath = props.getProperty("sink.keyStorepath");
-        String keystorePassword = props.getProperty("sink.keyStorepass");
-        String keyPassword = props.getProperty("sink.keypass");
-        String trustStorePath = props.getProperty("sink.trustStorepath");
-        String truststorePassword = props.getProperty("sink.trustStorepass");
+    @Autowired
+    private JmsSinkProperties properties;
 
-        KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
-                keystorePassword,
-                KeystoreType.PKCS12, keyPassword);
-        KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
-                truststorePassword,KeystoreType.JKS);
+    @Override
+    public void run(String... args) throws Exception {
+
+        System.out.println("Running");
+        KeystoreDetails keystoreDetails = new KeystoreDetails(properties.getKeystorePath(),
+                properties.getKeystorePass(),
+                KeystoreType.PKCS12, properties.getKeyPass());
+        KeystoreDetails trustStoreDetails = new KeystoreDetails(properties.getTrustStorePath(),
+                properties.getKeystorePass(),KeystoreType.JKS);
 
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
 
+        String url = properties.getUrl();
+        String receiveQueue = properties.getReceiveQueue();
         Sink sink = new Sink(url,receiveQueue,sslContext);
         System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
         sink.start();
+        System.out.println("This is the end");
     }
-
 }
