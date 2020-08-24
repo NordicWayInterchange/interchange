@@ -14,7 +14,6 @@ import javax.net.ssl.SSLContext;
 public class JmsSink implements CommandLineRunner {
 
     public static void main(String[] args) {
-        System.out.println("My main method");
         SpringApplication.run(JmsSink.class);
     }
 
@@ -24,7 +23,6 @@ public class JmsSink implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        System.out.println("Running");
         KeystoreDetails keystoreDetails = new KeystoreDetails(properties.getKeystorePath(),
                 properties.getKeystorePass(),
                 KeystoreType.PKCS12, properties.getKeyPass());
@@ -38,6 +36,5 @@ public class JmsSink implements CommandLineRunner {
         Sink sink = new Sink(url,receiveQueue,sslContext);
         System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
         sink.start();
-        System.out.println("This is the end");
     }
 }
