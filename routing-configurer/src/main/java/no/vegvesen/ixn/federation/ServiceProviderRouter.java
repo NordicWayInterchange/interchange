@@ -37,6 +37,7 @@ public class ServiceProviderRouter {
     }
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders) {
+        List<String> groupMemberNames = qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
@@ -54,7 +55,7 @@ public class ServiceProviderRouter {
                 }
             }
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
-                optionallyAddServiceProviderToGroup(qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME),name);
+                optionallyAddServiceProviderToGroup(groupMemberNames,name);
             } else {
                 removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
             }
