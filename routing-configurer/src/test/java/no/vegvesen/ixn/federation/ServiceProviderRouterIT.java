@@ -3,10 +3,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
@@ -36,6 +33,7 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -145,6 +143,24 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists(toreDownServiceProvider.getName())).isFalse();
 	}
 
+	/*
+	 Note that this test runs syncServiceProviders twice on the same ServiceProvider.
+	 This is due to a bug we had, that checked the members of the groups based on a stale list of
+	 group members. This only showed up after running the method twice.
+	 */
+	@Test
+	public void serviceProviderWithCapabiltiesShouldNotHaveQueuButExistInServiceProvidersGroup() {
+		ServiceProvider onlyCaps = new ServiceProvider("onlyCaps");
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
+				Collections.singleton(new DataType(null,"originatingCountry","NO")));
+		onlyCaps.setCapabilities(capabilities);
+		router.syncServiceProviders(Arrays.asList(onlyCaps));
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
+
+		router.syncServiceProviders(Arrays.asList(onlyCaps));
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
+		assertThat(client.queueExists(onlyCaps.getName())).isFalse();
+	}
 
    	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
