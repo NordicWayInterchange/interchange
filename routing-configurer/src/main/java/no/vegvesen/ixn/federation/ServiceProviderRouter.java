@@ -37,7 +37,6 @@ public class ServiceProviderRouter {
     }
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders) {
-        List<String> groupMemberNames = qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
@@ -49,18 +48,13 @@ public class ServiceProviderRouter {
             }
             //remove the queue and group member if we have no more subscriptions
             if (newSubscriptions.isEmpty()) {
-                //note that qpidClient.queueExists will be called twice for a tear down of a serviceProvider.
                 if (qpidClient.queueExists(name)) {
                     qpidClient.removeQueue(name);
                     logger.info("Removed queue for service provider {}", serviceProvider.getName());
                 }
-                if (groupMemberNames.contains(name)) {
-                    logger.debug("Removing queue for service provider {}", serviceProvider.getName());
-                    qpidClient.removeMemberFromGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
-                }
             }
-            if (serviceProvider.hasCapabilitiesOrSubscriptions()) {
-                optionallyAddServiceProviderToGroup(groupMemberNames,name);
+            if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
+                optionallyAddServiceProviderToGroup(qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME),name);
             } else {
                 removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
             }

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "service_providers", uniqueConstraints = @UniqueConstraint(columnNames = "name", name = "uk_spr_name"))
@@ -98,8 +99,16 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public boolean hasCapabilitiesOrSubscriptions() {
-		return (!subscriptions.isEmpty()) || capabilities.hasDataTypes();
+
+	public boolean hasCapabilitiesOrActiveSubscriptions() {
+		return (capabilities.hasDataTypes() ||
+				!activeSubscriptions().isEmpty());
+	}
+
+	public Set<LocalSubscription> activeSubscriptions() {
+		return subscriptions.stream()
+		.filter(subscription -> subscription.getStatus() != LocalSubscriptionStatus.TEAR_DOWN)
+		.collect(Collectors.toSet());
 	}
 
 	@Override
