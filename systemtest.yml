@@ -99,6 +99,8 @@ services:
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
       - JAVA_OPTS=-XX:HeapDumpPath=/dump/
+    depends_on:
+    - mock-dns-server
     networks:
     - testing_net
 
@@ -325,6 +327,8 @@ services:
       - GROUPS_FILE=/work/default/config/groups
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
+    depends_on:
+    - mock-dns-server
     networks:
     - testing_net
 

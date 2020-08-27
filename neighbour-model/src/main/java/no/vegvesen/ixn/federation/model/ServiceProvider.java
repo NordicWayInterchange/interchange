@@ -98,6 +98,10 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
+	public boolean hasCapabilitiesOrSubscriptions() {
+		return (!subscriptions.isEmpty()) || capabilities.hasDataTypes();
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

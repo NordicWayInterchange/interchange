@@ -1,47 +1,26 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.properties.MessageProperty;
-import no.vegvesen.ixn.ssl.KeystoreDetails;
-import no.vegvesen.ixn.ssl.KeystoreType;
-import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.Destination;
+import javax.jms.ExceptionListener;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.util.Enumeration;
-import java.util.Properties;
-
-import static no.vegvesen.ixn.Source.getProperties;
 
 public class Sink implements MessageListener, AutoCloseable {
 
 	private static Logger logger = LoggerFactory.getLogger(Sink.class);
 
-	public static void main(String[] args) throws Exception {
-		Properties props = getProperties(args, "/sink.properties");
-
-		String url = props.getProperty("sink.url");
-        String receiveQueue = props.getProperty("sink.receiveQueue");
-        String keystorePath = props.getProperty("sink.keyStorepath");
-        String keystorePassword = props.getProperty("sink.keyStorepass");
-        String keyPassword = props.getProperty("sink.keypass");
-        String trustStorePath = props.getProperty("sink.trustStorepath");
-        String truststorePassword = props.getProperty("sink.trustStorepass");
-
-        KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
-                keystorePassword,
-                KeystoreType.PKCS12, keyPassword);
-        KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
-                truststorePassword,KeystoreType.JKS);
-
-        SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
-
-        Sink sink = new Sink(url,receiveQueue,sslContext);
-		System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
-        sink.start();
-    }
 
     protected final String url;
     private final String queueName;

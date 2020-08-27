@@ -40,10 +40,11 @@ public class ServiceProviderRouter {
         List<String> groupMemberNames = qpidClient.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
+            logger.debug("Checking service provider {}",name);
             Set<LocalSubscription> newSubscriptions = new HashSet<>();
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
 
-                Optional<LocalSubscription> newSubscription = processSubscription(groupMemberNames, name, subscription);
+                Optional<LocalSubscription> newSubscription = processSubscription(name, subscription);
                 newSubscription.ifPresent(newSubscriptions::add);
             }
             //remove the queue and group member if we have no more subscriptions
@@ -58,6 +59,11 @@ public class ServiceProviderRouter {
                     qpidClient.removeMemberFromGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
                 }
             }
+            if (serviceProvider.hasCapabilitiesOrSubscriptions()) {
+                optionallyAddServiceProviderToGroup(groupMemberNames,name);
+            } else {
+                removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
+            }
             //save if it has changed from the initial
             if (! newSubscriptions.equals(serviceProvider.getSubscriptions())) {
                 serviceProvider.updateSubscriptions(newSubscriptions);
@@ -69,12 +75,12 @@ public class ServiceProviderRouter {
         }
     }
 
-    private Optional<LocalSubscription> processSubscription(List<String> groupMemberNames, String name, LocalSubscription subscription) {
+    private Optional<LocalSubscription> processSubscription(String name, LocalSubscription subscription) {
         Optional<LocalSubscription> newSubscription;
         switch (subscription.getStatus()) {
             case REQUESTED:
 			case CREATED:
-				newSubscription = onRequested(groupMemberNames, name, subscription);
+				newSubscription = onRequested(name, subscription);
                 break;
 			case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
@@ -91,8 +97,7 @@ public class ServiceProviderRouter {
         return Optional.empty();
     }
 
-    private Optional<LocalSubscription> onRequested(List<String> groupMemberNames, String name, LocalSubscription subscription) {
-        optionallyAddServiceProviderToGroup(groupMemberNames, name);
+    private Optional<LocalSubscription> onRequested(String name, LocalSubscription subscription) {
         optionallyCreateQueue(name);
         optionallyAddQueueBindings(name, subscription);
         return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
@@ -125,8 +130,14 @@ public class ServiceProviderRouter {
 
     private void optionallyAddServiceProviderToGroup(List<String> groupMemberNames, String name) {
         if (!groupMemberNames.contains(name)) {
+            logger.debug("Adding member {} to group {}", name,SERVICE_PROVIDERS_GROUP_NAME);
             qpidClient.addMemberToGroup(name, SERVICE_PROVIDERS_GROUP_NAME);
         }
+    }
+
+    private void removeServiceProviderFromGroup(String name, String groupName) {
+        logger.debug("Removing member {} from group {}", name,groupName);
+        qpidClient.removeMemberFromGroup(name,groupName);
     }
 
 }

@@ -9,7 +9,7 @@
 # rootCrtFileName="$(basename -- $rootCrtPth)"
 
 if [ "$#" -ne 1 ]; then
-    echo "USAGE: $0 <intermediateCA domain name> <country code (upper case)"
+    echo "USAGE: $0 <intermediateCA domain name> <country code (upper case)>"
     exit 1
 fi
 
