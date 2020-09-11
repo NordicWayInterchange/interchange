@@ -121,7 +121,7 @@ or remount the directories in the docker settings.
 
 
 
-### Third-party licenses 
+# Third-party licenses 
 To get a list of the third-party licenses used in the project, run (in bash):
 ```
 mvn license:add-third-party
