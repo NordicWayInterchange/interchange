@@ -20,10 +20,12 @@ Traffic message formats supported are DATEX, DENM and IVI.
 
 Neighbour nodes registered in the DNS (domain name server) will be discovered via a control channel.
 
-All neighbours must present the message types they produce - capabilities in this discovery process.
+All neighbours must present the message types they produce - capabilities - in this discovery process.
 
 Neighbours also has a set of message types they are interested in - subscriptions. 
-If a neighbour produces a message type we are interested in, we issue a subscription request to the neighbour. 
+If a neighbour produces a message type we are interested in, we issue a subscription request to the neighbour.
+
+Accepted subscriptions will be set up by the Routing Configurer so finally the messages can be collected by the Message collector.
 
 More information on the concepts and the open source implementation of the interchange node is found on the [Github Wiki](https://github.com/NordicWayInterchange/interchange/wiki) 
 
