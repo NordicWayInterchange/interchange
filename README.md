@@ -4,16 +4,7 @@ Interchange node under the Nordic Way project
 ### License
 See full MIT license text [here](license.md).
 
-####Third-party licenses
-To get a list of the third-party licenses used in the project, run (in bash):
-```
-mvn license:add-third-party
-```
-
-followed by:
-```
-find . -name THIRD-PARTY.txt -exec cat {} \; | sort | uniq 
-``` 
+Instructions on retrieval of all the [Third-party licenses](#third-party-licenses)
 
 ### Introduction
 The Nordic Way Interchange Node (NWIXN) is a message broker that
@@ -127,4 +118,17 @@ The actual start-up instructions are the same as for *nix systems:
 
 In general, the docker daemon sometimes have problems mounting directories or starting the docker containers. Try restarting the container and try again after it is restarted, 
 or remount the directories in the docker settings.
+
+
+
+###Third-party licenses 
+To get a list of the third-party licenses used in the project, run (in bash):
+```
+mvn license:add-third-party
+```
+
+followed by:
+```
+find . -name THIRD-PARTY.txt -exec cat {} \; | sort | uniq 
+``` 
 
