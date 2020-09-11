@@ -4,7 +4,7 @@ Interchange node under the Nordic Way project
 ### License
 See full MIT license text [here](license.md).
 
-Instructions on retrieval of all the [Third-party licenses](#third-party-licenses)
+See instructions to retrieve all the third party licences [here](#third-party-licenses)
 
 ### Introduction
 The Nordic Way Interchange Node (NWIXN) is a message broker that
