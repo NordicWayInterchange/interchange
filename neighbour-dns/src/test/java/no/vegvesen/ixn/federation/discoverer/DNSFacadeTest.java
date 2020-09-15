@@ -23,7 +23,7 @@ public class DNSFacadeTest {
 		List<Neighbour> neighbours = dnsFacade.getNeighbours();
 		assertThat(neighbours)
 				.withFailMessage("Number of known Neighbours in the actual dns is less than two")
-				.hasSizeGreaterThan(2);
+				.hasSizeGreaterThan(1);
 	}
 
 	@Test
@@ -39,7 +39,7 @@ public class DNSFacadeTest {
 	public void bouvetNodePresent() {
 		Neighbour bouvet = null;
 		for (Neighbour neighbour : dnsFacade.getNeighbours()) {
-			if (neighbour.getName().equals("bouveta-fed.itsinterchange.eu")){
+			if (neighbour.getName().equals("no-fed2.itsinterchange.eu")){
 				bouvet = neighbour;
 			}
 		}
