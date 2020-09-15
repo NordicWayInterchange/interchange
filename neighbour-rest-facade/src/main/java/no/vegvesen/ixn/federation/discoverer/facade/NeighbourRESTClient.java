@@ -156,8 +156,11 @@ public class NeighbourRESTClient {
         try {
             ResponseEntity<SubscriptionApi> response = restTemplate.getForEntity(url, SubscriptionApi.class);
             subscriptionApi = response.getBody();
-
-            logger.debug("Successfully polled subscription. Response code: {}", response.getStatusCodeValue());
+            try {
+                logger.debug("Successfully polled subscription. Response code: {}. Response body: {}", response.getStatusCodeValue(), mapper.writeValueAsString(subscriptionApi));
+            } catch (JsonProcessingException e) {
+                logger.warn("Could not log polled subscription response body", e);
+            }
 
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
