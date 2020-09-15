@@ -94,7 +94,11 @@ public class NeighbourRESTClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
-        logger.debug("Posting Subscription request api object: {}", subscriptionRequestApi.toString());
+        try{
+            logger.debug("Posting Subscription request api object: {}", mapper.writeValueAsString(subscriptionRequestApi));
+        } catch (JsonProcessingException e){
+            logger.warn("Could not convert Subscription request api to json string", e);
+        }
         logger.debug("Posting HttpEntity: {}", entity.toString());
         logger.debug("Posting Headers: {}", headers.toString());
 
@@ -111,7 +115,11 @@ public class NeighbourRESTClient {
                 throw new SubscriptionRequestException("Returned empty response from subscription request");
             }
             responseApi = response.getBody();
-            logger.debug("Received response object: {}", responseApi.toString());
+            try {
+                logger.debug("Received response object: {}", mapper.writeValueAsString(responseApi));
+            } catch(JsonProcessingException e){
+                logger.warn("Could not convert response from server to json", e);
+            }
             logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
 
             if (!subscriptionRequestApi.getSubscriptions().isEmpty() && responseApi.getSubscriptions().isEmpty()) {
