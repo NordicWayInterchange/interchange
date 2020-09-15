@@ -49,4 +49,9 @@ public abstract class EtsiDataTypeApi extends DataTypeApi{
 		result = 31 * result + (serviceType != null ? serviceType.hashCode() : 0);
 		return result;
 	}
+
+	public String baseToString() {
+		return 	super.baseToString() +
+				", serviceType='" + serviceType + '\'';
+	}
 }

@@ -52,4 +52,13 @@ public class Datex2DataTypeApi extends DataTypeApi{
 		putValue(values, MessageProperty.PUBLICATION_SUB_TYPE, this.getPublicationSubType());
 		return values;
 	}
+
+	@Override
+	public String toString() {
+		return 	"Datex2DataTypeApi{" +
+				super.baseToString() +
+				", publicationType='" + publicationType + '\'' +
+				", publicationSubType=" + publicationSubType +
+				'}';
+	}
 }

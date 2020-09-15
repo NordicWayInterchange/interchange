@@ -184,4 +184,16 @@ public class DataTypeApi {
 			values.put(messageProperty.getName(), value.toString());
 		}
 	}
+
+	public String baseToString() {
+		return 	"messageType='" + messageType + '\'' +
+				", publisherId='" + publisherId + '\'' +
+				", publisherName='" + publisherName + '\'' +
+				", originatingCountry='" + originatingCountry + '\'' +
+				", protocolVersion='" + protocolVersion + '\'' +
+				", contentType='" + contentType + '\'' +
+				", quadTree=" + quadTree;
+	}
+
+
 }

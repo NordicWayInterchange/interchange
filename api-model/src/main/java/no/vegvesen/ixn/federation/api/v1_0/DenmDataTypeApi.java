@@ -68,4 +68,13 @@ public class DenmDataTypeApi extends EtsiDataTypeApi{
 		result = 31 * result + (subCauseCode != null ? subCauseCode.hashCode() : 0);
 		return result;
 	}
+
+	@Override
+	public String toString() {
+		return "DenmDataTypeApi{" +
+				super.baseToString() +
+				", causeCode='" + causeCode + '\'' +
+				", subCauseCode='" + subCauseCode + '\'' +
+				'}';
+	}
 }
