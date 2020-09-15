@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer.facade;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
@@ -41,8 +42,12 @@ public class NeighbourRESTClient {
 
         // Convert discovering Neighbour to CapabilityApi object and post to neighbour
         HttpEntity<CapabilityApi> entity = new HttpEntity<>(selfCapability, headers);
-        logger.debug("Posting capability api object: {}", selfCapability.toString());
-        logger.debug("Posting HttpEntity: {}", entity.toString());
+		try {
+			logger.debug("Posting capability api object: {}", mapper.writeValueAsString(selfCapability));
+		} catch (JsonProcessingException e) {
+			logger.warn("Could not convert CapabilityApi to json string", e);
+		}
+		logger.debug("Posting HttpEntity: {}", entity.toString());
         logger.debug("Posting Headers: {}", headers.toString());
 
         try {
@@ -53,8 +58,12 @@ public class NeighbourRESTClient {
 
             if (response.getBody() != null) {
                 result = response.getBody();
-                logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", result == null ? "null" : result.toString());
-            } else {
+				try {
+					logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", result == null ? "null" : mapper.writeValueAsString(result));
+				} catch (JsonProcessingException e) {
+					logger.warn("Could not convert response from server to json", e);
+				}
+			} else {
                 throw new CapabilityPostException(String.format("Server returned http code %s with null capability response", response.getStatusCodeValue()));
             }
 
