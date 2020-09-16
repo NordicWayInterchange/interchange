@@ -322,7 +322,7 @@ public class NeighbourService {
 		logger.debug("Local subscriptions {}", localSubscriptions);
 		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)
 				.stream()
-				.map(DataType::toSubscription)
+				.map(dataType -> DataType.toSubscription(dataType, SubscriptionStatus.REQUESTED))
 				.collect(Collectors.toSet());
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;

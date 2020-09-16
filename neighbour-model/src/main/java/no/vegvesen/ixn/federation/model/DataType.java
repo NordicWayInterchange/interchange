@@ -252,8 +252,8 @@ public class DataType {
 		}
 	}
 
-	public static Subscription toSubscription(DataType dataType) {
-		return new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED);
+	public static Subscription toSubscription(DataType dataType, SubscriptionStatus status) {
+		return new Subscription(dataType.toSelector(), status);
 	}
 
 	@Override

@@ -200,10 +200,12 @@ class NeighbourServiceTest {
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
 
 		assertThat(calculatedSubscription).hasSize(1);
-		assertThat(calculatedSubscription.iterator().next().getSelector())
+		Subscription subscription = calculatedSubscription.iterator().next();
+		assertThat(subscription.getSelector())
 				.contains("originatingCountry = 'NO'")
 				.contains(" AND ")
 				.contains("messageType = 'DATEX2'");
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
 	}
 
 	@Test
