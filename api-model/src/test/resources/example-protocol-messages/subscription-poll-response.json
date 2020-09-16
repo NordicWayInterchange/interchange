@@ -1,0 +1,5 @@
+{
+  "selector": "messageType = 'DATEX2' AND originatingCountry = 'NO'",
+  "path": "/no-fed.itsinterchange.eu/subscription/3",
+  "status": "CREATED"
+}

@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "name": "b.itsinterchange.eu",
+  "capabilities": [
+    {
+      "messageType": "DATEX2",
+      "originatingCountry": "NO",
+      "quadTree": [],
+      "publicationSubType": []
+    },
+    {
+      "messageType": "DATEX2",
+      "originatingCountry": "SE",
+      "quadTree": [],
+      "publicationSubType": []
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "a.itsinterchange.eu",
+  "subscriptions": [
+    {
+      "selector": "messageType = 'DATEX2' AND originatingCountry = 'NO'",
+      "path": "/a.itsinterchange.eu/subscription/3",
+      "status": "ACCEPTED"
+    }
+  ]
+}
