@@ -69,6 +69,7 @@ public class DNSFacade {
 		Map<String, String> srvPorts = new HashMap<>();
 		// SRV record lookup for message chanel port on each sub domain
 		String srvLookupString = srvRecordType + dnsProperties.getDomainName();
+		logger.debug("Looking up {}", srvLookupString);
 
 		Record[] records = new Lookup(srvLookupString, Type.SRV).run();
 
@@ -79,6 +80,7 @@ public class DNSFacade {
 
 		for (Record record : records) {
 			SRVRecord srv = (SRVRecord) record;
+			logger.debug("Got srv record {}", records);
 			String domainName = srv.getTarget().toString();
 
 			String neighbourName = domainName.substring(0, domainName.length() - 1);
