@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LocalSubscriptionListApi {
-    private List<LocalSubscriptionApi> subscritions = new ArrayList<>();
+    private List<LocalSubscriptionApi> subscriptions = new ArrayList<>();
 
     public LocalSubscriptionListApi() {
 
     }
 
-    public LocalSubscriptionListApi(List<LocalSubscriptionApi> subscritions) {
-        this.subscritions = subscritions;
+    public LocalSubscriptionListApi(List<LocalSubscriptionApi> subscriptions) {
+        this.subscriptions = subscriptions;
     }
 
-    public List<LocalSubscriptionApi> getSubscritions() {
-        return subscritions;
+    public List<LocalSubscriptionApi> getSubscriptions() {
+        return subscriptions;
     }
 }
