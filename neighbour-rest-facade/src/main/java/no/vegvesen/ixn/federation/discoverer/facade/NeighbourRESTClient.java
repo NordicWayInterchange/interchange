@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.discoverer.facade;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
@@ -41,20 +42,15 @@ public class NeighbourRESTClient {
 
         // Convert discovering Neighbour to CapabilityApi object and post to neighbour
         HttpEntity<CapabilityApi> entity = new HttpEntity<>(selfCapability, headers);
-        logger.debug("Posting capability api object: {}", selfCapability.toString());
-        logger.debug("Posting HttpEntity: {}", entity.toString());
-        logger.debug("Posting Headers: {}", headers.toString());
+		logHttpEntity(entity, "Posting");
 
-        try {
+		try {
             ResponseEntity<CapabilityApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, CapabilityApi.class);
-            logger.debug("Received capability api: {}", response.getBody());
-            logger.debug("Received response entity: {}", response.toString());
-            logger.debug("Received headers: {}", response.getHeaders().toString());
+			logHttpEntity(response, "Received");
 
             if (response.getBody() != null) {
                 result = response.getBody();
-                logger.debug("Successful post of capabilities to neighbour. Response from server is: {}", result == null ? "null" : result.toString());
-            } else {
+			} else {
                 throw new CapabilityPostException(String.format("Server returned http code %s with null capability response", response.getStatusCodeValue()));
             }
 
@@ -79,30 +75,41 @@ public class NeighbourRESTClient {
         return result;
     }
 
-    SubscriptionRequestApi doPostSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, String controlChannelUrl, String neighbourName) {
+	private void logHttpEntity(HttpEntity<?> entity, String logPrefix) {
+		if (entity.hasBody()) {
+			Object body = entity.getBody();
+			assert body != null;
+			try {
+				logger.info("{} {} object: {}", logPrefix, body.getClass().getSimpleName(), mapper.writeValueAsString(body));
+			} catch (JsonProcessingException e) {
+				logger.warn("Could not convert {} to json string {}", body.getClass().getSimpleName(), body.toString(), e);
+			}
+		} else {
+			logger.warn("{} Expected body not to be null {}", logPrefix, entity);
+		}
+		logger.debug("{} HttpEntity: {}", logPrefix, entity.toString());
+		logger.debug("{} Headers: {}", logPrefix, entity.getHeaders().toString());
+	}
+
+	SubscriptionRequestApi doPostSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, String controlChannelUrl, String neighbourName) {
         // Post representation to neighbour
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
-        logger.debug("Posting Subscription request api object: {}", subscriptionRequestApi.toString());
-        logger.debug("Posting HttpEntity: {}", entity.toString());
-        logger.debug("Posting Headers: {}", headers.toString());
+        logHttpEntity(entity, "Posting");
 
         // Posting and receiving response
 
         SubscriptionRequestApi responseApi;
         try {
             ResponseEntity<SubscriptionRequestApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, SubscriptionRequestApi.class);
-            logger.debug("Received subscription request api: {}", response.getBody());
-            logger.debug("Received response entity: {}", response.toString());
-            logger.debug("Received headers: {}", response.getHeaders().toString());
+            logHttpEntity(response, "Received");
 
             if (response.getBody() == null) {
                 throw new SubscriptionRequestException("Returned empty response from subscription request");
             }
             responseApi = response.getBody();
-            logger.debug("Received response object: {}", responseApi.toString());
             logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
 
             if (!subscriptionRequestApi.getSubscriptions().isEmpty() && responseApi.getSubscriptions().isEmpty()) {
@@ -138,9 +145,8 @@ public class NeighbourRESTClient {
         SubscriptionApi subscriptionApi;
         try {
             ResponseEntity<SubscriptionApi> response = restTemplate.getForEntity(url, SubscriptionApi.class);
+            logHttpEntity(response, "Poll subscription");
             subscriptionApi = response.getBody();
-
-            logger.debug("Successfully polled subscription. Response code: {}", response.getStatusCodeValue());
 
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {

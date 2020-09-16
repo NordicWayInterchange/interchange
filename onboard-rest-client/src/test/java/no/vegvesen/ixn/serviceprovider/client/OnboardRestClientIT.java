@@ -112,13 +112,13 @@ public class OnboardRestClientIT extends DockerBaseIT {
         System.out.println(objectMapper.writeValueAsString(localSubscriptions));
 
         assertThat(localSubscriptions).isNotNull();
-        List<LocalSubscriptionApi> filtered = filterOutTearDownSubscriptions(localSubscriptions.getSubscritions());
+        List<LocalSubscriptionApi> filtered = filterOutTearDownSubscriptions(localSubscriptions.getSubscriptions());
         assertThat(filtered).isNotNull().hasSize(1);
         LocalSubscriptionApi idSubToDelete = filtered.get(0);
 
         client.deleteSubscriptions(idSubToDelete.getId());
 		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
-		List<LocalSubscriptionApi> filteredAfterDelete = filterOutTearDownSubscriptions(afterDelete.getSubscritions());
+		List<LocalSubscriptionApi> filteredAfterDelete = filterOutTearDownSubscriptions(afterDelete.getSubscriptions());
         assertThat(filteredAfterDelete).hasSize(0);
 	}
 
@@ -132,12 +132,12 @@ public class OnboardRestClientIT extends DockerBaseIT {
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
 		LocalSubscriptionListApi serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptions();
-		for (LocalSubscriptionApi subscription : serviceProviderSubscriptionRequest.getSubscritions()) {
+		for (LocalSubscriptionApi subscription : serviceProviderSubscriptionRequest.getSubscriptions()) {
 			System.out.println("deleting subscription " + subscription.getId());
 			client.deleteSubscriptions(subscription.getId());
 		}
 		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
-		assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscritions())).hasSize(0);
+		assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscriptions())).hasSize(0);
     }
 
 

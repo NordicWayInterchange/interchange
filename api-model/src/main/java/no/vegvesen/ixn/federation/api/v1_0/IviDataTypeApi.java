@@ -69,4 +69,13 @@ public class IviDataTypeApi extends EtsiDataTypeApi{
 		result = 31 * result + (pictogramCategoryCodes != null ? pictogramCategoryCodes.hashCode() : 0);
 		return result;
 	}
+
+	@Override
+	public String toString() {
+		return "IviDataTypeApi{" +
+				super.baseToString() +
+				", iviType=" + iviType +
+				", pictogramCategoryCodes=" + pictogramCategoryCodes +
+				'}';
+	}
 }

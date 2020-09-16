@@ -53,7 +53,7 @@ public class OnboardRestControllerIT {
 
         //Test that we don't mess up subscriptions and capabilities
         LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
-        assertThat(serviceProviderSubscriptions.getSubscritions()).hasSize(0);
+        assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(0);
 
         LocalDataType saved = serviceProviderCapabilities.getDataTypes().get(0);
         restController.deleteCapability(serviceProviderName, saved.getId());
@@ -67,12 +67,12 @@ public class OnboardRestControllerIT {
         restController.addSubscriptions(serviceProviderName, datexNO);
 
         LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
-        assertThat(serviceProviderSubscriptions.getSubscritions()).hasSize(1);
+        assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 
 		ServiceProvider afterAddSubscription = serviceProviderRepository.findByName(serviceProviderName);
 		assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
-		LocalSubscriptionApi subscriptionApi = serviceProviderSubscriptions.getSubscritions().get(0);
+		LocalSubscriptionApi subscriptionApi = serviceProviderSubscriptions.getSubscriptions().get(0);
         restController.deleteSubscription(serviceProviderName,subscriptionApi.getId());
 
 		ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
@@ -87,7 +87,7 @@ public class OnboardRestControllerIT {
 		restController.addSubscriptions(serviceProviderName, datexNO);
 
 		LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
-		assertThat(serviceProviderSubscriptions.getSubscritions()).hasSize(1);
+		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 		ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
 		Optional<LocalDateTime> subscriptionUpdated = savedSP.getSubscriptionUpdated();
 		assertThat(subscriptionUpdated).isPresent();

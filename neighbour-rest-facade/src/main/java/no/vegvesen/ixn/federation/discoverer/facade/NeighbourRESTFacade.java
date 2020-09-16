@@ -42,7 +42,7 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, Self self) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
-		logger.debug("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
+		logger.info("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
 		CapabilityApi selfCapability = capabilityTransformer.selfToCapabilityApi(self);
 		CapabilityApi result = neighbourRESTClient.doPostCapabilities(controlChannelUrl, name, selfCapability);
 		return capabilityTransformer.capabilityApiToCapabilities(result);
@@ -53,6 +53,7 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(selfName, subscriptions);
 		String controlChannelUrl = neighbour.getControlChannelUrl("/subscription");
 		String name = neighbour.getName();
+		logger.info("Posting subscription request to {} on URL: {}", name, controlChannelUrl);
 		SubscriptionRequestApi responseApi = neighbourRESTClient.doPostSubscriptionRequest(subscriptionRequestApi, controlChannelUrl, name);
 		return subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(responseApi, SubscriptionRequestStatus.REQUESTED);
 	}
@@ -61,7 +62,7 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 	public Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour) {
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
 		String name = neighbour.getName();
-		logger.debug("Polling subscription to {} with URL: {}", name, url);
+		logger.info("Polling subscription to {} with URL: {}", name, url);
 		SubscriptionApi subscriptionApi = neighbourRESTClient.doPollSubscriptionStatus(url, name);
 		Subscription returnSubscription = subscriptionTransformer.subscriptionApiToSubscription(subscriptionApi);
 		logger.debug("Received response object: {}", returnSubscription.toString());
