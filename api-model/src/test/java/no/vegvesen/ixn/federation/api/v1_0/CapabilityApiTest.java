@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class CapabilityApiTest {
 
     @Test
@@ -30,13 +32,31 @@ public class CapabilityApiTest {
 				"some-ivi-service-type?", 128, Sets.newLinkedHashSet(557, 559, 612)
 		);
 
-
         capSet.add(datexSituationReroutingWinterDriving);
         capSet.add(denmRoadworksWinterService);
         capSet.add(iviType128Pictograms557_559_612);
         capabilityApi.setCapabilities(capSet);
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writeValueAsString(capabilityApi));
+		String capabilityJson = mapper.writeValueAsString(capabilityApi);
+		assertThat(capabilityJson).contains("IVI").contains("pictogramCategoryCodes");
+		System.out.println(capabilityJson);
     }
 
+	@Test
+	void simplestDatexCapabilityApiJsonCanBeConvertedToApiObject() throws JsonProcessingException {
+		String simplestCapabilityJson = "{\"version\": \"1.0\", \"name\": \"a.itsinterchange.eu\", \"capabilities\": [{\"messageType\": \"DATEX2\",\"originatingCountry\": \"NO\"}]}";
+		ObjectMapper mapper = new ObjectMapper();
+		CapabilityApi fromJson = mapper.readValue(simplestCapabilityJson, CapabilityApi.class);
+		assertThat(fromJson).isNotNull();
+		assertThat(fromJson.getName()).isEqualTo("a.itsinterchange.eu");
+	}
+
+	@Test
+	void capabilityApiJsonWithoutVersionCanBeConvertedToApiObject() throws JsonProcessingException {
+		String simplestCapabilityJson = "{\"name\": \"a.itsinterchange.eu\", \"capabilities\": [{\"messageType\": \"DATEX2\",\"originatingCountry\": \"NO\"}]}";
+		ObjectMapper mapper = new ObjectMapper();
+		CapabilityApi fromJson = mapper.readValue(simplestCapabilityJson, CapabilityApi.class);
+		assertThat(fromJson).isNotNull();
+		assertThat(fromJson.getName()).isEqualTo("a.itsinterchange.eu");
+	}
 }
