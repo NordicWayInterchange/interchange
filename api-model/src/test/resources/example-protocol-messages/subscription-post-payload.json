@@ -2,9 +2,7 @@
   "name": "a.itsinterchange.eu",
   "subscriptions": [
     {
-      "selector": "messageType = 'DATEX2' AND originatingCountry = 'NO'",
-      "path": null,
-      "status": "REQUESTED"
+      "selector": "messageType = 'DATEX2' AND originatingCountry = 'NO'"
     }
   ]
 }
