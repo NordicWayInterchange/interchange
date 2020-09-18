@@ -12,15 +12,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 class QpidDockerBaseITIT {
+	static Path testKeysFolder = DockerBaseIT.getFolderPath("target/test-keys");
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public static GenericContainer keyContainer = QpidDockerBaseIT.getKeyContainer("my_ca", "localhost");
+	public static GenericContainer keyContainer = QpidDockerBaseIT.getKeyContainer(testKeysFolder,"my_ca", "localhost");
 
 	@Test
 	void generateCaAndOneServerKeyWhichCanBeReadInTheDockerHostFileSystem(){
 		assertThat(keyContainer).isNotNull();
-		Path testKeysFolder = DockerBaseIT.getFolderPath("target/test-keys");
 		assertThat(testKeysFolder.toFile()).exists();
 		assertThat(new File(testKeysFolder.toAbsolutePath().toString() + "/localhost.p12")).exists();
 	}

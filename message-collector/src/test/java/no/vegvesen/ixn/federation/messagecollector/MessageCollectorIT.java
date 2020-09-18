@@ -17,6 +17,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -25,11 +26,13 @@ import static org.mockito.Mockito.when;
 @Testcontainers
 public class MessageCollectorIT extends QpidDockerBaseIT {
 
+	static Path testKeysPath = getFolderPath("message-collector/target/test-keys");
+
 	@SuppressWarnings("rawtypes")
 	@Container
 	//Container is not static and is not reused between tests
 	public GenericContainer consumerContainer = getQpidContainer("docker/consumer",
-			"jks",
+			testKeysPath,
 			"localhost.p12",
 			"password",
 			"truststore.jks",
@@ -39,7 +42,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@Container
 	//Container is not static and is not reused between tests
 	public GenericContainer producerContainer = getQpidContainer("docker/producer",
-			"jks",
+			testKeysPath,
 			"localhost.p12",
 			"password",
 			"truststore.jks", "password");
@@ -47,13 +50,13 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	public Sink createSink(Integer containerPort, String queueName, String keyStore) {
 		return new Sink("amqps://localhost:" + containerPort,
 				queueName,
-				TestKeystoreHelper.sslContext(keyStore, "jks/truststore.jks"));
+				TestKeystoreHelper.sslContext(testKeysPath, keyStore, "truststore.jks"));
 	}
 
 	public Source createSource(Integer containerPort, String queue, String keystore) {
 		return new Source("amqps://localhost:" + containerPort,
 				queue,
-				TestKeystoreHelper.sslContext(keystore, "jks/truststore.jks"));
+				TestKeystoreHelper.sslContext(testKeysPath, keystore, "truststore.jks"));
 	}
 
 	@Test
@@ -70,17 +73,17 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks"),
+				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
 				"fedEx");
 		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerPort, "localhost", "jks/sp_producer.p12");
+		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
 		source.start();
 
-		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "jks/sp_consumer.p12");
+		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
 		source.send("fishy fishy", "SE", 8000L);
@@ -104,20 +107,20 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext("jks/localhost.p12", "jks/truststore.jks"),
+				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
 				"fedEx");
 		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator);
 		forwarder.runSchedule();
 
-		Source source = createSource(producerPort, "localhost", "jks/sp_producer.p12");
+		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
 		source.start();
 		source.send("fishy fishy", "SE", 1000L);
 
 		Thread.sleep(2000); // wait for the message to expire with extra margin
 
-		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "jks/sp_consumer.p12");
+		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 		Message message = consumer.receive(1000);
 		assertThat(message).withFailMessage("Expected message is not routed").isNull();

@@ -19,11 +19,15 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
 
-	public static GenericContainer getQpidContainer(String configPathFromClasspath, String jksPathFromClasspath, final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword) {
+	public static GenericContainer getQpidContainer(String configPathFromClasspath, Path testKeysPath,  final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword) {
+		return getQpidContainer(configPathFromClasspath, testKeysPath.toString(), keyStore, keyStorePassword, trustStore, trustStorePassword);
+	}
+
+	public static GenericContainer getQpidContainer(String configPathFromClasspath, String jksFileSystemPath, final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword) {
 		return new GenericContainer(
 				new ImageFromDockerfile("qpid-it", false).withFileFromPath(".", getFolderPath("qpid")))
 				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
-				.withClasspathResourceMapping(jksPathFromClasspath, "/jks", BindMode.READ_ONLY)
+				.withFileSystemBind(jksFileSystemPath, "/jks", BindMode.READ_ONLY)
 				.withEnv("PASSWD_FILE", "/config/passwd")
 				.withEnv("STATIC_GROUPS_FILE", "/config/groups")
 				.withEnv("STATIC_VHOST_FILE", "/config/vhost.json")
@@ -36,13 +40,12 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
 	}
 
-	protected static GenericContainer getKeyContainer(String ca, String... serverOrUserCns){
+	protected static GenericContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
 		String spaceSeparatedKeyCns = String.join(" ", serverOrUserCns);
-		Path targetTestKeys = getFolderPath("target/test-keys");
 		return new GenericContainer(
 				new ImageFromDockerfile("key-gen", false)
 						.withFileFromPath(".", getFolderPath("key-gen")))
-				.withFileSystemBind(targetTestKeys.toString(), "/jks/keys", BindMode.READ_WRITE)
+				.withFileSystemBind(testKeysPath.toString(), "/jks/keys", BindMode.READ_WRITE)
 				.withEnv("CA_CN", ca)
 				.withEnv("KEY_CNS", spaceSeparatedKeyCns)
 				.withEnv("KEYS_DIR", "/jks/keys")
