@@ -4,6 +4,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.assertj.core.util.Lists;
@@ -63,6 +64,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	public void testMessagesCollected() throws NamingException, JMSException {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
+		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("localhost");
 		neighbour.setMessageChannelPort(producerPort.toString());
@@ -76,7 +78,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				"localhost",
 				localIxnFederationPort,
 				"fedEx");
-		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator);
+		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
@@ -97,6 +99,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
+		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("localhost");
 		neighbour.setMessageChannelPort(producerPort.toString());
@@ -110,7 +113,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				"localhost",
 				localIxnFederationPort,
 				"fedEx");
-		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator);
+		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");

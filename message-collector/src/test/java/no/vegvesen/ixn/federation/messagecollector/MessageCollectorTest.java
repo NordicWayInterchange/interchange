@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
@@ -20,6 +21,7 @@ public class MessageCollectorTest {
         Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
         Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
 
+        GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
         NeighbourService neighbourService = mock(NeighbourService.class);
         when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Arrays.asList(one,two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
@@ -30,7 +32,7 @@ public class MessageCollectorTest {
 
         when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(sink,source));
 
-        MessageCollector collector = new MessageCollector(neighbourService, collectorCreator);
+        MessageCollector collector = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
         collector.runSchedule();
 
         verify(neighbourService).listNeighboursToConsumeMessagesFrom();

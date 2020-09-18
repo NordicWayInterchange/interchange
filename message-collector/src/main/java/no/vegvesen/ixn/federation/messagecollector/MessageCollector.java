@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
+import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ public class MessageCollector {
 
     private NeighbourService neighbourService;
     private final CollectorCreator collectorCreator;
+    private GracefulBackoffProperties backoffProperties;
 
     //NOTE: This is implicitly thread safe. If more than one thread can access the listeners map, the implementation of the listener Map will have to change.
     private Map<String, MessageCollectorListener> listeners;
@@ -23,11 +25,11 @@ public class MessageCollector {
 
 
     @Autowired
-    public MessageCollector(NeighbourService service, CollectorCreator collectorCreator) {
+    public MessageCollector(NeighbourService service, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties) {
         this.neighbourService = service;
         this.collectorCreator = collectorCreator;
         this.listeners = new HashMap<>();
-
+        this.backoffProperties = backoffProperties;
     }
 
     @Scheduled(fixedRateString = "${collector.fixeddelay}")
@@ -56,12 +58,17 @@ public class MessageCollector {
             String name = ixn.getName();
             interchangeNames.add(name);
             if (! listeners.containsKey(name)) {
-                try {
-                    logger.info("Setting up collection from ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
-                    MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
-                    listeners.put(name, messageListener);
-                } catch (MessageCollectorException e) {
-                    logger.warn("Tried to create connection to {}, but failed with exception.",name,e);
+                if(backoffProperties.canBeContacted(ixn)) {
+                    try {
+                        logger.info("Setting up connection from ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
+                        MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
+                        listeners.put(name, messageListener);
+                    } catch (MessageCollectorException e) {
+                        logger.warn("Tried to create connection to {}, but failed with exception.", name, e);
+                    }
+                }
+                else {
+                    logger.info("Too soon to set up connection to {}", name);
                 }
             } else {
                 if (listeners.get(name).isRunning()) {
