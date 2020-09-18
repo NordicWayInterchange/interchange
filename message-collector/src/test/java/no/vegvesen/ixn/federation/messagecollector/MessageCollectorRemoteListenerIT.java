@@ -28,11 +28,11 @@ public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-    public GenericContainer localContainer = getQpidContainer("docker/consumer", path, "localhost.p12","password","truststore.jks",	"password");
+    public GenericContainer localContainer = getQpidContainerGeneratedKeys("docker/consumer", path, "localhost.p12","password","truststore.jks",	"password");
 
 	@SuppressWarnings("rawtypes")
 	@Container
-    public GenericContainer remoteContainer = getQpidContainer("docker/producer",path, "localhost.p12","password","truststore.jks", "password");
+    public GenericContainer remoteContainer = getQpidContainerGeneratedKeys("docker/producer",path, "localhost.p12","password","truststore.jks", "password");
 
 	@Test
     public void stoppingRemoteContainerStopsListener() {

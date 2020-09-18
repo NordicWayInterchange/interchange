@@ -29,7 +29,7 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public GenericContainer localContainer = getQpidContainer("docker/consumer",
+	public GenericContainer localContainer = getQpidContainerGeneratedKeys("docker/consumer",
 			path,
 			"localhost.p12",
 			"password",
@@ -39,7 +39,7 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public GenericContainer remoteContainer = getQpidContainer("docker/producer",
+	public GenericContainer remoteContainer = getQpidContainerGeneratedKeys("docker/producer",
 			path,
 			"localhost.p12",
 			"password",
