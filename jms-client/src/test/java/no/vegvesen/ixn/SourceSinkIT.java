@@ -2,7 +2,7 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.apache.qpid.jms.message.JmsTextMessage;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -13,23 +13,30 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 public class SourceSinkIT extends QpidDockerBaseIT {
 
+	static Path testKeysPath = getFolderPath("jms-client/target/test-keys-SourceSinkIT");
+
 	@SuppressWarnings("rawtypes")
 	@Container
-	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.p12", "password", "truststore.jks", "password");
-	private static String URL;
-	private static SSLContext KING_HARALD_SSL_CONTEXT;
+	public static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "king_harald");
 
-	@BeforeAll
-	public static void setUp() {
+	@SuppressWarnings("rawtypes")
+	@Container
+	public final GenericContainer qpidContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
+	private String URL;
+	private SSLContext KING_HARALD_SSL_CONTEXT;
+
+	@BeforeEach
+	public void setUp() {
 		Integer mappedPort = qpidContainer.getMappedPort(5671);
 		URL = String.format("amqps://localhost:%s/", mappedPort);
-		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext("jks/king_harald.p12", "jks/truststore.jks");
+		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext(testKeysPath,"king_harald.p12", "truststore.jks");
 	}
 
 	@Test
