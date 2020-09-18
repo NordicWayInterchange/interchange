@@ -30,6 +30,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
+	public static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "sp_producer", "sp_consumer");
+
+	@SuppressWarnings("rawtypes")
+	@Container
 	//Container is not static and is not reused between tests
 	public GenericContainer consumerContainer = getQpidContainer("docker/consumer",
 			testKeysPath,
