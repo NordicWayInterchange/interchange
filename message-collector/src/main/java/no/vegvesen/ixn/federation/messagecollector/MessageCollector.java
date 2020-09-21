@@ -60,15 +60,17 @@ public class MessageCollector {
             if (! listeners.containsKey(name)) {
                 if(backoffProperties.canBeContacted(ixn)) {
                     try {
-                        logger.info("Setting up connection from ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
+                        logger.info("Setting up connection to ixn with name {}, port {}", name, ixn.getMessageChannelPort());
                         MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
                         listeners.put(name, messageListener);
+                        ixn.okConnection();
                     } catch (MessageCollectorException e) {
                         logger.warn("Tried to create connection to {}, but failed with exception.", name, e);
+                        ixn.failedConnection(backoffProperties.getNumberOfAttempts());
                     }
                 }
                 else {
-                    logger.info("Too soon to set up connection to {}", name);
+                    logger.info("Too soon to connect to {}", name);
                 }
             } else {
                 if (listeners.get(name).isRunning()) {

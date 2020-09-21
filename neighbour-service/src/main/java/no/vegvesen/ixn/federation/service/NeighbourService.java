@@ -258,7 +258,7 @@ public class NeighbourService {
 			logger.info("Successfully completed capability exchange.");
 			logger.debug("Updated neighbour: {}", neighbour.toString());
 		} catch (CapabilityPostException e) {
-			logger.error("capability post failed", e);
+			logger.error("Capability post failed", e);
 			neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
 			neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
 		} finally {
