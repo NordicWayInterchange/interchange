@@ -152,7 +152,7 @@ public class NeighbourRESTFacadeTest {
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionRequestApi);
 
-		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscriptions"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
@@ -212,7 +212,7 @@ public class NeighbourRESTFacadeTest {
 		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Error error");
 		String errorDetailsJson = new ObjectMapper().writeValueAsString(errorDetails);
 
-		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscriptions"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
@@ -236,7 +236,7 @@ public class NeighbourRESTFacadeTest {
 		SubscriptionRequestApi serverResponse = new SubscriptionRequestApi("remote server", new HashSet<>());
 		String errorDetailsJson = new ObjectMapper().writeValueAsString(serverResponse);
 
-		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscriptions"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
@@ -257,7 +257,7 @@ public class NeighbourRESTFacadeTest {
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
 		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
 
-		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscription"))
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscriptions"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond((request) -> mock);
@@ -286,14 +286,14 @@ public class NeighbourRESTFacadeTest {
 	public void test() throws IOException {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
-		subscription.setPath("bouvet/subscription/1");
+		subscription.setPath("bouvet/subscriptions/1");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
 
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
 		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);
 
-		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscription/1"))
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscriptions/1"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
 				.andRespond((request) -> mock);
 
