@@ -10,7 +10,15 @@ public class DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(DockerBaseIT.class);
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";
 
-	protected static Path getFolderPath(String dockerFolderName) {
+	protected static Path getFolderPath(String relativePathFromProjectRoot) {
+		Path projectRoot = getProjectRootPath();
+		logger.debug("Resolving path to project folder [{}] from project root path: [{}]", relativePathFromProjectRoot, projectRoot.toString());
+		Path dockerFilePath = projectRoot.resolve(relativePathFromProjectRoot);
+		logger.debug("Resolved path to project folder [{}] to path [{}]", relativePathFromProjectRoot, dockerFilePath.toAbsolutePath().toString());
+		return dockerFilePath;
+	}
+
+	private static Path getProjectRootPath() {
 		String projectFolder = "interchange";
 
 		String ciWorkdir = System.getenv(CI_WORKDIR);
@@ -22,7 +30,6 @@ public class DockerBaseIT {
 		}
 
 		Path run = Paths.get(".").toAbsolutePath();
-		logger.debug("Resolving path to docker image folder [{}] from run path: [{}]", dockerFolderName, run.toAbsolutePath().toString());
 		Path projectRoot = null;
 		while (projectRoot == null && run.getParent() != null) {
 			if (run.endsWith(projectFolder)) {
@@ -30,12 +37,10 @@ public class DockerBaseIT {
 			}
 			run = run.getParent();
 		}
-		if (projectRoot != null) {
-			Path dockerFilePath = projectRoot.resolve(dockerFolderName);
-			logger.debug("Resolved docker image folder [{}] to path [{}]", dockerFolderName, dockerFilePath.toAbsolutePath().toString());
-			return dockerFilePath;
+		if (projectRoot == null ) {
+			throw new RuntimeException("Could not resolve path to project root in parent folder of " + run.toString());
 		}
-		throw new RuntimeException("Could not resolve path to docker folder " + dockerFolderName + " in parent folder of " + run.toString());
+		return projectRoot;
 	}
 
 }

@@ -5,7 +5,9 @@
 pushd $(dirname $0)
 CA_CN=${CA_CN:-my_ca}
 KEY_CNS=${KEY_CNS:-localhost king_gustaf king_harald}
-KEYS_DIR=../jks/keys
+KEYS_DIR=$1
+CA_CERTIFICATE_FILE=${KEYS_DIR}/${CA_CN}.crt
+CA_PRIVATE_KEY_FILE=${KEYS_DIR}/${CA_CN}.key
 
 genCaCert() {
     local cn=$1
@@ -32,11 +34,11 @@ generateCertificate() {
         -CAfile ${CA_CERTIFICATE_FILE} -password pass:password
 }
 
-rm -rf ${KEYS_DIR} && mkdir -p ${KEYS_DIR} && pushd ${KEYS_DIR}
+rm -rf ${KEYS_DIR}/*
+pushd ${KEYS_DIR}
+chmod o+w ${KEYS_DIR}
 
 genCaCert ${CA_CN}
 for commonName in ${KEY_CNS}; do
     generateCertificate ${commonName}
 done
-
-echo fisk > /jks/ready.txt
