@@ -25,12 +25,7 @@ import static org.mockito.Mockito.when;
 
 @Testcontainers
 public class MessageCollectorIT extends QpidDockerBaseIT {
-
-	static Path testKeysPath = getFolderPath("message-collector/target/test-keys-MessageCollectorIT");
-
-	@SuppressWarnings("rawtypes")
-	@Container
-	public static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "sp_producer", "sp_consumer");
+	static Path testKeysPath = generateKeys(MessageCollectorIT.class,"my_ca", "localhost", "sp_producer", "sp_consumer");
 
 	@SuppressWarnings("rawtypes")
 	@Container

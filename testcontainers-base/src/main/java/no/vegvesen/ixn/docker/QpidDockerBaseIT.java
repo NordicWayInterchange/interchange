@@ -65,4 +65,11 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy());
 	}
 
+	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
+		Path path = getFolderPath("target/test-keys-" + clazz.getSimpleName());
+		GenericContainer keyContainer = getKeyContainer(path, ca_cn, serverOrUserCns);
+		keyContainer.start();
+		return path;
+	}
+
 }
