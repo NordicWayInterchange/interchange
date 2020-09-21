@@ -175,11 +175,11 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPollOfSubscriptionReturnsSubscription()throws Exception{
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
-		subscription.setPath("bouvet/subscription/1");
+		subscription.setPath("bouvet/subscriptions/1");
 		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
 
-		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscription/1"))
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscriptions/1"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
