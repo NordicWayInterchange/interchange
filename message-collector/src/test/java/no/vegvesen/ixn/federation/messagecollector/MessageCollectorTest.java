@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 public class MessageCollectorTest {
@@ -61,6 +60,27 @@ public class MessageCollectorTest {
         collector.runSchedule();
 
         assertThat(one.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
+        assertThat(two.getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
+    }
+
+    @Test
+    public void testConnectionsToNeighbourWhenNeighbourIsPossibleToContactAgain(){
+        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
+        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
+        one.failedConnection(4);
+
+        assertThat(one.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
+
+        GracefulBackoffProperties backoffProperties = mock(GracefulBackoffProperties.class);
+        NeighbourService neighbourService = mock(NeighbourService.class);
+        when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Arrays.asList(one,two));
+        CollectorCreator collectorCreator = mock(CollectorCreator.class);
+
+        MessageCollector collector = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
+        when(backoffProperties.canBeContacted(any())).thenReturn(true);
+        collector.runSchedule();
+
+        assertThat(one.getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
         assertThat(two.getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
     }
 
