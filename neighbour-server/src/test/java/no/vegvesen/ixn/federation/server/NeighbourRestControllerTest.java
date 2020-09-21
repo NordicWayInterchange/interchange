@@ -45,7 +45,7 @@ class NeighbourRestControllerTest {
 	@Autowired
 	private NeighbourRestController neighbourRestController;
 
-	private String subscriptionRequestPath = "/subscription";
+	private String subscriptionRequestPath = "/subscriptions";
 	private String capabilityExchangePath = "/capabilities";
 
 	private Set<String> quadTree = Collections.emptySet();

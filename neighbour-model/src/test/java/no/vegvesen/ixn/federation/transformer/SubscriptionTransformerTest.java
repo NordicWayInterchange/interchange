@@ -18,7 +18,7 @@ public class SubscriptionTransformerTest {
 	public void canTransformSubscriptionApiToSubscription(){
 
 		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setPath("bouvet/subscription/1");
+		subscriptionApi.setPath("bouvet/subscriptions/1");
 		subscriptionApi.setSelector("originatingCountry = 'NO'");
 		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
 
@@ -33,7 +33,7 @@ public class SubscriptionTransformerTest {
 	public void canTransformSubscriptionToSubscriptionApi(){
 
 		Subscription subscription = new Subscription();
-		subscription.setPath("bouvet/subscription/1");
+		subscription.setPath("bouvet/subscriptions/1");
 		subscription.setSelector("originatingCountry = 'NO'");
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 

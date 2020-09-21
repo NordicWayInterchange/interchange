@@ -130,7 +130,7 @@ public class NeighbourService {
 			logger.info("Paths for requested subscriptions created.");
 			// Create a path for each subscription
 			for (Subscription subscription : persistentRequest.getSubscriptions()) {
-				String path = "/" + neighbour.getName() + "/subscription/" + subscription.getId();
+				String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getId();
 				subscription.setPath(path);
 				logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
 			}
