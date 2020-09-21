@@ -16,6 +16,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(initializers = {QpidIT.Initializer.class})
 @Testcontainers
 public class QpidIT extends QpidDockerBaseIT {
+	static Path testKeysPath = generateKeys(QpidIT.class, "my_ca", "localhost", "king_harald");
 
 	private static final long RECEIVE_TIMEOUT = 2000;
 	private static final String NO_OUT = "NO-out";
@@ -45,8 +47,9 @@ public class QpidIT extends QpidDockerBaseIT {
 
 	private static Source producer;
 
+	@SuppressWarnings("rawtypes")
 	@Container
-	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.p12", "password", "truststore.jks", "password");
+	public static final GenericContainer qpidContainer = getQpidContainerGeneratedKeys("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
