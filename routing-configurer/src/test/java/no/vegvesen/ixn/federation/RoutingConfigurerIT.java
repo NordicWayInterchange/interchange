@@ -33,6 +33,7 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,13 +43,15 @@ import static org.assertj.core.api.Assertions.fail;
 
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
 @ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
 @Testcontainers
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
+	private static Path testKeysPath = generateKeys(RoutingConfigurerIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
+
 	@Container
-	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.p12", "password", "truststore.jks", "password");
+	public static final GenericContainer qpidContainer = getQpidContainerGeneratedKeys("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
 
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
@@ -65,7 +68,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
-					"routing-configurer.vhost=localhost"
+					"routing-configurer.vhost=localhost",
+					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
+					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 
@@ -162,7 +167,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED));
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions), null);
 		routingConfigurer.setupNeighbourRouting(nordea);
-		SSLContext nordeaSslContext = setUpTestSslContext("jks/nordea.p12");
+		SSLContext nordeaSslContext = setUpTestSslContext("nordea.p12");
 		try {
 			Source writeFedExExchange = new Source(AMQPS_URL, "fedEx", nordeaSslContext);
 			writeFedExExchange.start();
@@ -194,15 +199,15 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
-		SSLContext localhostSslContext = setUpTestSslContext("jks/localhost.p12");
+		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");
 		Sink neighbourSink = new Sink(AMQPS_URL, neighbourQueue, localhostSslContext);
 		neighbourSink.start();
 	}
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(getFilePathFromClasspathResource(s), "password", KeystoreType.PKCS12, "password"),
-				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
+				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
+				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
 
 }

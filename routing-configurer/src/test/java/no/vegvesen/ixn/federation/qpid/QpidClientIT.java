@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
+import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -17,6 +17,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,13 +27,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
 @Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
 
+	private static Path testKeysPath = generateKeys(QpidClientIT.class, "my_ca", "localhost", "routing_configurer");
+
 	@Container
-	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.p12", "password", "truststore.jks", "password");
+	public static final GenericContainer qpidContainer = getQpidContainerGeneratedKeys("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 	private static Integer MAPPED_HTTPS_PORT;
@@ -47,7 +50,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 			logger.info("server url: " + httpUrl);
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
-					"routing-configurer.vhost=localhost"
+					"routing-configurer.vhost=localhost",
+					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
+					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
 			MAPPED_HTTPS_PORT = qpidContainer.getMappedPort(HTTPS_PORT);
 		}

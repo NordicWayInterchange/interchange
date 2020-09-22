@@ -4,9 +4,9 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Maps;
@@ -28,21 +28,23 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.net.ssl.SSLContext;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
 @ContextConfiguration(initializers = {QuadTreeFilteringIT.Initializer.class})
 @Testcontainers
 public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(QuadTreeFilteringIT.class);
+	private static Path testKeysPath = generateKeys(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.p12", "password", "truststore.jks", "password");
+	public static final GenericContainer qpidContainer = getQpidContainerGeneratedKeys("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
 
 	private static String AMQPS_URL;
 
@@ -55,7 +57,9 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 			AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
-					"routing-configurer.vhost=localhost"
+					"routing-configurer.vhost=localhost",
+					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
+					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -107,7 +111,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());
 		qpidClient.addBinding(subscription.getSelector(), king_gustaf.getName(), subscription.bindKey(), "nwEx");
 
-		SSLContext sslContext = TestKeystoreHelper.sslContext("jks/king_gustaf.p12", "jks/truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 
 		Sink sink = new Sink(AMQPS_URL, "king_gustaf", sslContext);
 		MessageConsumer consumer = sink.createConsumer();
@@ -139,7 +143,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());
 		qpidClient.addBinding(subscription.toSelector(), king_gustaf.getName(), ""+subscription.toSelector().hashCode(), "nwEx");
 
-		SSLContext sslContext = TestKeystoreHelper.sslContext("jks/king_gustaf.p12", "jks/truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 
 		Sink sink = new Sink(AMQPS_URL, "king_gustaf", sslContext);
 		MessageConsumer consumer = sink.createConsumer();
