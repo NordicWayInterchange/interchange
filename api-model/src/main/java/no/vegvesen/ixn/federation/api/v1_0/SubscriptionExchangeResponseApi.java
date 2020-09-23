@@ -3,17 +3,21 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import java.util.Objects;
 import java.util.Set;
 
-public class SubscriptionExchangeRequestApi {
+public class SubscriptionExchangeResponseApi {
     private String version = "1.0";
     private String name;
-    private Set<SubscriptionExchangeSubscriptionRequestApi> subscriptions;
+    private Set<SubscriptionExchangeSubscriptionResponseApi> subscriptions;
 
-    public SubscriptionExchangeRequestApi() {
+    public SubscriptionExchangeResponseApi() {
     }
 
-    public SubscriptionExchangeRequestApi(String name, Set<SubscriptionExchangeSubscriptionRequestApi> subscriptions) {
+    public SubscriptionExchangeResponseApi(String name, Set<SubscriptionExchangeSubscriptionResponseApi> subscriptions) {
         this.name = name;
         this.subscriptions = subscriptions;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     public String getName() {
@@ -24,23 +28,19 @@ public class SubscriptionExchangeRequestApi {
         this.name = name;
     }
 
-    public Set<SubscriptionExchangeSubscriptionRequestApi> getSubscriptions() {
+    public Set<SubscriptionExchangeSubscriptionResponseApi> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<SubscriptionExchangeSubscriptionRequestApi> subscriptions) {
+    public void setSubscriptions(Set<SubscriptionExchangeSubscriptionResponseApi> subscriptions) {
         this.subscriptions = subscriptions;
-    }
-
-    public String getVersion() {
-        return version;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SubscriptionExchangeRequestApi that = (SubscriptionExchangeRequestApi) o;
+        SubscriptionExchangeResponseApi that = (SubscriptionExchangeResponseApi) o;
         return Objects.equals(version, that.version) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(subscriptions, that.subscriptions);
@@ -53,7 +53,7 @@ public class SubscriptionExchangeRequestApi {
 
     @Override
     public String toString() {
-        return "SubscriptionExchangeRequestApi{" +
+        return "SubscriptionExchangeResponseApi{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +
                 ", subscriptions=" + subscriptions +
