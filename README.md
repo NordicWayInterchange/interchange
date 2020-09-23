@@ -4,21 +4,30 @@ Interchange node under the Nordic Way project
 ### License
 See full MIT license text [here](license.md).
 
-####Third-party licenses
-To get a list of the third-party licenses used in the project, run (in bash):
-```
-mvn license:add-third-party
-```
-
-followed by:
-```
-find . -name THIRD-PARTY.txt -exec cat {} \; | sort | uniq 
-``` 
+See instructions to retrieve all the third party licences [here](#third-party-licenses)
 
 ### Introduction
 The Nordic Way Interchange Node (NWIXN) is a message broker that
 enables crowdsourcing of traffic data. Nordic Way partners send traffic information
 to the broker in the form of AMQP messages. These messages are distributed to subscribing partners.
+
+Messages are produced and exchanged over AMQP 1.0. Message content is not examined, but all messages must provide 
+header attributes as specified in the client specification. Send us a message to get the specification. 
+
+Traffic message formats supported are DATEX, DENM and IVI.  
+
+![Interchange architecture](/diagrams/interchange_architecture.png)
+
+Neighbour nodes registered in the DNS (domain name server) will be discovered via a control channel.
+
+All neighbours must present the message types they produce - capabilities - in this discovery process.
+
+Neighbours also has a set of message types they are interested in - subscriptions. 
+If a neighbour produces a message type we are interested in, we issue a subscription request to the neighbour.
+
+Accepted subscriptions will be set up by the Routing Configurer so finally the messages can be collected by the Message collector.
+
+More information on the concepts and the open source implementation of the interchange node is found on the [Github Wiki](https://github.com/NordicWayInterchange/interchange/wiki) 
 
 Additional information about the Nordic Way Interchange Node can be found [here](https://www.nordicway.net/).
 
@@ -118,4 +127,17 @@ The actual start-up instructions are the same as for *nix systems:
 
 In general, the docker daemon sometimes have problems mounting directories or starting the docker containers. Try restarting the container and try again after it is restarted, 
 or remount the directories in the docker settings.
+
+
+
+# Third-party licenses 
+To get a list of the third-party licenses used in the project, run (in bash):
+```
+mvn license:add-third-party
+```
+
+followed by:
+```
+find . -name THIRD-PARTY.txt -exec cat {} \; | sort | uniq 
+``` 
 
