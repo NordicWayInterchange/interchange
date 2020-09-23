@@ -9,7 +9,6 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -87,9 +86,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Autowired
 	QpidClient client;
-
-	@Autowired
-	TestSSLContextConfig sslContextConfig;
 
 	@Test
 	public void neighbourWithOneBindingIsCreated() {
