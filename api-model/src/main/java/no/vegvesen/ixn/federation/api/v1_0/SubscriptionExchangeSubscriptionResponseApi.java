@@ -1,12 +1,19 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import java.util.Objects;
 
 public class SubscriptionExchangeSubscriptionResponseApi {
 
     private String id;
     private String selector;
-    private boolean createNewQueue; //optional, defaults to false
+
+    @JsonInclude(Include.NON_NULL)
+    private Boolean createNewQueue; //optional, defaults to false
+
+    @JsonInclude(Include.NON_NULL)
     private String queueConsumerUser; //optional, defaults to CN of requesting interchange
     private String path;
     private SubscriptionStatusApi status;
@@ -21,7 +28,7 @@ public class SubscriptionExchangeSubscriptionResponseApi {
         this.status = status;
     }
 
-    public SubscriptionExchangeSubscriptionResponseApi(String id, String selector, boolean createNewQueue, String queueConsumerUser, String path, SubscriptionStatusApi status) {
+    public SubscriptionExchangeSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser) {
         this.id = id;
         this.selector = selector;
         this.createNewQueue = createNewQueue;
@@ -46,11 +53,11 @@ public class SubscriptionExchangeSubscriptionResponseApi {
         this.selector = selector;
     }
 
-    public boolean isCreateNewQueue() {
+    public Boolean isCreateNewQueue() {
         return createNewQueue;
     }
 
-    public void setCreateNewQueue(boolean createNewQueue) {
+    public void setCreateNewQueue(Boolean createNewQueue) {
         this.createNewQueue = createNewQueue;
     }
 
