@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation.api.v1_0;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.Objects;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.*;
 
 public class SubscriptionExchangeSubscriptionRequestApi {
@@ -48,5 +50,29 @@ public class SubscriptionExchangeSubscriptionRequestApi {
 
     public void setQueueConsumerUser(String queueConsumerUser) {
         this.queueConsumerUser = queueConsumerUser;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SubscriptionExchangeSubscriptionRequestApi that = (SubscriptionExchangeSubscriptionRequestApi) o;
+        return Objects.equals(selector, that.selector) &&
+                Objects.equals(createNewQueue, that.createNewQueue) &&
+                Objects.equals(queueConsumerUser, that.queueConsumerUser);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(selector, createNewQueue, queueConsumerUser);
+    }
+
+    @Override
+    public String toString() {
+        return "SubscriptionExchangeSubscriptionRequestApi{" +
+                "selector='" + selector + '\'' +
+                ", createNewQueue=" + createNewQueue +
+                ", queueConsumerUser='" + queueConsumerUser + '\'' +
+                '}';
     }
 }
