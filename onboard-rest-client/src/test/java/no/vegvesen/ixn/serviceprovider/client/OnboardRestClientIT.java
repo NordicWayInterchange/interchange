@@ -20,6 +20,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import javax.net.ssl.SSLContext;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OnboardRestClientIT extends DockerBaseIT {
 
 	private static Logger log = LoggerFactory.getLogger(OnboardRestClientIT.class);
+	private static Path testKeysPath = generateKeys(OnboardRestClientIT.class, "my_ca", "localhost", "onboard");
 
     public static Network network;
 
@@ -54,7 +56,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
                             )
                     )
                     .withNetwork(network)
-                    .withClasspathResourceMapping("jks/server","/jks", BindMode.READ_ONLY)
+                    .withFileSystemBind(testKeysPath.toString(),"/jks", BindMode.READ_ONLY)
                     .withEnv("KEY_STORE","/jks/localhost.p12")
                     .withEnv("KEY_STORE_PASSWORD","password")
                     .withEnv("TRUST_STORE_PASSWORD","password")
@@ -75,7 +77,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
     }
 
     private OnboardRESTClient client;
-    private final SSLContext sslContext = TestKeystoreHelper.sslContext("jks/client/onboard.p12", "jks/client/truststore.jks");
+    private final SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "onboard.p12", "truststore.jks");
 
 
     @BeforeEach
