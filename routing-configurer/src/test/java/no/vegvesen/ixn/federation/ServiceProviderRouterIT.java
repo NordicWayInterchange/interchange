@@ -50,7 +50,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
     @SuppressWarnings("rawtypes")
 	@Container
-    public static final GenericContainer qpidContainer = getQpidContainerGeneratedKeys("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
+    public static final GenericContainer qpidContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
     private static String AMQPS_URL;

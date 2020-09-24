@@ -51,7 +51,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-    public static final GenericContainer qpidContainer = getQpidContainerGeneratedKeys(
+    public static final GenericContainer qpidContainer = getQpidContainer(
             "qpid",
             testKeysPath,
             "localhost.p12",
