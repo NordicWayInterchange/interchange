@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.startupcheck.IndefiniteWaitOneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
@@ -53,23 +52,5 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
 	}
 
-	protected static GenericContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
-		String spaceSeparatedKeyCns = String.join(" ", serverOrUserCns);
-		return new GenericContainer(
-				new ImageFromDockerfile("key-gen", false)
-						.withFileFromPath(".", getFolderPath("key-gen")))
-				.withFileSystemBind(testKeysPath.toString(), "/jks/keys", BindMode.READ_WRITE)
-				.withEnv("CA_CN", ca)
-				.withEnv("KEY_CNS", spaceSeparatedKeyCns)
-				.withEnv("KEYS_DIR", "/jks/keys")
-				.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy());
-	}
-
-	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
-		Path path = getFolderPath("target/test-keys-" + clazz.getSimpleName());
-		GenericContainer keyContainer = getKeyContainer(path, ca_cn, serverOrUserCns);
-		keyContainer.start();
-		return path;
-	}
 
 }
