@@ -73,7 +73,7 @@ public class AccessControlIT extends QpidDockerBaseIT {
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
 		Source nwEx = new Source(getQpidURI(), NW_EX, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		nwEx.start();
-		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> {nwEx.send("Not allowed"); });
+		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> nwEx.send("Not allowed") );
 	}
 
 
