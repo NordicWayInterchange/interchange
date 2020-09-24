@@ -25,17 +25,12 @@ import static org.mockito.Mockito.when;
 
 @Testcontainers
 public class MessageCollectorIT extends QpidDockerBaseIT {
-
-	static Path testKeysPath = getFolderPath("message-collector/target/test-keys-MessageCollectorIT");
-
-	@SuppressWarnings("rawtypes")
-	@Container
-	public static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "sp_producer", "sp_consumer");
+	static Path testKeysPath = generateKeys(MessageCollectorIT.class,"my_ca", "localhost", "sp_producer", "sp_consumer");
 
 	@SuppressWarnings("rawtypes")
 	@Container
 	//Container is not static and is not reused between tests
-	public GenericContainer consumerContainer = getQpidContainerGeneratedKeys("docker/consumer",
+	public GenericContainer consumerContainer = getQpidContainer("docker/consumer",
 			testKeysPath,
 			"localhost.p12",
 			"password",
@@ -45,7 +40,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@SuppressWarnings("rawtypes")
 	@Container
 	//Container is not static and is not reused between tests
-	public GenericContainer producerContainer = getQpidContainerGeneratedKeys("docker/producer",
+	public GenericContainer producerContainer = getQpidContainer("docker/producer",
 			testKeysPath,
 			"localhost.p12",
 			"password",

@@ -19,18 +19,14 @@ import static org.mockito.Mockito.when;
 
 @Testcontainers
 public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
-	static Path path = getFolderPath("message-collector/target/testKeys-MessageCollectorLocalListenerIT");
 
 	private static Logger logger = LoggerFactory.getLogger(MessageCollectorLocalListenerIT.class);
+	static Path testKeysPath = generateKeys(MessageCollectorLocalListenerIT.class,"my_ca", "localhost");
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public static GenericContainer keyContainer = getKeyContainer(path,"my_ca", "localhost");
-
-	@SuppressWarnings("rawtypes")
-	@Container
-	public GenericContainer localContainer = getQpidContainerGeneratedKeys("docker/consumer",
-			path,
+	public GenericContainer localContainer = getQpidContainer("docker/consumer",
+			testKeysPath,
 			"localhost.p12",
 			"password",
 			"truststore.jks",
@@ -39,8 +35,8 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public GenericContainer remoteContainer = getQpidContainerGeneratedKeys("docker/producer",
-			path,
+	public GenericContainer remoteContainer = getQpidContainer("docker/producer",
+			testKeysPath,
 			"localhost.p12",
 			"password",
 			"truststore.jks",
@@ -49,7 +45,7 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 	@Test
 	public void stoppingLocalContainerStopsListener() {
 		String remoteAmqpsUrl = String.format("amqps://localhost:%s", remoteContainer.getMappedPort(AMQPS_PORT));
-		SSLContext sslContext = TestKeystoreHelper.sslContext(path, "localhost.p12", "truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "localhost.p12", "truststore.jks");
 		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
 		Neighbour remote = mock(Neighbour.class);
 		when(remote.getMessageChannelUrl()).thenReturn(remoteAmqpsUrl);

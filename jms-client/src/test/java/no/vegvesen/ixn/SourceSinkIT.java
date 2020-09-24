@@ -20,15 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public class SourceSinkIT extends QpidDockerBaseIT {
 
-	static Path testKeysPath = getFolderPath("jms-client/target/test-keys-SourceSinkIT");
+	static Path testKeysPath = generateKeys(SourceSinkIT.class,"my_ca", "localhost", "king_harald");
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "king_harald");
-
-	@SuppressWarnings("rawtypes")
-	@Container
-	public final GenericContainer qpidContainer = getQpidContainerGeneratedKeys("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
+	public final GenericContainer qpidContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
 	private String URL;
 	private SSLContext KING_HARALD_SSL_CONTEXT;
 

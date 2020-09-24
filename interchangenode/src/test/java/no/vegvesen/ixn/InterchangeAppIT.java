@@ -18,6 +18,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,9 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class InterchangeAppIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(InterchangeAppIT.class);
+    private static Path testKeysPath = generateKeys(InterchangeAppIT.class, "my_ca", "localhost", "king_harald");
 
-    private static final String JKS_KING_HARALD_P_12 = "jks/king_harald.p12";
-    private static final String TRUSTSTORE_JKS = "jks/truststore.jks";
+    private static final String JKS_KING_HARALD_P_12 = "king_harald.p12";
+    private static final String TRUSTSTORE_JKS = "truststore.jks";
 
 
 	static class InterchangeInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -51,7 +53,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 	@Container
     public static final GenericContainer qpidContainer = getQpidContainer(
             "qpid",
-            "jks",
+            testKeysPath,
             "localhost.p12",
             "password",
             "truststore.jks",
@@ -68,7 +70,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 		consumerCreator.setupConsumer();
 	    String sendUrl = getQpidURI();
 
-	    try (Source source = new Source(sendUrl,"onramp", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+	    try (Source source = new Source(sendUrl,"onramp", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
             source.start();
             logger.debug("Sending message");
             JmsTextMessage textMessage = source.createTextMessage("Yo!");
@@ -80,7 +82,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
             textMessage.setStringProperty("longitude","63.0");
             textMessage.setStringProperty("publicationType","SituationPublication");
 
-            try (Sink sink = new Sink(getQpidURI(), "NO-out", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+            try (Sink sink = new Sink(getQpidURI(), "NO-out", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
 
                 logger.debug("Creating consumer");
                 MessageConsumer consumer = sink.createConsumer();
@@ -104,7 +106,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
     public void sendReceiveWithoutInterchangeAppKeepsJmsExpiration() throws Exception {
 	    String sendUrl = getQpidURI();
 
-	    try (Source source = new Source(sendUrl,"NO-private", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+	    try (Source source = new Source(sendUrl,"NO-private", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
             source.start();
             logger.debug("Sending message");
             JmsTextMessage textMessage = source.createTextMessage("Yo!");
@@ -119,7 +121,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
             source.sendTextMessage(textMessage, 9999L);
             long estimateExpiry = System.currentTimeMillis() + 9999L;
             logger.debug("Message sendt");
-            try (Sink sink = new Sink(getQpidURI(), "NO-private", TestKeystoreHelper.sslContext(JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+            try (Sink sink = new Sink(getQpidURI(), "NO-private", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
                 logger.debug("Creating consumer");
                 MessageConsumer consumer = sink.createConsumer();
                 logger.debug("Starting receive");

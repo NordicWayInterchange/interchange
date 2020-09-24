@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
@@ -31,7 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.net.URL;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,14 +41,16 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-@SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
 @ContextConfiguration(initializers = {ServiceProviderRouterIT.Initializer.class})
 @Testcontainers
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
+	private static Path testKeysPath = generateKeys(ServiceProviderRouterIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+
     @SuppressWarnings("rawtypes")
 	@Container
-    public static final GenericContainer qpidContainer = getQpidContainer("qpid", "jks", "localhost.p12", "password", "truststore.jks", "password");
+    public static final GenericContainer qpidContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
     private static String AMQPS_URL;
@@ -65,7 +66,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
-					"routing-configurer.vhost=localhost"
+					"routing-configurer.vhost=localhost",
+					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
+					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -109,7 +112,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		router.syncServiceProviders(Arrays.asList(king_gustaf));
 
-		SSLContext kingGustafSslContext = setUpTestSslContext("jks/king_gustaf.p12");
+		SSLContext kingGustafSslContext = setUpTestSslContext("king_gustaf.p12");
 		Sink readKingGustafQueue = new Sink(AMQPS_URL, "king_gustaf", kingGustafSslContext);
 		readKingGustafQueue.start();
 		Source writeOnrampQueue = new Source(AMQPS_URL, "onramp", kingGustafSslContext);
@@ -164,17 +167,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
    	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(getFilePathFromClasspathResource(s), "password", KeystoreType.PKCS12, "password"),
-				new KeystoreDetails(getFilePathFromClasspathResource("jks/truststore.jks"), "password", KeystoreType.JKS));
+				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
+				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
-
-	private static String getFilePathFromClasspathResource(String classpathResource) {
-		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
-		if (resource != null) {
-			return resource.getFile();
-		}
-		throw new RuntimeException("Could not load classpath resource " + classpathResource);
-	}
-
 
 }
