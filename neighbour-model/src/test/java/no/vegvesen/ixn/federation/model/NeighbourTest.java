@@ -118,34 +118,6 @@ public class NeighbourTest {
 		Neighbour neighbourWithNewerCapabilitiesThanSubscriptionRequest = new Neighbour("nice-neighbour", capabilities, null, fedIn);
 		assertThat(neighbourWithNewerCapabilitiesThanSubscriptionRequest.shouldCheckSubscriptionRequestsForUpdates(Optional.of(localSubscriptionUpdateTimeBeforeCapabilityPost))).isTrue();
 	}
-	//Flytte til en egen test-klasse som tester ConnectionBackoff
-	@Test
-	public void failedSubscriptionRequest_firstSetsStart() {
-		Neighbour neighbour = new Neighbour("the-best-neighbour-ever", null, null, null);
-		neighbour.getConnectionBackoff().failedConnection(2);
-		assertThat(neighbour.getConnectionBackoff().getBackoffStartTime()).isNotNull().isAfter(LocalDateTime.now().minusSeconds(3));
-		assertThat(neighbour.getConnectionBackoff().getBackoffAttempts()).isEqualTo(0);
-		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
-
-		neighbour.getConnectionBackoff().failedConnection(2);
-		assertThat(neighbour.getConnectionBackoff().getBackoffAttempts()).isEqualTo(1);
-		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
-
-		neighbour.getConnectionBackoff().failedConnection(2);
-		assertThat(neighbour.getConnectionBackoff().getBackoffAttempts()).isEqualTo(2);
-		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
-
-		neighbour.getConnectionBackoff().failedConnection(2);
-		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
-
-		neighbour.getConnectionBackoff().failedConnection(2);
-		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
-
-		neighbour.getConnectionBackoff().okConnection();
-		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
-		assertThat(neighbour.getConnectionBackoff().getBackoffStartTime()).isNull();
-		assertThat(neighbour.getConnectionBackoff().getBackoffAttempts()).isEqualTo(0);
-	}
 
 	@Test
 	public void calculatedNextPostAttemptTimeIsInCorrectInterval(){
