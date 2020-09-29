@@ -74,7 +74,7 @@ public class GracefulBackoffProperties {
 	}
 
 	public boolean canBeContacted(Neighbour neighbour) {
-		return neighbour.canBeContacted(this.randomShiftUpperLimit, this.startIntervalLength);
+		return neighbour.getConnectionBackoff().canBeContacted(this.randomShiftUpperLimit, this.startIntervalLength);
 	}
 
 	@Override

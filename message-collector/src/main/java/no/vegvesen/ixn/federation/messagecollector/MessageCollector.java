@@ -63,10 +63,10 @@ public class MessageCollector {
                         logger.info("Setting up connection to ixn with name {}, port {}", name, ixn.getMessageChannelPort());
                         MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
                         listeners.put(name, messageListener);
-                        ixn.okConnection();
+                        ixn.getConnectionBackoff().okConnection();
                     } catch (MessageCollectorException e) {
                         logger.warn("Tried to create connection to {}, but failed with exception.", name, e);
-                        ixn.failedConnection(backoffProperties.getNumberOfAttempts());
+                        ixn.getConnectionBackoff().failedConnection(backoffProperties.getNumberOfAttempts());
                     }
                 }
                 else {

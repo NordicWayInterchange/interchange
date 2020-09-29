@@ -84,7 +84,7 @@ public class NeighbourTest {
 		fedIn.setSuccessfulRequest(now);
 		Capabilities capabilities = new Capabilities();
 		capabilities.setLastCapabilityExchange(now.minusHours(1));
-		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn);
+		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn, new ConnectionBackoff());
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(now))).isFalse();
 	}
 
@@ -118,33 +118,33 @@ public class NeighbourTest {
 		Neighbour neighbourWithNewerCapabilitiesThanSubscriptionRequest = new Neighbour("nice-neighbour", capabilities, null, fedIn);
 		assertThat(neighbourWithNewerCapabilitiesThanSubscriptionRequest.shouldCheckSubscriptionRequestsForUpdates(Optional.of(localSubscriptionUpdateTimeBeforeCapabilityPost))).isTrue();
 	}
-
+	//Flytte til en egen test-klasse som tester ConnectionBackoff
 	@Test
 	public void failedSubscriptionRequest_firstSetsStart() {
 		Neighbour neighbour = new Neighbour("the-best-neighbour-ever", null, null, null);
-		neighbour.failedConnection(2);
-		assertThat(neighbour.getBackoffStartTime()).isNotNull().isAfter(LocalDateTime.now().minusSeconds(3));
-		assertThat(neighbour.getBackoffAttempts()).isEqualTo(0);
-		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
+		neighbour.getConnectionBackoff().failedConnection(2);
+		assertThat(neighbour.getConnectionBackoff().getBackoffStartTime()).isNotNull().isAfter(LocalDateTime.now().minusSeconds(3));
+		assertThat(neighbour.getConnectionBackoff().getBackoffAttempts()).isEqualTo(0);
+		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
 
-		neighbour.failedConnection(2);
-		assertThat(neighbour.getBackoffAttempts()).isEqualTo(1);
-		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
+		neighbour.getConnectionBackoff().failedConnection(2);
+		assertThat(neighbour.getConnectionBackoff().getBackoffAttempts()).isEqualTo(1);
+		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
 
-		neighbour.failedConnection(2);
-		assertThat(neighbour.getBackoffAttempts()).isEqualTo(2);
-		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
+		neighbour.getConnectionBackoff().failedConnection(2);
+		assertThat(neighbour.getConnectionBackoff().getBackoffAttempts()).isEqualTo(2);
+		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
 
-		neighbour.failedConnection(2);
-		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
+		neighbour.getConnectionBackoff().failedConnection(2);
+		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 
-		neighbour.failedConnection(2);
-		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
+		neighbour.getConnectionBackoff().failedConnection(2);
+		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 
-		neighbour.okConnection();
-		assertThat(neighbour.getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
-		assertThat(neighbour.getBackoffStartTime()).isNull();
-		assertThat(neighbour.getBackoffAttempts()).isEqualTo(0);
+		neighbour.getConnectionBackoff().okConnection();
+		assertThat(neighbour.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
+		assertThat(neighbour.getConnectionBackoff().getBackoffStartTime()).isNull();
+		assertThat(neighbour.getConnectionBackoff().getBackoffAttempts()).isEqualTo(0);
 	}
 
 	@Test
@@ -163,10 +163,10 @@ public class NeighbourTest {
 		System.out.println("Lower limit: " + lowerLimit.toString());
 		System.out.println("Upper limit: " + upperLimit.toString());
 
-		ericsson.setBackoffAttempts(0);
-		ericsson.setBackoffStart(now);
+		ericsson.getConnectionBackoff().setBackoffAttempts(0);
+		ericsson.getConnectionBackoff().setBackoffStart(now);
 
-		LocalDateTime result = ericsson.getNextPostAttemptTime(60000, 2000);
+		LocalDateTime result = ericsson.getConnectionBackoff().getNextPostAttemptTime(60000, 2000);
 
 		assertThat(result).isBetween(lowerLimit, upperLimit);
 	}
