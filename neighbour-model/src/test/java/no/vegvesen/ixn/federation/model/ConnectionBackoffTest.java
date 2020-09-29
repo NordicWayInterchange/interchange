@@ -36,4 +36,28 @@ class ConnectionBackoffTest {
         assertThat(connectionBackoff.getBackoffAttempts()).isEqualTo(0);
     }
 
+    @Test
+    public void calculatedNextPostAttemptTimeIsInCorrectInterval(){
+        ConnectionBackoff connectionBackoff = new ConnectionBackoff();
+        LocalDateTime now = LocalDateTime.now();
+
+        // Mocking the first backoff attempt, where the exponential is 0.
+        double exponential = 0;
+        long expectedBackoff = (long) Math.pow(2, exponential)*2; //
+
+        System.out.println("LocalDataTime now: "+ now.toString());
+        LocalDateTime lowerLimit = now.plusSeconds(expectedBackoff);
+        LocalDateTime upperLimit = now.plusSeconds(expectedBackoff+60);
+
+        System.out.println("Lower limit: " + lowerLimit.toString());
+        System.out.println("Upper limit: " + upperLimit.toString());
+
+        connectionBackoff.setBackoffAttempts(0);
+        connectionBackoff.setBackoffStart(now);
+
+        LocalDateTime result = connectionBackoff.getNextPostAttemptTime(60000, 2000);
+
+        assertThat(result).isBetween(lowerLimit, upperLimit);
+    }
+
 }
