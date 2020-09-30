@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
@@ -58,6 +59,7 @@ public class NeighbourService {
 		this.discovererProperties = discovererProperties;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 	}
+
 
 
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
@@ -426,4 +428,9 @@ public class NeighbourService {
 	}
 
 
+	public SubscriptionExchangeResponseApi findSubscriptions(String ixnName) {
+		Neighbour neighbour = neighbourRepository.findByName(ixnName);
+		Set<Subscription> subscriptions = neighbour.getSubscriptionRequest().getSubscriptions();
+		return subscriptionTransformer.subscriptionsToSubscriptionExchangeResponseApi(neighbour.getName(),subscriptions);
+	}
 }

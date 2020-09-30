@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.auth.CertService;
@@ -43,6 +42,7 @@ public class NeighbourRestController {
 		this.selfService = selfService;
 	}
 
+	//TODO change to new api objects
 	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ApiResponses({@ApiResponse(code = 202, message = "Successfully requested a subscription", response = SubscriptionRequestApi.class),
 			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
@@ -77,12 +77,14 @@ public class NeighbourRestController {
 		logger.info("Common name matches Neighbour name in path.");
 
 		//fetch the list of neighbours
-		SubscriptionExchangeResponseApi reponse = null;
+		SubscriptionExchangeResponseApi reponse = neighbourService.findSubscriptions(ixnName);
 		NeighbourMDCUtil.removeLogVariables();
 
 		return reponse;
 	}
 
+
+	//TODO change this to new api objects.
 	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ApiResponses({@ApiResponse(code = 200, message = "Successfully polled the subscription.", response = SubscriptionApi.class),
 			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the polling Neighbour does not exist.", response = ErrorDetails.class),

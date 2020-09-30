@@ -215,6 +215,28 @@ class NeighbourServiceTest {
 		assertThat(calculatedSubscription).hasSize(0);
 	}
 
+	@Test
+	public void findSubscriptionsHappyCase() {
+		String neighbourName = "neighbour";
+		int id = 1;
+		Subscription subscription = new Subscription();
+		subscription.setId(id);
+		subscription.setPath("/" + neighbourName + "/subscriptions/" + id);
+		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
+		subscription.setSelector("originatingCountry = 'NO'");
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
+		Neighbour neighbour = new Neighbour(neighbourName, new Capabilities(), subscriptionRequest,new SubscriptionRequest());
+		Mockito.when(neighbourRepository.findByName(neighbourName)).thenReturn(neighbour);
+
+		SubscriptionExchangeResponseApi subscriptions = neighbourService.findSubscriptions(neighbourName);
+		assertThat(subscriptions.getName()).isEqualTo(neighbourName);
+		assertThat(subscriptions.getSubscriptions()).hasSize(1);
+
+		Mockito.verify(neighbourRepository,Mockito.times(1)).findByName(neighbourName);
+	}
+
+
 	private Set<DataType> getDataTypeSetOriginatingCountry(String country) {
 		return Sets.newLinkedHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
 	}

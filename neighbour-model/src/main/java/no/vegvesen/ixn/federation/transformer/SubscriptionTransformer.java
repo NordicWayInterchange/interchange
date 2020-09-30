@@ -1,8 +1,17 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeSubscriptionResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusApi;
 import no.vegvesen.ixn.federation.model.Subscription;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Component
 public class SubscriptionTransformer {
@@ -23,5 +32,25 @@ public class SubscriptionTransformer {
 		subscription.setSubscriptionStatus(subscriptionApi.getStatus());
 
 		return subscription;
+	}
+
+	public SubscriptionExchangeResponseApi subscriptionsToSubscriptionExchangeResponseApi(String name, Set<Subscription> subscriptions) {
+	    Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponseApis = subscriptionToSubscriptionExchangeSubscriptionResponseApi(subscriptions);
+	    return new SubscriptionExchangeResponseApi(name,subscriptionResponseApis);
+	}
+
+	private Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionToSubscriptionExchangeSubscriptionResponseApi(Set<Subscription> subscriptions) {
+		List<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponses = new ArrayList<>();
+		for (Subscription s : subscriptions) {
+			SubscriptionExchangeSubscriptionResponseApi responseApi = new SubscriptionExchangeSubscriptionResponseApi(s.getId().toString(),s.getSelector(),s.getPath(), subscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()));
+			subscriptionResponses.add(responseApi);
+		}
+		return new HashSet<>(subscriptionResponses);
+
+	}
+
+	//TODO what about statuses that are not valid in the api?
+	private SubscriptionStatusApi subscriptionStatusToSubscriptionStatusApi(SubscriptionStatus subscriptionStatus) {
+		return SubscriptionStatusApi.valueOf(subscriptionStatus.name());
 	}
 }
