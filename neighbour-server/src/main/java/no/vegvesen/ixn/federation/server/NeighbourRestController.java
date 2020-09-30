@@ -63,15 +63,24 @@ public class NeighbourRestController {
 	}
 
 
-	@ApiOperation(value = "Endpoint for requesting a lisst of an interchange's subscriptions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Endpoint for requesting a lisst of an interchange's subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ApiResponses({@ApiResponse(code = 200, message = "Success", response = SubscriptionExchangeResponseApi.class),
 					@ApiResponse(code = 403, message = "Common name in certificate does not match Neighbour name in path", response = ErrorDetails.class),
 					@ApiResponse(code = 404, message = "Invalid path, the requested subscriptions does not exist", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, path = "/{ixnName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	public SubscriptionExchangeResponseApi listSubscriptions(@RequestBody SubscriptionExchangeRequestApi requestApi) {
-		return null;
+	public SubscriptionExchangeResponseApi listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
+	    NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(),ixnName);
+	    logger.info("Received request for subscriptions for neighbour {}", ixnName);
+	    certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
+		logger.info("Common name matches Neighbour name in path.");
+
+		//fetch the list of neighbours
+		SubscriptionExchangeResponseApi reponse = null;
+		NeighbourMDCUtil.removeLogVariables();
+
+		return reponse;
 	}
 
 	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
