@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -58,6 +60,18 @@ public class NeighbourRestController {
 		SubscriptionRequestApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
 		NeighbourMDCUtil.removeLogVariables();
 		return response;
+	}
+
+
+	@ApiOperation(value = "Endpoint for requesting a lisst of an interchange's subscriptions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiResponses({@ApiResponse(code = 200, message = "Success", response = SubscriptionExchangeResponseApi.class),
+					@ApiResponse(code = 403, message = "Common name in certificate does not match Neighbour name in path", response = ErrorDetails.class),
+					@ApiResponse(code = 404, message = "Invalid path, the requested subscriptions does not exist", response = ErrorDetails.class)})
+	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping(method = RequestMethod.GET, path = "/{ixnName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Secured("ROLE_USER")
+	public SubscriptionExchangeResponseApi listSubscriptions(@RequestBody SubscriptionExchangeRequestApi requestApi) {
+		return null;
 	}
 
 	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
