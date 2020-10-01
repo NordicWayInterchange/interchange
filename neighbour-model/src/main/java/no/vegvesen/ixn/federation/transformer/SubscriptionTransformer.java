@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeSubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
 import no.vegvesen.ixn.federation.model.Subscription;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,20 @@ public class SubscriptionTransformer {
 		return subscription;
 	}
 
+	public SubscriptionStatusPollResponseApi subscriptionToSubscriptionStatusPollResponseApi(Subscription subscription, String neighbourName, String thisNodeName) {
+		SubscriptionStatusPollResponseApi response = new SubscriptionStatusPollResponseApi();
+		response.setId(subscription.getId().toString());
+		response.setSelector(subscription.getSelector());
+		response.setPath(subscription.getPath());
+		SubscriptionStatusApi status = subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
+		response.setStatus(status);
+		if (status.equals(SubscriptionStatusApi.CREATED)) {
+			response.setMessageBrokerUrl("amqps://" + thisNodeName);
+			response.setQueueName(neighbourName);
+		}
+		return response;
+	}
+
 	public SubscriptionExchangeResponseApi subscriptionsToSubscriptionExchangeResponseApi(String name, Set<Subscription> subscriptions) {
 	    Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponseApis = subscriptionToSubscriptionExchangeSubscriptionResponseApi(subscriptions);
 	    return new SubscriptionExchangeResponseApi(name,subscriptionResponseApis);
@@ -48,8 +63,8 @@ public class SubscriptionTransformer {
 		return new HashSet<>(subscriptionResponses);
 
 	}
-
 	//TODO what about statuses that are not valid in the api?
+
 	private SubscriptionStatusApi subscriptionStatusToSubscriptionStatusApi(SubscriptionStatus subscriptionStatus) {
 		return SubscriptionStatusApi.valueOf(subscriptionStatus.name());
 	}

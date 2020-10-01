@@ -1,15 +1,23 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 public class SubscriptionStatusPollResponseApi {
     private String id;
     private String selector;
-    private boolean createNewQueue;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean createNewQueue;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueConsumerUser;
     private String path;
     private SubscriptionStatusApi status;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String messageBrokerUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueName;
 
     public SubscriptionStatusPollResponseApi() {
@@ -17,12 +25,12 @@ public class SubscriptionStatusPollResponseApi {
 
     public SubscriptionStatusPollResponseApi(String id,
                                              String selector,
-                                             boolean createNewQueue,
-                                             String queueConsumerUser,
                                              String path,
                                              SubscriptionStatusApi status,
                                              String messageBrokerUrl,
-                                             String queueName) {
+                                             String queueName,
+                                             Boolean createNewQueue,
+                                             String queueConsumerUser) {
         this.id = id;
         this.selector = selector;
         this.createNewQueue = createNewQueue;
@@ -49,7 +57,7 @@ public class SubscriptionStatusPollResponseApi {
         this.selector = selector;
     }
 
-    public boolean isCreateNewQueue() {
+    public Boolean isCreateNewQueue() {
         return createNewQueue;
     }
 

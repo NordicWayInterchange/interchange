@@ -12,12 +12,12 @@ public class SubscriptionStatusPollResponseApiTest {
         SubscriptionStatusPollResponseApi responseApi = new SubscriptionStatusPollResponseApi(
                 "1",
                 "messageType='DENM' AND originatingCountry='NO'",
-                true,
-                "client1",
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,
                 "amqps://b.c-its-interchange.eu:5671",
-                "client1queue"
+                "client1queue",
+                true,
+                "client1"
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseApi));

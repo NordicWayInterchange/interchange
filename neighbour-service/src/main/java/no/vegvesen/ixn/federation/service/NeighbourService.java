@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
 import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
@@ -144,17 +144,17 @@ public class NeighbourService {
 		return subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
 	}
 
-	public SubscriptionApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
+	public SubscriptionStatusPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
 		logger.info("Looking up polling Neighbour in DB.");
-		Neighbour Neighbour = neighbourRepository.findByName(ixnName);
+		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
-		if (Neighbour != null) {
+		if (neighbour != null) {
 
-			Subscription subscription = Neighbour.getSubscriptionById(subscriptionId);
-			logger.info("Neighbour {} polled for status of subscription {}.", Neighbour.getName(), subscriptionId);
+			Subscription subscription = neighbour.getSubscriptionById(subscriptionId);
+			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
+			SubscriptionStatusPollResponseApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionStatusPollResponseApi(subscription,neighbour.getName(),nodeProviderName);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
