@@ -231,7 +231,7 @@ public class NeighbourService {
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				if (neighbour.getConnectionBackoff().canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
+				if (neighbour.getConnectionBackoff().canBeContacted(backoffProperties)) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
 						logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 						postCapabilities(self, neighbour, neighbourFacade);
@@ -280,7 +280,7 @@ public class NeighbourService {
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 							try {
-								if (neighbour.getConnectionBackoff().canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
+								if (neighbour.getConnectionBackoff().canBeContacted(backoffProperties)) {
 									SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, calculatedSubscriptionForNeighbour, self.getName());
 									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
 									neighbour.setFedIn(subscriptionRequestResponse);
@@ -336,7 +336,7 @@ public class NeighbourService {
 		for (Neighbour neighbour : neighboursToPoll) {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				if (neighbour.getConnectionBackoff().canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
+				if (neighbour.getConnectionBackoff().canBeContacted(backoffProperties)) {
 					pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling(), neighbourFacade);
 				}
 			} catch (Exception e) {

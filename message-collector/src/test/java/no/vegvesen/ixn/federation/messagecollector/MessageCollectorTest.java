@@ -44,10 +44,10 @@ public class MessageCollectorTest {
     @Test
     public void testConnectionsToNeighbourBacksOffWhenNotPossibleToContact(){
         ConnectionBackoff connectionBackoffOne = mock(ConnectionBackoff.class);
-        when(connectionBackoffOne.canBeContacted(anyInt(),anyInt())).thenReturn(true);
+        when(connectionBackoffOne.canBeContacted(any())).thenReturn(true);
 
         ConnectionBackoff connectionBackoffTwo = mock(ConnectionBackoff.class);
-        when(connectionBackoffTwo.canBeContacted(anyInt(),anyInt())).thenReturn(true);
+        when(connectionBackoffTwo.canBeContacted(any())).thenReturn(true);
 
 
         Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), connectionBackoffOne);

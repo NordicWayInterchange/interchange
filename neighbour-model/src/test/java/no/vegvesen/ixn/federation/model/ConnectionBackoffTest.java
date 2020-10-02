@@ -10,28 +10,27 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class ConnectionBackoffTest {
     private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-    private int maxBackoffAttemptsBeforeUnreachable = 2;
 
     @Test
     public void failedSubscriptionRequest_firstSetsStart() {
         ConnectionBackoff connectionBackoff = new ConnectionBackoff();
-        connectionBackoff.failedConnection(maxBackoffAttemptsBeforeUnreachable);
+        connectionBackoff.failedConnection(2);
         assertThat(connectionBackoff.getBackoffStartTime()).isNotNull().isAfter(LocalDateTime.now().minusSeconds(3));
         assertThat(connectionBackoff.getBackoffAttempts()).isEqualTo(0);
         AssertionsForInterfaceTypes.assertThat(connectionBackoff.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
 
-        connectionBackoff.failedConnection(maxBackoffAttemptsBeforeUnreachable);
+        connectionBackoff.failedConnection(2);
         assertThat(connectionBackoff.getBackoffAttempts()).isEqualTo(1);
         AssertionsForInterfaceTypes.assertThat(connectionBackoff.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
 
-        connectionBackoff.failedConnection(maxBackoffAttemptsBeforeUnreachable);
+        connectionBackoff.failedConnection(2);
         assertThat(connectionBackoff.getBackoffAttempts()).isEqualTo(2);
         AssertionsForInterfaceTypes.assertThat(connectionBackoff.getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
 
-        connectionBackoff.failedConnection(maxBackoffAttemptsBeforeUnreachable);
+        connectionBackoff.failedConnection(2);
         AssertionsForInterfaceTypes.assertThat(connectionBackoff.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 
-        connectionBackoff.failedConnection(maxBackoffAttemptsBeforeUnreachable);
+        connectionBackoff.failedConnection(2);
         AssertionsForInterfaceTypes.assertThat(connectionBackoff.getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 
         connectionBackoff.okConnection();
@@ -59,7 +58,7 @@ class ConnectionBackoffTest {
         connectionBackoff.setBackoffAttempts(0);
         connectionBackoff.setBackoffStart(now);
 
-        LocalDateTime result = connectionBackoff.getNextPostAttemptTime(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength());
+        LocalDateTime result = connectionBackoff.getNextPostAttemptTime(backoffProperties);
 
         assertThat(result).isBetween(lowerLimit, upperLimit);
     }
@@ -68,15 +67,15 @@ class ConnectionBackoffTest {
     public void canBeContactedWhenConnectionStatusIsCONNECTED() {
         ConnectionBackoff connectionBackoff = new ConnectionBackoff();
         connectionBackoff.okConnection();
-        Assert.assertTrue(connectionBackoff.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength()));
+        Assert.assertTrue(connectionBackoff.canBeContacted(backoffProperties));
         Assert.assertEquals(connectionBackoff.getConnectionStatus(), ConnectionStatus.CONNECTED);
     }
 
     @Test
     public void canBeContactedWhenConnectionStatusIsFAILED() {
         ConnectionBackoff connectionBackoff = new ConnectionBackoff();
-        connectionBackoff.failedConnection(maxBackoffAttemptsBeforeUnreachable);
-        Assert.assertFalse(connectionBackoff.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength()));
+        connectionBackoff.failedConnection(4);
+        Assert.assertFalse(connectionBackoff.canBeContacted(backoffProperties));
         Assert.assertEquals(connectionBackoff.getConnectionStatus(), ConnectionStatus.FAILED);
     }
 
@@ -84,9 +83,9 @@ class ConnectionBackoffTest {
     public void canBeContactedWhenConnectionStatusIsUNREACHABLE() {
         ConnectionBackoff connectionBackoff = new ConnectionBackoff();
         connectionBackoff.setBackoffStart(LocalDateTime.now());
-        connectionBackoff.setBackoffAttempts(2);
-        connectionBackoff.failedConnection(maxBackoffAttemptsBeforeUnreachable);
-        Assert.assertFalse(connectionBackoff.canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength()));
+        connectionBackoff.setBackoffAttempts(4);
+        connectionBackoff.failedConnection(4);
+        Assert.assertFalse(connectionBackoff.canBeContacted(backoffProperties));
         Assert.assertEquals(connectionBackoff.getConnectionStatus(), ConnectionStatus.UNREACHABLE);
     }
 }
