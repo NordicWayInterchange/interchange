@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
-import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
+import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
