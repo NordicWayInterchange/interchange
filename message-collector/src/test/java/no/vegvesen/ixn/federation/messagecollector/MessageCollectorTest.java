@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,42 +44,28 @@ public class MessageCollectorTest {
 
     @Test
     public void testConnectionsToNeighbourBacksOffWhenNotPossibleToContact(){
-        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
-        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
+        ConnectionBackoff connectionBackoffOne = mock(ConnectionBackoff.class);
+        when(connectionBackoffOne.canBeContacted(anyInt(),anyInt())).thenReturn(true);
 
-        GracefulBackoffProperties backoffProperties = mock(GracefulBackoffProperties.class);
+        ConnectionBackoff connectionBackoffTwo = mock(ConnectionBackoff.class);
+        when(connectionBackoffTwo.canBeContacted(anyInt(),anyInt())).thenReturn(true);
+
+
+        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), connectionBackoffOne);
+        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(),connectionBackoffTwo);
+
+        GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+
         NeighbourService neighbourService = mock(NeighbourService.class);
         when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Arrays.asList(one,two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
         when(collectorCreator.setupCollection(one)).thenThrow(new MessageCollectorException("Expected exception"));
 
         MessageCollector collector = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
-        when(backoffProperties.canBeContacted(one)).thenReturn(true);
         collector.runSchedule();
 
-        assertThat(one.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
-        assertThat(two.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
-    }
-
-    @Test
-    public void testConnectionsToNeighbourWhenNeighbourIsPossibleToContactAgain(){
-        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
-        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
-        one.getConnectionBackoff().failedConnection(4);
-
-        assertThat(one.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.FAILED);
-
-        GracefulBackoffProperties backoffProperties = mock(GracefulBackoffProperties.class);
-        NeighbourService neighbourService = mock(NeighbourService.class);
-        when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Arrays.asList(one,two));
-        CollectorCreator collectorCreator = mock(CollectorCreator.class);
-
-        MessageCollector collector = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
-        when(backoffProperties.canBeContacted(any())).thenReturn(true);
-        collector.runSchedule();
-
-        assertThat(one.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
-        assertThat(two.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.CONNECTED);
+        verify(connectionBackoffOne,times(1)).failedConnection(anyInt());
+        verify(connectionBackoffTwo,times(1)).okConnection();
     }
 
 }

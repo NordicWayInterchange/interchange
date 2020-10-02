@@ -29,23 +29,18 @@ public class ConnectionBackoff {
     }
 
     public boolean canBeContacted(int randomShiftUpperLimit, int startIntervalLength) {
-        if (this.getConnectionStatus() == ConnectionStatus.UNREACHABLE) {
-            this.unreachableTime = LocalDateTime.now();
-            LocalDateTime interval = lastFailedConnectionAttempt.plusHours(1);
-            if(unreachableTime.isAfter(interval)){
+        switch (connectionStatus){
+            case UNREACHABLE:
+                //Calculate if allowed to connect to UNREACHABLE
+                this.unreachableTime = LocalDateTime.now();
+                LocalDateTime interval = lastFailedConnectionAttempt.plusHours(1);
+                return unreachableTime.isAfter(interval);
+            case FAILED:
+                return this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(randomShiftUpperLimit, startIntervalLength));
+            case CONNECTED:
+            default :
                 return true;
-            }
-            //Calculate if allowed to connect to UNREACHABLE
-            return false;
         }
-        if (this.getConnectionStatus() == ConnectionStatus.CONNECTED) {
-            return true;
-        }
-
-        if (this.getConnectionStatus() == ConnectionStatus.FAILED) {
-            return this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(randomShiftUpperLimit, startIntervalLength));
-        }
-        return true;
     }
 
     public void failedConnection(int maxAttemptsBeforeUnreachable) {

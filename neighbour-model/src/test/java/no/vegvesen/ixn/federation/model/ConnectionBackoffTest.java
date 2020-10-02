@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import org.assertj.core.api.AssertionsForInterfaceTypes;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class ConnectionBackoffTest {
+
     @Test
     public void failedSubscriptionRequest_firstSetsStart() {
         ConnectionBackoff connectionBackoff = new ConnectionBackoff();
@@ -60,4 +62,29 @@ class ConnectionBackoffTest {
         assertThat(result).isBetween(lowerLimit, upperLimit);
     }
 
+    @Test
+    public void canBeContactedWhenConnectionStatusIsCONNECTED() {
+        ConnectionBackoff connectionBackoff = new ConnectionBackoff();
+        connectionBackoff.okConnection();
+        Assert.assertTrue(connectionBackoff.canBeContacted(0,0));
+        Assert.assertEquals(connectionBackoff.getConnectionStatus(), ConnectionStatus.CONNECTED);
+    }
+
+    @Test
+    public void canBeContactedWhenConnectionStatusIsFAILED() {
+        ConnectionBackoff connectionBackoff = new ConnectionBackoff();
+        connectionBackoff.failedConnection(4);
+        Assert.assertFalse(connectionBackoff.canBeContacted(60000,2000));
+        Assert.assertEquals(connectionBackoff.getConnectionStatus(), ConnectionStatus.FAILED);
+    }
+
+    @Test
+    public void canBeContactedWhenConnectionStatusIsUNREACHABLE() {
+        ConnectionBackoff connectionBackoff = new ConnectionBackoff();
+        connectionBackoff.setBackoffStart(LocalDateTime.now());
+        connectionBackoff.setBackoffAttempts(4);
+        connectionBackoff.failedConnection(4);
+        Assert.assertFalse(connectionBackoff.canBeContacted(60000,2000));
+        Assert.assertEquals(connectionBackoff.getConnectionStatus(), ConnectionStatus.UNREACHABLE);
+    }
 }

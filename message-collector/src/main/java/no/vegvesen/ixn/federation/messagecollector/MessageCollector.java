@@ -58,7 +58,7 @@ public class MessageCollector {
             String name = ixn.getName();
             interchangeNames.add(name);
             if (! listeners.containsKey(name)) {
-                if(backoffProperties.canBeContacted(ixn)) {
+                if(ixn.getConnectionBackoff().canBeContacted(backoffProperties.getRandomShiftUpperLimit(), backoffProperties.getStartIntervalLength())) {
                     try {
                         logger.info("Setting up connection to ixn with name {}, port {}", name, ixn.getMessageChannelPort());
                         MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
