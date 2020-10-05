@@ -59,6 +59,7 @@ public class MessageCollectorTest {
         when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Arrays.asList(one,two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
         when(collectorCreator.setupCollection(one)).thenThrow(new MessageCollectorException("Expected exception"));
+        when(collectorCreator.setupCollection(two)).thenReturn(mock(MessageCollectorListener.class));
 
         MessageCollector collector = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
         collector.runSchedule();

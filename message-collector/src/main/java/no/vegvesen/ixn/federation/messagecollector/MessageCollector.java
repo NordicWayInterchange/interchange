@@ -10,6 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Service
@@ -53,12 +56,27 @@ public class MessageCollector {
 
     public void setupConnectionsToNewNeighbours() {
         List<Neighbour> interchanges = neighbourService.listNeighboursToConsumeMessagesFrom();
-        List<String> interchangeNames = new ArrayList<>();
-        for (Neighbour ixn : interchanges) {
+
+        interchanges.stream().filter(ixn -> !listeners.containsKey(ixn.getName()))
+                .forEach(this::setUpConnectionToNeighbour);
+
+        interchanges.stream().filter(ixn -> listeners.containsKey(ixn.getName()))
+                .forEach(ixn -> {
+                    String name = ixn.getName();
+                    if (listeners.get(name).isRunning()) {
+                        logger.debug("Listener for {} is still running with no changes", name);
+                    } else {
+                        logger.debug("Non-running listener detected, name {}",name);
+                    }
+                });
+
+
+/*        for (Neighbour ixn : interchanges) {
             String name = ixn.getName();
             interchangeNames.add(name);
             if (! listeners.containsKey(name)) {
-                if(ixn.getConnectionBackoff().canBeContacted(backoffProperties)) {
+                setUpConnectionToNeighbour(ixn);
+                *//*if(ixn.getConnectionBackoff().canBeContacted(backoffProperties)) {
                     try {
                         logger.info("Setting up connection to ixn with name {}, port {}", name, ixn.getMessageChannelPort());
                         MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
@@ -71,7 +89,7 @@ public class MessageCollector {
                 }
                 else {
                     logger.info("Too soon to connect to {}", name);
-                }
+                }*//*
             } else {
                 if (listeners.get(name).isRunning()) {
                     logger.debug("Listener for {} is still running with no changes", name);
@@ -79,9 +97,20 @@ public class MessageCollector {
                     logger.debug("Non-running listener detected, name {}",name);
                 }
             }
-        }
+        }*/
+
+        List<String> interchangeNames = interchanges.stream().map(Neighbour::getName).collect(Collectors.toList());
+
         List<String> listenerKeysToRemove = new ArrayList<>();
-        for (String ixnName : listeners.keySet()) {
+        listeners.keySet().stream().filter(ixnName -> !interchangeNames.contains(ixnName))
+                .forEach(ixnName -> {
+                    logger.info("Listener for {} is now being removed",ixnName);
+                    MessageCollectorListener toRemove = listeners.get(ixnName);
+                    toRemove.teardown();
+                    listenerKeysToRemove.add(ixnName);
+                    //listeners.remove(ixnName);
+                });
+/*        for (String ixnName : listeners.keySet()) {
             if (! interchangeNames.contains(ixnName)) {
                 logger.info("Listener for {} is now being removed",ixnName);
 
@@ -90,10 +119,30 @@ public class MessageCollector {
                 toRemove.teardown();
                 listenerKeysToRemove.add(ixnName);
             }
+        }*/
+        /*        for (String ixnName : listenerKeysToRemove) {*/
+        /*        	logger.debug("Removing {} from listeners", ixnName);*/
+        /*            listeners.remove(ixnName);*/
+        /*        }*/
+
+        listenerKeysToRemove.stream().forEach(ixnName -> listeners.remove(ixnName));
+    }
+
+    public void setUpConnectionToNeighbour(Neighbour ixn){
+        String name = ixn.getName();
+        if(ixn.getConnectionBackoff().canBeContacted(backoffProperties)) {
+            try {
+                logger.info("Setting up connection to ixn with name {}, port {}", name, ixn.getMessageChannelPort());
+                MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
+                listeners.put(name, messageListener);
+                ixn.getConnectionBackoff().okConnection();
+            } catch (MessageCollectorException e) {
+                logger.warn("Tried to create connection to {}, but failed with exception.", name, e);
+                ixn.getConnectionBackoff().failedConnection(backoffProperties.getNumberOfAttempts());
+            }
         }
-        for (String ixnName : listenerKeysToRemove) {
-        	logger.debug("Removing {} from listeners", ixnName);
-            listeners.remove(ixnName);
+        else {
+            logger.info("Too soon to connect to {}", name);
         }
     }
 

@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.model;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -33,7 +34,7 @@ public class ConnectionBackoff {
             case UNREACHABLE:
                 //Calculate if allowed to connect to UNREACHABLE
                 this.unreachableTime = LocalDateTime.now();
-                LocalDateTime interval = lastFailedConnectionAttempt.plusHours(1);
+                LocalDateTime interval = lastFailedConnectionAttempt.plus(backoffProperties.getBackoffInterval(), ChronoUnit.MILLIS);
                 return unreachableTime.isAfter(interval);
             case FAILED:
                 return this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(backoffProperties));

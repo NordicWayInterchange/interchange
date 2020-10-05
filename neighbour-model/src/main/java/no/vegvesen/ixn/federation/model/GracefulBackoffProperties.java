@@ -33,6 +33,8 @@ public class GracefulBackoffProperties {
 	 */
 	private String checkOffset = "60000";
 
+	private int backoffInterval = 3600000;
+
 	public int getStartIntervalLength() {
 		return startIntervalLength;
 	}
@@ -72,6 +74,10 @@ public class GracefulBackoffProperties {
 	public void setCheckOffset(String checkOffset) {
 		this.checkOffset = checkOffset;
 	}
+
+	public int getBackoffInterval() { return this.backoffInterval; }
+
+	public void setBackoffInterval(int backoffInterval) { this.backoffInterval = backoffInterval; }
 
 	@Override
 	public String toString() {
