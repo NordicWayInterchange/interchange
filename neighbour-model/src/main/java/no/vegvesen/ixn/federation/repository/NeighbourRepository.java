@@ -34,5 +34,5 @@ public interface NeighbourRepository extends CrudRepository<Neighbour, Integer> 
 			@Param("subscriptionStatus") SubscriptionStatus subscriptionStatus
 	);
 
-	List<Neighbour> findByConnectionStatus(ConnectionStatus connectionStatus);
+	List<Neighbour> findByConnectionBackoff_ConnectionStatus(ConnectionStatus connectionStatus);
 }

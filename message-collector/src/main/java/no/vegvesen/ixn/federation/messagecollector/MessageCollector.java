@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
+import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
@@ -9,6 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Service
@@ -16,6 +20,7 @@ public class MessageCollector {
 
     private NeighbourService neighbourService;
     private final CollectorCreator collectorCreator;
+    private GracefulBackoffProperties backoffProperties;
 
     //NOTE: This is implicitly thread safe. If more than one thread can access the listeners map, the implementation of the listener Map will have to change.
     private Map<String, MessageCollectorListener> listeners;
@@ -23,11 +28,11 @@ public class MessageCollector {
 
 
     @Autowired
-    public MessageCollector(NeighbourService service, CollectorCreator collectorCreator) {
+    public MessageCollector(NeighbourService service, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties) {
         this.neighbourService = service;
         this.collectorCreator = collectorCreator;
         this.listeners = new HashMap<>();
-
+        this.backoffProperties = backoffProperties;
     }
 
     @Scheduled(fixedRateString = "${collector.fixeddelay}")
@@ -52,18 +57,14 @@ public class MessageCollector {
     public void setupConnectionsToNewNeighbours() {
         List<Neighbour> interchanges = neighbourService.listNeighboursToConsumeMessagesFrom();
         List<String> interchangeNames = new ArrayList<>();
+
         for (Neighbour ixn : interchanges) {
             String name = ixn.getName();
             interchangeNames.add(name);
-            if (! listeners.containsKey(name)) {
-                try {
-                    logger.info("Setting up collection from ixn with name {}, port {}", ixn.getName(), ixn.getMessageChannelPort());
-                    MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
-                    listeners.put(name, messageListener);
-                } catch (MessageCollectorException e) {
-                    logger.warn("Tried to create connection to {}, but failed with exception.",name,e);
-                }
-            } else {
+            if (!listeners.containsKey(name)) {
+                setUpConnectionToNeighbour(ixn);
+            }
+            else {
                 if (listeners.get(name).isRunning()) {
                     logger.debug("Listener for {} is still running with no changes", name);
                 } else {
@@ -71,20 +72,37 @@ public class MessageCollector {
                 }
             }
         }
+
         List<String> listenerKeysToRemove = new ArrayList<>();
         for (String ixnName : listeners.keySet()) {
-            if (! interchangeNames.contains(ixnName)) {
+            if (!interchangeNames.contains(ixnName)) {
                 logger.info("Listener for {} is now being removed",ixnName);
-
                 MessageCollectorListener toRemove = listeners.get(ixnName);
-                logger.info("Tearing down {}", ixnName);
+                logger.debug("Tearing down {}", ixnName);
                 toRemove.teardown();
                 listenerKeysToRemove.add(ixnName);
             }
         }
-        for (String ixnName : listenerKeysToRemove) {
-        	logger.debug("Removing {} from listeners", ixnName);
-            listeners.remove(ixnName);
+
+        listeners.keySet().removeAll(listenerKeysToRemove);
+        listenerKeysToRemove.stream().forEach(ixnName -> listeners.remove(ixnName));
+    }
+
+    public void setUpConnectionToNeighbour(Neighbour ixn){
+        String name = ixn.getName();
+        if(ixn.getConnectionBackoff().canBeContacted(backoffProperties)) {
+            try {
+                logger.info("Setting up connection to ixn with name {}, port {}", name, ixn.getMessageChannelPort());
+                MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
+                listeners.put(name, messageListener);
+                ixn.getConnectionBackoff().okConnection();
+            } catch (MessageCollectorException e) {
+                logger.warn("Tried to create connection to {}, but failed with exception.", name, e);
+                ixn.getConnectionBackoff().failedConnection(backoffProperties.getNumberOfAttempts());
+            }
+        }
+        else {
+            logger.info("Too soon to connect to {}", name);
         }
     }
 

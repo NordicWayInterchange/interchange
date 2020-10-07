@@ -2,9 +2,8 @@ package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.junit.jupiter.api.Test;
 
@@ -17,9 +16,10 @@ public class MessageCollectorTest {
 
     @Test
     public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() {
-        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
-        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest());
+        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), new ConnectionBackoff());
+        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), new ConnectionBackoff());
 
+        GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
         NeighbourService neighbourService = mock(NeighbourService.class);
         when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Arrays.asList(one,two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
@@ -30,7 +30,7 @@ public class MessageCollectorTest {
 
         when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(sink,source));
 
-        MessageCollector collector = new MessageCollector(neighbourService, collectorCreator);
+        MessageCollector collector = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
         collector.runSchedule();
 
         verify(neighbourService).listNeighboursToConsumeMessagesFrom();
@@ -39,6 +39,33 @@ public class MessageCollectorTest {
         assertThat(collector.getListeners()).size().isEqualTo(1);
         assertThat(collector.getListeners()).containsKeys("two");
 
+    }
+
+    @Test
+    public void testConnectionsToNeighbourBacksOffWhenNotPossibleToContact(){
+        ConnectionBackoff connectionBackoffOne = mock(ConnectionBackoff.class);
+        when(connectionBackoffOne.canBeContacted(any())).thenReturn(true);
+
+        ConnectionBackoff connectionBackoffTwo = mock(ConnectionBackoff.class);
+        when(connectionBackoffTwo.canBeContacted(any())).thenReturn(true);
+
+
+        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), connectionBackoffOne);
+        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(),connectionBackoffTwo);
+
+        GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+
+        NeighbourService neighbourService = mock(NeighbourService.class);
+        when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Arrays.asList(one,two));
+        CollectorCreator collectorCreator = mock(CollectorCreator.class);
+        when(collectorCreator.setupCollection(one)).thenThrow(new MessageCollectorException("Expected exception"));
+        when(collectorCreator.setupCollection(two)).thenReturn(mock(MessageCollectorListener.class));
+
+        MessageCollector collector = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
+        collector.runSchedule();
+
+        verify(connectionBackoffOne,times(1)).failedConnection(anyInt());
+        verify(connectionBackoffTwo,times(1)).okConnection();
     }
 
 }

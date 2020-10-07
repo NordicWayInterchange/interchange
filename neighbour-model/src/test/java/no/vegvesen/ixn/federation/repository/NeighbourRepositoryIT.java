@@ -2,13 +2,7 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.ConnectionStatus;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
@@ -39,7 +33,7 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void storedInterchangeIsPossibleToFindByName() {
-		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest());
+		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), new ConnectionBackoff());
 		repository.save(firstInterchange);
 		Neighbour foundInterchange = repository.findByName("another-interchange");
 		assertThat(foundInterchange).isNotNull();
@@ -216,11 +210,11 @@ public class NeighbourRepositoryIT {
 	void connectionStatusCanBeQueried() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("some-neighbour");
-		neighbour.setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		neighbour.getConnectionBackoff().setConnectionStatus(ConnectionStatus.UNREACHABLE);
 		repository.save(neighbour);
 
-		assertThat(repository.findByConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
-		assertThat(repository.findByConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
+		assertThat(repository.findByConnectionBackoff_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
+		assertThat(repository.findByConnectionBackoff_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
 	}
 
 }
