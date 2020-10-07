@@ -56,31 +56,34 @@ public class MessageCollector {
 
     public void setupConnectionsToNewNeighbours() {
         List<Neighbour> interchanges = neighbourService.listNeighboursToConsumeMessagesFrom();
+        List<String> interchangeNames = new ArrayList<>();
 
-        interchanges.stream().filter(ixn -> !listeners.containsKey(ixn.getName()))
-                .forEach(this::setUpConnectionToNeighbour);
-
-        interchanges.stream().filter(ixn -> listeners.containsKey(ixn.getName()))
-                .forEach(ixn -> {
-                    String name = ixn.getName();
-                    if (listeners.get(name).isRunning()) {
-                        logger.debug("Listener for {} is still running with no changes", name);
-                    } else {
-                        logger.debug("Non-running listener detected, name {}",name);
-                    }
-                });
-
-        List<String> interchangeNames = interchanges.stream().map(Neighbour::getName).collect(Collectors.toList());
+        for (Neighbour ixn : interchanges) {
+            String name = ixn.getName();
+            interchangeNames.add(name);
+            if (!listeners.containsKey(name)) {
+                setUpConnectionToNeighbour(ixn);
+            }
+            else {
+                if (listeners.get(name).isRunning()) {
+                    logger.debug("Listener for {} is still running with no changes", name);
+                } else {
+                    logger.debug("Non-running listener detected, name {}",name);
+                }
+            }
+        }
 
         List<String> listenerKeysToRemove = new ArrayList<>();
-        listeners.keySet().stream().filter(ixnName -> !interchangeNames.contains(ixnName))
-                .forEach(ixnName -> {
-                    logger.info("Listener for {} is now being removed",ixnName);
-                    MessageCollectorListener toRemove = listeners.get(ixnName);
-                    toRemove.teardown();
-                    listenerKeysToRemove.add(ixnName);
-                });
+        for (String ixnName : listeners.keySet()) {
+            if (!interchangeNames.contains(ixnName)) {
+                logger.info("Listener for {} is now being removed",ixnName);
+                MessageCollectorListener toRemove = listeners.get(ixnName);
+                toRemove.teardown();
+                listenerKeysToRemove.add(ixnName);
+            }
+        }
 
+        listeners.keySet().removeAll(listenerKeysToRemove);
         listenerKeysToRemove.stream().forEach(ixnName -> listeners.remove(ixnName));
     }
 
