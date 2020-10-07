@@ -78,6 +78,7 @@ public class MessageCollector {
             if (!interchangeNames.contains(ixnName)) {
                 logger.info("Listener for {} is now being removed",ixnName);
                 MessageCollectorListener toRemove = listeners.get(ixnName);
+                logger.debug("Tearing down {}", ixnName);
                 toRemove.teardown();
                 listenerKeysToRemove.add(ixnName);
             }
