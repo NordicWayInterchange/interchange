@@ -100,7 +100,7 @@ public class NeighbourService {
 			logger.info("Returning empty subscription request.");
 			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
 
-			return  new SubscriptionExchangeResponseApi(neighbour.getName(),Collections.emptySet());
+			return new SubscriptionExchangeResponseApi(neighbour.getName(),Collections.emptySet());
 		} else if (!persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			// empty subscription request - tear down existing subscription.
 			logger.info("Received empty subscription request.");
@@ -137,7 +137,7 @@ public class NeighbourService {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
 		logger.info("Saving updated Neighbour: {}", neighbour.toString());
-		return subscriptionRequestTransformer.neighbourToSubscriptionExchangeResponseApi(neighbour);
+		return subscriptionTransformer.subscriptionsToSubscriptionExchangeResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
 	}
 
 	public SubscriptionStatusPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
