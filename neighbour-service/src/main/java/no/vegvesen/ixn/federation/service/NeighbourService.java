@@ -1,10 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
@@ -86,8 +82,8 @@ public class NeighbourService {
 		return neighbourSubscriptionRequest;
 	}
 
-	public SubscriptionRequestApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
-		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest, SubscriptionRequestStatus.REQUESTED);
+	public SubscriptionExchangeResponseApi incomingSubscriptionRequest(SubscriptionExchangeRequestApi neighbourSubscriptionRequest) {
+		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionExchangeRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
 		logger.info("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
 		logger.info("Looking up neighbour in database.");
@@ -104,7 +100,7 @@ public class NeighbourService {
 			logger.info("Returning empty subscription request.");
 			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
 
-			return new SubscriptionRequestApi(neighbour.getName(), Collections.emptySet());
+			return  new SubscriptionExchangeResponseApi(neighbour.getName(),Collections.emptySet());
 		} else if (!persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			// empty subscription request - tear down existing subscription.
 			logger.info("Received empty subscription request.");
@@ -141,7 +137,7 @@ public class NeighbourService {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
 		logger.info("Saving updated Neighbour: {}", neighbour.toString());
-		return subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
+		return subscriptionRequestTransformer.neighbourToSubscriptionExchangeResponseApi(neighbour);
 	}
 
 	public SubscriptionStatusPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {

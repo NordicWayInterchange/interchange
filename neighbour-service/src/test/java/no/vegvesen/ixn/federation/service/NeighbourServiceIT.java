@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -65,13 +63,14 @@ public class NeighbourServiceIT {
 				new SubscriptionRequest(SubscriptionRequestStatus.EMPTY,Collections.emptySet()));
 		repository.save(neighbour);
 
-		SubscriptionRequestApi subscriptionRequestApi = service.incomingSubscriptionRequest(
-				new SubscriptionRequestApi("myNeighbour",
-						Collections.singleton(
-								new SubscriptionApi("originatingCountry = 'NO'", null, SubscriptionStatus.REQUESTED))));
-		Set<SubscriptionApi> subscriptions = subscriptionRequestApi.getSubscriptions();
+
+		SubscriptionExchangeResponseApi responseApi = service.incomingSubscriptionRequest(
+				new SubscriptionExchangeRequestApi("myNeighbour",
+						Collections.singleton(new SubscriptionExchangeSubscriptionRequestApi("originatingCountry = 'NO'")))
+		);
+		Set<SubscriptionExchangeSubscriptionResponseApi> subscriptions = responseApi.getSubscriptions();
 		assertThat(subscriptions.size()).isEqualTo(1);
-		SubscriptionApi subscriptionApi = subscriptions.stream().findFirst().get();
+		SubscriptionExchangeSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
 		assertThat(subscriptionApi.getPath()).isNotNull();
 	}
 

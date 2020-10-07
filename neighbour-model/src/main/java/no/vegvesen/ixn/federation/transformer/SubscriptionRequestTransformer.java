@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.Subscription;
@@ -59,4 +61,13 @@ public class SubscriptionRequestTransformer {
 		return new SubscriptionRequest(status, convertAllSubscriptionApisToSubscriptions(subscriptionRequestApi.getSubscriptions()));
 	}
 
+	public SubscriptionRequest subscriptionExchangeRequestApiToSubscriptionRequest(SubscriptionExchangeRequestApi request) {
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.subscriptionExchangeSubscriptionRequestApiToSubscriptions(request.getSubscriptions()));
+		return subscriptionRequest;
+	}
+
+
+	public SubscriptionExchangeResponseApi neighbourToSubscriptionExchangeResponseApi(Neighbour neighbour) {
+		return subscriptionTransformer.subscriptionsToSubscriptionExchangeResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
+	}
 }

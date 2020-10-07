@@ -78,9 +78,9 @@ class NeighbourServiceTest {
 	@Test
 	void postingSubscriptionRequestFromUnseenNeighbourReturnsException() {
 		// Create incoming subscription request api objcet
-		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
-		ericsson.setName("ericsson");
-		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", SubscriptionStatus.REQUESTED)));
+		SubscriptionExchangeRequestApi ericsson = new SubscriptionExchangeRequestApi("ericsson",Collections.singleton(
+				new SubscriptionExchangeSubscriptionRequestApi("originatingCountry = 'FI'")
+		));
 
 		// Mock saving Neighbour to Neighbour repository
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
@@ -136,19 +136,21 @@ class NeighbourServiceTest {
 	}
 
 	@Test
-	void postingSubscriptionRequestReturnsStatusAccepted() {
+	void postingSubscriptionRequestReturnsStatusRequested() {
 
 		// Create incoming subscription request api objcet
-		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
-		ericsson.setName("ericsson");
-		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", SubscriptionStatus.REQUESTED)));
+		SubscriptionExchangeRequestApi ericsson = new SubscriptionExchangeRequestApi("ericsson", Collections.singleton(
+				new SubscriptionExchangeSubscriptionRequestApi("originatingCountry = 'FI'")
+		));
 
 		// Mock saving Neighbour to Neighbour repository
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
+		firstSubscription.setId(1);
 		firstSubscription.setPath("/ericsson/subscriptions/1");
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(firstSubscription);
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
+		returnedSubscriptionRequest.setSubreq_id(1);
 		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
 
 		Mockito.doReturn(updatedNeighbour).when(neighbourRepository).save(ArgumentMatchers.any(Neighbour.class));

@@ -1,12 +1,9 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeSubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -43,10 +40,21 @@ public class SubscriptionTransformer {
 		SubscriptionStatusApi status = subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			response.setMessageBrokerUrl("amqps://" + thisNodeName);
+			response.setMessageBrokerUrl("amqps://" + thisNodeName); //TODO pass the actual URL from SelfService, let it create the url internally
 			response.setQueueName(neighbourName);
 		}
 		return response;
+	}
+
+
+	public Set<Subscription> subscriptionExchangeSubscriptionRequestApiToSubscriptions(Set<SubscriptionExchangeSubscriptionRequestApi> request) {
+		ArrayList<Subscription> subscriptions = new ArrayList<>();
+		for (SubscriptionExchangeSubscriptionRequestApi subscriptionRequestApi : request) {
+			Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(), SubscriptionStatus.REQUESTED);
+			subscriptions.add(subscription);
+		}
+		return new HashSet<>(subscriptions);
+
 	}
 
 	public SubscriptionExchangeResponseApi subscriptionsToSubscriptionExchangeResponseApi(String name, Set<Subscription> subscriptions) {
@@ -57,15 +65,22 @@ public class SubscriptionTransformer {
 	private Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionToSubscriptionExchangeSubscriptionResponseApi(Set<Subscription> subscriptions) {
 		List<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponses = new ArrayList<>();
 		for (Subscription s : subscriptions) {
-			SubscriptionExchangeSubscriptionResponseApi responseApi = new SubscriptionExchangeSubscriptionResponseApi(s.getId().toString(),s.getSelector(),s.getPath(), subscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()));
+			SubscriptionExchangeSubscriptionResponseApi responseApi = new SubscriptionExchangeSubscriptionResponseApi(
+					s.getId().toString(),
+					s.getSelector(),
+					s.getPath(),
+					subscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()));
 			subscriptionResponses.add(responseApi);
 		}
 		return new HashSet<>(subscriptionResponses);
 
 	}
-	//TODO what about statuses that are not valid in the api?
 
+	//TODO what about statuses that are not valid in the api?
 	private SubscriptionStatusApi subscriptionStatusToSubscriptionStatusApi(SubscriptionStatus subscriptionStatus) {
+		if (subscriptionStatus.equals(SubscriptionStatus.ACCEPTED)) {
+			return SubscriptionStatusApi.REQUESTED;
+		}
 		return SubscriptionStatusApi.valueOf(subscriptionStatus.name());
 	}
 }

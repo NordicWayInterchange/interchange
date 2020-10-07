@@ -80,4 +80,8 @@ public class SubscriptionRequest {
 	public void setSuccessfulRequest(LocalDateTime successfulRequest) {
 		this.successfulRequest = successfulRequest;
 	}
+
+	public void setSubreq_id(Integer subreq_id) {
+		this.subreq_id = subreq_id;
+	}
 }
