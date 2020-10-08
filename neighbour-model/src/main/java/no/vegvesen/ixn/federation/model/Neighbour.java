@@ -161,7 +161,8 @@ public class Neighbour {
 				", subscriptionRequest=" + subscriptionRequest +
 				", fedIn=" + fedIn +
 				", lastUpdated=" + lastUpdated +
-				", connectionBackoff=" + messageConnectionBackoff +
+				", messageConnectionBackoff=" + messageConnectionBackoff +
+				", controlConnectionBackoff=" + controlConnectionBackoff +
 				", messageChannelPort='" + messageChannelPort +
 				", controlChannelPort='" + controlChannelPort +
 				'}';

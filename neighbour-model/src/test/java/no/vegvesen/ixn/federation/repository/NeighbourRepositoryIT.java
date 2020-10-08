@@ -207,7 +207,7 @@ public class NeighbourRepositoryIT {
 	}
 
 	@Test
-	void connectionStatusCanBeQueried() {
+	public void messageConnectionStatusCanBeQueried() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("some-neighbour");
 		neighbour.getMessageConnectionBackoff().setConnectionStatus(ConnectionStatus.UNREACHABLE);
@@ -215,6 +215,17 @@ public class NeighbourRepositoryIT {
 
 		assertThat(repository.findByMessageConnectionBackoff_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
 		assertThat(repository.findByMessageConnectionBackoff_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
+	}
+
+	@Test
+	public void controlConnectionStatusCanBeQueried() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("some-neighbour");
+		neighbour.getControlConnectionBackoff().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		repository.save(neighbour);
+
+		assertThat(repository.findByControlConnectionBackoff_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
+		assertThat(repository.findByControlConnectionBackoff_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
 	}
 
 }
