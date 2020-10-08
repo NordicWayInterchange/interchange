@@ -33,7 +33,7 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void storedInterchangeIsPossibleToFindByName() {
-		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), new ConnectionBackoff());
+		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), new ConnectionBackoff(), new ConnectionBackoff());
 		repository.save(firstInterchange);
 		Neighbour foundInterchange = repository.findByName("another-interchange");
 		assertThat(foundInterchange).isNotNull();
@@ -210,11 +210,11 @@ public class NeighbourRepositoryIT {
 	void connectionStatusCanBeQueried() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("some-neighbour");
-		neighbour.getConnectionBackoff().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		neighbour.getMessageConnectionBackoff().setConnectionStatus(ConnectionStatus.UNREACHABLE);
 		repository.save(neighbour);
 
-		assertThat(repository.findByConnectionBackoff_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
-		assertThat(repository.findByConnectionBackoff_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
+		assertThat(repository.findByMessageConnectionBackoff_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
+		assertThat(repository.findByMessageConnectionBackoff_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
 	}
 
 }

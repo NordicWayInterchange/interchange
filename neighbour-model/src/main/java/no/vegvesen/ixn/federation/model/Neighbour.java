@@ -47,8 +47,12 @@ public class Neighbour {
 	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "con_back", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_connection_backoff"))
-	private ConnectionBackoff connectionBackoff = new ConnectionBackoff();
+	@JoinColumn(name = "mes_back", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_message_connection_backoff"))
+	private ConnectionBackoff messageConnectionBackoff = new ConnectionBackoff();
+
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "con_back", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_control_connection_backoff"))
+	private ConnectionBackoff controlConnectionBackoff = new ConnectionBackoff();
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
@@ -65,12 +69,13 @@ public class Neighbour {
 		this.fedIn = fedIn;
 	}
 
-	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn, ConnectionBackoff connectionBackoff) {
+	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn, ConnectionBackoff messageConnectionBackoff, ConnectionBackoff controlConnectionBackoff) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.subscriptionRequest = subscriptions;
 		this.fedIn = fedIn;
-		this.connectionBackoff = connectionBackoff;
+		this.messageConnectionBackoff = messageConnectionBackoff;
+		this.controlConnectionBackoff = controlConnectionBackoff;
 	}
 
 	public String getName() {
@@ -156,7 +161,7 @@ public class Neighbour {
 				", subscriptionRequest=" + subscriptionRequest +
 				", fedIn=" + fedIn +
 				", lastUpdated=" + lastUpdated +
-				", connectionBackoff=" + connectionBackoff +
+				", connectionBackoff=" + messageConnectionBackoff +
 				", messageChannelPort='" + messageChannelPort +
 				", controlChannelPort='" + controlChannelPort +
 				'}';
@@ -304,11 +309,17 @@ public class Neighbour {
 		this.neighbour_id = neighbour_id;
 	}
 
-	public ConnectionBackoff getConnectionBackoff() {
-		return connectionBackoff;
+	public ConnectionBackoff getMessageConnectionBackoff() {
+		return messageConnectionBackoff;
 	}
 
-	public void setConnectionBackoff(ConnectionBackoff connectionBackoff) {
-		this.connectionBackoff = connectionBackoff;
+	public void setMessageConnectionBackoff(ConnectionBackoff connectionBackoff) {
+		this.messageConnectionBackoff = connectionBackoff;
+	}
+
+	public ConnectionBackoff getControlConnectionBackoff() { return controlConnectionBackoff; }
+
+	public void setControlConnectionBackoff(ConnectionBackoff controlConnectionBackoff) {
+		this.controlConnectionBackoff = controlConnectionBackoff;
 	}
 }

@@ -10,9 +10,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @Service
@@ -85,20 +82,19 @@ public class MessageCollector {
         }
 
         listeners.keySet().removeAll(listenerKeysToRemove);
-        listenerKeysToRemove.stream().forEach(ixnName -> listeners.remove(ixnName));
     }
 
     public void setUpConnectionToNeighbour(Neighbour ixn){
         String name = ixn.getName();
-        if(ixn.getConnectionBackoff().canBeContacted(backoffProperties)) {
+        if(ixn.getMessageConnectionBackoff().canBeContacted(backoffProperties)) {
             try {
                 logger.info("Setting up connection to ixn with name {}, port {}", name, ixn.getMessageChannelPort());
                 MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
                 listeners.put(name, messageListener);
-                ixn.getConnectionBackoff().okConnection();
+                ixn.getMessageConnectionBackoff().okConnection();
             } catch (MessageCollectorException e) {
                 logger.warn("Tried to create connection to {}, but failed with exception.", name, e);
-                ixn.getConnectionBackoff().failedConnection(backoffProperties.getNumberOfAttempts());
+                ixn.getMessageConnectionBackoff().failedConnection(backoffProperties.getNumberOfAttempts());
             }
         }
         else {

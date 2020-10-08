@@ -22,6 +22,7 @@ public class ConnectionBackoff {
 
     private LocalDateTime backoffStart;
     private int backoffAttempts = 0;
+    @Enumerated(EnumType.STRING)
     private ConnectionStatus connectionStatus = ConnectionStatus.CONNECTED;
     private LocalDateTime unreachableTime;
     private LocalDateTime lastFailedConnectionAttempt;
