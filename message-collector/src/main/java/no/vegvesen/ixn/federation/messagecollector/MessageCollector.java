@@ -86,15 +86,15 @@ public class MessageCollector {
 
     public void setUpConnectionToNeighbour(Neighbour ixn){
         String name = ixn.getName();
-        if(ixn.getMessageConnectionBackoff().canBeContacted(backoffProperties)) {
+        if(ixn.getMessageConnection().canBeContacted(backoffProperties)) {
             try {
                 logger.info("Setting up connection to ixn with name {}, port {}", name, ixn.getMessageChannelPort());
                 MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
                 listeners.put(name, messageListener);
-                ixn.getMessageConnectionBackoff().okConnection();
+                ixn.getMessageConnection().okConnection();
             } catch (MessageCollectorException e) {
                 logger.warn("Tried to create connection to {}, but failed with exception.", name, e);
-                ixn.getMessageConnectionBackoff().failedConnection(backoffProperties.getNumberOfAttempts());
+                ixn.getMessageConnection().failedConnection(backoffProperties.getNumberOfAttempts());
             }
         }
         else {
