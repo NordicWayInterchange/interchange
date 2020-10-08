@@ -29,7 +29,6 @@ import org.assertj.core.util.Lists;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -149,7 +148,7 @@ class NeighbourServiceTest {
 	}
 
 	@Test
-	@Disabled //TODO IncomingSubscriptionRequest needs to be worked a bit on. Right now, it's difficult to test this method using mocks!
+	//TODO IncomingSubscriptionRequest needs to be worked a bit on. Right now, it's difficult to test this method using mocks!
 	void postingSubscriptionRequestReturnsStatusRequested() {
 
 		// Create incoming subscription request api objcet
@@ -166,7 +165,19 @@ class NeighbourServiceTest {
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
 
-		Mockito.doReturn(updatedNeighbour).when(neighbourRepository).save(ArgumentMatchers.any(Neighbour.class));
+		//Mockito.doReturn(updatedNeighbour).when(neighbourRepository).save(ArgumentMatchers.any(Neighbour.class));
+		Mockito.when(neighbourRepository.save(updatedNeighbour)).thenAnswer(
+				a -> {
+					Object argument = a.getArgument(0);
+					Neighbour neighbour = (Neighbour)argument;
+					int i = 0;
+					for (Subscription subscription : neighbour.getSubscriptionRequest().getSubscriptions()) {
+						subscription.setId(i);
+						i++;
+					}
+					return neighbour;
+				}
+		);
 		Mockito.doReturn(updatedNeighbour).when(neighbourRepository).findByName(ArgumentMatchers.anyString());
 
 		// Mock response from DNS facade on Server
