@@ -57,17 +57,23 @@ public class SubscriptionRequestTransformer {
 		return new SubscriptionRequestApi(name,convertAllSubscriptionsToSubscriptionApis(subscriptions));
 	}
 
+	public SubscriptionExchangeRequestApi subscriptionRequestToSubscriptionExchangeRequestApi(String selfName, Set<Subscription> subscriptions) {
+	    SubscriptionExchangeRequestApi requestApi = new SubscriptionExchangeRequestApi(selfName,
+				subscriptionTransformer.subscriptionsToSubscriptionExchangeSubscriptionRequestApi(subscriptions)
+		);
+	    return requestApi;
+	}
+
 	public SubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, SubscriptionRequestStatus status) {
 		return new SubscriptionRequest(status, convertAllSubscriptionApisToSubscriptions(subscriptionRequestApi.getSubscriptions()));
+	}
+
+	public SubscriptionRequest subscriptionExchangeResponseApiToSubscriptionRequest(SubscriptionExchangeResponseApi responseApi, SubscriptionRequestStatus status) {
+		return new SubscriptionRequest(status,subscriptionTransformer.subscriptionExchangeSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions()));
 	}
 
 	public SubscriptionRequest subscriptionExchangeRequestApiToSubscriptionRequest(SubscriptionExchangeRequestApi request) {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.subscriptionExchangeSubscriptionRequestApiToSubscriptions(request.getSubscriptions()));
 		return subscriptionRequest;
-	}
-
-
-	public SubscriptionExchangeResponseApi neighbourToSubscriptionExchangeResponseApi(Neighbour neighbour) {
-		return subscriptionTransformer.subscriptionsToSubscriptionExchangeResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
 	}
 }

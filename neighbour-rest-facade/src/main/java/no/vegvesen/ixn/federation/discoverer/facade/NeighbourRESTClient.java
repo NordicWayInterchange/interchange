@@ -4,8 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
@@ -91,19 +92,20 @@ public class NeighbourRESTClient {
 		logger.debug("{} Headers: {}", logPrefix, entity.getHeaders().toString());
 	}
 
-	SubscriptionRequestApi doPostSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, String controlChannelUrl, String neighbourName) {
+	SubscriptionExchangeResponseApi doPostSubscriptionRequest(SubscriptionExchangeRequestApi subscriptionRequestApi, String controlChannelUrl, String neighbourName) {
         // Post representation to neighbour
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
+        HttpEntity<SubscriptionExchangeRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
         logHttpEntity(entity, "Posting");
 
         // Posting and receiving response
 
-        SubscriptionRequestApi responseApi;
+        //SubscriptionRequestApi responseApi;
+        SubscriptionExchangeResponseApi responseApi;
         try {
-            ResponseEntity<SubscriptionRequestApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, SubscriptionRequestApi.class);
+            ResponseEntity<SubscriptionExchangeResponseApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, SubscriptionExchangeResponseApi.class);
             logHttpEntity(response, "Received");
 
             if (response.getBody() == null) {
@@ -141,10 +143,10 @@ public class NeighbourRESTClient {
         return responseApi;
     }
 
-    SubscriptionApi doPollSubscriptionStatus(String url, String name) {
-        SubscriptionApi subscriptionApi;
+    SubscriptionStatusPollResponseApi doPollSubscriptionStatus(String url, String name) {
+        SubscriptionStatusPollResponseApi subscriptionApi;
         try {
-            ResponseEntity<SubscriptionApi> response = restTemplate.getForEntity(url, SubscriptionApi.class);
+            ResponseEntity<SubscriptionStatusPollResponseApi> response = restTemplate.getForEntity(url, SubscriptionStatusPollResponseApi.class);
             logHttpEntity(response, "Poll subscription");
             subscriptionApi = response.getBody();
 

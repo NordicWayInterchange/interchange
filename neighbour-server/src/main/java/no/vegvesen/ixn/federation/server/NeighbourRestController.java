@@ -38,9 +38,8 @@ public class NeighbourRestController {
 		this.selfService = selfService;
 	}
 
-	//TODO change to new api objects
 	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({@ApiResponse(code = 202, message = "Successfully requested a subscription", response = SubscriptionRequestApi.class),
+	@ApiResponses({@ApiResponse(code = 202, message = "Successfully requested a subscription", response = SubscriptionExchangeResponseApi.class),
 			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)
 	})
 	@ResponseStatus(HttpStatus.ACCEPTED)

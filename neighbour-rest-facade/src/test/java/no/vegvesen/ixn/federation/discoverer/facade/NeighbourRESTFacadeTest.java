@@ -142,6 +142,7 @@ public class NeighbourRESTFacadeTest {
 		assertThat(remoteServerResponse.getPropertyValueAsInteger(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIviType());
 	}
 
+	//TODO does this test actually test anything??
 	@Test
 	public void successfulPostOfSubscriptionRequestReturnsSubscriptionRequest() throws Exception{
 

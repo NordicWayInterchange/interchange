@@ -62,6 +62,15 @@ public class SubscriptionTransformer {
 	    return new SubscriptionExchangeResponseApi(name,subscriptionResponseApis);
 	}
 
+	public Set<SubscriptionExchangeSubscriptionRequestApi> subscriptionsToSubscriptionExchangeSubscriptionRequestApi(Set<Subscription> subscriptions) {
+		List<SubscriptionExchangeSubscriptionRequestApi> subscriptionRequestApis = new ArrayList<>();
+		for (Subscription s : subscriptions) {
+			SubscriptionExchangeSubscriptionRequestApi subscriptionRequestApi = new SubscriptionExchangeSubscriptionRequestApi(s.getSelector());
+			subscriptionRequestApis.add(subscriptionRequestApi);
+		}
+		return new HashSet<>(subscriptionRequestApis);
+	}
+
 	private Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionToSubscriptionExchangeSubscriptionResponseApi(Set<Subscription> subscriptions) {
 		List<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponses = new ArrayList<>();
 		for (Subscription s : subscriptions) {
@@ -82,5 +91,25 @@ public class SubscriptionTransformer {
 			return SubscriptionStatusApi.REQUESTED;
 		}
 		return SubscriptionStatusApi.valueOf(subscriptionStatus.name());
+	}
+
+	public Set<Subscription> subscriptionExchangeSubscriptionResponseApiToSubscriptions(Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponseApis) {
+		List<Subscription> subscriptions = new ArrayList<>();
+		for (SubscriptionExchangeSubscriptionResponseApi s : subscriptionResponseApis) {
+			Subscription subscription = new Subscription(s.getSelector(), subscriptionStatusApiToSubscriptionStatus(s.getStatus()));
+			subscription.setPath(s.getPath());
+			subscriptions.add(subscription);
+		}
+		return new HashSet<>(subscriptions);
+	}
+
+	private SubscriptionStatus subscriptionStatusApiToSubscriptionStatus(SubscriptionStatusApi status) {
+	    return SubscriptionStatus.valueOf(status.name());
+	}
+
+	public Subscription subscriptionStatusPollApiToSubscription(SubscriptionStatusPollResponseApi subscriptionApi) {
+		Subscription subscription = new Subscription(subscriptionApi.getSelector(), subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
+		subscription.setPath(subscriptionApi.getPath());
+		return subscription;
 	}
 }
