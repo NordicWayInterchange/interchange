@@ -84,7 +84,7 @@ public class NeighbourTest {
 		fedIn.setSuccessfulRequest(now);
 		Capabilities capabilities = new Capabilities();
 		capabilities.setLastCapabilityExchange(now.minusHours(1));
-		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn, new ConnectionBackoff());
+		Neighbour neighbour = new Neighbour("nice-neighbour", capabilities, null, fedIn, new Connection(), new Connection());
 		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(Optional.of(now))).isFalse();
 	}
 

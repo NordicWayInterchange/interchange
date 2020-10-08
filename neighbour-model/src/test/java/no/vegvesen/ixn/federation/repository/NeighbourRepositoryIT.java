@@ -17,7 +17,6 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class NeighbourRepositoryIT {
@@ -33,7 +32,7 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void storedInterchangeIsPossibleToFindByName() {
-		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), new ConnectionBackoff());
+		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), new Connection(), new Connection());
 		repository.save(firstInterchange);
 		Neighbour foundInterchange = repository.findByName("another-interchange");
 		assertThat(foundInterchange).isNotNull();
@@ -207,14 +206,25 @@ public class NeighbourRepositoryIT {
 	}
 
 	@Test
-	void connectionStatusCanBeQueried() {
+	public void messageConnectionStatusCanBeQueried() {
 		Neighbour neighbour = new Neighbour();
-		neighbour.setName("some-neighbour");
-		neighbour.getConnectionBackoff().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		neighbour.setName("some-neighbour1");
+		neighbour.getMessageConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
 		repository.save(neighbour);
 
-		assertThat(repository.findByConnectionBackoff_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
-		assertThat(repository.findByConnectionBackoff_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
+		assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
+		assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
+	}
+
+	@Test
+	public void controlConnectionStatusCanBeQueried() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("some-neighbour2");
+		neighbour.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		repository.save(neighbour);
+
+		assertThat(repository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
+		assertThat(repository.findByControlConnection_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
 	}
 
 }

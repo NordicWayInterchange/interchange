@@ -174,8 +174,8 @@ public class NeighbourServiceDiscoveryTest {
 	public void gracefulBackoffPostOfCapabilityDoesNotHappenBeforeAllowedPostTime(){
 		Neighbour ericsson = createNeighbour();
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
-		ericsson.getConnectionBackoff().setBackoffStart(futureTime);
-		ericsson.getConnectionBackoff().setConnectionStatus(ConnectionStatus.FAILED);
+		ericsson.getControlConnection().setBackoffStart(futureTime);
+		ericsson.getControlConnection().setConnectionStatus(ConnectionStatus.FAILED);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
@@ -187,8 +187,8 @@ public class NeighbourServiceDiscoveryTest {
 	public void gracefulBackoffPostOfSubscriptionRequestDoesNotHappenBeforeAllowedTime(){
 		Neighbour ericsson = createNeighbour();
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
-		ericsson.getConnectionBackoff().setBackoffStart(futureTime);
-		ericsson.getConnectionBackoff().setConnectionStatus(ConnectionStatus.FAILED);
+		ericsson.getControlConnection().setBackoffStart(futureTime);
+		ericsson.getControlConnection().setConnectionStatus(ConnectionStatus.FAILED);
 		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(invocationOnMock -> {
@@ -211,7 +211,7 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription ericssonSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.FAILED);
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(ericssonSubscription));
 		ericsson.setFedIn(subReq);
-		ericsson.getConnectionBackoff().setBackoffStart(LocalDateTime.now().plusSeconds(10));
+		ericsson.getControlConnection().setBackoffStart(LocalDateTime.now().plusSeconds(10));
 		neighbourService.pollSubscriptions(neighbourFacade);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
@@ -228,7 +228,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(ericssonCapabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
-		ericsson.getConnectionBackoff().setBackoffStart(pastTime);
+		ericsson.getControlConnection().setBackoffStart(pastTime);
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
@@ -242,7 +242,7 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour ericsson = createNeighbour();
 		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourFacade).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString() );
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
-		ericsson.getConnectionBackoff().setBackoffStart(pastTime);
+		ericsson.getControlConnection().setBackoffStart(pastTime);
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		doReturn(self).when(selfService).fetchSelf();
 		Capabilities fiCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI"));
@@ -268,7 +268,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(ericssonSubscription).when(neighbourFacade).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
-		ericsson.getConnectionBackoff().setBackoffStart(pastTime);
+		ericsson.getControlConnection().setBackoffStart(pastTime);
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
@@ -280,29 +280,29 @@ public class NeighbourServiceDiscoveryTest {
 	@Test
 	public void failedPostOfCapabilitiesInBackoffIncreasesNumberOfBackoffAttempts(){
 		Neighbour ericsson = createNeighbour();
-		ericsson.getConnectionBackoff().setBackoffAttempts(0);
+		ericsson.getControlConnection().setBackoffAttempts(0);
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(5);
 
-		ericsson.getConnectionBackoff().setBackoffStart(pastTime);
+		ericsson.getControlConnection().setBackoffStart(pastTime);
 		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
-		assertThat(ericsson.getConnectionBackoff().getBackoffAttempts()).isEqualTo(1);
+		assertThat(ericsson.getControlConnection().getBackoffAttempts()).isEqualTo(1);
 	}
 
 	@Test
 	public void unsuccessfulPostOfCapabilitiesToNodeWithTooManyPreviousBackoffAttemptsMarksCapabilitiesUnreachable(){
 		Neighbour ericsson = createNeighbour();
-		ericsson.getConnectionBackoff().setBackoffAttempts(4);
+		ericsson.getControlConnection().setBackoffAttempts(4);
 
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(getDatexNoDataType()));
 		ericsson.setCapabilities(ericssonCapabilities);
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
-		ericsson.getConnectionBackoff().setBackoffStart(pastTime);
+		ericsson.getControlConnection().setBackoffStart(pastTime);
 		doThrow(new CapabilityPostException("Exception from mock")).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 
 		doReturn(self).when(selfService).fetchSelf();
@@ -310,7 +310,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
-		assertThat(ericsson.getConnectionBackoff().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
+		assertThat(ericsson.getControlConnection().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 		verify(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 
 	}
@@ -493,16 +493,16 @@ public class NeighbourServiceDiscoveryTest {
 	void unreachableNeighboursWillReceiveCapabilityExchangeWhenRetryingUnreachableNeighbours() {
 		Neighbour n1 = new Neighbour();
 		n1.setName("neighbour-one");
-		n1.getConnectionBackoff().setConnectionStatus(ConnectionStatus.UNREACHABLE);
-		n1.getConnectionBackoff().setBackoffStart(LocalDateTime.now().minusDays(2));
+		n1.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		n1.getControlConnection().setBackoffStart(LocalDateTime.now().minusDays(2));
 
 		Neighbour n2 = new Neighbour();
 		n2.setName("neighbour-two");
-		n2.getConnectionBackoff().setConnectionStatus(ConnectionStatus.UNREACHABLE);
-		n2.getConnectionBackoff().setBackoffStart(LocalDateTime.now().minusDays(2));
+		n2.getControlConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+		n2.getControlConnection().setBackoffStart(LocalDateTime.now().minusDays(2));
 
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
-		when(neighbourRepository.findByConnectionBackoff_ConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
+		when(neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
 		when(neighbourFacade.postCapabilitiesToCapabilities(any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
 
 		neighbourService.retryUnreachable(self, neighbourFacade);

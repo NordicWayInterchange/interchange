@@ -11,22 +11,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Entity
-public class ConnectionBackoff {
+public class Connection {
 
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "con_back")
     private Integer id;
 
-    private static Logger logger = LoggerFactory.getLogger(ConnectionBackoff.class);
+    private static Logger logger = LoggerFactory.getLogger(Connection.class);
 
     private LocalDateTime backoffStart;
     private int backoffAttempts = 0;
+    @Enumerated(EnumType.STRING)
     private ConnectionStatus connectionStatus = ConnectionStatus.CONNECTED;
     private LocalDateTime unreachableTime;
     private LocalDateTime lastFailedConnectionAttempt;
 
-    public ConnectionBackoff(){
+    public Connection(){
     }
 
     public boolean canBeContacted(GracefulBackoffProperties backoffProperties) {

@@ -47,8 +47,12 @@ public class Neighbour {
 	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "con_back", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_connection_backoff"))
-	private ConnectionBackoff connectionBackoff = new ConnectionBackoff();
+	@JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_message_connection"))
+	private Connection messageConnection = new Connection();
+
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "con_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_control_connection"))
+	private Connection controlConnection = new Connection();
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
@@ -65,12 +69,13 @@ public class Neighbour {
 		this.fedIn = fedIn;
 	}
 
-	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn, ConnectionBackoff connectionBackoff) {
+	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn, Connection messageConnection, Connection controlConnection) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.subscriptionRequest = subscriptions;
 		this.fedIn = fedIn;
-		this.connectionBackoff = connectionBackoff;
+		this.messageConnection = messageConnection;
+		this.controlConnection = controlConnection;
 	}
 
 	public String getName() {
@@ -156,7 +161,8 @@ public class Neighbour {
 				", subscriptionRequest=" + subscriptionRequest +
 				", fedIn=" + fedIn +
 				", lastUpdated=" + lastUpdated +
-				", connectionBackoff=" + connectionBackoff +
+				", messageConnection=" + messageConnection +
+				", controlConnection=" + controlConnection +
 				", messageChannelPort='" + messageChannelPort +
 				", controlChannelPort='" + controlChannelPort +
 				'}';
@@ -304,11 +310,17 @@ public class Neighbour {
 		this.neighbour_id = neighbour_id;
 	}
 
-	public ConnectionBackoff getConnectionBackoff() {
-		return connectionBackoff;
+	public Connection getMessageConnection() {
+		return messageConnection;
 	}
 
-	public void setConnectionBackoff(ConnectionBackoff connectionBackoff) {
-		this.connectionBackoff = connectionBackoff;
+	public void setMessageConnection(Connection messageConnection) {
+		this.messageConnection = messageConnection;
+	}
+
+	public Connection getControlConnection() { return controlConnection; }
+
+	public void setControlConnection(Connection controlConnection) {
+		this.controlConnection = controlConnection;
 	}
 }

@@ -16,8 +16,8 @@ public class MessageCollectorTest {
 
     @Test
     public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() {
-        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), new ConnectionBackoff());
-        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), new ConnectionBackoff());
+        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), new Connection(), new Connection());
+        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), new Connection(), new Connection());
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
         NeighbourService neighbourService = mock(NeighbourService.class);
@@ -43,15 +43,14 @@ public class MessageCollectorTest {
 
     @Test
     public void testConnectionsToNeighbourBacksOffWhenNotPossibleToContact(){
-        ConnectionBackoff connectionBackoffOne = mock(ConnectionBackoff.class);
-        when(connectionBackoffOne.canBeContacted(any())).thenReturn(true);
+        Connection messageConnectionOne = mock(Connection.class);
+        when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
 
-        ConnectionBackoff connectionBackoffTwo = mock(ConnectionBackoff.class);
-        when(connectionBackoffTwo.canBeContacted(any())).thenReturn(true);
+        Connection messageConnectionTwo = mock(Connection.class);
+        when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-
-        Neighbour one = new Neighbour("one",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(), connectionBackoffOne);
-        Neighbour two = new Neighbour("two",new Capabilities(),new SubscriptionRequest(),new SubscriptionRequest(),connectionBackoffTwo);
+        Neighbour one = new Neighbour("one", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), messageConnectionOne, mock(Connection.class));
+        Neighbour two = new Neighbour("two", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), messageConnectionTwo, mock(Connection.class));
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -64,8 +63,8 @@ public class MessageCollectorTest {
         MessageCollector collector = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
         collector.runSchedule();
 
-        verify(connectionBackoffOne,times(1)).failedConnection(anyInt());
-        verify(connectionBackoffTwo,times(1)).okConnection();
+        verify(messageConnectionOne,times(1)).failedConnection(anyInt());
+        verify(messageConnectionTwo,times(1)).okConnection();
     }
 
 }
