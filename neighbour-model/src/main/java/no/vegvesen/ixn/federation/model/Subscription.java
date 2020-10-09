@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-
 import javax.persistence.*;
 
 @Entity
