@@ -30,6 +30,19 @@ public class Subscription {
 		this.subscriptionStatus = subscriptionStatus;
 	}
 
+	public Subscription(Integer id, SubscriptionStatus subscriptionStatus, String selector) {
+		this.id = id;
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+	}
+
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path) {
+		this.id = id;
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+		this.path = path;
+	}
+
 	public SubscriptionStatus getSubscriptionStatus() {
 		return subscriptionStatus;
 	}

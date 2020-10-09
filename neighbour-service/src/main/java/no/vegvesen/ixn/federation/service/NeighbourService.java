@@ -137,7 +137,7 @@ public class NeighbourService {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
 		logger.info("Saving updated Neighbour: {}", neighbour.toString());
-		return subscriptionTransformer.subscriptionsToSubscriptionExchangeResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
+		return subscriptionRequestTransformer.subscriptionsToSubscriptionExchangeResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
 	}
 
 	public SubscriptionStatusPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
@@ -150,7 +150,7 @@ public class NeighbourService {
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionStatusPollResponseApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionStatusPollResponseApi(subscription,neighbour.getName(),nodeProviderName);
+			SubscriptionStatusPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionStatusPollResponseApi(subscription,neighbour.getName(),nodeProviderName);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
@@ -427,6 +427,6 @@ public class NeighbourService {
 	public SubscriptionExchangeResponseApi findSubscriptions(String ixnName) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		Set<Subscription> subscriptions = neighbour.getSubscriptionRequest().getSubscriptions();
-		return subscriptionTransformer.subscriptionsToSubscriptionExchangeResponseApi(neighbour.getName(),subscriptions);
+		return subscriptionRequestTransformer.subscriptionsToSubscriptionExchangeResponseApi(neighbour.getName(),subscriptions);
 	}
 }

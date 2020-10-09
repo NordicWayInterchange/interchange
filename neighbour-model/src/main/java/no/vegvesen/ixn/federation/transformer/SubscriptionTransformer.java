@@ -32,19 +32,6 @@ public class SubscriptionTransformer {
 		return subscription;
 	}
 
-	public SubscriptionStatusPollResponseApi subscriptionToSubscriptionStatusPollResponseApi(Subscription subscription, String neighbourName, String thisNodeName) {
-		SubscriptionStatusPollResponseApi response = new SubscriptionStatusPollResponseApi();
-		response.setId(subscription.getId().toString());
-		response.setSelector(subscription.getSelector());
-		response.setPath(subscription.getPath());
-		SubscriptionStatusApi status = subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
-		response.setStatus(status);
-		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			response.setMessageBrokerUrl("amqps://" + thisNodeName); //TODO pass the actual URL from SelfService, let it create the url internally
-			response.setQueueName(neighbourName);
-		}
-		return response;
-	}
 
 
 	public Set<Subscription> subscriptionExchangeSubscriptionRequestApiToSubscriptions(Set<SubscriptionExchangeSubscriptionRequestApi> request) {
@@ -57,10 +44,6 @@ public class SubscriptionTransformer {
 
 	}
 
-	public SubscriptionExchangeResponseApi subscriptionsToSubscriptionExchangeResponseApi(String name, Set<Subscription> subscriptions) {
-	    Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponseApis = subscriptionToSubscriptionExchangeSubscriptionResponseApi(subscriptions);
-	    return new SubscriptionExchangeResponseApi(name,subscriptionResponseApis);
-	}
 
 	public Set<SubscriptionExchangeSubscriptionRequestApi> subscriptionsToSubscriptionExchangeSubscriptionRequestApi(Set<Subscription> subscriptions) {
 		List<SubscriptionExchangeSubscriptionRequestApi> subscriptionRequestApis = new ArrayList<>();
@@ -71,7 +54,7 @@ public class SubscriptionTransformer {
 		return new HashSet<>(subscriptionRequestApis);
 	}
 
-	private Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionToSubscriptionExchangeSubscriptionResponseApi(Set<Subscription> subscriptions) {
+	public Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionToSubscriptionExchangeSubscriptionResponseApi(Set<Subscription> subscriptions) {
 		List<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponses = new ArrayList<>();
 		for (Subscription s : subscriptions) {
 			SubscriptionExchangeSubscriptionResponseApi responseApi = new SubscriptionExchangeSubscriptionResponseApi(
@@ -86,7 +69,7 @@ public class SubscriptionTransformer {
 	}
 
 	//TODO what about statuses that are not valid in the api?
-	private SubscriptionStatusApi subscriptionStatusToSubscriptionStatusApi(SubscriptionStatus subscriptionStatus) {
+	public SubscriptionStatusApi subscriptionStatusToSubscriptionStatusApi(SubscriptionStatus subscriptionStatus) {
 		if (subscriptionStatus.equals(SubscriptionStatus.ACCEPTED)) {
 			return SubscriptionStatusApi.REQUESTED;
 		}
@@ -103,13 +86,9 @@ public class SubscriptionTransformer {
 		return new HashSet<>(subscriptions);
 	}
 
-	private SubscriptionStatus subscriptionStatusApiToSubscriptionStatus(SubscriptionStatusApi status) {
+	public SubscriptionStatus subscriptionStatusApiToSubscriptionStatus(SubscriptionStatusApi status) {
 	    return SubscriptionStatus.valueOf(status.name());
 	}
 
-	public Subscription subscriptionStatusPollApiToSubscription(SubscriptionStatusPollResponseApi subscriptionApi) {
-		Subscription subscription = new Subscription(subscriptionApi.getSelector(), subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
-		subscription.setPath(subscriptionApi.getPath());
-		return subscription;
-	}
+
 }

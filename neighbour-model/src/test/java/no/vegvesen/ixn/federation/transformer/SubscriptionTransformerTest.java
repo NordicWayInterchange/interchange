@@ -49,25 +49,5 @@ public class SubscriptionTransformerTest {
 		assertThat(subscriptionApi.getPath()).isEqualTo(subscription.getPath());
 	}
 
-	@Test
-	public void canTransformSubscriptionsToSubscriptionExchangeResponseApi() {
-		Subscription subscription = new Subscription();
-		subscription.setId(1);
-		String path = "bouvet/subscriptions/1";
-		subscription.setPath(path);
-		String selector = "originatingCountry = 'NO'";
-		subscription.setSelector(selector);
-		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 
-		SubscriptionExchangeResponseApi response = subscriptionTransformer.subscriptionsToSubscriptionExchangeResponseApi("bouvet", Collections.singleton(subscription));
-		assertThat(response.getVersion()).isEqualTo("1.0");
-		assertThat(response.getName()).isEqualTo("bouvet");
-		assertThat(response.getSubscriptions()).hasSize(1);
-
-		SubscriptionExchangeSubscriptionResponseApi subsResponse = response.getSubscriptions().iterator().next();
-		assertThat(subsResponse.getId()).isEqualTo("1");
-		assertThat(subsResponse.getPath()).isEqualTo(path);
-		assertThat(subsResponse.getSelector()).isEqualTo(selector);
-		assertThat(subsResponse.getStatus()).isEqualTo(SubscriptionStatusApi.REQUESTED);
-	}
 }
