@@ -102,7 +102,6 @@ public class NeighbourRESTClient {
 
         // Posting and receiving response
 
-        //SubscriptionRequestApi responseApi;
         SubscriptionExchangeResponseApi responseApi;
         try {
             ResponseEntity<SubscriptionExchangeResponseApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, SubscriptionExchangeResponseApi.class);

@@ -64,9 +64,7 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
 		String name = neighbour.getName();
 		logger.info("Polling subscription to {} with URL: {}", name, url);
-		//SubscriptionApi subscriptionApi = neighbourRESTClient.doPollSubscriptionStatus(url, name);
 		SubscriptionStatusPollResponseApi subscriptionApi = neighbourRESTClient.doPollSubscriptionStatus(url,name);
-		//Subscription returnSubscription = subscriptionTransformer.subscriptionApiToSubscription(subscriptionApi);
 		Subscription returnSubscription = subscriptionRequestTransformer.subscriptionStatusPollApiToSubscription(subscriptionApi);
 		logger.debug("Received response object: {}", returnSubscription.toString());
 		return returnSubscription;

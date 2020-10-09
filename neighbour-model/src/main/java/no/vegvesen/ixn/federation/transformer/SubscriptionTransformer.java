@@ -14,26 +14,6 @@ import java.util.Set;
 @Component
 public class SubscriptionTransformer {
 
-	public SubscriptionApi subscriptionToSubscriptionApi(Subscription subscription){
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector(subscription.getSelector());
-		subscriptionApi.setPath(subscription.getPath());
-		subscriptionApi.setStatus(subscription.getSubscriptionStatus());
-
-		return subscriptionApi;
-	}
-
-	public Subscription subscriptionApiToSubscription(SubscriptionApi subscriptionApi){
-		Subscription subscription = new Subscription();
-		subscription.setSelector(subscriptionApi.getSelector());
-		subscription.setPath(subscriptionApi.getPath());
-		subscription.setSubscriptionStatus(subscriptionApi.getStatus());
-
-		return subscription;
-	}
-
-
-
 	public Set<Subscription> subscriptionExchangeSubscriptionRequestApiToSubscriptions(Set<SubscriptionExchangeSubscriptionRequestApi> request) {
 		ArrayList<Subscription> subscriptions = new ArrayList<>();
 		for (SubscriptionExchangeSubscriptionRequestApi subscriptionRequestApi : request) {
