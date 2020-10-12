@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.*;
 
-public class SubscriptionExchangeSubscriptionRequestApi {
+public class RequestedSubscriptionApi {
     private String selector;
 
     @JsonInclude(Include.NON_NULL)
@@ -15,14 +15,14 @@ public class SubscriptionExchangeSubscriptionRequestApi {
     @JsonInclude(Include.NON_NULL)
     private String queueConsumerUser;
 
-    public SubscriptionExchangeSubscriptionRequestApi() {
+    public RequestedSubscriptionApi() {
     }
 
-    public SubscriptionExchangeSubscriptionRequestApi(String selector) {
+    public RequestedSubscriptionApi(String selector) {
         this.selector = selector;
     }
 
-    public SubscriptionExchangeSubscriptionRequestApi(String selector, Boolean createNewQueue, String queueConsumerUser) {
+    public RequestedSubscriptionApi(String selector, Boolean createNewQueue, String queueConsumerUser) {
         this.selector = selector;
         this.createNewQueue = createNewQueue;
         this.queueConsumerUser = queueConsumerUser;
@@ -56,7 +56,7 @@ public class SubscriptionExchangeSubscriptionRequestApi {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SubscriptionExchangeSubscriptionRequestApi that = (SubscriptionExchangeSubscriptionRequestApi) o;
+        RequestedSubscriptionApi that = (RequestedSubscriptionApi) o;
         return Objects.equals(selector, that.selector) &&
                 Objects.equals(createNewQueue, that.createNewQueue) &&
                 Objects.equals(queueConsumerUser, that.queueConsumerUser);
@@ -69,7 +69,7 @@ public class SubscriptionExchangeSubscriptionRequestApi {
 
     @Override
     public String toString() {
-        return "SubscriptionExchangeSubscriptionRequestApi{" +
+        return "RequestedSubscriptionApi{" +
                 "selector='" + selector + '\'' +
                 ", createNewQueue=" + createNewQueue +
                 ", queueConsumerUser='" + queueConsumerUser + '\'' +

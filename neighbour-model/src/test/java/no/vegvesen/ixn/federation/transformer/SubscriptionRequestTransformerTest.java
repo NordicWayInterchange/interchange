@@ -40,7 +40,7 @@ public class SubscriptionRequestTransformerTest {
 		assertThat(requestApi.getName()).isEqualTo(name);
 		assertThat(requestApi.getSubscriptions()).hasSize(1);
 
-		SubscriptionExchangeSubscriptionRequestApi onlySubscription = requestApi.getSubscriptions().iterator().next();
+		RequestedSubscriptionApi onlySubscription = requestApi.getSubscriptions().iterator().next();
 		assertThat(onlySubscription.getSelector()).isEqualTo(selector);
 
 		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi);

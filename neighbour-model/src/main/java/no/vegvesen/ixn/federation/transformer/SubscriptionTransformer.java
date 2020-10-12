@@ -13,9 +13,9 @@ import java.util.Set;
 @Component
 public class SubscriptionTransformer {
 
-	public Set<Subscription> subscriptionExchangeSubscriptionRequestApiToSubscriptions(Set<SubscriptionExchangeSubscriptionRequestApi> request) {
+	public Set<Subscription> subscriptionExchangeSubscriptionRequestApiToSubscriptions(Set<RequestedSubscriptionApi> request) {
 		ArrayList<Subscription> subscriptions = new ArrayList<>();
-		for (SubscriptionExchangeSubscriptionRequestApi subscriptionRequestApi : request) {
+		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
 			Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(), SubscriptionStatus.REQUESTED);
 			subscriptions.add(subscription);
 		}
@@ -24,10 +24,10 @@ public class SubscriptionTransformer {
 	}
 
 
-	public Set<SubscriptionExchangeSubscriptionRequestApi> subscriptionsToSubscriptionExchangeSubscriptionRequestApi(Set<Subscription> subscriptions) {
-		List<SubscriptionExchangeSubscriptionRequestApi> subscriptionRequestApis = new ArrayList<>();
+	public Set<RequestedSubscriptionApi> subscriptionsToSubscriptionExchangeSubscriptionRequestApi(Set<Subscription> subscriptions) {
+		List<RequestedSubscriptionApi> subscriptionRequestApis = new ArrayList<>();
 		for (Subscription s : subscriptions) {
-			SubscriptionExchangeSubscriptionRequestApi subscriptionRequestApi = new SubscriptionExchangeSubscriptionRequestApi(s.getSelector());
+			RequestedSubscriptionApi subscriptionRequestApi = new RequestedSubscriptionApi(s.getSelector());
 			subscriptionRequestApis.add(subscriptionRequestApi);
 		}
 		return new HashSet<>(subscriptionRequestApis);

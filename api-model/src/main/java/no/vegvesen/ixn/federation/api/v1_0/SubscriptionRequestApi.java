@@ -6,12 +6,12 @@ import java.util.Set;
 public class SubscriptionRequestApi {
     private String version = "1.0";
     private String name;
-    private Set<SubscriptionExchangeSubscriptionRequestApi> subscriptions;
+    private Set<RequestedSubscriptionApi> subscriptions;
 
     public SubscriptionRequestApi() {
     }
 
-    public SubscriptionRequestApi(String name, Set<SubscriptionExchangeSubscriptionRequestApi> subscriptions) {
+    public SubscriptionRequestApi(String name, Set<RequestedSubscriptionApi> subscriptions) {
         this.name = name;
         this.subscriptions = subscriptions;
     }
@@ -24,11 +24,11 @@ public class SubscriptionRequestApi {
         this.name = name;
     }
 
-    public Set<SubscriptionExchangeSubscriptionRequestApi> getSubscriptions() {
+    public Set<RequestedSubscriptionApi> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<SubscriptionExchangeSubscriptionRequestApi> subscriptions) {
+    public void setSubscriptions(Set<RequestedSubscriptionApi> subscriptions) {
         this.subscriptions = subscriptions;
     }
 

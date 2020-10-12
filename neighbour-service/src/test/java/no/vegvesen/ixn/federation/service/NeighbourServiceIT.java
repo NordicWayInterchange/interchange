@@ -65,7 +65,7 @@ public class NeighbourServiceIT {
 
 		SubscriptionResponseApi responseApi = service.incomingSubscriptionRequest(
 				new SubscriptionRequestApi("myNeighbour",
-						Collections.singleton(new SubscriptionExchangeSubscriptionRequestApi("originatingCountry = 'NO'")))
+						Collections.singleton(new RequestedSubscriptionApi("originatingCountry = 'NO'")))
 		);
 		Set<SubscriptionExchangeSubscriptionResponseApi> subscriptions = responseApi.getSubscriptions();
 		assertThat(subscriptions.size()).isEqualTo(1);

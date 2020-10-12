@@ -87,7 +87,7 @@ class NeighbourServiceTest {
 	void postingSubscriptionRequestFromUnseenNeighbourReturnsException() {
 		// Create incoming subscription request api objcet
 		SubscriptionRequestApi ericsson = new SubscriptionRequestApi("ericsson",Collections.singleton(
-				new SubscriptionExchangeSubscriptionRequestApi("originatingCountry = 'FI'")
+				new RequestedSubscriptionApi("originatingCountry = 'FI'")
 		));
 
 		// Mock saving Neighbour to Neighbour repository
@@ -149,7 +149,7 @@ class NeighbourServiceTest {
 
 		// Create incoming subscription request api objcet
 		SubscriptionRequestApi ericsson = new SubscriptionRequestApi("ericsson", Collections.singleton(
-				new SubscriptionExchangeSubscriptionRequestApi("originatingCountry = 'FI'")
+				new RequestedSubscriptionApi("originatingCountry = 'FI'")
 		));
 
 		// Mock saving Neighbour to Neighbour repository

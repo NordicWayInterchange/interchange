@@ -12,7 +12,7 @@ public class SubscriptionExchangeRequestTest {
 
     @Test
     public void subsctiptionRequestOneSingleSubscriptionWithOnlySelector() throws JsonProcessingException {
-        SubscriptionExchangeSubscriptionRequestApi subscription = new SubscriptionExchangeSubscriptionRequestApi(
+        RequestedSubscriptionApi subscription = new RequestedSubscriptionApi(
                 "messageType='DENM' AND originatingCountry='SE'");
         SubscriptionRequestApi requestApi = new SubscriptionRequestApi("a.c-itsi-interchange.eu",
                 Collections.singleton(subscription));
@@ -22,10 +22,10 @@ public class SubscriptionExchangeRequestTest {
 
     @Test
     public void subscriptionRequesWithBothCreateQueueAndWithout() throws JsonProcessingException {
-        SubscriptionExchangeSubscriptionRequestApi sub1 = new SubscriptionExchangeSubscriptionRequestApi(
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi(
                 "messageType='DENM' AND orginatingCountry='SE'"
         );
-        SubscriptionExchangeSubscriptionRequestApi sub2 = new SubscriptionExchangeSubscriptionRequestApi(
+        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi(
                 "messageType='DENM' AND originatingCountry='NO'",
                 true,
                 "client1"
