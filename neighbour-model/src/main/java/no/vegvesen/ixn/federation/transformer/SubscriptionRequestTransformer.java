@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeSubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
@@ -25,24 +25,24 @@ public class SubscriptionRequestTransformer {
 	}
 
 
-	public SubscriptionExchangeRequestApi subscriptionRequestToSubscriptionExchangeRequestApi(String selfName, Set<Subscription> subscriptions) {
-	    SubscriptionExchangeRequestApi requestApi = new SubscriptionExchangeRequestApi(selfName,
+	public SubscriptionRequestApi subscriptionRequestToSubscriptionExchangeRequestApi(String selfName, Set<Subscription> subscriptions) {
+	    SubscriptionRequestApi requestApi = new SubscriptionRequestApi(selfName,
 				subscriptionTransformer.subscriptionsToSubscriptionExchangeSubscriptionRequestApi(subscriptions)
 		);
 	    return requestApi;
 	}
 
-	public SubscriptionExchangeResponseApi subscriptionsToSubscriptionExchangeResponseApi(String name, Set<Subscription> subscriptions) {
+	public SubscriptionResponseApi subscriptionsToSubscriptionExchangeResponseApi(String name, Set<Subscription> subscriptions) {
 	    Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponseApis = subscriptionTransformer.subscriptionToSubscriptionExchangeSubscriptionResponseApi(subscriptions);
-	    return new SubscriptionExchangeResponseApi(name,subscriptionResponseApis);
+	    return new SubscriptionResponseApi(name,subscriptionResponseApis);
 	}
 
 
-	public SubscriptionRequest subscriptionExchangeResponseApiToSubscriptionRequest(SubscriptionExchangeResponseApi responseApi, SubscriptionRequestStatus status) {
+	public SubscriptionRequest subscriptionExchangeResponseApiToSubscriptionRequest(SubscriptionResponseApi responseApi, SubscriptionRequestStatus status) {
 		return new SubscriptionRequest(status,subscriptionTransformer.subscriptionExchangeSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions()));
 	}
 
-	public SubscriptionRequest subscriptionExchangeRequestApiToSubscriptionRequest(SubscriptionExchangeRequestApi request) {
+	public SubscriptionRequest subscriptionExchangeRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.subscriptionExchangeSubscriptionRequestApiToSubscriptions(request.getSubscriptions()));
 		return subscriptionRequest;
 	}

@@ -1,8 +1,8 @@
 package no.vegvesen.ixn.federation.discoverer.facade;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
@@ -51,11 +51,11 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 
 	@Override
 	public SubscriptionRequest postSubscriptionRequest(Neighbour neighbour, Set<Subscription> subscriptions, String selfName) {
-		SubscriptionExchangeRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionExchangeRequestApi(selfName,subscriptions);
+		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionExchangeRequestApi(selfName,subscriptions);
 		String controlChannelUrl = neighbour.getControlChannelUrl("/subscriptions");
 		String name = neighbour.getName();
 		logger.info("Posting subscription request to {} on URL: {}", name, controlChannelUrl);
-		SubscriptionExchangeResponseApi responseApi = neighbourRESTClient.doPostSubscriptionRequest(subscriptionRequestApi, controlChannelUrl, name);
+		SubscriptionResponseApi responseApi = neighbourRESTClient.doPostSubscriptionRequest(subscriptionRequestApi, controlChannelUrl, name);
 		return subscriptionRequestTransformer.subscriptionExchangeResponseApiToSubscriptionRequest(responseApi,SubscriptionRequestStatus.REQUESTED);
 	}
 

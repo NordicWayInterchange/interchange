@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
@@ -92,19 +92,19 @@ public class NeighbourRESTClient {
 		logger.debug("{} Headers: {}", logPrefix, entity.getHeaders().toString());
 	}
 
-	SubscriptionExchangeResponseApi doPostSubscriptionRequest(SubscriptionExchangeRequestApi subscriptionRequestApi, String controlChannelUrl, String neighbourName) {
+	SubscriptionResponseApi doPostSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, String controlChannelUrl, String neighbourName) {
         // Post representation to neighbour
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<SubscriptionExchangeRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
+        HttpEntity<SubscriptionRequestApi> entity = new HttpEntity<>(subscriptionRequestApi, headers);
         logHttpEntity(entity, "Posting");
 
         // Posting and receiving response
 
-        SubscriptionExchangeResponseApi responseApi;
+        SubscriptionResponseApi responseApi;
         try {
-            ResponseEntity<SubscriptionExchangeResponseApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, SubscriptionExchangeResponseApi.class);
+            ResponseEntity<SubscriptionResponseApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, SubscriptionResponseApi.class);
             logHttpEntity(response, "Received");
 
             if (response.getBody() == null) {

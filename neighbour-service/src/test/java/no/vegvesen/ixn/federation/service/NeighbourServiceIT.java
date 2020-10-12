@@ -63,8 +63,8 @@ public class NeighbourServiceIT {
 		repository.save(neighbour);
 
 
-		SubscriptionExchangeResponseApi responseApi = service.incomingSubscriptionRequest(
-				new SubscriptionExchangeRequestApi("myNeighbour",
+		SubscriptionResponseApi responseApi = service.incomingSubscriptionRequest(
+				new SubscriptionRequestApi("myNeighbour",
 						Collections.singleton(new SubscriptionExchangeSubscriptionRequestApi("originatingCountry = 'NO'")))
 		);
 		Set<SubscriptionExchangeSubscriptionResponseApi> subscriptions = responseApi.getSubscriptions();

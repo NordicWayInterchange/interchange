@@ -1,11 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeSubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.model.Capabilities;
@@ -90,7 +86,7 @@ class NeighbourServiceTest {
 	@Test
 	void postingSubscriptionRequestFromUnseenNeighbourReturnsException() {
 		// Create incoming subscription request api objcet
-		SubscriptionExchangeRequestApi ericsson = new SubscriptionExchangeRequestApi("ericsson",Collections.singleton(
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi("ericsson",Collections.singleton(
 				new SubscriptionExchangeSubscriptionRequestApi("originatingCountry = 'FI'")
 		));
 
@@ -152,7 +148,7 @@ class NeighbourServiceTest {
 	void postingSubscriptionRequestReturnsStatusRequested() {
 
 		// Create incoming subscription request api objcet
-		SubscriptionExchangeRequestApi ericsson = new SubscriptionExchangeRequestApi("ericsson", Collections.singleton(
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi("ericsson", Collections.singleton(
 				new SubscriptionExchangeSubscriptionRequestApi("originatingCountry = 'FI'")
 		));
 
@@ -255,7 +251,7 @@ class NeighbourServiceTest {
 		Neighbour neighbour = new Neighbour(neighbourName, new Capabilities(), subscriptionRequest,new SubscriptionRequest());
 		Mockito.when(neighbourRepository.findByName(neighbourName)).thenReturn(neighbour);
 
-		SubscriptionExchangeResponseApi subscriptions = neighbourService.findSubscriptions(neighbourName);
+		SubscriptionResponseApi subscriptions = neighbourService.findSubscriptions(neighbourName);
 		assertThat(subscriptions.getName()).isEqualTo(neighbourName);
 		assertThat(subscriptions.getSubscriptions()).hasSize(1);
 

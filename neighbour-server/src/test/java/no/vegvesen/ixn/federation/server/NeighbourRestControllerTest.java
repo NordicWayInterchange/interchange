@@ -177,13 +177,13 @@ class NeighbourRestControllerTest {
 		mockCertificate(name);
 
 		// Create incoming subscription request api objcet
-		SubscriptionExchangeRequestApi ericsson = new SubscriptionExchangeRequestApi(name,
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi(name,
 				Collections.singleton(new SubscriptionExchangeSubscriptionRequestApi(selector)));
 
 		// Convert to JSON
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		SubscriptionExchangeResponseApi response = new SubscriptionExchangeResponseApi(name,
+		SubscriptionResponseApi response = new SubscriptionResponseApi(name,
 				Collections.singleton(new SubscriptionExchangeSubscriptionResponseApi("1",selector,path,SubscriptionStatusApi.REQUESTED)));
 
 		doReturn(response).when(neighbourService).incomingSubscriptionRequest(any());
@@ -203,7 +203,7 @@ class NeighbourRestControllerTest {
 		mockCertificate(name);
 
 		// Create incoming subscription request api object
-		SubscriptionExchangeRequestApi ericsson = new SubscriptionExchangeRequestApi(name,
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi(name,
 				Collections.singleton(new SubscriptionExchangeSubscriptionRequestApi(selector))
 		);
 

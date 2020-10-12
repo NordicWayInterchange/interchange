@@ -1,12 +1,8 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeSubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeSubscriptionResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
@@ -27,7 +23,7 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void emptySubscriptionsToSubscriptionExchangeRequest() {
 		String name = "myNode";
-		SubscriptionExchangeRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionExchangeRequestApi(name, Collections.emptySet());
+		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionExchangeRequestApi(name, Collections.emptySet());
 		assertThat(requestApi.getName()).isEqualTo(name);
 		assertThat(requestApi.getSubscriptions()).isEmpty();
 		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionExchangeRequestApiToSubscriptionRequest(requestApi);
@@ -40,7 +36,7 @@ public class SubscriptionRequestTransformerTest {
 		String selector = "originatingCountry = 'NO'";
 		Subscription one = new Subscription(selector, SubscriptionStatus.REQUESTED);
 
-		SubscriptionExchangeRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionExchangeRequestApi(name, Collections.singleton(one));
+		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionExchangeRequestApi(name, Collections.singleton(one));
 		assertThat(requestApi.getName()).isEqualTo(name);
 		assertThat(requestApi.getSubscriptions()).hasSize(1);
 
@@ -56,7 +52,7 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void emptySubscriptionsToSubscriptionExchangeResponseApi() {
 		String name = "myNode";
-		SubscriptionExchangeResponseApi responseApi = subscriptionRequestTransformer.subscriptionsToSubscriptionExchangeResponseApi(name,Collections.emptySet());
+		SubscriptionResponseApi responseApi = subscriptionRequestTransformer.subscriptionsToSubscriptionExchangeResponseApi(name,Collections.emptySet());
 		assertThat(responseApi.getName()).isEqualTo(name);
 		assertThat(responseApi.getSubscriptions()).isEmpty();
 		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionExchangeResponseApiToSubscriptionRequest(responseApi,SubscriptionRequestStatus.REQUESTED);
@@ -101,7 +97,7 @@ public class SubscriptionRequestTransformerTest {
 		subscription.setSelector(selector);
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 
-		SubscriptionExchangeResponseApi response = subscriptionRequestTransformer.subscriptionsToSubscriptionExchangeResponseApi("bouvet", Collections.singleton(subscription));
+		SubscriptionResponseApi response = subscriptionRequestTransformer.subscriptionsToSubscriptionExchangeResponseApi("bouvet", Collections.singleton(subscription));
 		assertThat(response.getVersion()).isEqualTo("1.0");
 		assertThat(response.getName()).isEqualTo("bouvet");
 		assertThat(response.getSubscriptions()).hasSize(1);

@@ -82,7 +82,7 @@ public class NeighbourService {
 		return neighbourSubscriptionRequest;
 	}
 
-	public SubscriptionExchangeResponseApi incomingSubscriptionRequest(SubscriptionExchangeRequestApi neighbourSubscriptionRequest) {
+	public SubscriptionResponseApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
 		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionExchangeRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
 		logger.info("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
@@ -100,7 +100,7 @@ public class NeighbourService {
 			logger.info("Returning empty subscription request.");
 			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
 
-			return new SubscriptionExchangeResponseApi(neighbour.getName(),Collections.emptySet());
+			return new SubscriptionResponseApi(neighbour.getName(),Collections.emptySet());
 		} else if (!persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			// empty subscription request - tear down existing subscription.
 			logger.info("Received empty subscription request.");
@@ -424,7 +424,7 @@ public class NeighbourService {
 	}
 
 
-	public SubscriptionExchangeResponseApi findSubscriptions(String ixnName) {
+	public SubscriptionResponseApi findSubscriptions(String ixnName) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		Set<Subscription> subscriptions = neighbour.getSubscriptionRequest().getSubscriptions();
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionExchangeResponseApi(neighbour.getName(),subscriptions);
