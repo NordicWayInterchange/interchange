@@ -140,7 +140,7 @@ public class NeighbourService {
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
 	}
 
-	public SubscriptionStatusPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
+	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
 		logger.info("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
@@ -150,7 +150,7 @@ public class NeighbourService {
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionStatusPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionStatusPollResponseApi(subscription,neighbour.getName(),nodeProviderName);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),nodeProviderName);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {

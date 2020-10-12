@@ -8,10 +8,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class SubscriptionExchangeRequestTest {
+public class SubscriptionRequestTest {
 
     @Test
-    public void subsctiptionRequestOneSingleSubscriptionWithOnlySelector() throws JsonProcessingException {
+    public void subscriptionRequestOneSingleSubscriptionWithOnlySelector() throws JsonProcessingException {
         RequestedSubscriptionApi subscription = new RequestedSubscriptionApi(
                 "messageType='DENM' AND originatingCountry='SE'");
         SubscriptionRequestApi requestApi = new SubscriptionRequestApi("a.c-itsi-interchange.eu",
@@ -21,7 +21,7 @@ public class SubscriptionExchangeRequestTest {
     }
 
     @Test
-    public void subscriptionRequesWithBothCreateQueueAndWithout() throws JsonProcessingException {
+    public void subscriptionRequestWithBothCreateQueueAndWithout() throws JsonProcessingException {
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi(
                 "messageType='DENM' AND orginatingCountry='SE'"
         );

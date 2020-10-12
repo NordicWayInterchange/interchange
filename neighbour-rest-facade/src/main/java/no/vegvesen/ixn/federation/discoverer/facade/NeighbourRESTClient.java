@@ -2,11 +2,8 @@ package no.vegvesen.ixn.federation.discoverer.facade;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
@@ -142,10 +139,10 @@ public class NeighbourRESTClient {
         return responseApi;
     }
 
-    SubscriptionStatusPollResponseApi doPollSubscriptionStatus(String url, String name) {
-        SubscriptionStatusPollResponseApi subscriptionApi;
+    SubscriptionPollResponseApi doPollSubscriptionStatus(String url, String name) {
+        SubscriptionPollResponseApi subscriptionApi;
         try {
-            ResponseEntity<SubscriptionStatusPollResponseApi> response = restTemplate.getForEntity(url, SubscriptionStatusPollResponseApi.class);
+            ResponseEntity<SubscriptionPollResponseApi> response = restTemplate.getForEntity(url, SubscriptionPollResponseApi.class);
             logHttpEntity(response, "Poll subscription");
             subscriptionApi = response.getBody();
 

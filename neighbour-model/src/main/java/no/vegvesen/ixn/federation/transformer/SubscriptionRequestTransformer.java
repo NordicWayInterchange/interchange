@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionExchangeSubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
@@ -27,34 +24,34 @@ public class SubscriptionRequestTransformer {
 
 	public SubscriptionRequestApi subscriptionRequestToSubscriptionRequestApi(String selfName, Set<Subscription> subscriptions) {
 	    SubscriptionRequestApi requestApi = new SubscriptionRequestApi(selfName,
-				subscriptionTransformer.subscriptionsToSubscriptionExchangeSubscriptionRequestApi(subscriptions)
+				subscriptionTransformer.subscriptionsToRequestedSubscriptionApi(subscriptions)
 		);
 	    return requestApi;
 	}
 
 	public SubscriptionResponseApi subscriptionsToSubscriptionResponseApi(String name, Set<Subscription> subscriptions) {
-	    Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponseApis = subscriptionTransformer.subscriptionToSubscriptionExchangeSubscriptionResponseApi(subscriptions);
+	    Set<RequestedSubscriptionResponseApi> subscriptionResponseApis = subscriptionTransformer.subscriptionToRequestedSubscriptionResponseApi(subscriptions);
 	    return new SubscriptionResponseApi(name,subscriptionResponseApis);
 	}
 
 
 	public SubscriptionRequest subscriptionResponseApiToSubscriptionRequest(SubscriptionResponseApi responseApi, SubscriptionRequestStatus status) {
-		return new SubscriptionRequest(status,subscriptionTransformer.subscriptionExchangeSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions()));
+		return new SubscriptionRequest(status,subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions()));
 	}
 
 	public SubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.subscriptionExchangeSubscriptionRequestApiToSubscriptions(request.getSubscriptions()));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions()));
 		return subscriptionRequest;
 	}
 
-	public Subscription subscriptionStatusPollApiToSubscription(SubscriptionStatusPollResponseApi subscriptionApi) {
+	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
 		Subscription subscription = new Subscription(subscriptionApi.getSelector(), subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
 		subscription.setPath(subscriptionApi.getPath());
 		return subscription;
 	}
 
-	public SubscriptionStatusPollResponseApi subscriptionToSubscriptionStatusPollResponseApi(Subscription subscription, String neighbourName, String thisNodeName) {
-		SubscriptionStatusPollResponseApi response = new SubscriptionStatusPollResponseApi();
+	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String thisNodeName) {
+		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
 		response.setId(subscription.getId().toString());
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());

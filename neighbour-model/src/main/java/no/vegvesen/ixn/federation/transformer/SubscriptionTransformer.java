@@ -13,7 +13,7 @@ import java.util.Set;
 @Component
 public class SubscriptionTransformer {
 
-	public Set<Subscription> subscriptionExchangeSubscriptionRequestApiToSubscriptions(Set<RequestedSubscriptionApi> request) {
+	public Set<Subscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request) {
 		ArrayList<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
 			Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(), SubscriptionStatus.REQUESTED);
@@ -24,7 +24,7 @@ public class SubscriptionTransformer {
 	}
 
 
-	public Set<RequestedSubscriptionApi> subscriptionsToSubscriptionExchangeSubscriptionRequestApi(Set<Subscription> subscriptions) {
+	public Set<RequestedSubscriptionApi> subscriptionsToRequestedSubscriptionApi(Set<Subscription> subscriptions) {
 		List<RequestedSubscriptionApi> subscriptionRequestApis = new ArrayList<>();
 		for (Subscription s : subscriptions) {
 			RequestedSubscriptionApi subscriptionRequestApi = new RequestedSubscriptionApi(s.getSelector());
@@ -33,10 +33,10 @@ public class SubscriptionTransformer {
 		return new HashSet<>(subscriptionRequestApis);
 	}
 
-	public Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionToSubscriptionExchangeSubscriptionResponseApi(Set<Subscription> subscriptions) {
-		List<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponses = new ArrayList<>();
+	public Set<RequestedSubscriptionResponseApi> subscriptionToRequestedSubscriptionResponseApi(Set<Subscription> subscriptions) {
+		List<RequestedSubscriptionResponseApi> subscriptionResponses = new ArrayList<>();
 		for (Subscription s : subscriptions) {
-			SubscriptionExchangeSubscriptionResponseApi responseApi = new SubscriptionExchangeSubscriptionResponseApi(
+			RequestedSubscriptionResponseApi responseApi = new RequestedSubscriptionResponseApi(
 					s.getId().toString(),
 					s.getSelector(),
 					s.getPath(),
@@ -55,9 +55,9 @@ public class SubscriptionTransformer {
 		return SubscriptionStatusApi.valueOf(subscriptionStatus.name());
 	}
 
-	public Set<Subscription> subscriptionExchangeSubscriptionResponseApiToSubscriptions(Set<SubscriptionExchangeSubscriptionResponseApi> subscriptionResponseApis) {
+	public Set<Subscription> requestedSubscriptionResponseApiToSubscriptions(Set<RequestedSubscriptionResponseApi> subscriptionResponseApis) {
 		List<Subscription> subscriptions = new ArrayList<>();
-		for (SubscriptionExchangeSubscriptionResponseApi s : subscriptionResponseApis) {
+		for (RequestedSubscriptionResponseApi s : subscriptionResponseApis) {
 			Subscription subscription = new Subscription(s.getSelector(), subscriptionStatusApiToSubscriptionStatus(s.getStatus()));
 			subscription.setPath(s.getPath());
 			subscriptions.add(subscription);

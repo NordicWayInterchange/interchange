@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.util.Objects;
 
-public class SubscriptionExchangeSubscriptionResponseApi {
+public class RequestedSubscriptionResponseApi {
 
     private String id;
     private String selector;
@@ -18,17 +18,17 @@ public class SubscriptionExchangeSubscriptionResponseApi {
     private String path;
     private SubscriptionStatusApi status;
 
-    public SubscriptionExchangeSubscriptionResponseApi() {
+    public RequestedSubscriptionResponseApi() {
     }
 
-    public SubscriptionExchangeSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
     }
 
-    public SubscriptionExchangeSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser) {
         this.id = id;
         this.selector = selector;
         this.createNewQueue = createNewQueue;
@@ -89,7 +89,7 @@ public class SubscriptionExchangeSubscriptionResponseApi {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SubscriptionExchangeSubscriptionResponseApi that = (SubscriptionExchangeSubscriptionResponseApi) o;
+        RequestedSubscriptionResponseApi that = (RequestedSubscriptionResponseApi) o;
         return createNewQueue == that.createNewQueue &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(selector, that.selector) &&
@@ -105,7 +105,7 @@ public class SubscriptionExchangeSubscriptionResponseApi {
 
     @Override
     public String toString() {
-        return "SubscriptionExchangeSubscriptionResponseApi{" +
+        return "RequestedSubscriptionResponseApi{" +
                 "id='" + id + '\'' +
                 ", selector='" + selector + '\'' +
                 ", createNewQueue=" + createNewQueue +

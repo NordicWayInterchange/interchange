@@ -21,7 +21,7 @@ public class SubscriptionRequestTransformerTest {
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
 	@Test
-	public void emptySubscriptionsToSubscriptionExchangeRequest() {
+	public void emptySubscriptionsToRequestedSubscriptionResponseApi() {
 		String name = "myNode";
 		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(name, Collections.emptySet());
 		assertThat(requestApi.getName()).isEqualTo(name);
@@ -31,7 +31,7 @@ public class SubscriptionRequestTransformerTest {
 	}
 
 	@Test
-	public void subscriptonsToSubscriptionExchangeRequest() {
+	public void subscriptonsToRequestedSubscriptionResponseApi() {
 		String name = "myNode";
 		String selector = "originatingCountry = 'NO'";
 		Subscription one = new Subscription(selector, SubscriptionStatus.REQUESTED);
@@ -50,7 +50,7 @@ public class SubscriptionRequestTransformerTest {
 	}
 
 	@Test
-	public void emptySubscriptionsToSubscriptionExchangeResponseApi() {
+	public void emptySubscriptionsToSubscriptionRequestApi() {
 		String name = "myNode";
 		SubscriptionResponseApi responseApi = subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(name,Collections.emptySet());
 		assertThat(responseApi.getName()).isEqualTo(name);
@@ -66,11 +66,11 @@ public class SubscriptionRequestTransformerTest {
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
 		Subscription subscription = new Subscription(1,SubscriptionStatus.REQUESTED,selector,path);
-		SubscriptionStatusPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionStatusPollResponseApi(subscription, neighbourName, thisNodeName);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, thisNodeName);
 		assertThat(responseApi.getPath()).isEqualTo(path);
 		assertThat(responseApi.getSelector()).isEqualTo(selector);
 		assertThat(responseApi.getStatus()).isEqualTo(SubscriptionStatusApi.REQUESTED);
-		Subscription result = subscriptionRequestTransformer.subscriptionStatusPollApiToSubscription(responseApi);
+		Subscription result = subscriptionRequestTransformer.subscriptionPollApiToSubscription(responseApi);
 		assertThat(result.getSelector()).isEqualTo(selector);
 		assertThat(result.getPath()).isEqualTo(path);
 		assertThat(responseApi.getPath()).isEqualTo(path);
@@ -83,12 +83,12 @@ public class SubscriptionRequestTransformerTest {
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
 		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path);
-		SubscriptionStatusPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionStatusPollResponseApi(subscription, neighbourName, thisNodeName);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, thisNodeName);
 		assertThat(responseApi.getMessageBrokerUrl()).isEqualTo("amqps://" + thisNodeName);
 	}
 
 	@Test
-	public void canTransformSubscriptionsToSubscriptionExchangeResponseApi() {
+	public void canTransformSubscriptionsToSubscriptionResponseApi() {
 		Subscription subscription = new Subscription();
 		subscription.setId(1);
 		String path = "bouvet/subscriptions/1";
@@ -102,7 +102,7 @@ public class SubscriptionRequestTransformerTest {
 		assertThat(response.getName()).isEqualTo("bouvet");
 		assertThat(response.getSubscriptions()).hasSize(1);
 
-		SubscriptionExchangeSubscriptionResponseApi subsResponse = response.getSubscriptions().iterator().next();
+		RequestedSubscriptionResponseApi subsResponse = response.getSubscriptions().iterator().next();
 		assertThat(subsResponse.getId()).isEqualTo("1");
 		assertThat(subsResponse.getPath()).isEqualTo(path);
 		assertThat(subsResponse.getSelector()).isEqualTo(selector);

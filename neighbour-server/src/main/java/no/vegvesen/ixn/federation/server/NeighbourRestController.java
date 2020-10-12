@@ -82,13 +82,13 @@ public class NeighbourRestController {
 
 	//TODO change this to new api objects.
 	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({@ApiResponse(code = 200, message = "Successfully polled the subscription.", response = SubscriptionStatusPollResponseApi.class),
+	@ApiResponses({@ApiResponse(code = 200, message = "Successfully polled the subscription.", response = SubscriptionPollResponseApi.class),
 			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the polling Neighbour does not exist.", response = ErrorDetails.class),
 			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	public SubscriptionStatusPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
+	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), ixnName);
 		logger.info("Received poll of subscription from neighbour {}.", ixnName);
 

@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.federation.discoverer.facade;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusPollResponseApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
@@ -64,8 +64,8 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
 		String name = neighbour.getName();
 		logger.info("Polling subscription to {} with URL: {}", name, url);
-		SubscriptionStatusPollResponseApi subscriptionApi = neighbourRESTClient.doPollSubscriptionStatus(url,name);
-		Subscription returnSubscription = subscriptionRequestTransformer.subscriptionStatusPollApiToSubscription(subscriptionApi);
+		SubscriptionPollResponseApi subscriptionApi = neighbourRESTClient.doPollSubscriptionStatus(url,name);
+		Subscription returnSubscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(subscriptionApi);
 		logger.debug("Received response object: {}", returnSubscription.toString());
 		return returnSubscription;
 	}

@@ -5,11 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-public class SubscriptionStatusPollResponseApiTest {
+public class SubscriptionPollResponseApiTest {
 
     @Test
     public void createValidJson() throws JsonProcessingException {
-        SubscriptionStatusPollResponseApi responseApi = new SubscriptionStatusPollResponseApi(
+        SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
                 "1",
                 "messageType='DENM' AND originatingCountry='NO'",
                 "/subscriptions/1",

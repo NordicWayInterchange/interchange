@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
 
-public class SubscriptionStatusPollResponseApi {
+public class SubscriptionPollResponseApi {
     private String id;
     private String selector;
 
@@ -20,17 +20,17 @@ public class SubscriptionStatusPollResponseApi {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueName;
 
-    public SubscriptionStatusPollResponseApi() {
+    public SubscriptionPollResponseApi() {
     }
 
-    public SubscriptionStatusPollResponseApi(String id,
-                                             String selector,
-                                             String path,
-                                             SubscriptionStatusApi status,
-                                             String messageBrokerUrl,
-                                             String queueName,
-                                             Boolean createNewQueue,
-                                             String queueConsumerUser) {
+    public SubscriptionPollResponseApi(String id,
+                                       String selector,
+                                       String path,
+                                       SubscriptionStatusApi status,
+                                       String messageBrokerUrl,
+                                       String queueName,
+                                       Boolean createNewQueue,
+                                       String queueConsumerUser) {
         this.id = id;
         this.selector = selector;
         this.createNewQueue = createNewQueue;
@@ -109,7 +109,7 @@ public class SubscriptionStatusPollResponseApi {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SubscriptionStatusPollResponseApi that = (SubscriptionStatusPollResponseApi) o;
+        SubscriptionPollResponseApi that = (SubscriptionPollResponseApi) o;
         return createNewQueue == that.createNewQueue &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(selector, that.selector) &&
@@ -134,7 +134,7 @@ public class SubscriptionStatusPollResponseApi {
 
     @Override
     public String toString() {
-        return "SubscriptionStatusPollResponseApi{" +
+        return "SubscriptionPollResponseApi{" +
                 "id='" + id + '\'' +
                 ", selector='" + selector + '\'' +
                 ", createNewQueue=" + createNewQueue +

@@ -67,9 +67,9 @@ public class NeighbourServiceIT {
 				new SubscriptionRequestApi("myNeighbour",
 						Collections.singleton(new RequestedSubscriptionApi("originatingCountry = 'NO'")))
 		);
-		Set<SubscriptionExchangeSubscriptionResponseApi> subscriptions = responseApi.getSubscriptions();
+		Set<RequestedSubscriptionResponseApi> subscriptions = responseApi.getSubscriptions();
 		assertThat(subscriptions.size()).isEqualTo(1);
-		SubscriptionExchangeSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
+		RequestedSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
 		assertThat(subscriptionApi.getPath()).isNotNull();
 	}
 
