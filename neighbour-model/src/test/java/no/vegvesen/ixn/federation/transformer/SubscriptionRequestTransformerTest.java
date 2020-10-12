@@ -23,10 +23,10 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void emptySubscriptionsToSubscriptionExchangeRequest() {
 		String name = "myNode";
-		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionExchangeRequestApi(name, Collections.emptySet());
+		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(name, Collections.emptySet());
 		assertThat(requestApi.getName()).isEqualTo(name);
 		assertThat(requestApi.getSubscriptions()).isEmpty();
-		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionExchangeRequestApiToSubscriptionRequest(requestApi);
+		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi);
 		assertThat(result.getSubscriptions()).isEmpty();
 	}
 
@@ -36,14 +36,14 @@ public class SubscriptionRequestTransformerTest {
 		String selector = "originatingCountry = 'NO'";
 		Subscription one = new Subscription(selector, SubscriptionStatus.REQUESTED);
 
-		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionExchangeRequestApi(name, Collections.singleton(one));
+		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(name, Collections.singleton(one));
 		assertThat(requestApi.getName()).isEqualTo(name);
 		assertThat(requestApi.getSubscriptions()).hasSize(1);
 
 		SubscriptionExchangeSubscriptionRequestApi onlySubscription = requestApi.getSubscriptions().iterator().next();
 		assertThat(onlySubscription.getSelector()).isEqualTo(selector);
 
-		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionExchangeRequestApiToSubscriptionRequest(requestApi);
+		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi);
 		assertThat(result.getSubscriptions()).hasSize(1);
 		Subscription subscription = result.getSubscriptions().iterator().next();
 		assertThat(subscription.getSelector()).isEqualTo(selector);
@@ -52,10 +52,10 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void emptySubscriptionsToSubscriptionExchangeResponseApi() {
 		String name = "myNode";
-		SubscriptionResponseApi responseApi = subscriptionRequestTransformer.subscriptionsToSubscriptionExchangeResponseApi(name,Collections.emptySet());
+		SubscriptionResponseApi responseApi = subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(name,Collections.emptySet());
 		assertThat(responseApi.getName()).isEqualTo(name);
 		assertThat(responseApi.getSubscriptions()).isEmpty();
-		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionExchangeResponseApiToSubscriptionRequest(responseApi,SubscriptionRequestStatus.REQUESTED);
+		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionResponseApiToSubscriptionRequest(responseApi,SubscriptionRequestStatus.REQUESTED);
 		assertThat(result.getSubscriptions()).isEmpty();
 	}
 
@@ -97,7 +97,7 @@ public class SubscriptionRequestTransformerTest {
 		subscription.setSelector(selector);
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 
-		SubscriptionResponseApi response = subscriptionRequestTransformer.subscriptionsToSubscriptionExchangeResponseApi("bouvet", Collections.singleton(subscription));
+		SubscriptionResponseApi response = subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi("bouvet", Collections.singleton(subscription));
 		assertThat(response.getVersion()).isEqualTo("1.0");
 		assertThat(response.getName()).isEqualTo("bouvet");
 		assertThat(response.getSubscriptions()).hasSize(1);
