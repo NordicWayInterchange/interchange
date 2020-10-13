@@ -26,7 +26,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -143,41 +142,13 @@ public class NeighbourRESTFacadeTest {
 	}
 
 	@Test
-	public void successfulPostOfSubscriptionRequestReturnsSubscriptionRequest() throws Exception{
-
-		SubscriptionApi subscriptionApi = new SubscriptionApi();
-		subscriptionApi.setSelector("originatingCountry = 'NO'");
-		subscriptionApi.setStatus(SubscriptionStatus.REQUESTED);
-		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("remote server", Collections.singleton(subscriptionApi) );
-
-		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionRequestApi);
-
-		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscriptions"))
-				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
-				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
-
-		self.setName("ericsson.itsinterchange.eu");
-		Set<Subscription> subscriptionSet = Collections.emptySet();
-
-		SubscriptionRequest response = neighbourRESTFacade.postSubscriptionRequest(ericsson,subscriptionSet, self.getName());
-
-		assertThat(response.getSubscriptions()).hasSize(1);
-
-		Iterator<Subscription> subscriptions = response.getSubscriptions().iterator();
-		Subscription subscriptionInSubscriptionRequest = subscriptions.next();
-
-		assertThat(subscriptionInSubscriptionRequest.getSelector()).isEqualTo(subscriptionApi.getSelector());
-		assertThat(subscriptionInSubscriptionRequest.getSubscriptionStatus()).isEqualTo(subscriptionApi.getStatus());
-	}
-
-	@Test
 	public void successfulPollOfSubscriptionReturnsSubscription()throws Exception{
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
+		subscription.setId(1);
 		subscription.setPath("bouvet/subscriptions/1");
-		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
-		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, "ericsson.itsinterchange.eu", "bouvet");
+		String remoteServerJson = new ObjectMapper().writeValueAsString(responseApi);
 
 		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscriptions/1"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
@@ -233,8 +204,7 @@ public class NeighbourRESTFacadeTest {
 		Set<Subscription> subscriptionSet = Collections.singleton(subscription);
 
 		// Subscription request received from the neighbour has empty set of subscription
-		SubscriptionRequestApi serverResponse = new SubscriptionRequestApi("remote server", new HashSet<>());
-		String errorDetailsJson = new ObjectMapper().writeValueAsString(serverResponse);
+		String errorDetailsJson = "this is an error";
 
 		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscriptions"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -287,8 +257,6 @@ public class NeighbourRESTFacadeTest {
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
 		subscription.setPath("bouvet/subscriptions/1");
-		SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
-		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionApi);
 
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);
 		Mockito.when(mock.getRawStatusCode()).thenThrow(IOException.class);

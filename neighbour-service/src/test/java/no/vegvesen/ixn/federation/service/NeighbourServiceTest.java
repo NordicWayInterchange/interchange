@@ -1,13 +1,21 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
+import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Self;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
@@ -78,9 +86,9 @@ class NeighbourServiceTest {
 	@Test
 	void postingSubscriptionRequestFromUnseenNeighbourReturnsException() {
 		// Create incoming subscription request api objcet
-		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
-		ericsson.setName("ericsson");
-		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", SubscriptionStatus.REQUESTED)));
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi("ericsson",Collections.singleton(
+				new RequestedSubscriptionApi("originatingCountry = 'FI'")
+		));
 
 		// Mock saving Neighbour to Neighbour repository
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
@@ -136,22 +144,36 @@ class NeighbourServiceTest {
 	}
 
 	@Test
-	void postingSubscriptionRequestReturnsStatusAccepted() {
+	//TODO IncomingSubscriptionRequest needs to be worked a bit on. Right now, it's difficult to test this method using mocks!
+	void postingSubscriptionRequestReturnsStatusRequested() {
 
 		// Create incoming subscription request api objcet
-		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
-		ericsson.setName("ericsson");
-		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", SubscriptionStatus.REQUESTED)));
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi("ericsson", Collections.singleton(
+				new RequestedSubscriptionApi("originatingCountry = 'FI'")
+		));
 
 		// Mock saving Neighbour to Neighbour repository
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED);
-		firstSubscription.setPath("/ericsson/subscriptions/1");
+		firstSubscription.setId(1);
+		//firstSubscription.setPath("/ericsson/subscriptions/1");
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(firstSubscription);
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
 
-		Mockito.doReturn(updatedNeighbour).when(neighbourRepository).save(ArgumentMatchers.any(Neighbour.class));
+		//Mockito.doReturn(updatedNeighbour).when(neighbourRepository).save(ArgumentMatchers.any(Neighbour.class));
+		Mockito.when(neighbourRepository.save(updatedNeighbour)).thenAnswer(
+				a -> {
+					Object argument = a.getArgument(0);
+					Neighbour neighbour = (Neighbour)argument;
+					int i = 0;
+					for (Subscription subscription : neighbour.getSubscriptionRequest().getSubscriptions()) {
+						subscription.setId(i);
+						i++;
+					}
+					return neighbour;
+				}
+		);
 		Mockito.doReturn(updatedNeighbour).when(neighbourRepository).findByName(ArgumentMatchers.anyString());
 
 		// Mock response from DNS facade on Server
@@ -214,6 +236,28 @@ class NeighbourServiceTest {
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, selfWithNoSubscriptions.getLocalSubscriptions());
 		assertThat(calculatedSubscription).hasSize(0);
 	}
+
+	@Test
+	public void findSubscriptionsHappyCase() {
+		String neighbourName = "neighbour";
+		int id = 1;
+		Subscription subscription = new Subscription();
+		subscription.setId(id);
+		subscription.setPath("/" + neighbourName + "/subscriptions/" + id);
+		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
+		subscription.setSelector("originatingCountry = 'NO'");
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
+		Neighbour neighbour = new Neighbour(neighbourName, new Capabilities(), subscriptionRequest,new SubscriptionRequest());
+		Mockito.when(neighbourRepository.findByName(neighbourName)).thenReturn(neighbour);
+
+		SubscriptionResponseApi subscriptions = neighbourService.findSubscriptions(neighbourName);
+		assertThat(subscriptions.getName()).isEqualTo(neighbourName);
+		assertThat(subscriptions.getSubscriptions()).hasSize(1);
+
+		Mockito.verify(neighbourRepository,Mockito.times(1)).findByName(neighbourName);
+	}
+
 
 	private Set<DataType> getDataTypeSetOriginatingCountry(String country) {
 		return Sets.newLinkedHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));

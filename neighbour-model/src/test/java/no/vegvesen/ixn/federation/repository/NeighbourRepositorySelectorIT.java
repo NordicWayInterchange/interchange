@@ -1,7 +1,11 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
+import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;

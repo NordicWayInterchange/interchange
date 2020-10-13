@@ -4,10 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
@@ -42,12 +39,13 @@ public class NeighbourRestController {
 	}
 
 	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({@ApiResponse(code = 202, message = "Successfully requested a subscription", response = SubscriptionRequestApi.class),
-			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
+	@ApiResponses({@ApiResponse(code = 202, message = "Successfully requested a subscription", response = SubscriptionResponseApi.class),
+			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)
+	})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@RequestMapping(method = RequestMethod.POST, path = "/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	public SubscriptionRequestApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
+	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), neighbourSubscriptionRequest.getName());
 		logger.info("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
@@ -55,19 +53,42 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
 		logger.info("Common name of certificate matched name in API object.");
 
-		SubscriptionRequestApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
+		SubscriptionResponseApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
 		NeighbourMDCUtil.removeLogVariables();
 		return response;
 	}
 
+
+	@ApiOperation(value = "Endpoint for requesting a lisst of an interchange's subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiResponses({@ApiResponse(code = 200, message = "Success", response = SubscriptionResponseApi.class),
+					@ApiResponse(code = 403, message = "Common name in certificate does not match Neighbour name in path", response = ErrorDetails.class),
+					@ApiResponse(code = 404, message = "Invalid path, the requested subscriptions does not exist", response = ErrorDetails.class)})
+	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping(method = RequestMethod.GET, path = "/{ixnName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Secured("ROLE_USER")
+	public SubscriptionResponseApi listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
+	    NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(),ixnName);
+	    logger.info("Received request for subscriptions for neighbour {}", ixnName);
+	    certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
+		logger.info("Common name matches Neighbour name in path.");
+
+		//fetch the list of neighbours
+		SubscriptionResponseApi reponse = neighbourService.findSubscriptions(ixnName);
+		NeighbourMDCUtil.removeLogVariables();
+
+		return reponse;
+	}
+
+
+	//TODO change this to new api objects.
 	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({@ApiResponse(code = 200, message = "Successfully polled the subscription.", response = SubscriptionApi.class),
+	@ApiResponses({@ApiResponse(code = 200, message = "Successfully polled the subscription.", response = SubscriptionPollResponseApi.class),
 			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the polling Neighbour does not exist.", response = ErrorDetails.class),
 			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	public SubscriptionApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
+	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), ixnName);
 		logger.info("Received poll of subscription from neighbour {}.", ixnName);
 
@@ -75,7 +96,7 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.info("Common name matches Neighbour name in path.");
 
-		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId);
+		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId,selfService.getNodeProviderName());
 	}
 
 

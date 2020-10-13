@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
-
 import javax.persistence.*;
 
 @Entity
@@ -30,6 +28,19 @@ public class Subscription {
 		this.subscriptionStatus = subscriptionStatus;
 	}
 
+	public Subscription(Integer id, SubscriptionStatus subscriptionStatus, String selector) {
+		this.id = id;
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+	}
+
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path) {
+		this.id = id;
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+		this.path = path;
+	}
+
 	public SubscriptionStatus getSubscriptionStatus() {
 		return subscriptionStatus;
 	}
@@ -48,6 +59,10 @@ public class Subscription {
 
 	public Integer getId() {
 		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public String getPath() {

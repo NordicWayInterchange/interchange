@@ -1,15 +1,13 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -24,39 +22,46 @@ public class SubscriptionRequestTransformer {
 	}
 
 
-	private Set<Subscription> convertAllSubscriptionApisToSubscriptions(Set<SubscriptionApi> subscriptionApis){
-		Set<Subscription> neighbourSubscriptions = new HashSet<>();
+	public SubscriptionRequestApi subscriptionRequestToSubscriptionRequestApi(String selfName, Set<Subscription> subscriptions) {
+	    SubscriptionRequestApi requestApi = new SubscriptionRequestApi(selfName,
+				subscriptionTransformer.subscriptionsToRequestedSubscriptionApi(subscriptions)
+		);
+	    return requestApi;
+	}
 
-		for(SubscriptionApi api : subscriptionApis){
-			Subscription converted = subscriptionTransformer.subscriptionApiToSubscription(api);
-			neighbourSubscriptions.add(converted);
+	public SubscriptionResponseApi subscriptionsToSubscriptionResponseApi(String name, Set<Subscription> subscriptions) {
+	    Set<RequestedSubscriptionResponseApi> subscriptionResponseApis = subscriptionTransformer.subscriptionToRequestedSubscriptionResponseApi(subscriptions);
+	    return new SubscriptionResponseApi(name,subscriptionResponseApis);
+	}
+
+
+	public SubscriptionRequest subscriptionResponseApiToSubscriptionRequest(SubscriptionResponseApi responseApi, SubscriptionRequestStatus status) {
+		return new SubscriptionRequest(status,subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions()));
+	}
+
+	public SubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions()));
+		return subscriptionRequest;
+	}
+
+	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
+		Subscription subscription = new Subscription(subscriptionApi.getSelector(), subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
+		subscription.setPath(subscriptionApi.getPath());
+		return subscription;
+	}
+
+	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String thisNodeName) {
+		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
+		response.setId(subscription.getId().toString());
+		response.setSelector(subscription.getSelector());
+		response.setPath(subscription.getPath());
+		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
+		response.setStatus(status);
+		if (status.equals(SubscriptionStatusApi.CREATED)) {
+			response.setMessageBrokerUrl("amqps://" + thisNodeName); //TODO pass the actual URL from SelfService, let it create the url internally
+			response.setQueueName(neighbourName);
 		}
-
-		return neighbourSubscriptions;
-	}
-
-	private Set<SubscriptionApi> convertAllSubscriptionsToSubscriptionApis(Set<Subscription> subscriptions){
-
-		Set<SubscriptionApi> subscriptionApis = new HashSet<>();
-
-		for(Subscription subscription : subscriptions){
-			SubscriptionApi converted = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
-			subscriptionApis.add(converted);
-		}
-
-		return subscriptionApis;
-	}
-
-	public SubscriptionRequestApi neighbourToSubscriptionRequestApi(Neighbour neighbour){
-		return subscriptionRequestToSubscriptionRequestApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
-	}
-
-	public SubscriptionRequestApi subscriptionRequestToSubscriptionRequestApi(String name, Set<Subscription> subscriptions) {
-		return new SubscriptionRequestApi(name,convertAllSubscriptionsToSubscriptionApis(subscriptions));
-	}
-
-	public SubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, SubscriptionRequestStatus status) {
-		return new SubscriptionRequest(status, convertAllSubscriptionApisToSubscriptions(subscriptionRequestApi.getSubscriptions()));
+		return response;
 	}
 
 }

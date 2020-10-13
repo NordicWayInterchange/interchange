@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
@@ -60,6 +57,7 @@ public class NeighbourService {
 	}
 
 
+
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
 	private Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
@@ -84,8 +82,8 @@ public class NeighbourService {
 		return neighbourSubscriptionRequest;
 	}
 
-	public SubscriptionRequestApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
-		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest, SubscriptionRequestStatus.REQUESTED);
+	public SubscriptionResponseApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
+		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
 		logger.info("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
 		logger.info("Looking up neighbour in database.");
@@ -102,7 +100,7 @@ public class NeighbourService {
 			logger.info("Returning empty subscription request.");
 			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
 
-			return new SubscriptionRequestApi(neighbour.getName(), Collections.emptySet());
+			return new SubscriptionResponseApi(neighbour.getName(),Collections.emptySet());
 		} else if (!persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			// empty subscription request - tear down existing subscription.
 			logger.info("Received empty subscription request.");
@@ -139,20 +137,20 @@ public class NeighbourService {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
 		logger.info("Saving updated Neighbour: {}", neighbour.toString());
-		return subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
+		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
 	}
 
-	public SubscriptionApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
+	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
 		logger.info("Looking up polling Neighbour in DB.");
-		Neighbour Neighbour = neighbourRepository.findByName(ixnName);
+		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
-		if (Neighbour != null) {
+		if (neighbour != null) {
 
-			Subscription subscription = Neighbour.getSubscriptionById(subscriptionId);
-			logger.info("Neighbour {} polled for status of subscription {}.", Neighbour.getName(), subscriptionId);
+			Subscription subscription = neighbour.getSubscriptionById(subscriptionId);
+			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),nodeProviderName);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
@@ -426,4 +424,9 @@ public class NeighbourService {
 	}
 
 
+	public SubscriptionResponseApi findSubscriptions(String ixnName) {
+		Neighbour neighbour = neighbourRepository.findByName(ixnName);
+		Set<Subscription> subscriptions = neighbour.getSubscriptionRequest().getSubscriptions();
+		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),subscriptions);
+	}
 }

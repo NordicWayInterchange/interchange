@@ -170,17 +170,21 @@ class NeighbourRestControllerTest {
 
 	@Test
 	void postingSubscriptionRequestReturnsStatusAccepted() throws Exception {
-		mockCertificate("ericsson");
+		String name = "ericsson";
+		String selector = "originatingCountry = 'FI'";
+		String path = "/subscriptions/ericsson/1";
+
+		mockCertificate(name);
 
 		// Create incoming subscription request api objcet
-		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
-		ericsson.setName("ericsson");
-		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", SubscriptionStatus.REQUESTED)));
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi(name,
+				Collections.singleton(new RequestedSubscriptionApi(selector)));
 
 		// Convert to JSON
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
-		SubscriptionRequestApi response = new SubscriptionRequestApi(ericsson.getName(), Sets.newLinkedHashSet(new SubscriptionApi("originatingCountry = 'FI'", "/subscriptions/ericsson/1", SubscriptionStatus.ACCEPTED)));
+		SubscriptionResponseApi response = new SubscriptionResponseApi(name,
+				Collections.singleton(new RequestedSubscriptionResponseApi("1",selector,path,SubscriptionStatusApi.REQUESTED)));
 
 		doReturn(response).when(neighbourService).incomingSubscriptionRequest(any());
 
@@ -193,12 +197,15 @@ class NeighbourRestControllerTest {
 
 	@Test
 	void postingSubscriptionRequestFromUnseenNeighbourReturnsClientError() throws Exception {
-		mockCertificate("ericsson");
+		String name = "ericsson";
+		String selector = "originatingCountry = 'FI'";
 
-		// Create incoming subscription request api objcet
-		SubscriptionRequestApi ericsson = new SubscriptionRequestApi();
-		ericsson.setName("ericsson");
-		ericsson.setSubscriptions(Collections.singleton(new SubscriptionApi("originatingCountry = 'FI'", "", SubscriptionStatus.REQUESTED)));
+		mockCertificate(name);
+
+		// Create incoming subscription request api object
+		SubscriptionRequestApi ericsson = new SubscriptionRequestApi(name,
+				Collections.singleton(new RequestedSubscriptionApi(selector))
+		);
 
 		// Convert to JSON
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);

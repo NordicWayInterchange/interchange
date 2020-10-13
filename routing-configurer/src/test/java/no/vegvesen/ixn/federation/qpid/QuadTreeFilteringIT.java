@@ -5,7 +5,6 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.properties.MessageProperty;

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.Subscription;
