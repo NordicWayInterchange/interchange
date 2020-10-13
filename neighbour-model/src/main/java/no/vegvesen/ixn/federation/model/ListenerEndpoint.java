@@ -45,4 +45,15 @@ public class ListenerEndpoint {
     public Connection getMessageConnection () { return messageConnection; }
 
     public void setMessageConnection (Connection messgeConnection) { this.messageConnection = messageConnection; }
+
+    @Override
+    public String toString() {
+        return "ListenerEndpoint{" +
+                "id=" + id +
+                ", neighbourName='" + neighbourName + '\'' +
+                ", brokerUrl='" + brokerUrl + '\'' +
+                ", queue='" + queue + '\'' +
+                ", messageConnection=" + messageConnection +
+                '}';
+    }
 }

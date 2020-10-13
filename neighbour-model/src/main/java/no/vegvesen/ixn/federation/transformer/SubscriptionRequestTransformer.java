@@ -47,6 +47,8 @@ public class SubscriptionRequestTransformer {
 	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
 		Subscription subscription = new Subscription(subscriptionApi.getSelector(), subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
 		subscription.setPath(subscriptionApi.getPath());
+		subscription.setBrokerUrl(subscriptionApi.getMessageBrokerUrl());
+		subscription.setQueue(subscriptionApi.getQueueName());
 		return subscription;
 	}
 

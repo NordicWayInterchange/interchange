@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -38,6 +40,7 @@ public class NeighbourService {
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 	private DNSFacade dnsFacade;
+	private ListenerEndpointRepository listenerEndpointRepository;
 
 	private GracefulBackoffProperties backoffProperties;
 	private NeighbourDiscovererProperties discovererProperties;
@@ -355,9 +358,15 @@ public class NeighbourService {
 
 						// Throws SubscriptionPollException if unsuccessful
 						Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
+						subscription.setBrokerUrl(polledSubscription.getBrokerUrl());
+						subscription.setQueue(polledSubscription.getQueue());
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
 						neighbour.getControlConnection().okConnection();
+						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
+							createListenerEndpoint(polledSubscription, neighbour.getName());
+						}
+						//utvide med ListenerEndpoint lookup + lage ny om det trengs
 						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
 					} else {
 						// Number of poll attempts exceeds allowed number of poll attempts.
@@ -373,6 +382,16 @@ public class NeighbourService {
 		} finally {
 			logger.info("Saving updated neighbour: {}", neighbour.toString());
 			neighbourRepository.save(neighbour);
+		}
+	}
+
+	public void createListenerEndpoint(Subscription subscription, String neighbourName) {
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, subscription.getBrokerUrl(), subscription.getQueue(), new Connection());
+		try {
+			listenerEndpointRepository.save(listenerEndpoint);
+			logger.info("Successfully saved ListenerEndpoint");
+		} catch(DataIntegrityViolationException e) {
+			logger.error("Error in saving ListenerEndpoint.", e);
 		}
 	}
 
