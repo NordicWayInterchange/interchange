@@ -1,10 +1,12 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
-import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
@@ -20,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -51,12 +52,14 @@ public class NeighbourService {
 							DNSFacade dnsFacade,
 							GracefulBackoffProperties backoffProperties,
 							NeighbourDiscovererProperties discovererProperties,
-							InterchangeNodeProperties interchangeNodeProperties) {
+							InterchangeNodeProperties interchangeNodeProperties,
+							ListenerEndpointRepository listenerEndpointRepository) {
 		this.neighbourRepository = neighbourRepository;
 		this.dnsFacade = dnsFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
 		this.interchangeNodeProperties = interchangeNodeProperties;
+		this.listenerEndpointRepository = listenerEndpointRepository;
 	}
 
 
@@ -386,12 +389,9 @@ public class NeighbourService {
 	}
 
 	public void createListenerEndpoint(Subscription subscription, String neighbourName) {
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, subscription.getBrokerUrl(), subscription.getQueue(), new Connection());
-		try {
-			listenerEndpointRepository.save(listenerEndpoint);
-			logger.info("Successfully saved ListenerEndpoint");
-		} catch(DataIntegrityViolationException e) {
-			logger.error("Error in saving ListenerEndpoint.", e);
+		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbourName, subscription.getBrokerUrl(), subscription.getQueue()) == null){
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbourName, subscription.getBrokerUrl(), subscription.getQueue(), new Connection()));
+			logger.info("ListenerEnpoint was saved: {}", savedListenerEndpoint.toString());
 		}
 	}
 

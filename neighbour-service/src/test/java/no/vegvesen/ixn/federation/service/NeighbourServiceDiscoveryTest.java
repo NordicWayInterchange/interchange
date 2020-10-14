@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -34,6 +35,8 @@ public class NeighbourServiceDiscoveryTest {
 
 	@MockBean
 	private NeighbourRepository neighbourRepository;
+	@MockBean
+	private ListenerEndpointRepository listenerEndpointRepository;
 	@MockBean
 	private DNSFacade dnsFacade;
 	@MockBean
@@ -508,5 +511,57 @@ public class NeighbourServiceDiscoveryTest {
 		neighbourService.retryUnreachable(self, neighbourFacade);
 
 		verify(neighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
+	}
+
+	@Test
+	public void listenerEndpointIsSavedWhenSubscriptionWithCreatedStatusIsPolled(){
+
+		Neighbour spyNeighbour1 = spy(Neighbour.class);
+
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
+		subscription.setNumberOfPolls(0);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		spyNeighbour1.setFedIn(subscriptionRequest);
+		spyNeighbour1.setName("spy-neighbour1");
+
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour1));
+
+		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED);
+		createdSubscription.setQueue("spy-neighbour1");
+		createdSubscription.setBrokerUrl("amqps://spy-neighbour1");
+
+
+		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
+
+		neighbourService.pollSubscriptions(neighbourFacade);
+
+		verify(listenerEndpointRepository).save(any(ListenerEndpoint.class));
+	}
+
+	@Test
+	public void listenerEndpointIsNotSavedWhenSubscriptionWithRequestedStatusIsPolled(){
+
+		Neighbour spyNeighbour1 = spy(Neighbour.class);
+
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
+		subscription.setNumberOfPolls(0);
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		spyNeighbour1.setFedIn(subscriptionRequest);
+		spyNeighbour1.setName("spy-neighbour1");
+
+		when(neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour1));
+
+		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
+		createdSubscription.setQueue("spy-neighbour1");
+		createdSubscription.setBrokerUrl("amqps://spy-neighbour1");
+
+
+		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
+
+		neighbourService.pollSubscriptions(neighbourFacade);
+
+		verify(listenerEndpointRepository, times(0)).save(any(ListenerEndpoint.class));
 	}
 }

@@ -17,6 +17,7 @@ import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -41,6 +42,8 @@ class NeighbourServiceTest {
 	@Mock
 	NeighbourRepository neighbourRepository;
 	@Mock
+	ListenerEndpointRepository listenerEndpointRepository;
+	@Mock
 	DNSFacade dnsFacade;
 	@Mock
 	SelfService selfService;
@@ -56,7 +59,7 @@ class NeighbourServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, new InterchangeNodeProperties(myName));
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, new InterchangeNodeProperties(myName), listenerEndpointRepository);
 	}
 
 	@Test
