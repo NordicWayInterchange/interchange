@@ -35,4 +35,16 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
 	}
 
+	public static GenericContainer getQpidTestContainer(String configPathFromClasspath, Path testKeysPath, final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword, String vHostName) {
+		return new GenericContainer(
+				new ImageFromDockerfile("qpid-it-memory", false).withFileFromPath(".", getFolderPath("qpid-initial")))
+				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
+				.withFileSystemBind(testKeysPath.toString(), "/jks", BindMode.READ_ONLY)
+				.withEnv("KEY_STORE", "/jks/" + keyStore)
+				.withEnv("KEY_STORE_PASSWORD", keyStorePassword)
+				.withEnv("TRUST_STORE", "/jks/" + trustStore)
+				.withEnv("TRUST_STORE_PASSWORD", trustStorePassword)
+                .withEnv("VHOST_NAME",vHostName)
+				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
+	}
 }

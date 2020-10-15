@@ -1,0 +1,168 @@
+{
+  "type": "Memory",
+  "name": "${VHOST_NAME}",
+  "modelVersion": "8.0",
+  "exchanges": [
+    {
+      "name": "nwEx",
+      "type": "headers",
+      "durable": true,
+      "durableBindings": [
+        {
+          "arguments": {
+            "x-filter-jms-selector": "originatingCountry='NO'"
+          },
+          "bindingKey": "originatingCountry",
+          "destination": "NO-out"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "originatingCountry='NO'"
+          },
+          "bindingKey": "originatingCountry",
+          "destination": "king_harald"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "originatingCountry='SE'"
+          },
+          "bindingKey": "originatingCountry ",
+          "destination": "king_gustaf"
+        },
+        {
+          "arguments": {
+            "x-filter-jms-selector": "originatingCountry LIKE '%'"
+          },
+          "bindingKey": "where",
+          "destination": "test-out"
+        }
+      ]
+    }
+  ],
+  "queues": [
+    {
+      "id": "bb885764-c684-4138-8e9d-b1342c7582ae",
+      "name": "dlqueue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
+    },
+    {
+      "id": "62db8a58-26c6-4121-8a79-2d6db32e13f9",
+      "name": "king_gustaf",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
+    },
+    {
+      "id": "ada38ba3-a880-4abd-8ecb-d5fb517523db",
+      "name": "king_harald",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
+    },
+    {
+      "id": "502bde7b-a4e9-47cb-912d-d960647746b9",
+      "name": "onramp",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
+    },
+    {
+      "id": "0c78cf35-f87b-4720-906f-6548d0786ec6",
+      "name": "test-out",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "messageDurability": "ALWAYS",
+      "owner": null,
+      "lastUpdatedBy": "interchange",
+      "createdBy": "interchange"
+    }
+  ],
+  "virtualhostaccesscontrolproviders": [
+    {
+      "name": "default",
+      "type": "RuleBased",
+      "defaultResult": "DENIED",
+      "rules": [
+        {
+          "objectType": "ALL",
+          "identity": "interchange",
+          "operation": "ALL",
+          "outcome": "ALLOW_LOG",
+          "attributes": {}
+        },
+        {
+          "objectType": "EXCHANGE",
+          "identity": "messaging-users",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "ROUTING_KEY": "onramp",
+            "NAME": ""
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "messaging-users",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "qpid.test.io"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "messaging-users",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "test-out"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "king_harald",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "king_harald"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "king_gustaf",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "king_gustaf"
+          }
+        },
+        {
+          "objectType": "ALL",
+          "identity": "ALL",
+          "operation": "ALL",
+          "outcome": "DENY_LOG",
+          "attributes": {}
+        }
+      ]
+    }
+  ]
+}
