@@ -11,10 +11,11 @@ RUN cd /usr/local && \
     rm -f apache-qpid-broker-j-${QPID_VERSION}-bin.tar.gz
 
 RUN mkdir -p /work
-ENV QPID_WORK=/work
-ENV QPID_HOME=/usr/local/qpid
+ENV QPID_WORK="/work"
+ENV QPID_HOME="/usr/local/qpid"
 ENV VHOST_FILE="/config/vhost.json"
 ENV PASSWD_FILE="/config/passwd"
+ENV GROUPS_FILE="/config/groups"
 ADD config.json ${QPID_WORK}
 ENTRYPOINT ["/usr/local/qpid/bin/qpid-server"]
 

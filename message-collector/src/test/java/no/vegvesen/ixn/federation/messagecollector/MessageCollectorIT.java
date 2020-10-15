@@ -31,21 +31,24 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@SuppressWarnings("rawtypes")
 	@Container
 	//Container is not static and is not reused between tests
-	public GenericContainer consumerContainer = getQpidContainer("docker/consumer",
+	public GenericContainer consumerContainer = getQpidTestContainer("docker/consumer",
 			testKeysPath,
 			"localhost.p12",
 			"password",
 			"truststore.jks",
-			"password");
+			"password",
+			"localhost");
 
 	@SuppressWarnings("rawtypes")
 	@Container
 	//Container is not static and is not reused between tests
-	public GenericContainer producerContainer = getQpidContainer("docker/producer",
+	public GenericContainer producerContainer = getQpidTestContainer("docker/producer",
 			testKeysPath,
 			"localhost.p12",
 			"password",
-			"truststore.jks", "password");
+			"truststore.jks",
+			"password",
+			"localhost");
 
 	public Sink createSink(Integer containerPort, String queueName, String keyStore) {
 		return new Sink("amqps://localhost:" + containerPort,

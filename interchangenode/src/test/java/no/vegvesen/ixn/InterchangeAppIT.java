@@ -51,13 +51,14 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-    public static final GenericContainer qpidContainer = getQpidContainer(
-            "qpid",
+    public static final GenericContainer qpidContainer = getQpidTestContainer(
+            "qpid-persistent",
             testKeysPath,
             "localhost.p12",
             "password",
             "truststore.jks",
-			"password");
+			"password",
+            "localhost");
 
 	private String getQpidURI() {
 		String url = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
