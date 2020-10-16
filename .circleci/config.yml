@@ -66,6 +66,9 @@ workflows:
       - docker-push:
           requires:
           - build
+      - docker-push-svv:
+          requires:
+          - build
       - maven-deploy:
           filters:
             branches:
