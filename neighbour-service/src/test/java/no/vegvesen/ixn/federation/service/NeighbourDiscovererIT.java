@@ -156,9 +156,9 @@ public class NeighbourDiscovererIT {
 		neighbourService.pollSubscriptions(mockNeighbourFacade);
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
-		assertThat(found1.getFedIn()).isNotNull();
-		assertThat(found1.getFedIn().getSubscriptions()).hasSize(1);
-		assertThat(found1.getFedIn().getSubscriptions().iterator().next().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.CREATED);
+		assertThat(found1.getOurRequestedSubscriptions()).isNotNull();
+		assertThat(found1.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+		assertThat(found1.getOurRequestedSubscriptions().getSubscriptions().iterator().next().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.CREATED);
 	}
 
 

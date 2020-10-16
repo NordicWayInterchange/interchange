@@ -63,10 +63,10 @@ public class NeighbourRepositoryIT {
 
 		Neighbour foundInOut = repository.findByName(savedInOut.getName());
 		assertThat(foundInOut).isNotNull();
-		assertThat(foundInOut.getFedIn().getSubscriptions()).hasSize(1);
+		assertThat(foundInOut.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 
 
-		Subscription inSub = foundInOut.getFedIn().getSubscriptions().iterator().next();
+		Subscription inSub = foundInOut.getOurRequestedSubscriptions().getSubscriptions().iterator().next();
 		assertThat(inSub.getSelector()).isEqualTo("inbound is true");
 		assertThat(foundInOut.getSubscriptionRequest().getSubscriptions()).hasSize(1);
 		Subscription outSub = foundInOut.getSubscriptionRequest().getSubscriptions().iterator().next();

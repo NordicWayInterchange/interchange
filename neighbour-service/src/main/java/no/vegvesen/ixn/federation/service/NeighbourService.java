@@ -210,7 +210,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {
-		return neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED);
+		return neighbourRepository.findByOurRequestedSubscriptions_StatusIn(SubscriptionRequestStatus.FAILED);
 	}
 
 	public void checkForNewNeighbours() {
@@ -281,20 +281,20 @@ public class NeighbourService {
 					if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 						Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
-						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
+						Set<Subscription> fedInSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 							try {
 								if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
 									SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, calculatedSubscriptionForNeighbour, self.getName());
 									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
-									neighbour.setFedIn(subscriptionRequestResponse);
+									neighbour.setOurRequestedSubscriptions(subscriptionRequestResponse);
 									neighbour.getControlConnection().okConnection();
 									logger.info("Successfully posted subscription request to neighbour.");
 								} else {
 									logger.info("Too soon to post subscription request to neighbour when backing off");
 								}
 							} catch (SubscriptionRequestException e) {
-								neighbour.getFedIn().setStatus(SubscriptionRequestStatus.FAILED);
+								neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.FAILED);
 								neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
 								logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
 							}
@@ -333,7 +333,7 @@ public class NeighbourService {
 	}
 
 	public void pollSubscriptions(NeighbourFacade neighbourFacade) {
-		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
+		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.REQUESTED,
 				SubscriptionStatus.ACCEPTED,
 				SubscriptionStatus.FAILED);
@@ -396,7 +396,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> listNeighboursToConsumeMessagesFrom() {
-		return neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
+		return neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
 	}
 
 	public void retryUnreachable(Self self, NeighbourFacade neighbourFacade) {

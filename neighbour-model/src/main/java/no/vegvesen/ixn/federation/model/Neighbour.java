@@ -43,7 +43,7 @@ public class Neighbour {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "fed_in", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_fed_in"))
-	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	private SubscriptionRequest ourRequestedSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_message_connection"))
@@ -61,18 +61,18 @@ public class Neighbour {
 	public Neighbour() {
 	}
 
-	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn) {
+	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.subscriptionRequest = subscriptions;
-		this.fedIn = fedIn;
+		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
 	}
 
-	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn, Connection messageConnection, Connection controlConnection) {
+	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection messageConnection, Connection controlConnection) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.subscriptionRequest = subscriptions;
-		this.fedIn = fedIn;
+		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
 		this.messageConnection = messageConnection;
 		this.controlConnection = controlConnection;
 	}
@@ -108,8 +108,8 @@ public class Neighbour {
 		this.subscriptionRequest.setStatus(subscriptionRequestStatus);
 	}
 
-	public SubscriptionRequest getFedIn() {
-		return fedIn;
+	public SubscriptionRequest getOurRequestedSubscriptions() {
+		return ourRequestedSubscriptions;
 	}
 
 	public Subscription getSubscriptionById(Integer id) throws SubscriptionNotFoundException {
@@ -123,8 +123,8 @@ public class Neighbour {
 		throw new SubscriptionNotFoundException("Could not find subscription with id " + id + " on interchange " + name);
 	}
 
-	public void setFedIn(SubscriptionRequest fedIn) {
-		this.fedIn = fedIn;
+	public void setOurRequestedSubscriptions(SubscriptionRequest fedIn) {
+		this.ourRequestedSubscriptions = fedIn;
 	}
 
 	public String getMessageChannelPort() {
@@ -144,7 +144,7 @@ public class Neighbour {
 	}
 
 	public Set<Subscription> getSubscriptionsForPolling() {
-		return getFedIn().getSubscriptions().stream()
+		return getOurRequestedSubscriptions().getSubscriptions().stream()
 				.filter(s -> SubscriptionStatus.REQUESTED.equals(s.getSubscriptionStatus()) ||
 						SubscriptionStatus.ACCEPTED.equals(s.getSubscriptionStatus()) ||
 						SubscriptionStatus.FAILED.equals(s.getSubscriptionStatus()))
@@ -158,7 +158,7 @@ public class Neighbour {
 				", name=" + name +
 				", capabilities=" + capabilities +
 				", subscriptionRequest=" + subscriptionRequest +
-				", fedIn=" + fedIn +
+				", fedIn=" + ourRequestedSubscriptions +
 				", lastUpdated=" + lastUpdated +
 				", messageConnection=" + messageConnection +
 				", controlConnection=" + controlConnection +
@@ -253,12 +253,12 @@ public class Neighbour {
 		}
 		LocalDateTime capabilityPostDate = this.getCapabilities().getLastCapabilityExchange();
 
-		if (this.getFedIn() == null || !this.getFedIn().getSuccessfulRequest().isPresent()) {
+		if (this.getOurRequestedSubscriptions() == null || !this.getOurRequestedSubscriptions().getSuccessfulRequest().isPresent()) {
 			logger.debug("Should check subscription for neighbour with no previous subscription request");
 			return true;
 		}
 
-		LocalDateTime neighbourSubscriptionRequestTime = this.getFedIn().getSuccessfulRequest().get();
+		LocalDateTime neighbourSubscriptionRequestTime = this.getOurRequestedSubscriptions().getSuccessfulRequest().get();
 
 		boolean shouldCheckSubscriptionRequestForUpdates = neighbourSubscriptionRequestTime.isBefore(localSubscriptionsUpdatedTime)
 				|| neighbourSubscriptionRequestTime.isBefore(capabilityPostDate);
