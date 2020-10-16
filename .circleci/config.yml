@@ -42,7 +42,21 @@ jobs:
             gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
             gcloud docker --authorize-only
             chmod +x build-push-images.sh
-            ./build-push-images.sh
+            ./build-push-images.sh eu.gcr.io/nordic-way-aad182cc
+  docker-push-svv:
+      executor: my-machine
+      steps:
+      - attach_workspace:
+          at: ~/interchange
+      - run:
+          name: Push containers
+          command: |
+            echo $SVV_GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
+            gcloud docker --authorize-only
+            chmod +x build-push-images.sh
+            ./build-push-images.sh gcr.io/nw-interchange-stm-whya
 
 workflows:
   version: 2.1
