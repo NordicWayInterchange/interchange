@@ -155,7 +155,7 @@ public class Neighbour {
 	public String toString() {
 		return "Neighbour{" +
 				"neighbour_id=" + neighbour_id +
-				", name='" + name +
+				", name=" + name +
 				", capabilities=" + capabilities +
 				", subscriptionRequest=" + subscriptionRequest +
 				", fedIn=" + fedIn +

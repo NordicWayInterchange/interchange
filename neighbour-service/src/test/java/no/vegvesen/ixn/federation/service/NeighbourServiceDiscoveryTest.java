@@ -515,7 +515,6 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void listenerEndpointIsSavedWhenSubscriptionWithCreatedStatusIsPolled(){
-
 		Neighbour spyNeighbour1 = spy(Neighbour.class);
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
@@ -541,7 +540,6 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void listenerEndpointIsNotSavedWhenSubscriptionWithRequestedStatusIsPolled(){
-
 		Neighbour spyNeighbour1 = spy(Neighbour.class);
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);

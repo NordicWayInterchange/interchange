@@ -162,7 +162,7 @@ public class NeighbourDiscovererIT {
 	}
 
 
-	private DataType getDataType(String messageType, String originatingCountry) {
+	static DataType getDataType(String messageType, String originatingCountry) {
 		DataType dataType = new DataType();
 		dataType.getValues().put(MessageProperty.MESSAGE_TYPE.getName(), messageType);
 		dataType.getValues().put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
