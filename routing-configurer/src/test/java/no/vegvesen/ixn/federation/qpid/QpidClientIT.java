@@ -35,7 +35,13 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	private static Path testKeysPath = generateKeys(QpidClientIT.class, "my_ca", "localhost", "routing_configurer");
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
+	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid",
+			testKeysPath,
+			"localhost.p12",
+			"password",
+			"truststore.jks",
+			"password",
+			"localhost");
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 	private static Integer MAPPED_HTTPS_PORT;

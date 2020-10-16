@@ -17,6 +17,7 @@ ENV VHOST_FILE="/config/vhost.json"
 ENV PASSWD_FILE="/config/passwd"
 ENV GROUPS_FILE="/config/groups"
 ADD config.json ${QPID_WORK}
-ENTRYPOINT ["/usr/local/qpid/bin/qpid-server"]
+ADD entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
 
 

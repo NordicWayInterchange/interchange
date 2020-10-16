@@ -24,7 +24,13 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public final GenericContainer qpidContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
+	public final GenericContainer qpidContainer = getQpidTestContainer("qpid",
+			testKeysPath,
+			"localhost.p12",
+			"password",
+			"truststore.jks",
+			"password",
+			"localhost");
 	private String URL;
 	private SSLContext KING_HARALD_SSL_CONTEXT;
 

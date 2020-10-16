@@ -10,16 +10,6 @@
       "name": "passwordFile",
       "type": "PlainPasswordFile",
       "path": "${PASSWD_FILE}"
-    },
-    {
-      "name": "plain",
-      "type" : "Plain",
-      "users": [{
-        "name": "guest",
-        "type": "managed",
-        "password":"guest"
-      }]
-
     }
   ],
   "brokerloggers" : [
@@ -43,7 +33,13 @@
     "password" : "${KEY_STORE_PASSWORD}"
     }
   ],
- "ports": [
+  "plugins": [
+    {
+      "type": "MANAGEMENT-HTTP",
+      "name": "httpManagement"
+    }
+  ],
+  "ports": [
     {
       "name": "AMQP",
       "type": "AMQP",
@@ -101,16 +97,16 @@
       "authenticationProvider": "passwordFile",
       "protocols": ["HTTP"]
     },
-   {
-     "name": "HTTPS",
-     "type" : "HTTP",
-     "authenticationProvider" : "clientCerts",
-     "bindingAddress" : "*",
-     "port" : "443",
-     "trustStores": ["default"],
-     "keyStore": "default",
-     "needClientAuth": true,
-     "wantClientAuth": false,
+    {
+      "name": "HTTPS",
+      "type" : "HTTP",
+      "authenticationProvider" : "clientCerts",
+      "bindingAddress" : "*",
+      "port" : "443",
+      "trustStores": ["default"],
+      "keyStore": "default",
+      "needClientAuth": true,
+      "wantClientAuth": false,
       "transports": [
         "SSL",
         "TCP"
@@ -139,10 +135,5 @@
     "name" : "default",
     "type" : "GroupFile",
     "path" : "${GROUPS_FILE}"
-  }],
-  "plugins" : [ {
-    "type" : "MANAGEMENT-HTTP",
-    "name" : "httpManagement"
   } ]
-
 }

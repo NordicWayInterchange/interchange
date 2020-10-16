@@ -49,7 +49,13 @@ public class QpidIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public static final GenericContainer qpidContainer = getQpidContainer("qpid-persistent", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
+	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid-persistent",
+			testKeysPath,
+			"localhost.p12",
+			"password",
+			"truststore.jks",
+			"password",
+			"localhost");
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
