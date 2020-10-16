@@ -41,8 +41,8 @@ jobs:
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
             gcloud docker --authorize-only
-            chmod +x docker-build-push-images.sh
-            ./docker-build-push-images.sh gcr.io/eu.gcr.io/nordic-way-aad182cc
+            chmod +x build-push-images.sh
+            ./build-push-images.sh gcr.io/eu.gcr.io/nordic-way-aad182cc
   docker-build-push-svv:
       executor: my-machine
       steps:
@@ -55,8 +55,8 @@ jobs:
             gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
             gcloud docker --authorize-only
-            chmod +x docker-build-push-images.sh
-            ./docker-build-push-images.sh gcr.io/nw-interchange-stm-whya
+            chmod +x build-push-images.sh
+            ./build-push-images.sh gcr.io/nw-interchange-stm-whya
 
 workflows:
   version: 2.1
