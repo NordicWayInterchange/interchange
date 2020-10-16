@@ -37,9 +37,9 @@ jobs:
       - run:
           name: Build and push containers to Bouvet
           command: |
-            echo $SVV_GCLOUD_SERVICE_KEY | gcloud auth activate-service-account circle-ci@nw-interchange-stm-whya.iam.gserviceaccount.com --key-file=-
-            gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
-            gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
+            echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
             gcloud docker --authorize-only
             chmod +x docker-build-push-images.sh
             ./docker-build-push-images.sh gcr.io/eu.gcr.io/nordic-way-aad182cc
