@@ -61,7 +61,7 @@ jobs:
       - run:
           name: Push containers to SVV
           command: |
-            echo $SVV_GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            echo $SVV_GCLOUD_SERVICE_KEY | gcloud auth activate-service-account circle-ci@nw-interchange-stm-whya.iam.gserviceaccount.com --key-file=-
             gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
             gcloud docker --authorize-only
