@@ -29,50 +29,63 @@ jobs:
           name: Push maven build
           command: |
             mvn -DskipTests=true -s .circleci.settings.xml deploy -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
-  docker-push:
+  docker-build:
       executor: my-machine
       steps:
       - attach_workspace:
           at: ~/interchange
       - run:
-          name: Push containers
+          name: Build containers
+          command: |
+            chmod +x docker-build-images.sh
+            ./docker-build-images.sh
+  docker-push-bouvet:
+      executor: my-machine
+      steps:
+      - attach_workspace:
+          at: ~/interchange
+      - run:
+          name: Push containers to Bouvet
           command: |
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
             gcloud docker --authorize-only
-            chmod +x build-push-images.sh
-            ./build-push-images.sh eu.gcr.io/nordic-way-aad182cc
+            chmod +x docker-push-images.sh
+            ./docker-push-images.sh eu.gcr.io/nordic-way-aad182cc
   docker-push-svv:
       executor: my-machine
       steps:
       - attach_workspace:
           at: ~/interchange
       - run:
-          name: Push containers
+          name: Push containers to SVV
           command: |
             echo $SVV_GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
             gcloud docker --authorize-only
-            chmod +x build-push-images.sh
-            ./build-push-images.sh gcr.io/nw-interchange-stm-whya
+            chmod +x docker-push-images.sh
+            ./docker-push-images.sh gcr.io/nw-interchange-stm-whya
 
 workflows:
   version: 2.1
   build_and_docker_push:
     jobs:
       - build
-      - docker-push:
+      - docker-build:
           requires:
           - build
+      - docker-push-bouvet:
+          requires:
+          - docker-build
       - docker-push-svv:
           requires:
-          - build
+          - docker-build
       - maven-deploy:
           filters:
             branches:
               only:
                 - federation-master
           requires:
-            - docker-push
+            - docker-build
