@@ -11,10 +11,6 @@ for image in ${IMAGES}; do
     pushd ${image}
 
     docker build -t ${image}:${TAG} .
-    docker tag ${image}:${TAG} ${REGISTRY}/${image}:${TAG}
-
-    docker tag ${image}:${TAG} ${image}:${BRANCH_TAG}
-    docker tag ${image}:${BRANCH_TAG} ${REGISTRY}/${image}:${BRANCH_TAG}
     popd
 done
 

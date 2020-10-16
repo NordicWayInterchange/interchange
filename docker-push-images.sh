@@ -10,6 +10,10 @@ BRANCH_TAG="${BRANCH//[^a-zA-Z_0-9]/_}"
 
 for image in ${IMAGES}; do
     pushd ${image}
+    docker tag ${image}:${TAG} ${REGISTRY}/${image}:${TAG}
+
+    docker tag ${image}:${TAG} ${image}:${BRANCH_TAG}
+    docker tag ${image}:${BRANCH_TAG} ${REGISTRY}/${image}:${BRANCH_TAG}
     docker push ${REGISTRY}/${image}:${TAG}
     docker push ${REGISTRY}/${image}:${BRANCH_TAG}
     popd
