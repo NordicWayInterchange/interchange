@@ -1,6 +1,8 @@
 #!/bin/bash -eu
 
-REGISTRY=eu.gcr.io/nordic-way-aad182cc
+echo Building and pushing docker images to container registry $1
+
+REGISTRY=$1
 TAG="$(git rev-parse --short HEAD)"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 IMAGES="interchange-node-app qpid message-collector-app neighbour-discoverer-app neighbour-server-app routing-configurer-app onboard-server-app"
