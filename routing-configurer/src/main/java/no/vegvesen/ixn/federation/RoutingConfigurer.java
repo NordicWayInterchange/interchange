@@ -79,8 +79,9 @@ public class RoutingConfigurer {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			createQueue(neighbour.getName());
 			addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
-			bindSubscriptions("nwEx", neighbour);
-			for (Subscription subscription : neighbour.getNeighbourRequestedSubscriptions().getSubscriptions()) {
+			Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
+			bindSubscriptions("nwEx", neighbour, acceptedSubscriptions);
+			for (Subscription subscription : acceptedSubscriptions) {
 				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 			}
 			logger.info("Set up routing for neighbour {}", neighbour.getName());
@@ -90,9 +91,9 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void bindSubscriptions(String exchange, Neighbour neighbour) {
+	private void bindSubscriptions(String exchange, Neighbour neighbour, Set<Subscription> acceptedSubscriptions) {
 		unbindOldUnwantedBindings(neighbour, exchange);
-		for (Subscription subscription : neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions()) {
+		for (Subscription subscription : acceptedSubscriptions) {
 			qpidClient.addBinding(subscription.getSelector(), neighbour.getName(), subscription.bindKey(), exchange);
 		}
 	}
