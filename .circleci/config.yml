@@ -43,15 +43,32 @@ jobs:
             gcloud docker --authorize-only
             chmod +x build-push-images.sh
             ./build-push-images.sh eu.gcr.io/nordic-way-aad182cc
+  docker-build-push-svv:
+      executor: my-machine
+      steps:
+      - attach_workspace:
+          at: ~/interchange
+      - run:
+          name: Build and push containers to SVV
+          command: |
+            echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
+            gcloud docker --authorize-only
+            chmod +x build-push-images.sh
+            ./build-push-images.sh eu.gcr.io/nw-interchange-stm-whya
 
 workflows:
   version: 2.1
   build_and_docker_push:
     jobs:
       - build
+      - docker-build-push-svv:
+          requires:
+          - build
       - docker-build-push-bouvet:
           requires:
-            - build
+            - docker-build-push-svv
       - maven-deploy:
           filters:
             branches:
