@@ -14,7 +14,6 @@ class SubscriptionModificationsTest {
 		Subscription sub1 = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED);
 		Subscription sub2 = new Subscription("dataType = 'denm'", SubscriptionStatus.ACCEPTED);
 		Set<Subscription> firstSet = Sets.newSet(sub1, sub2);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, firstSet);
 
 		Subscription sub3 = new Subscription("dataType = 'ivi'", SubscriptionStatus.ACCEPTED);
 		Set<Subscription> secondSet = Sets.newSet(sub1, sub2, sub3);
@@ -29,7 +28,6 @@ class SubscriptionModificationsTest {
 		Subscription sub2 = new Subscription("dataType = 'denm'", SubscriptionStatus.ACCEPTED);
 		Subscription sub3 = new Subscription("dataType = 'ivi'", SubscriptionStatus.ACCEPTED);
 		Set<Subscription> firstSet = Sets.newSet(sub1, sub2, sub3);
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, firstSet);
 
 		Set<Subscription> secondSet = Sets.newSet(sub1, sub2);
 		SubscriptionModifications modifications = new SubscriptionModifications(firstSet, secondSet);
