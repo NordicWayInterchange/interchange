@@ -203,21 +203,6 @@ public class Neighbour {
 		return getCapabilities() != null && getCapabilities().getStatus() == Capabilities.CapabilitiesStatus.KNOWN;
 	}
 
-	public Set<String> getUnwantedBindKeys(Set<String> existingBindKeys) {
-		Set<String> wantedBindKeys = this.wantedBindings();
-		Set<String> unwantedBindKeys = new HashSet<>(existingBindKeys);
-		unwantedBindKeys.removeAll(wantedBindKeys);
-		return unwantedBindKeys;
-	}
-
-	Set<String> wantedBindings() {
-		Set<String> wantedBindings = new HashSet<>();
-		for (Subscription subscription : getNeighbourRequestedSubscriptions().getAcceptedSubscriptions()) {
-			wantedBindings.add(subscription.bindKey());
-		}
-		return wantedBindings;
-	}
-
 	public void setDnsProperties(Neighbour dnsNeighbour) {
 		assert dnsNeighbour.getName().equals(this.getName());
 		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}, message {}",

@@ -100,7 +100,7 @@ public class RoutingConfigurer {
 	private void unbindOldUnwantedBindings(Neighbour neighbour, String exchangeName) {
 		String name = neighbour.getName();
 		Set<String> existingBindKeys = qpidClient.getQueueBindKeys(name);
-		Set<String> unwantedBindKeys = neighbour.getUnwantedBindKeys(existingBindKeys);
+		Set<String> unwantedBindKeys = neighbour.getNeighbourRequestedSubscriptions().getUnwantedBindKeys(existingBindKeys);
 		for (String unwantedBindKey : unwantedBindKeys) {
 			qpidClient.unbindBindKey(name, unwantedBindKey, exchangeName);
 		}
