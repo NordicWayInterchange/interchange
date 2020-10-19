@@ -68,8 +68,8 @@ public class NeighbourRepositoryIT {
 
 		Subscription inSub = foundInOut.getOurRequestedSubscriptions().getSubscriptions().iterator().next();
 		assertThat(inSub.getSelector()).isEqualTo("inbound is true");
-		assertThat(foundInOut.getSubscriptionRequest().getSubscriptions()).hasSize(1);
-		Subscription outSub = foundInOut.getSubscriptionRequest().getSubscriptions().iterator().next();
+		assertThat(foundInOut.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
+		Subscription outSub = foundInOut.getNeighbourRequestedSubscriptions().getSubscriptions().iterator().next();
 		assertThat(outSub.getSelector()).isEqualTo("outbound is true");
 	}
 
@@ -115,7 +115,7 @@ public class NeighbourRepositoryIT {
 		Neighbour tearDownIxn = new Neighbour("torry", caps, tearDownSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(tearDownIxn);
 
-		List<Neighbour> forTearDownFromRepo = repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
+		List<Neighbour> forTearDownFromRepo = repository.findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus.TEAR_DOWN);
 
 		assertThat(forTearDownFromRepo).hasSize(1);
 		assertThat(forTearDownFromRepo.iterator().next().getName()).isEqualTo("torry");
@@ -134,11 +134,11 @@ public class NeighbourRepositoryIT {
 
 		Set<Subscription> subscriptionsForUpdating = new HashSet<>();
 
-		savedForUpdate.getSubscriptionRequest().setSubscriptions(subscriptionsForUpdating);
+		savedForUpdate.getNeighbourRequestedSubscriptions().setSubscriptions(subscriptionsForUpdating);
 		Neighbour updated = repository.save(savedForUpdate);
 		assertThat(updated).isNotNull();
-		assertThat(updated.getSubscriptionRequest()).isNotNull();
-		assertThat(updated.getSubscriptionRequest().getSubscriptions()).hasSize(0);
+		assertThat(updated.getNeighbourRequestedSubscriptions()).isNotNull();
+		assertThat(updated.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(0);
 	}
 
 	@Test
@@ -156,7 +156,7 @@ public class NeighbourRepositoryIT {
 		Neighbour noForwards = new Neighbour("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
 		repository.save(noForwards);
 
-		List<Neighbour> establishedOutgoingSubscriptions = repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.ESTABLISHED);
+		List<Neighbour> establishedOutgoingSubscriptions = repository.findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus.ESTABLISHED);
 		assertThat(establishedOutgoingSubscriptions).hasSize(1);
 		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
 	}
@@ -199,7 +199,7 @@ public class NeighbourRepositoryIT {
 		Neighbour neighbour = new Neighbour("nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
 		Neighbour saved = repository.save(neighbour);
 		assertThat(saved).isNotNull();
-		assertThat(saved.getSubscriptionRequest().getSuccessfulRequest()).isNotNull();
+		assertThat(saved.getNeighbourRequestedSubscriptions().getSuccessfulRequest()).isNotNull();
 	}
 
 	@Test
@@ -209,7 +209,7 @@ public class NeighbourRepositoryIT {
 		Neighbour neighbour = new Neighbour("another-nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
 		Neighbour saved = repository.save(neighbour);
 		assertThat(saved).isNotNull();
-		assertThat(saved.getSubscriptionRequest().getSuccessfulRequest()).isEmpty();
+		assertThat(saved.getNeighbourRequestedSubscriptions().getSuccessfulRequest()).isEmpty();
 	}
 
 	@Test

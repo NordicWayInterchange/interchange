@@ -170,7 +170,7 @@ class NeighbourServiceTest {
 					Object argument = a.getArgument(0);
 					Neighbour neighbour = (Neighbour)argument;
 					int i = 0;
-					for (Subscription subscription : neighbour.getSubscriptionRequest().getSubscriptions()) {
+					for (Subscription subscription : neighbour.getNeighbourRequestedSubscriptions().getSubscriptions()) {
 						subscription.setId(i);
 						i++;
 					}

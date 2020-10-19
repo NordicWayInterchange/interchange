@@ -38,11 +38,11 @@ public class Neighbour {
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "sub_out", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_sub_out"))
-	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	@JoinColumn(name = "neighbour_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_neigh_requested"))
+	private SubscriptionRequest neighbourRequestedSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "fed_in", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_fed_in"))
+	@JoinColumn(name = "our_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_our_requested"))
 	private SubscriptionRequest ourRequestedSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -64,14 +64,14 @@ public class Neighbour {
 	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions) {
 		this.setName(name);
 		this.capabilities = capabilities;
-		this.subscriptionRequest = subscriptions;
+		this.neighbourRequestedSubscriptions = subscriptions;
 		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
 	}
 
 	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection messageConnection, Connection controlConnection) {
 		this.setName(name);
 		this.capabilities = capabilities;
-		this.subscriptionRequest = subscriptions;
+		this.neighbourRequestedSubscriptions = subscriptions;
 		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
 		this.messageConnection = messageConnection;
 		this.controlConnection = controlConnection;
@@ -96,16 +96,16 @@ public class Neighbour {
 		this.capabilities = capabilities;
 	}
 
-	public SubscriptionRequest getSubscriptionRequest() {
-		return subscriptionRequest;
+	public SubscriptionRequest getNeighbourRequestedSubscriptions() {
+		return neighbourRequestedSubscriptions;
 	}
 
-	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
-		this.subscriptionRequest = subscriptionRequest;
+	public void setNeighbourRequestedSubscriptions(SubscriptionRequest subscriptionRequest) {
+		this.neighbourRequestedSubscriptions = subscriptionRequest;
 	}
 
 	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
-		this.subscriptionRequest.setStatus(subscriptionRequestStatus);
+		this.neighbourRequestedSubscriptions.setStatus(subscriptionRequestStatus);
 	}
 
 	public SubscriptionRequest getOurRequestedSubscriptions() {
@@ -114,7 +114,7 @@ public class Neighbour {
 
 	public Subscription getSubscriptionById(Integer id) throws SubscriptionNotFoundException {
 
-		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
+		for (Subscription subscription : neighbourRequestedSubscriptions.getSubscriptions()) {
 			if (subscription.getId().equals(id)) {
 				return subscription;
 			}
@@ -157,8 +157,8 @@ public class Neighbour {
 				"neighbour_id=" + neighbour_id +
 				", name=" + name +
 				", capabilities=" + capabilities +
-				", subscriptionRequest=" + subscriptionRequest +
-				", fedIn=" + ourRequestedSubscriptions +
+				", neighbourRequestedSubscriptions=" + neighbourRequestedSubscriptions +
+				", ourRequestedSubscriptions=" + ourRequestedSubscriptions +
 				", lastUpdated=" + lastUpdated +
 				", messageConnection=" + messageConnection +
 				", controlConnection=" + controlConnection +
@@ -196,7 +196,7 @@ public class Neighbour {
 	}
 
 	public boolean hasEstablishedSubscriptions() {
-		return getSubscriptionRequest() != null && getSubscriptionRequest().getStatus() == SubscriptionRequestStatus.ESTABLISHED;
+		return getNeighbourRequestedSubscriptions() != null && getNeighbourRequestedSubscriptions().getStatus() == SubscriptionRequestStatus.ESTABLISHED;
 	}
 
 	public boolean hasCapabilities() {
@@ -212,7 +212,7 @@ public class Neighbour {
 
 	Set<String> wantedBindings() {
 		Set<String> wantedBindings = new HashSet<>();
-		for (Subscription subscription : getSubscriptionRequest().getAcceptedSubscriptions()) {
+		for (Subscription subscription : getNeighbourRequestedSubscriptions().getAcceptedSubscriptions()) {
 			wantedBindings.add(subscription.bindKey());
 		}
 		return wantedBindings;

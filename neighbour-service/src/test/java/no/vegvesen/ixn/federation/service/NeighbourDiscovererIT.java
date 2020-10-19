@@ -146,7 +146,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour found1 = repository.findByName(neighbour1.getName());
 		assertThat(found1).isNotNull();
-		assertThat(found1.getSubscriptionRequest()).isNotNull();
+		assertThat(found1.getNeighbourRequestedSubscriptions()).isNotNull();
 		assertThat(found1.getSubscriptionsForPolling()).hasSize(1);
 		return found1.getSubscriptionsForPolling().iterator().next();
 	}

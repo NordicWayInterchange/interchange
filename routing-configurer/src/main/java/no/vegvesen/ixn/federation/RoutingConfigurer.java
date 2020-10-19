@@ -80,7 +80,7 @@ public class RoutingConfigurer {
 			createQueue(neighbour.getName());
 			addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
 			bindSubscriptions("nwEx", neighbour);
-			for (Subscription subscription : neighbour.getSubscriptionRequest().getSubscriptions()) {
+			for (Subscription subscription : neighbour.getNeighbourRequestedSubscriptions().getSubscriptions()) {
 				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 			}
 			logger.info("Set up routing for neighbour {}", neighbour.getName());
@@ -92,7 +92,7 @@ public class RoutingConfigurer {
 
 	private void bindSubscriptions(String exchange, Neighbour neighbour) {
 		unbindOldUnwantedBindings(neighbour, exchange);
-		for (Subscription subscription : neighbour.getSubscriptionRequest().getAcceptedSubscriptions()) {
+		for (Subscription subscription : neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions()) {
 			qpidClient.addBinding(subscription.getSelector(), neighbour.getName(), subscription.bindKey(), exchange);
 		}
 	}

@@ -100,7 +100,7 @@ public class NeighbourService {
 		}
 
 		//Check if subscription request is empty or not
-		SubscriptionRequest persistentRequest = neighbour.getSubscriptionRequest();
+		SubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
 		if (persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			logger.info("Neighbour with no existing subscription posted empty subscription request.");
 			logger.info("Returning empty subscription request.");
@@ -129,7 +129,7 @@ public class NeighbourService {
 			logger.info("Saving neighbour in DB to generate paths for the subscriptions.");
 			// Save neighbour in DB to generate subscription ids for subscription paths.
 			neighbour = neighbourRepository.save(neighbour);
-			persistentRequest = neighbour.getSubscriptionRequest();
+			persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
 
 			logger.info("Paths for requested subscriptions created.");
 			// Create a path for each subscription
@@ -143,7 +143,7 @@ public class NeighbourService {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
 		logger.info("Saving updated Neighbour: {}", neighbour.toString());
-		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
+		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 	}
 
 	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
@@ -418,7 +418,7 @@ public class NeighbourService {
 
 
 	public List<Neighbour> findNeighboursToTearDownRoutingFor() {
-		List<Neighbour> tearDownRoutingList = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
+		List<Neighbour> tearDownRoutingList = neighbourRepository.findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus.TEAR_DOWN);
 		logger.debug("Found {} neighbours to set up routing for {}", tearDownRoutingList.size(), tearDownRoutingList);
 		return tearDownRoutingList;
 	}
@@ -436,7 +436,7 @@ public class NeighbourService {
 	}
 
 	public void saveSetupRouting(Neighbour neighbour) {
-		neighbour.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+		neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.ESTABLISHED);
 
 		neighbourRepository.save(neighbour);
 		logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
@@ -445,7 +445,7 @@ public class NeighbourService {
 
 	public SubscriptionResponseApi findSubscriptions(String ixnName) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		Set<Subscription> subscriptions = neighbour.getSubscriptionRequest().getSubscriptions();
+		Set<Subscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),subscriptions);
 	}
 }
