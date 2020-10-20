@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  helm: banzaicloud/helm:0.0.7
+  helm: banzaicloud/helm@0.0.7
 executors:
   my-machine:
     machine: true
