@@ -1,5 +1,6 @@
 version: 2.1
-
+orbs:
+  helm: circleci/helm@1.0.0
 executors:
   my-machine:
     machine: true
@@ -75,8 +76,7 @@ jobs:
             helm repo index
             gsutil cp *.tgz gs://interchange_helm_repository
             gsutil cp index.yaml gs://interchange_helm_repository
-orbs:
-  helm: circleci/helm@1.0.0
+
 workflows:
   version: 2.1
   build_and_docker_push:
