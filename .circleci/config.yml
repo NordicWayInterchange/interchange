@@ -90,5 +90,5 @@ workflows:
             - docker-build-push-bouvet
   helm-repo:
     jobs:
-      - helm-publish-charts:
+      - helm-publish-charts
 
