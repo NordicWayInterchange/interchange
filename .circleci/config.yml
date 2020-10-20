@@ -19,7 +19,6 @@ jobs:
           root: ~/interchange
           paths:
             - ./*
-
   maven-deploy:
     executor: my-machine
     steps:
@@ -75,6 +74,9 @@ workflows:
   version: 2.1
   build_and_docker_push:
     jobs:
+      - helm/build:
+          charts-dir: helm
+          tgz-dir: helm
       - build
       - docker-build-push-svv:
           requires:
@@ -82,11 +84,6 @@ workflows:
       - docker-build-push-bouvet:
           requires:
             - docker-build-push-svv
-  helm-build-interchange:
-    jobs:
-      - helm/build:
-          charts-dir: helm
-          tgz-dir: helm
       - helm-publish-charts:
           requires:
             - helm-build-interchange
