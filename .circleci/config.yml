@@ -75,7 +75,8 @@ jobs:
             helm repo index
             gsutil cp *.tgz gs://interchange_helm_repository
             gsutil cp index.yaml gs://interchange_helm_repository
-
+orbs:
+  helm: circleci/helm@1.0.0
 workflows:
   version: 2.1
   build_and_docker_push:
