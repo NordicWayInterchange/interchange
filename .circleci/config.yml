@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  helm: circleci/helm@1.0.0
+  helm: banzaicloud/helm:0.0.7
 executors:
   my-machine:
     machine: true
@@ -64,18 +64,12 @@ jobs:
       - attach_workspace:
           at: ~/interchange
       - run:
-          name: Package helm charts
+          name: Publish helm charts
           command: |
             echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
-            helm version
-            cd helm
-            helm package basic-interchange
-            helm package interchange
-            helm repo index
-            gsutil cp *.tgz gs://interchange_helm_repository
-            gsutil cp index.yaml gs://interchange_helm_repository
+            gsutil cp helm/*.tgz gs://interchange_helm_repository
 
 workflows:
   version: 2.1
@@ -88,9 +82,14 @@ workflows:
       - docker-build-push-bouvet:
           requires:
             - docker-build-push-svv
+  helm-build-interchange:
+    jobs:
+      - helm/build:
+          charts-dir: helm
+          tgz-dir: helm
       - helm-publish-charts:
           requires:
-            - build
+            - helm-build-interchange
       - maven-deploy:
           filters:
             branches:
