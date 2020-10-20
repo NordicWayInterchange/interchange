@@ -57,6 +57,24 @@ jobs:
             gcloud docker --authorize-only
             chmod +x build-push-images.sh
             ./build-push-images.sh eu.gcr.io/nw-interchange-stm-whya
+  helm-publish-charts:
+      executor: my-machine
+      steps:
+      - attach_workspace:
+          at: ~/interchange
+      - run:
+          name: Package helm charts
+          command: |
+            echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
+            helm version
+            cd helm
+            helm package basic-interchange
+            helm package interchange
+            helm repo index
+            gsutil cp *.tgz gs://interchange_helm_repository
+            gsutil cp index.yaml gs://interchange_helm_repository
 
 workflows:
   version: 2.1
@@ -69,6 +87,9 @@ workflows:
       - docker-build-push-bouvet:
           requires:
             - docker-build-push-svv
+      - helm-publish-charts:
+          requires:
+            - build
       - maven-deploy:
           filters:
             branches:
