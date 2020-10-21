@@ -72,12 +72,13 @@ jobs:
       - run:
           name: Package helm charts
           command: |
-            helm package ~/interchange/helm/interchange
-            helm repo index ~/interchange/helm
+            helm package ~/interchange/helm/interchange -d ~/interchange/target/helm
+            helm package ~/interchange/helm/basic-interchange -d ~/interchange/target/helm
+            helm repo index ~/interchange/target/helm
       - persist_to_workspace:
           root: ~/interchange
           paths:
-            - ./helm/*
+            - ./target/helm*
 
   helm-publish-charts:
     executor: gcloud
@@ -91,9 +92,7 @@ jobs:
             gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
       - gcloud/gsutil:
-          cmd:  cp ~/interchange/helm/*.tgz gs://interchange_helm_repository
-      - gcloud/gsutil:
-          cmd:  cp ~/interchange/helm/index.yaml gs://interchange_helm_repository
+          cmd:  cp ~/interchange/target/helm/* gs://interchange_helm_repository
 
 workflows:
   version: 2.1
