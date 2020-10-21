@@ -12,8 +12,7 @@ executors:
   gcloud:
     working_directory: ~/interchange
     docker:
-      - image: ceddy/gcloud@0.0.2
-
+      - image: google/cloud-sdk:latest
 jobs:
   build:
     executor: my-machine
@@ -52,49 +51,49 @@ jobs:
             chmod +x build-push-images.sh
             ./build-push-images.sh eu.gcr.io/nordic-way-aad182cc
   docker-build-push-svv:
-      executor: my-machine
-      steps:
+    executor: my-machine
+    steps:
+    - attach_workspace:
+        at: ~/interchange
+    - run:
+        name: Build and push containers to SVV
+        command: |
+          echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
+          gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
+          gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
+          gcloud docker --authorize-only
+          chmod +x build-push-images.sh
+          ./build-push-images.sh eu.gcr.io/nw-interchange-stm-whya
+  helm-package-charts:
+    executor: helm3
+    steps:
       - attach_workspace:
           at: ~/interchange
       - run:
-          name: Build and push containers to SVV
+          name: Package helm charts
+          command: |
+            helm package ~/interchange/helm/interchange
+            helm repo index ~/interchange/helm
+      - persist_to_workspace:
+          root: ~/interchange
+          paths:
+            - ./helm/*
+
+  helm-publish-charts:
+    executor: gcloud
+    steps:
+      - attach_workspace:
+          at: ~/interchange
+      - run:
+          name: Authenticate google cloud
           command: |
             echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
-            gcloud docker --authorize-only
-            chmod +x build-push-images.sh
-            ./build-push-images.sh eu.gcr.io/nw-interchange-stm-whya
-  helm-package-charts:
-      executor: helm3
-      steps:
-        - attach_workspace:
-            at: ~/interchange
-        - run:
-            name: Package helm charts
-            command: |
-              helm package ~/interchange/helm/interchange
-              helm repo index ~/interchange/helm
-        - persist_to_workspace:
-            root: ~/interchange
-            paths:
-              - ./helm/*
-
-  helm-publish-charts:
-      executor: gcloud
-      steps:
-        - attach_workspace:
-            at: ~/interchange
-        - run:
-            name: Authenticate google cloud
-            command: |
-              echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
-              gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
-              gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
-        - gcloud/gsutil:
-            cmd:  cp ~/interchange/helm/*.tgz gs://interchange_helm_repository
-        - gcloud/gsutil:
-            cmd:  cp ~/interchange/helm/index.yaml gs://interchange_helm_repository
+      - gcloud/gsutil:
+          cmd:  cp ~/interchange/helm/*.tgz gs://interchange_helm_repository
+      - gcloud/gsutil:
+          cmd:  cp ~/interchange/helm/index.yaml gs://interchange_helm_repository
 
 workflows:
   version: 2.1
