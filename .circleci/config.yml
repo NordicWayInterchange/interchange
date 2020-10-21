@@ -81,7 +81,7 @@ jobs:
               - ./helm/*
 
   helm-publish-charts:
-      excecutor: gcloud
+      executor: gcloud
       steps:
         - attach_workspace:
             at: ~/interchange
