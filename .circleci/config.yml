@@ -83,7 +83,7 @@ jobs:
         - run:
             name: Get service key
             command: |
-              export $SVV_DECODED_SERVICE_KEY = $(echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d -)
+              export SVV_DECODED_SERVICE_KEY=$(echo `echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 --d`)
         - gcloud/auth:
             service_key: $SVV_DECODED_SERVICE_KEY
             project_id: ${SVV_GOOGLE_PROJECT_ID}
