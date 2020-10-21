@@ -5,6 +5,10 @@ executors:
   my-machine:
     machine: true
     working_directory: ~/interchange
+  helm3:
+    docker:
+      - image: banzaicloud/helm:0.0.7
+
 
 jobs:
   build:
@@ -58,15 +62,12 @@ jobs:
             chmod +x build-push-images.sh
             ./build-push-images.sh eu.gcr.io/nw-interchange-stm-whya
   helm-publish-charts:
+      executor: helm3
       steps:
-        - attach_workspace:
-            at: ~/interchange
-        - helm/build:
-            charts-dir: helm/interchange
-            tgz-dir: target/helm
         - run:
             name: Publish helm charts
             command: |
+              helm version
               echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
               gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
               gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
