@@ -64,6 +64,7 @@ jobs:
   helm-package-charts:
       executor: helm3
       steps:
+        - checkout
         - run:
             name: Package helm charts
             command: |
