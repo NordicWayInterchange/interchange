@@ -93,7 +93,7 @@ public class MessageCollector {
         String name = listenerEndpoint.getNeighbourName();
         if(listenerEndpoint.getMessageConnection().canBeContacted(backoffProperties)) {
             try {
-                logger.info("Setting up connection to ixn with name {}, port {}", name, listenerEndpoint.getMessageChannelPort());
+                logger.info("Setting up connection to ixn with name {}, URL {}", name, listenerEndpoint.getBrokerUrl());
                 MessageCollectorListener messageListener = collectorCreator.setupCollection(listenerEndpoint);
                 listeners.put(name, messageListener);
                 listenerEndpoint.getMessageConnection().okConnection();

@@ -49,7 +49,7 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "localhost.p12", "truststore.jks");
 		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
 		ListenerEndpoint remote = mock(ListenerEndpoint.class);
-		when(remote.getMessageChannelUrl()).thenReturn(remoteAmqpsUrl);
+		when(remote.getBrokerUrl()).thenReturn(remoteAmqpsUrl);
 		MessageCollectorListener remoteForwardListener = collectorCreator.setupCollection(remote);
 
 		//Stop the container to trigger the connection exception listener to run

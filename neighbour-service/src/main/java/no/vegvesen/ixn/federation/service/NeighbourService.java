@@ -390,7 +390,7 @@ public class NeighbourService {
 
 	public void createListenerEndpoint(Subscription subscription, Neighbour neighbour) {
 		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue()) == null){
-			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue(), new Connection(), neighbour.getMessageChannelUrl(), neighbour.getMessageChannelPort()));
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue(), new Connection()));
 			logger.info("ListenerEnpoint was saved: {}", savedListenerEndpoint.toString());
 		}
 	}

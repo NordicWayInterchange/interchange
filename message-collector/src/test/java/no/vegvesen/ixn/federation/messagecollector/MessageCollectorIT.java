@@ -66,7 +66,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "", "", new Connection(), "", producerPort.toString());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "amqps://localhost:" + producerPort.toString(), "localhost", new Connection());
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
@@ -77,6 +77,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				"localhost",
 				localIxnFederationPort,
 				"fedEx");
+
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
@@ -99,7 +100,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("", "", "", new Connection(), "", "");
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "amqps://localhost:" + producerPort.toString(), "localhost", new Connection());
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));

@@ -49,7 +49,7 @@ public class CollectorCreator {
         logger.debug("Write URL: {}, queue {}", writeUrl, writeQueue);
         Source writeSource = new Source(writeUrl, writeQueue, sslContext);
 
-        String readUrl = listenerEndpoint.getMessageChannelUrl();
+        String readUrl = listenerEndpoint.getBrokerUrl();
         String readQueue = this.localIxnDomainName;
         Sink readSink = new Sink(readUrl, readQueue, sslContext);
         logger.info("Fetching messages from {}, write to {}",readUrl,writeUrl);
