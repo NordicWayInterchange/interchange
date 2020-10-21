@@ -64,6 +64,8 @@ jobs:
   helm-package-charts:
       executor: helm3
       steps:
+        - attach_workspace:
+            at: ~/interchange
         - run:
             name: Package helm charts
             command: |
