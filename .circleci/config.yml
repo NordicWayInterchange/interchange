@@ -66,8 +66,7 @@ jobs:
         - run:
             name: Package helm charts
             command: |
-              helm version
-              cd $CIRCLE_WORKING_DIRECTORY/helm
+              cd ./helm
               helm package interchange
               helm repo index
         - persist_to_workspace:
