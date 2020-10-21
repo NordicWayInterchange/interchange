@@ -76,18 +76,16 @@ jobs:
               - ./helm/*
 
   helm-publish-charts:
-      executor: my-machine
+      executor: helm3
       steps:
         - attach_workspace:
             at: ~/helm
         - run:
-            name: Get service key
+            name: Authenticate google cloud
             command: |
-              export SVV_DECODED_SERVICE_KEY=$(echo `echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 --d`)
-        - gcloud/auth:
-            service_key: $SVV_DECODED_SERVICE_KEY
-            project_id: ${SVV_GOOGLE_PROJECT_ID}
-            compute_zone: ${SVV_GOOGLE_COMPUTE_ZONE}
+              echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
+              gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
+              gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
 
 workflows:
   version: 2.1
