@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  gcloud: ceddy/gcloud@0.0.2
 executors:
   my-machine:
     machine: true
@@ -91,8 +89,7 @@ jobs:
             echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
-      - gcloud/gsutil:
-          cmd:  cp ~/interchange/target/helm/* gs://interchange_helm_repository
+            gsutil cp ~/interchange/target/helm/* gs://interchange_helm_repository
 
 workflows:
   version: 2.1
