@@ -4,10 +4,10 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.model.Connection;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.service.NeighbourService;
-import org.assertj.core.util.Lists;
+import no.vegvesen.ixn.federation.model.ListenerEndpoint;
+import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -19,6 +19,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -65,12 +66,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		Neighbour neighbour = new Neighbour();
-		neighbour.setName("localhost");
-		neighbour.setMessageChannelPort(producerPort.toString());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "", "", new Connection(), "", producerPort.toString());
 
-		NeighbourService neighbourService = mock(NeighbourService.class);
-		when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Lists.list(neighbour));
+		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -78,7 +77,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				"localhost",
 				localIxnFederationPort,
 				"fedEx");
-		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
+		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
@@ -100,12 +99,10 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		Neighbour neighbour = new Neighbour();
-		neighbour.setName("localhost");
-		neighbour.setMessageChannelPort(producerPort.toString());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("", "", "", new Connection(), "", "");
 
-		NeighbourService neighbourService = mock(NeighbourService.class);
-		when(neighbourService.listNeighboursToConsumeMessagesFrom()).thenReturn(Lists.list(neighbour));
+		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -113,7 +110,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				"localhost",
 				localIxnFederationPort,
 				"fedEx");
-		MessageCollector forwarder = new MessageCollector(neighbourService, collectorCreator, backoffProperties);
+		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");

@@ -367,7 +367,7 @@ public class NeighbourService {
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
 						neighbour.getControlConnection().okConnection();
 						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
-							createListenerEndpoint(polledSubscription, neighbour.getName());
+							createListenerEndpoint(polledSubscription, neighbour);
 						}
 						//utvide med ListenerEndpoint lookup + lage ny om det trengs
 						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
@@ -388,9 +388,9 @@ public class NeighbourService {
 		}
 	}
 
-	public void createListenerEndpoint(Subscription subscription, String neighbourName) {
-		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbourName, subscription.getBrokerUrl(), subscription.getQueue()) == null){
-			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbourName, subscription.getBrokerUrl(), subscription.getQueue(), new Connection()));
+	public void createListenerEndpoint(Subscription subscription, Neighbour neighbour) {
+		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue()) == null){
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue(), new Connection(), neighbour.getMessageChannelUrl(), neighbour.getMessageChannelPort()));
 			logger.info("ListenerEnpoint was saved: {}", savedListenerEndpoint.toString());
 		}
 	}

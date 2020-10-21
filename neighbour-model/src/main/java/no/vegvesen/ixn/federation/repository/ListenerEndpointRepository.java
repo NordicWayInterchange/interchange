@@ -9,6 +9,8 @@ import java.util.List;
 @Repository
 public interface ListenerEndpointRepository extends CrudRepository<ListenerEndpoint, Integer> {
 
+    List<ListenerEndpoint> findAll();
+
     List<ListenerEndpoint> findAllByNeighbourName (String neighbourName);
 
     ListenerEndpoint findByNeighbourNameAndBrokerUrlAndQueue (String neighbourName, String brokerUrl, String queue);
