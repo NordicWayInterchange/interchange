@@ -67,8 +67,8 @@ jobs:
         - run:
             name: Package helm charts
             command: |
-              helm package helm/interchange
-              helm repo index helm
+              helm package ./helm/interchange
+              helm repo index ./helm
         - persist_to_workspace:
             root: ~/helm
             paths:
