@@ -106,7 +106,7 @@ workflows:
             - docker-build-push-bouvet
   helm-repo:
     jobs:
-      - helm-package-charts
+      - helm-package-charts:
           requires:
             - build
       - helm-publish-charts:
