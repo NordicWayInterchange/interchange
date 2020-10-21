@@ -104,8 +104,6 @@ workflows:
                 - federation-master
           requires:
             - docker-build-push-bouvet
-  helm-repo:
-    jobs:
       - helm-package-charts:
           requires:
             - build
