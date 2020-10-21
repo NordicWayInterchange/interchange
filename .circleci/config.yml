@@ -58,7 +58,6 @@ jobs:
             chmod +x build-push-images.sh
             ./build-push-images.sh eu.gcr.io/nw-interchange-stm-whya
   helm-publish-charts:
-      executor: my-machine
       steps:
         - attach_workspace:
             at: ~/interchange
