@@ -63,7 +63,7 @@ jobs:
         - attach_workspace:
             at: ~/interchange
         - helm/build:
-            charts-dir: helm
+            charts-dir: helm/interchange
             tgz-dir: target/helm
         - run:
             name: Publish helm charts
