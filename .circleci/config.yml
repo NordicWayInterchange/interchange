@@ -17,13 +17,20 @@ jobs:
     steps:
       - checkout
       - run:
-          name: run integration tests
+          name: package maven artefacts
           command: |
-            mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            mvn package -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - persist_to_workspace:
           root: ~/interchange
           paths:
             - ./*
+  integration-tests:
+    executor: my-machine
+    steps:
+      - run:
+          name: run integration tests
+          command: |
+            mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
   maven-deploy:
     executor: my-machine
     steps:
@@ -96,9 +103,12 @@ workflows:
   build_and_docker_push:
     jobs:
       - build
+      - integration-tests:
+          requires:
+            - build
       - docker-build-push-svv:
           requires:
-          - build
+          - integration-tests
       - docker-build-push-bouvet:
           requires:
             - docker-build-push-svv
@@ -114,5 +124,5 @@ workflows:
             - build
       - helm-publish-charts:
           requires:
-            - helm-package-charts
+            - integration-tests
 
