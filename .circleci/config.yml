@@ -6,7 +6,7 @@ executors:
     machine: true
     working_directory: ~/interchange
   helm3:
-    working_directory: ~/helm
+    working_directory: ~/interchange
     docker:
       - image: banzaicloud/helm:0.0.7
 
@@ -18,7 +18,7 @@ jobs:
       - run:
           name: run integration tests
           command: |
-            mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            mvn package -DskipTests=true -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - persist_to_workspace:
           root: ~/interchange
           paths:
@@ -64,22 +64,21 @@ jobs:
   helm-package-charts:
       executor: helm3
       steps:
-        - checkout
         - run:
             name: Package helm charts
             command: |
-              helm package ~/helm/helm/interchange
-              helm repo index ~/helm/helm
+              helm package ~/interchange/helm/interchange
+              helm repo index ~/interchange/helm
         - persist_to_workspace:
-            root: ~/helm
+            root: ~/interchange
             paths:
               - ./helm/*
 
   helm-publish-charts:
-      executor: helm3
+      executor: my-machine
       steps:
         - attach_workspace:
-            at: ~/helm
+            at: ~/interchange
         - run:
             name: Authenticate google cloud
             command: |
@@ -108,6 +107,8 @@ workflows:
   helm-repo:
     jobs:
       - helm-package-charts
+        requires:
+          - build
       - helm-publish-charts:
           requires:
             - helm-package-charts
