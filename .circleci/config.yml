@@ -107,8 +107,8 @@ workflows:
   helm-repo:
     jobs:
       - helm-package-charts
-        requires:
-          - build
+          requires:
+            - build
       - helm-publish-charts:
           requires:
             - helm-package-charts
