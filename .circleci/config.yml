@@ -6,6 +6,7 @@ executors:
     machine: true
     working_directory: ~/interchange
   helm3:
+    working_directory: ~/helm
     docker:
       - image: banzaicloud/helm:0.0.7
 
@@ -66,11 +67,10 @@ jobs:
         - run:
             name: Package helm charts
             command: |
-              cd ./helm
-              helm package interchange
-              helm repo index
+              helm package helm/interchange
+              helm repo index helm
         - persist_to_workspace:
-            root: ~/interchange
+            root: ~/helm
             paths:
               - ./helm/*
 
@@ -78,7 +78,7 @@ jobs:
       executor: my-machine
       steps:
         - attach_workspace:
-            at: ~/interchange
+            at: ~/helm
         - run:
             name: Get service key
             command: |
