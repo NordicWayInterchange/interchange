@@ -9,6 +9,10 @@ executors:
     working_directory: ~/interchange
     docker:
       - image: banzaicloud/helm:0.0.7
+  gcloud:
+    working_directory: ~/interchange
+    docker:
+      - image: ceddy/gcloud@0.0.2
 
 jobs:
   build:
@@ -77,6 +81,7 @@ jobs:
               - ./helm/*
 
   helm-publish-charts:
+      excecutor: gcloud
       steps:
         - attach_workspace:
             at: ~/interchange
