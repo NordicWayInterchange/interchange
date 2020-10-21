@@ -123,8 +123,8 @@ workflows:
             - docker-build-push-bouvet
       - helm-package-charts:
           requires:
-            - build
+            - integration-tests
       - helm-publish-charts:
           requires:
-            - integration-tests
+            - helm-package-charts
 
