@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  helm: banzaicloud/helm@0.0.7
+  gcloud: ceddy/gcloud@0.0.2
 executors:
   my-machine:
     machine: true
@@ -81,13 +81,13 @@ jobs:
         - attach_workspace:
             at: ~/interchange
         - run:
-            name: Publish helm charts
+            name: Get service key
             command: |
-              echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
-              gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
-              gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
-              gsutil cp helm/*.tgz gs://interchange_helm_repository
-              gsutil cp helm/index.yaml gs://interchange_helm_repository
+              export $SVV_DECODED_SERVICE_KEY = $(echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d -)
+        - gcloud/auth:
+            service_key: $SVV_DECODED_SERVICE_KEY
+            project_id: ${SVV_GOOGLE_PROJECT_ID}
+            compute_zone: ${SVV_GOOGLE_COMPUTE_ZONE}
 
 workflows:
   version: 2.1
