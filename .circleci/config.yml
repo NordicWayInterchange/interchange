@@ -77,7 +77,6 @@ jobs:
               - ./helm/*
 
   helm-publish-charts:
-      executor: my-machine
       steps:
         - attach_workspace:
             at: ~/interchange
