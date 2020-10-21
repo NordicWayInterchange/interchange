@@ -3,14 +3,10 @@ executors:
   my-machine:
     machine: true
     working_directory: ~/interchange
-  helm3:
+  helm3-gcloud:
     working_directory: ~/interchange
     docker:
-      - image: dtzar/helm-kubectl:3.3.4
-  gcloud:
-    working_directory: ~/interchange
-    docker:
-      - image: google/cloud-sdk:latest
+      - image: martient/cloud-sdk-helm
 jobs:
   build:
     executor: my-machine
@@ -72,7 +68,7 @@ jobs:
           chmod +x build-push-images.sh
           ./build-push-images.sh eu.gcr.io/nw-interchange-stm-whya
   helm-package-charts:
-    executor: helm3
+    executor: helm3-gcloud
     steps:
       - attach_workspace:
           at: ~/interchange
@@ -88,7 +84,7 @@ jobs:
             - ./target/helm*
 
   helm-publish-charts:
-    executor: gcloud
+    executor: helm3-gcloud
     steps:
       - attach_workspace:
           at: ~/interchange
