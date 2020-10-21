@@ -84,7 +84,7 @@ jobs:
       - attach_workspace:
           at: ~/interchange
       - run:
-          name: Authenticate google cloud
+          name: Publsh packaged helm charts to google cloud hosted helm repository
           command: |
             echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
