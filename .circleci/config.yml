@@ -27,6 +27,8 @@ jobs:
   integration-tests:
     executor: my-machine
     steps:
+      - attach_workspace:
+          at: ~/interchange
       - run:
           name: run integration tests
           command: |
