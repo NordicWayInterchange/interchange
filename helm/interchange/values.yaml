@@ -1,6 +1,12 @@
+self:                                                               # ------ General node settings ----------------
+  control_channel_port: 443                                         # Specify the control channel port  for the Node
+  message_channel_port: 5671                                        # Specify the message channel port  for the Node
+  trust_store: truststore.jks                                       # Name of trust store file
+  secret_mount_path: /jks/keys/                                     # Location of certificates and keys
+  service_provider_port: "4141"                                     # Port of the onboarding server REST controller
+
 ## the name which will be used to address the QPID server externally
 # external_name: test.nordic-way.io
-
 interchange:
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/interchangenode
