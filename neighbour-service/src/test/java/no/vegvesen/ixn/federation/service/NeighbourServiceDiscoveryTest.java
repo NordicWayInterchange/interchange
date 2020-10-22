@@ -90,7 +90,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void testNewNeighbourIsAddedToDatabase(){
-		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(createNeighbour()));
+		when(dnsFacade.lookupNeighbours()).thenReturn(Collections.singletonList(createNeighbour()));
 		when(neighbourRepository.findByName(any(String.class))).thenReturn(null);
 		when(neighbourRepository.save(any(Neighbour.class))).thenReturn(mock(Neighbour.class));
 
@@ -102,7 +102,7 @@ public class NeighbourServiceDiscoveryTest {
 	@Test
 	public void testKnownNeighbourIsNotAddedToDatabase(){
 		Neighbour ericsson = createNeighbour();
-		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(ericsson));
+		when(dnsFacade.lookupNeighbours()).thenReturn(Collections.singletonList(ericsson));
 		when(neighbourRepository.findByName(any(String.class))).thenReturn(ericsson);
 
 		neighbourService.checkForNewNeighbours();
@@ -116,7 +116,7 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour discoveringNode = new Neighbour();
 		discoveringNode.setName(self.getName());
 		assertThat(self.getName()).isNotNull();
-		when(dnsFacade.getNeighbours()).thenReturn(Collections.singletonList(discoveringNode));
+		when(dnsFacade.lookupNeighbours()).thenReturn(Collections.singletonList(discoveringNode));
 
 		neighbourService.checkForNewNeighbours();
 

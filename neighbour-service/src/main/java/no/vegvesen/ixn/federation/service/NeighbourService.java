@@ -185,7 +185,7 @@ public class NeighbourService {
 	}
 
 	Neighbour findNeighbour(String neighbourName) {
-		return dnsFacade.getNeighbours().stream()
+		return dnsFacade.lookupNeighbours().stream()
 				.filter(n -> n.getName().equals(neighbourName))
 				.findFirst()
 				.orElseThrow(() ->
@@ -215,7 +215,7 @@ public class NeighbourService {
 
 	public void checkForNewNeighbours() {
 		logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
-		List<Neighbour> neighbours = dnsFacade.getNeighbours();
+		List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
 		logger.debug("Got neighbours from DNS {}.", neighbours);
 
 		for (Neighbour neighbour : neighbours) {

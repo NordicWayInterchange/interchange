@@ -20,7 +20,7 @@ public class DNSFacadeTest {
 
 	@Test
 	public void testNumberOfNeighbours(){
-		List<Neighbour> neighbours = dnsFacade.getNeighbours();
+		List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
 		assertThat(neighbours)
 				.withFailMessage("Number of known Neighbours in the actual dns is less than two")
 				.hasSizeGreaterThan(1);
@@ -28,7 +28,7 @@ public class DNSFacadeTest {
 
 	@Test
 	public void testThatDiscoveredNeighboursAreNotNull(){
-		List<Neighbour> neighbours = dnsFacade.getNeighbours();
+		List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
 
 		for(Neighbour i : neighbours){
 			assertThat(i).isNotNull();
@@ -38,14 +38,13 @@ public class DNSFacadeTest {
 	@Test
 	public void bouvetNodePresent() {
 		Neighbour bouvet = null;
-		for (Neighbour neighbour : dnsFacade.getNeighbours()) {
+		for (Neighbour neighbour : dnsFacade.lookupNeighbours()) {
 			if (neighbour.getName().equals("no-fed2.itsinterchange.eu")){
 				bouvet = neighbour;
 			}
 		}
 		assertThat(bouvet).isNotNull();
 		assertThat(bouvet.getControlChannelUrl("/")).isNotNull();
-		assertThat(bouvet.getMessageChannelPort()).isNotNull().isEqualTo("5671");
 	}
 
 }

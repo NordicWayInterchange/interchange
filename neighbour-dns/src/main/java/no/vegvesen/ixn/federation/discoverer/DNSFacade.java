@@ -21,13 +21,12 @@ public class DNSFacade {
 	}
 
 	// Returns a list of neighbours discovered through DNS lookup.
-	public List<Neighbour> getNeighbours() {
+	public List<Neighbour> lookupNeighbours() {
 		try {
 			if (dnsProperties.getDomainName() == null || dnsProperties.getDomainName().isEmpty()) {
 				throw new RuntimeException("DNS lookup with no domain");
 			}
 			System.setProperty("dns.search", dnsProperties.getDomainName());
-			Map<String, String> messageChannelPorts = getSrvRecords("_ixn._tcp.");
 			Map<String, String> controlChannelPorts = new HashMap<>();
 			try {
 				controlChannelPorts = getSrvRecords("_ixc._tcp.");
@@ -36,25 +35,14 @@ public class DNSFacade {
 			}
 
 			List<Neighbour> neighbours = new LinkedList<>();
-			for (String nodeName : messageChannelPorts.keySet()) {
+			for (String nodeName : controlChannelPorts.keySet()) {
 				Neighbour neighbour = new Neighbour();
 				neighbour.setName(nodeName);
-				neighbour.setMessageChannelPort(messageChannelPorts.get(nodeName));
-				if (controlChannelPorts.containsKey(nodeName)) {
-					neighbour.setControlChannelPort(controlChannelPorts.get(nodeName));
-					logger.debug("DNS server {} has message channel port {} and control channel port {} for node {}",
-							getDnsServerName(),
-							neighbour.getMessageChannelPort(),
-							neighbour.getControlChannelPort(),
-							neighbour.getName());
-				} else {
-					neighbour.setControlChannelPort(dnsProperties.getControlChannelPort());
-					logger.debug("DNS server {} has only message channel port {} for node, using standard port for control channel {} for node {}",
-							getDnsServerName(),
-							neighbour.getMessageChannelPort(),
-							neighbour.getControlChannelPort(),
-							neighbour.getName());
-				}
+				neighbour.setControlChannelPort(controlChannelPorts.get(nodeName));
+				logger.debug("DNS server {} has control channel port {} for node {}",
+						getDnsServerName(),
+						neighbour.getControlChannelPort(),
+						neighbour.getName());
 				neighbours.add(neighbour);
 			}
 			return neighbours;
@@ -80,7 +68,7 @@ public class DNSFacade {
 
 		for (Record record : records) {
 			SRVRecord srv = (SRVRecord) record;
-			logger.debug("Got srv record {}", records);
+			logger.debug("Got srv record {}", record);
 			String domainName = srv.getTarget().toString();
 
 			String neighbourName = domainName.substring(0, domainName.length() - 1);

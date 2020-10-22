@@ -22,7 +22,7 @@ public class DNSFacadeErrorTest {
 
 	@Test
 	public void testGetNeighbourFailsWithWrongConfiguration(){
-		List<Neighbour> neighbours = dnsFacade.getNeighbours();
+		List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
 		assertThat(neighbours).isEmpty();
 	}
 }
