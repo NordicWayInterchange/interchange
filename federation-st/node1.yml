@@ -1,0 +1,78 @@
+external_name: node1.nordicay.test
+self:
+  domain_name: nordicay.test
+  tls_secret_name: node1
+  control_channel_port: 443
+  key_store: node1.nordicay.test.p12
+  key_store_password: password
+  trust_store: truststore.jks
+  trust_store_password: password
+  key_password: password
+  secret_mount_path: /jks/keys/
+  service_provider_port: "4141"
+qpid:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/qpid
+    tag: "7fc5c843"
+  expose_amqps: true
+  interchange_password: s09oijqljoriu
+  admin_password: lskjdflkj21234
+  persistence:
+    enabled: true
+    storageClassName: standard
+interchange:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/interchange-node-app
+    tag: "7fc5c843"
+  logging:
+    - logger_name: .root
+      level: info
+neighbour_discoverer:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app
+    tag: "7fc5c843"
+  logging:
+    - logger_name: .root
+      level: info
+database:
+  image:
+    repository: postgres
+    tag: 9.6
+  postgres_user: federation
+  postgres_password: federation
+  postgres_db: federation
+  persistence:
+    enabled: true
+    storageClassName: standard
+    size: 3Gi
+  pgdata: /var/lib/postgresql/data/pgdata
+message_collector:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/message-collector-app
+    tag: "7fc5c843"
+  logging:
+    - logger_name: .root
+      level: info
+  key_store_type: PKCS12
+  trust_store_type: JKS
+neighbour_server:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app
+    tag: "7fc5c843"
+  logging:
+    - logger_name: .root
+      level: info
+routing_configurer:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app
+    tag: "7fc5c843"
+  logging:
+    - logger_name: .root
+      level: info
+onboard_server:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/onboard-server-app
+    tag: "7fc5c843"
+  logging:
+    - logger_name: .root
+      level: info

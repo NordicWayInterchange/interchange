@@ -80,12 +80,26 @@ jobs:
       - attach_workspace:
           at: ~/interchange
       - run:
-          name: Publsh packaged helm charts to google cloud hosted helm repository
+          name: Publish packaged helm charts to google cloud hosted helm repository
           command: |
             echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
             gsutil cp ~/interchange/target/helm/* gs://interchange_helm_repository
+
+  helm-deploy-system-test:
+    executor: helm3-gcloud
+    steps:
+      - attach_workspace:
+          at: ~/interchange
+      - run:
+          name: Install two nodes to be used in system test
+          command: |
+            mkdir -p ~/interchange/target/test-keys
+            export CA_CN=system-test-ca.nordicway.test
+            export KEY_CNS=node1.nordicway.test sp1.nordicway.test node2.nordicway.test sp2.nordicway.test sp3.nordicway.test
+            ~/interchange/generate-keys.sh ~/interchange/target/test-keys
+            helm upgrade --install --namespace test ixn-test ~/interchange/helm/interchange --values ~/interchange/federation-st/test.yml
 
 workflows:
   version: 2.1
