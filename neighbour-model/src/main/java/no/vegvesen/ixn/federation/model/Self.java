@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 
+import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +16,16 @@ public class Self {
 
 	private String name;
 
+	private static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
+
 	private Set<DataType> localCapabilities = new HashSet<>();
 
 	private Set<DataType> localSubscriptions = new HashSet<>();
 
 	private LocalDateTime lastUpdatedLocalCapabilities;
 	private LocalDateTime lastUpdatedLocalSubscriptions;
+
+	private String messageChannelPort;
 
 	public Self(){}
 
@@ -73,6 +78,25 @@ public class Self {
 		this.lastUpdatedLocalSubscriptions = lastUpdatedLocalSubscriptions;
 	}
 
+	public String getMessageChannelPort() { return this.messageChannelPort; }
+
+	public void setMessageChannelPort(String messageChannelPort) {
+		this.messageChannelPort = messageChannelPort;
+	}
+
+	public String getMessageChannelUrl() {
+		try {
+			if (this.getMessageChannelPort() == null || this.getMessageChannelPort().equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
+				return String.format("amqps://%s/", name);
+			} else {
+				return String.format("amqps://%s:%s/", name, this.getMessageChannelPort());
+			}
+		} catch (NumberFormatException e) {
+			logger.error("Could not create message channel url for interchange {}", this, e);
+			throw new DiscoveryException(e);
+		}
+	}
+
 	@Override
 	public String toString() {
 		return "Self{" +
@@ -81,6 +105,7 @@ public class Self {
 				", localSubscriptions=" + localSubscriptions +
 				", lastUpdatedLocalCapabilities=" + lastUpdatedLocalCapabilities +
 				", lastUpdatedLocalSubscriptions=" + lastUpdatedLocalSubscriptions +
+				", messageChannelPort=" + messageChannelPort +
 				'}';
 	}
 }

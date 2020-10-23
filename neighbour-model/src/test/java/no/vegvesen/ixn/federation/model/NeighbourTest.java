@@ -18,25 +18,20 @@ public class NeighbourTest {
 	public void getControlChannelUrlWithDomainNameAndSpecifiedNonDefaultPorts() {
 		Neighbour fullDomainName = new Neighbour("my-host.my-domain.top", null, null, null);
 		fullDomainName.setControlChannelPort("1234");
-		fullDomainName.setMessageChannelPort("5678");
 		assertThat(fullDomainName.getControlChannelUrl("/alive")).isEqualTo("https://my-host.my-domain.top:1234/alive");
-		assertThat(fullDomainName.getMessageChannelUrl()).isEqualTo("amqps://my-host.my-domain.top:5678/");
 	}
 
 	@Test
-	public void getMessageAndControlChannelUrlWithDomainNameAndSpecifiedDefaultPorts() {
+	public void getControlChannelUrlWithDomainNameAndSpecifiedDefaultPorts() {
 		Neighbour fullDomainName = new Neighbour("my-host.my-domain.top", null, null, null);
 		fullDomainName.setControlChannelPort("443");
-		fullDomainName.setMessageChannelPort("5671");
 		assertThat(fullDomainName.getControlChannelUrl("/alive")).isEqualTo("https://my-host.my-domain.top/alive");
-		assertThat(fullDomainName.getMessageChannelUrl()).isEqualTo("amqps://my-host.my-domain.top/");
 	}
 
 	@Test
-	public void getMessageAndControlChannelUrlWithDomainNameDefaultPorts() {
+	public void getControlChannelUrlWithDomainNameDefaultPorts() {
 		Neighbour fullDomainName = new Neighbour("my-host.my-domain.top", null, null, null);
 		assertThat(fullDomainName.getControlChannelUrl("/alive")).isEqualTo("https://my-host.my-domain.top/alive");
-		assertThat(fullDomainName.getMessageChannelUrl()).isEqualTo("amqps://my-host.my-domain.top/");
 	}
 
 	@Test
@@ -52,13 +47,6 @@ public class NeighbourTest {
 	public void serverNameEndWithoutDot() {
 		assertThatExceptionOfType(DiscoveryException.class).isThrownBy(() ->
 				new Neighbour("ericsson.", null, null, null));
-	}
-
-	@Test
-	public void getMessageChannelUrlWithoutDomainNameAndSpecificPort() {
-		Neighbour fullDomainName = new Neighbour("my-host", null, null, null);
-		fullDomainName.setMessageChannelPort("5678");
-		assertThat(fullDomainName.getMessageChannelUrl()).isEqualTo("amqps://my-host:5678/");
 	}
 
 	@Test
