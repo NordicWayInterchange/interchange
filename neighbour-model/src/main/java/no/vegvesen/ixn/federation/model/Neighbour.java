@@ -22,7 +22,6 @@ public class Neighbour {
 
 	private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
 	private static final String DEFAULT_CONTROL_CHANNEL_PROTOCOL = "https";
-	private static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 
 	private static Logger logger = LoggerFactory.getLogger(Neighbour.class);
 
@@ -55,7 +54,6 @@ public class Neighbour {
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
-	private String messageChannelPort;
 	private String controlChannelPort;
 
 	public Neighbour() {
@@ -127,14 +125,6 @@ public class Neighbour {
 		this.ourRequestedSubscriptions = fedIn;
 	}
 
-	public String getMessageChannelPort() {
-		return messageChannelPort;
-	}
-
-	public void setMessageChannelPort(String messageChannelPort) {
-		this.messageChannelPort = messageChannelPort;
-	}
-
 	public String getControlChannelPort() {
 		return controlChannelPort;
 	}
@@ -162,7 +152,6 @@ public class Neighbour {
 				", lastUpdated=" + lastUpdated +
 				", messageConnection=" + messageConnection +
 				", controlConnection=" + controlConnection +
-				", messageChannelPort='" + messageChannelPort +
 				", controlChannelPort='" + controlChannelPort +
 				'}';
 	}
@@ -182,19 +171,6 @@ public class Neighbour {
 		}
 	}
 
-	public String getMessageChannelUrl() {
-		try {
-			if (this.getMessageChannelPort() == null || this.getMessageChannelPort().equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
-				return String.format("amqps://%s/", name);
-			} else {
-				return String.format("amqps://%s:%s/", name, this.getMessageChannelPort());
-			}
-		} catch (NumberFormatException e) {
-			logger.error("Could not create message channel url for interchange {}", this, e);
-			throw new DiscoveryException(e);
-		}
-	}
-
 	public boolean hasEstablishedSubscriptions() {
 		return getNeighbourRequestedSubscriptions() != null && getNeighbourRequestedSubscriptions().getStatus() == SubscriptionRequestStatus.ESTABLISHED;
 	}
@@ -205,13 +181,10 @@ public class Neighbour {
 
 	public void setDnsProperties(Neighbour dnsNeighbour) {
 		assert dnsNeighbour.getName().equals(this.getName());
-		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}, message {}",
+		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}",
 				this.getName(),
-				dnsNeighbour.getControlChannelPort(),
-				dnsNeighbour.getMessageChannelPort());
+				dnsNeighbour.getControlChannelPort());
 		this.setControlChannelPort(dnsNeighbour.getControlChannelPort());
-		this.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
-
 	}
 
 	/**

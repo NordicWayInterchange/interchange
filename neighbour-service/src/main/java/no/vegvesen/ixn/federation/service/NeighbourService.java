@@ -146,7 +146,7 @@ public class NeighbourService {
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 	}
 
-	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
+	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String messageChannelUrl) {
 		logger.info("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
@@ -156,7 +156,7 @@ public class NeighbourService {
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),nodeProviderName);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),messageChannelUrl);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
@@ -185,7 +185,7 @@ public class NeighbourService {
 	}
 
 	Neighbour findNeighbour(String neighbourName) {
-		return dnsFacade.getNeighbours().stream()
+		return dnsFacade.lookupNeighbours().stream()
 				.filter(n -> n.getName().equals(neighbourName))
 				.findFirst()
 				.orElseThrow(() ->
@@ -215,7 +215,7 @@ public class NeighbourService {
 
 	public void checkForNewNeighbours() {
 		logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
-		List<Neighbour> neighbours = dnsFacade.getNeighbours();
+		List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
 		logger.debug("Got neighbours from DNS {}.", neighbours);
 
 		for (Neighbour neighbour : neighbours) {

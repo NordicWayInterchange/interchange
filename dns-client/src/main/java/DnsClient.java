@@ -7,19 +7,16 @@ import java.util.List;
 public class DnsClient {
 
     public static void main(String[] args) {
-        String controlChannelPort = "443";
         String domainName = "itsinterchange.eu";
         if (args.length > 0) {
            domainName = args[0];
         }
-        if (args.length > 1 ) {
-            controlChannelPort = args[1];
-        }
-        DNSProperties properties = new DNSProperties(controlChannelPort, domainName);
+
+        DNSProperties properties = new DNSProperties(domainName);
         DNSFacade facade = new DNSFacade(properties);
 
         System.out.println(facade.getDnsServerName());
-        List<Neighbour> neighbours = facade.getNeighbours();
+        List<Neighbour> neighbours = facade.lookupNeighbours();
         for (Neighbour neighbour : neighbours) {
             System.out.println(neighbour.getName());
         }

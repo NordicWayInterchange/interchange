@@ -79,12 +79,12 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void subscriptionPollResponseApiWithStatusCreated() {
 		String neighbourName = "myNeighbour";
-		String thisNodeName = "myName";
+		String brokerUrl = "amqps://myName";
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
 		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path);
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, thisNodeName);
-		assertThat(responseApi.getMessageBrokerUrl()).isEqualTo("amqps://" + thisNodeName);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, brokerUrl);
+		assertThat(responseApi.getMessageBrokerUrl()).isEqualTo(brokerUrl);
 	}
 
 	@Test

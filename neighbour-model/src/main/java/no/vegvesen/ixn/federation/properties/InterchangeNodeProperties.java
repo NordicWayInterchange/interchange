@@ -10,7 +10,7 @@ public class InterchangeNodeProperties {
 	public InterchangeNodeProperties() {
 	}
 
-	public InterchangeNodeProperties(String name) {
+	public InterchangeNodeProperties(String name, String messageChannelPort) {
 		this.name = name;
 	}
 
@@ -19,6 +19,11 @@ public class InterchangeNodeProperties {
 	 */
 	String name;
 
+	/**
+	 * The message channel port for amqps
+	 */
+	String messageChannelPort = "5671";
+
 	public String getName() {
 		return name;
 	}
@@ -26,4 +31,8 @@ public class InterchangeNodeProperties {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public String getMessageChannelPort() { return messageChannelPort; }
+
+	public void setMessageChannelPort(String messageChannelPort) { this.messageChannelPort = messageChannelPort; }
 }

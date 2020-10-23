@@ -52,7 +52,7 @@ public class SubscriptionRequestTransformer {
 		return subscription;
 	}
 
-	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String thisNodeName) {
+	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelUrl) {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
 		response.setId(subscription.getId().toString());
 		response.setSelector(subscription.getSelector());
@@ -60,7 +60,7 @@ public class SubscriptionRequestTransformer {
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			response.setMessageBrokerUrl("amqps://" + thisNodeName); //TODO pass the actual URL from SelfService, let it create the url internally
+			response.setMessageBrokerUrl(messageChannelUrl);
 			response.setQueueName(neighbourName);
 		}
 		return response;

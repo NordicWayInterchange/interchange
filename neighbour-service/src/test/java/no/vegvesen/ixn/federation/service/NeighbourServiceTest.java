@@ -59,7 +59,7 @@ class NeighbourServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, new InterchangeNodeProperties(myName), listenerEndpointRepository);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, new InterchangeNodeProperties(myName, "5671"), listenerEndpointRepository);
 	}
 
 	@Test
@@ -77,11 +77,11 @@ class NeighbourServiceTest {
 		// Mock dns lookup
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
+		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
 		CapabilityApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
 
-		Mockito.verify(dnsFacade, Mockito.times(1)).getNeighbours();
+		Mockito.verify(dnsFacade, Mockito.times(1)).lookupNeighbours();
 		Mockito.verify(neighbourRepository, Mockito.times(1)).save(ArgumentMatchers.any(Neighbour.class));
 		Assertions.assertThat(response.getName()).isEqualTo("bouvet");
 	}
@@ -108,7 +108,7 @@ class NeighbourServiceTest {
 
 		Assertions.assertThat(thrown).isInstanceOf(SubscriptionRequestException.class);
 		Mockito.verify(neighbourRepository, Mockito.times(1)).findByName(ArgumentMatchers.anyString());
-		Mockito.verify(dnsFacade, Mockito.times(0)).getNeighbours();
+		Mockito.verify(dnsFacade, Mockito.times(0)).lookupNeighbours();
 	}
 
 	@Test
@@ -122,11 +122,11 @@ class NeighbourServiceTest {
 		// Mock dns lookup
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
+		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
 		neighbourService.incomingCapabilities(ericsson, new Self(myName));
 
-		Mockito.verify(dnsFacade, Mockito.times(1)).getNeighbours();
+		Mockito.verify(dnsFacade, Mockito.times(1)).lookupNeighbours();
 	}
 
 	@Test
@@ -138,12 +138,12 @@ class NeighbourServiceTest {
 
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
-		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).getNeighbours();
+		Mockito.doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
 		Throwable thrown = Assertions.catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, new Self("some-node-name")));
 
 		Assertions.assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
-		Mockito.verify(dnsFacade, Mockito.times(1)).getNeighbours();
+		Mockito.verify(dnsFacade, Mockito.times(1)).lookupNeighbours();
 	}
 
 	@Test
@@ -186,19 +186,19 @@ class NeighbourServiceTest {
 		neighbourService.incomingSubscriptionRequest(ericsson);
 		Mockito.verify(neighbourRepository, Mockito.times(2)).save(ArgumentMatchers.any(Neighbour.class)); //saved twice because first save generates id, and second save saves the path derived from the ids
 		Mockito.verify(neighbourRepository, Mockito.times(1)).findByName(ArgumentMatchers.anyString());
-		Mockito.verify(dnsFacade, Mockito.times(0)).getNeighbours();
+		Mockito.verify(dnsFacade, Mockito.times(0)).lookupNeighbours();
 	}
 
 	@Test
 	public void findBouvetExists() {
-		Mockito.when(dnsFacade.getNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
+		Mockito.when(dnsFacade.lookupNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
 		Neighbour neighbour = neighbourService.findNeighbour("bouveta-fed.itsinterchange.eu");
 		Assertions.assertThat(neighbour).isNotNull();
 	}
 
 	@Test
 	public void findNotDefinedDoesNotExists() {
-		Mockito.when(dnsFacade.getNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
+		Mockito.when(dnsFacade.lookupNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
 		Throwable trown = Assertions.catchThrowable(() -> neighbourService.findNeighbour("no-such-interchange.itsinterchange.eu"));
 		Assertions.assertThat(trown).isInstanceOf(InterchangeNotInDNSException.class);
 	}
