@@ -30,7 +30,7 @@ spec:
         - name: amqp
           containerPort: 5672
         - name: amqps
-          containerPort: {{ .Values.self.message_channel_port }}
+          containerPort: 5671
         - name: http-qpid-gui
           containerPort: 8080
         - name: https-qpid-rest
