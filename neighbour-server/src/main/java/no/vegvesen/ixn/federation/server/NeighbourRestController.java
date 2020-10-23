@@ -96,7 +96,7 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.info("Common name matches Neighbour name in path.");
 
-		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId,selfService.getNodeProviderName());
+		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId,selfService.fetchSelf().getMessageChannelUrl());
 	}
 
 
