@@ -99,7 +99,9 @@ jobs:
             export CA_CN=system-test-ca.nordicway.test
             export KEY_CNS=node1.nordicway.test sp1.nordicway.test node2.nordicway.test sp2.nordicway.test sp3.nordicway.test
             ~/interchange/generate-keys.sh ~/interchange/target/test-keys
-            helm upgrade --install --namespace test ixn-test ~/interchange/helm/interchange --values ~/interchange/federation-st/test.yml
+            echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
+            gcloud container clusters get-credentials ic --zone europe-west4-a --project nw-interchange-stm-whya
+            helm upgrade --install --namespace system-test-node1 ixn-system-test-node1 ~/interchange/helm/interchange --values ~/interchange/federation-st/system-test-node1.yml
 
 workflows:
   version: 2.1
@@ -125,4 +127,6 @@ workflows:
       - helm-publish-charts:
           requires:
             - helm-package-charts
-
+      - helm-deploy-system-test:
+          requires:
+            - helm-publish-charts
