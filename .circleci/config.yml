@@ -122,8 +122,16 @@ workflows:
           requires:
             - docker-build-push-bouvet
       - helm-package-charts:
+          filters:
+            branches:
+              only:
+                - federation-master
           requires:
             - build
       - helm-publish-charts:
+          filters:
+            branches:
+              only:
+                - federation-master
           requires:
             - helm-package-charts
