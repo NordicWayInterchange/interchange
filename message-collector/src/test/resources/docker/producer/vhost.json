@@ -1,7 +1,7 @@
 {
   "type": "BDB",
-  "name": "Memory",
-  "modelVersion": "8.0",
+  "name": "localhost",
+  "modelVersion": "7.0",
   "exchanges": [
   ],
   "queues": [

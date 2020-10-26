@@ -43,13 +43,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	private static Path testKeysPath = generateKeys(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid",
-			testKeysPath,
-			"localhost.p12",
-			"password",
-			"truststore.jks",
-			"password",
-			"localhost");
+	public static final GenericContainer qpidContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
 
 	private static String AMQPS_URL;
 

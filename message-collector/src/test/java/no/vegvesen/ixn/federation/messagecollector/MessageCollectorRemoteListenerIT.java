@@ -25,25 +25,12 @@ public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-    public GenericContainer localContainer = getQpidTestContainer("docker/consumer",
-            testKeysPath,
-            "localhost.p12",
-            "password",
-            "truststore.jks",
-            "password",
-            "localhost");
+    public GenericContainer localContainer = getQpidContainer("docker/consumer", testKeysPath, "localhost.p12","password","truststore.jks",	"password");
 
 	@SuppressWarnings("rawtypes")
 	@Container
-    public GenericContainer remoteContainer = getQpidTestContainer("docker/producer",
-            testKeysPath,
-            "localhost.p12",
-            "password",
-            "truststore.jks",
-            "password",
-            "localhost");
+    public GenericContainer remoteContainer = getQpidContainer("docker/producer", testKeysPath, "localhost.p12","password","truststore.jks", "password");
 
-	//TODO this is wrong! The user is different, and connects as the Interchange user, I think?
 	@Test
     public void stoppingRemoteContainerStopsListener() {
 		String remoteAmqpsUrl = String.format("amqps://localhost:%s", remoteContainer.getMappedPort(AMQPS_PORT));
