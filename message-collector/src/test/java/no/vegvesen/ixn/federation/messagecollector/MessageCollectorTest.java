@@ -2,8 +2,9 @@ package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.federation.model.Connection;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import org.junit.jupiter.api.Test;
 

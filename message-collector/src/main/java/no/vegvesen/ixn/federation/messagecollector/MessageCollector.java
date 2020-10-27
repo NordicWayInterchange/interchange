@@ -2,9 +2,7 @@ package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
-import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,6 @@ import java.util.*;
 @Service
 public class MessageCollector {
 
-    private NeighbourService neighbourService;
     private final CollectorCreator collectorCreator;
     private GracefulBackoffProperties backoffProperties;
     private ListenerEndpointRepository listenerEndpointRepository;
