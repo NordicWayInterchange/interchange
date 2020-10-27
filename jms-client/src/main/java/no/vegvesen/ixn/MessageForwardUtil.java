@@ -41,7 +41,7 @@ public class MessageForwardUtil {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Message body {}", message.getBody(String.class));
 			}
-			producer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, remainingTimeToLive);
+			producer.send(message, message.getJMSDeliveryMode(), Message.DEFAULT_PRIORITY, remainingTimeToLive);
 			logger.debug("Sent message");
 		}
 	}
