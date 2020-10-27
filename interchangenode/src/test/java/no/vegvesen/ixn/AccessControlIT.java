@@ -43,7 +43,7 @@ public class AccessControlIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public static final GenericContainer localContainer = getQpidTestContainer("qpid-persistent",
+	public static final GenericContainer localContainer = getQpidTestContainer("qpid",
 			testKeysPath,
 			"localhost.p12",
 			"password",

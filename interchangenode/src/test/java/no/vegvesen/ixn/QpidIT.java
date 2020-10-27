@@ -49,7 +49,7 @@ public class QpidIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid-persistent",
+	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid",
 			testKeysPath,
 			"localhost.p12",
 			"password",
@@ -104,7 +104,7 @@ public class QpidIT extends QpidDockerBaseIT {
 
 		}
 		outgoingMessage.setText(body);
-		producer.sendTextMessage(outgoingMessage, timeToLive);
+		producer.sendNonPersistentMessage(outgoingMessage, timeToLive);
 
 	}
 	public void sendBadMessage(String messageId, String country, float lat, float lon) throws JMSException {
