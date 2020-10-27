@@ -3,10 +3,8 @@ package no.vegvesen.ixn.util;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 
-import javax.jms.Destination;
+import javax.jms.*;
 import javax.jms.IllegalStateException;
-import javax.jms.JMSException;
-import javax.jms.Message;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,7 +89,7 @@ public class MessageTestDouble implements Message {
 
     @Override
     public int getJMSDeliveryMode() throws JMSException {
-        throw new IllegalStateException("Method not implemented");
+        return DeliveryMode.NON_PERSISTENT;
     }
 
     @Override
