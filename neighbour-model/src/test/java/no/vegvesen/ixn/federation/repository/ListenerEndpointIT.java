@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.Connection;
+import no.vegvesen.ixn.federation.model.ConnectionStatus;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
+import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,5 +63,15 @@ public class ListenerEndpointIT {
         repository.save(end5);
         assertThatExceptionOfType(DataIntegrityViolationException.class).isThrownBy(() ->
                 repository.save(end6));
+    }
+
+    @Test
+    public void messageConnectionStatusCanBeQueried() {
+        ListenerEndpoint listenerEndpoint = new ListenerEndpoint("neighbourName", "brokerUrl", "queue", new Connection());
+        listenerEndpoint.getMessageConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+        repository.save(listenerEndpoint);
+
+        assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(listenerEndpoint);
+        assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(listenerEndpoint);
     }
 }

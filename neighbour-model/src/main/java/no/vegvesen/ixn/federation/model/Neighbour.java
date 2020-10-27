@@ -45,10 +45,6 @@ public class Neighbour {
 	private SubscriptionRequest ourRequestedSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_message_connection"))
-	private Connection messageConnection = new Connection();
-
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "con_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_control_connection"))
 	private Connection controlConnection = new Connection();
 
@@ -66,12 +62,11 @@ public class Neighbour {
 		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
 	}
 
-	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection messageConnection, Connection controlConnection) {
+	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection controlConnection) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.neighbourRequestedSubscriptions = subscriptions;
 		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
-		this.messageConnection = messageConnection;
 		this.controlConnection = controlConnection;
 	}
 
@@ -150,7 +145,6 @@ public class Neighbour {
 				", neighbourRequestedSubscriptions=" + neighbourRequestedSubscriptions +
 				", ourRequestedSubscriptions=" + ourRequestedSubscriptions +
 				", lastUpdated=" + lastUpdated +
-				", messageConnection=" + messageConnection +
 				", controlConnection=" + controlConnection +
 				", controlChannelPort='" + controlChannelPort +
 				'}';
@@ -265,14 +259,6 @@ public class Neighbour {
 
 	public void setNeighbour_id(Integer neighbour_id) {
 		this.neighbour_id = neighbour_id;
-	}
-
-	public Connection getMessageConnection() {
-		return messageConnection;
-	}
-
-	public void setMessageConnection(Connection messageConnection) {
-		this.messageConnection = messageConnection;
 	}
 
 	public Connection getControlConnection() { return controlConnection; }

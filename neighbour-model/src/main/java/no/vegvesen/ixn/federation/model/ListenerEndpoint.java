@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "listener_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"neighbourName", "brokerUrl", "queue"}, name = "uk_listener_endpoint"))
@@ -55,4 +56,21 @@ public class ListenerEndpoint {
                 ", messageConnection=" + messageConnection +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ListenerEndpoint that = (ListenerEndpoint) o;
+        return neighbourName.equals(that.neighbourName) &&
+                brokerUrl.equals(that.brokerUrl) &&
+                queue.equals(that.queue) &&
+                messageConnection.equals(that.messageConnection);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(neighbourName, brokerUrl, queue, messageConnection);
+    }
+
 }

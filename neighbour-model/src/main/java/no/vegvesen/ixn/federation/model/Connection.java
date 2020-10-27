@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.Random;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -106,5 +107,22 @@ public class Connection {
                 ", backoffAttempts=" + backoffAttempts +
                 ", connectionStatus=" + connectionStatus +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Connection that = (Connection) o;
+        return backoffAttempts == that.backoffAttempts &&
+                Objects.equals(backoffStart, that.backoffStart) &&
+                connectionStatus == that.connectionStatus &&
+                Objects.equals(unreachableTime, that.unreachableTime) &&
+                Objects.equals(lastFailedConnectionAttempt, that.lastFailedConnectionAttempt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(backoffStart, backoffAttempts, connectionStatus, unreachableTime, lastFailedConnectionAttempt);
     }
 }
