@@ -25,10 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -288,6 +285,7 @@ public class NeighbourService {
 									SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, calculatedSubscriptionForNeighbour, self.getName());
 									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
 									neighbour.setOurRequestedSubscriptions(subscriptionRequestResponse);
+									tearDownListenerEndpoints(neighbour);
 									neighbour.getControlConnection().okConnection();
 									logger.info("Successfully posted subscription request to neighbour.");
 								} else {
@@ -315,6 +313,19 @@ public class NeighbourService {
 			}
 			finally {
 				NeighbourMDCUtil.removeLogVariables();
+			}
+		}
+	}
+
+	public void tearDownListenerEndpoints(Neighbour neighbour) {
+		List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
+		Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+
+		Set<String> brokerUrlList = subscriptions.stream().map(Subscription::getBrokerUrl).collect(Collectors.toSet());
+
+		for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
+			if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
+				listenerEndpointRepository.delete(listenerEndpoint);
 			}
 		}
 	}
