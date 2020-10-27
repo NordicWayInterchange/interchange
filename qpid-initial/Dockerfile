@@ -18,6 +18,7 @@ ENV PASSWD_FILE="/config/passwd"
 ENV GROUPS_FILE="/config/groups"
 ADD config.json ${QPID_WORK}
 ADD entrypoint.sh /
+RUN chmod ug+x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 
