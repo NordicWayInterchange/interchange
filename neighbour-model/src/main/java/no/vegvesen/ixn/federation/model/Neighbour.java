@@ -22,7 +22,6 @@ public class Neighbour {
 
 	private static final String DEFAULT_CONTROL_CHANNEL_PORT = "443";
 	private static final String DEFAULT_CONTROL_CHANNEL_PROTOCOL = "https";
-	private static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 
 	private static Logger logger = LoggerFactory.getLogger(Neighbour.class);
 
@@ -38,16 +37,12 @@ public class Neighbour {
 	private Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "sub_out", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_sub_out"))
-	private SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	@JoinColumn(name = "neighbour_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_neigh_requested"))
+	private SubscriptionRequest neighbourRequestedSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "fed_in", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_fed_in"))
-	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
-
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_message_connection"))
-	private Connection messageConnection = new Connection();
+	@JoinColumn(name = "our_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_our_requested"))
+	private SubscriptionRequest ourRequestedSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "con_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_control_connection"))
@@ -55,25 +50,23 @@ public class Neighbour {
 
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
-	private String messageChannelPort;
 	private String controlChannelPort;
 
 	public Neighbour() {
 	}
 
-	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn) {
+	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions) {
 		this.setName(name);
 		this.capabilities = capabilities;
-		this.subscriptionRequest = subscriptions;
-		this.fedIn = fedIn;
+		this.neighbourRequestedSubscriptions = subscriptions;
+		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
 	}
 
-	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn, Connection messageConnection, Connection controlConnection) {
+	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection controlConnection) {
 		this.setName(name);
 		this.capabilities = capabilities;
-		this.subscriptionRequest = subscriptions;
-		this.fedIn = fedIn;
-		this.messageConnection = messageConnection;
+		this.neighbourRequestedSubscriptions = subscriptions;
+		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
 		this.controlConnection = controlConnection;
 	}
 
@@ -96,25 +89,25 @@ public class Neighbour {
 		this.capabilities = capabilities;
 	}
 
-	public SubscriptionRequest getSubscriptionRequest() {
-		return subscriptionRequest;
+	public SubscriptionRequest getNeighbourRequestedSubscriptions() {
+		return neighbourRequestedSubscriptions;
 	}
 
-	public void setSubscriptionRequest(SubscriptionRequest subscriptionRequest) {
-		this.subscriptionRequest = subscriptionRequest;
+	public void setNeighbourRequestedSubscriptions(SubscriptionRequest subscriptionRequest) {
+		this.neighbourRequestedSubscriptions = subscriptionRequest;
 	}
 
 	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
-		this.subscriptionRequest.setStatus(subscriptionRequestStatus);
+		this.neighbourRequestedSubscriptions.setStatus(subscriptionRequestStatus);
 	}
 
-	public SubscriptionRequest getFedIn() {
-		return fedIn;
+	public SubscriptionRequest getOurRequestedSubscriptions() {
+		return ourRequestedSubscriptions;
 	}
 
 	public Subscription getSubscriptionById(Integer id) throws SubscriptionNotFoundException {
 
-		for (Subscription subscription : subscriptionRequest.getSubscriptions()) {
+		for (Subscription subscription : neighbourRequestedSubscriptions.getSubscriptions()) {
 			if (subscription.getId().equals(id)) {
 				return subscription;
 			}
@@ -123,16 +116,8 @@ public class Neighbour {
 		throw new SubscriptionNotFoundException("Could not find subscription with id " + id + " on interchange " + name);
 	}
 
-	public void setFedIn(SubscriptionRequest fedIn) {
-		this.fedIn = fedIn;
-	}
-
-	public String getMessageChannelPort() {
-		return messageChannelPort;
-	}
-
-	public void setMessageChannelPort(String messageChannelPort) {
-		this.messageChannelPort = messageChannelPort;
+	public void setOurRequestedSubscriptions(SubscriptionRequest fedIn) {
+		this.ourRequestedSubscriptions = fedIn;
 	}
 
 	public String getControlChannelPort() {
@@ -144,7 +129,7 @@ public class Neighbour {
 	}
 
 	public Set<Subscription> getSubscriptionsForPolling() {
-		return getFedIn().getSubscriptions().stream()
+		return getOurRequestedSubscriptions().getSubscriptions().stream()
 				.filter(s -> SubscriptionStatus.REQUESTED.equals(s.getSubscriptionStatus()) ||
 						SubscriptionStatus.ACCEPTED.equals(s.getSubscriptionStatus()) ||
 						SubscriptionStatus.FAILED.equals(s.getSubscriptionStatus()))
@@ -155,14 +140,12 @@ public class Neighbour {
 	public String toString() {
 		return "Neighbour{" +
 				"neighbour_id=" + neighbour_id +
-				", name='" + name +
+				", name=" + name +
 				", capabilities=" + capabilities +
-				", subscriptionRequest=" + subscriptionRequest +
-				", fedIn=" + fedIn +
+				", neighbourRequestedSubscriptions=" + neighbourRequestedSubscriptions +
+				", ourRequestedSubscriptions=" + ourRequestedSubscriptions +
 				", lastUpdated=" + lastUpdated +
-				", messageConnection=" + messageConnection +
 				", controlConnection=" + controlConnection +
-				", messageChannelPort='" + messageChannelPort +
 				", controlChannelPort='" + controlChannelPort +
 				'}';
 	}
@@ -182,51 +165,20 @@ public class Neighbour {
 		}
 	}
 
-	public String getMessageChannelUrl() {
-		try {
-			if (this.getMessageChannelPort() == null || this.getMessageChannelPort().equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
-				return String.format("amqps://%s/", name);
-			} else {
-				return String.format("amqps://%s:%s/", name, this.getMessageChannelPort());
-			}
-		} catch (NumberFormatException e) {
-			logger.error("Could not create message channel url for interchange {}", this, e);
-			throw new DiscoveryException(e);
-		}
-	}
-
 	public boolean hasEstablishedSubscriptions() {
-		return getSubscriptionRequest() != null && getSubscriptionRequest().getStatus() == SubscriptionRequestStatus.ESTABLISHED;
+		return getNeighbourRequestedSubscriptions() != null && getNeighbourRequestedSubscriptions().getStatus() == SubscriptionRequestStatus.ESTABLISHED;
 	}
 
 	public boolean hasCapabilities() {
 		return getCapabilities() != null && getCapabilities().getStatus() == Capabilities.CapabilitiesStatus.KNOWN;
 	}
 
-	public Set<String> getUnwantedBindKeys(Set<String> existingBindKeys) {
-		Set<String> wantedBindKeys = this.wantedBindings();
-		Set<String> unwantedBindKeys = new HashSet<>(existingBindKeys);
-		unwantedBindKeys.removeAll(wantedBindKeys);
-		return unwantedBindKeys;
-	}
-
-	Set<String> wantedBindings() {
-		Set<String> wantedBindings = new HashSet<>();
-		for (Subscription subscription : getSubscriptionRequest().getAcceptedSubscriptions()) {
-			wantedBindings.add(subscription.bindKey());
-		}
-		return wantedBindings;
-	}
-
 	public void setDnsProperties(Neighbour dnsNeighbour) {
 		assert dnsNeighbour.getName().equals(this.getName());
-		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}, message {}",
+		logger.debug("Found neighbour {} in DNS, populating with port values from DNS: control {}",
 				this.getName(),
-				dnsNeighbour.getControlChannelPort(),
-				dnsNeighbour.getMessageChannelPort());
+				dnsNeighbour.getControlChannelPort());
 		this.setControlChannelPort(dnsNeighbour.getControlChannelPort());
-		this.setMessageChannelPort(dnsNeighbour.getMessageChannelPort());
-
 	}
 
 	/**
@@ -253,12 +205,12 @@ public class Neighbour {
 		}
 		LocalDateTime capabilityPostDate = this.getCapabilities().getLastCapabilityExchange();
 
-		if (this.getFedIn() == null || !this.getFedIn().getSuccessfulRequest().isPresent()) {
+		if (this.getOurRequestedSubscriptions() == null || !this.getOurRequestedSubscriptions().getSuccessfulRequest().isPresent()) {
 			logger.debug("Should check subscription for neighbour with no previous subscription request");
 			return true;
 		}
 
-		LocalDateTime neighbourSubscriptionRequestTime = this.getFedIn().getSuccessfulRequest().get();
+		LocalDateTime neighbourSubscriptionRequestTime = this.getOurRequestedSubscriptions().getSuccessfulRequest().get();
 
 		boolean shouldCheckSubscriptionRequestForUpdates = neighbourSubscriptionRequestTime.isBefore(localSubscriptionsUpdatedTime)
 				|| neighbourSubscriptionRequestTime.isBefore(capabilityPostDate);
@@ -307,14 +259,6 @@ public class Neighbour {
 
 	public void setNeighbour_id(Integer neighbour_id) {
 		this.neighbour_id = neighbour_id;
-	}
-
-	public Connection getMessageConnection() {
-		return messageConnection;
-	}
-
-	public void setMessageConnection(Connection messageConnection) {
-		this.messageConnection = messageConnection;
 	}
 
 	public Connection getControlConnection() { return controlConnection; }

@@ -34,7 +34,7 @@ data:
     frontend qpid-messaging-frontend
         mode tcp
         log global
-        bind *:5671
+        bind *:{{ .Values.self.message_channel_port }}
         default_backend qpid-messaging
 
     frontend service-provider-frontent

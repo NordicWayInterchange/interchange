@@ -1,15 +1,29 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
-import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.Connection;
+import no.vegvesen.ixn.federation.model.ConnectionStatus;
+import no.vegvesen.ixn.federation.model.DataType;
+import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
+import no.vegvesen.ixn.federation.model.ListenerEndpoint;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Self;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
+import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
@@ -22,10 +36,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,6 +49,7 @@ public class NeighbourService {
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 	private DNSFacade dnsFacade;
+	private ListenerEndpointRepository listenerEndpointRepository;
 
 	private GracefulBackoffProperties backoffProperties;
 	private NeighbourDiscovererProperties discovererProperties;
@@ -48,12 +60,14 @@ public class NeighbourService {
 							DNSFacade dnsFacade,
 							GracefulBackoffProperties backoffProperties,
 							NeighbourDiscovererProperties discovererProperties,
-							InterchangeNodeProperties interchangeNodeProperties) {
+							InterchangeNodeProperties interchangeNodeProperties,
+							ListenerEndpointRepository listenerEndpointRepository) {
 		this.neighbourRepository = neighbourRepository;
 		this.dnsFacade = dnsFacade;
 		this.backoffProperties = backoffProperties;
 		this.discovererProperties = discovererProperties;
 		this.interchangeNodeProperties = interchangeNodeProperties;
+		this.listenerEndpointRepository = listenerEndpointRepository;
 	}
 
 
@@ -94,7 +108,7 @@ public class NeighbourService {
 		}
 
 		//Check if subscription request is empty or not
-		SubscriptionRequest persistentRequest = neighbour.getSubscriptionRequest();
+		SubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
 		if (persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			logger.info("Neighbour with no existing subscription posted empty subscription request.");
 			logger.info("Returning empty subscription request.");
@@ -123,7 +137,7 @@ public class NeighbourService {
 			logger.info("Saving neighbour in DB to generate paths for the subscriptions.");
 			// Save neighbour in DB to generate subscription ids for subscription paths.
 			neighbour = neighbourRepository.save(neighbour);
-			persistentRequest = neighbour.getSubscriptionRequest();
+			persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
 
 			logger.info("Paths for requested subscriptions created.");
 			// Create a path for each subscription
@@ -137,10 +151,10 @@ public class NeighbourService {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
 		logger.info("Saving updated Neighbour: {}", neighbour.toString());
-		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
+		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 	}
 
-	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
+	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String messageChannelUrl) {
 		logger.info("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
@@ -150,7 +164,7 @@ public class NeighbourService {
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),nodeProviderName);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),messageChannelUrl);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
@@ -179,7 +193,7 @@ public class NeighbourService {
 	}
 
 	Neighbour findNeighbour(String neighbourName) {
-		return dnsFacade.getNeighbours().stream()
+		return dnsFacade.lookupNeighbours().stream()
 				.filter(n -> n.getName().equals(neighbourName))
 				.findFirst()
 				.orElseThrow(() ->
@@ -204,12 +218,12 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {
-		return neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED);
+		return neighbourRepository.findByOurRequestedSubscriptions_StatusIn(SubscriptionRequestStatus.FAILED);
 	}
 
 	public void checkForNewNeighbours() {
 		logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
-		List<Neighbour> neighbours = dnsFacade.getNeighbours();
+		List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
 		logger.debug("Got neighbours from DNS {}.", neighbours);
 
 		for (Neighbour neighbour : neighbours) {
@@ -275,20 +289,21 @@ public class NeighbourService {
 					if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 						Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
-						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
+						Set<Subscription> fedInSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 							try {
 								if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
 									SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, calculatedSubscriptionForNeighbour, self.getName());
 									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
-									neighbour.setFedIn(subscriptionRequestResponse);
+									neighbour.setOurRequestedSubscriptions(subscriptionRequestResponse);
+									tearDownListenerEndpoints(neighbour);
 									neighbour.getControlConnection().okConnection();
 									logger.info("Successfully posted subscription request to neighbour.");
 								} else {
 									logger.info("Too soon to post subscription request to neighbour when backing off");
 								}
 							} catch (SubscriptionRequestException e) {
-								neighbour.getFedIn().setStatus(SubscriptionRequestStatus.FAILED);
+								neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.FAILED);
 								neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
 								logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
 							}
@@ -313,6 +328,19 @@ public class NeighbourService {
 		}
 	}
 
+	public void tearDownListenerEndpoints(Neighbour neighbour) {
+		List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
+		Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+
+		Set<String> brokerUrlList = subscriptions.stream().map(Subscription::getBrokerUrl).collect(Collectors.toSet());
+
+		for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
+			if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
+				listenerEndpointRepository.delete(listenerEndpoint);
+			}
+		}
+	}
+
 	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
@@ -327,7 +355,7 @@ public class NeighbourService {
 	}
 
 	public void pollSubscriptions(NeighbourFacade neighbourFacade) {
-		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
+		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.REQUESTED,
 				SubscriptionStatus.ACCEPTED,
 				SubscriptionStatus.FAILED);
@@ -355,9 +383,15 @@ public class NeighbourService {
 
 						// Throws SubscriptionPollException if unsuccessful
 						Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
+						subscription.setBrokerUrl(polledSubscription.getBrokerUrl());
+						subscription.setQueue(polledSubscription.getQueue());
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
 						neighbour.getControlConnection().okConnection();
+						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
+							createListenerEndpoint(polledSubscription, neighbour);
+						}
+						//utvide med ListenerEndpoint lookup + lage ny om det trengs
 						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
 					} else {
 						// Number of poll attempts exceeds allowed number of poll attempts.
@@ -376,8 +410,15 @@ public class NeighbourService {
 		}
 	}
 
+	public void createListenerEndpoint(Subscription subscription, Neighbour neighbour) {
+		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue()) == null){
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue(), new Connection()));
+			logger.info("ListenerEnpoint was saved: {}", savedListenerEndpoint.toString());
+		}
+	}
+
 	public List<Neighbour> listNeighboursToConsumeMessagesFrom() {
-		return neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
+		return neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
 	}
 
 	public void retryUnreachable(Self self, NeighbourFacade neighbourFacade) {
@@ -399,7 +440,7 @@ public class NeighbourService {
 
 
 	public List<Neighbour> findNeighboursToTearDownRoutingFor() {
-		List<Neighbour> tearDownRoutingList = neighbourRepository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
+		List<Neighbour> tearDownRoutingList = neighbourRepository.findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus.TEAR_DOWN);
 		logger.debug("Found {} neighbours to set up routing for {}", tearDownRoutingList.size(), tearDownRoutingList);
 		return tearDownRoutingList;
 	}
@@ -417,7 +458,7 @@ public class NeighbourService {
 	}
 
 	public void saveSetupRouting(Neighbour neighbour) {
-		neighbour.getSubscriptionRequest().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+		neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.ESTABLISHED);
 
 		neighbourRepository.save(neighbour);
 		logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
@@ -426,7 +467,7 @@ public class NeighbourService {
 
 	public SubscriptionResponseApi findSubscriptions(String ixnName) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		Set<Subscription> subscriptions = neighbour.getSubscriptionRequest().getSubscriptions();
+		Set<Subscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),subscriptions);
 	}
 }

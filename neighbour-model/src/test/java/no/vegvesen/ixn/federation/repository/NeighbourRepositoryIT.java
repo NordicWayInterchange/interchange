@@ -39,7 +39,7 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void storedInterchangeIsPossibleToFindByName() {
-		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), new Connection(), new Connection());
+		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), new Connection());
 		repository.save(firstInterchange);
 		Neighbour foundInterchange = repository.findByName("another-interchange");
 		assertThat(foundInterchange).isNotNull();
@@ -63,13 +63,13 @@ public class NeighbourRepositoryIT {
 
 		Neighbour foundInOut = repository.findByName(savedInOut.getName());
 		assertThat(foundInOut).isNotNull();
-		assertThat(foundInOut.getFedIn().getSubscriptions()).hasSize(1);
+		assertThat(foundInOut.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 
 
-		Subscription inSub = foundInOut.getFedIn().getSubscriptions().iterator().next();
+		Subscription inSub = foundInOut.getOurRequestedSubscriptions().getSubscriptions().iterator().next();
 		assertThat(inSub.getSelector()).isEqualTo("inbound is true");
-		assertThat(foundInOut.getSubscriptionRequest().getSubscriptions()).hasSize(1);
-		Subscription outSub = foundInOut.getSubscriptionRequest().getSubscriptions().iterator().next();
+		assertThat(foundInOut.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
+		Subscription outSub = foundInOut.getNeighbourRequestedSubscriptions().getSubscriptions().iterator().next();
 		assertThat(outSub.getSelector()).isEqualTo("outbound is true");
 	}
 
@@ -115,7 +115,7 @@ public class NeighbourRepositoryIT {
 		Neighbour tearDownIxn = new Neighbour("torry", caps, tearDownSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(tearDownIxn);
 
-		List<Neighbour> forTearDownFromRepo = repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.TEAR_DOWN);
+		List<Neighbour> forTearDownFromRepo = repository.findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus.TEAR_DOWN);
 
 		assertThat(forTearDownFromRepo).hasSize(1);
 		assertThat(forTearDownFromRepo.iterator().next().getName()).isEqualTo("torry");
@@ -134,11 +134,11 @@ public class NeighbourRepositoryIT {
 
 		Set<Subscription> subscriptionsForUpdating = new HashSet<>();
 
-		savedForUpdate.getSubscriptionRequest().setSubscriptions(subscriptionsForUpdating);
+		savedForUpdate.getNeighbourRequestedSubscriptions().setSubscriptions(subscriptionsForUpdating);
 		Neighbour updated = repository.save(savedForUpdate);
 		assertThat(updated).isNotNull();
-		assertThat(updated.getSubscriptionRequest()).isNotNull();
-		assertThat(updated.getSubscriptionRequest().getSubscriptions()).hasSize(0);
+		assertThat(updated.getNeighbourRequestedSubscriptions()).isNotNull();
+		assertThat(updated.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(0);
 	}
 
 	@Test
@@ -156,7 +156,7 @@ public class NeighbourRepositoryIT {
 		Neighbour noForwards = new Neighbour("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
 		repository.save(noForwards);
 
-		List<Neighbour> establishedOutgoingSubscriptions = repository.findBySubscriptionRequest_Status(SubscriptionRequestStatus.ESTABLISHED);
+		List<Neighbour> establishedOutgoingSubscriptions = repository.findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus.ESTABLISHED);
 		assertThat(establishedOutgoingSubscriptions).hasSize(1);
 		assertThat(establishedOutgoingSubscriptions.iterator().next().getName()).isEqualTo(ixnForwards.getName());
 	}
@@ -199,7 +199,7 @@ public class NeighbourRepositoryIT {
 		Neighbour neighbour = new Neighbour("nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
 		Neighbour saved = repository.save(neighbour);
 		assertThat(saved).isNotNull();
-		assertThat(saved.getSubscriptionRequest().getSuccessfulRequest()).isNotNull();
+		assertThat(saved.getNeighbourRequestedSubscriptions().getSuccessfulRequest()).isNotNull();
 	}
 
 	@Test
@@ -209,18 +209,7 @@ public class NeighbourRepositoryIT {
 		Neighbour neighbour = new Neighbour("another-nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
 		Neighbour saved = repository.save(neighbour);
 		assertThat(saved).isNotNull();
-		assertThat(saved.getSubscriptionRequest().getSuccessfulRequest()).isEmpty();
-	}
-
-	@Test
-	public void messageConnectionStatusCanBeQueried() {
-		Neighbour neighbour = new Neighbour();
-		neighbour.setName("some-neighbour1");
-		neighbour.getMessageConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
-		repository.save(neighbour);
-
-		assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(neighbour);
-		assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
+		assertThat(saved.getNeighbourRequestedSubscriptions().getSuccessfulRequest()).isEmpty();
 	}
 
 	@Test

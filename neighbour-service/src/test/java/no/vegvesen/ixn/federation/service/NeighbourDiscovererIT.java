@@ -82,7 +82,7 @@ public class NeighbourDiscovererIT {
 
 		Capabilities c1 = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
 		Capabilities c2 = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "FI")));
-		when(mockDnsFacade.getNeighbours()).thenReturn(Lists.list(neighbour1, neighbour2));
+		when(mockDnsFacade.lookupNeighbours()).thenReturn(Lists.list(neighbour1, neighbour2));
 
 		checkForNewNeighbours();
 		performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(neighbour1, neighbour2, c1, c2);
@@ -146,7 +146,7 @@ public class NeighbourDiscovererIT {
 
 		Neighbour found1 = repository.findByName(neighbour1.getName());
 		assertThat(found1).isNotNull();
-		assertThat(found1.getSubscriptionRequest()).isNotNull();
+		assertThat(found1.getNeighbourRequestedSubscriptions()).isNotNull();
 		assertThat(found1.getSubscriptionsForPolling()).hasSize(1);
 		return found1.getSubscriptionsForPolling().iterator().next();
 	}
@@ -156,13 +156,13 @@ public class NeighbourDiscovererIT {
 		neighbourService.pollSubscriptions(mockNeighbourFacade);
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
-		assertThat(found1.getFedIn()).isNotNull();
-		assertThat(found1.getFedIn().getSubscriptions()).hasSize(1);
-		assertThat(found1.getFedIn().getSubscriptions().iterator().next().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.CREATED);
+		assertThat(found1.getOurRequestedSubscriptions()).isNotNull();
+		assertThat(found1.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+		assertThat(found1.getOurRequestedSubscriptions().getSubscriptions().iterator().next().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.CREATED);
 	}
 
 
-	private DataType getDataType(String messageType, String originatingCountry) {
+	static DataType getDataType(String messageType, String originatingCountry) {
 		DataType dataType = new DataType();
 		dataType.getValues().put(MessageProperty.MESSAGE_TYPE.getName(), messageType);
 		dataType.getValues().put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);

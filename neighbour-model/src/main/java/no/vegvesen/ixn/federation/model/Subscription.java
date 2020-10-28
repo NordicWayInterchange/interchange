@@ -20,6 +20,10 @@ public class Subscription {
 
 	private int numberOfPolls = 0;
 
+	private String brokerUrl;
+
+	private String queue;
+
 	public Subscription() {
 	}
 
@@ -81,6 +85,14 @@ public class Subscription {
 		this.numberOfPolls = numberOfPolls;
 	}
 
+	public void setBrokerUrl(String brokerUrl) { this.brokerUrl = brokerUrl; }
+
+	public String getBrokerUrl() { return brokerUrl; }
+
+	public void setQueue(String queue) { this.queue = queue; }
+
+	public String getQueue() { return queue; }
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null) return false;
@@ -100,10 +112,13 @@ public class Subscription {
 	@Override
 	public String toString() {
 		return "Subscription{" +
-				"sub_id=" + id +
+				"id=" + id +
 				", subscriptionStatus=" + subscriptionStatus +
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +
+				", numberOfPolls=" + numberOfPolls +
+				", brokerUrl='" + brokerUrl + '\'' +
+				", queue='" + queue + '\'' +
 				'}';
 	}
 

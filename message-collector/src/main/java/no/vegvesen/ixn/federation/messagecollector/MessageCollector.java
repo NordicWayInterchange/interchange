@@ -1,8 +1,8 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.model.ListenerEndpoint;
+import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +15,9 @@ import java.util.*;
 @Service
 public class MessageCollector {
 
-    private NeighbourService neighbourService;
     private final CollectorCreator collectorCreator;
     private GracefulBackoffProperties backoffProperties;
+    private ListenerEndpointRepository listenerEndpointRepository;
 
     //NOTE: This is implicitly thread safe. If more than one thread can access the listeners map, the implementation of the listener Map will have to change.
     private Map<String, MessageCollectorListener> listeners;
@@ -25,8 +25,8 @@ public class MessageCollector {
 
 
     @Autowired
-    public MessageCollector(NeighbourService service, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties) {
-        this.neighbourService = service;
+    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties) {
+        this.listenerEndpointRepository = listenerEndpointRepository;
         this.collectorCreator = collectorCreator;
         this.listeners = new HashMap<>();
         this.backoffProperties = backoffProperties;
@@ -52,25 +52,27 @@ public class MessageCollector {
     }
 
     public void setupConnectionsToNewNeighbours() {
-        List<Neighbour> interchanges = neighbourService.listNeighboursToConsumeMessagesFrom();
+        List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAll();
         List<String> interchangeNames = new ArrayList<>();
 
-        for (Neighbour ixn : interchanges) {
-            String name = ixn.getName();
-            interchangeNames.add(name);
-            if (!listeners.containsKey(name)) {
-                setUpConnectionToNeighbour(ixn);
+        for (ListenerEndpoint listenerEndpoint : listenerEndpoints) {
+            String neighbourName = listenerEndpoint.getNeighbourName();
+            interchangeNames.add(neighbourName);
+            if (!listeners.containsKey(neighbourName)) {
+                setUpConnectionToNeighbour(listenerEndpoint);
             }
             else {
-                if (listeners.get(name).isRunning()) {
-                    logger.debug("Listener for {} is still running with no changes", name);
+                if (listeners.get(neighbourName).isRunning()) {
+                    logger.debug("Listener for {} is still running with no changes", neighbourName);
                 } else {
-                    logger.debug("Non-running listener detected, name {}",name);
+                    logger.debug("Non-running listener detected, name {}", neighbourName);
                 }
             }
+
         }
 
         List<String> listenerKeysToRemove = new ArrayList<>();
+
         for (String ixnName : listeners.keySet()) {
             if (!interchangeNames.contains(ixnName)) {
                 logger.info("Listener for {} is now being removed",ixnName);
@@ -84,17 +86,17 @@ public class MessageCollector {
         listeners.keySet().removeAll(listenerKeysToRemove);
     }
 
-    public void setUpConnectionToNeighbour(Neighbour ixn){
-        String name = ixn.getName();
-        if(ixn.getMessageConnection().canBeContacted(backoffProperties)) {
+    public void setUpConnectionToNeighbour(ListenerEndpoint listenerEndpoint){
+        String name = listenerEndpoint.getNeighbourName();
+        if(listenerEndpoint.getMessageConnection().canBeContacted(backoffProperties)) {
             try {
-                logger.info("Setting up connection to ixn with name {}, port {}", name, ixn.getMessageChannelPort());
-                MessageCollectorListener messageListener = collectorCreator.setupCollection(ixn);
+                logger.info("Setting up connection to ixn with name {}, URL {}", name, listenerEndpoint.getBrokerUrl());
+                MessageCollectorListener messageListener = collectorCreator.setupCollection(listenerEndpoint);
                 listeners.put(name, messageListener);
-                ixn.getMessageConnection().okConnection();
+                listenerEndpoint.getMessageConnection().okConnection();
             } catch (MessageCollectorException e) {
                 logger.warn("Tried to create connection to {}, but failed with exception.", name, e);
-                ixn.getMessageConnection().failedConnection(backoffProperties.getNumberOfAttempts());
+                listenerEndpoint.getMessageConnection().failedConnection(backoffProperties.getNumberOfAttempts());
             }
         }
         else {

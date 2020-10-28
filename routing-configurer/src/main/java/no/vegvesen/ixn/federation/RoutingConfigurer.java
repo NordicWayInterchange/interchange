@@ -79,8 +79,9 @@ public class RoutingConfigurer {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			createQueue(neighbour.getName());
 			addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
-			bindSubscriptions("nwEx", neighbour);
-			for (Subscription subscription : neighbour.getSubscriptionRequest().getSubscriptions()) {
+			Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
+			bindSubscriptions("nwEx", neighbour, acceptedSubscriptions);
+			for (Subscription subscription : acceptedSubscriptions) {
 				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 			}
 			logger.info("Set up routing for neighbour {}", neighbour.getName());
@@ -90,9 +91,9 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void bindSubscriptions(String exchange, Neighbour neighbour) {
+	private void bindSubscriptions(String exchange, Neighbour neighbour, Set<Subscription> acceptedSubscriptions) {
 		unbindOldUnwantedBindings(neighbour, exchange);
-		for (Subscription subscription : neighbour.getSubscriptionRequest().getAcceptedSubscriptions()) {
+		for (Subscription subscription : acceptedSubscriptions) {
 			qpidClient.addBinding(subscription.getSelector(), neighbour.getName(), subscription.bindKey(), exchange);
 		}
 	}
@@ -100,7 +101,7 @@ public class RoutingConfigurer {
 	private void unbindOldUnwantedBindings(Neighbour neighbour, String exchangeName) {
 		String name = neighbour.getName();
 		Set<String> existingBindKeys = qpidClient.getQueueBindKeys(name);
-		Set<String> unwantedBindKeys = neighbour.getUnwantedBindKeys(existingBindKeys);
+		Set<String> unwantedBindKeys = neighbour.getNeighbourRequestedSubscriptions().getUnwantedBindKeys(existingBindKeys);
 		for (String unwantedBindKey : unwantedBindKeys) {
 			qpidClient.unbindBindKey(name, unwantedBindKey, exchangeName);
 		}

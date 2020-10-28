@@ -34,6 +34,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -117,6 +118,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists(salmon.getName())).isTrue();
 		Set<String> queueBindKeys = client.getQueueBindKeys(salmon.getName());
 		assertThat(queueBindKeys).hasSize(1);
+		Set<Subscription> createdSubscriptions = salmon.getNeighbourRequestedSubscriptions().getSubscriptions().stream().filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)).collect(Collectors.toSet());
+		assertThat(createdSubscriptions).hasSize(1);
 	}
 
 	@Test

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Table(name = "subscription_request")
 public class SubscriptionRequest {
 
-	private static Logger logger = LoggerFactory.getLogger(SubscriptionRequest.class);
+	private static final Logger logger = LoggerFactory.getLogger(SubscriptionRequest.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subreq_seq")
@@ -80,4 +80,18 @@ public class SubscriptionRequest {
 		this.successfulRequest = successfulRequest;
 	}
 
+	public Set<String> wantedBindings() {
+		Set<String> wantedBindings = new HashSet<>();
+		for (Subscription subscription : getAcceptedSubscriptions()) {
+			wantedBindings.add(subscription.bindKey());
+		}
+		return wantedBindings;
+	}
+
+	public Set<String> getUnwantedBindKeys(Set<String> existingBindKeys) {
+		Set<String> wantedBindKeys = this.wantedBindings();
+		Set<String> unwantedBindKeys = new HashSet<>(existingBindKeys);
+		unwantedBindKeys.removeAll(wantedBindKeys);
+		return unwantedBindKeys;
+	}
 }

@@ -93,7 +93,7 @@ public class NeighbourRepositorySelectorIT {
 		Neighbour ericsson = createNeighbourObject("ericsson-3", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.FAILED);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> getInterchangesWithFailedFedIn = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.FAILED);
+		List<Neighbour> getInterchangesWithFailedFedIn = neighbourRepository.findByOurRequestedSubscriptions_StatusIn(SubscriptionRequestStatus.FAILED);
 
 		assertThat(interchangeInList(ericsson.getName(), getInterchangesWithFailedFedIn )).isTrue();
 	}
@@ -116,7 +116,7 @@ public class NeighbourRepositorySelectorIT {
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
-		ericsson.getFedIn().setSubscriptions(Collections.singleton(subscription));
+		ericsson.getOurRequestedSubscriptions().setSubscriptions(Collections.singleton(subscription));
 		neighbourRepository.save(ericsson);
 
 		Subscription subscriptionA = new Subscription();
@@ -127,7 +127,7 @@ public class NeighbourRepositorySelectorIT {
 		Neighbour ericssonA = new Neighbour("ericsson-5-A", capabilities, null, fedin);
 		neighbourRepository.save(ericssonA);
 
-		List<Neighbour> getInterchangeWithRequestedSubscriptionsInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(
+		List<Neighbour> getInterchangeWithRequestedSubscriptionsInFedIn = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.ACCEPTED, SubscriptionStatus.REQUESTED);
 
 		assertThat(interchangeInList(ericsson.getName(), getInterchangeWithRequestedSubscriptionsInFedIn)).isTrue();
@@ -143,10 +143,10 @@ public class NeighbourRepositorySelectorIT {
 		subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
 		Set<Subscription> subscriptionSet = new HashSet<>();
 		subscriptionSet.add(subscription);
-		ericsson.getFedIn().setSubscriptions(subscriptionSet);
+		ericsson.getOurRequestedSubscriptions().setSubscriptions(subscriptionSet);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> getInterchangesWithFailedSubscriptionInFedIn = neighbourRepository.findNeighboursByFedIn_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
+		List<Neighbour> getInterchangesWithFailedSubscriptionInFedIn = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.FAILED);
 
 		assertThat(interchangeInList(ericsson.getName(), getInterchangesWithFailedSubscriptionInFedIn)).isTrue();
 	}
@@ -159,10 +159,10 @@ public class NeighbourRepositorySelectorIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
-		ericsson.setFedIn(subscriptionRequest);
+		ericsson.setOurRequestedSubscriptions(subscriptionRequest);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> interchangeWithFedInRequested = neighbourRepository.findByFedIn_StatusIn(
+		List<Neighbour> interchangeWithFedInRequested = neighbourRepository.findByOurRequestedSubscriptions_StatusIn(
 				SubscriptionRequestStatus.REQUESTED, SubscriptionRequestStatus.ESTABLISHED);
 
 		assertThat(interchangeInList(ericsson.getName(), interchangeWithFedInRequested)).isTrue();
@@ -176,10 +176,10 @@ public class NeighbourRepositorySelectorIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest.setStatus(SubscriptionRequestStatus.ESTABLISHED);
-		ericsson.setFedIn(subscriptionRequest);
+		ericsson.setOurRequestedSubscriptions(subscriptionRequest);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> interchangeWithFedInEstablished = neighbourRepository.findByFedIn_StatusIn(
+		List<Neighbour> interchangeWithFedInEstablished = neighbourRepository.findByOurRequestedSubscriptions_StatusIn(
 				SubscriptionRequestStatus.REQUESTED, SubscriptionRequestStatus.ESTABLISHED);
 
 		assertThat(interchangeInList(ericsson.getName(), interchangeWithFedInEstablished)).isTrue();
@@ -193,10 +193,10 @@ public class NeighbourRepositorySelectorIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 		subscriptionRequest.setStatus(SubscriptionRequestStatus.REJECTED);
-		ericsson.setFedIn(subscriptionRequest);
+		ericsson.setOurRequestedSubscriptions(subscriptionRequest);
 		neighbourRepository.save(ericsson);
 
-		List<Neighbour> interchangeWithFedInRejected = neighbourRepository.findByFedIn_StatusIn(SubscriptionRequestStatus.REJECTED);
+		List<Neighbour> interchangeWithFedInRejected = neighbourRepository.findByOurRequestedSubscriptions_StatusIn(SubscriptionRequestStatus.REJECTED);
 
 		assertThat(interchangeInList(ericsson.getName(), interchangeWithFedInRejected)).isTrue();
 	}

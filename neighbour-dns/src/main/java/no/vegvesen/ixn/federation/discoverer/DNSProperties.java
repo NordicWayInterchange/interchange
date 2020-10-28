@@ -9,11 +9,6 @@ import org.springframework.stereotype.Component;
 public class DNSProperties {
 
 	/**
-	 * When discovery of neighbours only finds message port in DNS, this port is selected as the control channel port
-	 */
-	private String controlChannelPort = "443";
-
-	/**
 	 * The domain name where to look for neighbours in the DNS.
 	 */
 	private String domainName;
@@ -22,17 +17,8 @@ public class DNSProperties {
 	public DNSProperties() {
 	}
 
-	public DNSProperties(String controlChannelPort, String domainName) {
-		this.controlChannelPort = controlChannelPort;
+	public DNSProperties(String domainName) {
 		this.domainName = domainName;
-	}
-
-	public String getControlChannelPort() {
-		return controlChannelPort;
-	}
-
-	public void setControlChannelPort(String controlChannelPort) {
-		this.controlChannelPort = controlChannelPort;
 	}
 
 	public String getDomainName() {
@@ -47,7 +33,7 @@ public class DNSProperties {
 	@Override
 	public String toString() {
 		return "DNSProperties{" +
-				", controlChannelPort='" + controlChannelPort + '\'' +
+				//", controlChannelPort='" + controlChannelPort + '\'' +
 				", domainName='" + domainName + '\'' +
 				'}';
 	}
