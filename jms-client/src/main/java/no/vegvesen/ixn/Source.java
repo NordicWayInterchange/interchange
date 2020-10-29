@@ -49,6 +49,9 @@ public class Source implements AutoCloseable {
 		this.send(messageText, "SE", null);
 	}
 
+	public void sendNonPersistent(String messageText) throws JMSException {
+		this.sendNonPersistent(messageText, "SE", null);
+	}
 
     public void send(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
     	if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
