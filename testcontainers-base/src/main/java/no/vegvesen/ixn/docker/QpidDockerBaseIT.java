@@ -39,7 +39,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		return new GenericContainer(
 				new ImageFromDockerfile("qpid-it-memory", false)
 						.withFileFromPath(".", getFolderPath("qpid-initial")))
-				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_WRITE)
+				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
 				.withFileSystemBind(testKeysPath.toString(), "/jks", BindMode.READ_ONLY)
 				.withEnv("KEY_STORE", "/jks/" + keyStore)
 				.withEnv("KEY_STORE_PASSWORD", keyStorePassword)
