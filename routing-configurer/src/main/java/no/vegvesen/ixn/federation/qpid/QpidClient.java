@@ -28,11 +28,11 @@ public class QpidClient {
 
 
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
-	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/%s/%s";
-	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/%s/%s";
-	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/%s/%s";
+	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s";
+	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
+	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
-	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/%s/%s/default";
+	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
 
 	private final String exchangesURL;
 	private final String queuesURL;
@@ -44,11 +44,11 @@ public class QpidClient {
 	public QpidClient(String baseUrl,
 					  String vhostName,
 					  RestTemplate restTemplate) {
-		this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName,vhostName);
-		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName,vhostName);
-		this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName,vhostName);
+		this.exchangesURL = String.format(EXCHANGE_URL_PATTERN, baseUrl, vhostName);
+		this.queuesURL = String.format(QUEUES_URL_PATTERN, baseUrl, vhostName);
+		this.pingURL = String.format(PING_URL_PATTERN, baseUrl, vhostName);
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
-		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName,vhostName);
+		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
 		this.restTemplate = restTemplate;
 	}
 

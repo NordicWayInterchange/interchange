@@ -125,7 +125,7 @@
   ],
   "virtualhostnodes": [
     {
-      "name": "${VHOST_NAME}",
+      "name": "default",
       "type": "JSON",
       "defaultVirtualHostNode": "true",
       "storePath":"${VHOST_FILE}"
