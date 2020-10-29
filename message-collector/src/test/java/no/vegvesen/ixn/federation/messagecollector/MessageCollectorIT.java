@@ -90,7 +90,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
-		source.send("fishy fishy", "SE", 8000L);
+		source.sendNonPersistent("fishy fishy", "SE", 8000L);
 
 		Message message = consumer.receive(2000);
 		assertThat(message).withFailMessage("Expected message is not routed").isNotNull();
@@ -121,7 +121,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
 		source.start();
-		source.send("fishy fishy", "SE", 1000L);
+		source.sendNonPersistent("fishy fishy", "SE", 1000L);
 
 		Thread.sleep(2000); // wait for the message to expire with extra margin
 
