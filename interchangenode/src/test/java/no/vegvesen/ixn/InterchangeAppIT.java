@@ -52,7 +52,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 	@SuppressWarnings("rawtypes")
 	@Container
     public static final GenericContainer qpidContainer = getQpidTestContainer(
-            "qpid-persistent",
+            "qpid",
             testKeysPath,
             "localhost.p12",
             "password",
@@ -90,7 +90,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
                 logger.debug("Starting receive");
 
 				long ttl = 2000L;
-				source.sendTextMessage(textMessage, ttl);
+				source.sendNonPersistentMessage(textMessage, ttl);
 				long expectedExpiration = System.currentTimeMillis() + ttl;
 				logger.debug("Message sendt with expected expiry {}", expectedExpiration);
 
@@ -119,7 +119,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
             textMessage.setStringProperty("longitude","63.0");
             textMessage.setStringProperty("publicationType","SituationPublication");
 
-            source.sendTextMessage(textMessage, 9999L);
+            source.sendNonPersistentMessage(textMessage, 9999L);
             long estimateExpiry = System.currentTimeMillis() + 9999L;
             logger.debug("Message sendt");
             try (Sink sink = new Sink(getQpidURI(), "NO-private", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
