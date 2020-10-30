@@ -1,24 +1,25 @@
 version: 2.1
-
 executors:
   my-machine:
     machine: true
     working_directory: ~/interchange
-
+  helm3-gcloud:
+    working_directory: ~/interchange
+    docker:
+      - image: martient/cloud-sdk-helm
 jobs:
   build:
     executor: my-machine
     steps:
       - checkout
       - run:
-          name: run integration tests
+          name: Build and run integration tests
           command: |
             mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - persist_to_workspace:
           root: ~/interchange
           paths:
             - ./*
-
   maven-deploy:
     executor: my-machine
     steps:
@@ -29,33 +30,108 @@ jobs:
           name: Push maven build
           command: |
             mvn -DskipTests=true -s .circleci.settings.xml deploy -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
-  docker-push:
-      executor: my-machine
-      steps:
+  docker-build-push-bouvet:
+    executor: my-machine
+    steps:
       - attach_workspace:
           at: ~/interchange
       - run:
-          name: Push containers
+          name: Build and push containers to Bouvet
           command: |
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
             gcloud docker --authorize-only
             chmod +x build-push-images.sh
-            ./build-push-images.sh
+            ./build-push-images.sh eu.gcr.io/nordic-way-aad182cc
+  docker-build-push-svv:
+    executor: my-machine
+    steps:
+    - attach_workspace:
+        at: ~/interchange
+    - run:
+        name: Build and push containers to SVV
+        command: |
+          echo $SVV_CCLOUD_CIRCLE_CI_SHARED | base64 -d - | gcloud auth activate-service-account --key-file=-
+          gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID_SHARED}
+          gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
+          gcloud docker --authorize-only
+          chmod +x build-push-images.sh
+          ./build-push-images.sh eu.gcr.io/nw-shared-w3ml
+  helm-package-charts:
+    executor: helm3-gcloud
+    steps:
+      - attach_workspace:
+          at: ~/interchange
+      - run:
+          name: Package helm charts
+          command: |
+            helm package ~/interchange/helm/interchange -d ~/interchange/target/helm
+            helm package ~/interchange/helm/basic-interchange -d ~/interchange/target/helm
+            helm repo index ~/interchange/target/helm
+      - persist_to_workspace:
+          root: ~/interchange
+          paths:
+            - ./target/helm*
+
+  helm-publish-charts:
+    executor: helm3-gcloud
+    steps:
+      - attach_workspace:
+          at: ~/interchange
+      - run:
+          name: Publish packaged helm charts to google cloud hosted helm repository
+          command: |
+            echo $SVV_CCLOUD_CIRCLE_CI_SHARED | base64 -d - | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${SVV_GOOGLE_PROJECT_ID_SHARED}
+            gcloud --quiet config set compute/zone ${SVV_GOOGLE_COMPUTE_ZONE}
+            gsutil cp ~/interchange/target/helm/* gs://nordic_way_helm_repository
+
+  helm-deploy-system-test:
+    executor: helm3-gcloud
+    steps:
+      - attach_workspace:
+          at: ~/interchange
+      - run:
+          name: Install two nodes to be used in system test
+          command: |
+            mkdir -p ~/interchange/target/test-keys
+            export CA_CN=system-test-ca.nordicway.test
+            export KEY_CNS=node1.nordicway.test sp1.nordicway.test node2.nordicway.test sp2.nordicway.test sp3.nordicway.test
+            ~/interchange/generate-keys.sh ~/interchange/target/test-keys
+            echo $SVV_GCLOUD_CIRCLE_CI_BASE64 | base64 -d - | gcloud auth activate-service-account --key-file=-
+            gcloud container clusters get-credentials ic --zone europe-west4-a --project nw-interchange-stm-whya
+            helm upgrade --install --namespace system-test-node1 ixn-system-test-node1 ~/interchange/helm/interchange --values ~/interchange/federation-st/system-test-node1.yml
 
 workflows:
   version: 2.1
   build_and_docker_push:
     jobs:
       - build
-      - docker-push:
+      - docker-build-push-svv:
           requires:
           - build
+      - docker-build-push-bouvet:
+          requires:
+            - docker-build-push-svv
       - maven-deploy:
           filters:
             branches:
               only:
                 - federation-master
           requires:
-            - docker-push
+            - docker-build-push-bouvet
+      - helm-package-charts:
+          filters:
+            branches:
+              only:
+                - federation-master
+          requires:
+            - build
+      - helm-publish-charts:
+          filters:
+            branches:
+              only:
+                - federation-master
+          requires:
+            - helm-package-charts
