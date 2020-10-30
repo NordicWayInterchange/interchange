@@ -43,7 +43,13 @@ public class AccessControlIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public static final GenericContainer localContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
+	public static final GenericContainer localContainer = getQpidTestContainer("qpid",
+			testKeysPath,
+			"localhost.p12",
+			"password",
+			"truststore.jks",
+			"password",
+			"localhost");
 
 	private String getQpidURI() {
 		String url = "amqps://localhost:" + localContainer.getMappedPort(AMQPS_PORT);

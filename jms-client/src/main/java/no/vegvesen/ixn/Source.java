@@ -49,6 +49,9 @@ public class Source implements AutoCloseable {
 		this.send(messageText, "SE", null);
 	}
 
+	public void sendNonPersistent(String messageText) throws JMSException {
+		this.sendNonPersistent(messageText, "SE", null);
+	}
 
     public void send(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
     	if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
@@ -69,8 +72,33 @@ public class Source implements AutoCloseable {
         sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
     }
 
+	public void sendNonPersistent(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
+		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
+			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
+		}
+
+        JmsTextMessage message = createTextMessage(messageText);
+        message.getFacade().setUserId("localhost");
+        message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
+        message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+        message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
+        message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
+        message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
+        message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
+        message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+        message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
+        message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
+        sendNonPersistentMessage(message,Message.DEFAULT_TIME_TO_LIVE);
+
+	}
+
 	public void sendTextMessage(JmsTextMessage message, long timeToLive) throws JMSException {
 		producer.send(message,  DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
+	}
+
+	public void sendNonPersistentMessage(JmsTextMessage message, long timeToLive) throws JMSException {
+		producer.send(message,  DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
+
 	}
 
     @Override
@@ -114,6 +142,20 @@ public class Source implements AutoCloseable {
 		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
 		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
 		sendTextMessage(message, timeToLive);
+	}
+
+	public void sendNonPersistent(String messageText, String originatingCountry, long timeToLive) throws JMSException {
+		JmsTextMessage message = createTextMessage(messageText);
+		message.getFacade().setUserId("localhost");
+		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
+		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
+		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
+		message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
+		message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
+		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
+		sendNonPersistentMessage(message, timeToLive);
 	}
 
 	public MessageProducer createProducer() throws JMSException, NamingException {

@@ -1,7 +1,7 @@
 {
-  "type": "BDB",
+  "type": "Memory",
   "name": "localhost",
-  "modelVersion": "7.0",
+  "modelVersion": "8.0",
   "exchanges": [
     {
       "name": "nwEx",

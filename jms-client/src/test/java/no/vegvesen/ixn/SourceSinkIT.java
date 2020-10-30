@@ -24,7 +24,13 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public final GenericContainer qpidContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
+	public final GenericContainer qpidContainer = getQpidTestContainer("qpid",
+			testKeysPath,
+			"localhost.p12",
+			"password",
+			"truststore.jks",
+			"password",
+			"localhost");
 	private String URL;
 	private SSLContext KING_HARALD_SSL_CONTEXT;
 
@@ -40,7 +46,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Source kingHaraldTestQueueSource = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		kingHaraldTestQueueSource.start();
 		JmsTextMessage fisk = kingHaraldTestQueueSource.createTextMessage("fisk");
-		kingHaraldTestQueueSource.sendTextMessage(fisk, 2000);
+		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
 
 		Sink kingHaraldTestQueueSink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
@@ -54,7 +60,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Source kingHaraldTestQueueSource = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		kingHaraldTestQueueSource.start();
 		JmsTextMessage fisk = kingHaraldTestQueueSource.createTextMessage("fisk");
-		kingHaraldTestQueueSource.sendTextMessage(fisk, 200);
+		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 200);
 
 		Thread.sleep(1000);
 
@@ -68,7 +74,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	public void queueMaxTtlIsRespected() throws JMSException, NamingException, InterruptedException {
 		Source kingHaraldTestQueueSource = new Source(URL, "expiry-queue", KING_HARALD_SSL_CONTEXT);
 		kingHaraldTestQueueSource.start();
-		kingHaraldTestQueueSource.send("fisk"); //send with default expiry (0)
+		kingHaraldTestQueueSource.sendNonPersistent("fisk"); //send with default expiry (0)
 
 		Thread.sleep(2000); // let the message expire on the queue with queue declaration "maximumMessageTtl": 1000
 

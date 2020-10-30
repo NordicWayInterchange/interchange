@@ -32,21 +32,24 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@SuppressWarnings("rawtypes")
 	@Container
 	//Container is not static and is not reused between tests
-	public GenericContainer consumerContainer = getQpidContainer("docker/consumer",
+	public GenericContainer consumerContainer = getQpidTestContainer("docker/consumer",
 			testKeysPath,
 			"localhost.p12",
 			"password",
 			"truststore.jks",
-			"password");
+			"password",
+			"localhost");
 
 	@SuppressWarnings("rawtypes")
 	@Container
 	//Container is not static and is not reused between tests
-	public GenericContainer producerContainer = getQpidContainer("docker/producer",
+	public GenericContainer producerContainer = getQpidTestContainer("docker/producer",
 			testKeysPath,
 			"localhost.p12",
 			"password",
-			"truststore.jks", "password");
+			"truststore.jks",
+			"password",
+			"localhost");
 
 	public Sink createSink(Integer containerPort, String queueName, String keyStore) {
 		return new Sink("amqps://localhost:" + containerPort,
@@ -87,7 +90,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
-		source.send("fishy fishy", "SE", 8000L);
+		source.sendNonPersistent("fishy fishy", "SE", 8000L);
 
 		Message message = consumer.receive(2000);
 		assertThat(message).withFailMessage("Expected message is not routed").isNotNull();
@@ -116,7 +119,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
 		source.start();
-		source.send("fishy fishy", "SE", 1000L);
+		source.sendNonPersistent("fishy fishy", "SE", 1000L);
 
 		Thread.sleep(2000); // wait for the message to expire with extra margin
 

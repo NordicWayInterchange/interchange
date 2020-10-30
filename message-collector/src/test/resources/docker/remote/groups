@@ -1,3 +1,0 @@
-messaging-users.users=
-administrators.users=qpid-admin,remote
-federated-interchanges.users=localhost
