@@ -106,47 +106,37 @@ public class NeighbourService {
 		if (neighbour == null) {
 			throw new SubscriptionRequestException("Neighbours can not request subscriptions before capabilities are exchanged.");
 		}
-
-		//Check if subscription request is empty or not
-		SubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
-		if (persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
-			logger.info("Neighbour with no existing subscription posted empty subscription request.");
-			logger.info("Returning empty subscription request.");
-			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
-
-			return new SubscriptionResponseApi(neighbour.getName(),Collections.emptySet());
-		} else if (!persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
-			// empty subscription request - tear down existing subscription.
-			logger.info("Received empty subscription request.");
-			logger.info("Neighbour has existing subscription: {}", persistentRequest.getSubscriptions().toString());
-			logger.info("Setting status of subscription request to TEAR_DOWN.");
-			persistentRequest.setStatus(SubscriptionRequestStatus.TEAR_DOWN);
-			persistentRequest.setSubscriptions(Collections.emptySet());
-		} else {
-			// Subscription request is not empty
-			// validate the requested subscriptions and give each a status
-
-			logger.info("Received non-empty subscription request.");
-			logger.info("Processing subscription request...");
-			Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
-			persistentRequest.setSubscriptions(processedSubscriptionRequest);
-			persistentRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
-
-			logger.info("Processed subscription request: {}", persistentRequest.toString());
-
-			logger.info("Saving neighbour in DB to generate paths for the subscriptions.");
-			// Save neighbour in DB to generate subscription ids for subscription paths.
-			neighbour = neighbourRepository.save(neighbour);
-			persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
-
-			logger.info("Paths for requested subscriptions created.");
-			// Create a path for each subscription
-			for (Subscription subscription : persistentRequest.getSubscriptions()) {
-				String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getId();
-				subscription.setPath(path);
-				logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
-			}
+		if (incomingRequest.getSubscriptions().isEmpty()) {
+			throw new SubscriptionRequestException("Neighbours can not request an empty set of subscriptions.");
 		}
+
+		SubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
+
+
+		// Subscription request is not empty
+		// validate the requested subscriptions and give each a status
+
+		logger.info("Received non-empty subscription request.");
+		logger.info("Processing subscription request...");
+		Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
+		persistentRequest.setSubscriptions(processedSubscriptionRequest);
+		persistentRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
+
+		logger.info("Processed subscription request: {}", persistentRequest.toString());
+
+		logger.info("Saving neighbour in DB to generate paths for the subscriptions.");
+		// Save neighbour in DB to generate subscription ids for subscription paths.
+		neighbour = neighbourRepository.save(neighbour);
+		persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
+
+		logger.info("Paths for requested subscriptions created.");
+		// Create a path for each subscription
+		for (Subscription subscription : persistentRequest.getSubscriptions()) {
+			String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getId();
+			subscription.setPath(path);
+			logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
+		}
+
 
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
@@ -197,8 +187,10 @@ public class NeighbourService {
 		neighbour.getNeighbourRequestedSubscriptions().deleteSubscription(subscriptionId);
 		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
 			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.TEAR_DOWN);
+			logger.debug("Saved neighbour {} with subscription request status TEAR_DOWN", neighbour.getName());
 		} else {
 			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.MODIFIED);
+			logger.debug("Saved neighbour {} with subscription request status MODIFIED", neighbour.getName());
 		}
 		neighbourRepository.save(neighbour);
 	}
