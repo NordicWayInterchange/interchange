@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -71,6 +69,25 @@ public class NeighbourServiceIT {
 		assertThat(subscriptions.size()).isEqualTo(1);
 		RequestedSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
 		assertThat(subscriptionApi.getPath()).isNotNull();
+	}
+
+	@Test
+	public void incomingSubscriptionRequestIsSaved() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("my-neighbour");
+		repository.save(neighbour);
+
+		RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='NO'");
+		RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='SE'");
+
+		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour",  new HashSet<>(Arrays.asList(sub1, sub2)));
+
+		service.incomingSubscriptionRequest(subscriptionRequestApi);
+
+		assertThat(service.findNeighboursToSetupRoutingFor().contains(neighbour));
+		service.saveSetupRouting(neighbour);
+
+		assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.ESTABLISHED);
 	}
 
 }

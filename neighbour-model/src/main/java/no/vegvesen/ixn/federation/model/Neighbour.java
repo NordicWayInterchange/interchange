@@ -105,17 +105,6 @@ public class Neighbour {
 		return ourRequestedSubscriptions;
 	}
 
-	public Subscription getSubscriptionById(Integer id) throws SubscriptionNotFoundException {
-
-		for (Subscription subscription : neighbourRequestedSubscriptions.getSubscriptions()) {
-			if (subscription.getId().equals(id)) {
-				return subscription;
-			}
-		}
-
-		throw new SubscriptionNotFoundException("Could not find subscription with id " + id + " on interchange " + name);
-	}
-
 	public void setOurRequestedSubscriptions(SubscriptionRequest fedIn) {
 		this.ourRequestedSubscriptions = fedIn;
 	}

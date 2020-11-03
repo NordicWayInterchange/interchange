@@ -120,4 +120,22 @@ public class NeighbourRestController {
 		NeighbourMDCUtil.removeLogVariables();
 		return capabilityApiResponse;
 	}
+
+	@ApiOperation(value = "Endpoint for deleting subscriptions")
+	@ApiResponses({@ApiResponse(code = 200, message = "Successfully deleted subscription"),
+			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the Neighbour does not exist.", response = ErrorDetails.class),
+			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
+	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{ixnName}/subscriptions/{subscriptionId}")
+	@Secured("ROLE_USER")
+	public void deleteSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
+		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), ixnName);
+		logger.info("Received subscription to delete from neighbour {}.", ixnName);
+
+		// Check if CN of certificate matches name in api object. Reject if they do not match.
+		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
+		logger.info("Common name matches Neighbour name in path.");
+
+		neighbourService.incomingSubscriptionDelete(ixnName, subscriptionId);
+	}
 }

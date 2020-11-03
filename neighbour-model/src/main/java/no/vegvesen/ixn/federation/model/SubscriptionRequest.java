@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +56,26 @@ public class SubscriptionRequest {
 		if (newSubscription != null) {
 			this.subscription.addAll(newSubscription);
 		}
+	}
+
+	public void deleteSubscription (Integer subscriptionId) {
+		Subscription subscriptionToRemove = getSubscriptionById(subscriptionId);
+		subscription.remove(subscriptionToRemove);
+	}
+
+	public void addNewSubscriptions (Set<Subscription> newSubscriptions) {
+		subscription.addAll(newSubscriptions);
+	}
+
+	public Subscription getSubscriptionById(Integer id) throws SubscriptionNotFoundException {
+
+		for (Subscription subscription : subscription) {
+			if (subscription.getId().equals(id)) {
+				return subscription;
+			}
+		}
+
+		throw new SubscriptionNotFoundException("Could not find subscription with id " + id);
 	}
 
 	@Override

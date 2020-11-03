@@ -160,7 +160,7 @@ public class NeighbourService {
 
 		if (neighbour != null) {
 
-			Subscription subscription = neighbour.getSubscriptionById(subscriptionId);
+			Subscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(subscriptionId);
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
@@ -190,6 +190,17 @@ public class NeighbourService {
 		neighbourRepository.save(neighbourToUpdate);
 
 		return capabilityTransformer.selfToCapabilityApi(self);
+	}
+
+	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {
+		Neighbour neighbour = neighbourRepository.findByName(ixnName);
+		neighbour.getNeighbourRequestedSubscriptions().deleteSubscription(subscriptionId);
+		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
+			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.TEAR_DOWN);
+		} else {
+			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.MODIFIED);
+		}
+		neighbourRepository.save(neighbour);
 	}
 
 	Neighbour findNeighbour(String neighbourName) {
@@ -438,17 +449,16 @@ public class NeighbourService {
 		}
 	}
 
-
 	public List<Neighbour> findNeighboursToTearDownRoutingFor() {
 		List<Neighbour> tearDownRoutingList = neighbourRepository.findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus.TEAR_DOWN);
-		logger.debug("Found {} neighbours to set up routing for {}", tearDownRoutingList.size(), tearDownRoutingList);
+		logger.debug("Found {} neighbours to tear down routing for {}", tearDownRoutingList.size(), tearDownRoutingList);
 		return tearDownRoutingList;
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
-		List<Neighbour> readyToSetupRouting = neighbourRepository.findInterchangesBySubscriptionRequest_Status_And_SubscriptionStatus(SubscriptionRequestStatus.REQUESTED, SubscriptionStatus.ACCEPTED);
-		logger.debug("Found {} neighbours to set up routing for {}", readyToSetupRouting.size(), readyToSetupRouting);
-		return readyToSetupRouting;
+		List<Neighbour> readyToUpdateRouting = neighbourRepository.findByNeighbourRequestedSubscriptions_StatusIn(SubscriptionRequestStatus.REQUESTED, SubscriptionRequestStatus.MODIFIED);
+		logger.debug("Found {} neighbours to set up routing for {}", readyToUpdateRouting.size(), readyToUpdateRouting);
+		return readyToUpdateRouting;
 	}
 
 	public void saveTearDownRouting(Neighbour neighbour, String name) {
