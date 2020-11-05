@@ -112,14 +112,10 @@ public class NeighbourService {
 
 		SubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
 
-
-		// Subscription request is not empty
-		// validate the requested subscriptions and give each a status
-
 		logger.info("Received non-empty subscription request.");
 		logger.info("Processing subscription request...");
 		Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
-		persistentRequest.setSubscriptions(processedSubscriptionRequest);
+		persistentRequest.addNewSubscriptions(processedSubscriptionRequest);
 		persistentRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
 
 		logger.info("Processed subscription request: {}", persistentRequest.toString());
@@ -465,7 +461,6 @@ public class NeighbourService {
 		neighbourRepository.save(neighbour);
 		logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
 	}
-
 
 	public SubscriptionResponseApi findSubscriptions(String ixnName) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
