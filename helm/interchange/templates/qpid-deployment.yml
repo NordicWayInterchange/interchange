@@ -8,6 +8,7 @@ metadata:
     component: qpid
     release: {{ .Release.Name }}
 spec:
+  serviceName: {{ .Release.Name }}-qpid
   replicas: 1
   selector:
     matchLabels:

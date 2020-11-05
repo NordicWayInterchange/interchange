@@ -8,6 +8,7 @@ metadata:
     component: database
     release: {{ .Release.Name }}
 spec:
+  serviceName: {{ .Release.Name }}-database
   replicas: 1
   selector:
     matchLabels:
