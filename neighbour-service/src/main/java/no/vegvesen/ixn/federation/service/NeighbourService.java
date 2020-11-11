@@ -287,14 +287,21 @@ public class NeighbourService {
 				if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 					if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
 						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
-						Set<Subscription> calculatedSubscriptionForNeighbour = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
-						Set<Subscription> fedInSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
-						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
+						Set<Subscription> wantedSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
+						Set<Subscription> existingSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+						if (!wantedSubscriptions.equals(existingSubscriptions)) {
+							Set<Subscription> subscriptionsToRemove = new HashSet<>(existingSubscriptions);
+							subscriptionsToRemove.removeAll(wantedSubscriptions);
+							for (Subscription subscription : subscriptionsToRemove) {
+								subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+							}
 							try {
 								if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-									SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, calculatedSubscriptionForNeighbour, self.getName());
+									Set<Subscription> additionalSubscriptions = new HashSet<>(wantedSubscriptions);
+									additionalSubscriptions.removeAll(existingSubscriptions);
+									SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, self.getName());
 									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
-									neighbour.setOurRequestedSubscriptions(subscriptionRequestResponse);
+									neighbour.getOurRequestedSubscriptions().addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
 									tearDownListenerEndpoints(neighbour);
 									neighbour.getControlConnection().okConnection();
 									logger.info("Successfully posted subscription request to neighbour.");
@@ -323,6 +330,32 @@ public class NeighbourService {
 			}
 			finally {
 				NeighbourMDCUtil.removeLogVariables();
+			}
+		}
+	}
+
+	public void deleteSubscriptions (NeighbourFacade neighbourFacade) {
+		List<Neighbour> neighbours = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN);
+		for (Neighbour neighbour : neighbours) {
+			if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
+				Set<Subscription> subscriptionsToDelete = new HashSet<>();
+				for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
+					if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+						try{
+						neighbourFacade.deleteSubscription(neighbour, subscription);
+						subscriptionsToDelete.add(subscription);
+						} catch(SubscriptionDeleteException e) {
+							logger.error("Exception when deleting subscription {} to neighbour {}", subscription.getId(), neighbour.getName(), e);
+						}
+					}
+				}
+				neighbour.getOurRequestedSubscriptions().getSubscriptions().removeAll(subscriptionsToDelete);
+				if (neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
+					neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.EMPTY);
+					logger.info("SubscriptionRequest is empty, setting SubscriptionRequestStatus to SubscriptionRequestStatus.EMPTY");
+				}
+				neighbourRepository.save(neighbour);
+				logger.debug("Saving updated neighbour: {}", neighbour.toString());
 			}
 		}
 	}

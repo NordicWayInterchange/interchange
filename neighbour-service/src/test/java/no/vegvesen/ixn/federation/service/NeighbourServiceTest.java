@@ -10,7 +10,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Maps;
@@ -21,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.internal.util.collections.Sets;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +37,8 @@ class NeighbourServiceTest {
 	ListenerEndpointRepository listenerEndpointRepository;
 	@Mock
 	DNSFacade dnsFacade;
+	@Mock
+	NeighbourFacade neighbourFacade;
 
 	private NeighbourDiscovererProperties discovererProperties = new NeighbourDiscovererProperties();
 	private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
@@ -192,7 +194,7 @@ class NeighbourServiceTest {
 	public void calculateCustomSubscriptionForNeighbour_localSubscriptionOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
 		Set<DataType> localSubscriptions = getDataTypeSetOriginatingCountry("NO");
 
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatex2NorwayDataType()));
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatex2DataType("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
 
@@ -203,9 +205,9 @@ class NeighbourServiceTest {
 	@Test
 	public void calculateCustomSubscriptionForNeighbour_localSubscriptionMessageTypeAndOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
 		Set<DataType> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(getDatex2NorwayDataType());
+		localSubscriptions.add(getDatex2DataType("NO"));
 
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatex2NorwayDataType()));
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatex2DataType("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
 
@@ -219,7 +221,7 @@ class NeighbourServiceTest {
 	@Test
 	public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
 		Self selfWithNoSubscriptions = new Self("self");
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatex2NorwayDataType()));
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatex2DataType("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, selfWithNoSubscriptions.getLocalSubscriptions());
 		assertThat(calculatedSubscription).hasSize(0);
@@ -244,6 +246,54 @@ class NeighbourServiceTest {
 		assertThat(subscriptions.getSubscriptions()).hasSize(1);
 
 		verify(neighbourRepository, times(1)).findByName(neighbourName);
+	}
+
+	@Test
+	public void noSubscriptionsAreAddedWhenLocalSubscriptionsAndCapabilitiesAreTheSame() {
+		Self self = new Self("self");
+		self.setLocalSubscriptions(Collections.singleton(getDatex2DataType("NO")));
+		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
+
+		Subscription subscription = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1");
+
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
+
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(getDatex2DataType("NO")));
+		capabilities.setLastCapabilityExchange(LocalDateTime.now());
+		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), subscriptionRequest);
+
+
+		neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+
+		neighbourService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour), self, neighbourFacade);
+		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
+	}
+
+	@Test
+	public void subscriptionsAreAddedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
+		Self self = new Self("self");
+		self.setLocalSubscriptions(new HashSet<>(Arrays.asList(getDatex2DataType("NO"), getDatex2DataType("SE"))));
+		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
+
+		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1");
+
+		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
+		existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
+
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(getDatex2DataType("NO"), getDatex2DataType("SE"))));
+		capabilities.setLastCapabilityExchange(LocalDateTime.now());
+		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), existingSubscriptions);
+
+		neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+
+		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2");
+
+		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, new HashSet<>(Collections.singleton(subscription2))));
+		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
+		neighbourService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour), self, neighbourFacade);
+		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
+		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
 	}
 
 	@Test
@@ -295,10 +345,10 @@ class NeighbourServiceTest {
 		return Sets.newSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
 	}
 
-	private DataType getDatex2NorwayDataType() {
+	private DataType getDatex2DataType(String country) {
 		Map<String, String> datexDataTypeHeaders = new HashMap<>();
 		datexDataTypeHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-		datexDataTypeHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		datexDataTypeHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), country);
 		return new DataType(datexDataTypeHeaders);
 	}
 

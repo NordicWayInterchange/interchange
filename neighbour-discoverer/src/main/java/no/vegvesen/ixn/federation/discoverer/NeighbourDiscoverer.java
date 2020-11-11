@@ -44,15 +44,20 @@ public class NeighbourDiscoverer {
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), null);
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
-	public void schedulePollSubscriptions() {
-		neighbourService.pollSubscriptions(neighbourFacade);
+	@Scheduled(fixedRateString = "${discoverer.dns-lookup-interval}", initialDelayString = "${discoverer.dns-initial-start-delay}")
+	public void scheduleCheckForNewNeighbours() {
+		neighbourService.checkForNewNeighbours();
 	}
 
-	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
-	public void gracefulBackoffPostSubscriptionRequest() {
-		List<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourService.getNeighboursFailedSubscriptionRequest();
-		neighbourService.evaluateAndPostSubscriptionRequest(neighboursWithFailedSubscriptionRequest, selfService.fetchSelf(), neighbourFacade);
+	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
+	public void scheduleCapabilityExchangeWithNeighbours() {
+		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
+		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), neighbourFacade);
+	}
+
+	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
+	public void scheduleUnreachableRetry() {
+		neighbourService.retryUnreachable(selfService.fetchSelf(), neighbourFacade);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
@@ -63,19 +68,19 @@ public class NeighbourDiscoverer {
 		neighbourService.evaluateAndPostSubscriptionRequest(neighboursForSubscriptionRequest, selfService.fetchSelf(), neighbourFacade);
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
-	public void scheduleCapabilityExchangeWithNeighbours() {
-		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
-		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), neighbourFacade);
+	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
+	public void gracefulBackoffPostSubscriptionRequest() {
+		List<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourService.getNeighboursFailedSubscriptionRequest();
+		neighbourService.evaluateAndPostSubscriptionRequest(neighboursWithFailedSubscriptionRequest, selfService.fetchSelf(), neighbourFacade);
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.dns-lookup-interval}", initialDelayString = "${discoverer.dns-initial-start-delay}")
-	public void scheduleCheckForNewNeighbours() {
-		neighbourService.checkForNewNeighbours();
+	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
+	public void schedulePollSubscriptions() {
+		neighbourService.pollSubscriptions(neighbourFacade);
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
-	public void scheduleUnreachableRetry() {
-		neighbourService.retryUnreachable(selfService.fetchSelf(), neighbourFacade);
+	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
+	public void deleteSubscriptionAtKnownNeighbours () {
+		neighbourService.deleteSubscriptions(neighbourFacade);
 	}
 }

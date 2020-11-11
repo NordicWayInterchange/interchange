@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import org.slf4j.Logger;
@@ -168,5 +169,15 @@ public class NeighbourRESTClient {
             throw new SubscriptionPollException("Error in posting capabilities to neighbour " + name + " due to exception", e);
         }
         return subscriptionApi;
+    }
+
+    public void deleteSubscriptions(String url, String name) {
+        try {
+            restTemplate.delete(url);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            HttpStatus status = e.getStatusCode();
+            logger.error("Failed deleting subscription with url {}. Server returned error code {}", url, status.toString());
+            throw new SubscriptionDeleteException("Error in deleting subscription to neighbour " + name + " due to exception", e);
+        }
     }
 }

@@ -70,4 +70,12 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		return returnSubscription;
 	}
 
+	@Override
+	public void deleteSubscription (Neighbour neighbour, Subscription subscription) {
+		String url = neighbour.getControlChannelUrl(subscription.getPath());
+    	String neighbourName = neighbour.getName();
+    	neighbourRESTClient.deleteSubscriptions(url, neighbourName);
+		logger.info("Deleting subscription to neighbour {} with url {}", neighbourName, url);
+	}
+
 }

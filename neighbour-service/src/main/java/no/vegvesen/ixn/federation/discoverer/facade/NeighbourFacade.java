@@ -10,4 +10,6 @@ public interface NeighbourFacade {
 	SubscriptionRequest postSubscriptionRequest(Neighbour neighbour, Set<Subscription> subscriptions, String selfName);
 
 	Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour);
+
+	void deleteSubscription (Neighbour neighbour, Subscription subscription);
 }
