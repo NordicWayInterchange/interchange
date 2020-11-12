@@ -286,39 +286,7 @@ public class NeighbourService {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
 				if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
 					if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
-						logger.info("Found neighbour for subscription request: {}", neighbour.getName());
-						Set<Subscription> wantedSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
-						Set<Subscription> existingSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
-						if (!wantedSubscriptions.equals(existingSubscriptions)) {
-							Set<Subscription> subscriptionsToRemove = new HashSet<>(existingSubscriptions);
-							subscriptionsToRemove.removeAll(wantedSubscriptions);
-							for (Subscription subscription : subscriptionsToRemove) {
-								subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
-							}
-							try {
-								if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-									Set<Subscription> additionalSubscriptions = new HashSet<>(wantedSubscriptions);
-									additionalSubscriptions.removeAll(existingSubscriptions);
-									SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, self.getName());
-									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
-									neighbour.getOurRequestedSubscriptions().addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
-									tearDownListenerEndpoints(neighbour);
-									neighbour.getControlConnection().okConnection();
-									logger.info("Successfully posted subscription request to neighbour.");
-								} else {
-									logger.info("Too soon to post subscription request to neighbour when backing off");
-								}
-							} catch (SubscriptionRequestException e) {
-								neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.FAILED);
-								neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
-								logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
-							}
-							// Successful subscription request, update discovery state subscription request timestamp.
-							neighbour = neighbourRepository.save(neighbour);
-							logger.info("Saving updated neighbour: {}", neighbour.toString());
-						} else {
-							logger.info("Neighbour has our last subscription request");
-						}
+						postSubscriptionRequest(neighbour, self, neighbourFacade);
 					} else {
 						logger.debug("No need to calculateCustomSubscriptionForNeighbour based on timestamps on local subscriptions, neighbour capabilities, last subscription request");
 					}
@@ -331,6 +299,42 @@ public class NeighbourService {
 			finally {
 				NeighbourMDCUtil.removeLogVariables();
 			}
+		}
+	}
+
+	public void postSubscriptionRequest (Neighbour neighbour, Self self, NeighbourFacade neighbourFacade) {
+		logger.info("Found neighbour for subscription request: {}", neighbour.getName());
+		Set<Subscription> wantedSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
+		Set<Subscription> existingSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+		if (!wantedSubscriptions.equals(existingSubscriptions)) {
+			Set<Subscription> subscriptionsToRemove = new HashSet<>(existingSubscriptions);
+			subscriptionsToRemove.removeAll(wantedSubscriptions);
+			for (Subscription subscription : subscriptionsToRemove) {
+				subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+			}
+			try {
+				if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
+					Set<Subscription> additionalSubscriptions = new HashSet<>(wantedSubscriptions);
+					additionalSubscriptions.removeAll(existingSubscriptions);
+					SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, self.getName());
+					subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
+					neighbour.getOurRequestedSubscriptions().addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
+					tearDownListenerEndpoints(neighbour);
+					neighbour.getControlConnection().okConnection();
+					logger.info("Successfully posted subscription request to neighbour.");
+				} else {
+					logger.info("Too soon to post subscription request to neighbour when backing off");
+				}
+			} catch (SubscriptionRequestException e) {
+				neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.FAILED);
+				neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
+				logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
+			}
+			// Successful subscription request, update discovery state subscription request timestamp.
+			neighbour = neighbourRepository.save(neighbour);
+			logger.info("Saving updated neighbour: {}", neighbour.toString());
+		} else {
+			logger.info("Neighbour has our last subscription request");
 		}
 	}
 
