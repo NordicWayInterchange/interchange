@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,4 +79,5 @@ public class SubscriptionRequest {
 	public void setSuccessfulRequest(LocalDateTime successfulRequest) {
 		this.successfulRequest = successfulRequest;
 	}
+
 }

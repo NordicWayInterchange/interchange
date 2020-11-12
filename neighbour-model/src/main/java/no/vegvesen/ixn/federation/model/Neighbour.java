@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,10 +10,8 @@ import javax.persistence.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoField;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,13 +45,18 @@ public class Neighbour {
 	@JoinColumn(name = "fed_in", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_fed_in"))
 	private SubscriptionRequest fedIn = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_message_connection"))
+	private Connection messageConnection = new Connection();
+
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "con_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neighbour_control_connection"))
+	private Connection controlConnection = new Connection();
+
 	@UpdateTimestamp
 	private LocalDateTime lastUpdated;
-	private LocalDateTime backoffStart;
-	private int backoffAttempts = 0;
 	private String messageChannelPort;
 	private String controlChannelPort;
-	private ConnectionStatus connectionStatus = ConnectionStatus.CONNECTED;
 
 	public Neighbour() {
 	}
@@ -64,6 +66,15 @@ public class Neighbour {
 		this.capabilities = capabilities;
 		this.subscriptionRequest = subscriptions;
 		this.fedIn = fedIn;
+	}
+
+	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest fedIn, Connection messageConnection, Connection controlConnection) {
+		this.setName(name);
+		this.capabilities = capabilities;
+		this.subscriptionRequest = subscriptions;
+		this.fedIn = fedIn;
+		this.messageConnection = messageConnection;
+		this.controlConnection = controlConnection;
 	}
 
 	public String getName() {
@@ -132,24 +143,6 @@ public class Neighbour {
 		this.controlChannelPort = controlChannelPort;
 	}
 
-
-	@SuppressWarnings("WeakerAccess")
-	public LocalDateTime getBackoffStartTime() {
-		return backoffStart;
-	}
-
-	public void setBackoffStart(LocalDateTime backoffStart) {
-		this.backoffStart = backoffStart;
-	}
-
-	public int getBackoffAttempts() {
-		return backoffAttempts;
-	}
-
-	public void setBackoffAttempts(int backoffAttempts) {
-		this.backoffAttempts = backoffAttempts;
-	}
-
 	public Set<Subscription> getSubscriptionsForPolling() {
 		return getFedIn().getSubscriptions().stream()
 				.filter(s -> SubscriptionStatus.REQUESTED.equals(s.getSubscriptionStatus()) ||
@@ -167,8 +160,8 @@ public class Neighbour {
 				", subscriptionRequest=" + subscriptionRequest +
 				", fedIn=" + fedIn +
 				", lastUpdated=" + lastUpdated +
-				", backoffStart=" + backoffStart +
-				", backoffAttempts=" + backoffAttempts +
+				", messageConnection=" + messageConnection +
+				", controlConnection=" + controlConnection +
 				", messageChannelPort='" + messageChannelPort +
 				", controlChannelPort='" + controlChannelPort +
 				'}';
@@ -277,58 +270,6 @@ public class Neighbour {
 		return shouldCheckSubscriptionRequestForUpdates;
 	}
 
-	public void failedConnection(int maxAttemptsBeforeUnreachable) {
-		if (this.getBackoffStartTime() == null) {
-			this.setConnectionStatus(ConnectionStatus.FAILED);
-			this.backoffStart = LocalDateTime.now();
-			this.backoffAttempts = 0;
-			logger.warn("Starting backoff now {}", this.backoffStart);
-		} else {
-			this.backoffAttempts++;
-			logger.warn("Increasing backoff counter to {}", this.backoffAttempts);
-			if (this.getBackoffAttempts() > maxAttemptsBeforeUnreachable) {
-				this.setConnectionStatus(ConnectionStatus.UNREACHABLE);
-				logger.warn("Unsuccessful in reestablishing contact with neighbour. Exceeded number of allowed connection attempts.");
-				logger.warn("Number of allowed connection attempts: {} Number of actual connection attempts: {}", maxAttemptsBeforeUnreachable, this.getBackoffAttempts());
-				logger.warn("Setting status of neighbour to UNREACHABLE.");
-			}
-		}
-	}
-
-	public void setConnectionStatus(ConnectionStatus connectionStatus) {
-		this.connectionStatus = connectionStatus;
-	}
-
-	public ConnectionStatus getConnectionStatus() {
-		return connectionStatus;
-	}
-
-	public boolean canBeContacted(int randomShiftUpperLimit, int startIntervalLength) {
-		if (this.getConnectionStatus() == ConnectionStatus.UNREACHABLE) {
-			return false;
-		}
-		if (this.getConnectionStatus() == ConnectionStatus.CONNECTED) {
-			return true;
-		}
-
-		if (this.getConnectionStatus() == ConnectionStatus.FAILED) {
-			return this.getBackoffStartTime() == null || LocalDateTime.now().isAfter(this.getNextPostAttemptTime(randomShiftUpperLimit, startIntervalLength));
-		}
-		return true;
-	}
-
-	// Calculates next possible post attempt time, using exponential backoff
-	LocalDateTime getNextPostAttemptTime(int randomShiftUpperLimit, int startIntervalLength) {
-
-		logger.info("Calculating next allowed time to contact neighbour.");
-		int randomShift = new Random().nextInt(randomShiftUpperLimit);
-		long exponentialBackoffWithRandomizationMillis = (long) (Math.pow(2, this.getBackoffAttempts()) * startIntervalLength) + randomShift;
-		LocalDateTime nextPostAttempt = this.getBackoffStartTime().plus(exponentialBackoffWithRandomizationMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit());
-
-		logger.info("Next allowed post time: {}", nextPostAttempt.toString());
-		return nextPostAttempt;
-	}
-
 	public boolean needsOurUpdatedCapabilities(Optional<LocalDateTime> localCapabilitiesUpdated) {
 		if (localCapabilitiesUpdated.isPresent()) {
 			logger.debug("Local capabilities updated {}, last neighbour capability exchange {}", localCapabilitiesUpdated, this.getCapabilities().getLastCapabilityExchange());
@@ -341,12 +282,6 @@ public class Neighbour {
 
 	private boolean capabilitiesNeverSeen() {
 		return this.getCapabilities() == null || this.getCapabilities().getLastCapabilityExchange() == null;
-	}
-
-	public void okConnection() {
-		this.setConnectionStatus(ConnectionStatus.CONNECTED);
-		this.backoffAttempts = 0;
-		this.backoffStart = null;
 	}
 
 	/**
@@ -372,5 +307,19 @@ public class Neighbour {
 
 	public void setNeighbour_id(Integer neighbour_id) {
 		this.neighbour_id = neighbour_id;
+	}
+
+	public Connection getMessageConnection() {
+		return messageConnection;
+	}
+
+	public void setMessageConnection(Connection messageConnection) {
+		this.messageConnection = messageConnection;
+	}
+
+	public Connection getControlConnection() { return controlConnection; }
+
+	public void setControlConnection(Connection controlConnection) {
+		this.controlConnection = controlConnection;
 	}
 }

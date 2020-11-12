@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
+import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import javax.net.ssl.SSLContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = {MessageCollector.class, CollectorCreator.class, CollectorProperties.class, InterchangeNodeProperties.class})
+@SpringBootTest(classes = {MessageCollector.class, CollectorCreator.class, CollectorProperties.class, InterchangeNodeProperties.class, GracefulBackoffProperties.class})
 @EnableScheduling //Enable scheduling to verify scheduling parameters annotated with ${...}
 class MessageCollectorTestSpring {
 

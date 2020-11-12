@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.discoverer;
+package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.model.Neighbour;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -32,6 +32,8 @@ public class GracefulBackoffProperties {
 	 * Time, in milliseconds, from application startup until lookup for failed neighbours in the database.
 	 */
 	private String checkOffset = "60000";
+
+	private int backoffInterval = 3600000;
 
 	public int getStartIntervalLength() {
 		return startIntervalLength;
@@ -73,9 +75,9 @@ public class GracefulBackoffProperties {
 		this.checkOffset = checkOffset;
 	}
 
-	public boolean canBeContacted(Neighbour neighbour) {
-		return neighbour.canBeContacted(this.randomShiftUpperLimit, this.startIntervalLength);
-	}
+	public int getBackoffInterval() { return this.backoffInterval; }
+
+	public void setBackoffInterval(int backoffInterval) { this.backoffInterval = backoffInterval; }
 
 	@Override
 	public String toString() {

@@ -3,17 +3,21 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import java.util.Objects;
 import java.util.Set;
 
-public class SubscriptionRequestApi {
+public class SubscriptionResponseApi {
     private String version = "1.0";
     private String name;
-    private Set<RequestedSubscriptionApi> subscriptions;
+    private Set<RequestedSubscriptionResponseApi> subscriptions;
 
-    public SubscriptionRequestApi() {
+    public SubscriptionResponseApi() {
     }
 
-    public SubscriptionRequestApi(String name, Set<RequestedSubscriptionApi> subscriptions) {
+    public SubscriptionResponseApi(String name, Set<RequestedSubscriptionResponseApi> subscriptions) {
         this.name = name;
         this.subscriptions = subscriptions;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     public String getName() {
@@ -24,23 +28,19 @@ public class SubscriptionRequestApi {
         this.name = name;
     }
 
-    public Set<RequestedSubscriptionApi> getSubscriptions() {
+    public Set<RequestedSubscriptionResponseApi> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<RequestedSubscriptionApi> subscriptions) {
+    public void setSubscriptions(Set<RequestedSubscriptionResponseApi> subscriptions) {
         this.subscriptions = subscriptions;
-    }
-
-    public String getVersion() {
-        return version;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SubscriptionRequestApi that = (SubscriptionRequestApi) o;
+        SubscriptionResponseApi that = (SubscriptionResponseApi) o;
         return Objects.equals(version, that.version) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(subscriptions, that.subscriptions);
@@ -53,7 +53,7 @@ public class SubscriptionRequestApi {
 
     @Override
     public String toString() {
-        return "SubscriptionRequestApi{" +
+        return "SubscriptionResponseApi{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +
                 ", subscriptions=" + subscriptions +

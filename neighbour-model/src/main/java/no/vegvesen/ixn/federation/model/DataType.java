@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;
 import org.hibernate.annotations.UpdateTimestamp;

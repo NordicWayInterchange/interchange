@@ -1,13 +1,10 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
-import no.vegvesen.ixn.federation.discoverer.GracefulBackoffProperties;
+import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
@@ -60,6 +57,7 @@ public class NeighbourService {
 	}
 
 
+
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
 	private Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
@@ -84,8 +82,8 @@ public class NeighbourService {
 		return neighbourSubscriptionRequest;
 	}
 
-	public SubscriptionRequestApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
-		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest, SubscriptionRequestStatus.REQUESTED);
+	public SubscriptionResponseApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
+		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
 		logger.info("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
 		logger.info("Looking up neighbour in database.");
@@ -102,7 +100,7 @@ public class NeighbourService {
 			logger.info("Returning empty subscription request.");
 			logger.warn("!!! NOT SAVING NEIGHBOUR IN DATABASE.");
 
-			return new SubscriptionRequestApi(neighbour.getName(), Collections.emptySet());
+			return new SubscriptionResponseApi(neighbour.getName(),Collections.emptySet());
 		} else if (!persistentRequest.getSubscriptions().isEmpty() && incomingRequest.getSubscriptions().isEmpty()) {
 			// empty subscription request - tear down existing subscription.
 			logger.info("Received empty subscription request.");
@@ -139,20 +137,20 @@ public class NeighbourService {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
 		logger.info("Saving updated Neighbour: {}", neighbour.toString());
-		return subscriptionRequestTransformer.neighbourToSubscriptionRequestApi(neighbour);
+		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getSubscriptionRequest().getSubscriptions());
 	}
 
-	public SubscriptionApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
+	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String nodeProviderName) {
 		logger.info("Looking up polling Neighbour in DB.");
-		Neighbour Neighbour = neighbourRepository.findByName(ixnName);
+		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
-		if (Neighbour != null) {
+		if (neighbour != null) {
 
-			Subscription subscription = Neighbour.getSubscriptionById(subscriptionId);
-			logger.info("Neighbour {} polled for status of subscription {}.", Neighbour.getName(), subscriptionId);
+			Subscription subscription = neighbour.getSubscriptionById(subscriptionId);
+			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionApi subscriptionApi = subscriptionTransformer.subscriptionToSubscriptionApi(subscription);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),nodeProviderName);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
@@ -231,7 +229,7 @@ public class NeighbourService {
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				if (backoffProperties.canBeContacted(neighbour)) {
+				if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
 					if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
 						logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
 						postCapabilities(self, neighbour, neighbourFacade);
@@ -254,13 +252,13 @@ public class NeighbourService {
 			Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, self);
 			capabilities.setLastCapabilityExchange(LocalDateTime.now());
 			neighbour.setCapabilities(capabilities);
-			neighbour.okConnection();
+			neighbour.getControlConnection().okConnection();
 			logger.info("Successfully completed capability exchange.");
 			logger.debug("Updated neighbour: {}", neighbour.toString());
 		} catch (CapabilityPostException e) {
-			logger.error("capability post failed", e);
+			logger.error("Capability post failed", e);
 			neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
-			neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
+			neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
 		} finally {
 			neighbour = neighbourRepository.save(neighbour);
 			logger.info("Saving updated neighbour: {}", neighbour.toString());
@@ -280,18 +278,18 @@ public class NeighbourService {
 						Set<Subscription> fedInSubscriptions = neighbour.getFedIn().getSubscriptions();
 						if (!calculatedSubscriptionForNeighbour.equals(fedInSubscriptions)) {
 							try {
-								if (backoffProperties.canBeContacted(neighbour)) {
+								if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
 									SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, calculatedSubscriptionForNeighbour, self.getName());
 									subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
 									neighbour.setFedIn(subscriptionRequestResponse);
-									neighbour.okConnection();
+									neighbour.getControlConnection().okConnection();
 									logger.info("Successfully posted subscription request to neighbour.");
 								} else {
 									logger.info("Too soon to post subscription request to neighbour when backing off");
 								}
 							} catch (SubscriptionRequestException e) {
 								neighbour.getFedIn().setStatus(SubscriptionRequestStatus.FAILED);
-								neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
+								neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
 								logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
 							}
 							// Successful subscription request, update discovery state subscription request timestamp.
@@ -336,7 +334,7 @@ public class NeighbourService {
 		for (Neighbour neighbour : neighboursToPoll) {
 			try {
 				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				if (backoffProperties.canBeContacted(neighbour)) {
+				if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
 					pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling(), neighbourFacade);
 				}
 			} catch (Exception e) {
@@ -359,7 +357,7 @@ public class NeighbourService {
 						Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
-						neighbour.okConnection();
+						neighbour.getControlConnection().okConnection();
 						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
 					} else {
 						// Number of poll attempts exceeds allowed number of poll attempts.
@@ -368,7 +366,7 @@ public class NeighbourService {
 					}
 				} catch (SubscriptionPollException e) {
 					subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
-					neighbour.failedConnection(backoffProperties.getNumberOfAttempts());
+					neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
 					logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
 				}
 			}
@@ -383,7 +381,7 @@ public class NeighbourService {
 	}
 
 	public void retryUnreachable(Self self, NeighbourFacade neighbourFacade) {
-		List<Neighbour> unreachableNeighbours = neighbourRepository.findByConnectionStatus(ConnectionStatus.UNREACHABLE);
+		List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
 		if (!unreachableNeighbours.isEmpty()) {
 			logger.info("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
 			for (Neighbour neighbour : unreachableNeighbours) {
@@ -426,4 +424,9 @@ public class NeighbourService {
 	}
 
 
+	public SubscriptionResponseApi findSubscriptions(String ixnName) {
+		Neighbour neighbour = neighbourRepository.findByName(ixnName);
+		Set<Subscription> subscriptions = neighbour.getSubscriptionRequest().getSubscriptions();
+		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),subscriptions);
+	}
 }

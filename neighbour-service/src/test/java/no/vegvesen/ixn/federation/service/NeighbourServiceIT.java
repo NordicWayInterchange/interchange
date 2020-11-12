@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatus;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -14,7 +12,6 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,13 +62,14 @@ public class NeighbourServiceIT {
 				new SubscriptionRequest(SubscriptionRequestStatus.EMPTY,Collections.emptySet()));
 		repository.save(neighbour);
 
-		SubscriptionRequestApi subscriptionRequestApi = service.incomingSubscriptionRequest(
+
+		SubscriptionResponseApi responseApi = service.incomingSubscriptionRequest(
 				new SubscriptionRequestApi("myNeighbour",
-						Collections.singleton(
-								new SubscriptionApi("originatingCountry = 'NO'", null, SubscriptionStatus.REQUESTED))));
-		Set<SubscriptionApi> subscriptions = subscriptionRequestApi.getSubscriptions();
+						Collections.singleton(new RequestedSubscriptionApi("originatingCountry = 'NO'")))
+		);
+		Set<RequestedSubscriptionResponseApi> subscriptions = responseApi.getSubscriptions();
 		assertThat(subscriptions.size()).isEqualTo(1);
-		SubscriptionApi subscriptionApi = subscriptions.stream().findFirst().get();
+		RequestedSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
 		assertThat(subscriptionApi.getPath()).isNotNull();
 	}
 
