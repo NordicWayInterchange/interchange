@@ -2,13 +2,20 @@ package no.vegvesen.ixn;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
+import javax.net.ssl.SSLContext;
 
 public class BasicAuthSource extends Source {
-	private final String username;
-	private final String password;
+	protected  final String username;
+	protected final String password;
 
 	public BasicAuthSource(String url, String sendQueue, String username, String password) {
 		super(url, sendQueue, null);
+		this.username = username;
+		this.password = password;
+	}
+
+	public BasicAuthSource(String url, String sendQueue, String username, String password, SSLContext sslContext) {
+		super(url, sendQueue, sslContext);
 		this.username = username;
 		this.password = password;
 	}

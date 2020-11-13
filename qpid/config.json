@@ -92,6 +92,36 @@
       ]
     },
     {
+      "name": "AMQPS_BASIC",
+      "type": "AMQP",
+      "authenticationProvider": "passwordFile",
+      "bindingAddress": "*",
+      "keyStore": "default",
+      "needClientAuth": true,
+      "port": "5677",
+      "protocols": ["AMQP_1_0"],
+      "transports": [
+        "SSL",
+        "TCP"
+      ],
+      "trustStores": ["default"],
+      "wantClientAuth": false,
+      "virtualhostaliases": [
+        {
+          "name": "defaultAlias",
+          "type": "defaultAlias"
+        },
+        {
+          "name": "hostnameAlias",
+          "type": "hostnameAlias"
+        },
+        {
+          "name": "nameAlias",
+          "type": "nameAlias"
+        }
+      ]
+    },
+    {
       "name": "HTTP",
       "port": "8080",
       "authenticationProvider": "passwordFile",

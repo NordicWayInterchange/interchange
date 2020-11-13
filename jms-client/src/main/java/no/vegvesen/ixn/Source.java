@@ -19,8 +19,8 @@ public class Source implements AutoCloseable {
 
 	private final String url;
     private final String sendQueue;
-    private final SSLContext sslContext;
-    protected Connection connection;
+    protected final SSLContext sslContext;
+	protected Connection connection;
     private Session session;
     private Destination queueS;
 	private MessageProducer producer;
@@ -32,7 +32,7 @@ public class Source implements AutoCloseable {
         this.sslContext = context;
     }
 
-    public void start() throws NamingException, JMSException {
+	public void start() throws NamingException, JMSException {
         IxnContext context = new IxnContext(url, sendQueue, null);
         createConnection(context);
         queueS = context.getSendQueue();
@@ -132,4 +132,5 @@ public class Source implements AutoCloseable {
 	public MessageProducer getProducer() {
 		return producer;
 	}
+
 }

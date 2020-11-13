@@ -14,6 +14,7 @@ import java.nio.file.Path;
 public class QpidDockerBaseIT extends DockerBaseIT {
 	public static final int HTTPS_PORT = 443;
 	public static final int AMQPS_PORT = 5671;
+	public static final int AMQPS_BASIC_PORT = 5677;
 	public static final int AMQP_PORT = 5672;
 
 	private static Logger logger = LoggerFactory.getLogger(QpidDockerBaseIT.class);
@@ -32,7 +33,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				.withEnv("KEY_STORE_PASSWORD", keyStorePassword)
 				.withEnv("TRUST_STORE", "/jks/" + trustStore)
 				.withEnv("TRUST_STORE_PASSWORD", trustStorePassword)
-				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
+				.withExposedPorts(AMQP_PORT, AMQPS_PORT, AMQPS_BASIC_PORT, HTTPS_PORT, 8080);
 	}
 
 }

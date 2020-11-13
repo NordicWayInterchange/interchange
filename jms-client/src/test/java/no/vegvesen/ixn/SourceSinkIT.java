@@ -26,12 +26,15 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	@Container
 	public final GenericContainer qpidContainer = getQpidContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password");
 	private String URL;
+	private String URL_BASIC;
 	private SSLContext KING_HARALD_SSL_CONTEXT;
 
 	@BeforeEach
 	public void setUp() {
 		Integer mappedPort = qpidContainer.getMappedPort(5671);
 		URL = String.format("amqps://localhost:%s/", mappedPort);
+		Integer mappedPortBasic = qpidContainer.getMappedPort(5677);
+		URL_BASIC = String.format("amqps://localhost:%s/", mappedPortBasic);
 		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext(testKeysPath,"king_harald.p12", "truststore.jks");
 	}
 
@@ -86,4 +89,13 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		source.close();
 		assertThat(source.isConnected()).isFalse();
 	}
+
+	@Test
+	public void basicAuthOnSecureUrlCanContact() throws JMSException, NamingException {
+		BasicAuthSSLSource source = new BasicAuthSSLSource(URL_BASIC, "test-queue", "king_harald", "sonjaIsMyQueen", KING_HARALD_SSL_CONTEXT);
+		source.start();
+		assertThat(source.isConnected()).isTrue();
+	}
+
+
 }

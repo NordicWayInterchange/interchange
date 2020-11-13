@@ -40,6 +40,16 @@ public class IxnContext {
 	}
 
 	/**
+	 * uses basic authentication, and an SSLContext
+	 */
+	public Connection createConnection(String username, String password, SSLContext sslContext) throws NamingException, JMSException {
+		JmsConnectionFactory factory = (JmsConnectionFactory) context.lookup(JMS_JNDI_INITIAL_CONTEXT_FACTORY);
+		factory.setPopulateJMSXUserID(true);
+		factory.setSslContext(sslContext);
+		return factory.createConnection(username, password);
+	}
+
+	/**
 	 * uses a preconfigured ssl context
 	 */
 	public Connection createConnection(SSLContext sslContext) throws NamingException, JMSException {
