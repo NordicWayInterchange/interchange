@@ -11,6 +11,7 @@ data:
   passwd: |
     {{ .Values.qpid.admin_user }}:{{ .Values.qpid.admin_password }}
     {{ .Values.qpid.interchange_user }}:{{ .Values.qpid.interchange_password }}
+    interchange.nordicway.net:{{ .Values.qpid.interchange_nordicway_net_password }}
   groups: |
     service-providers.users={{ range .Values.qpid.users }}{{ .name }},{{ end }}
     federated-interchanges.users=
