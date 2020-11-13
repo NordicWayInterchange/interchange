@@ -17,6 +17,9 @@ spec:
   - name: amqps
     port: 5671
     targetPort: amqps
+  - name: amqps-basic
+    port: 5677
+    targetPort: amqps-basic
   - name: http-qpid-gui
     port: 8080
     targetPort: http-qpid-gui

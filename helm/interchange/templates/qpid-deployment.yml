@@ -31,6 +31,8 @@ spec:
           containerPort: 5672
         - name: amqps
           containerPort: 5671
+        - name: amqps-basic
+          containerPort: 5677
         - name: http-qpid-gui
           containerPort: 8080
         - name: https-qpid-rest
