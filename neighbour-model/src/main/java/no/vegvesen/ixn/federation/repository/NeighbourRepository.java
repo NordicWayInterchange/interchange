@@ -27,6 +27,8 @@ public interface NeighbourRepository extends CrudRepository<Neighbour, Integer> 
 
 	List<Neighbour> findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus status);
 
+	List<Neighbour> findByNeighbourRequestedSubscriptions_StatusIn(SubscriptionRequestStatus... status);
+
 	List<Neighbour> findByOurRequestedSubscriptions_StatusIn(SubscriptionRequestStatus... statuses);
 
 	List<Neighbour> findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus... subscriptionStatus);
