@@ -97,7 +97,7 @@
       "authenticationProvider": "passwordFile",
       "bindingAddress": "*",
       "keyStore": "default",
-      "needClientAuth": true,
+      "needClientAuth": false,
       "port": "5677",
       "protocols": ["AMQP_1_0"],
       "transports": [
