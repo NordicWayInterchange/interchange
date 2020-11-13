@@ -31,11 +31,17 @@
         </dependency>
 
         <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>onboard-service</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>testcontainers-init-postgres</artifactId>
@@ -43,10 +49,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>onboard-service</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
