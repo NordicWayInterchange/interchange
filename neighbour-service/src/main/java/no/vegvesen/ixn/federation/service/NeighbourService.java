@@ -316,9 +316,11 @@ public class NeighbourService {
 				if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
 					Set<Subscription> additionalSubscriptions = new HashSet<>(wantedSubscriptions);
 					additionalSubscriptions.removeAll(existingSubscriptions);
-					SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, self.getName());
-					subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
-					neighbour.getOurRequestedSubscriptions().addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
+					if (!additionalSubscriptions.isEmpty()) {
+						SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, self.getName());
+						subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
+						neighbour.getOurRequestedSubscriptions().addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
+					}
 					tearDownListenerEndpoints(neighbour);
 					neighbour.getControlConnection().okConnection();
 					logger.info("Successfully posted subscription request to neighbour.");
