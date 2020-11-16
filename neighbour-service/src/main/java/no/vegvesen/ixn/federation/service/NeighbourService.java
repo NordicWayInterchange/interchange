@@ -321,7 +321,6 @@ public class NeighbourService {
 						subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
 						neighbour.getOurRequestedSubscriptions().addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
 					}
-					tearDownListenerEndpoints(neighbour);
 					neighbour.getControlConnection().okConnection();
 					logger.info("Successfully posted subscription request to neighbour.");
 				} else {
@@ -360,6 +359,7 @@ public class NeighbourService {
 					neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.EMPTY);
 					logger.info("SubscriptionRequest is empty, setting SubscriptionRequestStatus to SubscriptionRequestStatus.EMPTY");
 				}
+				tearDownListenerEndpoints(neighbour);
 				neighbourRepository.save(neighbour);
 				logger.debug("Saving updated neighbour: {}", neighbour.toString());
 			}
