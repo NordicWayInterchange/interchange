@@ -27,8 +27,14 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
 
 	@Override
 	public void onMessage(Message message) {
-		log.debug("Message received!");
 		if (running.get()) {
+			try {
+				String jmsMessageID = null;
+				jmsMessageID = message.getJMSMessageID();
+				log.debug("Received message {}", jmsMessageID);
+			} catch (JMSException ignore) {
+				log.debug("Received message with no jmsMessageID");
+			}
 			try {
 				Object timestamp = message.getObjectProperty("timestamp");
 				if (timestamp != null && timestamp.getClass().getName().contains("proton.amqp.UnsignedInteger")) {
