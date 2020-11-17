@@ -30,6 +30,11 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
 		log.debug("Message received!");
 		if (running.get()) {
 			try {
+				Object timestamp = message.getObjectProperty("timestamp");
+				if (timestamp != null && timestamp.getClass().getName().contains("proton.amqp.UnsignedInteger")) {
+					log.warn("Ignoring message with illegal header values");
+					return;
+				}
 				MessageForwardUtil.send(source.getProducer(), message);
 			} catch (JMSException e) {
 				log.error("Problem receiving message", e);
