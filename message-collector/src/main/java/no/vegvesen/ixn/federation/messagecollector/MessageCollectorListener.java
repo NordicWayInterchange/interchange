@@ -6,7 +6,11 @@ import no.vegvesen.ixn.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.*;
+import javax.jms.ExceptionListener;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MessageCollectorListener implements MessageListener, ExceptionListener {
@@ -29,6 +33,7 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
 				MessageForwardUtil.send(source.getProducer(), message);
             } catch (JMSException e) {
                 log.error("Problem receiving message", e);
+                logMessageHeadersAndBody(message);
                 teardown();
                 throw new MessageCollectorException(e);
             }
@@ -39,7 +44,39 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
         }
     }
 
-    public void teardown()  {
+	private void logMessageHeadersAndBody(Message message){
+		try {
+			log.debug("Message of type {}", message.getClass().getName());
+			Enumeration propertyNames = message.getPropertyNames();
+			while (propertyNames.hasMoreElements()) {
+				String propertyName = (String) propertyNames.nextElement();
+				try {
+					Object property = message.getObjectProperty(propertyName);
+					if (property instanceof String){
+						log.debug("String property {} value: [{}]", propertyName, message.getStringProperty(propertyName));
+					}
+					else if (property instanceof Integer) {
+						log.debug("Integer property {} value: [{}]", propertyName, message.getIntProperty(propertyName));
+					}
+					else if (property instanceof Long) {
+						log.debug("Long property {} value: [{}]", propertyName, message.getLongProperty(propertyName));
+					}
+					else {
+						log.warn("Property {} of unknown type {}", propertyName, property.getClass().getName());
+					}
+				} catch (JMSException e) {
+					log.error("Error getting property value for property name {}", propertyName, e);
+				}
+			}
+			if (log.isTraceEnabled()) {
+				log.trace("Message body [{}]", message.getBody(String.class));
+			}
+		} catch (JMSException e) {
+			log.error("Error while getting property names of remote message", e);
+		}
+	}
+
+	public void teardown()  {
 		try {
 			sink.close();
 		} catch (Exception ignore) {
