@@ -14,37 +14,42 @@ import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MessageCollectorListener implements MessageListener, ExceptionListener {
-    private AtomicBoolean running;
-    private final Sink sink;
-    private final Source source;
-    private Logger log = LoggerFactory.getLogger(MessageCollectorListener.class);
+	private AtomicBoolean running;
+	private final Sink sink;
+	private final Source source;
+	private Logger log = LoggerFactory.getLogger(MessageCollectorListener.class);
 
-    MessageCollectorListener(Sink sink, Source source) {
-        this.sink = sink;
-        this.source = source;
-        this.running = new AtomicBoolean(true);
-    }
+	MessageCollectorListener(Sink sink, Source source) {
+		this.sink = sink;
+		this.source = source;
+		this.running = new AtomicBoolean(true);
+	}
 
-    @Override
-    public void onMessage(Message message) {
-        log.debug("Message received!");
-        if (running.get()) {
-            try {
+	@Override
+	public void onMessage(Message message) {
+		log.debug("Message received!");
+		if (running.get()) {
+			try {
 				MessageForwardUtil.send(source.getProducer(), message);
-            } catch (JMSException e) {
-                log.error("Problem receiving message", e);
-                logMessageHeadersAndBody(message);
-                teardown();
-                throw new MessageCollectorException(e);
-            }
-        } else {
-            log.debug("Got message, but listener is not running");
-            this.teardown();
-            throw new MessageCollectorException("Not running!");
-        }
-    }
+			} catch (JMSException e) {
+				log.error("Problem receiving message", e);
+				logMessageHeadersAndBody(message);
+				if (e.getMessage().contains("Application properties do not allow non-primitive values")){
+					log.warn("Ignoring message with illegal header values");
+				}
+				else {
+					teardown();
+					throw new MessageCollectorException(e);
+				}
+			}
+		} else {
+			log.debug("Got message, but listener is not running");
+			this.teardown();
+			throw new MessageCollectorException("Not running!");
+		}
+	}
 
-	private void logMessageHeadersAndBody(Message message){
+	private void logMessageHeadersAndBody(Message message) {
 		try {
 			log.debug("Message of type {}", message.getClass().getName());
 			Enumeration propertyNames = message.getPropertyNames();
@@ -61,6 +66,9 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
 					else if (property instanceof Long) {
 						log.debug("Long property {} value: [{}]", propertyName, message.getLongProperty(propertyName));
 					}
+					else if (property instanceof Double) {
+						log.debug("Double property {} value: [{}]", propertyName, message.getDoubleProperty(propertyName));
+					}
 					else {
 						log.warn("Property {} of unknown type {}", propertyName, property.getClass().getName());
 					}
@@ -76,27 +84,27 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
 		}
 	}
 
-	public void teardown()  {
+	public void teardown() {
 		try {
 			sink.close();
 		} catch (Exception ignore) {
 		}
-        try {
+		try {
 			source.close();
-        } catch (Exception ignore) {
-        } finally {
-            running.set(false);
-        }
-    }
+		} catch (Exception ignore) {
+		} finally {
+			running.set(false);
+		}
+	}
 
-    @Override
-    public void onException(JMSException e) {
-        log.error("Exception caught",e);
-        this.teardown();
-    }
+	@Override
+	public void onException(JMSException e) {
+		log.error("Exception caught", e);
+		this.teardown();
+	}
 
 
-    boolean isRunning() {
-        return running.get();
-    }
+	boolean isRunning() {
+		return running.get();
+	}
 }
