@@ -7,12 +7,15 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,17 +35,20 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.mockito.Mockito.when;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
+@SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, ServiceProviderRouter.class})
 @ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
 @Testcontainers
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
@@ -78,14 +84,21 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	@MockBean
 	NeighbourService neighbourService;
 
-	@MockBean
-	ServiceProviderRouter serviceProviderRouter;
-
 	@Autowired
 	RoutingConfigurer routingConfigurer;
 
 	@Autowired
 	QpidClient client;
+
+	@MockBean
+	ServiceProviderRepository serviceProviderRepository;
+
+	ServiceProviderRouter serviceProviderRouter;
+
+	@BeforeEach
+	void setUp() {
+		serviceProviderRouter = new ServiceProviderRouter(serviceProviderRepository, client);
+	}
 
 	@Test
 	public void neighbourWithOneBindingIsCreated() {
@@ -193,6 +206,22 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		routingConfigurer.tearDownNeighbourRouting(toreDownNeighbour);
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).doesNotContain(toreDownNeighbour.getName());
+	}
+
+	@Test
+	public void serviceProviderShouldBeRemoved() {
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
+				Collections.singleton(new DataType(null,"originatingCountry","NO")));
+		serviceProvider.setCapabilities(capabilities);
+
+		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
+		routingConfigurer.checkForServiceProvidersToSetupRoutingFor();
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
+
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
+		routingConfigurer.checkForServiceProvidersToSetupRoutingFor();
+		routingConfigurer.checkForServiceProvidersToSetupRoutingFor();
 	}
 
 

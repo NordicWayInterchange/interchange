@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 
@@ -33,7 +34,11 @@ public class ServiceProviderRouter {
 
 
     public Iterable<ServiceProvider> findServiceProviders() {
-		return repository.findAll();
+        Iterable<ServiceProvider> serviceProviders = repository.findAll()
+                .stream()
+                .filter(serviceProvider -> serviceProvider.hasCapabilitiesOrActiveSubscriptions())
+                .collect(Collectors.toList());
+		return serviceProviders;
     }
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders) {

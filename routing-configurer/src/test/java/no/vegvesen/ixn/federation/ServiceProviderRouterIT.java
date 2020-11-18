@@ -31,10 +31,7 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.fail;
@@ -163,6 +160,21 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(onlyCaps));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
 		assertThat(client.queueExists(onlyCaps.getName())).isFalse();
+	}
+
+	@Test
+	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
+		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
+				Collections.singleton(new DataType(1,"originatingCountry","NO")));
+		serviceProvider.setCapabilities(capabilities);
+
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
+
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
 	}
 
    	public SSLContext setUpTestSslContext(String s) {
