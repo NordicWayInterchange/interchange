@@ -43,7 +43,13 @@ public class QuadTreeTest {
         lat = -34.697221;
         lon = -58.436691;
         assertThat(QuadTreeTool.lonLatToQuadTree(lon,lat,zoom)).isEqualTo("21032130031302");
-    }
+
+        // Mjøsbrua
+        lat = 13.334253;
+        lon = 60.352374;
+		assertThat(QuadTreeTool.lonLatToQuadTree(lon, lat, 11)).isEqualTo("12321230133");
+
+	}
 
     @Test
     public void testClip() {
