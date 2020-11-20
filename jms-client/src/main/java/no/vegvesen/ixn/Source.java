@@ -49,6 +49,19 @@ public class Source implements AutoCloseable {
 		this.send(messageText, "SE", null);
 	}
 
+	public void sendNorwegianTestMessage(String messageText) throws JMSException {
+		JmsTextMessage message = createTextMessage(messageText);
+		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
+		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
+		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
+		message.setFloatProperty(MessageProperty.LATITUDE.getName(), 60.928193f);
+		message.setFloatProperty(MessageProperty.LONGITUDE.getName(), 10.672942f);
+		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), ",12321230133");
+		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
+		sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
+	}
 
     public void send(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
     	if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
