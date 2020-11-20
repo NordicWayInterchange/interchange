@@ -1,18 +1,12 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.apache.qpid.jms.message.JmsBytesMessage;
+import org.apache.qpid.jms.message.JmsTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.util.Enumeration;
@@ -24,7 +18,7 @@ public class Sink implements MessageListener, AutoCloseable {
 
     protected final String url;
     private final String queueName;
-    private final SSLContext sslContext;
+    protected final SSLContext sslContext;
     protected Connection connection;
 	private MessageConsumer consumer;
 
@@ -90,8 +84,28 @@ public class Sink implements MessageListener, AutoCloseable {
 			}
 
 			try {
-				System.out.println(((TextMessage)message).getText() + " delay " + delay + " ms \n");
+				String messageBody;
+				if (message instanceof JmsBytesMessage){
+					System.out.println(" BYTES message");
+					JmsBytesMessage bytesMessage = (JmsBytesMessage) message;
+					byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
+					bytesMessage.readBytes(messageBytes);
+					messageBody = new String(messageBytes);
+				}
+				else if (message instanceof JmsTextMessage) {
+					System.out.println(" TEXT message");
+					messageBody = message.getBody(String.class);
+				}
+				else {
+					System.err.println("Message type unknown: " + message.getClass().getName());
+					messageBody = null;
+				}
+				System.out.println("Body ------------");
+				System.out.println(messageBody);
+				System.out.println("/Body -----------");
+				System.out.println("Delay " + delay + " ms \n");
 			} catch (JMSException e) {
+				System.err.println(e);
 				throw new RuntimeException(e);
 			}
 		} catch (JMSException e) {
