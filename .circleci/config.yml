@@ -45,7 +45,7 @@ jobs:
             chmod +x build-push-images.sh
             ./build-push-images.sh eu.gcr.io/nordic-way-aad182cc
   docker-build-push-svv:
-    executor: my-machine
+    executor: helm3-gcloud
     steps:
     - attach_workspace:
         at: ~/interchange
@@ -58,6 +58,7 @@ jobs:
           gcloud docker --authorize-only
           chmod +x build-push-images.sh
           ./build-push-images.sh eu.gcr.io/nw-shared-w3ml
+          gsutil iam ch allUsers:objectViewer gs://eu.artifacts.nw-shared-w3ml.appspot.com
   helm-package-charts:
     executor: helm3-gcloud
     steps:
