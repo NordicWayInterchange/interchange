@@ -13,6 +13,7 @@ cd jms-client-sink
 docker build . -t jms_client_sink
 cd ..
 cd jms-client-source
-docker builld . -t jms_client_sink
+docker build . -t jms_client_sink
+cd ..
 [ -f tmp/keys/remote.bouvetinterchange.eu.p12 ] || docker-compose -f systemtest-keys.yml up --build
 docker-compose -f systemtest.yml build && docker-compose -f systemtest.yml up
