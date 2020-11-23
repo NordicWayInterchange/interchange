@@ -34,11 +34,7 @@ public class ServiceProviderRouter {
 
 
     public Iterable<ServiceProvider> findServiceProviders() {
-        Iterable<ServiceProvider> serviceProviders = repository.findAll()
-                .stream()
-                .filter(serviceProvider -> serviceProvider.hasCapabilitiesOrActiveSubscriptions())
-                .collect(Collectors.toList());
-		return serviceProviders;
+		return repository.findAll();
     }
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders) {
@@ -62,8 +58,11 @@ public class ServiceProviderRouter {
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 optionallyAddServiceProviderToGroup(groupMemberNames,name);
             } else {
-                removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
+                if (groupMemberNames.contains(serviceProvider.getName())){
+                    removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
+                }
             }
+
             //save if it has changed from the initial
             if (! newSubscriptions.equals(serviceProvider.getSubscriptions())) {
                 serviceProvider.updateSubscriptions(newSubscriptions);

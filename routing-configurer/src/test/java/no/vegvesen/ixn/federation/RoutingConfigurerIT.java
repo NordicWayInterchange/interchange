@@ -209,7 +209,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void serviceProviderShouldBeRemoved() {
+	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
 				Collections.singleton(new DataType(null,"originatingCountry","NO")));
@@ -221,9 +221,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
 		routingConfigurer.checkForServiceProvidersToSetupRoutingFor();
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
+
 		routingConfigurer.checkForServiceProvidersToSetupRoutingFor();
 	}
-
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");
