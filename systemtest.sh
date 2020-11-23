@@ -15,5 +15,5 @@ cd ..
 cd jms-client-source
 docker build . -t jms_client_sink
 cd ..
-[ -f tmp/keys/remote.bouvetinterchange.eu.p12 ] || docker-compose -f systemtest-keys.yml up --build
+[ -f tmp/keys/remote.bouvetinterchange.eu.p12 ] || ./systemtest-keys.sh
 docker-compose -f systemtest.yml build && docker-compose -f systemtest.yml up
