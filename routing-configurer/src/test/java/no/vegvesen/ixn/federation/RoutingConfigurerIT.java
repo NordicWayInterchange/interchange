@@ -209,7 +209,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void serviceProviderShouldBeRemovedWhenTheyHaveNoCapabilitiesOrSubscriptions() {
+	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
 				Collections.singleton(new DataType(null,"originatingCountry","NO")));
