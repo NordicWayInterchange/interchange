@@ -14,6 +14,7 @@ public class Subscription {
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;
 
+	@Column(columnDefinition="TEXT")
 	private String selector;
 
 	private String path;
