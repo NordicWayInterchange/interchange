@@ -53,7 +53,7 @@ public class MessageProperty {
 			SUB_CAUSE_CODE
 	);
 
-	public static final MessageProperty IVI_TYPE = new MessageProperty("iviType", false, true, MessagePropertyType.INTEGER);
+	public static final MessageProperty IVI_TYPE = new MessageProperty("iviType", false, true, MessagePropertyType.INTEGER_ARRAY);
 	public static final MessageProperty PICTOGRAM_CATEGORY_CODE = new MessageProperty("pictogramCategoryCode", false, true, MessagePropertyType.INTEGER_ARRAY);
 	public static final List<MessageProperty> iviApplicationProperties = Arrays.asList(
 			IVI_TYPE,

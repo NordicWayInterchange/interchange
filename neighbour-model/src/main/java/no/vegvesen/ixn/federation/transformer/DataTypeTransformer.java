@@ -67,7 +67,7 @@ public class DataTypeTransformer {
 						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
 						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
 						dataType.getPropertyValue(MessageProperty.SERVICE_TYPE),
-						dataType.getPropertyValueAsInteger(MessageProperty.IVI_TYPE),
+						dataType.getPropertyValueAsIntegerSet(MessageProperty.IVI_TYPE),
 						dataType.getPropertyValueAsIntegerSet(MessageProperty.PICTOGRAM_CATEGORY_CODE));
 			default:
 				logger.warn("Unknown message type to be converted to API data type: {}", messageType);

@@ -139,7 +139,7 @@ public class DataTypeTransformerTest {
 		HashSet<String> quads = Sets.newLinkedHashSet("qt1", "qt2");
 		IviDataTypeApi iviDataTypeApi = new IviDataTypeApi("NO-38367", "No such publisher",
 				"NO", "pv7", "ct6", quads,
-				"st8", 12134, Sets.newLinkedHashSet(9876, 7654));
+				"st8", Sets.newLinkedHashSet(12134), Sets.newLinkedHashSet(9876, 7654));
 		Set<DataType> converted = dataTypeTransformer.dataTypeApiToDataType(Collections.singleton(iviDataTypeApi));
 		assertThat(converted).isNotNull().hasSize(1);
 		DataType convertedDataType = converted.iterator().next();
