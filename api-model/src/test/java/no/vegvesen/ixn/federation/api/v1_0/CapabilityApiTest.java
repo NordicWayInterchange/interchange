@@ -27,7 +27,7 @@ public class CapabilityApiTest {
 		IviDataTypeApi iviType128Pictograms557_559_612 = new IviDataTypeApi(
 				"NO-12345", "Some Norwegian publisher",
 				"NO", "IVI:1.2", "application/base64", quadTree,
-				"some-ivi-service-type?", 128, Sets.newLinkedHashSet(557, 559, 612)
+				"some-ivi-service-type?", Sets.newLinkedHashSet(128), Sets.newLinkedHashSet(557, 559, 612)
 		);
 
 

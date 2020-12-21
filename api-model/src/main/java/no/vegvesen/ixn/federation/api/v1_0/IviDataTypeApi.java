@@ -8,7 +8,7 @@ import java.util.Set;
 public class IviDataTypeApi extends EtsiDataTypeApi{
 	public static final String IVI = "IVI";
 
-	private Integer iviType;
+	private Set<Integer> iviTypes;
 	private Set<Integer> pictogramCategoryCodes;
 
 	public IviDataTypeApi() {
@@ -17,19 +17,19 @@ public class IviDataTypeApi extends EtsiDataTypeApi{
 
 	public IviDataTypeApi(String publisherId, String publisherName, String originatingCountry,
 						  String protocolVersion, String contentType, Set<String> quadTree,
-						  String serviceType, Integer iviType, Set<Integer> pictogramCategoryCodes) {
+						  String serviceType, Set<Integer> iviTypes, Set<Integer> pictogramCategoryCodes) {
 		super(IVI, publisherId, publisherName, originatingCountry, protocolVersion, contentType, quadTree, serviceType);
-		this.iviType = iviType;
+		this.iviTypes = iviTypes;
 		this.pictogramCategoryCodes = pictogramCategoryCodes;
 	}
 
 
-	public Integer getIviType() {
-		return iviType;
+	public Set<Integer> getIviTypes() {
+		return iviTypes;
 	}
 
-	public void setIviType(Integer iviType) {
-		this.iviType = iviType;
+	public void setIviTypes(Set<Integer> iviTypes) {
+		this.iviTypes = iviTypes;
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -44,7 +44,7 @@ public class IviDataTypeApi extends EtsiDataTypeApi{
 	@Override
 	public Map<String, String> getValues() {
 		Map<String, String> values = super.getValues();
-		putValue(values, MessageProperty.IVI_TYPE, this.getIviType());
+		putIntegerValue(values, MessageProperty.IVI_TYPE, this.getIviTypes());
 		putIntegerValue(values, MessageProperty.PICTOGRAM_CATEGORY_CODE, this.getPictogramCategoryCodes());
 		return values;
 	}
@@ -58,14 +58,14 @@ public class IviDataTypeApi extends EtsiDataTypeApi{
 
 		IviDataTypeApi that = (IviDataTypeApi) o;
 
-		if (iviType != null ? !iviType.equals(that.iviType) : that.iviType != null) return false;
+		if (iviTypes != null ? !iviTypes.equals(that.iviTypes) : that.iviTypes != null) return false;
 		return pictogramCategoryCodes != null ? pictogramCategoryCodes.equals(that.pictogramCategoryCodes) : that.pictogramCategoryCodes == null;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = 31 * result + (iviType != null ? iviType.hashCode() : 0);
+		result = 31 * result + (iviTypes != null ? iviTypes.hashCode() : 0);
 		result = 31 * result + (pictogramCategoryCodes != null ? pictogramCategoryCodes.hashCode() : 0);
 		return result;
 	}
@@ -74,7 +74,7 @@ public class IviDataTypeApi extends EtsiDataTypeApi{
 	public String toString() {
 		return "IviDataTypeApi{" +
 				super.baseToString() +
-				", iviType=" + iviType +
+				", iviType=" + iviTypes +
 				", pictogramCategoryCodes=" + pictogramCategoryCodes +
 				'}';
 	}
