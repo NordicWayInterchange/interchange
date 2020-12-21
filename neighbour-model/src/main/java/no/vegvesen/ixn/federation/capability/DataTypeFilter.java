@@ -12,13 +12,13 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Set;
 
-class DataTypeFilter implements Filterable {
+public class DataTypeFilter implements Filterable {
 
 	private static Logger logger = LoggerFactory.getLogger(DataTypeFilter.class);
 
 	private final HashMap<String, Object> headers = new HashMap<>();
 
-	DataTypeFilter(DataType dataType) {
+	public DataTypeFilter(DataType dataType) {
 		Set<MessageProperty> allPropertyNames = MessageProperty.filterableProperties;
 		for (MessageProperty property: allPropertyNames) {
 			headers.put(property.getName(), dataType.getPropertyValue(property));
