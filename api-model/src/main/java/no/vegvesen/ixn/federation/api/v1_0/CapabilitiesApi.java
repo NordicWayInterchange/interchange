@@ -6,14 +6,14 @@ import java.util.Set;
 
 public class CapabilitiesApi {
 
-	private String version = "1.0";
+	private String version = "1.1";
 	private String name;
-	private Set<DataTypeApi> capabilities = new HashSet<>();
+	private Set<CapabilityApi> capabilities = new HashSet<>();
 
 	public CapabilitiesApi() {
 	}
 
-	public CapabilitiesApi(String name, Set<? extends DataTypeApi> capabilities) {
+	public CapabilitiesApi(String name, Set<CapabilityApi> capabilities) {
 		this.name = name;
 		this.capabilities.addAll(capabilities);
 	}
@@ -30,11 +30,11 @@ public class CapabilitiesApi {
 		this.name = name;
 	}
 
-	public Set<DataTypeApi> getCapabilities() {
+	public Set<CapabilityApi> getCapabilities() {
 		return capabilities;
 	}
 
-	public void setCapabilities(Set<? extends DataTypeApi> capabilities) {
+	public void setCapabilities(Set<CapabilityApi> capabilities) {
 		if (this.capabilities == null) {
 			this.capabilities = new HashSet<>();
 		}

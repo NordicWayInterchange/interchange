@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class CapabilitiesTransformer {
 
-	private final DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
+	private final DataTypeCapabilityApiTransformer dataTypeTransformer = new DataTypeCapabilityApiTransformer();
 
 	public Capabilities capabilitiesApiToCapabilities(CapabilitiesApi capabilitiesApi) {
 		Capabilities capabilities = new Capabilities();
-		capabilities.setDataTypes(dataTypeTransformer.dataTypeApiToDataType(capabilitiesApi.getCapabilities()));
+		capabilities.setDataTypes(dataTypeTransformer.capabilityApiToDataType(capabilitiesApi.getCapabilities()));
 		capabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		return capabilities;
 	}
@@ -20,7 +20,7 @@ public class CapabilitiesTransformer {
 	public CapabilitiesApi selfToCapabilityApi(Self self) {
 		CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
 		capabilitiesApi.setName(self.getName());
-		capabilitiesApi.setCapabilities(dataTypeTransformer.dataTypesToDataTypeApis(self.getLocalCapabilities()));
+		capabilitiesApi.setCapabilities(dataTypeTransformer.dataTypesTocapabilityApis(self.getLocalCapabilities()));
 		return capabilitiesApi;
 	}
 

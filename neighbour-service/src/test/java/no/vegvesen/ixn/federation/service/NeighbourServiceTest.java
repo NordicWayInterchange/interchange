@@ -59,7 +59,7 @@ class NeighbourServiceTest {
 	void postDatexDataTypeCapability() {
 		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
-		DataTypeApi ericssonDataType = new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", null, null, Sets.newSet(), "myPublicationType", null);
+		CapabilityApi ericssonDataType = new DatexCapabilityApi("myPublisherId", "NO", null, Sets.newSet(), Sets.newSet("myPublicationType"));
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -104,7 +104,7 @@ class NeighbourServiceTest {
 		// incoming capabiity API
 		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
-		DataTypeApi ericssonDataType = new Datex2DataTypeApi("NO");
+		CapabilityApi ericssonDataType = new DatexCapabilityApi("NO");
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -122,7 +122,7 @@ class NeighbourServiceTest {
 		// Mock the incoming API object.
 		CapabilitiesApi unknownNeighbour = new CapabilitiesApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new Datex2DataTypeApi("NO")));
+		unknownNeighbour.setCapabilities(Collections.singleton(new DatexCapabilityApi("NO")));
 
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
