@@ -33,18 +33,18 @@ public class NeighbourRESTClient {
         this.mapper = mapper;
     }
 
-    CapabilityApi doPostCapabilities(String controlChannelUrl, String name, CapabilityApi selfCapability) {
-        CapabilityApi result;
+    CapabilitiesApi doPostCapabilities(String controlChannelUrl, String name, CapabilitiesApi selfCapability) {
+        CapabilitiesApi result;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // Convert discovering Neighbour to CapabilityApi object and post to neighbour
-        HttpEntity<CapabilityApi> entity = new HttpEntity<>(selfCapability, headers);
+        HttpEntity<CapabilitiesApi> entity = new HttpEntity<>(selfCapability, headers);
 		logHttpEntity(entity, "Posting");
 
 		try {
-            ResponseEntity<CapabilityApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, CapabilityApi.class);
+            ResponseEntity<CapabilitiesApi> response = restTemplate.exchange(controlChannelUrl, HttpMethod.POST, entity, CapabilitiesApi.class);
 			logHttpEntity(response, "Received");
 
             if (response.getBody() != null) {

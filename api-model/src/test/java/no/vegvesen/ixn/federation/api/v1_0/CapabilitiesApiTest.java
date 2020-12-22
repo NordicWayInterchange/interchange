@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CapabilityApiTest {
+public class CapabilitiesApiTest {
 
     @Test
-    public void createEmptyCapabilityApiJson() throws JsonProcessingException {
-        CapabilityApi capabilityApi = new CapabilityApi();
-        capabilityApi.setName("a.itsinterchange.eu");
+    public void createEmptyCapabilitiesApiJson() throws JsonProcessingException {
+        CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
+        capabilitiesApi.setName("a.itsinterchange.eu");
         Set<DataTypeApi> capSet = new HashSet<>();
 		Set<String> quadTree = Sets.newLinkedHashSet("01230123", "01230122");
 		DenmDataTypeApi denmRoadworksWinterService = new DenmDataTypeApi(
@@ -34,9 +34,9 @@ public class CapabilityApiTest {
         capSet.add(datexSituationReroutingWinterDriving);
         capSet.add(denmRoadworksWinterService);
         capSet.add(iviType128Pictograms557_559_612);
-        capabilityApi.setCapabilities(capSet);
+        capabilitiesApi.setCapabilities(capSet);
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writeValueAsString(capabilityApi));
+        System.out.println(mapper.writeValueAsString(capabilitiesApi));
     }
 
 }

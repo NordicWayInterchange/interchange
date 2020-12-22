@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import org.assertj.core.util.Sets;
@@ -13,18 +13,18 @@ import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CapabilityApiJsonTest {
+public class CapabilitiesApiJsonTest {
 	@Test
 	public void capabilitiesApiDatexTransformedToJsonAndBackToCapabilitiesApi() throws IOException {
 		HashSet<Datex2DataTypeApi> capabilities = new HashSet<>();
 		capabilities.add(new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", "pv1", "ct3", Collections.emptySet(), "myPublicationType", Sets.newLinkedHashSet("aa", "bb")));
-		CapabilityApi capabilityApi = new CapabilityApi("norway", capabilities);
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("norway", capabilities);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		String capabilityApiJson = objectMapper.writeValueAsString(capabilityApi);
+		String capabilityApiJson = objectMapper.writeValueAsString(capabilitiesApi);
 		assertThat(capabilityApiJson).contains("myPublicationType");
 
-		CapabilityApi fromString = objectMapper.readValue(capabilityApiJson.getBytes(), CapabilityApi.class);
+		CapabilitiesApi fromString = objectMapper.readValue(capabilityApiJson.getBytes(), CapabilitiesApi.class);
 		assertThat(fromString.getCapabilities()).hasSize(1);
 		DataTypeApi dataTypeFromJson = fromString.getCapabilities().iterator().next();
 		assertThat(dataTypeFromJson.getMessageType()).isEqualTo("DATEX2");
