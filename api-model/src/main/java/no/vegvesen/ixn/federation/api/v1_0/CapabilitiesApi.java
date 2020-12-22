@@ -4,16 +4,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class CapabilityApi{
+public class CapabilitiesApi {
 
 	private String version = "1.0";
 	private String name;
 	private Set<DataTypeApi> capabilities = new HashSet<>();
 
-	public CapabilityApi() {
+	public CapabilitiesApi() {
 	}
 
-	public CapabilityApi(String name, Set<? extends DataTypeApi> capabilities) {
+	public CapabilitiesApi(String name, Set<? extends DataTypeApi> capabilities) {
 		this.name = name;
 		this.capabilities.addAll(capabilities);
 	}
