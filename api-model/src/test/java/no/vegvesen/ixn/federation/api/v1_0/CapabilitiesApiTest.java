@@ -14,21 +14,19 @@ public class CapabilitiesApiTest {
     public void createEmptyCapabilitiesApiJson() throws JsonProcessingException {
         CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
         capabilitiesApi.setName("a.itsinterchange.eu");
-        Set<DataTypeApi> capSet = new HashSet<>();
+        Set<CapabilityApi> capSet = new HashSet<>();
 		Set<String> quadTree = Sets.newLinkedHashSet("01230123", "01230122");
-		DenmDataTypeApi denmRoadworksWinterService = new DenmDataTypeApi(
-				"NO-12345", "Some Norwegian publisher",
-				"NO", "DENM:1.2.2", "application/octet-stream", quadTree,
-				"some-denm-service-type?", "3", "6");
-		Datex2DataTypeApi datexSituationReroutingWinterDriving = new Datex2DataTypeApi(
-				"NO-12345", "Some Norwegian publisher",
-				"NO", "DATEX2:2.3", "application/xml", quadTree,
-				"SituationPublication", Sets.newLinkedHashSet("ReroutingManagement", "WinterDrivingManagement"));
-		IviDataTypeApi iviType128Pictograms557_559_612 = new IviDataTypeApi(
-				"NO-12345", "Some Norwegian publisher",
-				"NO", "IVI:1.2", "application/base64", quadTree,
-				"some-ivi-service-type?", Sets.newLinkedHashSet(128), Sets.newLinkedHashSet(557, 559, 612)
-		);
+		DenmCapabilityApi denmRoadworksWinterService = new DenmCapabilityApi(
+				"NO-12345",	"NO", "DENM:1.2.2",
+				quadTree, Sets.newLinkedHashSet("3"));
+		DatexCapabilityApi datexSituationReroutingWinterDriving = new DatexCapabilityApi(
+				"NO-12345",
+				"NO", "DATEX2:2.3", quadTree,
+				Sets.newLinkedHashSet("SituationPublication"));
+		IviCapabilityApi iviType128Pictograms557_559_612 = new IviCapabilityApi(
+				"NO-12345",
+				"NO", "IVI:1.2", quadTree,
+				Sets.newLinkedHashSet("128"));
 
 
         capSet.add(datexSituationReroutingWinterDriving);

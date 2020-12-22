@@ -73,7 +73,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
-		DataTypeApi dataType = new Datex2DataTypeApi("NO");
+		CapabilityApi dataType = new DatexCapabilityApi("NO");
 		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(dataType));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
@@ -96,8 +96,8 @@ public class NeighbourRESTFacadeTest {
 
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDenmCapabilities() throws Exception {
-		DenmDataTypeApi dataType = new DenmDataTypeApi("NO-123123", "Norwegian Road Broadcasting", "NO", "P1", "application/base64", Sets.newSet("aaa"), "road", "cc1", "scc2");
-		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(dataType));
+		DenmCapabilityApi capbility = new DenmCapabilityApi("NO-123123", "NO", "P1", Sets.newSet("aaa"), Sets.newSet("road"));
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(capbility));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
@@ -113,14 +113,13 @@ public class NeighbourRESTFacadeTest {
 		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
 		DataType remoteServerResponse = dataTypes.next();
 
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo(dataType.getServiceType());
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(capbility.getMessageType());
+		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(capbility.getOriginatingCountry());
 	}
 
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithIviCapabilities() throws Exception {
-		IviDataTypeApi dataType = new IviDataTypeApi("NO-123123", "Norwegian Road Broadcasting", "NO", "P1", "application/base64", Sets.newSet("aaa"), "road", org.assertj.core.util.Sets.newLinkedHashSet(12321), Sets.newSet(92827));
+		IviCapabilityApi dataType = new IviCapabilityApi("NO-123123", "NO", "P1", Sets.newSet("aaa"), Sets.newSet("12321"));
 		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(dataType));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
@@ -138,7 +137,7 @@ public class NeighbourRESTFacadeTest {
 		DataType remoteServerResponse = dataTypes.next();
 
 		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		assertThat(remoteServerResponse.getPropertyValueAsIntegerSet(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIviTypes());
+		assertThat(remoteServerResponse.getPropertyValueAsSet(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIviType());
 	}
 
 	@Test
