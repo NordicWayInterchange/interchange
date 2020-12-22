@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
@@ -25,7 +25,7 @@ import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
+import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
@@ -45,7 +45,7 @@ public class NeighbourService {
 	private static Logger logger = LoggerFactory.getLogger(NeighbourService.class);
 
 	private NeighbourRepository neighbourRepository;
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+	private CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 	private DNSFacade dnsFacade;
@@ -158,8 +158,8 @@ public class NeighbourService {
 		}
 	}
 
-	public CapabilityApi incomingCapabilities(CapabilityApi neighbourCapabilities, Self self) {
-		Capabilities incomingCapabilities = capabilityTransformer.capabilityApiToCapabilities(neighbourCapabilities);
+	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Self self) {
+		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
 		logger.info("Looking up neighbour in DB.");
@@ -175,7 +175,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilityTransformer.selfToCapabilityApi(self);
+		return capabilitiesTransformer.selfToCapabilityApi(self);
 	}
 
 	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {

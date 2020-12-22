@@ -1,11 +1,11 @@
 package no.vegvesen.ixn.federation.discoverer.facade;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
+import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.slf4j.Logger;
@@ -24,16 +24,16 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 
     private NeighbourRESTClient neighbourRESTClient;
     private Logger logger = LoggerFactory.getLogger(NeighbourRESTFacade.class);
-    private CapabilityTransformer capabilityTransformer;
+    private CapabilitiesTransformer capabilitiesTransformer;
 	private SubscriptionTransformer subscriptionTransformer;
 	private SubscriptionRequestTransformer subscriptionRequestTransformer;
 
     @Autowired
-	public NeighbourRESTFacade(NeighbourRESTClient neighbourRESTClient, CapabilityTransformer capabilityTransformer,
+	public NeighbourRESTFacade(NeighbourRESTClient neighbourRESTClient, CapabilitiesTransformer capabilitiesTransformer,
 							   SubscriptionTransformer subscriptionTransformer,
 							   SubscriptionRequestTransformer subscriptionRequestTransformer) {
 		this.neighbourRESTClient = neighbourRESTClient;
-		this.capabilityTransformer = capabilityTransformer;
+		this.capabilitiesTransformer = capabilitiesTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
 		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
 	}
@@ -44,9 +44,9 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.info("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
-		CapabilityApi selfCapability = capabilityTransformer.selfToCapabilityApi(self);
-		CapabilityApi result = neighbourRESTClient.doPostCapabilities(controlChannelUrl, name, selfCapability);
-		return capabilityTransformer.capabilityApiToCapabilities(result);
+		CapabilitiesApi selfCapability = capabilitiesTransformer.selfToCapabilityApi(self);
+		CapabilitiesApi result = neighbourRESTClient.doPostCapabilities(controlChannelUrl, name, selfCapability);
+		return capabilitiesTransformer.capabilitiesApiToCapabilities(result);
 	}
 
 	@Override

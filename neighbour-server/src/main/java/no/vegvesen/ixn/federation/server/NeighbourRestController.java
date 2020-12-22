@@ -101,12 +101,12 @@ public class NeighbourRestController {
 
 
 	@ApiOperation(value = "Endpoint for capability exchange. Receives a capabilities from a neighbour and responds with local capabilities.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({@ApiResponse(code = 200, message = "Successfully posted capabilities.", response = CapabilityApi.class),
+	@ApiResponses({@ApiResponse(code = 200, message = "Successfully posted capabilities.", response = CapabilitiesApi.class),
 			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	public CapabilityApi updateCapabilities(@RequestBody CapabilityApi neighbourCapabilities) {
+	public CapabilitiesApi updateCapabilities(@RequestBody CapabilitiesApi neighbourCapabilities) {
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), neighbourCapabilities.getName());
 
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
@@ -115,10 +115,10 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.info("Common name of certificate matches Neighbour name in capability api object.");
 
-		CapabilityApi capabilityApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, selfService.fetchSelf());
-		logger.info("Responding with local capabilities: {}", capabilityApiResponse.toString());
+		CapabilitiesApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, selfService.fetchSelf());
+		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();
-		return capabilityApiResponse;
+		return capabilitiesApiResponse;
 	}
 
 	@ApiOperation(value = "Endpoint for deleting subscriptions")

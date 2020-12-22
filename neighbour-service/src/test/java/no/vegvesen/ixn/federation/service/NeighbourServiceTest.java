@@ -57,7 +57,7 @@ class NeighbourServiceTest {
 
 	@Test
 	void postDatexDataTypeCapability() {
-		CapabilityApi ericsson = new CapabilityApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
 		DataTypeApi ericssonDataType = new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", null, null, Sets.newSet(), "myPublicationType", null);
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
@@ -67,7 +67,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		CapabilityApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
+		CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
@@ -102,7 +102,7 @@ class NeighbourServiceTest {
 	@Test
 	void postingDatexCapabilitiesReturnsStatusCreated() {
 		// incoming capabiity API
-		CapabilityApi ericsson = new CapabilityApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
 		DataTypeApi ericssonDataType = new Datex2DataTypeApi("NO");
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
@@ -120,7 +120,7 @@ class NeighbourServiceTest {
 	@Test
 	public void postingCapabilitiesUnknownInDNSReturnsError() {
 		// Mock the incoming API object.
-		CapabilityApi unknownNeighbour = new CapabilityApi();
+		CapabilitiesApi unknownNeighbour = new CapabilitiesApi();
 		unknownNeighbour.setName("unknownNeighbour");
 		unknownNeighbour.setCapabilities(Collections.singleton(new Datex2DataTypeApi("NO")));
 

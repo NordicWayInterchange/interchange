@@ -6,7 +6,7 @@ import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
+import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -37,12 +37,12 @@ public class NeighbourRESTFacadeTest {
 
 	private RestTemplate restTemplate = new RestTemplate();
 	private ObjectMapper mapper = new ObjectMapper();
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+	private CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
 	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(new NeighbourRESTClient(restTemplate,mapper),
-			capabilityTransformer,
+			capabilitiesTransformer,
 			subscriptionTransformer,
 			subscriptionRequestTransformer);
 
@@ -74,9 +74,9 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
 		DataTypeApi dataType = new Datex2DataTypeApi("NO");
-		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(dataType));
 
-		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
+		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
 		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -97,9 +97,9 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDenmCapabilities() throws Exception {
 		DenmDataTypeApi dataType = new DenmDataTypeApi("NO-123123", "Norwegian Road Broadcasting", "NO", "P1", "application/base64", Sets.newSet("aaa"), "road", "cc1", "scc2");
-		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(dataType));
 
-		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
+		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
 		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -121,9 +121,9 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithIviCapabilities() throws Exception {
 		IviDataTypeApi dataType = new IviDataTypeApi("NO-123123", "Norwegian Road Broadcasting", "NO", "P1", "application/base64", Sets.newSet("aaa"), "road", org.assertj.core.util.Sets.newLinkedHashSet(12321), Sets.newSet(92827));
-		CapabilityApi capabilityApi = new CapabilityApi("remote server", Collections.singleton(dataType));
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(dataType));
 
-		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilityApi);
+		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
 		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/capabilities"))
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -196,7 +196,7 @@ public class NeighbourRESTFacadeTest {
 	}
 
 	@Test
-	public void clientSubscriptionRequestNotEmptyButServerResponseEmptySubscriptionRequest() throws Exception{
+	public void clientSubscriptionRequestNotEmptyButServerResponseEmptySubscriptionRequest() {
 
 		// Subscription request posted to neighbour has non empty subscription set.
 		Subscription subscription = new Subscription();
