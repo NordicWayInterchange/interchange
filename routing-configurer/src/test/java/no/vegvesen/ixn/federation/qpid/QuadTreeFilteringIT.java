@@ -90,6 +90,13 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void matchingFilterAndQuadTreeExactMatchGetsRouted() throws Exception {
+		String messageQuadTreeTiles = ",abcdefghijklmnop";
+		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')");
+		assertThat(message).isNotNull();
+	}
+
+	@Test
 	public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')");

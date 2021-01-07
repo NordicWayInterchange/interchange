@@ -9,5 +9,5 @@ java \
     -Dsink.keypass=${KEY_PASS} \
     -Dsink.truststorepath=${TRUST_STORE_PATH} \
     -Dsink.truststorepass=${TRUST_STORE_PASS} \
-    -jar jms-client-sink.jar
+    -jar jms-client-image-sink.jar
 

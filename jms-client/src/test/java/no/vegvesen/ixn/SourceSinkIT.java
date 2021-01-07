@@ -13,6 +13,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,5 +92,38 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		assertThat(source.isConnected()).isTrue();
 		source.close();
 		assertThat(source.isConnected()).isFalse();
+	}
+
+	@Test
+	public void sendNonPersistentBytesMessage() throws JMSException, NamingException {
+		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		source.start();
+		source.sendNonPersistentByteMessage("FIIIIIISK!", "NO", "");
+
+		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		MessageConsumer testConsumer = sink.createConsumer();
+		Message receive = testConsumer.receive(1000);
+		sink.onMessage(receive);
+		assertThat(receive).isNotNull();
+	}
+
+	@Test
+	public void convertImageToBytes() throws IOException {
+		ImageSource source = new ImageSource(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		byte[] byteArray = source.convertImageToByteArray("src/images/cabin_view.jpg");
+		assertThat(byteArray[0]).isInstanceOf(Byte.class);
+	}
+
+	@Test
+	public void sendNonPersistentBytesMessageWithImage() throws JMSException, NamingException, IOException {
+		ImageSource source = new ImageSource(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		source.start();
+		source.sendNonPersistentByteMessageWithImage("NO", "", "src/images/cabin_view.jpg");
+
+		ImageSink sink = new ImageSink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		MessageConsumer testConsumer = sink.createConsumer();
+		Message receive = testConsumer.receive(1000);
+		sink.onMessage(receive);
+		assertThat(receive).isNotNull();
 	}
 }

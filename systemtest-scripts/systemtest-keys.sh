@@ -1,5 +1,6 @@
 #!/bin/bash -eu
 
+cd ..
 TMP_FOLDER=$(realpath -s tmp)
 echo Generating systemtest keys to folder $TMP_FOLDER
 

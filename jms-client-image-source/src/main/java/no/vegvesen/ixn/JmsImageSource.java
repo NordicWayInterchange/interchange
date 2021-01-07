@@ -11,17 +11,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import javax.net.ssl.SSLContext;
 
 @SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
-public class JmsSource implements CommandLineRunner {
+public class JmsImageSource implements CommandLineRunner {
 
     /**
      * A message source. Sends a single message, and exits.
      */
     public static void main(String[] args) {
-        SpringApplication.run(JmsSource.class);
+        SpringApplication.run(JmsImageSource.class);
     }
 
     @Autowired
-    private JmsSourceProperties properties;
+    private JmsImageSourceProperties properties;
 
     @Override
     public void run(String... args) throws Exception {
@@ -31,10 +31,9 @@ public class JmsSource implements CommandLineRunner {
         KeystoreDetails trustStoreDetails = new KeystoreDetails(properties.getTrustStorepath(),
                 properties.getTrustStorepass(),KeystoreType.JKS);
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
-        try(Source s = new Source(properties.getUrl(),properties.getSendQueue(),sslContext)) {
+        try(ImageSource s = new ImageSource(properties.getUrl(),properties.getSendQueue(),sslContext)) {
             s.start();
-            s.send("Dette er en test, FISK!", "NO", ",01230122");
-            //s.sendByteMessageWithoutImage("Dette er en test, FISK!", "NO", ",01230122");
+            s.sendByteMessageWithImage( "NO", ",01230122", "cabin_view.jpg");
         }
     }
 }

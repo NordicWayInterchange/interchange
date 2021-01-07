@@ -1,0 +1,16 @@
+{
+  "messageType": "DATEX2",
+  "publisherId": "NO-12345",
+  "publisherName": "Norwegian Public Roads Administration",
+  "originatingCountry": "NO",
+  "protocolVersion": "DATEX2:2.3",
+  "contentType": "application/xml",
+  "quadTree": [
+    "01230122"
+  ],
+  "publicationType": "Obstruction",
+  "publicationSubType": [
+    "WinterDrivingManagement",
+    "ReroutingManagement"
+  ]
+}

@@ -278,5 +278,7 @@
         <module>onboard-rest-client</module>
         <module>jms-client-source</module>
         <module>jms-client-sink</module>
+        <module>jms-client-image-sink</module>
+        <module>jms-client-image-source</module>
     </modules>
 </project>
