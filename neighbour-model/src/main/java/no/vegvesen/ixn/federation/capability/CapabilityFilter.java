@@ -15,21 +15,21 @@ public class CapabilityFilter implements Filterable {
 
 	private static Logger logger = LoggerFactory.getLogger(CapabilityFilter.class);
 
-	private final HashMap<String, Object> headers = new HashMap<>();
+	private final HashMap<String, String> headers = new HashMap<>();
 
-	public CapabilityFilter(Map<String, Object> capabilityFlat) {
+	public CapabilityFilter(Map<String, String> capabilityFlat) {
 		headers.putAll(capabilityFlat);
 	}
 
 	@Override
-	public Object getHeader(String messageHeaderName) {
+	public String getHeader(String messageHeaderName) {
 		if (!this.headers.containsKey(messageHeaderName)) {
 			if (MessageProperty.nonFilterablePropertyNames.contains(messageHeaderName)) {
 				throw new HeaderNotFilterable(String.format("Message header [%s] not possible to use in selector filter", messageHeaderName));
 			}
 			throw new HeaderNotFoundException(String.format("Message header [%s] not a known capability attribute", messageHeaderName));
 		}
-		Object value = this.headers.get(messageHeaderName);
+		String value = this.headers.get(messageHeaderName);
 		logger.debug("Getting header [{}] with value [{}] of type {}", messageHeaderName, value, value == null ? null : value.getClass().getSimpleName());
 		return value;
 	}

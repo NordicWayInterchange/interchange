@@ -9,7 +9,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -73,8 +72,8 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
-		CapabilityApi dataType = new DatexCapabilityApi("NO");
-		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(dataType));
+		CapabilityApi capabilityApi = new DatexCapabilityApi("NO");
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(capabilityApi));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
@@ -85,13 +84,13 @@ public class NeighbourRESTFacadeTest {
 
 		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self );
 
-		assertThat(res.getDataTypes()).hasSize(1);
+		assertThat(res.getCapabilities()).hasSize(1);
 
-		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
-		DataType dataTypeInCapabilities = dataTypes.next();
+		Iterator<Capability> dataTypes = res.getCapabilities().iterator();
+		Capability capability = dataTypes.next();
 
-		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		assertThat(dataTypeInCapabilities.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(dataType.getOriginatingCountry());
+		assertThat(capability).isInstanceOf(DatexCapability.class);
+		assertThat(capability.getOriginatingCountry()).isEqualTo(capabilityApi.getOriginatingCountry());
 	}
 
 	@Test
@@ -108,13 +107,13 @@ public class NeighbourRESTFacadeTest {
 
 		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
 
-		assertThat(res.getDataTypes()).hasSize(1);
+		assertThat(res.getCapabilities()).hasSize(1);
 
-		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
-		DataType remoteServerResponse = dataTypes.next();
+		Iterator<Capability> dataTypes = res.getCapabilities().iterator();
+		Capability capability = dataTypes.next();
 
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(capbility.getMessageType());
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo(capbility.getOriginatingCountry());
+		assertThat(capability).isInstanceOf(DenmCapability.class);
+		assertThat(capability.getOriginatingCountry()).isEqualTo(capbility.getOriginatingCountry());
 	}
 
 	@Test
@@ -131,13 +130,12 @@ public class NeighbourRESTFacadeTest {
 
 		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
 
-		assertThat(res.getDataTypes()).hasSize(1);
+		assertThat(res.getCapabilities()).hasSize(1);
 
-		Iterator<DataType> dataTypes = res.getDataTypes().iterator();
-		DataType remoteServerResponse = dataTypes.next();
+		Iterator<Capability> dataTypes = res.getCapabilities().iterator();
+		Capability remoteServerResponse = dataTypes.next();
 
-		assertThat(remoteServerResponse.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(dataType.getMessageType());
-		assertThat(remoteServerResponse.getPropertyValueAsSet(MessageProperty.IVI_TYPE)).isEqualTo(dataType.getIviType());
+		assertThat(remoteServerResponse).isInstanceOf(IviCapability.class);
 	}
 
 	@Test

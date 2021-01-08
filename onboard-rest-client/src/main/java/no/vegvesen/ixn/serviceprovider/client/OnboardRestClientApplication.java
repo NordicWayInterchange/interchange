@@ -2,11 +2,9 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionApi;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionListApi;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -62,7 +60,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalDataTypeList serviceProviderCapabilities = client.getServiceProviderCapabilities();
+            LocalCapabilityList serviceProviderCapabilities = client.getServiceProviderCapabilities();
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(serviceProviderCapabilities));
             return 0;
@@ -82,8 +80,8 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws IOException {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            DataTypeApi capability = mapper.readValue(file,DataTypeApi.class);
-            LocalDataType result = client.addCapability(capability);
+            CapabilityApi capability = mapper.readValue(file,CapabilityApi.class);
+            LocalCapability result = client.addCapability(capability);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
@@ -138,7 +136,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() {
             OnboardRESTClient client = parentCommand.createClient();
             client.deleteCapability(capabilityId);
-            System.out.println(String.format("Capability %d deleted successfully",capabilityId));
+            System.out.printf("Capability %d deleted successfully%n",capabilityId);
             return 0;
         }
     }
@@ -153,10 +151,10 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         Integer subscriptionId;
 
         @Override
-        public Integer call() throws Exception {
+        public Integer call(){
             OnboardRESTClient client = parentCommand.createClient();
             client.deleteSubscriptions(subscriptionId);
-            System.out.println(String.format("Subscription %d deleted successfully",subscriptionId));
+            System.out.printf("Subscription %d deleted successfully%n",subscriptionId);
             return 0;
         }
     }

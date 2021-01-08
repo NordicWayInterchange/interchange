@@ -1,15 +1,7 @@
 package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.Connection;
-import no.vegvesen.ixn.federation.model.ConnectionStatus;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
-import no.vegvesen.ixn.federation.model.SubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
@@ -80,8 +72,8 @@ public class NeighbourRepositoryIT {
 		repository.save(thirdInterchange);
 
 		Neighbour update = repository.findByName("Third Neighbour");
-		DataType aDataType = new DataType(getDatexHeaders("NO", null, null));
-		Capabilities firstCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(aDataType));
+		Capability aCapability = new DatexCapability(null, "NO", null, null, null);
+		Capabilities firstCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(aCapability));
 		update.setCapabilities(firstCapabilities);
 		repository.save(update);
 		Neighbour updatedInterchange = repository.findByName("Third Neighbour");
@@ -163,18 +155,18 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void neighbourWithDatex2SpecificCapabilitiesCanBeStoredAndRetrieved() {
-		HashSet<DataType> capabilities = new HashSet<>();
-		capabilities.add(new DataType(getDatexHeaders("NO", "SituationPublication", ",aa,")));
-		capabilities.add(new DataType(getDatexHeaders("NO", "MeasuredDataPublication", ",aa,bb,")));
+		HashSet<Capability> capabilities = new HashSet<>();
+		capabilities.add(new DatexCapability(null, "NO", null, Collections.emptySet(), Sets.newLinkedHashSet("SituationPublication", "MeasuredDataPublication")));
+		capabilities.add(new DatexCapability(null, "SE", null, Collections.emptySet(), Sets.newLinkedHashSet("SituationPublication", "MeasuredDataPublication")));
 		Neighbour anyNeighbour = new Neighbour("any", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities), new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()), new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()));
 
 		Neighbour savedNeighbour = repository.save(anyNeighbour);
 		assertThat(savedNeighbour.getName()).isEqualTo("any");
-		assertThat(savedNeighbour.getCapabilities().getDataTypes()).hasSize(2);
+		assertThat(savedNeighbour.getCapabilities().getCapabilities()).hasSize(2);
 
 		Neighbour foundNeighbour = repository.findByName("any");
 		assertThat(foundNeighbour.getName()).isEqualTo("any");
-		assertThat(foundNeighbour.getCapabilities().getDataTypes()).hasSize(2);
+		assertThat(foundNeighbour.getCapabilities().getCapabilities()).hasSize(2);
 	}
 
 	@NonNull

@@ -45,13 +45,13 @@ public class SelfService {
 
 	}
 
-	Set<DataType> calculateSelfCapabilities(Iterable<ServiceProvider> serviceProviders) {
+	Set<Capability> calculateSelfCapabilities(Iterable<ServiceProvider> serviceProviders) {
 		logger.info("Calculating Self capabilities...");
-		Set<DataType> localCapabilities = new HashSet<>();
+		Set<Capability> localCapabilities = new HashSet<>();
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
 			logger.info("Service provider name: {}", serviceProvider.getName());
-			Set<DataType> serviceProviderCapabilities = serviceProvider.getCapabilities().getDataTypes();
+			Set<Capability> serviceProviderCapabilities = serviceProvider.getCapabilities().getCapabilities();
 			logger.info("Service Provider capabilities: {}", serviceProviderCapabilities.toString());
 			localCapabilities.addAll(serviceProviderCapabilities);
 		}

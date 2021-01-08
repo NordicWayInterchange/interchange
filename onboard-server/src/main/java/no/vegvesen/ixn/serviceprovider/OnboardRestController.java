@@ -1,20 +1,16 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.onboard.SelfService;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionApi;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionListApi;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +28,7 @@ public class OnboardRestController {
 	private final CertService certService;
 	private final SelfService selfService;
 	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
+	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
 
@@ -45,18 +42,18 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-	public LocalDataType addCapabilities(@PathVariable String serviceProviderName, @RequestBody DataTypeApi capabilityDataType) {
+	public LocalCapability addCapabilities(@PathVariable String serviceProviderName, @RequestBody CapabilityApi capabilityApi) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Capabilities - Received POST from Service Provider: {}", serviceProviderName);
 
-		if (capabilityDataType == null) {
+		if (capabilityApi == null) {
 			throw new CapabilityPostException("Bad api object. The posted DataTypeApi object had no capabilities. Nothing to add.");
 		}
 
 
-		DataType newLocalCapability = dataTypeTransformer.dataTypeApiToDataType(capabilityDataType);
+		Capability newLocalCapability = capabilityApiTransformer.capabilityApiToCapability(capabilityApi);
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 
 		if (serviceProviderToUpdate == null) {
@@ -69,20 +66,21 @@ public class OnboardRestController {
 
 		// Save the Service Provider representation in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-		DataType dataTypeId = null;
-		for (DataType dataType : saved.getCapabilities().getDataTypes()) {
-			if (dataType.equals(newLocalCapability)) {
-				dataTypeId = dataType;
+		Capability addedCapability = null;
+		for (Capability capability : saved.getCapabilities().getCapabilities()) {
+			if (capability.equals(newLocalCapability)) {
+				addedCapability = capability;
 			}
 		}
 
+
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
-		LocalDataType localDataType = null;
-		if (dataTypeId != null) {
-			localDataType = typeTransformer.transformToDataTypeApiId(dataTypeId);
-		}
 		OnboardMDCUtil.removeLogVariables();
-		return localDataType;
+		LocalCapability localCapability = null;
+		if (addedCapability != null) {
+			localCapability = new LocalCapability(addedCapability.getId(), addedCapability.toApi());
+		}
+		return localCapability;
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/capabilities/{capabilityId}")
@@ -177,16 +175,15 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-	public LocalDataTypeList getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
+	public LocalCapabilityList getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
-		LocalDataTypeList localDataTypeList = typeTransformer.transformToDataTypeIdList(serviceProvider.getCapabilities().getDataTypes());
+		LocalCapabilityList localDataTypeList = typeTransformer.transformToLocalCapabilityList(serviceProvider.getCapabilities().getCapabilities());
 		OnboardMDCUtil.removeLogVariables();
 		return localDataTypeList;
-
 	}
 
-	private ServiceProvider checkAndGetServiceProvider(@PathVariable String serviceProviderName) {
+	private ServiceProvider checkAndGetServiceProvider(String serviceProviderName) {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProvider == null) {
