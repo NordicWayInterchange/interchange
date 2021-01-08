@@ -152,7 +152,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderWithCapabiltiesShouldNotHaveQueuButExistInServiceProvidersGroup() {
 		ServiceProvider onlyCaps = new ServiceProvider("onlyCaps");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new DataType(null,"originatingCountry","NO")));
+				Collections.singleton(new DatexCapability(null,"NO", null, null, null)));
 		onlyCaps.setCapabilities(capabilities);
 		router.syncServiceProviders(Arrays.asList(onlyCaps));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
@@ -166,7 +166,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new DataType(1,"originatingCountry","NO")));
+				Collections.singleton(new DatexCapability(null,"NO", null, null, null)));
 		serviceProvider.setCapabilities(capabilities);
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider));

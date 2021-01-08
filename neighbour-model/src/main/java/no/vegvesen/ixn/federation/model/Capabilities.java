@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -16,7 +15,6 @@ import java.util.Set;
 @Table(name = "capabilities")
 public class Capabilities {
 
-	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_seq")
 	private Integer id;
@@ -39,12 +37,12 @@ public class Capabilities {
 		this.lastUpdated = lastUpdated;
 	}
 
-	public void addDataType(DataType newCapability) {
+	public void addDataType(Capability newCapability) {
 		// Add the incoming capabilities to the capabilities
-		if (dataTypes.contains(newCapability)) {
+		if (capabilities.contains(newCapability)) {
 			throw new CapabilityPostException("The posted capability already exist as capabilities. Nothing to add.");
 		}
-		dataTypes.add(newCapability);
+		capabilities.add(newCapability);
 
 		if (hasDataTypes()) {
 			setStatus(Capabilities.CapabilitiesStatus.KNOWN);
@@ -53,13 +51,13 @@ public class Capabilities {
 	}
 
 	public void removeDataType(Integer capabilityId) {
-		Set<DataType> currentServiceProviderCapabilities = getDataTypes();
+		Set<Capability> currentServiceProviderCapabilities = getCapabilities();
 
-		Optional<DataType> subscriptionToDelete = currentServiceProviderCapabilities
+		Optional<Capability> subscriptionToDelete = currentServiceProviderCapabilities
 				.stream()
-				.filter(dataType -> dataType.getData_id().equals(capabilityId))
+				.filter(dataType -> dataType.getId().equals(capabilityId))
 				.findFirst();
-		DataType toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
+		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
 		currentServiceProviderCapabilities.remove(toDelete);
 
 		if (currentServiceProviderCapabilities.size() == 0) {
@@ -77,7 +75,7 @@ public class Capabilities {
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
-	private Set<DataType> dataTypes = new HashSet<>();
+	private Set<Capability> capabilities = new HashSet<>();
 
 	@Column
 	@UpdateTimestamp
@@ -86,14 +84,14 @@ public class Capabilities {
 	public Capabilities(){
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<DataType> capabilities) {
+	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilities) {
 		this.status = status;
-		this.dataTypes = capabilities;
+		this.capabilities = capabilities;
 	}
 
-	public Capabilities(CapabilitiesStatus status, Set<DataType> capabilties, LocalDateTime lastUpdated) {
+	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilties, LocalDateTime lastUpdated) {
 		this.status = status;
-		this.dataTypes = capabilties;
+		this.capabilities = capabilties;
 		this.lastUpdated = lastUpdated;
 	}
 
@@ -105,19 +103,19 @@ public class Capabilities {
 		this.status = status;
 	}
 
-	public Set<DataType> getDataTypes() {
-		return dataTypes;
+	public Set<Capability> getCapabilities() {
+		return capabilities;
 	}
 
-	public void setDataTypes(Set<DataType> capabilities) {
-		this.dataTypes.clear();
+	public void setCapabilities(Set<Capability> capabilities) {
+		this.capabilities.clear();
 		if ( capabilities != null ) {
-			this.dataTypes.addAll(capabilities);
+			this.capabilities.addAll(capabilities);
 		}
 	}
 
 	public boolean hasDataTypes() {
-		return dataTypes.size() > 0;
+		return capabilities.size() > 0;
 	}
 
 	@Override
@@ -125,7 +123,7 @@ public class Capabilities {
 		return "Capabilities{" +
 				"id=" + id +
 				", status=" + status +
-				", dataTypes=" + dataTypes +
+				", dataTypes=" + capabilities +
 				", lastCapabilityExchange=" + lastCapabilityExchange +
 				'}';
 	}

@@ -3,8 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -76,7 +75,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DataTypeApi datexNo = new Datex2DataTypeApi( "NO");
+		DatexCapabilityApi datexNo = new DatexCapabilityApi("NO");
 		String datexNoString = objectMapper.writeValueAsString(datexNo);
 		String capabilitiesPath = String.format("/%s/capabilities", firstServiceProvider);
 
@@ -99,11 +98,10 @@ public class OnboardRestControllerTest {
 
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
-		// Mock existing service provider with two capabilities in database
-		DataType dataType42 = new DataType(42, MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-		DataType dataType6 = new DataType(6, MessageProperty.MESSAGE_TYPE.getName(), DenmDataTypeApi.DENM);
-		DataType dataType7 = new DataType(7, MessageProperty.MESSAGE_TYPE.getName(), IviDataTypeApi.IVI);
-		Set<DataType> capabilities = Sets.newLinkedHashSet(dataType42, dataType6, dataType7);
+		// Mock existing service provider with three capabilities in database
+		DatexCapability capability42 = mock(DatexCapability.class);
+		when(capability42.getId()).thenReturn(42);
+		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42, mock(Capability.class), mock(Capability.class));
 		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
@@ -126,7 +124,7 @@ public class OnboardRestControllerTest {
 
 		mockCertificate("First Service Provider");
 
-		DataTypeApi datexFi = new Datex2DataTypeApi("FI");
+		DatexCapabilityApi datexFi = new DatexCapabilityApi("FI");
 		String capabilitiesPath = String.format("/%s/capabilities", "SecondServiceProvider");
 
 		String datexFiString = objectMapper.writeValueAsString(datexFi);

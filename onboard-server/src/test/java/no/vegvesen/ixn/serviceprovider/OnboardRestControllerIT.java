@@ -1,13 +1,14 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
+import no.vegvesen.ixn.serviceprovider.model.LocalCapability;
+import no.vegvesen.ixn.serviceprovider.model.LocalCapabilityList;
 import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionApi;
 import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionListApi;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -43,19 +43,19 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testDeletingCapability() {
-        Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
+        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
         String serviceProviderName = "serviceprovider";
 
-        LocalDataType localDataType = restController.addCapabilities(serviceProviderName, datexNO);
-        assertThat(localDataType).isNotNull();
-        LocalDataTypeList serviceProviderCapabilities = restController.getServiceProviderCapabilities(serviceProviderName);
-        assertThat(serviceProviderCapabilities.getDataTypes()).hasSize(1);
+        LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
+        assertThat(addedCapability).isNotNull();
+		LocalCapabilityList serviceProviderCapabilities = restController.getServiceProviderCapabilities(serviceProviderName);
+        assertThat(serviceProviderCapabilities.getCapabilities()).hasSize(1);
 
         //Test that we don't mess up subscriptions and capabilities
         LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(0);
 
-        LocalDataType saved = serviceProviderCapabilities.getDataTypes().get(0);
+        LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
         restController.deleteCapability(serviceProviderName, saved.getId());
     }
 

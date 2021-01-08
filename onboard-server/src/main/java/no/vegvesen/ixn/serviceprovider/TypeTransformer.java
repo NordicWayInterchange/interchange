@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.federation.model.Capability;
 import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
@@ -44,4 +45,12 @@ public class TypeTransformer {
         }
         return new LocalSubscriptionListApi(subscriptionApis);
     }
+
+	public LocalCapabilityList transformToLocalCapabilityList(Set<Capability> capabilities) {
+		List<LocalCapability> idList = new LinkedList<>();
+		for (Capability capability : capabilities) {
+			idList.add(new LocalCapability(capability.getId(), capability.toApi()));
+		}
+		return new LocalCapabilityList(idList);
+	}
 }

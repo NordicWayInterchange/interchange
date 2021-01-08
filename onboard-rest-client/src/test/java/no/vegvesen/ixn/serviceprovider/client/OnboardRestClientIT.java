@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -89,15 +90,15 @@ public class OnboardRestClientIT extends DockerBaseIT {
     @Test
     public void addCapabilityCheckAndDelete() throws JsonProcessingException {
 
-        Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
+        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
         client.addCapability(datexNO);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        LocalDataTypeList newCapabilities = client.getServiceProviderCapabilities();
+        LocalCapabilityList newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
-        assertThat(newCapabilities.getDataTypes()).hasSize(1);
+        assertThat(newCapabilities.getCapabilities()).hasSize(1);
 
-		LocalDataType localDataType = newCapabilities.getDataTypes().iterator().next();
+		LocalCapability localDataType = newCapabilities.getCapabilities().iterator().next();
         Integer id = localDataType.getId();
         client.deleteCapability(id);
 
@@ -130,7 +131,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 		LocalSubscriptionApi addedSubscription = client.addSubscription(new Datex2DataTypeApi("NO"));
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
-        LocalDataTypeList capabilities = client.getServiceProviderCapabilities();
+        LocalCapabilityList capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
 		LocalSubscriptionListApi serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptions();

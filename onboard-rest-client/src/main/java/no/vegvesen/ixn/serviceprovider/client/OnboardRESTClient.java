@@ -1,10 +1,8 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataType;
-import no.vegvesen.ixn.serviceprovider.model.LocalDataTypeList;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionApi;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionListApi;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -35,15 +33,15 @@ public class OnboardRESTClient {
         this.user = user;
     }
 
-    public LocalDataType addCapability(DataTypeApi capability) {
+    public LocalCapability addCapability(CapabilityApi capability) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<DataTypeApi> entity = new HttpEntity<>(capability,headers);
-        return restTemplate.exchange(server + "/" + user + "/capabilities", HttpMethod.POST, entity, LocalDataType.class).getBody();
+        HttpEntity<CapabilityApi> entity = new HttpEntity<>(capability,headers);
+        return restTemplate.exchange(server + "/" + user + "/capabilities", HttpMethod.POST, entity, LocalCapability.class).getBody();
     }
 
-    public LocalDataTypeList getServiceProviderCapabilities() {
-        return restTemplate.getForEntity(server + "/" + user + "/capabilities", LocalDataTypeList.class).getBody();
+    public LocalCapabilityList getServiceProviderCapabilities() {
+        return restTemplate.getForEntity(server + "/" + user + "/capabilities", LocalCapabilityList.class).getBody();
     }
 
 
