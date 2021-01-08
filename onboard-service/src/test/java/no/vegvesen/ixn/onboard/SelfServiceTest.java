@@ -85,7 +85,7 @@ class SelfServiceTest {
 	void calculateLastUpdatedCapabiltiesOneCap() {
 		ServiceProvider serviceProvider = new ServiceProvider();
 		LocalDateTime lastUpdated = LocalDateTime.now();
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,setOf(getDatex("NO")),lastUpdated);
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,Sets.newLinkedHashSet(getDatexCapability("NO")),lastUpdated);
 		serviceProvider.setCapabilities(capabilities);
 		LocalDateTime result = selfService.calculateLastUpdatedCapabilities(Arrays.asList(serviceProvider));
 		assertThat(result).isEqualTo(lastUpdated);
@@ -94,9 +94,9 @@ class SelfServiceTest {
 	@Test
 	void calculateSelfCapabilitiesTest() {
 
-		DataType a = getDatex("SE");
-		DataType b = getDatex("FI");
-		DataType c = getDatex("NO");
+		Capability a = getDatexCapability("SE");
+		Capability b = getDatexCapability("FI");
+		Capability c = getDatexCapability("NO");
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
@@ -110,7 +110,7 @@ class SelfServiceTest {
 
 		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 
-		Set<DataType> selfCapabilities = selfService.calculateSelfCapabilities(serviceProviders);
+		Set<Capability> selfCapabilities = selfService.calculateSelfCapabilities(serviceProviders);
 
 		assertThat(selfCapabilities).hasSize(3);
 		assertThat(selfCapabilities).containsAll(Stream.of(a, b, c).collect(Collectors.toSet()));
@@ -140,20 +140,20 @@ class SelfServiceTest {
 	@Test
 	void fetchSelfCalculatesGetLastUpdatedLocalCapabilities() {
 		LocalDateTime aCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
-		DataType aCap1 = getDatex("SE");
-		DataType aCap2 = getDatex("SE");
+		Capability aCap1 = getDatexCapability("SE");
+		Capability aCap2 = getDatexCapability("SE");
 		ServiceProvider aServiceProvider = new ServiceProvider();
 		aServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(aCap1, aCap2), aCapDate));
 
 		LocalDateTime bCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
-		DataType bCap1 = getDatex("SE");
-		DataType bCap2 = getDatex("SE");
+		Capability bCap1 = getDatexCapability("SE");
+		Capability bCap2 = getDatexCapability("SE");
 		ServiceProvider bServiceProvider = new ServiceProvider();
 		bServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
 
 		LocalDateTime cCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
-		DataType cCap1 = getDatex("FI");
-		DataType cCap2 = getDatex("FI");
+		Capability cCap1 = getDatexCapability("FI");
+		Capability cCap2 = getDatexCapability("FI");
 		ServiceProvider cServiceProvider = new ServiceProvider();
 		cServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cCap1, cCap2), cCapDate));
 
@@ -170,7 +170,7 @@ class SelfServiceTest {
 		LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,getDatex("FI"));
 		LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,getDatex("NO"));
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
-		serviceProvider.setSubscriptions(setOf(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
+		serviceProvider.setSubscriptions(Sets.newLinkedHashSet(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
 		Set<DataType> dataTypes = selfService.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
 		assertThat(dataTypes)
 				.hasSize(1).
@@ -182,10 +182,6 @@ class SelfServiceTest {
 		assertThat(selfService.getNodeProviderName()).isEqualTo("my-interchange");
 	}
 
-	private LocalSubscription getLocalSubscription(DataType dataType, LocalDateTime lastUpdated) {
-		return new LocalSubscription(-1, LocalSubscriptionStatus.CREATED, dataType, lastUpdated);
-	}
-
 	@NonNull
 	private DataType getDatex(String se) {
 		HashMap<String, String> datexHeaders = new HashMap<>();
@@ -194,8 +190,8 @@ class SelfServiceTest {
 		return new DataType(datexHeaders);
 	}
 
-	private <T> Set<T> setOf(T ... instances) {
-		return Stream.of(instances).collect(Collectors.toSet());
+	private Capability getDatexCapability(String originatingCountry) {
+		return new DatexCapability(null, originatingCountry, null, Collections.emptySet(), Collections.emptySet());
 	}
 
 }

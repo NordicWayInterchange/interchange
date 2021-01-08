@@ -13,7 +13,6 @@ import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +42,7 @@ import static org.mockito.Mockito.when;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.when;
 
 
 @SuppressWarnings("rawtypes")
@@ -210,7 +210,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new DataType(null,"originatingCountry","NO")));
+				Collections.singleton(new DatexCapability(null, "NO", null, null, null)));
 		serviceProvider.setCapabilities(capabilities);
 
 		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));

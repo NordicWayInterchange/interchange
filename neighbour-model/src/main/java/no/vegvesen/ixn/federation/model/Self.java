@@ -18,7 +18,7 @@ public class Self {
 
 	private static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 
-	private Set<DataType> localCapabilities = new HashSet<>();
+	private Set<Capability> localCapabilities = new HashSet<>();
 
 	private Set<DataType> localSubscriptions = new HashSet<>();
 
@@ -41,12 +41,12 @@ public class Self {
 		this.name = name;
 	}
 
-	public Set<DataType> getLocalCapabilities() {
+	public Set<Capability> getLocalCapabilities() {
 		return localCapabilities;
 	}
 
 
-	public void setLocalCapabilities(Set<DataType> localCapabilities) {
+	public void setLocalCapabilities(Set<Capability> localCapabilities) {
 		if (localCapabilities != null) {
 			this.localCapabilities.addAll(localCapabilities);
 		}

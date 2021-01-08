@@ -61,6 +61,10 @@ public class NeighbourServiceDiscoveryTest {
 		return new DataType(datexDataTypeHeaders);
 	}
 
+	private Capability getDatexCapability(String originatingCountry) {
+		return new DatexCapability(null, originatingCountry, null, null, null);
+	}
+
 	@BeforeEach
 	public void before(){
 		self = createSelf();
@@ -76,7 +80,7 @@ public class NeighbourServiceDiscoveryTest {
 	private Self createSelf() {
 		// Self setup
 		self = new Self(interchangeNodeProperties.getName());
-		Set<DataType> selfCapabilities = Collections.singleton(getDatexNoDataType());
+		Set<Capability> selfCapabilities = Collections.singleton(getDatexCapability("NO"));
 		self.setLocalCapabilities(selfCapabilities);
 		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("FI");
 		self.setLocalSubscriptions(selfSubscriptions);
@@ -134,7 +138,7 @@ public class NeighbourServiceDiscoveryTest {
 	public void successfulCapabilitiesPostCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
 		Capabilities capabilities = new Capabilities();
-		assertThat(capabilities.getDataTypes()).isEmpty();
+		assertThat(capabilities.getCapabilities()).isEmpty();
 
 		doReturn(capabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
@@ -152,7 +156,7 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour ericsson = createNeighbour();
 		doReturn(createFirstSubscriptionRequestResponse()).when(neighbourFacade).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
-		Capabilities fi = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSet("FI"));
+		Capabilities fi = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("FI")));
 		fi.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		ericsson.setCapabilities(fi);
 
@@ -192,7 +196,7 @@ public class NeighbourServiceDiscoveryTest {
 		LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
 		ericsson.getControlConnection().setBackoffStart(futureTime);
 		ericsson.getControlConnection().setConnectionStatus(ConnectionStatus.FAILED);
-		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI")));
+		ericsson.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("FI"))));
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(invocationOnMock -> {
 			Neighbour answer = invocationOnMock.getArgument(0);
@@ -225,7 +229,7 @@ public class NeighbourServiceDiscoveryTest {
 	public void gracefulBackoffPostOfCapabilitiesHappensIfAllowedPostTimeHasPassed(){
 		Neighbour ericsson = createNeighbour();
 
-		DataType firstDataType = getDatexNoDataType();
+		Capability firstDataType = getDatexCapability("NO");
 		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
 
 		doReturn(ericssonCapabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
@@ -248,7 +252,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.getControlConnection().setBackoffStart(pastTime);
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		doReturn(self).when(selfService).fetchSelf();
-		Capabilities fiCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSetOriginatingCountry("FI"));
+		Capabilities fiCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("FI")));
 		fiCapabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		ericsson.setCapabilities(fiCapabilities);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
@@ -301,7 +305,7 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour ericsson = createNeighbour();
 		ericsson.getControlConnection().setBackoffAttempts(4);
 
-		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(getDatexNoDataType()));
+		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.FAILED, Collections.singleton(getDatexCapability("NO")));
 		ericsson.setCapabilities(ericssonCapabilities);
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
@@ -405,9 +409,9 @@ public class NeighbourServiceDiscoveryTest {
 	// To introduce error make sure part 1 and part 2 below has same selector filter
 	@Test
 	public void subscriptionRequestProcessesAllNeighboursDespiteNetworkError() {
-		HashSet<DataType> dtNO = new HashSet<>();
-		dtNO.add(getDatexNoDataType());
-		Capabilities capabilitiesNO = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, dtNO);
+		HashSet<Capability> capabilitiesNo = new HashSet<>();
+		capabilitiesNo.add(getDatexCapability("NO"));
+		Capabilities capabilitiesNO = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilitiesNo);
 		Neighbour neighbourA = new Neighbour("a", capabilitiesNO, getEmptySR(), getEmptySR());
 		Neighbour neighbourB = new Neighbour("b", capabilitiesNO, getEmptySR(), getEmptySR());
 		Neighbour neighbourC = new Neighbour("c", capabilitiesNO, getEmptySR(), getEmptySR());
@@ -427,8 +431,8 @@ public class NeighbourServiceDiscoveryTest {
 
 		// Self setup
 		Self discoveringNode = new Self("d");
-		Set<DataType> selfCapabilities = new HashSet<>();
-		selfCapabilities.add(getDatexNoDataType());
+		Set<Capability> selfCapabilities = new HashSet<>();
+		selfCapabilities.add(getDatexCapability("NO"));
 		discoveringNode.setLocalCapabilities(selfCapabilities);
 
 		Set<DataType> selfSubscriptions = getDataTypeSetOriginatingCountry("NO");
@@ -461,10 +465,10 @@ public class NeighbourServiceDiscoveryTest {
 		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
-		DataType neighbourDataType = getDatexNoDataType();
-		Set<DataType> dataTypeSet = new HashSet<>();
-		dataTypeSet.add(neighbourDataType);
-		Capabilities neighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,dataTypeSet);
+		Capability neighbourCapability = getDatexCapability("NO");
+		Set<Capability> capabilitySet = new HashSet<>();
+		capabilitySet.add(neighbourCapability);
+		Capabilities neighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,capabilitySet);
 		neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilities,subscriptionRequest,new SubscriptionRequest());
 		Set<Subscription> neighbourFedInSubscription = new HashSet<>();
@@ -477,7 +481,7 @@ public class NeighbourServiceDiscoveryTest {
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
-		Capabilities otherNeighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, getDataTypeSet("NO"));
+		Capabilities otherNeighbourCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(getDatexCapability("NO")));
 		otherNeighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
 				otherNeighbourCapabilities,
