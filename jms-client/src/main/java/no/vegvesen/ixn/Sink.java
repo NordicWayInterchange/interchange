@@ -95,7 +95,6 @@ public class Sink implements MessageListener, AutoCloseable {
 					System.out.println(" BYTES message");
 					JmsBytesMessage bytesMessage = (JmsBytesMessage) message;
 					byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
-					System.out.println(bytesMessage.getBodyLength());
 					bytesMessage.readBytes(messageBytes);
 					messageBody = new String(messageBytes);
 				}

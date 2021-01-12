@@ -10,7 +10,5 @@
   ],
   "publicationType": "Obstruction",
   "publicationSubType": [
-    "WinterDrivingManagement",
-    "ReroutingManagement"
-  ]
+    "WinterDrivingManagement"]
 }

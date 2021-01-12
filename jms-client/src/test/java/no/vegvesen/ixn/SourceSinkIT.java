@@ -95,10 +95,23 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void sendNonPersistentBytesMessage() throws JMSException, NamingException {
+	public void sendNonPersistentDenmByteMessage() throws JMSException, NamingException {
 		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		source.start();
-		source.sendNonPersistentByteMessage("FIIIIIISK!", "NO", "");
+		source.sendNonPersistentDenmByteMessage("FIIIIIISK!", "NO", "");
+
+		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		MessageConsumer testConsumer = sink.createConsumer();
+		Message receive = testConsumer.receive(1000);
+		sink.onMessage(receive);
+		assertThat(receive).isNotNull();
+	}
+
+	@Test
+	public void sendNonPersistentIviByteMessage() throws JMSException, NamingException {
+		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
+		source.start();
+		source.sendNonPersistentIviByteMessage("FIIIIIISK!", "NO", "");
 
 		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testConsumer = sink.createConsumer();
