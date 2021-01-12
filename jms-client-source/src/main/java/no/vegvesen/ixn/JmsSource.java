@@ -34,7 +34,6 @@ public class JmsSource implements CommandLineRunner {
         try(Source s = new Source(properties.getUrl(),properties.getSendQueue(),sslContext)) {
             s.start();
             s.send("Dette er en test, FISK!", "NO", ",01230122");
-            s.sendDenmByteMessage("Dette er en test, FISK!", "NO", ",01230122");
         }
     }
 }
