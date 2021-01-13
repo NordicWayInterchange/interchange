@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFilterable;
-import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.server.filter.Filterable;
 import org.apache.qpid.server.message.AMQMessageHeader;
@@ -27,7 +26,7 @@ public class CapabilityFilter implements Filterable {
 			if (MessageProperty.nonFilterablePropertyNames.contains(messageHeaderName)) {
 				throw new HeaderNotFilterable(String.format("Message header [%s] not possible to use in selector filter", messageHeaderName));
 			}
-			throw new HeaderNotFoundException(String.format("Message header [%s] not a known capability attribute", messageHeaderName));
+//			throw new HeaderNotFoundException(String.format("Message header [%s] not a known capability attribute", messageHeaderName));
 		}
 		String value = this.headers.get(messageHeaderName);
 		logger.debug("Getting header [{}] with value [{}] of type {}", messageHeaderName, value, value == null ? null : value.getClass().getSimpleName());
@@ -105,5 +104,9 @@ public class CapabilityFilter implements Filterable {
 		return "CapabilityFilter{" +
 				"headers=" + headers +
 				'}';
+	}
+
+	public void putValue(String key, String value) {
+		this.headers.put(key, value);
 	}
 }

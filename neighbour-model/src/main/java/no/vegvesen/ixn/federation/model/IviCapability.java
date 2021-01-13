@@ -2,11 +2,11 @@ package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.IviCapabilityApi;
-import no.vegvesen.ixn.federation.capability.CapabilityFilter;
-import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 @DiscriminatorValue(CapabilityApi.IVI)
@@ -28,20 +28,9 @@ public class IviCapability extends Capability {
 		return iviTypes;
 	}
 
-	@Transient
 	@Override
-	public List<CapabilityFilter> getCapabilityFiltersFlat() {
-		List<CapabilityFilter> capabilitiesFilters = new LinkedList<>();
-		for (String quadTreeTile : noEmptySet(getQuadTree())) {
-			for (String iviType : noEmptySet(iviTypes)) {
-				Map<String, String> singleCapability = getValues();
-				singleCapability.put(MessageProperty.MESSAGE_TYPE.getName(), CapabilityApi.IVI);
-				singleCapability.put(MessageProperty.QUAD_TREE.getName(), quadTreeTile);
-				singleCapability.put(MessageProperty.IVI_TYPE.getName(), iviType);
-				capabilitiesFilters.add(new CapabilityFilter(singleCapability));
-			}
-		}
-		return capabilitiesFilters;
+	public Map<String, String> getSingleValues() {
+		return getSingleValuesBase(CapabilityApi.IVI);
 	}
 
 	@Override
@@ -49,4 +38,10 @@ public class IviCapability extends Capability {
 		return new IviCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getIviTypes());
 	}
 
+	@Override
+	public String toString() {
+		return "IviCapability{" +
+				"iviTypes=" + iviTypes +
+				"} " + super.toString();
+	}
 }

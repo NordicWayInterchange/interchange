@@ -2,11 +2,11 @@ package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
-import no.vegvesen.ixn.federation.capability.CapabilityFilter;
-import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 @DiscriminatorValue(CapabilityApi.DENM)
@@ -24,20 +24,9 @@ public class DenmCapability extends Capability {
 	public DenmCapability() {
 	}
 
-	@Transient
 	@Override
-	public List<CapabilityFilter> getCapabilityFiltersFlat() {
-		List<CapabilityFilter> capabilitiesFilters = new LinkedList<>();
-		for (String quadTreeTile : noEmptySet(getQuadTree())) {
-			for (String causeCode : noEmptySet(causeCodes)) {
-				Map<String, String> singleCapability = getValues();
-				singleCapability.put(MessageProperty.MESSAGE_TYPE.getName(), CapabilityApi.DENM);
-				singleCapability.put(MessageProperty.QUAD_TREE.getName(), quadTreeTile);
-				singleCapability.put(MessageProperty.CAUSE_CODE.getName(), causeCode);
-				capabilitiesFilters.add(new CapabilityFilter(singleCapability));
-			}
-		}
-		return capabilitiesFilters;
+	public Map<String, String> getSingleValues() {
+		return getSingleValuesBase(CapabilityApi.DENM);
 	}
 
 	@Override
@@ -47,5 +36,12 @@ public class DenmCapability extends Capability {
 
 	public Set<String> getCauseCodes() {
 		return causeCodes;
+	}
+
+	@Override
+	public String toString() {
+		return "DenmCapability{" +
+				"causeCodes=" + causeCodes +
+				"} " + super.toString();
 	}
 }

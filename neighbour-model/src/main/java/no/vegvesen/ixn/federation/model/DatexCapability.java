@@ -2,11 +2,11 @@ package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
-import no.vegvesen.ixn.federation.capability.CapabilityFilter;
-import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 @DiscriminatorValue(CapabilityApi.DATEX_2)
@@ -37,24 +37,20 @@ public class DatexCapability extends Capability{
 		}
 	}
 
-	@Transient
 	@Override
-	public List<CapabilityFilter> getCapabilityFiltersFlat() {
-		List<CapabilityFilter> capabilitiesFilters = new LinkedList<>();
-		for (String quadTreeTile : noEmptySet(getQuadTree())) {
-			for (String publicationType : noEmptySet(this.publicationTypes)) {
-				Map<String, String> singleCapability = getValues();
-				singleCapability.put(MessageProperty.MESSAGE_TYPE.getName(), CapabilityApi.DATEX_2);
-				singleCapability.put(MessageProperty.QUAD_TREE.getName(), quadTreeTile);
-				singleCapability.put(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
-				capabilitiesFilters.add(new CapabilityFilter(singleCapability));
-			}
-		}
-		return capabilitiesFilters;
+	public Map<String, String> getSingleValues() {
+		return getSingleValuesBase(CapabilityApi.DATEX_2);
 	}
 
 	@Override
 	public CapabilityApi toApi() {
 		return new DatexCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getPublicationTypes());
+	}
+
+	@Override
+	public String toString() {
+		return "DatexCapability{" +
+				"publicationTypes=" + publicationTypes +
+				"} " + super.toString();
 	}
 }

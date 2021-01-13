@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.capability.CapabilityFilter;
 import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.persistence.*;
@@ -81,14 +80,14 @@ public abstract class Capability {
 		return id;
 	}
 
-	@Transient
-	public abstract List<CapabilityFilter> getCapabilityFiltersFlat();
+	public abstract Map<String, String> getSingleValues();
 
-	public Map<String, String> getValues() {
+	protected Map<String, String> getSingleValuesBase(String messageType) {
 		Map<String, String> values = new HashMap<>();
 		putValue(values, MessageProperty.PUBLISHER_ID, this.getPublisherId());
 		putValue(values, MessageProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
 		putValue(values, MessageProperty.PROTOCOL_VERSION, this.getProtocolVersion());
+		putValue(values, MessageProperty.MESSAGE_TYPE, messageType);
 		return values;
 	}
 
@@ -107,4 +106,16 @@ public abstract class Capability {
 	}
 
 	public abstract CapabilityApi toApi();
+
+
+	@Override
+	public String toString() {
+		return "Capability{" +
+				"id=" + id +
+				", publisherId='" + publisherId + '\'' +
+				", originatingCountry='" + originatingCountry + '\'' +
+				", protocolVersion='" + protocolVersion + '\'' +
+				", quadTree=" + quadTree +
+				'}';
+	}
 }
