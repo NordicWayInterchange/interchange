@@ -48,19 +48,29 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
+	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeLongerInFilter() {
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, Sets.newLinkedHashSet("a", "b"), Sets.newLinkedHashSet("1", "2"));
+		Set<String> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+				Sets.newLinkedHashSet(datexCapability),
+				Sets.newLinkedHashSet("messageType = 'DATEX2' and quadTree like '%,bullshit%'"));
+		assertThat(commonInterest).isNotEmpty();
+	}
+
+	@Test
+	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, Sets.newLinkedHashSet("a", "b"), Sets.newLinkedHashSet("1", "2"));
+		Set<String> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+				Sets.newLinkedHashSet(datexCapability),
+				Sets.newLinkedHashSet("messageType = 'DATEX2' and quadTree like '%,frogshit%'"));
+		assertThat(commonInterest).isEmpty();
+	}
+
+	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeWithExtraWhitespace() {
 		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, Sets.newLinkedHashSet("a", "b"), Sets.newLinkedHashSet("1", "2"));
 		Set<String> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(" \n\t\n\n messageType = 'DATEX2' and \tquadTree \r\n\t\n\n like \t\t '%,b%'\r\n"));
-		assertThat(commonInterest).isNotEmpty();
-	}
-
-	void datexCapabilitiesMatchDatexSelectorExactMatchQuadTreeTile() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, Sets.newLinkedHashSet("01230123012301230123", "b"), Sets.newLinkedHashSet("1", "2"));
-		Set<String> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
-				Sets.newLinkedHashSet(datexCapability),
-				Sets.newLinkedHashSet("messageType = 'DATEX2' and quadTree = '01230123012301230123'"));
 		assertThat(commonInterest).isNotEmpty();
 	}
 

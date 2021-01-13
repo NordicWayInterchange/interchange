@@ -28,6 +28,7 @@ public class CapabilityMatcher {
 		Set<String> matches = new HashSet<>();
 		for (Capability capability : capabilities) {
 			for (String selector : subscriptionSelectors) {
+				logger.debug("Evaluating selector [{}] against capability {}", selector, capability);
 				String whiteSpaceTrimmedSelector = selector.replaceAll(REGEX_ALL_WHITESPACE, " ");
 				String quadTreeEvaluatedSelector = evaluateQuadTreeMatch(whiteSpaceTrimmedSelector, capability.getQuadTree());
 				JMSSelectorFilter selectorFilter = JMSSelectorFilterFactory.get(quadTreeEvaluatedSelector);
@@ -42,6 +43,7 @@ public class CapabilityMatcher {
 					logger.warn("Unknown Capability type {} ", capability.getClass().getName());
 				}
 				if (match) {
+					logger.debug("Selector [{}] matches capability {}", selector, capability);
 					matches.add(selector);
 				}
 			}
@@ -64,12 +66,16 @@ public class CapabilityMatcher {
 	private static boolean matchArrayValues(JMSSelectorFilter selectorFilter, Capability capability, MessageProperty messageProperty, Set<String> propertyValues) {
 		CapabilityFilter capabilityFilter = new CapabilityFilter(capability.getSingleValues());
 		if (propertyValues.isEmpty()){
-			return selectorFilter.matches(capabilityFilter);
+			boolean matches = selectorFilter.matches(capabilityFilter);
+			logger.debug("Evaluated match {} against selector [{}] without array values because array values are empty for property {}",
+					matches, selectorFilter.getSelector(), messageProperty.getName());
+			return matches;
 		}
 		for (String propertyValue : propertyValues) {
 			capabilityFilter.putValue(messageProperty.getName(), propertyValue);
 			if (selectorFilter.matches(capabilityFilter)) {
-				logger.debug("quadTree-evaluated selector filter [{}] matches capability [{}].", selectorFilter.toString(), capabilityFilter.toString());
+				logger.debug("array value matches selector [{}] on property [{}] with value [{}].",
+						selectorFilter.getSelector(), messageProperty.getName(), propertyValue);
 				return true;
 			}
 		}
@@ -78,36 +84,38 @@ public class CapabilityMatcher {
 
 	private static String evaluateQuadTreeMatch(String selector, Set<String> capabilityQuadTrees) {
 		if (!selector.toLowerCase().contains(QUAD_TREE_MATCH_PATTERN_START)) {
-			logger.debug("Selector with no quadTree tiles specified needs no custom quadTree matching: {}", selector);
+			logger.debug("Selector with no quadTree tiles specified needs no custom quadTree matching: [{}]", selector);
 			return selector;
 		} else if (capabilityQuadTrees.isEmpty()) {
 			logger.debug("Capabilities with no quadTree tiles specified needs no custom quadTree matching");
 			return selector;
 		}
 		String evaluatedSelector = selector;
-		int matchEnd = 0;
-		int matchStart = 0;
-		while (matchStart >= 0 && matchEnd >= 0) {
+		int matchEnd;
+		int matchStart;
+		while (true) {
 			matchStart = evaluatedSelector.toLowerCase().indexOf(QUAD_TREE_MATCH_PATTERN_START);
 			if (matchStart < 0) {
 				break;
 			}
-			matchEnd = evaluatedSelector.indexOf(QUAD_TREE_MATCH_PATTERN_END, matchStart); // could it end differetly?
+			matchEnd = evaluatedSelector.indexOf(QUAD_TREE_MATCH_PATTERN_END, matchStart);
 			String selectorQuadTreeTile = evaluatedSelector.substring(matchStart + QUAD_TREE_MATCH_PATTERN_START.length(), matchEnd).trim();
 
-			logger.info("checking capability quadTreeTile against  " + selectorQuadTreeTile);
+			logger.info("Checking capability quadTreeTile against selector quadTree tile [{}]", selectorQuadTreeTile);
 			boolean gotMatch = false;
 			for (String capabilityQuadTreeTile : capabilityQuadTrees) {
 				if (selectorQuadTreeTile.startsWith(capabilityQuadTreeTile) || capabilityQuadTreeTile.startsWith(selectorQuadTreeTile)) {
 					gotMatch = true;
+					logger.debug("Capability quadTree tile [{}] matching selector quadTree tile [{}]", capabilityQuadTreeTile, selectorQuadTreeTile);
 					break;
 				}
 			}
 			if (gotMatch)
-				evaluatedSelector = evaluatedSelector.substring(0, matchStart) + "true" + evaluatedSelector.substring(matchEnd + 2);
+				evaluatedSelector = evaluatedSelector.substring(0, matchStart) + "true" + evaluatedSelector.substring(matchEnd + QUAD_TREE_MATCH_PATTERN_END.length());
 			else
-				evaluatedSelector = evaluatedSelector.substring(0, matchStart) + "false" + evaluatedSelector.substring(matchEnd + 2);
+				evaluatedSelector = evaluatedSelector.substring(0, matchStart) + "false" + evaluatedSelector.substring(matchEnd + QUAD_TREE_MATCH_PATTERN_END.length());
 		}
+		logger.debug("Selector with quadTree tiles [{}] evaluated to : [{}] with capability quadTree tiles {}", selector, evaluatedSelector, capabilityQuadTrees);
 		return evaluatedSelector;
 	}
 
