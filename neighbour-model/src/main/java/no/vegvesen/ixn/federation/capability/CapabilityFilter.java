@@ -26,7 +26,6 @@ public class CapabilityFilter implements Filterable {
 			if (MessageProperty.nonFilterablePropertyNames.contains(messageHeaderName)) {
 				throw new HeaderNotFilterable(String.format("Message header [%s] not possible to use in selector filter", messageHeaderName));
 			}
-//			throw new HeaderNotFoundException(String.format("Message header [%s] not a known capability attribute", messageHeaderName));
 		}
 		String value = this.headers.get(messageHeaderName);
 		logger.debug("Getting header [{}] with value [{}] of type {}", messageHeaderName, value, value == null ? null : value.getClass().getSimpleName());

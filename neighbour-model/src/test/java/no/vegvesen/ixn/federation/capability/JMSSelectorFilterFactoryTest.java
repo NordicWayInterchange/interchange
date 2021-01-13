@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFilterable;
-import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
 import org.junit.jupiter.api.Test;
@@ -13,10 +12,8 @@ public class JMSSelectorFilterFactoryTest {
 
 	//equals without quote seems to be matching one header against another
 	@Test
-	public void mathcingWithoutSingleQuotes() {
-		assertThatExceptionOfType(HeaderNotFoundException.class).isThrownBy(() -> {
-			JMSSelectorFilterFactory.get("originatingCountry = NO");
-		});
+	public void mathcingWithoutSingleQuotesMatchesAgainstOtherHeader() {
+		assertThat(JMSSelectorFilterFactory.isValidSelector("originatingCountry = NO")).isTrue();
 	}
 
 	@Test
@@ -25,8 +22,8 @@ public class JMSSelectorFilterFactoryTest {
 	}
 
 	@Test
-	public void mathcingUnknownAttributeIsNotValid() {
-		assertThat(JMSSelectorFilterFactory.isValidSelector("illegalAttribute = 'NO'")).isFalse();
+	public void mathcingUnknownAttributeIsAllowed() {
+		assertThat(JMSSelectorFilterFactory.isValidSelector("illegalAttribute = 'NO'")).isTrue();
 	}
 
 	@Test
@@ -44,10 +41,8 @@ public class JMSSelectorFilterFactoryTest {
 	}
 
 	@Test
-	public void unknownHeaderAttributeNotAccepted() {
-		assertThatExceptionOfType(HeaderNotFoundException.class).isThrownBy(() -> {
-			JMSSelectorFilterFactory.get("region like 'some region%'");
-		});
+	public void unknownHeaderAttributeAccepted() {
+		assertThat(JMSSelectorFilterFactory.get("region like 'some region%'")).isNotNull();
 	}
 
 	@Test
