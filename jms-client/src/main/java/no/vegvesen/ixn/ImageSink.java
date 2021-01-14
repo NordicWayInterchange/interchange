@@ -1,7 +1,6 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.properties.MessageProperty;
-import org.apache.commons.io.FileUtils;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import javax.jms.*;
 import javax.net.ssl.SSLContext;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Enumeration;
 
 public class ImageSink extends Sink {
@@ -43,7 +44,9 @@ public class ImageSink extends Sink {
             JmsBytesMessage bytesMessage = (JmsBytesMessage) message;
             byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
             bytesMessage.readBytes(messageBytes);
-            FileUtils.writeByteArrayToFile(new File("target/receivedImage.jpg"), messageBytes);
+            File image = new File("target/receivedImage.jpg");
+            Path imagePath = image.toPath();
+            Files.write(imagePath, messageBytes);
 
             System.out.println("Body ------------");
             System.out.println("IMAGE RECEIVED");

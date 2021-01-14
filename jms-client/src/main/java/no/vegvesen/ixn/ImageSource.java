@@ -1,7 +1,6 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.properties.MessageProperty;
-import org.apache.commons.io.FileUtils;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 
 import javax.jms.JMSException;
@@ -9,6 +8,7 @@ import javax.jms.Message;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 public class ImageSource extends Source{
 
@@ -60,7 +60,7 @@ public class ImageSource extends Source{
 
     public byte[] convertImageToByteArray(String imageName) throws IOException {
         File image = new File(imageName);
-        byte [] bytes = FileUtils.readFileToByteArray(image);
+        byte [] bytes = Files.readAllBytes(image.toPath());
         return bytes;
     }
 }
