@@ -20,7 +20,7 @@ public class CapabilitiesTransformer {
 	public CapabilitiesApi selfToCapabilityApi(Self self) {
 		CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
 		capabilitiesApi.setName(self.getName());
-		capabilitiesApi.setCapabilities(dataTypeTransformer.dataTypesTocapabilityApis(self.getLocalCapabilities()));
+		capabilitiesApi.setCapabilities(dataTypeTransformer.capabilitiesToCapabilityApis(self.getLocalCapabilities()));
 		return capabilitiesApi;
 	}
 

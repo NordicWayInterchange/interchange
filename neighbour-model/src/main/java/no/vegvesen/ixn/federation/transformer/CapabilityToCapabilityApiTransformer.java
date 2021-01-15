@@ -20,10 +20,10 @@ public class CapabilityToCapabilityApiTransformer {
 	public CapabilityToCapabilityApiTransformer() {
 	}
 
-	Set<CapabilityApi> dataTypesTocapabilityApis(Set<Capability> dataTypes) {
+	Set<CapabilityApi> capabilitiesToCapabilityApis(Set<Capability> capabilities) {
 		Set<CapabilityApi> apis = new HashSet<>();
-		for (Capability dataType : dataTypes) {
-			CapabilityApi capabilityApi = dataType.toApi();
+		for (Capability capability : capabilities) {
+			CapabilityApi capabilityApi = capability.toApi();
 			if (capabilityApi != null) {
 				apis.add(capabilityApi);
 			}
