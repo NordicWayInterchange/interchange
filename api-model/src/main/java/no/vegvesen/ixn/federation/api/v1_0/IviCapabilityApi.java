@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import no.vegvesen.ixn.properties.MessageProperty;
-
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class IviCapabilityApi extends CapabilityApi {
@@ -32,10 +29,11 @@ public class IviCapabilityApi extends CapabilityApi {
 		}
 	}
 
+
 	@Override
-	public Map<String, String> getValues() {
-		Map<String, String> values = super.getValues();
-		putValue(values, MessageProperty.IVI_TYPE, this.getIviType());
-		return values;
+	public String toString() {
+		return "IviCapabilityApi{" +
+				"iviType=" + iviType +
+				"} " + super.toString();
 	}
 }

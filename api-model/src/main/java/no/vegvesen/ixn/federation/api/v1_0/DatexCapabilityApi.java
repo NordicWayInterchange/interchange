@@ -1,8 +1,9 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import no.vegvesen.ixn.properties.MessageProperty;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DatexCapabilityApi extends CapabilityApi {
 	private Set<String> publicationType = new HashSet<>();
@@ -32,13 +33,11 @@ public class DatexCapabilityApi extends CapabilityApi {
 		}
 	}
 
+
 	@Override
-	public Map<String, String> getValues() {
-		Map<String, String> values = super.getValues();
-		putValue(values, MessageProperty.PUBLICATION_TYPE, this.getPublicationType());
-		return values;
+	public String toString() {
+		return "DatexCapabilityApi{" +
+				"publicationType=" + publicationType +
+				"} " + super.toString();
 	}
-
-
-
 }

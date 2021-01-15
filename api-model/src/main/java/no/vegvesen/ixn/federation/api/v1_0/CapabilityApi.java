@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import no.vegvesen.ixn.properties.MessageProperty;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static no.vegvesen.ixn.federation.api.v1_0.CapabilityApi.*;
 
@@ -95,45 +95,15 @@ public class CapabilityApi {
 		this.protocolVersion = protocolVersion;
 	}
 
-	@JsonIgnore
-	public Map<String, String> getValues() {
-		Map<String, String> values = new HashMap<>();
-		putValue(values, MessageProperty.MESSAGE_TYPE, this.getMessageType());
-		putValue(values, MessageProperty.PUBLISHER_ID, this.getPublisherId());
-		putValue(values, MessageProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
-		putValue(values, MessageProperty.PROTOCOL_VERSION, this.getProtocolVersion());
-		putValue(values, MessageProperty.QUAD_TREE, this.getQuadTree());
-		return values;
-	}
-
-	static void putValue(Map<String, String> values, MessageProperty messageProperty, Set<String> value) {
-		if (value != null && value.size() > 0) {
-			String join = String.join(",", value);
-			values.put(messageProperty.getName(), join);
-		}
-	}
-
-	static void putValue(Map<String, String> values, MessageProperty messageProperty, String value) {
-		if (value != null && value.length() > 0) {
-			values.put(messageProperty.getName(), value);
-		}
-	}
 
 	@Override
 	public String toString() {
-		StringBuffer string = new StringBuffer();
-		string.append(this.getClass().getSimpleName());
-		string.append("{");
-		Map<String, String> values = getValues();
-		for (String key : values.keySet()) {
-			string.append("\"");
-			string.append(key);
-			string.append("\":");
-			string.append("\"");
-			string.append(values.get(key));
-			string.append("\"");
-		}
-		string.append("}");
-		return string.toString();
+		return "CapabilityApi{" +
+				"messageType='" + messageType + '\'' +
+				", publisherId='" + publisherId + '\'' +
+				", originatingCountry='" + originatingCountry + '\'' +
+				", protocolVersion='" + protocolVersion + '\'' +
+				", quadTree=" + quadTree +
+				'}';
 	}
 }

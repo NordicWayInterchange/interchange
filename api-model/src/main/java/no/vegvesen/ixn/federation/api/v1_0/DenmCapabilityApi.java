@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import no.vegvesen.ixn.properties.MessageProperty;
-
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class DenmCapabilityApi extends CapabilityApi {
@@ -32,11 +29,11 @@ public class DenmCapabilityApi extends CapabilityApi {
 		}
 	}
 
-	@Override
-	public Map<String, String> getValues() {
-		Map<String, String> values = super.getValues();
-		putValue(values, MessageProperty.CAUSE_CODE, this.getCauseCode());
-		return values;
-	}
 
+	@Override
+	public String toString() {
+		return "DenmCapabilityApi{" +
+				"causeCode=" + causeCode +
+				"} " + super.toString();
+	}
 }
