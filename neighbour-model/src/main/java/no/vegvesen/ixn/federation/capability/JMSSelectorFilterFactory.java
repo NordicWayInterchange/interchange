@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
-import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.server.filter.JMSSelectorFilter;
 import org.apache.qpid.server.filter.SelectorParsingException;
@@ -12,7 +11,7 @@ import org.apache.qpid.server.filter.selector.TokenMgrError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.Collections;
 
 public class JMSSelectorFilterFactory {
 	private static Logger logger = LoggerFactory.getLogger(JMSSelectorFilterFactory.class);
@@ -42,9 +41,7 @@ public class JMSSelectorFilterFactory {
 	}
 
 	private static void notAlwaysTrue(JMSSelectorFilter filter) {
-		HashMap<String, String> neverTrueValues = new HashMap<>();
-		neverTrueValues.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "-1");
-		DataTypeFilter neverTrue = new DataTypeFilter(new DataType(neverTrueValues));
+		CapabilityFilter neverTrue = new CapabilityFilter(Collections.singletonMap(MessageProperty.ORIGINATING_COUNTRY.getName(), "-1"));
 		if (filter.matches(neverTrue)){
 			throw new SelectorAlwaysTrueException("Cannot subscribe to a filter that is always true: " + filter.getSelector());
 		}

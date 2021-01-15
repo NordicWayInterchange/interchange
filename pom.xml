@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>qpid-broker-core</artifactId>
-                <version>7.1.8</version>
+                <version>8.0.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.google.guava</groupId>
@@ -254,28 +254,28 @@
         <module>interchange-spring-security-client</module>
         <module>interchange-spring-security-client-test</module>
         <module>neighbour-dns</module>
+        <module>dns-client</module>
         <module>neighbour-model</module>
         <module>neighbour-rest-facade</module>
         <module>neighbour-service</module>
         <module>neighbour-server</module>
         <module>neighbour-discoverer</module>
-        <module>onboard-service</module>
-        <module>onboard-rest-api</module>
-        <module>onboard-server</module>
         <module>routing-configurer</module>
         <module>federation-st</module>
         <module>interchangenode</module>
         <module>debugclient</module>
         <module>message-collector</module>
-        <module>dns-client</module>
         <module>quadtree-tool</module>
+        <module>onboard-service</module>
+        <module>onboard-rest-api</module>
+        <module>onboard-server</module>
+        <module>onboard-server-app</module>
+        <module>onboard-rest-client</module>
         <module>interchange-node-app</module>
         <module>message-collector-app</module>
         <module>neighbour-discoverer-app</module>
         <module>neighbour-server-app</module>
         <module>routing-configurer-app</module>
-        <module>onboard-server-app</module>
-        <module>onboard-rest-client</module>
         <module>jms-client-source</module>
         <module>jms-client-sink</module>
         <module>jms-client-image-sink</module>

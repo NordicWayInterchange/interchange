@@ -57,9 +57,9 @@ class NeighbourServiceTest {
 
 	@Test
 	void postDatexDataTypeCapability() {
-		CapabilityApi ericsson = new CapabilityApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
-		DataTypeApi ericssonDataType = new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", null, null, Sets.newSet(), "myPublicationType", null);
+		CapabilityApi ericssonDataType = new DatexCapabilityApi("myPublisherId", "NO", null, Sets.newSet(), Sets.newSet("myPublicationType"));
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -67,7 +67,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		CapabilityApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
+		CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
@@ -102,9 +102,9 @@ class NeighbourServiceTest {
 	@Test
 	void postingDatexCapabilitiesReturnsStatusCreated() {
 		// incoming capabiity API
-		CapabilityApi ericsson = new CapabilityApi();
+		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
-		DataTypeApi ericssonDataType = new Datex2DataTypeApi("NO");
+		CapabilityApi ericssonDataType = new DatexCapabilityApi("NO");
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -120,9 +120,9 @@ class NeighbourServiceTest {
 	@Test
 	public void postingCapabilitiesUnknownInDNSReturnsError() {
 		// Mock the incoming API object.
-		CapabilityApi unknownNeighbour = new CapabilityApi();
+		CapabilitiesApi unknownNeighbour = new CapabilitiesApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new Datex2DataTypeApi("NO")));
+		unknownNeighbour.setCapabilities(Collections.singleton(new DatexCapabilityApi("NO")));
 
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
@@ -193,7 +193,7 @@ class NeighbourServiceTest {
 	public void calculateCustomSubscriptionForNeighbour_localSubscriptionOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
 		Set<DataType> localSubscriptions = getDataTypeSetOriginatingCountry("NO");
 
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatex2DataType("NO")));
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
 
@@ -206,7 +206,7 @@ class NeighbourServiceTest {
 		Set<DataType> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(getDatex2DataType("NO"));
 
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatex2DataType("NO")));
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
 
@@ -220,7 +220,7 @@ class NeighbourServiceTest {
 	@Test
 	public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
 		Self selfWithNoSubscriptions = new Self("self");
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatex2DataType("NO")));
+		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, selfWithNoSubscriptions.getLocalSubscriptions());
 		assertThat(calculatedSubscription).hasSize(0);
@@ -257,7 +257,7 @@ class NeighbourServiceTest {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
 
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(getDatex2DataType("NO")));
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), subscriptionRequest);
 
 		neighbourService.postSubscriptionRequest(neighbour, self, neighbourFacade);
@@ -274,7 +274,7 @@ class NeighbourServiceTest {
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
 		existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
 
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(getDatex2DataType("NO"), getDatex2DataType("SE"))));
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newSet(getDatexCapability("NO"), getDatexCapability("SE")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), existingSubscriptions);
 
 		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2");
@@ -297,7 +297,7 @@ class NeighbourServiceTest {
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
 		existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
 
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(getDatex2DataType("NO"), getDatex2DataType("SE"))));
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newSet(getDatexCapability("NO"), getDatexCapability("SE")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), existingSubscriptions);
 
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
@@ -318,7 +318,7 @@ class NeighbourServiceTest {
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
 		existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
 
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(getDatex2DataType("NO"), getDatex2DataType("SE"), getDatex2DataType("FI"))));
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newSet(getDatexCapability("NO"), getDatexCapability("SE"), getDatexCapability("FI")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), existingSubscriptions);
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, new HashSet<>(Collections.singleton(subscription3))));
@@ -425,6 +425,10 @@ class NeighbourServiceTest {
 		datexDataTypeHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		datexDataTypeHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), country);
 		return new DataType(datexDataTypeHeaders);
+	}
+
+	private Capability getDatexCapability(String country) {
+		return new DatexCapability(null, country, null, null, null);
 	}
 
 }

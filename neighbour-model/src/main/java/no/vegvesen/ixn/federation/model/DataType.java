@@ -251,10 +251,6 @@ public class DataType {
 		}
 	}
 
-	public static Subscription toSubscription(DataType dataType) {
-		return new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED);
-	}
-
 	@Override
 	public String toString() {
 		return "DataType{" +

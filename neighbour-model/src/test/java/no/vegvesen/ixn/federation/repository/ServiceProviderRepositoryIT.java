@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;

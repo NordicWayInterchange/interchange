@@ -1,31 +1,20 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
-import no.vegvesen.ixn.federation.capability.DataTypeMatcher;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.Connection;
-import no.vegvesen.ixn.federation.model.ConnectionStatus;
-import no.vegvesen.ixn.federation.model.DataType;
-import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
-import no.vegvesen.ixn.federation.model.ListenerEndpoint;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Self;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
-import no.vegvesen.ixn.federation.model.SubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilityTransformer;
+import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
@@ -36,7 +25,10 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -45,7 +37,7 @@ public class NeighbourService {
 	private static Logger logger = LoggerFactory.getLogger(NeighbourService.class);
 
 	private NeighbourRepository neighbourRepository;
-	private CapabilityTransformer capabilityTransformer = new CapabilityTransformer();
+	private CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 	private DNSFacade dnsFacade;
@@ -158,8 +150,8 @@ public class NeighbourService {
 		}
 	}
 
-	public CapabilityApi incomingCapabilities(CapabilityApi neighbourCapabilities, Self self) {
-		Capabilities incomingCapabilities = capabilityTransformer.capabilityApiToCapabilities(neighbourCapabilities);
+	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Self self) {
+		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
 		logger.info("Looking up neighbour in DB.");
@@ -175,7 +167,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilityTransformer.selfToCapabilityApi(self);
+		return capabilitiesTransformer.selfToCapabilityApi(self);
 	}
 
 	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {
@@ -382,12 +374,12 @@ public class NeighbourService {
 
 	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
-		Set<DataType> neighbourCapsDataTypes = neighbour.getCapabilities().getDataTypes();
-		logger.debug("Neighbour capabilities {}", neighbourCapsDataTypes);
+		Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
+		logger.debug("Neighbour capabilities {}", neighbourCapabilities);
 		logger.debug("Local subscriptions {}", localSubscriptions);
-		Set<Subscription> calculatedSubscriptions = DataTypeMatcher.calculateCommonInterest(localSubscriptions, neighbourCapsDataTypes)
+		Set<Subscription> calculatedSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptions(neighbourCapabilities, localSubscriptions)
 				.stream()
-				.map(DataType::toSubscription)
+				.map(s -> new Subscription(s, SubscriptionStatus.REQUESTED))
 				.collect(Collectors.toSet());
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;

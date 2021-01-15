@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFilterable;
-import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
-import no.vegvesen.ixn.federation.model.DataType;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.server.filter.Filterable;
 import org.apache.qpid.server.message.AMQMessageHeader;
@@ -10,30 +8,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.Set;
+import java.util.Map;
 
-class DataTypeFilter implements Filterable {
+public class CapabilityFilter implements Filterable {
 
-	private static Logger logger = LoggerFactory.getLogger(DataTypeFilter.class);
+	private static Logger logger = LoggerFactory.getLogger(CapabilityFilter.class);
 
-	private final HashMap<String, Object> headers = new HashMap<>();
+	private final HashMap<String, String> headers = new HashMap<>();
 
-	DataTypeFilter(DataType dataType) {
-		Set<MessageProperty> allPropertyNames = MessageProperty.filterableProperties;
-		for (MessageProperty property: allPropertyNames) {
-			headers.put(property.getName(), dataType.getPropertyValue(property));
-		}
+	public CapabilityFilter(Map<String, String> capabilityFlat) {
+		headers.putAll(capabilityFlat);
 	}
 
 	@Override
-	public Object getHeader(String messageHeaderName) {
+	public String getHeader(String messageHeaderName) {
 		if (!this.headers.containsKey(messageHeaderName)) {
 			if (MessageProperty.nonFilterablePropertyNames.contains(messageHeaderName)) {
 				throw new HeaderNotFilterable(String.format("Message header [%s] not possible to use in selector filter", messageHeaderName));
 			}
-			throw new HeaderNotFoundException(String.format("Message header [%s] not a known capability attribute", messageHeaderName));
 		}
-		Object value = this.headers.get(messageHeaderName);
+		String value = this.headers.get(messageHeaderName);
 		logger.debug("Getting header [{}] with value [{}] of type {}", messageHeaderName, value, value == null ? null : value.getClass().getSimpleName());
 		return value;
 	}
@@ -102,5 +96,16 @@ class DataTypeFilter implements Filterable {
 	@Override
 	public long getExpiration() {
 		throw new IllegalArgumentException("expiration not implemented for capabilities matching");
+	}
+
+	@Override
+	public String toString() {
+		return "CapabilityFilter{" +
+				"headers=" + headers +
+				'}';
+	}
+
+	public void putValue(String key, String value) {
+		this.headers.put(key, value);
 	}
 }
