@@ -35,12 +35,10 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -224,6 +222,43 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
 
 		routingConfigurer.checkForServiceProvidersToSetupRoutingFor();
+	}
+
+	@Test
+	public void addingOneSubscriptionResultsInOneBindKey() {
+		HashSet<Subscription> subs = new HashSet<>();
+		subs.add(new Subscription("(quadTree like '%,01230122%') " +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED));
+
+		Neighbour hammershark = new Neighbour("hammershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+
+		routingConfigurer.setupNeighbourRouting(hammershark);
+		assertThat(client.queueExists("hammershark")).isTrue();
+		assertThat(client.getQueueBindKeys("hammershark").size()).isEqualTo(1);
+	}
+
+	@Test
+	public void addingTwoSubscriptionsResultsInTwoBindKeys() {
+		HashSet<Subscription> subs = new HashSet<>();
+		subs.add(new Subscription("(quadTree like '%,01230122%') " +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED));
+
+		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+
+		routingConfigurer.setupNeighbourRouting(tigershark);
+		assertThat(client.queueExists("tigershark")).isTrue();
+		assertThat(client.getQueueBindKeys("tigershark").size()).isEqualTo(1);
+
+		subs.add(new Subscription("(quadTree like '%,01230122%') " +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'SE'",SubscriptionStatus.ACCEPTED));
+
+		tigershark.setNeighbourRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs));
+		routingConfigurer.setupNeighbourRouting(tigershark);
+		assertThat(client.getQueueBindKeys("tigershark").size()).isEqualTo(2);
+		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
 	}
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {

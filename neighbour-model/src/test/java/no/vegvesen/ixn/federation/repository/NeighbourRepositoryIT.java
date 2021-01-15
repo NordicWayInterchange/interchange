@@ -223,4 +223,26 @@ public class NeighbourRepositoryIT {
 		assertThat(repository.findByControlConnection_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(neighbour);
 	}
 
+	@Test
+	public void selectorOutOfSizeScope() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("some-neighbour3");
+		String selector = "publisherName = 'Some Norwegian publisher' " +
+				"AND (quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+				"AND protocolVersion = 'DATEX2:2.3' " +
+				"AND publicationType = 'SituationPublication' " +
+				"AND messageType = 'DATEX2' " +
+				"AND publisherId = 'NO-12345' " +
+				"AND originatingCountry = 'NO' " +
+				"AND (publicationSubType = 'WinterDrivingManagement' OR publicationSubType = 'ReroutingManagement') " +
+				"AND contentType = 'application/xml";
+
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED);
+
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
+		neighbour.setOurRequestedSubscriptions(subscriptionRequest);
+
+		repository.save(neighbour);
+	}
+
 }

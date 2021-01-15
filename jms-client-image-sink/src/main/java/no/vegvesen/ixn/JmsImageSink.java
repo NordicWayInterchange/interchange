@@ -11,29 +11,30 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import javax.net.ssl.SSLContext;
 
 @SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
-public class JmsSource implements CommandLineRunner {
+public class JmsImageSink implements CommandLineRunner {
 
-    /**
-     * A message source. Sends a single message, and exits.
-     */
     public static void main(String[] args) {
-        SpringApplication.run(JmsSource.class);
+        SpringApplication.run(JmsImageSink.class);
     }
 
     @Autowired
-    private JmsSourceProperties properties;
+    private JmsImageSinkProperties properties;
 
     @Override
     public void run(String... args) throws Exception {
+
         KeystoreDetails keystoreDetails = new KeystoreDetails(properties.getKeystorePath(),
                 properties.getKeystorePass(),
                 KeystoreType.PKCS12, properties.getKeyPass());
-        KeystoreDetails trustStoreDetails = new KeystoreDetails(properties.getTrustStorepath(),
-                properties.getTrustStorepass(),KeystoreType.JKS);
+        KeystoreDetails trustStoreDetails = new KeystoreDetails(properties.getTrustStorePath(),
+                properties.getKeystorePass(),KeystoreType.JKS);
+
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
-        try(Source s = new Source(properties.getUrl(),properties.getSendQueue(),sslContext)) {
-            s.start();
-            s.send("Dette er en test, FISK!", "NO", ",01230122");
-        }
+
+        String url = properties.getUrl();
+        String receiveQueue = properties.getReceiveQueue();
+        ImageSink sink = new ImageSink(url,receiveQueue,sslContext);
+        System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
+        sink.start();
     }
 }

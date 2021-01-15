@@ -9,5 +9,5 @@ java \
     -Dsource.keypass=${KEY_PASS} \
     -Dsource.trustStorepath=${TRUST_STORE_PATH} \
     -Dsource.trustStorepass=${TRUST_STORE_PASS} \
-    -jar jms-client-source.jar
+    -jar jms-client-image-source.jar
 

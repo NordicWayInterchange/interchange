@@ -93,6 +93,12 @@ public class SubscriptionRequest {
 				.collect(Collectors.toSet());
 	}
 
+	public Set<Subscription> getCreatedSubscriptions() {
+		return getSubscriptions().stream()
+				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED))
+				.collect(Collectors.toSet());
+	}
+
 	public Optional<LocalDateTime> getSuccessfulRequest() {
 		return Optional.ofNullable(successfulRequest);
 	}
@@ -104,6 +110,9 @@ public class SubscriptionRequest {
 	public Set<String> wantedBindings() {
 		Set<String> wantedBindings = new HashSet<>();
 		for (Subscription subscription : getAcceptedSubscriptions()) {
+			wantedBindings.add(subscription.bindKey());
+		}
+		for (Subscription subscription : getCreatedSubscriptions()) {
 			wantedBindings.add(subscription.bindKey());
 		}
 		return wantedBindings;

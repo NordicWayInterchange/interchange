@@ -375,6 +375,7 @@ public class NeighbourService {
 		for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
 			if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
 				listenerEndpointRepository.delete(listenerEndpoint);
+				logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), listenerEndpoint.getBrokerUrl(), listenerEndpoint.getQueue());
 			}
 		}
 	}
