@@ -10,7 +10,6 @@ import org.springframework.lang.NonNull;
 
 import java.util.*;
 
-import static no.vegvesen.ixn.federation.capability.DataTypeMatcherTest.getDatex;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DataTypeTest {
@@ -349,4 +348,13 @@ public class DataTypeTest {
 		String selector = dataType.toSelector();
 		assertThat(selector).isEqualTo("");
 	}
+
+	@NonNull
+	public static DataType getDatex(String originatingCountry) {
+		HashMap<String, String> values = new HashMap<>();
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+		return new DataType(values);
+	}
+
 }
