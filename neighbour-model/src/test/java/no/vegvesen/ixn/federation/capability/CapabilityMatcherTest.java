@@ -70,6 +70,15 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
+	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndOtherPublicationTypeDoesNotMatch() {
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		Set<String> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+				Sets.newLinkedHashSet(datexCapability),
+				Sets.newLinkedHashSet("messageType = 'DATEX2' and quadTree like '%,012100%' and publicationType = 'Obstruction'"));
+		assertThat(commonInterest).isEmpty();
+	}
+
+	@Test
 	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
 		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<String> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
