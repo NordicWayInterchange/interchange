@@ -97,14 +97,6 @@ public abstract class Capability {
 		}
 	}
 
-	/**
-	 * Ensure that the set contains a null value in order to produce a cartesian product of the array values even if
-	 * the original set is empty
- 	 */
-	protected Set<String> noEmptySet(Set<String> possibleEmptySet) {
-		return possibleEmptySet.isEmpty() ? Collections.singleton(null) : possibleEmptySet;
-	}
-
 	public abstract CapabilityApi toApi();
 
 
