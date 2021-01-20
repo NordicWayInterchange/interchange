@@ -54,10 +54,10 @@ public class OnboardRESTClient {
         restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId));
     }
 
-    public LocalSubscriptionApi addSubscription(DataTypeApi subscription) {
+    public LocalSubscriptionApi addSubscription(SelectorApi subscription) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<DataTypeApi> entity = new HttpEntity<>(subscription,headers);
+        HttpEntity<SelectorApi> entity = new HttpEntity<>(subscription,headers);
 		String url = String.format("/%s/subscriptions", user) ;
 		return restTemplate.exchange(server + url, HttpMethod.POST, entity, LocalSubscriptionApi.class).getBody();
     }

@@ -99,13 +99,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		values.put(MessageProperty.MESSAGE_TYPE.getName(), messageType);
 		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
 		dataType.setValues(values);
-		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, dataType);
+		String selector = "messageType = '" + messageType + "' and originatingCountry = '" + originatingCountry +"'";
+		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
 	}
 
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,new DataType()));
+		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,""));
 
 		router.syncServiceProviders(Arrays.asList(king_gustaf));
 
@@ -125,7 +126,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void subscriberToreDownWillBeRemovedFromSubscribFederatedInterchangesGroup() {
 		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
-		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, new DataType());
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "");
 		toreDownServiceProvider.addLocalSubscription(subscription);
 
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));

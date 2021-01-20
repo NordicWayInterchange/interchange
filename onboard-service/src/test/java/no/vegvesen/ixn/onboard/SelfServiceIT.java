@@ -35,7 +35,7 @@ class SelfServiceIT {
 		Self selfBeforeUpdate = selfService.fetchSelf();
 		assertThat(selfBeforeUpdate.getLastUpdatedLocalSubscriptions()).isEmpty();
 
-		serviceProviderBefore.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, new DataType(null, MessageProperty.MESSAGE_TYPE.getName(), "DATEX2")));
+		serviceProviderBefore.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'"));
 		Optional<LocalDateTime> subscriptionUpdatedRequested = serviceProviderBefore.getSubscriptionUpdated();
 		assertThat(subscriptionUpdatedRequested).isPresent();
 

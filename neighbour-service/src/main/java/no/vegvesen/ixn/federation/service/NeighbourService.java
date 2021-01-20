@@ -372,12 +372,12 @@ public class NeighbourService {
 		}
 	}
 
-	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<DataType> localSubscriptions) {
+	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<String> localSubscriptions) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
 		logger.debug("Neighbour capabilities {}", neighbourCapabilities);
 		logger.debug("Local subscriptions {}", localSubscriptions);
-		Set<Subscription> calculatedSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptions(neighbourCapabilities, localSubscriptions)
+		Set<Subscription> calculatedSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions)
 				.stream()
 				.map(s -> new Subscription(s, SubscriptionStatus.REQUESTED))
 				.collect(Collectors.toSet());

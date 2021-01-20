@@ -33,10 +33,9 @@ class SelfServiceTest {
 
 	@Test
 	void calculateSelfSubscriptionsTest() {
-
-		DataType localSubA = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
-		DataType localSubB = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
-		DataType localSubC = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		String localSubA = "originatingCountry = 'FI'";
+		String localSubB = "originatingCountry = 'SE'";
+		String localSubC = "originatingCountry = 'NO'";
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
@@ -45,12 +44,12 @@ class SelfServiceTest {
 
 		ServiceProvider secondServiceProvider = new ServiceProvider();
 		secondServiceProvider.setName("Second Service Provider");
-		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubB));
-		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubC));
+		secondServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubB));
+		secondServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubC));
 
 		List<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toList());
 
-		Set<DataType> selfSubscriptions = selfService.calculateSelfSubscriptions(serviceProviders);
+		Set<String> selfSubscriptions = selfService.calculateSelfSubscriptions(serviceProviders);
 
 		assertThat(selfSubscriptions).hasSize(3);
 		assertThat(selfSubscriptions).containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet()));
@@ -66,7 +65,7 @@ class SelfServiceTest {
 	@Test
 	void calculateLastUpdatedSubscriptionOneSub() {
 		ServiceProvider serviceProvider = new ServiceProvider();
-		LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, getDatex("no"));
+		LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'NO'");
 		serviceProvider.addLocalSubscription(subscription);
 		Optional<LocalDateTime> lastUpdated = serviceProvider.getSubscriptionUpdated();
 		assertThat(lastUpdated).isPresent();
@@ -165,16 +164,15 @@ class SelfServiceTest {
 		assertThat(self.getLastUpdatedLocalCapabilities()).isEqualTo(Optional.of(bCapDate));
 	}
 
+	//TODO: add method in LocalSubscription to be able to get out originatingCountry etc.
 	@Test
 	void calculateLocalSubscriptionsShouldOnlyReturnDataTypesFromCreatedSubs() {
-		LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,getDatex("FI"));
-		LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,getDatex("NO"));
+		LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'");
+		LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'");
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
 		serviceProvider.setSubscriptions(Sets.newLinkedHashSet(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
-		Set<DataType> dataTypes = selfService.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
-		assertThat(dataTypes)
-				.hasSize(1).
-				allMatch(dataType -> dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY).equals("NO"));
+		Set<String> localSubscriptions = selfService.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
+		assertThat(localSubscriptions).hasSize(1);
 	}
 
 	@Test
