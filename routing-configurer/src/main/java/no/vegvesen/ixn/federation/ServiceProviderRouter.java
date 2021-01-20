@@ -114,8 +114,8 @@ public class ServiceProviderRouter {
     private void optionallyAddQueueBindings(String name, LocalSubscription subscription) {
         if (!qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
             logger.debug("Adding bindings to the queue {}", name);
-            qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "nwEx");
-            qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "fedEx");
+            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "nwEx");
+            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "fedEx");
         }
     }
 

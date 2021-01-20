@@ -21,6 +21,10 @@ public class LocalSubscription {
     @JoinColumn(name = "dat_id", foreignKey = @ForeignKey(name = "fk_locsub_dat"))
     private DataType dataType;
 
+    @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locsub_sel"))
+    @Column(columnDefinition="TEXT")
+    private String selector = "";
+
     @Column
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
@@ -29,21 +33,24 @@ public class LocalSubscription {
 
     }
 
-    public LocalSubscription(LocalSubscriptionStatus status, DataType dataType) {
+    public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
-        this.dataType = dataType;
+        //this.dataType = dataType;
+        this.selector = selector;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, DataType dataType) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
         this.sub_id = id;
         this.status = status;
-        this.dataType = dataType;
+        //this.dataType = dataType;
+        this.selector = selector;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, DataType dataType, LocalDateTime lastUpdated) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
         this.sub_id = id;
         this.status = status;
-        this.dataType = dataType;
+        //this.dataType = dataType;
+        this.selector = selector;
         this.lastUpdated = lastUpdated;
     }
 
@@ -65,13 +72,21 @@ public class LocalSubscription {
         return dataType;
     }
 
-    public String selector() {
-        return dataType.toSelector();
+    public String getSelector() {
+        return selector;
     }
+
+    public void setSelector(String selector) {
+        this.selector = selector;
+    }
+
+    //public String selector() {
+        //return dataType.toSelector();
+    //}
 
     //TODO lag et objekt av selector??
     public String bindKey() {
-        return "" + dataType.toSelector().hashCode();
+        return "" + selector.hashCode();
     }
 
     @Override
@@ -80,12 +95,12 @@ public class LocalSubscription {
         if (o == null || getClass() != o.getClass()) return false;
         LocalSubscription that = (LocalSubscription) o;
         return status == that.status &&
-                Objects.equals(dataType, that.dataType);
+                Objects.equals(selector, that.selector);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status, dataType);
+        return Objects.hash(status, selector);
     }
 
     public Integer getSub_id() {
@@ -97,7 +112,7 @@ public class LocalSubscription {
         return "LocalSubscription{" +
                 "sub_id=" + sub_id +
                 ", status=" + status +
-                ", dataType=" + dataType +
+                ", selector=" + selector +
                 '}';
     }
 
@@ -105,7 +120,7 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(sub_id,newStatus,dataType);
+            return new LocalSubscription(sub_id, newStatus, selector);
         }
     }
 

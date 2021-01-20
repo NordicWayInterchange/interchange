@@ -191,7 +191,10 @@ class NeighbourServiceTest {
 
 	@Test
 	public void calculateCustomSubscriptionForNeighbour_localSubscriptionOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
-		Set<DataType> localSubscriptions = getDataTypeSetOriginatingCountry("NO");
+		//Set<DataType> localSubscriptions = getDataTypeSetOriginatingCountry("NO");
+
+		Set<String> localSubscriptions = new HashSet<>();
+		localSubscriptions.add("originatingCountry = 'NO'");
 
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
@@ -203,8 +206,8 @@ class NeighbourServiceTest {
 
 	@Test
 	public void calculateCustomSubscriptionForNeighbour_localSubscriptionMessageTypeAndOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
-		Set<DataType> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(getDatex2DataType("NO"));
+		Set<String> localSubscriptions = new HashSet<>();
+		localSubscriptions.add("messageType = 'DATEX2' AND originatingCountry = 'NO'");
 
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
@@ -250,7 +253,9 @@ class NeighbourServiceTest {
 	@Test
 	public void noSubscriptionsAreAddedWhenLocalSubscriptionsAndCapabilitiesAreTheSame() {
 		Self self = new Self("self");
-		self.setLocalSubscriptions(Collections.singleton(getDatex2DataType("NO")));
+		Set<String> localSubscriptions = new HashSet<>();
+		localSubscriptions.add("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+		self.setLocalSubscriptions(localSubscriptions);
 
 		Subscription subscription = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1");
 
@@ -267,7 +272,10 @@ class NeighbourServiceTest {
 	@Test
 	public void subscriptionsAreAddedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
 		Self self = new Self("self");
-		self.setLocalSubscriptions(new HashSet<>(Arrays.asList(getDatex2DataType("NO"), getDatex2DataType("SE"))));
+		Set<String> localSubscriptions = new HashSet<>();
+		localSubscriptions.add("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+		localSubscriptions.add("messageType = 'DATEX2' AND originatingCountry = 'SE'");
+		self.setLocalSubscriptions(localSubscriptions);
 
 		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1");
 
@@ -289,7 +297,9 @@ class NeighbourServiceTest {
 	@Test
 	public void subscriptionsAreRemovedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
 		Self self = new Self("self");
-		self.setLocalSubscriptions(new HashSet<>(Arrays.asList(getDatex2DataType("NO"))));
+		Set<String> localSubscriptions = new HashSet<>();
+		localSubscriptions.add("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+		self.setLocalSubscriptions(localSubscriptions);
 
 		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1");
 		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2");
@@ -309,7 +319,10 @@ class NeighbourServiceTest {
 	@Test
 	public void subscriptionsAreAddedAndRemovedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
 		Self self = new Self("self");
-		self.setLocalSubscriptions(new HashSet<>(Arrays.asList(getDatex2DataType("NO"), getDatex2DataType("FI"))));
+		Set<String> localSubscriptions = new HashSet<>();
+		localSubscriptions.add("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+		localSubscriptions.add("messageType = 'DATEX2' AND originatingCountry = 'FI'");
+		self.setLocalSubscriptions(localSubscriptions);
 
 		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1");
 		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2");

@@ -108,7 +108,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
-		client.addSubscription(new Datex2DataTypeApi("NO"));
+		client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
 
         LocalSubscriptionListApi localSubscriptions = client.getServiceProviderSubscriptions();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -128,7 +128,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
     @Test
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-		LocalSubscriptionApi addedSubscription = client.addSubscription(new Datex2DataTypeApi("NO"));
+		LocalSubscriptionApi addedSubscription = client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
         LocalCapabilityList capabilities = client.getServiceProviderCapabilities();

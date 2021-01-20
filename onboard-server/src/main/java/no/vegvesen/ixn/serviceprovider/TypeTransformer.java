@@ -35,7 +35,7 @@ public class TypeTransformer {
     public LocalSubscriptionApi transformLocalSubecriptionToLocalSubscriptionApi(LocalSubscription localSubscription) {
         return new LocalSubscriptionApi(localSubscription.getSub_id(),
                 transformLocalSubscriptionStatusToLoccalSubscriptionStatusApi(localSubscription.getStatus()),
-                dataTypeTransformer.dataTypeToApi(localSubscription.getDataType()));
+                localSubscription.getSelector());
     }
 
     public LocalSubscriptionListApi transformLocalSubscriptionListToLocalSubscriptionListApi(Set<LocalSubscription> subscriptions) {

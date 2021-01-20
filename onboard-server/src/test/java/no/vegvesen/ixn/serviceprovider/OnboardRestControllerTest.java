@@ -146,7 +146,7 @@ public class OnboardRestControllerTest {
 
 		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
 
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString("messageType = 'DATEX2' and originatingCountry = 'SE'");
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
@@ -201,10 +201,12 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProviderName);
 
 		// The existing subscriptions of the Service Provider
-		Set<DataType> serviceProviderSubscriptionRequest = new HashSet<>();
-		DataType se = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
+		Set<String> serviceProviderSubscriptionRequest = new HashSet<>();
+		//DataType se = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
+		String se = "originatingCountry = 'SE'";
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se);
-		DataType fi = new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
+		//DataType fi = new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
+		String fi = "originatingCountry = 'FI'";
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi);
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName(firstServiceProviderName);
@@ -276,7 +278,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(secondServiceProviderName);
 
 		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(subscriptionApi);
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString("messageType = 'DATEX2' and originatingCountry = 'SE'");
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProviderName))

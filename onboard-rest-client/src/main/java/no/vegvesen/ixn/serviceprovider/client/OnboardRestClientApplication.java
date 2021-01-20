@@ -116,7 +116,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            DataTypeApi subscription = mapper.readValue(file,DataTypeApi.class);
+            SelectorApi subscription = mapper.readValue(file,SelectorApi.class);
             LocalSubscriptionApi result = client.addSubscription(subscription);
             System.out.println(mapper.writeValueAsString(result));
             return 0;

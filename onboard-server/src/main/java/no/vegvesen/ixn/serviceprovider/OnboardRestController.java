@@ -110,22 +110,22 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
-	public LocalSubscriptionApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
+	public LocalSubscriptionApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody SelectorApi selector) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
 
-		if (dataTypeApi == null) {
+		if (selector == null) {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. The DataTypeApi object was null. Nothing to add.");
 		}
 
-		logger.info("Service provider {} Incoming subscription post: {}", serviceProviderName, dataTypeApi.toString());
+		logger.info("Service provider {} Incoming subscription selector: {}", serviceProviderName,selector.getSelector());
 
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		DataType newDataType = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, newDataType);
+		//DataType newDataType = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector.getSelector());
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
@@ -143,7 +143,7 @@ public class OnboardRestController {
 				.stream()
 				.filter(subscription -> subscription.equals(localSubscription))
 				.findFirst()
-				.orElseThrow(() -> new IllegalStateException("Something went wrondg. Could not find localSubscription after saving"));
+				.orElseThrow(() -> new IllegalStateException("Something went wrong. Could not find localSubscription after saving"));
 
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubecriptionToLocalSubscriptionApi(savedSubscription);

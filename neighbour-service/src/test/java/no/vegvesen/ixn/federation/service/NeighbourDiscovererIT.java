@@ -23,6 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.net.ssl.SSLContext;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,7 +67,9 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
 		Self self = new Self(nodeProperties.getName());
-		self.setLocalSubscriptions(Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
+		Set<String> localSubscriptions = new HashSet<>();
+		localSubscriptions.add("messageType = 'DATEX2' and originatingCountry = 'NO'");
+		self.setLocalSubscriptions(localSubscriptions);
 		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 		when(selfService.fetchSelf()).thenReturn(self);
 
