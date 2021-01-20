@@ -2,9 +2,7 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
-import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,7 +50,6 @@ public class ServiceProviderRepositoryIT {
 		assertThat(foundDdd.getName()).isEqualTo("ddd");
 	}
 
-
 	@Test
 	public void savingServiceProviderWithLocalSubscriptionGivesNonNullSubscription(){
 		ServiceProvider volvo = new ServiceProvider("Volvo");
@@ -64,7 +61,6 @@ public class ServiceProviderRepositoryIT {
 		Optional<LocalSubscription> first = volvoFromRepository.getSubscriptions().stream().findFirst();
 		LocalSubscription savedSubscription = first.orElseThrow(() -> new AssertionError("Could not locate subscription"));
 		assertThat(savedSubscription.getSub_id()).isNotNull();
-
 	}
 
 	@Test
@@ -79,7 +75,6 @@ public class ServiceProviderRepositoryIT {
 		ServiceProvider volvoFromRepo = providers.get(0);
 		assertThat(volvoFromRepo.getSubscriptions()).size().isEqualTo(2);
 	}
-
 
 	@Test
 	public void findByLocalSubscriptionStatusRequestedCanBeRetrieved() {
@@ -129,7 +124,6 @@ public class ServiceProviderRepositoryIT {
 		assertThat(retrieved.getSubscriptions()).hasSize(1);
 	}
 
-
 	@Test
 	public void testChangingLocalSubscriptionsWithNewSetAnSeeIfWeGetDeletedOneThatIsRemoved() {
 		String name = "serviceProvider";
@@ -167,8 +161,6 @@ public class ServiceProviderRepositoryIT {
 		//So should have 1 subscription, status CREATED
 		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
 		assertThat(serviceProvider.getSubscriptions()).allMatch(subscription -> subscription.getStatus().equals(LocalSubscriptionStatus.CREATED));
-
-
 	}
 
 	@Test
@@ -193,10 +185,5 @@ public class ServiceProviderRepositoryIT {
 				.getSubscriptions()
 				.stream()
 				.filter(s -> s.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN))).hasSize(1);
-
-	}
-
-	private DataType getDataTypeOriginatingCountry(String originatingCountry) {
-		return new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry));
 	}
 }

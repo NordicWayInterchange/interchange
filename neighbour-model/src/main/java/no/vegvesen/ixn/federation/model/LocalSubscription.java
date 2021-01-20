@@ -17,10 +17,6 @@ public class LocalSubscription {
     @Enumerated(EnumType.STRING)
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "dat_id", foreignKey = @ForeignKey(name = "fk_locsub_dat"))
-    private DataType dataType;
-
     @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locsub_sel"))
     @Column(columnDefinition="TEXT")
     private String selector = "";
@@ -35,21 +31,18 @@ public class LocalSubscription {
 
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
-        //this.dataType = dataType;
         this.selector = selector;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
         this.sub_id = id;
         this.status = status;
-        //this.dataType = dataType;
         this.selector = selector;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
         this.sub_id = id;
         this.status = status;
-        //this.dataType = dataType;
         this.selector = selector;
         this.lastUpdated = lastUpdated;
     }
@@ -68,10 +61,6 @@ public class LocalSubscription {
                 || status.equals(LocalSubscriptionStatus.CREATED);
     }
 
-    public DataType getDataType() {
-        return dataType;
-    }
-
     public String getSelector() {
         return selector;
     }
@@ -79,10 +68,6 @@ public class LocalSubscription {
     public void setSelector(String selector) {
         this.selector = selector;
     }
-
-    //public String selector() {
-        //return dataType.toSelector();
-    //}
 
     //TODO lag et objekt av selector??
     public String bindKey() {

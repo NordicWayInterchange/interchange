@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.onboard.SelfService;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -138,13 +137,10 @@ public class OnboardRestControllerTest {
 				.andExpect(status().isForbidden());
 	}
 
-
 	@Test
 	void postingSubscriptionReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
-
-		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString("messageType = 'DATEX2' and originatingCountry = 'SE'");
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
@@ -202,10 +198,8 @@ public class OnboardRestControllerTest {
 
 		// The existing subscriptions of the Service Provider
 		Set<String> serviceProviderSubscriptionRequest = new HashSet<>();
-		//DataType se = new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), "SE");
 		String se = "originatingCountry = 'SE'";
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se);
-		//DataType fi = new DataType(2, MessageProperty.ORIGINATING_COUNTRY.getName(), "FI");
 		String fi = "originatingCountry = 'FI'";
 		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi);
 		ServiceProvider firstServiceProvider = new ServiceProvider();
@@ -277,7 +271,6 @@ public class OnboardRestControllerTest {
 		String secondServiceProviderName = "SecondServiceProvider";
 		mockCertificate(secondServiceProviderName);
 
-		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString("messageType = 'DATEX2' and originatingCountry = 'SE'");
 
 		mockMvc.perform(

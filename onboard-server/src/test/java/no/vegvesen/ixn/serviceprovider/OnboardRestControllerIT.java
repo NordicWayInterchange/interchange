@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
@@ -60,7 +59,6 @@ public class OnboardRestControllerIT {
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
-        Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
         restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
 
         LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
@@ -78,9 +76,7 @@ public class OnboardRestControllerIT {
 
 	@Test
 	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
-		LocalDateTime beforeDeleteTime = LocalDateTime.now();
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
-		Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
 		restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
 
 		LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
