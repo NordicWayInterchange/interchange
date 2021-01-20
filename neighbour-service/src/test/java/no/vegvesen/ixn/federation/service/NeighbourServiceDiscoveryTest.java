@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
@@ -13,9 +12,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Lists;
-import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,13 +51,6 @@ public class NeighbourServiceDiscoveryTest {
 
 	private Self self;
 
-	private DataType getDatexNoDataType() {
-		Map<String, String> datexDataTypeHeaders = new HashMap<>();
-		datexDataTypeHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-		datexDataTypeHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
-		return new DataType(datexDataTypeHeaders);
-	}
-
 	private Capability getDatexCapability(String originatingCountry) {
 		return new DatexCapability(null, originatingCountry, null, null, null);
 	}
@@ -87,10 +77,6 @@ public class NeighbourServiceDiscoveryTest {
 		self.setLocalSubscriptions(selfSubscriptions);
 		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 		return self;
-	}
-
-	private Set<DataType> getDataTypeSetOriginatingCountry(String country) {
-		return Sets.newLinkedHashSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
 	}
 
 	@Test
@@ -141,7 +127,7 @@ public class NeighbourServiceDiscoveryTest {
 		Capabilities capabilities = new Capabilities();
 		assertThat(capabilities.getCapabilities()).isEmpty();
 
-		doReturn(capabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
+		doReturn(capabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 
@@ -168,15 +154,10 @@ public class NeighbourServiceDiscoveryTest {
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
 
-	private Set<DataType> getDataTypeSet(String originatingCountry) {
-		return Sets.newLinkedHashSet(new DataType(1, MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry));
-	}
-
 	private SubscriptionRequest createFirstSubscriptionRequestResponse() {
 		Subscription firstSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
 		return new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 	}
-
 
 	@Test
 	public void gracefulBackoffPostOfCapabilityDoesNotHappenBeforeAllowedPostTime(){
@@ -462,7 +443,6 @@ public class NeighbourServiceDiscoveryTest {
 	@Test
 	public void calculatedSubscriptionRequestSameAsNeighbourSubscriptionsAllowsNextNeighbourToBeSaved() {
 		Self self = new Self("self");
-		//Set<DataType> selfLocalSubscriptions = getDataTypeSetOriginatingCountry("NO");
 		Set<String> selfLocalSubscriptions = new HashSet<>();
 		selfLocalSubscriptions.add("originatingCountry = 'NO'");
 		self.setLocalSubscriptions(selfLocalSubscriptions);

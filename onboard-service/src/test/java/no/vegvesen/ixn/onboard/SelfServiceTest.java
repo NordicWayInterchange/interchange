@@ -1,17 +1,14 @@
 package no.vegvesen.ixn.onboard;
 
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -178,14 +175,6 @@ class SelfServiceTest {
 	@Test
 	void interchangeNodeNameIsPickedUpFromPropertiesFile() {
 		assertThat(selfService.getNodeProviderName()).isEqualTo("my-interchange");
-	}
-
-	@NonNull
-	private DataType getDatex(String se) {
-		HashMap<String, String> datexHeaders = new HashMap<>();
-		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-		datexHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), se);
-		return new DataType(datexHeaders);
 	}
 
 	private Capability getDatexCapability(String originatingCountry) {

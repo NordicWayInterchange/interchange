@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 @Component
@@ -18,11 +17,6 @@ public class CapabilityMatcher {
 	private static final String QUAD_TREE_MATCH_PATTERN_START = "quadtree like '%,";
 	private static final String QUAD_TREE_MATCH_PATTERN_END = "%'";
 	private static final Logger logger = LoggerFactory.getLogger(CapabilityMatcher.class);
-
-/*	public static Set<String> calculateNeighbourSubscriptions(Set<Capability> capabilities, Set<String> subscriptions ) {
-		Set<String> subscriptionSelectors = subscriptions.stream().map(DataType::toSelector).collect(Collectors.toSet());
-		return calculateNeighbourSubscriptionsFromSelectors(capabilities, subscriptionSelectors);
-	}*/
 
 	public static Set<String> calculateNeighbourSubscriptionsFromSelectors(Set<Capability> capabilities, Set<String> subscriptionSelectors) {
 		Set<String> matches = new HashSet<>();

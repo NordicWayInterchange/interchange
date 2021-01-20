@@ -10,9 +10,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Lists;
-import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -185,14 +183,12 @@ class NeighbourServiceTest {
 	@Test
 	public void findNotDefinedDoesNotExists() {
 		when(dnsFacade.lookupNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
-		Throwable trown = catchThrowable(() -> neighbourService.findNeighbour("no-such-interchange.itsinterchange.eu"));
-		assertThat(trown).isInstanceOf(InterchangeNotInDNSException.class);
+		Throwable thrown = catchThrowable(() -> neighbourService.findNeighbour("no-such-interchange.itsinterchange.eu"));
+		assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 	}
 
 	@Test
 	public void calculateCustomSubscriptionForNeighbour_localSubscriptionOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
-		//Set<DataType> localSubscriptions = getDataTypeSetOriginatingCountry("NO");
-
 		Set<String> localSubscriptions = new HashSet<>();
 		localSubscriptions.add("originatingCountry = 'NO'");
 
@@ -427,17 +423,6 @@ class NeighbourServiceTest {
 		neighbourService.tearDownListenerEndpoints(neighbour);
 
 		verify(listenerEndpointRepository, times(0)).delete(any(ListenerEndpoint.class));
-	}
-
-	private Set<DataType> getDataTypeSetOriginatingCountry(String country) {
-		return Sets.newSet(new DataType(Maps.newHashMap(MessageProperty.ORIGINATING_COUNTRY.getName(), country)));
-	}
-
-	private DataType getDatex2DataType(String country) {
-		Map<String, String> datexDataTypeHeaders = new HashMap<>();
-		datexDataTypeHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-		datexDataTypeHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), country);
-		return new DataType(datexDataTypeHeaders);
 	}
 
 	private Capability getDatexCapability(String country) {

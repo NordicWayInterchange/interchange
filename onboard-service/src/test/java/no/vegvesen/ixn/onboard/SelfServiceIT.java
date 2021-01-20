@@ -3,7 +3,6 @@ package no.vegvesen.ixn.onboard;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

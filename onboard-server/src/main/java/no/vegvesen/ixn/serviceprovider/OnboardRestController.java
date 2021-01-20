@@ -1,14 +1,12 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.slf4j.Logger;
@@ -27,7 +25,6 @@ public class OnboardRestController {
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final CertService certService;
 	private final SelfService selfService;
-	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
@@ -124,7 +121,6 @@ public class OnboardRestController {
 
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		//DataType newDataType = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
 		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector.getSelector());
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
@@ -146,7 +142,7 @@ public class OnboardRestController {
 				.orElseThrow(() -> new IllegalStateException("Something went wrong. Could not find localSubscription after saving"));
 
 		OnboardMDCUtil.removeLogVariables();
-		return typeTransformer.transformLocalSubecriptionToLocalSubscriptionApi(savedSubscription);
+		return typeTransformer.transformLocalSubscriptionToLocalSubscriptionApi(savedSubscription);
 	}
 
 
@@ -215,5 +211,4 @@ public class OnboardRestController {
 
 		return returnServiceProviders;
 	}
-
 }
