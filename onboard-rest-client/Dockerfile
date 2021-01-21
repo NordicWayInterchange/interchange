@@ -11,4 +11,6 @@ ADD ivi_no_datatype.json /
 ADD ivi_se_datatype.json /
 ADD denm_no_datatype.json /
 ADD denm_se_datatype.json /
+ADD capability_dat_no.json /
+ADD localSubscription_dat_no.json /
 ENTRYPOINT ["/entrypoint.sh"]

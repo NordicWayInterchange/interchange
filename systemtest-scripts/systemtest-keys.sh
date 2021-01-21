@@ -1,7 +1,7 @@
 #!/bin/bash -eu
 
 
-TMP_FOLDER=../$(realpath -s tmp)
+TMP_FOLDER=$(realpath -s ../tmp)
 echo Generating systemtest keys to folder $TMP_FOLDER
 
 docker build ../key-gen -t key-gen
