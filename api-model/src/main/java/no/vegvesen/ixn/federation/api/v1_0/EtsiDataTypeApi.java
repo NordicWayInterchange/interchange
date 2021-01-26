@@ -12,8 +12,8 @@ public abstract class EtsiDataTypeApi extends DataTypeApi{
 	EtsiDataTypeApi() {
 	}
 
-	EtsiDataTypeApi(String messageType, String publisherId, String publisherName, String originatingCountry, String protocolVersion, String contentType, Set<String> quadTree, String serviceType) {
-		super(messageType, publisherId, publisherName, originatingCountry, protocolVersion, contentType, quadTree);
+	EtsiDataTypeApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, String serviceType) {
+		super(messageType, publisherId, originatingCountry, protocolVersion, quadTree);
 		this.serviceType = serviceType;
 	}
 

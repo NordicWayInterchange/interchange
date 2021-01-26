@@ -4,33 +4,32 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"WeakerAccess", "ArraysAsListWithZeroOrOneArgument"})
+@SuppressWarnings({"WeakerAccess"})
 public class MessageProperty {
 
 	public static final MessageProperty MESSAGE_TYPE = new MessageProperty("messageType", true, true, MessagePropertyType.STRING);
-	public static final MessageProperty QUAD_TREE = new MessageProperty("quadTree", false, true, MessagePropertyType.STRING_ARRAY);
-	public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true, true, MessagePropertyType.STRING);
-	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true, true, MessagePropertyType.STRING);
+	public static final MessageProperty QUAD_TREE = new MessageProperty("quadTree", true, true, MessagePropertyType.STRING_ARRAY);
 
-	public static final MessageProperty PUBLISHER_ID = new MessageProperty("publisherId", false, true, MessagePropertyType.STRING);
-	public static final MessageProperty PUBLISHER_NAME = new MessageProperty("publisherName", true, true, MessagePropertyType.STRING);
-	public static final MessageProperty LATITUDE = new MessageProperty("latitude", true, false, MessagePropertyType.STRING);
-	public static final MessageProperty LONGITUDE = new MessageProperty("longitude", true, false, MessagePropertyType.STRING);
+	/* Is this to be removed? */
+	public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true, true, MessagePropertyType.STRING);
+
+	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true, true, MessagePropertyType.STRING);
+	public static final MessageProperty PUBLISHER_ID = new MessageProperty("publisherId", true, true, MessagePropertyType.STRING);
+	public static final MessageProperty LATITUDE = new MessageProperty("latitude", false, false, MessagePropertyType.STRING);
+	public static final MessageProperty LONGITUDE = new MessageProperty("longitude", false, false, MessagePropertyType.STRING);
 	public static final MessageProperty PROTOCOL_VERSION = new MessageProperty("protocolVersion", true, true, MessagePropertyType.STRING);
-	public static final MessageProperty CONTENT_TYPE = new MessageProperty("contentType", false, true, MessagePropertyType.STRING);
+	//public static final MessageProperty CONTENT_TYPE = new MessageProperty("contentType", false, true, MessagePropertyType.STRING);
 	public static final MessageProperty TIMESTAMP = new MessageProperty("timestamp", false, false, MessagePropertyType.STRING);
+	public static final MessageProperty SERVICE_TYPE = new MessageProperty("serviceType", false, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
 			MESSAGE_TYPE,
 			QUAD_TREE,
 			PUBLISHER_ID,
-			PUBLISHER_NAME,
 			ORIGINATING_COUNTRY,
 			PROTOCOL_VERSION,
-			CONTENT_TYPE,
+			SERVICE_TYPE,
 			LATITUDE,
-			LONGITUDE,
-			TIMESTAMP,
-			new MessageProperty("relation", false, true, MessagePropertyType.STRING)
+			LONGITUDE
 	);
 
 
@@ -41,13 +40,12 @@ public class MessageProperty {
 			PUBLICATION_SUB_TYPE
 	);
 
-	public static final MessageProperty SERVICE_TYPE = new MessageProperty("serviceType", false, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> itsG5ApplicationProperties = Arrays.asList(
 			SERVICE_TYPE
 	);
 
 	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.STRING);
-	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", false, true, MessagePropertyType.STRING);
+	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", true, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> denmApplicationProperties = Arrays.asList(
 			CAUSE_CODE,
 			SUB_CAUSE_CODE
@@ -55,10 +53,13 @@ public class MessageProperty {
 
 	public static final MessageProperty IVI_TYPE = new MessageProperty("iviType", false, true, MessagePropertyType.INTEGER_ARRAY);
 	public static final MessageProperty PICTOGRAM_CATEGORY_CODE = new MessageProperty("pictogramCategoryCode", false, true, MessagePropertyType.INTEGER_ARRAY);
+
+	/* TODO This is specified as String, but obviously has some string-array properties. Double check that this is not a mistake in spec */
+	public static final MessageProperty IVI_CONTAINER = new MessageProperty("iviContainer", false, false, MessagePropertyType.STRING);
 	public static final List<MessageProperty> iviApplicationProperties = Arrays.asList(
 			IVI_TYPE,
 			PICTOGRAM_CATEGORY_CODE,
-			new MessageProperty("iviContainer", false, false, MessagePropertyType.STRING)
+			IVI_CONTAINER
 	);
 
 	public static Set<String> mandatoryDatex2PropertyNames = Stream.of(
@@ -132,6 +133,10 @@ public class MessageProperty {
 		return mandatory;
 	}
 
+	public boolean isOptional() {
+		return !mandatory;
+	}
+
 	public boolean isFilterable() {
 		return filterable;
 	}
@@ -152,5 +157,15 @@ public class MessageProperty {
 
 	public MessagePropertyType getMessagePropertyType() {
 		return messagePropertyType;
+	}
+
+	@Override
+	public String toString() {
+		return "MessageProperty{" +
+				"name='" + name + '\'' +
+				", mandatory=" + mandatory +
+				", filterable=" + filterable +
+				", messagePropertyType=" + messagePropertyType +
+				'}';
 	}
 }

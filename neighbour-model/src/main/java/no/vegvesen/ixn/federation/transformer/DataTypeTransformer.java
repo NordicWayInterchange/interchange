@@ -40,20 +40,16 @@ public class DataTypeTransformer {
 			case Datex2DataTypeApi.DATEX_2:
 				return new Datex2DataTypeApi(
 						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
 						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
 						dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
-						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
 						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
 						dataType.getPropertyValue(MessageProperty.PUBLICATION_TYPE),
 						dataType.getPropertyValueAsSet(MessageProperty.PUBLICATION_SUB_TYPE));
 			case DenmDataTypeApi.DENM:
 				return new DenmDataTypeApi(
 						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
 						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
 						dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
-						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
 						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
 						dataType.getPropertyValue(MessageProperty.SERVICE_TYPE),
 						dataType.getPropertyValue(MessageProperty.CAUSE_CODE),
@@ -61,10 +57,8 @@ public class DataTypeTransformer {
 			case IviDataTypeApi.IVI:
 				return new IviDataTypeApi(
 						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
 						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
 						dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
-						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
 						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE),
 						dataType.getPropertyValue(MessageProperty.SERVICE_TYPE),
 						dataType.getPropertyValueAsIntegerSet(MessageProperty.IVI_TYPE),
@@ -74,10 +68,8 @@ public class DataTypeTransformer {
 				return new DataTypeApi(
 						messageType,
 						dataType.getPropertyValue(MessageProperty.PUBLISHER_ID),
-						dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME),
 						dataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY),
 						dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION),
-						dataType.getPropertyValue(MessageProperty.CONTENT_TYPE),
 						dataType.getPropertyValueAsSet(MessageProperty.QUAD_TREE)
 				);
 		}

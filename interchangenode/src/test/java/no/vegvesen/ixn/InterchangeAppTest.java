@@ -13,6 +13,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -40,10 +41,11 @@ public class InterchangeAppTest {
                 "NO",
                 "DATEX2:1.0",
                 "DATEX2",
-                "10.0",
-                "63.0",
+                "abc",
                 new KeyValue("publicationType","SituationPublication")
         );
+        MessageValidator validator = new MessageValidator();
+        assertThat(validator.isValid(message)).isTrue();
         consumer.onMessage(message);
         verify(nwExProducer, times(1)).send(any(Message.class), anyInt(), anyInt(), anyLong());
     }
@@ -57,8 +59,7 @@ public class InterchangeAppTest {
                 null,
                 "DATEX2:1.0",
                 "DATEX2",
-                "Ahah",
-                "yo",
+                "abc",
                 new KeyValue("publicationType","SituationPublication")
         );
 		consumer.onMessage(message);

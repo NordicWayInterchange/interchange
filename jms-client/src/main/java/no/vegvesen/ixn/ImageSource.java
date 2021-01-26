@@ -21,9 +21,7 @@ public class ImageSource extends Source{
         message.getFacade().setUserId("localhost");
         message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), "DENM");
         message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
-        message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Some Norwegian publisher");
         message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DENM:1.2.2");
-        message.setStringProperty(MessageProperty.CONTENT_TYPE.getName(), "application/octet-stream");
         message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
         message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
         message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
@@ -42,9 +40,7 @@ public class ImageSource extends Source{
         message.getFacade().setUserId("localhost");
         message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), "DENM");
         message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
-        message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Some Norwegian publisher");
         message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DENM:1.2.2");
-        message.setStringProperty(MessageProperty.CONTENT_TYPE.getName(), "application/octet-stream");
         message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
         message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
         message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");

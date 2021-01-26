@@ -75,15 +75,14 @@ public class DebugClient implements MessageListener {
 				System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
 			}
 
-			String publisherName = msg.getStringProperty(MessageProperty.PUBLISHER_NAME.getName());
-			printWithColor(GREEN, " Got message from " + publisherName + " @ delay=" + delay + "ms:");
+			String publisher = msg.getStringProperty(MessageProperty.PUBLISHER_ID.getName());
+			printWithColor(GREEN, " Got message from " + publisher+ "@delay=" + delay + "ms:");
 			printWithColor(GREEN, " (Msg type: " + msg.getStringProperty(MessageProperty.MESSAGE_TYPE.getName()) + ")\n");
 			printWithColor(GREEN, " Msg props:");
 			printWithColor(GREEN, " UserID:" + ((JmsMessage) msg).getFacade().getUserId());
 			printWithColor(GREEN, " Type:" + ((JmsMessage) msg).getFacade().getType());
 			printWithColor(GREEN, " Expiration:" + ((JmsMessage) msg).getFacade().getExpiration());
 			printWithColor(GREEN, " App props:");
-			printWithColor(GREEN, " who: " + publisherName);
 			printWithColor(GREEN, " how: " + msg.getStringProperty(MessageProperty.PUBLICATION_TYPE.getName()));
 			printWithColor(GREEN, " what: " + msg.getStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName()));
 			try {
@@ -137,7 +136,6 @@ public class DebugClient implements MessageListener {
 	private void sendMessage(String originatingCountry, String msg) {
 		try {
 			JmsTextMessage message = send.createTextMessage(msg);
-			message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
 			message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 			message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), Datex2DataTypeApi.DATEX_2 + ";2.3");
 			message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Conditions");

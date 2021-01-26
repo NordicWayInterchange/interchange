@@ -19,8 +19,7 @@ public class MessageValidatorTest {
                 "NO",
                 "DATEX2:1.0",
                 "FOO", //should be datex2!
-                "10.0",
-                "63.0",
+                "abc",
                 new KeyValue("publicationType", "Situation")
         );
         assertThat(validator.isValid(message)).isFalse();
@@ -33,8 +32,7 @@ public class MessageValidatorTest {
                 "NO",
                 "DATEX2:1.0",
                 "DATEX2",
-                "10.0",
-                "63.0"
+                "abc"
         );
         assertThat(validator.isValid(message)).isFalse();
 
@@ -46,8 +44,7 @@ public class MessageValidatorTest {
                 "SVV",
                 "NO",
                 "DATEX2:1.0",
-                "10.0",
-                "63.0",
+                "abc",
                 new KeyValue("publicationType","Situation")
         );
         assertThat(validator.isValid(message)).isTrue();
@@ -59,8 +56,7 @@ public class MessageValidatorTest {
                 "SVV",
                 "NO",
                 "DATEX2:1.0",
-                "10.0",
-                "63.0",
+                "abc",
                 new KeyValue("publicationType","Situation"),
                 new KeyValue("foo", "bar")
         );
@@ -74,8 +70,7 @@ public class MessageValidatorTest {
                 "NO",
                 "DENM:1.0",
                 "DENM",
-                "10.0",
-                "63.0"
+                "abe"
         );
         assertThat(validator.isValid(message)).isFalse();
 
@@ -88,9 +83,9 @@ public class MessageValidatorTest {
                 "NO",
                 "DENM:1.0",
                 "DENM",
-                "10.0",
-                "63.0",
-                new KeyValue("causeCode", "AAA")
+                "abc",
+                new KeyValue("causeCode", "AAA"),
+                new KeyValue("subCauseCode", "BBB")
         );
         assertThat(validator.isValid(message)).isTrue();
     }
@@ -102,9 +97,9 @@ public class MessageValidatorTest {
                 "NO",
                 "DENM:1.0",
                 "DENM",
-                "10.0",
-                "63.0",
+                "abc",
                 new KeyValue("causeCode", "AAA"),
+                new KeyValue("subCauseCode", "BBB"),
                 new KeyValue("foo", "bar")
         );
         assertThat(validator.isValid(message)).isTrue();
@@ -117,8 +112,7 @@ public class MessageValidatorTest {
                 "NO",
                 "IVI:1.0",
                 "IVI",
-                "10.0",
-                "63.0"
+                "abc"
         );
         assertThat(validator.isValid(message)).isTrue();
     }
@@ -130,8 +124,7 @@ public class MessageValidatorTest {
                 "NO",
                 "IVI:1.0",
                 "IVI",
-                "10.0",
-                "63.0",
+                "abc",
                 new KeyValue("foo","bar")
         );
         assertThat(validator.isValid(message)).isTrue();

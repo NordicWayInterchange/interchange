@@ -15,10 +15,10 @@ public class DenmDataTypeApi extends EtsiDataTypeApi{
 		this.setMessageType(DENM);
 	}
 
-	public DenmDataTypeApi(String publisherId, String publisherName, String originatingCountry,
-						   String protocolVersion, String contentType, Set<String> quadTree,
+	public DenmDataTypeApi(String publisherId, String originatingCountry,
+						   String protocolVersion,  Set<String> quadTree,
 						   String serviceType, String causeCode, String subCauseCode) {
-		super(DENM, publisherId, publisherName, originatingCountry, protocolVersion, contentType, quadTree, serviceType);
+		super(DENM, publisherId, originatingCountry, protocolVersion,  quadTree, serviceType);
 		this.causeCode = causeCode;
 		this.subCauseCode = subCauseCode;
 	}
