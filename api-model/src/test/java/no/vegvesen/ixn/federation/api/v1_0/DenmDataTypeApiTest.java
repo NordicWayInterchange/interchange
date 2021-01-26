@@ -18,7 +18,7 @@ public class DenmDataTypeApiTest {
 
 	@Test
 	public void parseValidJson() throws IOException {
-		DenmDataTypeApi denmDataTypeApi = mapper.readValue("{\"messageType\":\"DENM\",\"publisherId\":\"pubid\",\"publisherName\":\"pubname\",\"originatingCountry\":\"NO\",\"protocolVersion\":\"1.0\",\"contentType\":\"application/base64\",\"quadTree\":[],\"serviceType\":\"serviceType\",\"causeCode\":\"1\",\"subCauseCode\":\"1\"}", DenmDataTypeApi.class);
+		DenmDataTypeApi denmDataTypeApi = mapper.readValue("{\"messageType\":\"DENM\",\"publisherId\":\"pubid\",\"originatingCountry\":\"NO\",\"protocolVersion\":\"1.0\",\"quadTree\":[],\"serviceType\":\"serviceType\",\"causeCode\":\"1\",\"subCauseCode\":\"1\"}", DenmDataTypeApi.class);
 		assertThat(denmDataTypeApi).isNotNull();
 	}
 
@@ -32,7 +32,7 @@ public class DenmDataTypeApiTest {
 	@Test
 	public void printValidJson() throws JsonProcessingException {
 		Set<String> quads = Collections.emptySet();
-		DenmDataTypeApi denmDataTypeApi = new DenmDataTypeApi("pubid", "pubname", "NO", "1.0", "application/base64", quads, "serviceType", "1", "1");
+		DenmDataTypeApi denmDataTypeApi = new DenmDataTypeApi("pubid", "NO", "1.0", quads, "serviceType", "1", "1");
 		System.out.println(mapper.writeValueAsString(denmDataTypeApi));
 	}
 }

@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.org.bouncycastle.asn1.x500.style.RFC4519Style;
 
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
@@ -95,9 +96,10 @@ public class QpidIT extends QpidDockerBaseIT {
 		JmsTextMessage outgoingMessage = producer.createTextMessage(body);
 		outgoingMessage.setFloatProperty("latitude", latitude);
 		outgoingMessage.setFloatProperty("longitude", longitude);
-		outgoingMessage.setStringProperty("publisherName", publisher);
+		outgoingMessage.setStringProperty("publisherId", publisher);
 		outgoingMessage.setStringProperty("originatingCountry", originatingCountry);
 		outgoingMessage.setStringProperty("protocolVersion", protocolVersion);
+		outgoingMessage.setStringProperty("quadTree","abc");
 		outgoingMessage.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), messageType);
 		for (Map.Entry<String,String> entry : additionalValues.entrySet()) {
 			outgoingMessage.setStringProperty(entry.getKey(), entry.getValue());

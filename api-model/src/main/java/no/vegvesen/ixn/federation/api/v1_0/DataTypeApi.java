@@ -25,25 +25,21 @@ public class DataTypeApi {
 
 	private String messageType;
 	private String publisherId;
-	private String publisherName;
 	private String originatingCountry;
 	private String protocolVersion;
-	private String contentType;
 	private Set<String> quadTree = new HashSet<>();
 
 	public DataTypeApi() {
 	}
 
-	public DataTypeApi(String messageType, String publisherId, String publisherName, String originatingCountry, String protocolVersion, String contentType, Set<String> quadTree) {
+	public DataTypeApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
 		if (messageType == null) {
 			throw new IllegalArgumentException("messageType can not be null");
 		}
 		this.messageType = messageType;
 		this.publisherId = publisherId;
-		this.publisherName = publisherName;
 		this.originatingCountry = originatingCountry;
 		this.protocolVersion = protocolVersion;
-		this.contentType = contentType;
 		if (quadTree != null) {
 			this.quadTree.addAll(quadTree);
 		}
@@ -87,15 +83,6 @@ public class DataTypeApi {
 		this.publisherId = publisherId;
 	}
 
-	public String getPublisherName() {
-		return publisherName;
-	}
-
-	public void setPublisherName(String publisherName) {
-		this.publisherName = publisherName;
-	}
-
-
 	public String getProtocolVersion() {
 		return protocolVersion;
 	}
@@ -104,43 +91,21 @@ public class DataTypeApi {
 		this.protocolVersion = protocolVersion;
 	}
 
-	public String getContentType() {
-		return contentType;
-	}
-
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof DataTypeApi)) return false;
-
+		if (o == null || getClass() != o.getClass()) return false;
 		DataTypeApi that = (DataTypeApi) o;
-
-		if (!messageType.equals(that.messageType)) return false;
-		if (publisherId != null ? !publisherId.equals(that.publisherId) : that.publisherId != null) return false;
-		if (publisherName != null ? !publisherName.equals(that.publisherName) : that.publisherName != null)
-			return false;
-		if (originatingCountry != null ? !originatingCountry.equals(that.originatingCountry) : that.originatingCountry != null)
-			return false;
-		if (protocolVersion != null ? !protocolVersion.equals(that.protocolVersion) : that.protocolVersion != null)
-			return false;
-		if (contentType != null ? !contentType.equals(that.contentType) : that.contentType != null) return false;
-		return quadTree != null ? quadTree.equals(that.quadTree) : that.quadTree == null;
+		return Objects.equals(messageType, that.messageType) &&
+				Objects.equals(publisherId, that.publisherId) &&
+				Objects.equals(originatingCountry, that.originatingCountry) &&
+				Objects.equals(protocolVersion, that.protocolVersion) &&
+				Objects.equals(quadTree, that.quadTree);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = messageType.hashCode();
-		result = 31 * result + (publisherId != null ? publisherId.hashCode() : 0);
-		result = 31 * result + (publisherName != null ? publisherName.hashCode() : 0);
-		result = 31 * result + (originatingCountry != null ? originatingCountry.hashCode() : 0);
-		result = 31 * result + (protocolVersion != null ? protocolVersion.hashCode() : 0);
-		result = 31 * result + (contentType != null ? contentType.hashCode() : 0);
-		result = 31 * result + (quadTree != null ? quadTree.hashCode() : 0);
-		return result;
+		return Objects.hash(messageType, publisherId, originatingCountry, protocolVersion, quadTree);
 	}
 
 	@JsonIgnore
@@ -148,10 +113,8 @@ public class DataTypeApi {
 		Map<String, String> values = new HashMap<>();
 		putValue(values, MessageProperty.MESSAGE_TYPE, this.getMessageType());
 		putValue(values, MessageProperty.PUBLISHER_ID, this.getPublisherId());
-		putValue(values, MessageProperty.PUBLISHER_NAME, this.getPublisherName());
 		putValue(values, MessageProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
 		putValue(values, MessageProperty.PROTOCOL_VERSION, this.getProtocolVersion());
-		putValue(values, MessageProperty.CONTENT_TYPE, this.getContentType());
 		putValue(values, MessageProperty.QUAD_TREE, this.getQuadTree());
 		return values;
 	}
@@ -188,10 +151,8 @@ public class DataTypeApi {
 	public String baseToString() {
 		return 	"messageType='" + messageType + '\'' +
 				", publisherId='" + publisherId + '\'' +
-				", publisherName='" + publisherName + '\'' +
 				", originatingCountry='" + originatingCountry + '\'' +
 				", protocolVersion='" + protocolVersion + '\'' +
-				", contentType='" + contentType + '\'' +
 				", quadTree=" + quadTree;
 	}
 

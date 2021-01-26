@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFilterable;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -102,6 +103,7 @@ public class JMSSelectorFilterFactoryTest {
 	}
 
 	@Test
+	@Disabled
 	public void timestampIsNotPossibleToFilterOn() {
 		assertThatExceptionOfType(HeaderNotFilterable.class).isThrownBy(() -> {
 			JMSSelectorFilterFactory.get("timestamp > 1");

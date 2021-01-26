@@ -76,9 +76,11 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
             logger.debug("Sending message");
             JmsTextMessage textMessage = source.createTextMessage("Yo!");
             textMessage.setStringProperty("messageType", "DATEX2");
-            textMessage.setStringProperty("publisherName","SVV");
+            textMessage.setStringProperty("publisherId","SVV");
             textMessage.setStringProperty("originatingCountry","NO");
             textMessage.setStringProperty("protocolVersion","DATEX2:1.0");
+            textMessage.setStringProperty("quadTree","abc");
+
             textMessage.setStringProperty("latitude","10.0");
             textMessage.setStringProperty("longitude","63.0");
             textMessage.setStringProperty("publicationType","SituationPublication");

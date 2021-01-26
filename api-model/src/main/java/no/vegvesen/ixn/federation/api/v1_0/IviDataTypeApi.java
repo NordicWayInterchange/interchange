@@ -15,10 +15,10 @@ public class IviDataTypeApi extends EtsiDataTypeApi{
 		this.setMessageType(IVI);
 	}
 
-	public IviDataTypeApi(String publisherId, String publisherName, String originatingCountry,
-						  String protocolVersion, String contentType, Set<String> quadTree,
+	public IviDataTypeApi(String publisherId, String originatingCountry,
+						  String protocolVersion, Set<String> quadTree,
 						  String serviceType, Set<Integer> iviTypes, Set<Integer> pictogramCategoryCodes) {
-		super(IVI, publisherId, publisherName, originatingCountry, protocolVersion, contentType, quadTree, serviceType);
+		super(IVI, publisherId, originatingCountry, protocolVersion,  quadTree, serviceType);
 		this.iviTypes = iviTypes;
 		this.pictogramCategoryCodes = pictogramCategoryCodes;
 	}
