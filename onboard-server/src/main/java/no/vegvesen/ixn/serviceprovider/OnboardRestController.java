@@ -1,14 +1,12 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.federation.transformer.DataTypeTransformer;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.slf4j.Logger;
@@ -27,7 +25,6 @@ public class OnboardRestController {
 	private final ServiceProviderRepository serviceProviderRepository;
 	private final CertService certService;
 	private final SelfService selfService;
-	private DataTypeTransformer dataTypeTransformer = new DataTypeTransformer();
 	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
@@ -110,22 +107,21 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
-	public LocalSubscriptionApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody DataTypeApi dataTypeApi) {
+	public LocalSubscriptionApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody SelectorApi selector) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
 
-		if (dataTypeApi == null) {
+		if (selector == null) {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. The DataTypeApi object was null. Nothing to add.");
 		}
 
-		logger.info("Service provider {} Incoming subscription post: {}", serviceProviderName, dataTypeApi.toString());
+		logger.info("Service provider {} Incoming subscription selector: {}", serviceProviderName,selector.getSelector());
 
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		DataType newDataType = dataTypeTransformer.dataTypeApiToDataType(dataTypeApi);
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, newDataType);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector.getSelector());
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
@@ -143,10 +139,10 @@ public class OnboardRestController {
 				.stream()
 				.filter(subscription -> subscription.equals(localSubscription))
 				.findFirst()
-				.orElseThrow(() -> new IllegalStateException("Something went wrondg. Could not find localSubscription after saving"));
+				.orElseThrow(() -> new IllegalStateException("Something went wrong. Could not find localSubscription after saving"));
 
 		OnboardMDCUtil.removeLogVariables();
-		return typeTransformer.transformLocalSubecriptionToLocalSubscriptionApi(savedSubscription);
+		return typeTransformer.transformLocalSubscriptionToLocalSubscriptionApi(savedSubscription);
 	}
 
 
@@ -215,5 +211,4 @@ public class OnboardRestController {
 
 		return returnServiceProviders;
 	}
-
 }

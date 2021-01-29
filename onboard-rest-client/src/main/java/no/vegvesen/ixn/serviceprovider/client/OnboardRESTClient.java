@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
@@ -54,10 +53,10 @@ public class OnboardRESTClient {
         restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId));
     }
 
-    public LocalSubscriptionApi addSubscription(DataTypeApi subscription) {
+    public LocalSubscriptionApi addSubscription(SelectorApi subscription) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<DataTypeApi> entity = new HttpEntity<>(subscription,headers);
+        HttpEntity<SelectorApi> entity = new HttpEntity<>(subscription,headers);
 		String url = String.format("/%s/subscriptions", user) ;
 		return restTemplate.exchange(server + url, HttpMethod.POST, entity, LocalSubscriptionApi.class).getBody();
     }

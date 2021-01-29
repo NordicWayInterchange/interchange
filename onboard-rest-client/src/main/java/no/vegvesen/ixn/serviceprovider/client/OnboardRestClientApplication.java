@@ -3,7 +3,6 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -116,7 +115,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            DataTypeApi subscription = mapper.readValue(file,DataTypeApi.class);
+            SelectorApi subscription = mapper.readValue(file,SelectorApi.class);
             LocalSubscriptionApi result = client.addSubscription(subscription);
             System.out.println(mapper.writeValueAsString(result));
             return 0;

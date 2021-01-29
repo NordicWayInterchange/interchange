@@ -3,7 +3,6 @@ package no.vegvesen.ixn.onboard;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +34,7 @@ class SelfServiceIT {
 		Self selfBeforeUpdate = selfService.fetchSelf();
 		assertThat(selfBeforeUpdate.getLastUpdatedLocalSubscriptions()).isEmpty();
 
-		serviceProviderBefore.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, new DataType(null, MessageProperty.MESSAGE_TYPE.getName(), "DATEX2")));
+		serviceProviderBefore.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'"));
 		Optional<LocalDateTime> subscriptionUpdatedRequested = serviceProviderBefore.getSubscriptionUpdated();
 		assertThat(subscriptionUpdatedRequested).isPresent();
 

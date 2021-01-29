@@ -20,7 +20,7 @@ public class Self {
 
 	private Set<Capability> localCapabilities = new HashSet<>();
 
-	private Set<DataType> localSubscriptions = new HashSet<>();
+	private Set<String> localSubscriptions = new HashSet<>();
 
 	private LocalDateTime lastUpdatedLocalCapabilities;
 	private LocalDateTime lastUpdatedLocalSubscriptions;
@@ -52,11 +52,11 @@ public class Self {
 		}
 	}
 
-	public Set<DataType> getLocalSubscriptions() {
+	public Set<String> getLocalSubscriptions() {
 		return localSubscriptions;
 	}
 
-	public void setLocalSubscriptions(Set<DataType> localSubscriptions) {
+	public void setLocalSubscriptions(Set<String> localSubscriptions) {
 		if(localSubscriptions != null){
 			this.localSubscriptions = localSubscriptions;
 		}

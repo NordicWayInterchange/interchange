@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 
@@ -114,8 +113,8 @@ public class ServiceProviderRouter {
     private void optionallyAddQueueBindings(String name, LocalSubscription subscription) {
         if (!qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
             logger.debug("Adding bindings to the queue {}", name);
-            qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "nwEx");
-            qpidClient.addBinding(subscription.selector(), name, subscription.bindKey(), "fedEx");
+            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "nwEx");
+            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "fedEx");
         }
     }
 

@@ -1,20 +1,17 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-
 public class LocalSubscriptionApi {
     private Integer id;
     private LocalSubscriptionStatusApi status;
-    private DataTypeApi dataType;
+    private String selector;
 
     public LocalSubscriptionApi() {
-
     }
 
-    public LocalSubscriptionApi(Integer id, LocalSubscriptionStatusApi status, DataTypeApi dataType) {
+    public LocalSubscriptionApi(Integer id, LocalSubscriptionStatusApi status, String selector) {
         this.id = id;
         this.status = status;
-        this.dataType = dataType;
+        this.selector = selector;
     }
 
     public Integer getId() {
@@ -33,11 +30,11 @@ public class LocalSubscriptionApi {
         this.status = status;
     }
 
-    public DataTypeApi getDataType() {
-        return dataType;
+    public String getSelector() {
+        return selector;
     }
 
-    public void setDataType(DataTypeApi dataType) {
-        this.dataType = dataType;
+    public void setSelector(String selector) {
+        this.selector = selector;
     }
 }

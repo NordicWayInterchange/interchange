@@ -1,16 +1,12 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.serviceprovider.model.LocalCapability;
-import no.vegvesen.ixn.serviceprovider.model.LocalCapabilityList;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionApi;
-import no.vegvesen.ixn.serviceprovider.model.LocalSubscriptionListApi;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -63,8 +59,7 @@ public class OnboardRestControllerIT {
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
-        Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
-        restController.addSubscriptions(serviceProviderName, datexNO);
+        restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
 
         LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -81,10 +76,8 @@ public class OnboardRestControllerIT {
 
 	@Test
 	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
-		LocalDateTime beforeDeleteTime = LocalDateTime.now();
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
-		Datex2DataTypeApi datexNO = new Datex2DataTypeApi("NO");
-		restController.addSubscriptions(serviceProviderName, datexNO);
+		restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
 
 		LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
 		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);

@@ -37,12 +37,10 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.Mockito.when;
 
 
 @SuppressWarnings("rawtypes")
@@ -259,6 +257,22 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.setupNeighbourRouting(tigershark);
 		assertThat(client.getQueueBindKeys("tigershark").size()).isEqualTo(2);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
+	}
+
+	@Test
+	public void getSelectorsFromProvider() {
+		HashSet<Subscription> subs = new HashSet<>();
+		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED));
+
+		Neighbour whaleshark = new Neighbour("whaleshark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+
+		routingConfigurer.setupNeighbourRouting(whaleshark);
+		Set<String> bindings = client.getQueueBindKeys("whaleshark");
+		for(String bind : bindings){
+			System.out.println(bind);
+		}
 	}
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
