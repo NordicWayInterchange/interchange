@@ -1,6 +1,6 @@
 {
   "messageType":"DATEX2",
   "originatingCountry":"NO",
-  "quadTree":[],
+  "quadTree":["01220123"],
   "publicationType":[]
 }
