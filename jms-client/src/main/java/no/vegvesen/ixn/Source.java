@@ -257,13 +257,12 @@ public class Source implements AutoCloseable {
 
 		JmsTextMessage message = createTextMessage(messageText);
 		message.getFacade().setUserId("localhost");
-		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
+		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "Norwegian Public Roads Administration");
 		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
 		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
 		message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), "WinterDrivingManagement");
 		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
-		message.setStringProperty(MessageProperty.CONTENT_TYPE.getName(), "application/xml");
 		message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
 		message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
 		message.setStringProperty("fishyBusiness", "fishTaco");
