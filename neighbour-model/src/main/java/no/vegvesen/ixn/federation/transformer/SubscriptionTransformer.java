@@ -16,7 +16,7 @@ public class SubscriptionTransformer {
 	public Set<Subscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request) {
 		ArrayList<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
-			Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(), SubscriptionStatus.REQUESTED);
+			Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(), SubscriptionStatus.REQUESTED, subscriptionRequestApi.getCreateNewQueue(), subscriptionRequestApi.getQueueConsumerUser());
 			subscriptions.add(subscription);
 		}
 		return new HashSet<>(subscriptions);
@@ -27,7 +27,7 @@ public class SubscriptionTransformer {
 	public Set<RequestedSubscriptionApi> subscriptionsToRequestedSubscriptionApi(Set<Subscription> subscriptions) {
 		List<RequestedSubscriptionApi> subscriptionRequestApis = new ArrayList<>();
 		for (Subscription s : subscriptions) {
-			RequestedSubscriptionApi subscriptionRequestApi = new RequestedSubscriptionApi(s.getSelector());
+			RequestedSubscriptionApi subscriptionRequestApi = new RequestedSubscriptionApi(s.getSelector(), s.isCreateNewQueue(), s.getQueueConsumerUser());
 			subscriptionRequestApis.add(subscriptionRequestApi);
 		}
 		return new HashSet<>(subscriptionRequestApis);
@@ -40,7 +40,9 @@ public class SubscriptionTransformer {
 					s.getId().toString(),
 					s.getSelector(),
 					s.getPath(),
-					subscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()));
+					subscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()),
+					s.isCreateNewQueue(),
+					s.getQueueConsumerUser());
 			subscriptionResponses.add(responseApi);
 		}
 		return new HashSet<>(subscriptionResponses);
@@ -60,6 +62,8 @@ public class SubscriptionTransformer {
 		for (RequestedSubscriptionResponseApi s : subscriptionResponseApis) {
 			Subscription subscription = new Subscription(s.getSelector(), subscriptionStatusApiToSubscriptionStatus(s.getStatus()));
 			subscription.setPath(s.getPath());
+			subscription.setCreateNewQueue(s.isCreateNewQueue());
+			subscription.setQueueConsumerUser(s.getQueueConsumerUser());
 			subscriptions.add(subscription);
 		}
 		return new HashSet<>(subscriptions);

@@ -25,6 +25,10 @@ public class Subscription {
 
 	private String queue;
 
+	private Boolean createNewQueue;
+
+	private String queueConsumerUser;
+
 	public Subscription() {
 	}
 
@@ -44,6 +48,22 @@ public class Subscription {
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
+	}
+
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, Boolean createNewQueue, String queueConsumerUser) {
+		this.id = id;
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+		this.path = path;
+		this.createNewQueue = createNewQueue;
+		this.queueConsumerUser = queueConsumerUser;
+	}
+
+	public Subscription(String selector, SubscriptionStatus subscriptionStatus, Boolean createNewQueue, String queueConsumerUser) {
+		this.selector = selector;
+		this.subscriptionStatus = subscriptionStatus;
+		this.createNewQueue = createNewQueue;
+		this.queueConsumerUser = queueConsumerUser;
 	}
 
 	public SubscriptionStatus getSubscriptionStatus() {
@@ -94,6 +114,22 @@ public class Subscription {
 
 	public String getQueue() { return queue; }
 
+	public Boolean isCreateNewQueue() {
+		return createNewQueue;
+	}
+
+	public void setCreateNewQueue(Boolean createNewQueue) {
+		this.createNewQueue = createNewQueue;
+	}
+
+	public String getQueueConsumerUser() {
+		return queueConsumerUser;
+	}
+
+	public void setQueueConsumerUser(String queueConsumerUser) {
+		this.queueConsumerUser = queueConsumerUser;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null) return false;
@@ -120,6 +156,8 @@ public class Subscription {
 				", numberOfPolls=" + numberOfPolls +
 				", brokerUrl='" + brokerUrl + '\'' +
 				", queue='" + queue + '\'' +
+				", createNewQueue='" + createNewQueue + '\'' +
+				", queueConsumerUser='" + queueConsumerUser + '\'' +
 				'}';
 	}
 

@@ -49,6 +49,8 @@ public class SubscriptionRequestTransformer {
 		subscription.setPath(subscriptionApi.getPath());
 		subscription.setBrokerUrl(subscriptionApi.getMessageBrokerUrl());
 		subscription.setQueue(subscriptionApi.getQueueName());
+		subscription.setCreateNewQueue(subscriptionApi.isCreateNewQueue());
+		subscription.setQueueConsumerUser(subscriptionApi.getQueueConsumerUser());
 		return subscription;
 	}
 
@@ -59,6 +61,8 @@ public class SubscriptionRequestTransformer {
 		response.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
+		response.setCreateNewQueue(subscription.isCreateNewQueue());
+		response.setQueueConsumerUser(subscription.getQueueConsumerUser());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			response.setMessageBrokerUrl(messageChannelUrl);
 			response.setQueueName(neighbourName);
