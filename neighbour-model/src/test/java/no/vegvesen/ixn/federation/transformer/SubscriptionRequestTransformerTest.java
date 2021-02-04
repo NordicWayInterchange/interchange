@@ -34,7 +34,7 @@ public class SubscriptionRequestTransformerTest {
 	public void subscriptonsToRequestedSubscriptionResponseApi() {
 		String name = "myNode";
 		String selector = "originatingCountry = 'NO'";
-		Subscription one = new Subscription(selector, SubscriptionStatus.REQUESTED);
+		Subscription one = new Subscription(selector, SubscriptionStatus.REQUESTED, false, "");
 
 		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(name, Collections.singleton(one));
 		assertThat(requestApi.getName()).isEqualTo(name);
