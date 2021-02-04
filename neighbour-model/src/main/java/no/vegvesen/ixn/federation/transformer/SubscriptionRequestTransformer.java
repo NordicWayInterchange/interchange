@@ -45,13 +45,23 @@ public class SubscriptionRequestTransformer {
 	}
 
 	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
-		Subscription subscription = new Subscription(subscriptionApi.getSelector(), subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
-		subscription.setPath(subscriptionApi.getPath());
-		subscription.setBrokerUrl(subscriptionApi.getMessageBrokerUrl());
-		subscription.setQueue(subscriptionApi.getQueueName());
-		subscription.setCreateNewQueue(subscriptionApi.isCreateNewQueue());
-		subscription.setQueueConsumerUser(subscriptionApi.getQueueConsumerUser());
-		return subscription;
+		if (subscriptionApi.isCreateNewQueue() == null) {
+			Subscription subscription = new Subscription(Integer.parseInt(subscriptionApi.getId()),
+					subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()),
+					subscriptionApi.getSelector(),
+					subscriptionApi.getPath(),
+					false,
+					subscriptionApi.getQueueConsumerUser());
+			return subscription;
+		} else {
+			Subscription subscription = new Subscription(Integer.parseInt(subscriptionApi.getId()),
+					subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()),
+					subscriptionApi.getSelector(),
+					subscriptionApi.getPath(),
+					subscriptionApi.isCreateNewQueue(),
+					subscriptionApi.getQueueConsumerUser());
+			return subscription;
+		}
 	}
 
 	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelUrl) {
@@ -61,7 +71,9 @@ public class SubscriptionRequestTransformer {
 		response.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
-		response.setCreateNewQueue(subscription.isCreateNewQueue());
+		if (subscription.isCreateNewQueue()) {
+			response.setCreateNewQueue(subscription.isCreateNewQueue());
+		}
 		response.setQueueConsumerUser(subscription.getQueueConsumerUser());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			response.setMessageBrokerUrl(messageChannelUrl);

@@ -25,7 +25,7 @@ public class Subscription {
 
 	private String queue;
 
-	private Boolean createNewQueue;
+	private boolean createNewQueue;
 
 	private String queueConsumerUser;
 
@@ -50,7 +50,7 @@ public class Subscription {
 		this.path = path;
 	}
 
-	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, Boolean createNewQueue, String queueConsumerUser) {
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String queueConsumerUser) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
@@ -59,7 +59,7 @@ public class Subscription {
 		this.queueConsumerUser = queueConsumerUser;
 	}
 
-	public Subscription(String selector, SubscriptionStatus subscriptionStatus, Boolean createNewQueue, String queueConsumerUser) {
+	public Subscription(String selector, SubscriptionStatus subscriptionStatus, boolean createNewQueue, String queueConsumerUser) {
 		this.selector = selector;
 		this.subscriptionStatus = subscriptionStatus;
 		this.createNewQueue = createNewQueue;
@@ -114,11 +114,11 @@ public class Subscription {
 
 	public String getQueue() { return queue; }
 
-	public Boolean isCreateNewQueue() {
+	public boolean isCreateNewQueue() {
 		return createNewQueue;
 	}
 
-	public void setCreateNewQueue(Boolean createNewQueue) {
+	public void setCreateNewQueue(boolean createNewQueue) {
 		this.createNewQueue = createNewQueue;
 	}
 

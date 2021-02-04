@@ -65,7 +65,9 @@ public class SubscriptionRequestTransformerTest {
 		String thisNodeName = "myName";
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
-		Subscription subscription = new Subscription(1,SubscriptionStatus.REQUESTED,selector,path);
+		boolean createNewQueue = false;
+		String queueConsumerUser = "myName";
+		Subscription subscription = new Subscription(1,SubscriptionStatus.REQUESTED,selector,path, createNewQueue, queueConsumerUser);
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, thisNodeName);
 		assertThat(responseApi.getPath()).isEqualTo(path);
 		assertThat(responseApi.getSelector()).isEqualTo(selector);
@@ -82,7 +84,7 @@ public class SubscriptionRequestTransformerTest {
 		String brokerUrl = "amqps://myName";
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
-		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path);
+		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path, false, "");
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, brokerUrl);
 		assertThat(responseApi.getMessageBrokerUrl()).isEqualTo(brokerUrl);
 	}

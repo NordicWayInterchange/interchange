@@ -124,4 +124,8 @@ public class SubscriptionRequest {
 		unwantedBindKeys.removeAll(wantedBindKeys);
 		return unwantedBindKeys;
 	}
+
+	public boolean hasCreateNewQueue() {
+		return subscription.stream().filter(Subscription::isCreateNewQueue).collect(Collectors.counting()) > 0;
+	}
 }

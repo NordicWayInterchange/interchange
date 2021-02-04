@@ -16,8 +16,19 @@ public class SubscriptionTransformer {
 	public Set<Subscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request) {
 		ArrayList<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
-			Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(), SubscriptionStatus.REQUESTED, subscriptionRequestApi.getCreateNewQueue(), subscriptionRequestApi.getQueueConsumerUser());
-			subscriptions.add(subscription);
+			if(subscriptionRequestApi.getCreateNewQueue() == null) {
+				Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(),
+						SubscriptionStatus.REQUESTED,
+						false,
+						subscriptionRequestApi.getQueueConsumerUser());
+				subscriptions.add(subscription);
+			} else {
+				Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(),
+						SubscriptionStatus.REQUESTED,
+						subscriptionRequestApi.getCreateNewQueue(),
+						subscriptionRequestApi.getQueueConsumerUser());
+				subscriptions.add(subscription);
+			}
 		}
 		return new HashSet<>(subscriptions);
 
@@ -27,7 +38,9 @@ public class SubscriptionTransformer {
 	public Set<RequestedSubscriptionApi> subscriptionsToRequestedSubscriptionApi(Set<Subscription> subscriptions) {
 		List<RequestedSubscriptionApi> subscriptionRequestApis = new ArrayList<>();
 		for (Subscription s : subscriptions) {
-			RequestedSubscriptionApi subscriptionRequestApi = new RequestedSubscriptionApi(s.getSelector(), s.isCreateNewQueue(), s.getQueueConsumerUser());
+			RequestedSubscriptionApi subscriptionRequestApi = new RequestedSubscriptionApi(s.getSelector(),
+					s.isCreateNewQueue(),
+					s.getQueueConsumerUser());
 			subscriptionRequestApis.add(subscriptionRequestApi);
 		}
 		return new HashSet<>(subscriptionRequestApis);
@@ -60,11 +73,23 @@ public class SubscriptionTransformer {
 	public Set<Subscription> requestedSubscriptionResponseApiToSubscriptions(Set<RequestedSubscriptionResponseApi> subscriptionResponseApis) {
 		List<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionResponseApi s : subscriptionResponseApis) {
-			Subscription subscription = new Subscription(s.getSelector(), subscriptionStatusApiToSubscriptionStatus(s.getStatus()));
-			subscription.setPath(s.getPath());
-			subscription.setCreateNewQueue(s.isCreateNewQueue());
-			subscription.setQueueConsumerUser(s.getQueueConsumerUser());
-			subscriptions.add(subscription);
+			if (s.isCreateNewQueue() == null) {
+				Subscription subscription = new Subscription(Integer.parseInt(s.getId()),
+						subscriptionStatusApiToSubscriptionStatus(s.getStatus()),
+						s.getSelector(),
+						s.getPath(),
+						false,
+						s.getQueueConsumerUser());
+				subscriptions.add(subscription);
+			} else {
+				Subscription subscription = new Subscription(Integer.parseInt(s.getId()),
+						subscriptionStatusApiToSubscriptionStatus(s.getStatus()),
+						s.getSelector(),
+						s.getPath(),
+						s.isCreateNewQueue(),
+						s.getQueueConsumerUser());
+				subscriptions.add(subscription);
+			}
 		}
 		return new HashSet<>(subscriptions);
 	}

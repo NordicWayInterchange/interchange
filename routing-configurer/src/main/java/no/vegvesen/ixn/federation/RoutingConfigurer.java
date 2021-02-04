@@ -77,15 +77,19 @@ public class RoutingConfigurer {
 	void setupNeighbourRouting(Neighbour neighbour) {
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
-			createQueue(neighbour.getName());
-			addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
-			Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
-			bindSubscriptions("nwEx", neighbour, acceptedSubscriptions);
-			for (Subscription subscription : acceptedSubscriptions) {
-				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+			if(neighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()){
+				//TODO: handle when SubscriptionRequest contains Subscription with createNewQueue = true
+			} else {
+				createQueue(neighbour.getName());
+				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
+				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
+				bindSubscriptions("nwEx", neighbour, acceptedSubscriptions);
+				for (Subscription subscription : acceptedSubscriptions) {
+					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+				}
+				logger.info("Set up routing for neighbour {}", neighbour.getName());
+				neighbourService.saveSetupRouting(neighbour);
 			}
-			logger.info("Set up routing for neighbour {}", neighbour.getName());
-			neighbourService.saveSetupRouting(neighbour);
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
 		}

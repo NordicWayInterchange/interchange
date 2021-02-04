@@ -90,8 +90,8 @@ public class NeighbourServiceIT {
 		neighbour.setName("my-neighbour2");
 		repository.save(neighbour);
 
-		RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='NO'");
-		RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='SE'");
+		RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
+		RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'");
 
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour2",  new HashSet<>(Arrays.asList(sub1, sub2)));
 
@@ -109,8 +109,8 @@ public class NeighbourServiceIT {
 		neighbour.setName("my-neighbour3");
 		repository.save(neighbour);
 
-		RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='NO'");
-		RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='SE'");
+		RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
+		RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'");
 
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour3",  new HashSet<>(Arrays.asList(sub1, sub2)));
 
@@ -132,7 +132,7 @@ public class NeighbourServiceIT {
 		neighbour.setName("my-neighbour4");
 		repository.save(neighbour);
 
-		RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='NO'");
+		RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
 
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour4",  new HashSet<>(Collections.singleton(sub1)));
 
@@ -154,8 +154,8 @@ public class NeighbourServiceIT {
 		neighbour.setName("my-neighbour5");
 		repository.save(neighbour);
 
-		RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='NO'");
-		RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='SE'");
+		RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
+		RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'");
 
 
 		SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour5",  new HashSet<>(Arrays.asList(sub1, sub2)));
@@ -167,7 +167,7 @@ public class NeighbourServiceIT {
 
 		assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
 
-		RequestedSubscriptionApi sub3 = new RequestedSubscriptionApi("messageType='DENM' AND orginatingCountry='FI'");
+		RequestedSubscriptionApi sub3 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='FI'");
 
 		SubscriptionRequestApi subscriptionRequestApi2 = new SubscriptionRequestApi("my-neighbour5",  new HashSet<>(Collections.singleton(sub3)));
 

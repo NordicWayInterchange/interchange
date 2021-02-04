@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.AfterAll;

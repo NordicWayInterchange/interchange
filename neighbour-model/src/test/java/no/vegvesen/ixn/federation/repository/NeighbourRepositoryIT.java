@@ -237,4 +237,46 @@ public class NeighbourRepositoryIT {
 		repository.save(neighbour);
 	}
 
+	@Test
+	public void addSubscriptionWhereCreateNewQueueIsTrue() {
+		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, true, "neighbour-for-queue-true")));
+		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
+		Neighbour neighbour = new Neighbour("neighbour-for-queue-true", new Capabilities(), subscriptions, new SubscriptionRequest());
+
+		repository.save(neighbour);
+
+		Neighbour savedNeighbour = repository.findByName("neighbour-for-queue-true");
+		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()).isTrue();
+	}
+
+	@Test
+	public void addSubscriptionWhereCreateNewQueueIsFalse() {
+		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, false, "")));
+		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
+		Neighbour neighbour = new Neighbour("neighbour-for-queue-false", new Capabilities(), subscriptions, new SubscriptionRequest());
+
+		repository.save(neighbour);
+
+		Neighbour savedNeighbour = repository.findByName("neighbour-for-queue-false");
+		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()).isFalse();
+	}
+
+	@Test
+	public void addSubscriptionWhereOneCreateNewQueueIsTrueAndOneIsFalse() {
+		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, true, "neighbour-for-queue-true");
+		Subscription sub2 = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, false, "");
+		Set<Subscription> subs = Sets.newLinkedHashSet(sub1, sub2);
+
+		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
+		Neighbour neighbour = new Neighbour("neighbour-for-queue-true-and-false", new Capabilities(), subscriptions, new SubscriptionRequest());
+
+		repository.save(neighbour);
+
+		Neighbour savedNeighbour = repository.findByName("neighbour-for-queue-true-and-false");
+
+		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()).isTrue();
+		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(2);
+
+	}
+
 }
