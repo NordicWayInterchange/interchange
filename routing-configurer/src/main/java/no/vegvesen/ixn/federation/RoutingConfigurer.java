@@ -83,7 +83,7 @@ public class RoutingConfigurer {
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithCreateNewQueue();
 				for (Subscription subscription : acceptedSubscriptions){
 					createQueue(subscription.getQueueConsumerUser());
-					addSubscriberToGroup(FEDERATED_GROUP_NAME, subscription.getQueueConsumerUser());
+					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getQueueConsumerUser());
 					bindRemoteServiceProvider("nwEx", subscription.getQueueConsumerUser(), subscription);
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 					logger.info("Set up routing for service provider {}", subscription.getQueueConsumerUser());

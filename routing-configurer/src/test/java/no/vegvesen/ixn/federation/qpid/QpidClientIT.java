@@ -127,7 +127,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(userNames).doesNotContain(deleteUser);
 	}
 
-	/*@Test
+	@Test
 	public void addRemoteServiceProviderToGroup() {
 		String newUser = "service-provider";
 		client.addMemberToGroup(newUser, REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
@@ -135,7 +135,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		List<String> userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 
 		assertThat(userNames).contains(newUser);
-	}*/
+	}
 
 	@Test
 	public void addAccessBuildsUpRules() {
