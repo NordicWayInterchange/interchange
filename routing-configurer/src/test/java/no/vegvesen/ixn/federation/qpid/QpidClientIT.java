@@ -21,8 +21,7 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
-import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
-import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -127,6 +126,16 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
 		assertThat(userNames).doesNotContain(deleteUser);
 	}
+
+	/*@Test
+	public void addRemoteServiceProviderToGroup() {
+		String newUser = "service-provider";
+		client.addMemberToGroup(newUser, REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+
+		List<String> userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+
+		assertThat(userNames).contains(newUser);
+	}*/
 
 	@Test
 	public void addAccessBuildsUpRules() {

@@ -24,6 +24,7 @@ public class QpidClient {
 
 	public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
 	public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
+	public static final String REMOTE_SERVICE_PROVIDERS_GROUP_NAME = "remote-service-providers";
 	public final static long MAX_TTL_8_DAYS = 691_200_000L;
 
 

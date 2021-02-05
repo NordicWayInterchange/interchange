@@ -259,6 +259,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
 	}
 
+	//TODO: look over this
 	@Test
 	public void getSelectorsFromProvider() {
 		HashSet<Subscription> subs = new HashSet<>();
@@ -273,6 +274,52 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		for(String bind : bindings){
 			System.out.println(bind);
 		}
+	}
+
+	@Test
+	public void setUpQueueForServiceProvider() {
+		HashSet<Subscription> subs = new HashSet<>();
+		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, true, "remote-service-provider"));
+
+		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+
+		routingConfigurer.setupNeighbourRouting(neigh);
+
+		assertThat(client.queueExists("remote-service-provider")).isTrue();
+	}
+	@Test
+	public void setUpQueueForNeighbour() {
+		HashSet<Subscription> subs = new HashSet<>();
+		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, false, "neigh-false"));
+
+		Neighbour neigh = new Neighbour("neigh-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+
+		routingConfigurer.setupNeighbourRouting(neigh);
+
+		assertThat(client.queueExists(neigh.getName())).isTrue();
+	}
+
+	@Test
+	public void setUpQueueForServiceProviderAndNeighbour() {
+		HashSet<Subscription> subs = new HashSet<>();
+		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, true, "remote-service-provider"));
+
+		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, false, "neigh-true-and-false"));
+
+		Neighbour neigh = new Neighbour("neigh-true-and-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+
+		routingConfigurer.setupNeighbourRouting(neigh);
+
+		assertThat(client.queueExists("remote-service-provider")).isTrue();
+		assertThat(client.queueExists(neigh.getName())).isTrue();
 	}
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {

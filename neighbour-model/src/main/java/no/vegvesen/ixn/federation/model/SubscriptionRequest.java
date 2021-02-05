@@ -128,4 +128,16 @@ public class SubscriptionRequest {
 	public boolean hasCreateNewQueue() {
 		return subscription.stream().filter(Subscription::isCreateNewQueue).collect(Collectors.counting()) > 0;
 	}
+
+	public Set<Subscription> getAcceptedSubscriptionsWithCreateNewQueue() {
+		return getAcceptedSubscriptions().stream()
+				.filter(Subscription::isCreateNewQueue)
+				.collect(Collectors.toSet());
+	}
+
+	public Set<Subscription> getAcceptedSubscriptionsWithoutCreateNewQueue() {
+		return getAcceptedSubscriptions().stream()
+				.filter(s -> s.isCreateNewQueue() == false)
+				.collect(Collectors.toSet());
+	}
 }
