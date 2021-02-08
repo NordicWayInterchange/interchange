@@ -59,7 +59,7 @@ public class OnboardRestControllerIT {
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
-        restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
+        restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
 
         LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -77,7 +77,7 @@ public class OnboardRestControllerIT {
 	@Test
 	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
-		restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
+		restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
 
 		LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
 		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);

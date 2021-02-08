@@ -8,8 +8,8 @@ docker run \
     --dns=172.28.1.1 \
     -v ${PWD}/../tmp/keys:/keys \
     -e URL=amqps://local.bouvetinterchange.eu \
-    -e QUEUE=king_gustaf.bouvetinterchange.eu \
-    -e KEY_STORE_PATH=/keys/king_gustaf.bouvetinterchange.eu.p12 \
+    -e QUEUE=king_olav.bouvetinterchange.eu \
+    -e KEY_STORE_PATH=/keys/king_olav.bouvetinterchange.eu.p12 \
     -e KEY_STORE_PASS=password \
     -e KEY_PASS=password \
     -e TRUST_STORE_PATH=/keys/truststore.jks \

@@ -34,5 +34,17 @@ class SubscriptionModificationsTest {
 		assertThat(modifications.getRemoveSubscriptions()).contains(sub3).hasSize(1);
 	}
 
+	@Test
+	void addSubscriptionWithAndWithoutCreateNewQueue() {
+		Subscription sub1 = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, false, "");
+		Subscription sub2 = new Subscription("dataType = 'denm'", SubscriptionStatus.ACCEPTED);
+		Set<Subscription> firstSet = Sets.newSet(sub1, sub2);
+
+		Subscription sub3 = new Subscription("dataType = 'ivi'", SubscriptionStatus.ACCEPTED, false, null);
+		Set<Subscription> secondSet = Sets.newSet(sub1, sub2, sub3);
+
+		SubscriptionModifications modifications = new SubscriptionModifications(firstSet, secondSet);
+		assertThat(modifications.getNewSubscriptions()).contains(sub3).hasSize(1);
+	}
 
 }

@@ -25,6 +25,10 @@ public class LocalSubscription {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
+    private boolean createNewQueue;
+
+    private String queueConsumerUser;
+
     public LocalSubscription() {
 
     }
@@ -69,6 +73,22 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
+    public boolean isCreateNewQueue() {
+        return createNewQueue;
+    }
+
+    public void setCreateNewQueue(boolean createNewQueue) {
+        this.createNewQueue = createNewQueue;
+    }
+
+    public String getQueueConsumerUser() {
+        return queueConsumerUser;
+    }
+
+    public void setQueueConsumerUser(String queueConsumerUser) {
+        this.queueConsumerUser = queueConsumerUser;
+    }
+
     //TODO lag et objekt av selector??
     public String bindKey() {
         return "" + selector.hashCode();
@@ -98,6 +118,8 @@ public class LocalSubscription {
                 "sub_id=" + sub_id +
                 ", status=" + status +
                 ", selector=" + selector +
+                ", createNewQueue=" + createNewQueue +
+                ", queueConsumerUser=" + queueConsumerUser +
                 '}';
     }
 

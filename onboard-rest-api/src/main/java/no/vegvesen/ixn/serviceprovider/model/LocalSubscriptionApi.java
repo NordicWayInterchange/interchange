@@ -4,6 +4,7 @@ public class LocalSubscriptionApi {
     private Integer id;
     private LocalSubscriptionStatusApi status;
     private String selector;
+    private boolean createNewQueue;
 
     public LocalSubscriptionApi() {
     }
@@ -12,6 +13,13 @@ public class LocalSubscriptionApi {
         this.id = id;
         this.status = status;
         this.selector = selector;
+    }
+
+    public LocalSubscriptionApi(Integer id, LocalSubscriptionStatusApi status, String selector, boolean createNewQueue) {
+        this.id = id;
+        this.status = status;
+        this.selector = selector;
+        this.createNewQueue = createNewQueue;
     }
 
     public Integer getId() {
@@ -36,5 +44,13 @@ public class LocalSubscriptionApi {
 
     public void setSelector(String selector) {
         this.selector = selector;
+    }
+
+    public boolean isCreateNewQueue() {
+        return createNewQueue;
+    }
+
+    public void setCreateNewQueue(boolean createNewQueue) {
+        this.createNewQueue = createNewQueue;
     }
 }

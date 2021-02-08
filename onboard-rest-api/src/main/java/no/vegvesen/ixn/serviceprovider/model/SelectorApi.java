@@ -8,13 +8,15 @@ import java.util.Objects;
 
 public class SelectorApi {
     private String selector;
+    private boolean createNewQueue;
 
     public SelectorApi() {
 
     }
 
-    public SelectorApi(String selector){
+    public SelectorApi(String selector, boolean createNewQueue){
         this.selector = selector;
+        this.createNewQueue = createNewQueue;
     }
 
     public void setSelector(String selector) {
@@ -25,23 +27,33 @@ public class SelectorApi {
         return selector;
     }
 
+    public void setCreateNewQueue(boolean createNewQueue) {
+        this.createNewQueue = createNewQueue;
+    }
+
+    public boolean isCreateNewQueue() {
+        return createNewQueue;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof SelectorApi)) return false;
         SelectorApi that = (SelectorApi) o;
-        return Objects.equals(selector, that.selector);
+        return createNewQueue == that.createNewQueue &&
+                selector.equals(that.selector);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selector);
+        return Objects.hash(selector, createNewQueue);
     }
 
     @Override
     public String toString() {
         return "SelectorApi{" +
                 "selector='" + selector + '\'' +
+                "createNewQueue='" + createNewQueue + '\'' +
                 '}';
     }
 }
