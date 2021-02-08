@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
@@ -46,6 +47,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				.withEnv("TRUST_STORE", "/jks/" + trustStore)
 				.withEnv("TRUST_STORE_PASSWORD", trustStorePassword)
                 .withEnv("VHOST_NAME",vHostName)
-				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
+				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080)
+				.waitingFor(Wait.forLogMessage(".*BRK-1004.*\\n",1));
 	}
 }
