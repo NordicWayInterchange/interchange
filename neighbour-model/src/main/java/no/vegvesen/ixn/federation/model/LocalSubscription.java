@@ -51,7 +51,6 @@ public class LocalSubscription {
         this.lastUpdated = lastUpdated;
     }
 
-
     public void setStatus(LocalSubscriptionStatus status) {
         this.status = status;
     }

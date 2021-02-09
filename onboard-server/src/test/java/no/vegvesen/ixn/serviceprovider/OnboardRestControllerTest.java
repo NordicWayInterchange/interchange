@@ -202,7 +202,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProviderName);
 
 		// The existing subscriptions of the Service Provider
-		Set<String> serviceProviderSubscriptionRequest = new HashSet<>();
+		Set<LocalSubscription> serviceProviderSubscriptionRequest = new HashSet<>();
 		String se = "originatingCountry = 'SE'";
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se);
 		String fi = "originatingCountry = 'FI'";

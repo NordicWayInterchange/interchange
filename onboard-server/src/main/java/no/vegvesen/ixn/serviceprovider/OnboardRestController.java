@@ -122,6 +122,16 @@ public class OnboardRestController {
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector.getSelector());
+		if (selector.isCreateNewQueue() == null) {
+			selector.setCreateNewQueue(false);
+		} else {
+			if (selector.isCreateNewQueue()) {
+				localSubscription.setCreateNewQueue(true);
+				localSubscription.setQueueConsumerUser(serviceProviderName);
+			} else {
+				localSubscription.setCreateNewQueue(false);
+			}
+		}
 		if (selector.isCreateNewQueue()) {
 			localSubscription.setCreateNewQueue(true);
 			localSubscription.setQueueConsumerUser(serviceProviderName);

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import net.bytebuddy.asm.Advice;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
@@ -372,15 +373,20 @@ public class NeighbourService {
 		}
 	}
 
-	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<String> localSubscriptions) {
+	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<LocalSubscription> localSubscriptions) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
 		logger.debug("Neighbour capabilities {}", neighbourCapabilities);
 		logger.debug("Local subscriptions {}", localSubscriptions);
-		Set<Subscription> calculatedSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions)
-				.stream()
-				.map(s -> new Subscription(s, SubscriptionStatus.REQUESTED))
-				.collect(Collectors.toSet());
+		Set<LocalSubscription> existingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
+		Set<Subscription> calculatedSubscriptions = new HashSet<>();
+		for (LocalSubscription subscription : existingSubscriptions) {
+			Subscription newSubsription = new Subscription(subscription.getSelector(),
+					SubscriptionStatus.REQUESTED,
+					subscription.isCreateNewQueue(),
+					subscription.getQueueConsumerUser());
+			calculatedSubscriptions.add(newSubsription);
+		}
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;
 	}

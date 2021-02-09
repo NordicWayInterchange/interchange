@@ -72,8 +72,8 @@ public class NeighbourServiceDiscoveryTest {
 		self = new Self(interchangeNodeProperties.getName());
 		Set<Capability> selfCapabilities = Collections.singleton(getDatexCapability("NO"));
 		self.setLocalCapabilities(selfCapabilities);
-		Set<String> selfSubscriptions = new HashSet<>();
-		selfSubscriptions.add("messageType = 'DATEX2' and originatingCountry = 'NO'");
+		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
+		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'"));
 		self.setLocalSubscriptions(selfSubscriptions);
 		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 		return self;
@@ -417,8 +417,8 @@ public class NeighbourServiceDiscoveryTest {
 		selfCapabilities.add(getDatexCapability("NO"));
 		discoveringNode.setLocalCapabilities(selfCapabilities);
 
-		Set<String> selfSubscriptions = new HashSet<>();
-		selfSubscriptions.add("originatingCountry = 'NO'");
+		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
+		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'"));
 		discoveringNode.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
@@ -443,8 +443,8 @@ public class NeighbourServiceDiscoveryTest {
 	@Test
 	public void calculatedSubscriptionRequestSameAsNeighbourSubscriptionsAllowsNextNeighbourToBeSaved() {
 		Self self = new Self("self");
-		Set<String> selfLocalSubscriptions = new HashSet<>();
-		selfLocalSubscriptions.add("originatingCountry = 'NO'");
+		Set<LocalSubscription> selfLocalSubscriptions = new HashSet<>();
+		selfLocalSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'"));
 		self.setLocalSubscriptions(selfLocalSubscriptions);
 		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 

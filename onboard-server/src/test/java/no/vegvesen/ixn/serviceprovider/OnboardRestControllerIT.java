@@ -2,6 +2,7 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.onboard.SelfService;
@@ -16,6 +17,8 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -93,4 +96,18 @@ public class OnboardRestControllerIT {
 
 		assertThat(savedSPAfterDelete.getSubscriptionUpdated()).isEqualTo(subscriptionUpdated);
 	}
+
+	@Test
+    void testAddingLocalSubscriptionWithCreateNewQueue() {
+        String serviceProviderName = "service-provider-create-new-queue";
+        restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", true));
+
+        LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
+
+        ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
+        Set<LocalSubscription> localSubscriptions = savedSP.getSubscriptions();
+        assertThat(localSubscriptions).hasSize(1);
+        assertThat(localSubscriptions.stream().filter(LocalSubscription::isCreateNewQueue).collect(Collectors.toSet())).hasSize(1);
+    }
 }

@@ -8,13 +8,13 @@ import java.util.Objects;
 
 public class SelectorApi {
     private String selector;
-    private boolean createNewQueue;
+    private Boolean createNewQueue;
 
     public SelectorApi() {
 
     }
 
-    public SelectorApi(String selector, boolean createNewQueue){
+    public SelectorApi(String selector, Boolean createNewQueue){
         this.selector = selector;
         this.createNewQueue = createNewQueue;
     }
@@ -31,7 +31,7 @@ public class SelectorApi {
         this.createNewQueue = createNewQueue;
     }
 
-    public boolean isCreateNewQueue() {
+    public Boolean isCreateNewQueue() {
         return createNewQueue;
     }
 

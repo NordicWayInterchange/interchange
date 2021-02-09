@@ -30,23 +30,23 @@ class SelfServiceTest {
 
 	@Test
 	void calculateSelfSubscriptionsTest() {
-		String localSubA = "originatingCountry = 'FI'";
-		String localSubB = "originatingCountry = 'SE'";
-		String localSubC = "originatingCountry = 'NO'";
+		LocalSubscription localSubA = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'FI'");
+		LocalSubscription localSubB = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'SE'");
+		LocalSubscription localSubC = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'NO'");
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName("First Service Provider");
-		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubA));
-		firstServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubB));
+		firstServiceProvider.addLocalSubscription(localSubA);
+		firstServiceProvider.addLocalSubscription(localSubB);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider();
 		secondServiceProvider.setName("Second Service Provider");
-		secondServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubB));
-		secondServiceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.CREATED,localSubC));
+		secondServiceProvider.addLocalSubscription(localSubB);
+		secondServiceProvider.addLocalSubscription(localSubC);
 
 		List<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toList());
 
-		Set<String> selfSubscriptions = selfService.calculateSelfSubscriptions(serviceProviders);
+		Set<LocalSubscription> selfSubscriptions = selfService.calculateSelfSubscriptions(serviceProviders);
 
 		assertThat(selfSubscriptions).hasSize(3);
 		assertThat(selfSubscriptions).containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet()));
@@ -168,7 +168,7 @@ class SelfServiceTest {
 		LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'");
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
 		serviceProvider.setSubscriptions(Sets.newLinkedHashSet(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
-		Set<String> localSubscriptions = selfService.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
+		Set<LocalSubscription> localSubscriptions = selfService.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
 		assertThat(localSubscriptions).hasSize(1);
 	}
 
