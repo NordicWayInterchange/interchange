@@ -108,7 +108,9 @@ public class OnboardRestControllerIT {
         ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalSubscription> localSubscriptions = savedSP.getSubscriptions();
         assertThat(localSubscriptions).hasSize(1);
-        assertThat(localSubscriptions.stream().filter(LocalSubscription::isCreateNewQueue).collect(Collectors.toSet())).hasSize(1);
+        LocalSubscription subscription = localSubscriptions.stream().findFirst().get();
+        assertThat(subscription.isCreateNewQueue()).isTrue();
+        assertThat(subscription.getQueueConsumerUser()).isEqualTo(serviceProviderName);
     }
 
     @Test

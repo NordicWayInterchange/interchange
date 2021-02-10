@@ -33,7 +33,7 @@ public class SelectorApi {
         this.createNewQueue = createNewQueue;
     }
 
-    public Boolean isCreateNewQueue() {
+    public boolean isCreateNewQueue() {
         return (createNewQueue != null) && createNewQueue;
     }
 
