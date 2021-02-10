@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -111,6 +112,11 @@ public class OnboardRestControllerIT {
         LocalSubscription subscription = localSubscriptions.stream().findFirst().get();
         assertThat(subscription.isCreateNewQueue()).isTrue();
         assertThat(subscription.getQueueConsumerUser()).isEqualTo(serviceProviderName);
+
+        LocalSubscriptionListApi subscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        List<LocalSubscriptionApi> localSubscriptionApis = subscriptions.getSubscriptions();
+        assertThat(localSubscriptionApis.size()).isEqualTo(1);
+        assertThat(localSubscriptionApis.get(0).isCreateNewQueue()).isTrue();
     }
 
     @Test

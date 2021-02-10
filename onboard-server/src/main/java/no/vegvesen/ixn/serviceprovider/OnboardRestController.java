@@ -119,13 +119,9 @@ public class OnboardRestController {
 
 		logger.info("Service provider {} Incoming subscription createNewQueue {} and selector {}", serviceProviderName,selector.isCreateNewQueue(), selector.getSelector());
 
+		LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,selector);
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector.getSelector());
-		if (selector.isCreateNewQueue()) {
-			localSubscription.setCreateNewQueue(true);
-			localSubscription.setQueueConsumerUser(serviceProviderName);
-		}
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);

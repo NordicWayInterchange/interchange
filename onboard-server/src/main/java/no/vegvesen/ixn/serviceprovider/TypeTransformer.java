@@ -37,4 +37,12 @@ public class TypeTransformer {
 		}
 		return new LocalCapabilityList(idList);
 	}
+
+
+	public LocalSubscription transformSelectorApiToLocalSubscription(String serviceProviderName, SelectorApi selectorApi) {
+        return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
+                selectorApi.getSelector(),
+                selectorApi.isCreateNewQueue(),
+                serviceProviderName);
+    }
 }
