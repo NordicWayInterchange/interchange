@@ -177,6 +177,25 @@ class SelfServiceTest {
 		assertThat(selfService.getNodeProviderName()).isEqualTo("my-interchange");
 	}
 
+	@Test
+	void addLocalSubscriptionWithCreateNewQueueFromServiceProvider() {
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+		LocalSubscription subscription1 = new LocalSubscription(LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", true, "my-service-provider");
+		LocalSubscription subscription2 = new LocalSubscription(LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", false, null);
+
+		serviceProvider.addLocalSubscription(subscription1);
+		serviceProvider.addLocalSubscription(subscription2);
+
+		List<ServiceProvider> SPs = new ArrayList<>(Arrays.asList(serviceProvider));
+
+		Set<LocalSubscription> serviceProviderSubscriptions = selfService.calculateSelfSubscriptions(SPs)
+				.stream()
+				.filter(LocalSubscription::isCreateNewQueue)
+				.collect(Collectors.toSet());
+
+		assertThat(serviceProviderSubscriptions).hasSize(1);
+	}
+
 	private Capability getDatexCapability(String originatingCountry) {
 		return new DatexCapability(null, originatingCountry, null, Collections.emptySet(), Collections.emptySet());
 	}

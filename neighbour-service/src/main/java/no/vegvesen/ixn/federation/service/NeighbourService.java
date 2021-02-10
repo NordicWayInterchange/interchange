@@ -381,11 +381,11 @@ public class NeighbourService {
 		Set<LocalSubscription> existingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
 		Set<Subscription> calculatedSubscriptions = new HashSet<>();
 		for (LocalSubscription subscription : existingSubscriptions) {
-			Subscription newSubsription = new Subscription(subscription.getSelector(),
+			Subscription newSubscription = new Subscription(subscription.getSelector(),
 					SubscriptionStatus.REQUESTED,
 					subscription.isCreateNewQueue(),
 					subscription.getQueueConsumerUser());
-			calculatedSubscriptions.add(newSubsription);
+			calculatedSubscriptions.add(newSubscription);
 		}
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;
@@ -424,6 +424,8 @@ public class NeighbourService {
 						subscription.setQueue(polledSubscription.getQueue());
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
+						subscription.setCreateNewQueue(polledSubscription.isCreateNewQueue());
+						subscription.setQueueConsumerUser(polledSubscription.getQueueConsumerUser());
 						neighbour.getControlConnection().okConnection();
 						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
 							createListenerEndpoint(polledSubscription, neighbour);

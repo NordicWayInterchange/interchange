@@ -8,6 +8,8 @@ import java.util.Objects;
 
 public class SelectorApi {
     private String selector;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean createNewQueue;
 
     public SelectorApi() {
@@ -32,7 +34,7 @@ public class SelectorApi {
     }
 
     public Boolean isCreateNewQueue() {
-        return createNewQueue;
+        return (createNewQueue != null) && createNewQueue;
     }
 
     @Override

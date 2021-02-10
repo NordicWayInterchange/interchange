@@ -38,6 +38,13 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, boolean createNewQueue, String queueConsumerUser) {
+        this.status = status;
+        this.selector = selector;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
+    }
+
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
         this.sub_id = id;
         this.status = status;

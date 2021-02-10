@@ -110,4 +110,12 @@ public class OnboardRestControllerIT {
         assertThat(localSubscriptions).hasSize(1);
         assertThat(localSubscriptions.stream().filter(LocalSubscription::isCreateNewQueue).collect(Collectors.toSet())).hasSize(1);
     }
+
+    @Test
+    void testAddingLocalSubscriptionWithCreateNewQueueAndGetApiObject() {
+        String serviceProviderName = "service-provider-create-new-queue";
+        LocalSubscriptionApi serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", true));
+
+        assertThat(serviceProviderSubscriptions.isCreateNewQueue()).isTrue();
+    }
 }

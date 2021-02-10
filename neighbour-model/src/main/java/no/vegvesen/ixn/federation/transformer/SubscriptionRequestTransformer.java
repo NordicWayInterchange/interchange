@@ -73,8 +73,8 @@ public class SubscriptionRequestTransformer {
 		response.setStatus(status);
 		if (subscription.isCreateNewQueue()) {
 			response.setCreateNewQueue(subscription.isCreateNewQueue());
+			response.setQueueConsumerUser(subscription.getQueueConsumerUser());
 		}
-		response.setQueueConsumerUser(subscription.getQueueConsumerUser());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			response.setMessageBrokerUrl(messageChannelUrl);
 			response.setQueueName(neighbourName);

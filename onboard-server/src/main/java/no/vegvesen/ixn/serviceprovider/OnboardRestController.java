@@ -117,7 +117,7 @@ public class OnboardRestController {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. The DataTypeApi object was null. Nothing to add.");
 		}
 
-		logger.info("Service provider {} Incoming subscription selector: {}", serviceProviderName,selector.getSelector());
+		logger.info("Service provider {} Incoming subscription createNewQueue {} and selector {}", serviceProviderName,selector.isCreateNewQueue(), selector.getSelector());
 
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
@@ -131,10 +131,6 @@ public class OnboardRestController {
 			} else {
 				localSubscription.setCreateNewQueue(false);
 			}
-		}
-		if (selector.isCreateNewQueue()) {
-			localSubscription.setCreateNewQueue(true);
-			localSubscription.setQueueConsumerUser(serviceProviderName);
 		}
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
