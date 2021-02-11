@@ -51,6 +51,14 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, boolean createNewQueue, String queueConsumerUser) {
+        this.sub_id = id;
+        this.status = status;
+        this.selector = selector;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
+    }
+
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
         this.sub_id = id;
         this.status = status;
@@ -133,7 +141,7 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(sub_id, newStatus, selector);
+            return new LocalSubscription(sub_id, newStatus, selector,createNewQueue,queueConsumerUser);
         }
     }
 
