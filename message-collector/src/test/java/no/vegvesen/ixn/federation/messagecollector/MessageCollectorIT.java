@@ -64,7 +64,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(1)
+	//@Order(1)
 	public void testMessagesCollected() throws NamingException, JMSException {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
@@ -98,7 +98,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Order(2)
+	//@Order(2)
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
