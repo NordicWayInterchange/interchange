@@ -186,4 +186,26 @@ public class ServiceProviderRepositoryIT {
 				.stream()
 				.filter(s -> s.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN))).hasSize(1);
 	}
+
+	@Test
+	public void testThatServiceProviderSavesLocalSubscriptionWithCreateNewQueue() {
+		String name = "my-service-provider";
+		ServiceProvider sp = new ServiceProvider(name);
+
+		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'", true, name);
+		sp.addLocalSubscription(sub);
+
+		repository.save(sp);
+
+		ServiceProvider savedSp = repository.findByName(name);
+		assertThat(savedSp.getSubscriptions()).hasSize(1);
+
+		LocalSubscription savedSub = savedSp
+				.getSubscriptions()
+				.stream()
+				.findFirst()
+				.get();
+
+		assertThat(savedSub.isCreateNewQueue()).isTrue();
+	}
 }
