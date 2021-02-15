@@ -14,12 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -34,8 +29,6 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("rawtypes")
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
-@ContextConfiguration(initializers = {QuadTreeFilteringIT.Initializer.class})
 @Testcontainers
 public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
@@ -43,32 +36,19 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	private static Path testKeysPath = generateKeys(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
+	public GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
 
-	private static String AMQPS_URL;
+	private String AMQPS_URL;
 
-	static class Initializer  implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			String httpsUrl = "https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT);
-			String httpUrl = "http://localhost:" + qpidContainer.getMappedPort(8080);
-			logger.info("server url: " + httpsUrl);
-			logger.info("server url: " + httpUrl);
-			AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
-			TestPropertyValues.of(
-					"routing-configurer.baseUrl=" + httpsUrl,
-					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
-			).applyTo(configurableApplicationContext.getEnvironment());
-		}
-	}
-
-	@Autowired
 	private QpidClient qpidClient;
 
 	@BeforeEach
 	public void setUp() {
+		String keyStoreName = "routing_configurer.p12";
+		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		qpidClient = createQpidClient(keyStoreName);
 		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
+        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
 		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
 		if (!administrators.contains("king_gustaf")) {
 			qpidClient.addMemberToGroup("king_gustaf", "administrators");
@@ -162,6 +142,17 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 
 		return receivedMessage;
+	}
+
+	private QpidClient createQpidClient(String keyStoreName) {
+		TestSSLProperties properties = new TestSSLProperties();
+		properties.setTrustStore(testKeysPath.resolve("trustStore.jks").toString());
+		properties.setKeyStore(testKeysPath.resolve(keyStoreName).toString());
+		RestTemplate restTemplate = new QpidClientConfig(new TestSSLContextConfigGeneratedExternalKeys(properties).getTestSslContext()).qpidRestTemplate();
+		RoutingConfigurerProperties routingConfigurerProperties = new RoutingConfigurerProperties();
+		routingConfigurerProperties.setVhost("localhost");
+		routingConfigurerProperties.setBaseUrl("https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT));
+		return new QpidClient(restTemplate, routingConfigurerProperties);
 	}
 
 }
