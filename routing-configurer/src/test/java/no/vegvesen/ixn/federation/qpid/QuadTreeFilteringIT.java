@@ -150,17 +150,17 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.addBinding(subscription.toSelector(), king_gustaf.getName(), ""+subscription.toSelector().hashCode(), "nwEx");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
+		Message receivedMessage;
+		try (Source source = new Source(AMQPS_URL, "nwEx", sslContext)) {
+			source.start();
+			source.sendNonPersistent("fisk", "NO", messageQuadTreeTiles);
+		}
 
-		Sink sink = new Sink(AMQPS_URL, "king_gustaf", sslContext);
-		MessageConsumer consumer = sink.createConsumer();
+		try (MessageConsumer consumer = new Sink(AMQPS_URL, "king_gustaf", sslContext).createConsumer()) {
+			receivedMessage = consumer.receive(1000);
+		}
 
-		Source source = new Source(AMQPS_URL, "nwEx", sslContext);
-		source.start();
-		source.sendNonPersistent("fisk", "NO", messageQuadTreeTiles);
 
-		Message receivedMessage = consumer.receive(1000);
-		sink.close();
-		source.close();
 		return receivedMessage;
 	}
 
