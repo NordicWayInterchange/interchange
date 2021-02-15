@@ -428,7 +428,9 @@ public class NeighbourService {
 						subscription.setQueueConsumerUser(polledSubscription.getQueueConsumerUser());
 						neighbour.getControlConnection().okConnection();
 						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
-							createListenerEndpoint(polledSubscription, neighbour);
+							if (!subscription.isCreateNewQueue()) {
+								createListenerEndpoint(polledSubscription, neighbour);
+							}
 						}
 						//utvide med ListenerEndpoint lookup + lage ny om det trengs
 						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());

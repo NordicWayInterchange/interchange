@@ -105,6 +105,10 @@ public class ServiceProvider {
 				!activeSubscriptions().isEmpty());
 	}
 
+	public boolean hasCapabilities () {
+		return capabilities.hasDataTypes();
+	}
+
 	public Set<LocalSubscription> activeSubscriptions() {
 		return subscriptions.stream()
 		.filter(subscription -> subscription.getStatus() != LocalSubscriptionStatus.TEAR_DOWN)

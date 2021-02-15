@@ -178,6 +178,39 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
 	}
 
+	@Test
+	public void doNotSetUpQueueWhenOnlySubscriptionHasCreateNewQueue() {
+		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
+				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO'", true, "my-service-provider1");
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+		serviceProvider.addLocalSubscription(sub);
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
+		assertThat(client.queueExists(serviceProvider.getName())).isFalse();
+	}
+
+	@Test
+	public void doSetUpQueueWhenSubscriptionHasCreateNewQueueAndNot() {
+		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
+				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+						"AND messageType = 'DATEX2' " +
+						"AND originatingCountry = 'NO'", true, "my-service-provider");
+		LocalSubscription sub2 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
+				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+						"AND messageType = 'DATEX2' " +
+						"AND originatingCountry = 'SE'", false, "");
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider2");
+		serviceProvider.addLocalSubscription(sub1);
+		serviceProvider.addLocalSubscription(sub2);
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
+		assertThat(client.queueExists(serviceProvider.getName())).isTrue();
+	}
+
    	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),

@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
 
@@ -47,6 +48,13 @@ public class ServiceProviderRouter {
                 Optional<LocalSubscription> newSubscription = processSubscription(name, subscription);
                 newSubscription.ifPresent(newSubscriptions::add);
             }
+
+            //making a set of LocalSubscriptions that has createNewQueue = true
+            Set<LocalSubscription> hasCreateNewQueue = newSubscriptions
+                    .stream()
+                    .filter(LocalSubscription::isCreateNewQueue)
+                    .collect(Collectors.toSet());
+
             //remove the queue and group member if we have no more subscriptions
             if (newSubscriptions.isEmpty()) {
                 if (qpidClient.queueExists(name)) {
@@ -54,8 +62,11 @@ public class ServiceProviderRouter {
                     logger.info("Removed queue for service provider {}", serviceProvider.getName());
                 }
             }
+
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
-                optionallyAddServiceProviderToGroup(groupMemberNames,name);
+                if (serviceProvider.hasCapabilities() || (newSubscriptions.size() > hasCreateNewQueue.size())) {
+                    optionallyAddServiceProviderToGroup(groupMemberNames,name);
+                }
             } else {
                 if (groupMemberNames.contains(serviceProvider.getName())){
                     removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
@@ -78,7 +89,11 @@ public class ServiceProviderRouter {
         switch (subscription.getStatus()) {
             case REQUESTED:
 			case CREATED:
-				newSubscription = onRequested(name, subscription);
+			    if (subscription.isCreateNewQueue()) {
+                    newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
+                } else {
+				    newSubscription = onRequested(name, subscription);
+			    }
                 break;
 			case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
