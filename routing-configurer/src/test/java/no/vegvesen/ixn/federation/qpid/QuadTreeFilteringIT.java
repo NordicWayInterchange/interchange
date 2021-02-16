@@ -42,8 +42,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	private QpidClient qpidClient;
 
-	@BeforeEach
-	public void setUp() {
+	@Test
+	public void matchingFilterAndQuadTreeGetsRouted() throws Exception {
 		String keyStoreName = "routing_configurer.p12";
 		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
 		qpidClient = createQpidClient(keyStoreName);
@@ -53,10 +53,6 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		if (!administrators.contains("king_gustaf")) {
 			qpidClient.addMemberToGroup("king_gustaf", "administrators");
 		}
-	}
-
-	@Test
-	public void matchingFilterAndQuadTreeGetsRouted() throws Exception {
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,abcdefgh%')");
 		assertThat(message).isNotNull();
@@ -64,6 +60,15 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void matchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
+	    String keyStoreName = "routing_configurer.p12";
+		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		qpidClient = createQpidClient(keyStoreName);
+		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
+        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
+		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
+		if (!administrators.contains("king_gustaf")) {
+			qpidClient.addMemberToGroup("king_gustaf", "administrators");
+		}
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,cdefghij%')");
 		assertThat(message).isNull();
@@ -71,13 +76,31 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void matchingFilterAndQuadTreeExactMatchGetsRouted() throws Exception {
-		String messageQuadTreeTiles = ",abcdefghijklmnop";
+
+		String keyStoreName = "routing_configurer.p12";
+		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		qpidClient = createQpidClient(keyStoreName);
+		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
+        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
+		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
+		if (!administrators.contains("king_gustaf")) {
+			qpidClient.addMemberToGroup("king_gustaf", "administrators");
+		}		String messageQuadTreeTiles = ",abcdefghijklmnop";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')");
 		assertThat(message).isNotNull();
 	}
 
 	@Test
 	public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
+	    String keyStoreName = "routing_configurer.p12";
+		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		qpidClient = createQpidClient(keyStoreName);
+		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
+        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
+		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
+		if (!administrators.contains("king_gustaf")) {
+			qpidClient.addMemberToGroup("king_gustaf", "administrators");
+		}
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')");
 		assertThat(message).isNull();
@@ -85,9 +108,37 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void nonMatchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
+	    String keyStoreName = "routing_configurer.p12";
+		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		qpidClient = createQpidClient(keyStoreName);
+		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
+        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
+		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
+		if (!administrators.contains("king_gustaf")) {
+			qpidClient.addMemberToGroup("king_gustaf", "administrators");
+		}
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'SE') and (quadTree like '%,cdefghij%')");
 		assertThat(message).isNull();
+	}
+
+	@Test
+	public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
+	    String keyStoreName = "routing_configurer.p12";
+		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		qpidClient = createQpidClient(keyStoreName);
+		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
+        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
+		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
+		if (!administrators.contains("king_gustaf")) {
+			qpidClient.addMemberToGroup("king_gustaf", "administrators");
+		}
+		Map<String, String> props = Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2");
+		props.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		props.put(MessageProperty.QUAD_TREE.getName(), "abcdef");
+		DataType datexNoAbcdef = new DataType(props);
+		Message recievedMsg = sendReceiveMessageServiceProvider(",abcdefghijklmno,cdefghijklmnop", datexNoAbcdef);
+		assertThat(recievedMsg).isNotNull();
 	}
 
 	private Message sendReceiveMessageNeighbour(String messageQuadTreeTiles, String selector) throws Exception {
@@ -110,16 +161,6 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 		}
 		return receivedMessage;
-	}
-
-	@Test
-	public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
-		Map<String, String> props = Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2");
-		props.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
-		props.put(MessageProperty.QUAD_TREE.getName(), "abcdef");
-		DataType datexNoAbcdef = new DataType(props);
-		Message recievedMsg = sendReceiveMessageServiceProvider(",abcdefghijklmno,cdefghijklmnop", datexNoAbcdef);
-		assertThat(recievedMsg).isNotNull();
 	}
 
 	private Message sendReceiveMessageServiceProvider(String messageQuadTreeTiles, DataType subscription) throws Exception {
