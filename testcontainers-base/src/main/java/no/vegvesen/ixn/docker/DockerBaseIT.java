@@ -16,7 +16,7 @@ public class DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(DockerBaseIT.class);
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";
 
-	protected static Path getFolderPath(String relativePathFromProjectRoot) {
+	protected static Path getProjectRelativePath(String relativePathFromProjectRoot) {
 		Path projectRoot = getProjectRootPath();
 		logger.debug("Resolving path to project folder [{}] from project root path: [{}]", relativePathFromProjectRoot, projectRoot.toString());
 		Path dockerFilePath = projectRoot.resolve(relativePathFromProjectRoot);
@@ -50,10 +50,11 @@ public class DockerBaseIT {
 	}
 
 	protected static GenericContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
+		logger.debug("Test key path: ",testKeysPath);
 		String spaceSeparatedKeyCns = String.join(" ", serverOrUserCns);
 		return new GenericContainer(
 				new ImageFromDockerfile("key-gen", false)
-						.withFileFromPath(".", getFolderPath("key-gen")))
+						.withFileFromPath(".", getProjectRelativePath("key-gen")))
 				.withFileSystemBind(testKeysPath.toString(), "/jks/keys", BindMode.READ_WRITE)
 				.withEnv("CA_CN", ca)
 				.withEnv("KEY_CNS", spaceSeparatedKeyCns)
@@ -63,7 +64,8 @@ public class DockerBaseIT {
 	}
 
 	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
-		Path path = getFolderPath("target/test-keys-" + clazz.getSimpleName());
+		Path path = getProjectRelativePath("target/test-keys-" + clazz.getSimpleName());
+		logger.debug("Key container writes to " + path);
 		GenericContainer keyContainer = getKeyContainer(path, ca_cn, serverOrUserCns);
 		keyContainer.start();
 		return path;

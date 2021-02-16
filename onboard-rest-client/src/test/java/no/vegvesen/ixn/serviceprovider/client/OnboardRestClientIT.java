@@ -52,7 +52,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         onboardServer = new GenericContainer(
                     new ImageFromDockerfile()
                             .withFileFromPath(".",
-                                    getFolderPath("onboard-server-app")
+                                    getProjectRelativePath("onboard-server-app")
                             )
                     )
                     .withNetwork(network)

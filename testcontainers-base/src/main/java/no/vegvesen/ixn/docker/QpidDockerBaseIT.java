@@ -21,7 +21,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 
 	public static GenericContainer getQpidContainer(String configPathFromClasspath, Path testKeysPath, final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword) {
 		return new GenericContainer(
-				new ImageFromDockerfile("qpid-it", false).withFileFromPath(".", getFolderPath("qpid")))
+				new ImageFromDockerfile("qpid-it", false).withFileFromPath(".", getProjectRelativePath("qpid")))
 				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
 				.withFileSystemBind(testKeysPath.toString(), "/jks", BindMode.READ_ONLY)
 				.withEnv("PASSWD_FILE", "/config/passwd")
@@ -39,7 +39,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 	public static GenericContainer getQpidTestContainer(String configPathFromClasspath, Path testKeysPath, final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword, String vHostName) {
 		return new GenericContainer(
 				new ImageFromDockerfile("qpid-it-memory", false)
-						.withFileFromPath(".", getFolderPath("qpid-test")))
+						.withFileFromPath(".", getProjectRelativePath("qpid-test")))
 				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
 				.withFileSystemBind(testKeysPath.toString(), "/jks", BindMode.READ_ONLY)
 				.withEnv("KEY_STORE", "/jks/" + keyStore)

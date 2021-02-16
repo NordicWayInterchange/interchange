@@ -11,14 +11,14 @@ class DockerBaseITTest {
 
 	@Test
 	void testcontainersBaseFolderCanBeResolved() {
-		Path folderPath = DockerBaseIT.getFolderPath("testcontainers-base");
+		Path folderPath = DockerBaseIT.getProjectRelativePath("testcontainers-base");
 		assertThat(folderPath).isNotNull();
 		assertThat(folderPath.toString()).endsWith("testcontainers-base");
 	}
 
 	@Test
 	void keyGenDockerImageFolderCanBeResolved() {
-		Path folderPath = DockerBaseIT.getFolderPath("key-gen");
+		Path folderPath = DockerBaseIT.getProjectRelativePath("key-gen");
 		assertThat(folderPath).isNotNull();
 		assertThat(folderPath.toString()).endsWith("key-gen");
 		File f = new File(folderPath.toUri());
@@ -27,7 +27,7 @@ class DockerBaseITTest {
 
 	@Test
 	void getFolderPathOfNonExistingFolderWillGivePath() {
-		Path folderPath = DockerBaseIT.getFolderPath("this-folder-does-not-exist");
+		Path folderPath = DockerBaseIT.getProjectRelativePath("this-folder-does-not-exist");
 		assertThat(folderPath).isNotNull();
 		File f = new File(folderPath.toUri());
 		assertThat(f.exists()).isFalse();
