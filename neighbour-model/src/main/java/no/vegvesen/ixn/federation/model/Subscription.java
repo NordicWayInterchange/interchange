@@ -53,6 +53,27 @@ public class Subscription {
 		this.queueConsumerUser = queueConsumerUser;
 	}
 
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String brokerUrl, String queue, boolean createNewQueue, String queueConsumerUser) {
+		this.id = id;
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+		this.path = path;
+		this.brokerUrl = brokerUrl;
+		this.queue = queue;
+		this.createNewQueue = createNewQueue;
+		this.queueConsumerUser = queueConsumerUser;
+	}
+
+	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String brokerUrl, String queue, boolean createNewQueue, String queueConsumerUser) {
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+		this.path = path;
+		this.brokerUrl = brokerUrl;
+		this.queue = queue;
+		this.createNewQueue = createNewQueue;
+		this.queueConsumerUser = queueConsumerUser;
+	}
+
 	public SubscriptionStatus getSubscriptionStatus() {
 		return subscriptionStatus;
 	}

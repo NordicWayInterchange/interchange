@@ -52,6 +52,8 @@ public class SubscriptionRequestTransformer {
 					subscriptionApi.getPath(),
 					false,
 					subscriptionApi.getQueueConsumerUser());
+			subscription.setBrokerUrl(subscriptionApi.getMessageBrokerUrl());
+			subscription.setQueue(subscriptionApi.getQueueName());
 			return subscription;
 		} else {
 			Subscription subscription = new Subscription(Integer.parseInt(subscriptionApi.getId()),
@@ -60,6 +62,8 @@ public class SubscriptionRequestTransformer {
 					subscriptionApi.getPath(),
 					subscriptionApi.isCreateNewQueue(),
 					subscriptionApi.getQueueConsumerUser());
+			subscription.setBrokerUrl(subscriptionApi.getMessageBrokerUrl());
+			subscription.setQueue(subscriptionApi.getQueueName());
 			return subscription;
 		}
 	}
