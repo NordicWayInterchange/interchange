@@ -50,7 +50,7 @@ public class DockerBaseIT {
 	}
 
 	protected static GenericContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
-		logger.debug("Test key path: ",testKeysPath);
+		logger.debug("Test key path: {}",testKeysPath);
 		String spaceSeparatedKeyCns = String.join(" ", serverOrUserCns);
 		return new GenericContainer(
 				new ImageFromDockerfile("key-gen", false)
