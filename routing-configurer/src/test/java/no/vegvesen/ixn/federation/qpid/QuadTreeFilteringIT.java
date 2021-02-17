@@ -8,6 +8,9 @@ import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.properties.MessageProperty;
+import no.vegvesen.ixn.ssl.KeystoreDetails;
+import no.vegvesen.ixn.ssl.KeystoreType;
+import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,9 +55,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void matchingFilterAndQuadTreeGetsRouted() throws Exception {
-		String keyStoreName = "routing_configurer.p12";
 		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
-		qpidClient = createQpidClient(keyStoreName);
+		qpidClient = createClient();
 		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
         //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
 		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
@@ -68,9 +70,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void matchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
-	    String keyStoreName = "routing_configurer.p12";
 		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
-		qpidClient = createQpidClient(keyStoreName);
+		qpidClient = createClient();
 		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
         //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
 		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
@@ -85,9 +86,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	@Test
 	public void matchingFilterAndQuadTreeExactMatchGetsRouted() throws Exception {
 
-		String keyStoreName = "routing_configurer.p12";
 		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
-		qpidClient = createQpidClient(keyStoreName);
+		qpidClient = createClient();
 		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
         //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
 		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
@@ -100,9 +100,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
-	    String keyStoreName = "routing_configurer.p12";
 		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
-		qpidClient = createQpidClient(keyStoreName);
+		qpidClient = createClient();
 		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
         //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
 		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
@@ -116,9 +115,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void nonMatchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
-	    String keyStoreName = "routing_configurer.p12";
 		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
-		qpidClient = createQpidClient(keyStoreName);
+		qpidClient = createClient();
 		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
         //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
 		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
@@ -132,9 +130,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
-	    String keyStoreName = "routing_configurer.p12";
 		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
-		qpidClient = createQpidClient(keyStoreName);
+		qpidClient = createClient();
 		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
         //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
 		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
@@ -193,15 +190,16 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		return receivedMessage;
 	}
 
-	private QpidClient createQpidClient(String keyStoreName) {
-		TestSSLProperties properties = new TestSSLProperties();
-		properties.setTrustStore(testKeysPath.resolve("trustStore.jks").toString());
-		properties.setKeyStore(testKeysPath.resolve(keyStoreName).toString());
-		RestTemplate restTemplate = new QpidClientConfig(new TestSSLContextConfigGeneratedExternalKeys(properties).getTestSslContext()).qpidRestTemplate();
-		RoutingConfigurerProperties routingConfigurerProperties = new RoutingConfigurerProperties();
-		routingConfigurerProperties.setVhost("localhost");
-		routingConfigurerProperties.setBaseUrl("https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT));
-		return new QpidClient(restTemplate, routingConfigurerProperties);
+
+	public QpidClient createClient() {
+		RestTemplate restTemplate = new QpidClientConfig(setUpTestSslContext("routing_configurer.p12")).qpidRestTemplate();
+		return new QpidClient("https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT), "localhost", restTemplate);
+	}
+
+	public SSLContext setUpTestSslContext(String s) {
+		return SSLContextFactory.sslContextFromKeyAndTrustStores(
+				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
+				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
 
 }
