@@ -33,10 +33,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(QuadTreeFilteringIT.class);
-	private static Path testKeysPath = generateKeys(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+	private static Path testKeysPath = generateKeys(QuadTreeFilteringIT.class,
+			"my_ca",
+			"localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	public GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
+	public GenericContainer qpidContainer = getQpidTestContainer("qpid",
+			testKeysPath,
+			"localhost.p12",
+			"password",
+			"truststore.jks",
+			"password",
+			"localhost");
 
 	private String AMQPS_URL;
 
