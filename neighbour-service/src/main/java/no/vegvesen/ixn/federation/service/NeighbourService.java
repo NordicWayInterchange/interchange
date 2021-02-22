@@ -462,6 +462,26 @@ public class NeighbourService {
 		return neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
 	}
 
+	public void updateLocalSubscriptions(Self self) {
+		Set<LocalSubscription> selfSubscriptions = self.getLocalSubscriptions();
+		List<Neighbour> neighboursWithOurRequestedSubscriptions = listNeighboursToConsumeMessagesFrom();
+
+		for(Neighbour neighbour : neighboursWithOurRequestedSubscriptions) {
+			Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getAcceptedSubscriptionsWithCreateNewQueue();
+			for(Subscription subscription : subscriptions){
+				if(subscription.getBrokerUrl() != null){
+					LocalSubscription localSubscription = selfSubscriptions.stream()
+							.filter(s -> s.getSelector().equals(subscription.getSelector()))
+							.findFirst()
+							.get();
+					if(localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser())){
+						localSubscription.setBrokerUrl(subscription.getBrokerUrl());
+					}
+				}
+			}
+		}
+	}
+
 	public void retryUnreachable(Self self, NeighbourFacade neighbourFacade) {
 		List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
 		if (!unreachableNeighbours.isEmpty()) {
