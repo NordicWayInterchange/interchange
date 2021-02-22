@@ -9,6 +9,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @SuppressWarnings("rawtypes")
 @NotThreadSafe
@@ -36,18 +37,15 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080);
 	}
 
-	public static GenericContainer getQpidTestContainer(String configPathFromClasspath, Path testKeysPath, final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword, String vHostName) {
-		return new GenericContainer(
-				new ImageFromDockerfile("qpid-it-memory", false)
-						.withFileFromPath(".", getProjectRelativePath("qpid-test")))
-				.withClasspathResourceMapping(configPathFromClasspath, "/config", BindMode.READ_ONLY)
-				.withFileSystemBind(testKeysPath.toString(), "/jks", BindMode.READ_ONLY)
-				.withEnv("KEY_STORE", "/jks/" + keyStore)
-				.withEnv("KEY_STORE_PASSWORD", keyStorePassword)
-				.withEnv("TRUST_STORE", "/jks/" + trustStore)
-				.withEnv("TRUST_STORE_PASSWORD", trustStorePassword)
-                .withEnv("VHOST_NAME",vHostName)
-				.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTPS_PORT, 8080)
-				.waitingFor(Wait.forLogMessage(".*BRK-1004.*\\n",1));
+	public static QpidContainer getQpidTestContainer(String configPathFromClasspath, Path testKeysPath, final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword, String vHostName) {
+		return new QpidContainer("qpid-it-memory",
+				getProjectRelativePath("qpid-test"),
+				Paths.get(configPathFromClasspath),
+				testKeysPath,
+				keyStore,
+				keyStorePassword,
+				trustStore,
+				trustStorePassword,
+				vHostName);
 	}
 }

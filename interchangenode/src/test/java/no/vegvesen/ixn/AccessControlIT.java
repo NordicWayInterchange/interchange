@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class AccessControlIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public static final GenericContainer localContainer = getQpidTestContainer("qpid",
+	public static final QpidContainer localContainer = getQpidTestContainer("qpid",
 			testKeysPath,
 			"localhost.p12",
 			"password",
@@ -52,7 +53,8 @@ public class AccessControlIT extends QpidDockerBaseIT {
 			"localhost");
 
 	private String getQpidURI() {
-		String url = "amqps://localhost:" + localContainer.getMappedPort(AMQPS_PORT);
+		//String url = "amqps://localhost:" + localContainer.getMappedPort(AMQPS_PORT);
+		String url = localContainer.getAmqpsUrl();
 		logger.info("connection string to local message broker {}", url);
 		return url;
 	}

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public final GenericContainer qpidContainer = getQpidTestContainer("qpid",
+	public final QpidContainer qpidContainer = getQpidTestContainer("qpid",
 			testKeysPath,
 			"localhost.p12",
 			"password",
@@ -38,8 +39,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@BeforeEach
 	public void setUp() {
-		Integer mappedPort = qpidContainer.getMappedPort(5671);
-		URL = String.format("amqps://localhost:%s/", mappedPort);
+		URL = qpidContainer.getAmqpsUrl();
 		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext(testKeysPath,"king_harald.p12", "truststore.jks");
 	}
 

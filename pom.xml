@@ -16,7 +16,7 @@
         <java.version>1.8</java.version>
         <spring-boot-dependencies.version>2.2.3.RELEASE</spring-boot-dependencies.version>
         <picocli-version>4.2.0</picocli-version>
-        <testcontiainers.version>1.15.1</testcontiainers.version>
+        <testcontiainers.version>1.15.2</testcontiainers.version>
     </properties>
 
     <distributionManagement>
