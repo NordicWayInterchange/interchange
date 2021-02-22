@@ -19,7 +19,8 @@ public class TypeTransformer {
         return new LocalSubscriptionApi(localSubscription.getSub_id(),
                 transformLocalSubscriptionStatusToLocalSubscriptionStatusApi(localSubscription.getStatus()),
                 localSubscription.getSelector(),
-                localSubscription.isCreateNewQueue());
+                localSubscription.isCreateNewQueue(),
+                localSubscription.getBrokerUrl());
     }
 
     public LocalSubscriptionListApi transformLocalSubscriptionListToLocalSubscriptionListApi(Set<LocalSubscription> subscriptions) {

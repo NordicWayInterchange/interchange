@@ -29,6 +29,8 @@ public class LocalSubscription {
 
     private String queueConsumerUser;
 
+    private String brokerUrl;
+
     public LocalSubscription() {
 
     }
@@ -101,6 +103,14 @@ public class LocalSubscription {
 
     public void setQueueConsumerUser(String queueConsumerUser) {
         this.queueConsumerUser = queueConsumerUser;
+    }
+
+    public String getBrokerUrl() {
+        return brokerUrl;
+    }
+
+    public void setBrokerUrl(String brokerUrl) {
+        this.brokerUrl = brokerUrl;
     }
 
     //TODO lag et objekt av selector??
