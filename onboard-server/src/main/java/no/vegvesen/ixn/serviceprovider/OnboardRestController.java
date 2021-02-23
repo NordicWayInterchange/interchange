@@ -197,6 +197,15 @@ public class OnboardRestController {
 		return localDataTypeList;
 	}
 
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public LocalSubscriptionApi getServiceProviderSubscriptionWithBrokerUrl(@PathVariable String serviceProviderName, @PathVariable Integer subscriptionId) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		LocalSubscription localSubscription = selfService.fetchSelf().getLocalSubscriptions().stream().filter(s -> s.getSub_id().equals(subscriptionId)).findFirst().get();
+		logger.info("Received poll on brokerUrl = {} from Service Provider {} with queueConsumerUser = {}", localSubscription.getBrokerUrl(), serviceProviderName, localSubscription.getQueueConsumerUser());
+		OnboardMDCUtil.removeLogVariables();
+		return typeTransformer.transformLocalSubscriptionToLocalSubscriptionApi(localSubscription);
+	}
+
 	// TODO: Remove
 	@RequestMapping(method = RequestMethod.GET, path = "/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ServiceProvider> getServiceProviders() {
