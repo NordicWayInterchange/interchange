@@ -65,7 +65,7 @@ public class OnboardRESTClient {
 		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, user, capabilityId));
     }
 
-    public LocalSubscriptionApi getServiceProviderSubscriptionWithBrokerUrl(Integer localSubscriptionId) {
+    public LocalSubscriptionApi getSubscription(Integer localSubscriptionId) {
         String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId.toString());
         return restTemplate.getForEntity(url, LocalSubscriptionApi.class).getBody();
     }

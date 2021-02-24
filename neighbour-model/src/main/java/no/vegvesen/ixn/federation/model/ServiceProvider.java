@@ -99,6 +99,13 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
+	public void updateSubscriptionWithBrokerUrl(LocalSubscription subscription, String brokerUrl) {
+		for(LocalSubscription localSubscription : subscriptions) {
+			if (localSubscription.getSelector().equals(subscription.getSelector())){
+				localSubscription.setBrokerUrl(brokerUrl);
+			}
+		}
+	}
 
 	public boolean hasCapabilitiesOrActiveSubscriptions() {
 		return (capabilities.hasDataTypes() ||
