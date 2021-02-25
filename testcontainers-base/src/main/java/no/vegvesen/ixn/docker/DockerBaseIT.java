@@ -49,7 +49,7 @@ public class DockerBaseIT {
 		return projectRoot;
 	}
 
-	protected static GenericContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
+	protected static KeysContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
 		logger.debug("Test key path: {}",testKeysPath);
 		return new KeysContainer(getProjectRelativePath("key-gen"),testKeysPath,ca,serverOrUserCns);
 	}
