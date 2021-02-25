@@ -59,7 +59,6 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void matchingFilterAndQuadTreeGetsRouted() throws Exception {
-		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,abcdefgh%')");
@@ -68,7 +67,6 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void matchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
-		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,cdefghij%')");
@@ -77,8 +75,6 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void matchingFilterAndQuadTreeExactMatchGetsRouted() throws Exception {
-
-		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
 		String messageQuadTreeTiles = ",abcdefghijklmnop";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')");
@@ -87,7 +83,6 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
-		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')");
@@ -96,7 +91,6 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void nonMatchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
-		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'SE') and (quadTree like '%,cdefghij%')");
@@ -105,7 +99,6 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
-		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
 		Map<String, String> props = Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2");
 		props.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");

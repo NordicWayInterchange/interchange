@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
@@ -52,7 +53,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	private static Path testKeysPath = generateKeys(RoutingConfigurerIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
 
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
@@ -62,14 +63,14 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			String httpsUrl = "https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT);
-			String httpUrl = "http://localhost:" + qpidContainer.getMappedPort(8080);
+			String httpsUrl = qpidContainer.getHttpsUrl();
+			String httpUrl = qpidContainer.getHttpUrl();
 			logger.info("server url: " + httpsUrl);
 			logger.info("server url: " + httpUrl);
-			AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+			AMQPS_URL = qpidContainer.getAmqpsUrl();
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
-					"routing-configurer.vhost=localhost",
+					"routing-configurer.vhost=" + qpidContainer.getvHostName(),
 					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
 					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
@@ -158,14 +159,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		routingConfigurer.setupNeighbourRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
-	}
-
-	private static String getFilePathFromClasspathResource(String classpathResource) {
-		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
-		if (resource != null) {
-			return resource.getFile();
-		}
-		throw new RuntimeException("Could not load classpath resource " + classpathResource);
 	}
 
 	@Test
