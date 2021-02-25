@@ -38,9 +38,13 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 	}
 
 	public static QpidContainer getQpidTestContainer(String configPathFromClasspath, Path testKeysPath, final String keyStore, final String keyStorePassword, final String trustStore, String trustStorePassword, String vHostName) {
+		Path imageLocation = getProjectRelativePath("qpid-test");
+		Path configPath = Paths.get(configPathFromClasspath);
+		logger.debug("Creating container qpid-it-memory, from Docker file from {} and config from {}",
+				imageLocation,configPath);
 		return new QpidContainer("qpid-it-memory",
-				getProjectRelativePath("qpid-test"),
-				Paths.get(configPathFromClasspath),
+				imageLocation,
+				configPath,
 				testKeysPath,
 				keyStore,
 				keyStorePassword,

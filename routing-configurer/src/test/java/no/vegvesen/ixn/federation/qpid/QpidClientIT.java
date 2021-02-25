@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -34,17 +35,16 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	private static Path testKeysPath = generateKeys(QpidClientIT.class, "my_ca", "localhost", "routing_configurer");
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
-	private static Integer MAPPED_HTTPS_PORT;
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			String httpsUrl = "https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT);
-			String httpUrl = "http://localhost:" + qpidContainer.getMappedPort(8080);
+			String httpsUrl = qpidContainer.getHttpsUrl();
+			String httpUrl = qpidContainer.getHttpUrl();
 			logger.info("server url: " + httpsUrl);
 			logger.info("server url: " + httpUrl);
 			TestPropertyValues.of(
@@ -53,7 +53,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
 					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
-			MAPPED_HTTPS_PORT = qpidContainer.getMappedPort(HTTPS_PORT);
 		}
 	}
 
@@ -162,7 +161,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void httpsConnectionToQpidRestServerInsideTheClusterDoesNotVerifyServerName() {
-		QpidClient localhostAddressedWithIpAddress = new QpidClient("https://127.0.0.1:" + MAPPED_HTTPS_PORT, "localhost", restTemplate);
+		QpidClient localhostAddressedWithIpAddress = new QpidClient("https://127.0.0.1:" + qpidContainer.getHttpsPort(), "localhost", restTemplate);
 		localhostAddressedWithIpAddress.ping();
 	}
 }

@@ -63,9 +63,29 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         return Collections.singleton(getMappedPort(AMQP_PORT));
     }
 
+    public Integer getAmqpsPort() {
+        return getMappedPort(AMQPS_PORT);
+    }
+
+    public Integer getHttpsPort() {
+        return getMappedPort(HTTPS_PORT);
+    }
+
+    public Integer getHttpPort() {
+        return getMappedPort(HTTP_PORT);
+    }
 
     public String getAmqpsUrl() {
         return String.format("amqps://%s:%d",vHostName,getMappedPort(AMQPS_PORT));
+    }
+
+
+    public String getHttpsUrl() {
+        return String.format("https://%s:%d",vHostName,getMappedPort(HTTPS_PORT));
+    }
+
+    public String getHttpUrl() {
+        return String.format("http://%s:%d",vHostName,getMappedPort(HTTP_PORT));
     }
 
 }
