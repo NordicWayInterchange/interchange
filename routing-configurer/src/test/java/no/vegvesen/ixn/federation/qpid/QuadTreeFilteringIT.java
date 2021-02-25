@@ -53,7 +53,6 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 			"password",
 			"localhost");
 
-	private String AMQPS_URL;
 
 	private QpidClient qpidClient;
 
@@ -119,11 +118,11 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 		Message receivedMessage;
 
-		try (Source source = new Source(AMQPS_URL, "nwEx", sslContext)) {
+		try (Source source = new Source(qpidContainer.getAmqpsUrl(), "nwEx", sslContext)) {
 			source.start();
 			source.sendNonPersistent("fisk", "NO", messageQuadTreeTiles);
 		}
-		try (MessageConsumer consumer = new Sink(AMQPS_URL, "king_gustaf", sslContext).createConsumer()) {
+		try (MessageConsumer consumer = new Sink(qpidContainer.getAmqpsUrl(), "king_gustaf", sslContext).createConsumer()) {
 			receivedMessage = consumer.receive(1000);
 
 		}
@@ -139,12 +138,12 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 		Message receivedMessage;
-		try (Source source = new Source(AMQPS_URL, "nwEx", sslContext)) {
+		try (Source source = new Source(qpidContainer.getAmqpsUrl(), "nwEx", sslContext)) {
 			source.start();
 			source.sendNonPersistent("fisk", "NO", messageQuadTreeTiles);
 		}
 
-		try (MessageConsumer consumer = new Sink(AMQPS_URL, "king_gustaf", sslContext).createConsumer()) {
+		try (MessageConsumer consumer = new Sink(qpidContainer.getAmqpsUrl(), "king_gustaf", sslContext).createConsumer()) {
 			receivedMessage = consumer.receive(1000);
 		}
 
