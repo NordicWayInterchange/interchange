@@ -57,8 +57,9 @@ public class DockerBaseIT {
 	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
 		Path path = getProjectRelativePath("target/test-keys-" + clazz.getSimpleName());
 		logger.debug("Key container writes to " + path);
-		GenericContainer keyContainer = getKeyContainer(path, ca_cn, serverOrUserCns);
-		keyContainer.start();
+		try (KeysContainer keyContainer = getKeyContainer(path, ca_cn, serverOrUserCns)) {
+			keyContainer.start();
+		}
 		return path;
 	}
 

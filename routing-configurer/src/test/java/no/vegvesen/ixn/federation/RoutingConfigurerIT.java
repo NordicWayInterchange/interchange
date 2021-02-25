@@ -58,7 +58,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
-	private static String AMQPS_URL;
+
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -67,7 +67,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			String httpUrl = qpidContainer.getHttpUrl();
 			logger.info("server url: " + httpsUrl);
 			logger.info("server url: " + httpUrl);
-			AMQPS_URL = qpidContainer.getAmqpsUrl();
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=" + qpidContainer.getvHostName(),
@@ -168,15 +167,13 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions), null);
 		routingConfigurer.setupNeighbourRouting(nordea);
 		SSLContext nordeaSslContext = setUpTestSslContext("nordea.p12");
-		try {
-			Source writeFedExExchange = new Source(AMQPS_URL, "fedEx", nordeaSslContext);
+		try (Source writeFedExExchange = new Source(qpidContainer.getAmqpsUrl(), "fedEx", nordeaSslContext)){
 			writeFedExExchange.start();
 			writeFedExExchange.send("Ordinary business at the Nordea office.");
 			fail("Should not allow neighbour nordea to write on (fedEx)");
 		} catch (JMSException ignore) {
 		}
-		try {
-			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
+		try (Source writeOnramp = new Source(qpidContainer.getAmqpsUrl(), "onramp", nordeaSslContext)){
 			writeOnramp.start();
 			writeOnramp.send("Make Nordea great again!");
 
@@ -317,8 +314,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");
-		Sink neighbourSink = new Sink(AMQPS_URL, neighbourQueue, localhostSslContext);
-		neighbourSink.start();
+		try (Sink neighbourSink = new Sink(qpidContainer.getAmqpsUrl(), neighbourQueue, localhostSslContext)) {
+			neighbourSink.start();
+		} catch (Exception e) {
+			fail("Starting this sink should succeed");
+		}
 	}
 
 	public SSLContext setUpTestSslContext(String s) {
