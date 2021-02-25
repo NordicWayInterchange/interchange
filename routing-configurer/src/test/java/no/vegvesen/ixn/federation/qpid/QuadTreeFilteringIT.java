@@ -3,22 +3,27 @@ package no.vegvesen.ixn.federation.qpid;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
-import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.federation.model.DataType;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
+import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -26,7 +31,6 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +45,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 			"localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	public GenericContainer qpidContainer = getQpidTestContainer("qpid",
+	public QpidContainer qpidContainer = getQpidTestContainer("quadtree",
 			testKeysPath,
 			"localhost.p12",
 			"password",
@@ -55,14 +59,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void matchingFilterAndQuadTreeGetsRouted() throws Exception {
-		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
-		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
-        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
-		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
-		if (!administrators.contains("king_gustaf")) {
-			qpidClient.addMemberToGroup("king_gustaf", "administrators");
-		}
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,abcdefgh%')");
 		assertThat(message).isNotNull();
@@ -70,14 +68,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void matchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
-		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
-		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
-        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
-		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
-		if (!administrators.contains("king_gustaf")) {
-			qpidClient.addMemberToGroup("king_gustaf", "administrators");
-		}
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,cdefghij%')");
 		assertThat(message).isNull();
@@ -86,28 +78,17 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	@Test
 	public void matchingFilterAndQuadTreeExactMatchGetsRouted() throws Exception {
 
-		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
-		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
-        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
-		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
-		if (!administrators.contains("king_gustaf")) {
-			qpidClient.addMemberToGroup("king_gustaf", "administrators");
-		}		String messageQuadTreeTiles = ",abcdefghijklmnop";
+		String messageQuadTreeTiles = ",abcdefghijklmnop";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')");
 		assertThat(message).isNotNull();
 	}
 
 	@Test
 	public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
-		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
-		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
-        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
-		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
-		if (!administrators.contains("king_gustaf")) {
-			qpidClient.addMemberToGroup("king_gustaf", "administrators");
-		}
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')");
 		assertThat(message).isNull();
@@ -115,14 +96,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void nonMatchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
-		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
-		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
-        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
-		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
-		if (!administrators.contains("king_gustaf")) {
-			qpidClient.addMemberToGroup("king_gustaf", "administrators");
-		}
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		Message message = sendReceiveMessageNeighbour(messageQuadTreeTiles, "(originatingCountry = 'SE') and (quadTree like '%,cdefghij%')");
 		assertThat(message).isNull();
@@ -130,14 +105,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
-		AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		AMQPS_URL = qpidContainer.getAmqpsUrl();
 		qpidClient = createClient();
-		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
-        //TODO this should probably have a custom version of qpid in the container, with it's own config, group and passwd files, to avoid hammering the qpid admin server
-		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
-		if (!administrators.contains("king_gustaf")) {
-			qpidClient.addMemberToGroup("king_gustaf", "administrators");
-		}
 		Map<String, String> props = Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2");
 		props.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
 		props.put(MessageProperty.QUAD_TREE.getName(), "abcdef");
@@ -193,7 +162,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	public QpidClient createClient() {
 		RestTemplate restTemplate = new QpidClientConfig(setUpTestSslContext("routing_configurer.p12")).qpidRestTemplate();
-		return new QpidClient("https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT), "localhost", restTemplate);
+		return new QpidClient(qpidContainer.getHttpsUrl(), qpidContainer.getvHostName(), restTemplate);
 	}
 
 	public SSLContext setUpTestSslContext(String s) {

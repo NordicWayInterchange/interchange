@@ -88,4 +88,7 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         return String.format("http://%s:%d",vHostName,getMappedPort(HTTP_PORT));
     }
 
+    public String getvHostName() {
+        return vHostName;
+    }
 }
