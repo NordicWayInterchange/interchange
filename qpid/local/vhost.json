@@ -83,6 +83,15 @@
           }
         },
         {
+          "objectType": "VIRTUALHOST",
+          "identity": "remote-service-providers",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "local.bouvetinterchange.eu"
+          }
+        },
+        {
           "objectType": "QUEUE",
           "identity": "interchange",
           "operation": "CONSUME",
