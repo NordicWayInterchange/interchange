@@ -101,7 +101,8 @@ public class ServiceProvider {
 
 	public void updateSubscriptionWithBrokerUrl(LocalSubscription subscription, String brokerUrl) {
 		for(LocalSubscription localSubscription : subscriptions) {
-			if (localSubscription.getSelector().equals(subscription.getSelector())){
+			if (localSubscription.getSelector().equals(subscription.getSelector()) &&
+					localSubscription.isCreateNewQueue()){
 				localSubscription.setBrokerUrl(brokerUrl);
 			}
 		}
