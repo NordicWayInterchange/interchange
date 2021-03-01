@@ -33,7 +33,7 @@ public class KeysContainer extends GenericContainer<KeysContainer> {
 		this.waitingFor(Wait.forLogMessage(".*CERT GENERATION DONE.*\\n",1));
 	}
 
-	public Path getLocalKeyFolder() {
+	public Path getKeyFolderOnHost() {
 		return keyFolder;
 	}
 }

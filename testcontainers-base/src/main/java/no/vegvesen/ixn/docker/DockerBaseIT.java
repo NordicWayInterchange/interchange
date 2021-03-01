@@ -47,7 +47,7 @@ public class DockerBaseIT {
 	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
 		try (KeysContainer keyContainer = getKeysContainer(clazz,ca_cn,serverOrUserCns)) {
 			keyContainer.start();
-			return keyContainer.getLocalKeyFolder();
+			return keyContainer.getKeyFolderOnHost();
 		}
 	}
 

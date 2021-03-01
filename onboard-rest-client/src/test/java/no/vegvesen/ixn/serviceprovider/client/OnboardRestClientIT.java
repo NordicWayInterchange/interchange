@@ -60,7 +60,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
                                     getProjectRelativePath("onboard-server-app")
                             )
                     )
-                    .withFileSystemBind(keysContainer.getLocalKeyFolder().toString(),"/jks", BindMode.READ_ONLY)
+                    .withFileSystemBind(keysContainer.getKeyFolderOnHost().toString(),"/jks", BindMode.READ_ONLY)
                     .withEnv("KEY_STORE","/jks/localhost.p12")
                     .withEnv("KEY_STORE_PASSWORD","password")
                     .withEnv("TRUST_STORE_PASSWORD","password")
@@ -77,7 +77,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addCapabilityCheckAndDelete() throws JsonProcessingException {
-        SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getLocalKeyFolder(), "test1.p12", "truststore.jks");
+        SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "test1.p12", "truststore.jks");
         OnboardRESTClient client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"test1");;
 
         DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
@@ -98,7 +98,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
-        SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getLocalKeyFolder(), "test2.p12", "truststore.jks");
+        SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "test2.p12", "truststore.jks");
         OnboardRESTClient client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"test2");;
 		client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
 
@@ -119,7 +119,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
-        SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getLocalKeyFolder(), "test3.p12", "truststore.jks");
+        SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "test3.p12", "truststore.jks");
         OnboardRESTClient client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"test3");
         ObjectMapper objectMapper = new ObjectMapper();
 		LocalSubscriptionApi addedSubscription = client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));

@@ -6,7 +6,6 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -16,7 +15,6 @@ import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -29,7 +27,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	@SuppressWarnings("rawtypes")
 	@Container
 	public final QpidContainer qpidContainer = getQpidTestContainer("qpid",
-			keysContainer.getLocalKeyFolder(),
+			keysContainer.getKeyFolderOnHost(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
@@ -41,7 +39,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 
 	@BeforeEach
 	public void setUp() {
-		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext(keysContainer.getLocalKeyFolder(),"king_harald.p12", "truststore.jks");
+		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),"king_harald.p12", "truststore.jks");
 	}
 
 	@Test
