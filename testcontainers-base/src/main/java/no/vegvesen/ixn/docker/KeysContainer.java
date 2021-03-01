@@ -32,4 +32,8 @@ public class KeysContainer extends GenericContainer<KeysContainer> {
 		this.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy());
 		this.waitingFor(Wait.forLogMessage(".*CERT GENERATION DONE.*\\n",1));
 	}
+
+	public Path getLocalKeyFolder() {
+		return keyFolder;
+	}
 }

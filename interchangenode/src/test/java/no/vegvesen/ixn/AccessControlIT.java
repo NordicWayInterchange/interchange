@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,11 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class AccessControlIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(AccessControlIT.class);
-	private static Path testKeysPath = generateKeys(AccessControlIT.class, "my_ca", "localhost", "king_harald", "king_gustaf");
+
+	private static KeysContainer testKeys = getKeysContainer(AccessControlIT.class, "my_ca", "localhost", "king_harald", "king_gustaf");
 
 	class AccessControlNegativeTestClass { }
-	private static Path testKeysPathOtherCa = generateKeys(AccessControlNegativeTestClass.class, "my_ca", "king_harald");
+	private static KeysContainer testKeysOtherCa = getKeysContainer(AccessControlNegativeTestClass.class, "my_ca", "king_harald");
 
 	// Keystore and trust store files for integration testing.
 	private static final String JKS_KING_HARALD_P_12 = "king_harald.p12";
@@ -44,34 +46,36 @@ public class AccessControlIT extends QpidDockerBaseIT {
 	@SuppressWarnings("rawtypes")
 	@Container
 	public static final QpidContainer localContainer = getQpidTestContainer("qpid",
-			testKeysPath,
+			testKeys.getLocalKeyFolder(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost");
+			"localhost")
+			.dependsOn(testKeys)
+			.dependsOn(testKeysOtherCa);
 
 	@Test
 	public void testKingHaraldCanNotConsumeSE_OUT(){
-		Sink seOut = new Sink(localContainer.getAmqpsUrl(), SE_OUT, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
+		Sink seOut = new Sink(localContainer.getAmqpsUrl(), SE_OUT, TestKeystoreHelper.sslContext(testKeys.getLocalKeyFolder(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		assertThatExceptionOfType(JMSSecurityException.class).isThrownBy(seOut::start);
 	}
 
 	@Test
 	public void testKingGustafCanNotConsumeNO_OUT() {
-		Sink noOut = new Sink(localContainer.getAmqpsUrl(), NO_OUT, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS));
+		Sink noOut = new Sink(localContainer.getAmqpsUrl(), NO_OUT, TestKeystoreHelper.sslContext(testKeys.getLocalKeyFolder(), JKS_KING_GUSTAF_P_12, TRUSTSTORE_JKS));
 		assertThatExceptionOfType(JMSSecurityException.class).isThrownBy(noOut::start);
 	}
 
 	@Test
 	public void KingHaraldCanNotConsumeFromOnramp() {
-		Sink onramp = new Sink(localContainer.getAmqpsUrl(), ONRAMP, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
+		Sink onramp = new Sink(localContainer.getAmqpsUrl(), ONRAMP, TestKeystoreHelper.sslContext(testKeys.getLocalKeyFolder(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		assertThatExceptionOfType(JMSSecurityException.class).isThrownBy(onramp::start);
 	}
 
 	@Test
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
-		Source nwEx = new Source(localContainer.getAmqpsUrl(), NW_EX, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
+		Source nwEx = new Source(localContainer.getAmqpsUrl(), NW_EX, TestKeystoreHelper.sslContext(testKeys.getLocalKeyFolder(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		nwEx.start();
 		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> nwEx.send("Not allowed") );
 	}
@@ -79,14 +83,14 @@ public class AccessControlIT extends QpidDockerBaseIT {
 
 	@Test
 	public void userWithInvalidCertificateCannotConnect() {
-		Sink testOut = new Sink(localContainer.getAmqpsUrl(), TEST_OUT, TestKeystoreHelper.sslContext(testKeysPathOtherCa, JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS));
+		Sink testOut = new Sink(localContainer.getAmqpsUrl(), TEST_OUT, TestKeystoreHelper.sslContext(testKeysOtherCa.getLocalKeyFolder(), JKS_IMPOSTER_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		assertThatExceptionOfType(JMSException.class).isThrownBy(testOut::start);
 	}
 
 
 	@Test
 	public void userWithValidCertificateCanConnect() throws Exception {
-		Sink noOut = new Sink(localContainer.getAmqpsUrl(), NO_OUT, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
+		Sink noOut = new Sink(localContainer.getAmqpsUrl(), NO_OUT, TestKeystoreHelper.sslContext(testKeys.getLocalKeyFolder(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		noOut.start();
 		MessageConsumer consumer = noOut.createConsumer();
 		assertThat(consumer).isNotNull();

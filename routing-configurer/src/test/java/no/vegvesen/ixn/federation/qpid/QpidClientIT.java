@@ -17,10 +17,13 @@ import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.github.dockerjava.okhttp.OkDockerHttpClient;
+import org.testcontainers.shaded.okhttp3.OkHttpClient;
 
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +41,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
+
+	static {
+		java.util.logging.Logger.getLogger(OkDockerHttpClient.class.getName()).setLevel(Level.FINE);
+	}
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {

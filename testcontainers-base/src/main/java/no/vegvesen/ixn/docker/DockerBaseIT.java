@@ -2,11 +2,6 @@ package no.vegvesen.ixn.docker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.startupcheck.IndefiniteWaitOneShotStartupCheckStrategy;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,7 +26,7 @@ public class DockerBaseIT {
 		if (ciWorkdir != null) {
 			logger.debug("Circle CI because we got environment varaible [{}] with value [{}]", CI_WORKDIR, ciWorkdir);
 			Path ciWorkdirPath = Paths.get(ciWorkdir);
-			logger.debug("ci workdir environment variable [{}] with folder name [{}] reolves to full path [{}]", ciWorkdir, ciWorkdirPath.getFileName().toString(), ciWorkdirPath.toAbsolutePath());
+			logger.debug("ci workdir environment variable [{}] with folder name [{}] resolves to full path [{}]", ciWorkdir, ciWorkdirPath.getFileName().toString(), ciWorkdirPath.toAbsolutePath());
 			projectFolder = ciWorkdirPath.getFileName().toString();
 		}
 
@@ -49,18 +44,17 @@ public class DockerBaseIT {
 		return projectRoot;
 	}
 
-	protected static KeysContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
-		logger.debug("Test key path: {}",testKeysPath);
-		return new KeysContainer(getProjectRelativePath("key-gen"),testKeysPath,ca,serverOrUserCns);
+	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
+		try (KeysContainer keyContainer = getKeysContainer(clazz,ca_cn,serverOrUserCns)) {
+			keyContainer.start();
+			return keyContainer.getLocalKeyFolder();
+		}
 	}
 
-	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
-		Path path = getProjectRelativePath("target/test-keys-" + clazz.getSimpleName());
-		logger.debug("Key container writes to " + path);
-		try (KeysContainer keyContainer = getKeyContainer(path, ca_cn, serverOrUserCns)) {
-			keyContainer.start();
-		}
-		return path;
+	public static KeysContainer getKeysContainer(Class clazz, String ca_cn, String ... serverOrUserCns) {
+		Path imagePath = getProjectRelativePath("key-gen");
+		Path keysOutputPath = getProjectRelativePath("target/test-keys-" + clazz.getSimpleName());
+		return new KeysContainer(imagePath,keysOutputPath,ca_cn,serverOrUserCns);
 	}
 
 

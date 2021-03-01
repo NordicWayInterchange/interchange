@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.messagecollector;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.Connection;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
@@ -32,7 +33,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	@SuppressWarnings("rawtypes")
 	@Container
 	//Container is not static and is not reused between tests
-	public GenericContainer consumerContainer = getQpidTestContainer("docker/consumer",
+	public QpidContainer consumerContainer = getQpidTestContainer("docker/consumer",
 			testKeysPath,
 			"localhost.p12",
 			"password",

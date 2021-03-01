@@ -4,11 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,47 +14,53 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("rawtypes")
+@Testcontainers
 public class OnboardRestClientIT extends DockerBaseIT {
 
 	private static Logger log = LoggerFactory.getLogger(OnboardRestClientIT.class);
-	private static Path testKeysPath = generateKeys(OnboardRestClientIT.class, "my_ca", "localhost", "onboard");
 
-    public static Network network;
+	@Container
+	private static KeysContainer keysContainer = getKeysContainer(OnboardRestClientIT.class,"my_ca","localhost","test1","test2","test3");
 
+    public static Network network = Network.newNetwork();
+
+    @Container
     public static PostgreSQLContainer dbContainer =
             new PostgreSQLContainer<>("postgres:9.6")
                     .withDatabaseName("federation")
                     .withUsername("federation")
-                    .withPassword("federation");
+                    .withPassword("federation")
+                    .withNetwork(network)
+                    .withNetworkAliases("database")
+                    .dependsOn(keysContainer);
 
-    public static GenericContainer onboardServer;
 
-    @BeforeAll
-    public static void startUp() {
-        Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
-        network = Network.newNetwork();
-        dbContainer.withNetwork(network)
-                .withNetworkAliases("database")
-                .start();
-        onboardServer = new GenericContainer(
+    @Container
+    public static GenericContainer onboardServer = createOnboardContainer()
+            .withNetwork(network)
+            .dependsOn(dbContainer);
+
+
+    public static GenericContainer createOnboardContainer() {
+        GenericContainer container =  new GenericContainer(
                     new ImageFromDockerfile()
                             .withFileFromPath(".",
                                     getProjectRelativePath("onboard-server-app")
                             )
                     )
-                    .withNetwork(network)
-                    .withFileSystemBind(testKeysPath.toString(),"/jks", BindMode.READ_ONLY)
+                    .withFileSystemBind(keysContainer.getLocalKeyFolder().toString(),"/jks", BindMode.READ_ONLY)
                     .withEnv("KEY_STORE","/jks/localhost.p12")
                     .withEnv("KEY_STORE_PASSWORD","password")
                     .withEnv("TRUST_STORE_PASSWORD","password")
@@ -64,30 +68,17 @@ public class OnboardRestClientIT extends DockerBaseIT {
                     .withEnv("SERVER_NAME","localhost")
                     .withEnv("SP_CHNL_PORT","8899")
                     .withEnv("POSTGRES_URI","jdbc:postgresql://database/federation")
+                    .withEnv("LOG_LEVELS","-Dlogging.level.no.vegvesen.ixn=DEBUG")
+                    .waitingFor(Wait.forLogMessage(".*- Started OnboardApplication in.*",1))
                     .withExposedPorts(8899);
-        onboardServer
-                .start();
-        onboardServer.followOutput(logConsumer);
+        return container;
+
     }
-
-    @AfterAll
-    public static void shutdown() {
-        onboardServer.stop();
-        dbContainer.stop();
-    }
-
-    private OnboardRESTClient client;
-    private final SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "onboard.p12", "truststore.jks");
-
-
-    @BeforeEach
-    public void setUp() {
-        client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"onboard");
-    }
-
 
     @Test
     public void addCapabilityCheckAndDelete() throws JsonProcessingException {
+        SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getLocalKeyFolder(), "test1.p12", "truststore.jks");
+        OnboardRESTClient client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"test1");;
 
         DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
         client.addCapability(datexNO);
@@ -107,6 +98,8 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
+        SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getLocalKeyFolder(), "test2.p12", "truststore.jks");
+        OnboardRESTClient client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"test2");;
 		client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
 
         LocalSubscriptionListApi localSubscriptions = client.getServiceProviderSubscriptions();
@@ -126,6 +119,8 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
+        SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getLocalKeyFolder(), "test3.p12", "truststore.jks");
+        OnboardRESTClient client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"test3");
         ObjectMapper objectMapper = new ObjectMapper();
 		LocalSubscriptionApi addedSubscription = client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
