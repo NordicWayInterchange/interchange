@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.discoverer;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
@@ -32,15 +33,18 @@ public class NeighbourDiscoverer {
 	private final NeighbourService neighbourService;
 	private final SelfService selfService;
 	private final NeighbourRESTFacade neighbourFacade;
+	private final ServiceProviderService serviceProviderService;
 
 
 	@Autowired
 	NeighbourDiscoverer(NeighbourService neighbourService,
 						SelfService selfService,
-						NeighbourRESTFacade neighbourFacade) {
+						NeighbourRESTFacade neighbourFacade,
+						ServiceProviderService serviceProviderService) {
 		this.neighbourService = neighbourService;
 		this.selfService = selfService;
 		this.neighbourFacade = neighbourFacade;
+		this.serviceProviderService = serviceProviderService;
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), null);
 	}
 
@@ -79,8 +83,13 @@ public class NeighbourDiscoverer {
 		neighbourService.pollSubscriptions(neighbourFacade);
 	}
 
+	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void updateLocalSubscriptions() {
+		serviceProviderService.updateLocalSubscriptions();
+	}
+
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
-	public void deleteSubscriptionAtKnownNeighbours () {
+	public void deleteSubscriptionAtKnownNeighbours() {
 		neighbourService.deleteSubscriptions(neighbourFacade);
 	}
 }

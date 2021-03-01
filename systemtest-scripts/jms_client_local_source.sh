@@ -9,7 +9,7 @@ docker run \
     -v ${PWD}/../tmp/keys:/keys \
     -e URL=amqps://local.bouvetinterchange.eu \
     -e QUEUE=onramp \
-    -e KEY_STORE_PATH=/keys/king_gustaf.bouvetinterchange.eu.p12 \
+    -e KEY_STORE_PATH=/keys/king_olav.bouvetinterchange.eu.p12 \
     -e KEY_STORE_PASS=password \
     -e KEY_PASS=password \
     -e TRUST_STORE_PATH=/keys/truststore.jks \

@@ -13,10 +13,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
 
 @Component
 public class RoutingConfigurer {
@@ -77,15 +79,37 @@ public class RoutingConfigurer {
 	void setupNeighbourRouting(Neighbour neighbour) {
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
-			createQueue(neighbour.getName());
-			addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
-			Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
-			bindSubscriptions("nwEx", neighbour, acceptedSubscriptions);
-			for (Subscription subscription : acceptedSubscriptions) {
-				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+			if(neighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()){
+				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithCreateNewQueue();
+				for (Subscription subscription : acceptedSubscriptions){
+					createQueue(subscription.getQueueConsumerUser());
+					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getQueueConsumerUser());
+					bindRemoteServiceProvider("nwEx", subscription.getQueueConsumerUser(), subscription);
+					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+					logger.info("Set up routing for service provider {}", subscription.getQueueConsumerUser());
+				}
+				if(!neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithoutCreateNewQueue().isEmpty()){
+					createQueue(neighbour.getName());
+					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
+					Set<Subscription> acceptedSubscriptionsWithoutCreateNewQueue = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithoutCreateNewQueue();
+					bindSubscriptions("nwEx", neighbour, acceptedSubscriptionsWithoutCreateNewQueue);
+					for (Subscription subscription : acceptedSubscriptionsWithoutCreateNewQueue) {
+						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+					}
+					logger.info("Set up routing for neighbour {}", neighbour.getName());
+				}
+				neighbourService.saveSetupRouting(neighbour);
+			} else {
+				createQueue(neighbour.getName());
+				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
+				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
+				bindSubscriptions("nwEx", neighbour, acceptedSubscriptions);
+				for (Subscription subscription : acceptedSubscriptions) {
+					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+				}
+				logger.info("Set up routing for neighbour {}", neighbour.getName());
+				neighbourService.saveSetupRouting(neighbour);
 			}
-			logger.info("Set up routing for neighbour {}", neighbour.getName());
-			neighbourService.saveSetupRouting(neighbour);
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
 		}
@@ -96,6 +120,10 @@ public class RoutingConfigurer {
 		for (Subscription subscription : acceptedSubscriptions) {
 			qpidClient.addBinding(subscription.getSelector(), neighbour.getName(), subscription.bindKey(), exchange);
 		}
+	}
+
+	private void bindRemoteServiceProvider(String exchange, String commonName, Subscription acceptedSubscription) {
+		qpidClient.addBinding(acceptedSubscription.getSelector(), commonName, acceptedSubscription.bindKey(), exchange);
 	}
 
 	private void unbindOldUnwantedBindings(Neighbour neighbour, String exchangeName) {

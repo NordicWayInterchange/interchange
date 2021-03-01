@@ -61,7 +61,7 @@ public class SubscriptionPollResponseApi {
         return createNewQueue;
     }
 
-    public void setCreateNewQueue(boolean createNewQueue) {
+    public void setCreateNewQueue(Boolean createNewQueue) {
         this.createNewQueue = createNewQueue;
     }
 

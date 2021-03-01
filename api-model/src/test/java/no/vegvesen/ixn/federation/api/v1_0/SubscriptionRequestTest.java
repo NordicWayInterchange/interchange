@@ -14,7 +14,7 @@ public class SubscriptionRequestTest {
     public void subscriptionRequestOneSingleSubscriptionWithOnlySelector() throws JsonProcessingException {
         RequestedSubscriptionApi subscription = new RequestedSubscriptionApi(
                 "messageType='DENM' AND originatingCountry='SE'");
-        SubscriptionRequestApi requestApi = new SubscriptionRequestApi("a.c-itsi-interchange.eu",
+        SubscriptionRequestApi requestApi = new SubscriptionRequestApi("client1",
                 Collections.singleton(subscription));
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(requestApi));

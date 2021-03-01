@@ -33,7 +33,7 @@ public class JmsSource implements CommandLineRunner {
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
         try(Source s = new Source(properties.getUrl(),properties.getSendQueue(),sslContext)) {
             s.start();
-            s.send("Dette er en test, FISK!", "NO", ",01230122");
+            s.send("Dette er en test, FISK!", "NO", ",01220123");
         }
     }
 }

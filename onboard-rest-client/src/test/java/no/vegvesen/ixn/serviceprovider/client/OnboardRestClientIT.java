@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.AfterAll;
@@ -108,7 +107,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
-		client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
+		client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
 
         LocalSubscriptionListApi localSubscriptions = client.getServiceProviderSubscriptions();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -128,7 +127,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
     @Test
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-		LocalSubscriptionApi addedSubscription = client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"));
+		LocalSubscriptionApi addedSubscription = client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
         LocalCapabilityList capabilities = client.getServiceProviderCapabilities();

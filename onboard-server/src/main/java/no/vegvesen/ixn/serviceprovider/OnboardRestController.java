@@ -117,11 +117,11 @@ public class OnboardRestController {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. The DataTypeApi object was null. Nothing to add.");
 		}
 
-		logger.info("Service provider {} Incoming subscription selector: {}", serviceProviderName,selector.getSelector());
+		logger.info("Service provider {} Incoming subscription createNewQueue {} and selector {}", serviceProviderName,selector.isCreateNewQueue(), selector.getSelector());
 
+		LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,selector);
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector.getSelector());
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
@@ -195,6 +195,16 @@ public class OnboardRestController {
 		LocalSubscriptionListApi localDataTypeList = typeTransformer.transformLocalSubscriptionListToLocalSubscriptionListApi(serviceProvider.getSubscriptions());
 		OnboardMDCUtil.removeLogVariables();
 		return localDataTypeList;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public LocalSubscriptionApi getServiceProviderSubscription(@PathVariable String serviceProviderName, @PathVariable Integer subscriptionId) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s -> s.getSub_id().equals(subscriptionId)).findFirst().get();
+		logger.info("Received poll on brokerUrl = {} from Service Provider {} with queueConsumerUser = {}", localSubscription.getBrokerUrl(), serviceProviderName, localSubscription.getQueueConsumerUser());
+		OnboardMDCUtil.removeLogVariables();
+		return typeTransformer.transformLocalSubscriptionToLocalSubscriptionApi(localSubscription);
 	}
 
 	// TODO: Remove

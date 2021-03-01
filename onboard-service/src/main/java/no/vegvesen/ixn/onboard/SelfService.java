@@ -59,17 +59,16 @@ public class SelfService {
 		return localCapabilities;
 	}
 
-	Set<String> calculateSelfSubscriptions(List<ServiceProvider> serviceProviders) {
+	Set<LocalSubscription> calculateSelfSubscriptions(List<ServiceProvider> serviceProviders) {
 		logger.info("Calculating Self subscriptions...");
-		Set<String> localSubscriptions = new HashSet<>();
+		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 
 		for (ServiceProvider serviceProvider : serviceProviders) {
 			logger.info("Service provider name: {}", serviceProvider.getName());
-			Set<String> serviceProviderSubscriptions = serviceProvider
+			Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider
 					.getSubscriptions()
 					.stream()
 					.filter(subscription -> LocalSubscriptionStatus.CREATED.equals(subscription.getStatus()))
-					.map(LocalSubscription::getSelector)
 					.collect(Collectors.toSet());
 			logger.info("Service Provider Subscriptions: {}", serviceProviderSubscriptions.toString());
 			localSubscriptions.addAll(serviceProviderSubscriptions);

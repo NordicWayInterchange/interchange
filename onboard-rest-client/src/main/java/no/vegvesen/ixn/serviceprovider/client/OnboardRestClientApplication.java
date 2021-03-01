@@ -25,7 +25,8 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
         OnboardRestClientApplication.AddServiceProviderSubscription.class,
         OnboardRestClientApplication.DeleteServiceProviderCapability.class,
-        OnboardRestClientApplication.DeleteServiceProviderSubscription.class
+        OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
+        OnboardRestClientApplication.GetSubscription.class
 })
 public class OnboardRestClientApplication implements Callable<Integer> {
 
@@ -154,6 +155,24 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             client.deleteSubscriptions(subscriptionId);
             System.out.printf("Subscription %d deleted successfully%n",subscriptionId);
+            return 0;
+        }
+    }
+
+    @Command(name = "getsubscription", description = "Retrieving brokerUrl for remote service provider subscription")
+    static class GetSubscription implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The ID of the subscription with the brokerUrl")
+        Integer subscriptionId;
+
+        @Override
+        public Integer call() {
+            OnboardRESTClient client = parentCommand.createClient();
+            LocalSubscriptionApi subscription = client.getSubscription(subscriptionId);
+            System.out.printf("Subscription %d successfully polled with brokerUrl %s %n", subscriptionId, subscription.getBrokerUrl());
             return 0;
         }
     }

@@ -141,7 +141,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPollOfSubscriptionReturnsSubscription()throws Exception{
 
-		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, false, "");
 		subscription.setId(1);
 		subscription.setPath("bouvet/subscriptions/1");
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, "ericsson.itsinterchange.eu", "bouvet");
@@ -252,7 +252,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void test() throws IOException {
 
-		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, false, "");
 		subscription.setPath("bouvet/subscriptions/1");
 
 		final ClientHttpResponse mock = Mockito.mock(ClientHttpResponse.class);

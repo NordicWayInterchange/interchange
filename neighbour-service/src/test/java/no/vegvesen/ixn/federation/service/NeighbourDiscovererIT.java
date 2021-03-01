@@ -67,8 +67,8 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
 		Self self = new Self(nodeProperties.getName());
-		Set<String> localSubscriptions = new HashSet<>();
-		localSubscriptions.add("messageType = 'DATEX2' and originatingCountry = 'NO'");
+		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'"));
 		self.setLocalSubscriptions(localSubscriptions);
 		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 		when(selfService.fetchSelf()).thenReturn(self);
@@ -138,7 +138,7 @@ public class NeighbourDiscovererIT {
 	}
 
 	private Subscription performSubscriptionRequest(Neighbour neighbour1, Neighbour neighbour2, Set<DataType> subs) {
-		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs.stream().map(dataType -> new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED)).collect(Collectors.toSet()));
+		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs.stream().map(dataType -> new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED, false, "")).collect(Collectors.toSet()));
 		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptionRequestResponse);
 
 		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf(), mockNeighbourFacade);
@@ -154,7 +154,7 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
-		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED));
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED, false, ""));
 		neighbourService.pollSubscriptions(mockNeighbourFacade);
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();

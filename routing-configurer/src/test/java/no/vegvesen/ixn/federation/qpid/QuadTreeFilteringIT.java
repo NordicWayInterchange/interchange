@@ -111,7 +111,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	}
 
 	private Message sendReceiveMessageNeighbour(String messageQuadTreeTiles, String selector) throws Exception {
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED, false, "");
 		Neighbour king_gustaf = new Neighbour("king_gustaf", null, new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newLinkedHashSet(subscription)), null);
 		qpidClient.createQueue(king_gustaf.getName());
 		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());

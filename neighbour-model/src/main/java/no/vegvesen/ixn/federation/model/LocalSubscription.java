@@ -25,6 +25,12 @@ public class LocalSubscription {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
+    private boolean createNewQueue;
+
+    private String queueConsumerUser;
+
+    private String brokerUrl;
+
     public LocalSubscription() {
 
     }
@@ -34,10 +40,25 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, boolean createNewQueue, String queueConsumerUser) {
+        this.status = status;
+        this.selector = selector;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
+    }
+
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
         this.sub_id = id;
         this.status = status;
         this.selector = selector;
+    }
+
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, boolean createNewQueue, String queueConsumerUser) {
+        this.sub_id = id;
+        this.status = status;
+        this.selector = selector;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
@@ -46,7 +67,6 @@ public class LocalSubscription {
         this.selector = selector;
         this.lastUpdated = lastUpdated;
     }
-
 
     public void setStatus(LocalSubscriptionStatus status) {
         this.status = status;
@@ -67,6 +87,30 @@ public class LocalSubscription {
 
     public void setSelector(String selector) {
         this.selector = selector;
+    }
+
+    public boolean isCreateNewQueue() {
+        return createNewQueue;
+    }
+
+    public void setCreateNewQueue(boolean createNewQueue) {
+        this.createNewQueue = createNewQueue;
+    }
+
+    public String getQueueConsumerUser() {
+        return queueConsumerUser;
+    }
+
+    public void setQueueConsumerUser(String queueConsumerUser) {
+        this.queueConsumerUser = queueConsumerUser;
+    }
+
+    public String getBrokerUrl() {
+        return brokerUrl;
+    }
+
+    public void setBrokerUrl(String brokerUrl) {
+        this.brokerUrl = brokerUrl;
     }
 
     //TODO lag et objekt av selector??
@@ -98,6 +142,8 @@ public class LocalSubscription {
                 "sub_id=" + sub_id +
                 ", status=" + status +
                 ", selector=" + selector +
+                ", createNewQueue=" + createNewQueue +
+                ", queueConsumerUser=" + queueConsumerUser +
                 '}';
     }
 
@@ -105,7 +151,7 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(sub_id, newStatus, selector);
+            return new LocalSubscription(sub_id, newStatus, selector,createNewQueue,queueConsumerUser);
         }
     }
 

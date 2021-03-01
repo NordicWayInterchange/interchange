@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.onboard.SelfService;
+import no.vegvesen.ixn.serviceprovider.model.SelectorApi;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -142,7 +144,9 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString("messageType = 'DATEX2' and originatingCountry = 'SE'");
+		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'", false);
+
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(selectorApi);
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
@@ -197,7 +201,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProviderName);
 
 		// The existing subscriptions of the Service Provider
-		Set<String> serviceProviderSubscriptionRequest = new HashSet<>();
+		Set<LocalSubscription> serviceProviderSubscriptionRequest = new HashSet<>();
 		String se = "originatingCountry = 'SE'";
 		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se);
 		String fi = "originatingCountry = 'FI'";
@@ -271,7 +275,9 @@ public class OnboardRestControllerTest {
 		String secondServiceProviderName = "SecondServiceProvider";
 		mockCertificate(secondServiceProviderName);
 
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString("messageType = 'DATEX2' and originatingCountry = 'SE'");
+		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'", false);
+
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(selectorApi);
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProviderName))

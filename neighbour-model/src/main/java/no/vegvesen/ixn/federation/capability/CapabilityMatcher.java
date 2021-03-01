@@ -18,12 +18,12 @@ public class CapabilityMatcher {
 	private static final String QUAD_TREE_MATCH_PATTERN_END = "%'";
 	private static final Logger logger = LoggerFactory.getLogger(CapabilityMatcher.class);
 
-	public static Set<String> calculateNeighbourSubscriptionsFromSelectors(Set<Capability> capabilities, Set<String> subscriptionSelectors) {
-		Set<String> matches = new HashSet<>();
+	public static Set<LocalSubscription> calculateNeighbourSubscriptionsFromSelectors(Set<Capability> capabilities, Set<LocalSubscription> subscriptionSelectors) {
+		Set<LocalSubscription> matches = new HashSet<>();
 		for (Capability capability : capabilities) {
-			for (String selector : subscriptionSelectors) {
+			for (LocalSubscription selector : subscriptionSelectors) {
 				logger.debug("Evaluating selector [{}] against capability {}", selector, capability);
-				String whiteSpaceTrimmedSelector = selector.replaceAll(REGEX_ALL_WHITESPACE, " ");
+				String whiteSpaceTrimmedSelector = selector.getSelector().replaceAll(REGEX_ALL_WHITESPACE, " ");
 				String quadTreeEvaluatedSelector = evaluateQuadTreeMatch(whiteSpaceTrimmedSelector, capability.getQuadTree());
 				JMSSelectorFilter selectorFilter = JMSSelectorFilterFactory.get(quadTreeEvaluatedSelector);
 				boolean match = false;

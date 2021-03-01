@@ -45,6 +45,18 @@ public class NeighbourDiscovererProperties {
 	private String subscriptionPollInitialDelay;
 
 	/**
+	 * Time, in milliseconds, between each attempt of updating a localSubscription.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
+	 */
+	private String localSubscriptionUpdateInterval;
+
+	/**
+	 * Time, in milliseconds, from application start-up to first attempt at updating localSubscriptions.
+	 * Is used in scheduling settings, and must be provided as an application property, no default value.
+	 */
+	private String localSubscriptionInitialDelay;
+
+	/**
 	 * Time, in milleseconds, between each check for new entries in DNS.
  	 * Is used in scheduling settings, and must be provided as an application property, no default value.
 	 */
@@ -139,6 +151,22 @@ public class NeighbourDiscovererProperties {
 		this.subscriptionPollInitialDelay = subscriptionPollInitialDelay;
 	}
 
+	public String getLocalSubscriptionUpdateInterval() {
+		return localSubscriptionUpdateInterval;
+	}
+
+	public void setLocalSubscriptionUpdateInterval(String localSubscriptionUpdateInterval) {
+		this.localSubscriptionUpdateInterval = localSubscriptionUpdateInterval;
+	}
+
+	public String getLocalSubscriptionInitialDelay() {
+		return localSubscriptionInitialDelay;
+	}
+
+	public void setLocalSubscriptionInitialDelay(String localSubscriptionInitialDelay) {
+		this.localSubscriptionInitialDelay = localSubscriptionInitialDelay;
+	}
+
 	@Override
 	public String toString() {
 		return "NeighbourDiscovererProperties{" +
@@ -148,6 +176,8 @@ public class NeighbourDiscovererProperties {
 				", subscriptionRequestInitialDelay='" + subscriptionRequestInitialDelay + '\'' +
 				", subscriptionPollUpdateInterval='" + subscriptionPollUpdateInterval + '\'' +
 				", subscriptionPollInitialDelay='" + subscriptionPollInitialDelay + '\'' +
+				", localSubscriptionUpdateInterval=" + localSubscriptionUpdateInterval +
+				", localSubscriptionInitialDelay=" + localSubscriptionInitialDelay +
 				", dnsLookupInterval='" + dnsLookupInterval + '\'' +
 				", dnsInitialStartDelay='" + dnsInitialStartDelay + '\'' +
 				", subscriptionPollingNumberOfAttempts=" + subscriptionPollingNumberOfAttempts +
