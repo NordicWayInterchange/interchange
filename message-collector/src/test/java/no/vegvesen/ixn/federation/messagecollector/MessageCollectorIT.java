@@ -55,7 +55,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	public Source createSource(String url, String queue, String keyStore) {
-		return new Source(url,queue,TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),keyStore,"trustStore.jks"));
+		return new Source(url,queue,TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),keyStore,"truststore.jks"));
 	}
 
 	@Test
@@ -90,7 +90,6 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	//@Order(2)
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();

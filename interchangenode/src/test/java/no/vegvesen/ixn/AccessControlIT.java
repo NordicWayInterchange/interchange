@@ -24,9 +24,12 @@ public class AccessControlIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(AccessControlIT.class);
 
+	@Container
 	private static KeysContainer testKeys = getKeysContainer(AccessControlIT.class, "my_ca", "localhost", "king_harald", "king_gustaf");
 
 	class AccessControlNegativeTestClass { }
+
+	@Container
 	private static KeysContainer testKeysOtherCa = getKeysContainer(AccessControlNegativeTestClass.class, "my_ca", "king_harald");
 
 	// Keystore and trust store files for integration testing.

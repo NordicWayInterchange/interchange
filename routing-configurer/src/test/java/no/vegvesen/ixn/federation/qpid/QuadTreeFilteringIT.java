@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.qpid;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.DataType;
@@ -40,18 +41,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(QuadTreeFilteringIT.class);
-	private static Path testKeysPath = generateKeys(QuadTreeFilteringIT.class,
+
+	private static KeysContainer keysContainer = getKeysContainer(QuadTreeFilteringIT.class,
 			"my_ca",
-			"localhost", "routing_configurer", "king_gustaf");
+			"localhost","routing_configurer","king_gustaf");
 
 	@Container
 	public QpidContainer qpidContainer = getQpidTestContainer("quadtree",
-			testKeysPath,
+			keysContainer.getKeyFolderOnHost(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost");
+			"localhost")
+			.dependsOn(keysContainer);
 
 
 	private QpidClient qpidClient;
@@ -114,7 +117,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());
 		qpidClient.addBinding(subscription.getSelector(), king_gustaf.getName(), subscription.bindKey(), "nwEx");
 
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "king_gustaf.p12", "truststore.jks");
 
 		Message receivedMessage;
 
@@ -136,7 +139,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());
 		qpidClient.addBinding(subscription.toSelector(), king_gustaf.getName(), ""+subscription.toSelector().hashCode(), "nwEx");
 
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "king_gustaf.p12", "truststore.jks");
 		Message receivedMessage;
 		try (Source source = new Source(qpidContainer.getAmqpsUrl(), "nwEx", sslContext)) {
 			source.start();
@@ -159,8 +162,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
-				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
+				new KeystoreDetails(keysContainer.getKeyFolderOnHost().resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
+				new KeystoreDetails(keysContainer.getKeyFolderOnHost().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
 
 }
