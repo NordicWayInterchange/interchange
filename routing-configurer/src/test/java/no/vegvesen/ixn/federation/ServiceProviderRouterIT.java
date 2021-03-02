@@ -43,11 +43,16 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @Testcontainers
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
-	private static Path testKeysPath = generateKeys(ServiceProviderRouterIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+
+	private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
+
+	@Container
+	private static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
     @SuppressWarnings("rawtypes")
 	@Container
-    public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
+    public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+			.dependsOn(keyContainer);
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
     private static String AMQPS_URL;

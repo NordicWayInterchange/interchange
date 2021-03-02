@@ -42,3 +42,4 @@ genCaCert ${CA_CN}
 for commonName in ${KEY_CNS}; do
     generateCertificate ${commonName}
 done
+echo "CERT GENERATION DONE"

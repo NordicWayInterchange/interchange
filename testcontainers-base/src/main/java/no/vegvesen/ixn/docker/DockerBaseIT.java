@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.IndefiniteWaitOneShotStartupCheckStrategy;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
@@ -57,7 +58,8 @@ public class DockerBaseIT {
 				.withEnv("CA_CN", ca)
 				.withEnv("KEY_CNS", spaceSeparatedKeyCns)
 				.withEnv("KEYS_DIR", "/jks/keys")
-				.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy());
+				.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy())
+				.waitingFor(Wait.forLogMessage(".*CERT GENERATION DONE.*\\n",1));
 	}
 
 	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
