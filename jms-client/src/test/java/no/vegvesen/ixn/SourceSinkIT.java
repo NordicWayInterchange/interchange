@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @Testcontainers
 public class SourceSinkIT extends QpidDockerBaseIT {
@@ -133,10 +134,13 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		source.start();
 		source.sendNonPersistentByteMessageWithImage("NO", "", "src/images/cabin_view.jpg");
 
-		ImageSink sink = new ImageSink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
-		MessageConsumer testConsumer = sink.createConsumer();
-		Message receive = testConsumer.receive(1000);
-		sink.onMessage(receive);
-		assertThat(receive).isNotNull();
+		try (ImageSink sink = new ImageSink(URL, "test-queue", KING_HARALD_SSL_CONTEXT)) {
+			MessageConsumer testConsumer = sink.createConsumer();
+			Message receive = testConsumer.receive(1000);
+			sink.onMessage(receive);
+			assertThat(receive).isNotNull();
+		} catch (Exception e) {
+			fail("unexpected exception",e);
+		}
 	}
 }

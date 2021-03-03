@@ -68,6 +68,7 @@ public class LocalSubscription {
         this.lastUpdated = lastUpdated;
     }
 
+
     public void setStatus(LocalSubscriptionStatus status) {
         this.status = status;
     }
@@ -124,12 +125,14 @@ public class LocalSubscription {
         if (o == null || getClass() != o.getClass()) return false;
         LocalSubscription that = (LocalSubscription) o;
         return status == that.status &&
-                Objects.equals(selector, that.selector);
+                Objects.equals(selector, that.selector) &&
+                createNewQueue == that.createNewQueue &&
+                Objects.equals(queueConsumerUser, that.queueConsumerUser);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status, selector);
+        return Objects.hash(status, selector, createNewQueue, queueConsumerUser);
     }
 
     public Integer getSub_id() {

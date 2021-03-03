@@ -291,21 +291,19 @@ public class MessageTestDouble implements Message {
     }
 
    //All the properties are defined as String, just for ease.
-    public static Message createMessage(String publisher,
+    public static Message createMessage(String publisherId,
         String originatingCountry,
         String protocolVersion,
         String messageType,
-        String latitude,
-        String longitude,
+        String quadTree,
         KeyValue... additionalProperties) {
 
         Map<String, String> properties = new HashMap<>();
-        properties.put(MessageProperty.PUBLISHER_NAME.getName(),publisher);
+        properties.put(MessageProperty.PUBLISHER_ID.getName(),publisherId);
         properties.put(MessageProperty.ORIGINATING_COUNTRY.getName(),originatingCountry);
         properties.put(MessageProperty.PROTOCOL_VERSION.getName(),protocolVersion);
         properties.put(MessageProperty.MESSAGE_TYPE.getName(),messageType);
-        properties.put(MessageProperty.LATITUDE.getName(),latitude);
-        properties.put(MessageProperty.LONGITUDE.getName(),longitude);
+        properties.put(MessageProperty.QUAD_TREE.getName(), quadTree);
         for (KeyValue kv : additionalProperties) {
             properties.put(kv.getKey(),kv.getValue());
         }
@@ -320,7 +318,7 @@ public class MessageTestDouble implements Message {
                                         String longitude,
                                         Map<String,String> additionalProperties) {
         Map<String, String> properties = new HashMap<>();
-        properties.put(MessageProperty.PUBLISHER_NAME.getName(),publisher);
+        properties.put(MessageProperty.PUBLISHER_ID.getName(),publisher);
         properties.put(MessageProperty.ORIGINATING_COUNTRY.getName(),originatingCountry);
         properties.put(MessageProperty.PROTOCOL_VERSION.getName(),protocolVersion);
         properties.put(MessageProperty.MESSAGE_TYPE.getName(),messageType);
@@ -333,15 +331,13 @@ public class MessageTestDouble implements Message {
     public static Message createDatexMessage(String publisher,
         String originatingCountry,
         String protocolVersion,
-        String latitude,
-        String longitude,
+        String quadTree,
         KeyValue... additionalProperties) {
         return createMessage(publisher,
                 originatingCountry,
                 protocolVersion,
 				Datex2DataTypeApi.DATEX_2,
-                latitude,
-                longitude,
+                quadTree,
                 additionalProperties);
     }
 

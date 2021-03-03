@@ -64,13 +64,11 @@ public class Source implements AutoCloseable {
 
         JmsTextMessage message = createTextMessage(messageText);
         message.getFacade().setUserId("localhost");
-        message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
         message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
         message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
         message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
         message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), "WinterDrivingManagement");
 		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
-        message.setStringProperty(MessageProperty.CONTENT_TYPE.getName(), "application/xml");
         message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
         message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
         message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
@@ -86,7 +84,6 @@ public class Source implements AutoCloseable {
 
         JmsTextMessage message = createTextMessage(messageText);
         message.getFacade().setUserId("localhost");
-        message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
         message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
         message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
         message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
@@ -154,7 +151,6 @@ public class Source implements AutoCloseable {
 	public void send(String messageText, String originatingCountry, long timeToLive) throws JMSException {
 		JmsTextMessage message = createTextMessage(messageText);
 		message.getFacade().setUserId("localhost");
-		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
 		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
 		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
@@ -168,7 +164,6 @@ public class Source implements AutoCloseable {
 	public void sendNonPersistent(String messageText, String originatingCountry, long timeToLive) throws JMSException {
 		JmsTextMessage message = createTextMessage(messageText);
 		message.getFacade().setUserId("localhost");
-		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
 		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
 		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
@@ -184,9 +179,7 @@ public class Source implements AutoCloseable {
 		message.getFacade().setUserId("localhost");
 		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), "DENM");
 		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
-		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Some Norwegian publisher");
 		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DENM:1.2.2");
-		message.setStringProperty(MessageProperty.CONTENT_TYPE.getName(), "application/octet-stream");
 		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
 		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
 		message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
@@ -206,9 +199,7 @@ public class Source implements AutoCloseable {
 		message.getFacade().setUserId("localhost");
 		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), "DENM");
 		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
-		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Some Norwegian publisher");
 		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DENM:1.2.2");
-		message.setStringProperty(MessageProperty.CONTENT_TYPE.getName(), "application/octet-stream");
 		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
 		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
 		message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), "some-denm-service-type");
@@ -226,9 +217,7 @@ public class Source implements AutoCloseable {
 		message.getFacade().setUserId("localhost");
 		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), "IVI");
 		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
-		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Some Norwegian publisher");
 		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "IVI:1.2");
-		message.setStringProperty(MessageProperty.CONTENT_TYPE.getName(), "application/base64");
 		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
 		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
 		message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
@@ -248,9 +237,7 @@ public class Source implements AutoCloseable {
 		message.getFacade().setUserId("localhost");
 		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), "IVI");
 		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
-		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Some Norwegian publisher");
 		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "IVI:1.2");
-		message.setStringProperty(MessageProperty.CONTENT_TYPE.getName(), "application/base64");
 		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
 		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
 		message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), "some-ivi-service-type");
@@ -270,13 +257,12 @@ public class Source implements AutoCloseable {
 
 		JmsTextMessage message = createTextMessage(messageText);
 		message.getFacade().setUserId("localhost");
-		message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), "Norwegian Public Roads Administration");
+		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "Norwegian Public Roads Administration");
 		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
 		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
 		message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), "WinterDrivingManagement");
 		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
-		message.setStringProperty(MessageProperty.CONTENT_TYPE.getName(), "application/xml");
 		message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
 		message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
 		message.setStringProperty("fishyBusiness", "fishTaco");

@@ -26,10 +26,8 @@ public class DataTypeTransformerTest {
 		String travelTimeData = "TravelTimeData";
 		String siteMeasurements = "SiteMeasurements";
 		String publisherId = "NO-91247";
-		String publisherName = "Some norwegian publisher name";
 		String protocolVersion = "pv2";
-		String contentType = "ct-3";
-		DataTypeApi capability = new Datex2DataTypeApi(publisherId, publisherName, originatingCountry, protocolVersion, contentType, Collections.emptySet(), publicationType, Sets.newLinkedHashSet(siteMeasurements, travelTimeData));
+		DataTypeApi capability = new Datex2DataTypeApi(publisherId, originatingCountry, protocolVersion, Collections.emptySet(), publicationType, Sets.newLinkedHashSet(siteMeasurements, travelTimeData));
 		Set<DataTypeApi> capabilities = Collections.singleton(capability);
 
 		Set<DataType> dataTypes = dataTypeTransformer.dataTypeApiToDataType(capabilities);
@@ -41,7 +39,6 @@ public class DataTypeTransformerTest {
 		assertThat(dataType.getPropertyValueAsSet(MessageProperty.PUBLICATION_SUB_TYPE)).hasSize(2).contains(siteMeasurements).contains(travelTimeData);
 		assertThat(dataType.getValues().containsKey(MessageProperty.QUAD_TREE.getName())).isFalse();
 		assertThat(dataType.getPropertyValue(MessageProperty.PUBLISHER_ID)).isEqualTo(publisherId);
-		assertThat(dataType.getPropertyValue(MessageProperty.PUBLISHER_NAME)).isEqualTo(publisherName);
 		assertThat(dataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION)).isEqualTo(protocolVersion);
 	}
 
@@ -95,7 +92,7 @@ public class DataTypeTransformerTest {
 
 	@Test
 	public void dataTypeApiWithQuadIsConvertedToDataType() {
-		DataTypeApi dataTypeApi = new DataTypeApi("myQuadMessageType", "myPublisherId", "myPublisherName", "no", "pv3", "ct3", Sets.newLinkedHashSet("aaa", "bbb"));
+		DataTypeApi dataTypeApi = new DataTypeApi("myQuadMessageType", "no", "pv3", "ct3", Sets.newLinkedHashSet("aaa", "bbb"));
 		Set<DataType> dataTypes = dataTypeTransformer.dataTypeApiToDataType(Sets.newLinkedHashSet(dataTypeApi));
 		assertThat(dataTypes).hasSize(1);
 		assertThat(dataTypes.iterator().next().getPropertyValueAsSet(MessageProperty.QUAD_TREE)).hasSize(2);
@@ -103,7 +100,7 @@ public class DataTypeTransformerTest {
 
 	@Test
 	public void datexDataTypeApiWithoutPulicationSubTypeReturnsNoPropertyForPublicationSubType() {
-		Datex2DataTypeApi datex2DataTypeApi = new Datex2DataTypeApi("myPublisherId", "myPublisherName", "NO", "pv3", "ct3", Collections.emptySet(), "myPublication", Collections.emptySet());
+		Datex2DataTypeApi datex2DataTypeApi = new Datex2DataTypeApi("NO", "pv3", "ct3", Collections.emptySet(), "myPublication", Collections.emptySet());
 		assertThat(datex2DataTypeApi.getValues().containsKey(MessageProperty.PUBLICATION_SUB_TYPE.getName())).isFalse();
 	}
 
@@ -111,18 +108,16 @@ public class DataTypeTransformerTest {
 	@Test
 	public void denmDataTypeApiIsConvertedToDataTypeAndBack() {
 		HashSet<String> quads = Sets.newLinkedHashSet("qt1", "qt2");
-		DenmDataTypeApi denmDataTypeApi = new DenmDataTypeApi("NO-393783", "No such publisher",
-				"NO", "pv3", "ct4", quads,
+		DenmDataTypeApi denmDataTypeApi = new DenmDataTypeApi("NO-393783",
+				"NO", "pv3", quads,
 				"st5", "cc3", "scc55");
 		Set<DataType> converted = dataTypeTransformer.dataTypeApiToDataType(Collections.singleton(denmDataTypeApi));
 		assertThat(converted).isNotNull().hasSize(1);
 		DataType convertedDataType = converted.iterator().next();
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(DenmDataTypeApi.DENM);
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.PUBLISHER_ID)).isEqualTo("NO-393783");
-		assertThat(convertedDataType.getPropertyValue(MessageProperty.PUBLISHER_NAME)).isEqualTo("No such publisher");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo("NO");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION)).isEqualTo("pv3");
-		assertThat(convertedDataType.getPropertyValue(MessageProperty.CONTENT_TYPE)).isEqualTo("ct4");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo("st5");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.CAUSE_CODE)).isEqualTo("cc3");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.SUB_CAUSE_CODE)).isEqualTo("scc55");
@@ -137,18 +132,16 @@ public class DataTypeTransformerTest {
 	@Test
 	public void iviDataTypeApiIsConvertedToDataTypeAndBack() {
 		HashSet<String> quads = Sets.newLinkedHashSet("qt1", "qt2");
-		IviDataTypeApi iviDataTypeApi = new IviDataTypeApi("NO-38367", "No such publisher",
-				"NO", "pv7", "ct6", quads,
+		IviDataTypeApi iviDataTypeApi = new IviDataTypeApi("NO-38367",
+				"NO", "pv7", quads,
 				"st8", Sets.newLinkedHashSet(12134), Sets.newLinkedHashSet(9876, 7654));
 		Set<DataType> converted = dataTypeTransformer.dataTypeApiToDataType(Collections.singleton(iviDataTypeApi));
 		assertThat(converted).isNotNull().hasSize(1);
 		DataType convertedDataType = converted.iterator().next();
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.MESSAGE_TYPE)).isEqualTo(IviDataTypeApi.IVI);
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.PUBLISHER_ID)).isEqualTo("NO-38367");
-		assertThat(convertedDataType.getPropertyValue(MessageProperty.PUBLISHER_NAME)).isEqualTo("No such publisher");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.ORIGINATING_COUNTRY)).isEqualTo("NO");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.PROTOCOL_VERSION)).isEqualTo("pv7");
-		assertThat(convertedDataType.getPropertyValue(MessageProperty.CONTENT_TYPE)).isEqualTo("ct6");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.SERVICE_TYPE)).isEqualTo("st8");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.IVI_TYPE)).isEqualTo("12134");
 		assertThat(convertedDataType.getPropertyValue(MessageProperty.PICTOGRAM_CATEGORY_CODE)).isEqualTo("9876,7654");
