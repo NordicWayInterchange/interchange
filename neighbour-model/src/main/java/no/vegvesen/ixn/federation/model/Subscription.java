@@ -25,7 +25,8 @@ public class Subscription {
 
 	private String queue;
 
-	private boolean createNewQueue;
+
+	private boolean createNewQueue = false;
 
 	private String queueConsumerUser;
 
