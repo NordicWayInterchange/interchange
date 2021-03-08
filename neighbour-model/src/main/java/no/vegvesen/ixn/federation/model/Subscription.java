@@ -26,6 +26,7 @@ public class Subscription {
 	private String queue;
 
 
+	@Column(columnDefinition = "boolean default false")
 	private boolean createNewQueue = false;
 
 	private String queueConsumerUser;
