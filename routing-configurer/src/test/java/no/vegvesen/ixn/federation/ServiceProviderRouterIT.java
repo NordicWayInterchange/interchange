@@ -4,6 +4,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.KeysContainer;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.DataType;
@@ -13,9 +14,7 @@ import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
-import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -25,14 +24,12 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,7 +52,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	private static KeysContainer keyContainer = DockerBaseIT.getKeysContainer(ServiceProviderRouterIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-    public GenericContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")
+    public QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")
 			.dependsOn(keyContainer);
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
@@ -85,7 +82,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
 		QpidClient client = createClient();
 		ServiceProviderRouter router = createRouter(serviceProviderRepository, client);
-		String AMQPS_URL = getQpidUrl();
+		String connectionUrl = qpidContainer.getAmqpsUrl();
 
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,""));
@@ -93,12 +90,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(king_gustaf));
 
 		SSLContext kingGustafSslContext = setUpTestSslContext("king_gustaf.p12");
-		Sink readKingGustafQueue = new Sink(AMQPS_URL, "king_gustaf", kingGustafSslContext);
+		Sink readKingGustafQueue = new Sink(connectionUrl, "king_gustaf", kingGustafSslContext);
 		readKingGustafQueue.start();
-		Source writeOnrampQueue = new Source(AMQPS_URL, "onramp", kingGustafSslContext);
+		Source writeOnrampQueue = new Source(connectionUrl, "onramp", kingGustafSslContext);
 		writeOnrampQueue.start();
 		try {
-			Sink readDlqueue = new Sink(AMQPS_URL, "onramp", kingGustafSslContext);
+			Sink readDlqueue = new Sink(connectionUrl, "onramp", kingGustafSslContext);
 			readDlqueue.start();
 			fail("Should not allow king_gustaf to read from queue not granted access on (onramp)");
 		} catch (Exception ignore) {
@@ -219,17 +216,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	public QpidClient createClient() {
 		RestTemplate restTemplate = new QpidClientConfig(setUpTestSslContext("routing_configurer.p12")).qpidRestTemplate();
-		return new QpidClient("https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT), "localhost", restTemplate);
+		return new QpidClient(qpidContainer.getHttpsUrl(), "localhost", restTemplate);
 	}
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(keyContainer.getKeyFolderOnHost().resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
 				new KeystoreDetails(keyContainer.getKeyFolderOnHost().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
-	}
-
-	public String getQpidUrl() {
-		return "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
 	}
 
 	private LocalSubscription createSubscription(String messageType, String originatingCountry) {
