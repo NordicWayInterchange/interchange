@@ -73,7 +73,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 			String httpsUrl = qpidContainer.getHttpsUrl();
+			String httpUrl = qpidContainer.getHttpUrl();
 			logger.info("server url: " + httpsUrl);
+			logger.info("server url: " + httpUrl);
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=" + qpidContainer.getvHostName(),
@@ -83,6 +85,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		}
 
 	}
+
+	@MockBean
+	NeighbourService neighbourService;
 
 	@Autowired
 	RoutingConfigurer routingConfigurer;
