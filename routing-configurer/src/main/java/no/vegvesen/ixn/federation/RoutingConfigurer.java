@@ -72,12 +72,15 @@ public class RoutingConfigurer {
 	//This avoids loop of messages
 	private void setupRouting(List<Neighbour> readyToSetupRouting) {
 		for (Neighbour subscriber : readyToSetupRouting) {
-			setupNeighbourRouting(subscriber);
+			try {
+				setupNeighbourRouting(subscriber);
+			} catch (Throwable e) {
+				logger.error("Could not set up routing for neighbour {}", subscriber.getName(), e);
+			}
 		}
 	}
 
 	void setupNeighbourRouting(Neighbour neighbour) {
-		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			if(neighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()){
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithCreateNewQueue();
@@ -110,9 +113,6 @@ public class RoutingConfigurer {
 				logger.info("Set up routing for neighbour {}", neighbour.getName());
 				neighbourService.saveSetupRouting(neighbour);
 			}
-		} catch (Throwable e) {
-			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
-		}
 	}
 
 	private void bindSubscriptions(String exchange, Neighbour neighbour, Set<Subscription> acceptedSubscriptions) {

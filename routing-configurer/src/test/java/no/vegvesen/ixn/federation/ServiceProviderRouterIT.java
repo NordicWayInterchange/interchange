@@ -19,6 +19,7 @@ import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -57,12 +58,20 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
 
+	private ServiceProviderRepository serviceProviderRepository;
+	private QpidClient client;
+	private ServiceProviderRouter router;
+
+	@BeforeEach
+	public void setUp() {
+		serviceProviderRepository = mock(ServiceProviderRepository.class);
+		client = createClient();
+		router = createRouter(serviceProviderRepository, client);
+
+	}
 
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
-		ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
-		QpidClient client = createClient();
-		ServiceProviderRouter router = createRouter(serviceProviderRepository, client);
 
 		ServiceProvider nordea = new ServiceProvider("nordea");
 		nordea.addLocalSubscription(createSubscription("DATEX2", "NO"));
@@ -79,9 +88,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
-		ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
-		QpidClient client = createClient();
-		ServiceProviderRouter router = createRouter(serviceProviderRepository, client);
 		String connectionUrl = qpidContainer.getAmqpsUrl();
 
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
@@ -104,9 +110,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void subscriberToreDownWillBeRemovedFromSubscribFederatedInterchangesGroup() {
-		ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
-		QpidClient client = createClient();
-		ServiceProviderRouter router = createRouter(serviceProviderRepository, client);
 
 		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
 		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "");
@@ -136,9 +139,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	 */
 	@Test
 	public void serviceProviderWithCapabiltiesShouldNotHaveQueuButExistInServiceProvidersGroup() {
-		ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
-		QpidClient client = createClient();
-		ServiceProviderRouter router = createRouter(serviceProviderRepository, client);
 
 		ServiceProvider onlyCaps = new ServiceProvider("onlyCaps");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
@@ -154,9 +154,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
-		ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
-		QpidClient client = createClient();
-		ServiceProviderRouter router = createRouter(serviceProviderRepository, client);
 
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
@@ -173,9 +170,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void doNotSetUpQueueWhenOnlySubscriptionHasCreateNewQueue() {
-		ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
-		QpidClient client = createClient();
-		ServiceProviderRouter router = createRouter(serviceProviderRepository, client);
 		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 				"AND messageType = 'DATEX2' " +
@@ -190,9 +184,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void doSetUpQueueWhenSubscriptionHasCreateNewQueueAndNot() {
-		ServiceProviderRepository serviceProviderRepository = mock(ServiceProviderRepository.class);
-		QpidClient client = createClient();
-		ServiceProviderRouter router = createRouter(serviceProviderRepository, client);
 		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 						"AND messageType = 'DATEX2' " +
