@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.DataType;
@@ -49,14 +51,11 @@ import static org.mockito.Mockito.times;
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
-	private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
+	@Container
+	private static KeysContainer keyContainer = DockerBaseIT.getKeysContainer(ServiceProviderRouterIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	private static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
-
-    @SuppressWarnings("rawtypes")
-	@Container
-    public GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+    public GenericContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")
 			.dependsOn(keyContainer);
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
@@ -225,8 +224,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
-				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
+				new KeystoreDetails(keyContainer.getKeyFolderOnHost().resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
+				new KeystoreDetails(keyContainer.getKeyFolderOnHost().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
 
 	public String getQpidUrl() {
