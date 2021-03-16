@@ -24,8 +24,8 @@ public class ImageSource extends Source{
         message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DENM:1.2.2");
         message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
         message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
-        message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
-        message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
+        message.setDoubleProperty(MessageProperty.LATITUDE.getName(), 60.352374);
+        message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), 13.334253);
         message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), "some-denm-service-type");
         message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), "3");
         message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), "6");
@@ -43,8 +43,8 @@ public class ImageSource extends Source{
         message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DENM:1.2.2");
         message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
         message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
-        message.setStringProperty(MessageProperty.LATITUDE.getName(), "60.352374");
-        message.setStringProperty(MessageProperty.LONGITUDE.getName(), "13.334253");
+        message.setDoubleProperty(MessageProperty.LATITUDE.getName(), 60.352374);
+        message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), 13.334253);
         message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), "some-denm-service-type");
         message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), "3");
         message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), "6");

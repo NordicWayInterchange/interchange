@@ -15,8 +15,8 @@ public class MessageProperty {
 
 	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true, true, MessagePropertyType.STRING);
 	public static final MessageProperty PUBLISHER_ID = new MessageProperty("publisherId", true, true, MessagePropertyType.STRING);
-	public static final MessageProperty LATITUDE = new MessageProperty("latitude", false, false, MessagePropertyType.STRING);
-	public static final MessageProperty LONGITUDE = new MessageProperty("longitude", false, false, MessagePropertyType.STRING);
+	public static final MessageProperty LATITUDE = new MessageProperty("latitude", false, false, MessagePropertyType.DOUBLE);
+	public static final MessageProperty LONGITUDE = new MessageProperty("longitude", false, false, MessagePropertyType.DOUBLE);
 	public static final MessageProperty PROTOCOL_VERSION = new MessageProperty("protocolVersion", true, true, MessagePropertyType.STRING);
 	//public static final MessageProperty CONTENT_TYPE = new MessageProperty("contentType", false, true, MessagePropertyType.STRING);
 	public static final MessageProperty TIMESTAMP = new MessageProperty("timestamp", false, false, MessagePropertyType.STRING);
