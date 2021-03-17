@@ -142,6 +142,16 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		assertThat(recievedMsg).isNotNull();
 	}
 
+	@Test
+	public void sendMessageWhereQuadTreeTileIsLongerThanEighteen() throws Exception {
+		Map<String, String> props = Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2");
+		props.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		props.put(MessageProperty.QUAD_TREE.getName(), "abcdefghijklmnopqrs");
+		DataType datexNoAbcdef = new DataType(props);
+		Message recievedMsg = sendReceiveMessageServiceProvider(",abcdefghijklmnopqrs,cdefghijklmnop", datexNoAbcdef);
+		assertThat(recievedMsg).isNotNull();
+	}
+
 	private Message sendReceiveMessageServiceProvider(String messageQuadTreeTiles, DataType subscription) throws Exception {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'Datex2' and originatingCountry= 'NO' and quadTree like '%,abcdef%"));
