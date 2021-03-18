@@ -17,6 +17,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.xml.ws.Service;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -164,5 +165,19 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void httpsConnectionToQpidRestServerInsideTheClusterDoesNotVerifyServerName() {
 		QpidClient localhostAddressedWithIpAddress = new QpidClient("https://127.0.0.1:" + MAPPED_HTTPS_PORT, "localhost", restTemplate);
 		localhostAddressedWithIpAddress.ping();
+	}
+
+	@Test
+	public void removeServiceProviderFromGroup() {
+		String myUser = "my-service-provider";
+		client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
+		List<String> myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
+
+		assertThat(myUserNames).contains(myUser);
+
+		client.removeMemberFromGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
+		myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
+
+		assertThat(myUserNames).doesNotContain(myUser);
 	}
 }
