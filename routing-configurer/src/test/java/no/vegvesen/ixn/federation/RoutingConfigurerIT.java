@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -65,6 +66,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			.dependsOn(keysContainer);
 
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
+
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
 
@@ -72,6 +74,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+			qpidContainer.followOutput(new Slf4jLogConsumer(logger));
 			String httpsUrl = qpidContainer.getHttpsUrl();
 			String httpUrl = qpidContainer.getHttpUrl();
 			logger.info("server url: " + httpsUrl);

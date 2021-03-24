@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @EnableScheduling
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-class RoutingConfigurerTest {
+class RoutingConfigurerAppIT {
 
 	@MockBean
 	RestTemplate restTemplate;

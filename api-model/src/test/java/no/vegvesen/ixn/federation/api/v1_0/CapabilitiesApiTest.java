@@ -11,7 +11,7 @@ import java.util.Set;
 public class CapabilitiesApiTest {
 
     @Test
-    public void createEmptyCapabilitiesApiJson() throws JsonProcessingException {
+    public void createSampleCapabilitiesApiJson() throws JsonProcessingException {
         CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
         capabilitiesApi.setName("a.itsinterchange.eu");
         Set<CapabilityApi> capSet = new HashSet<>();
@@ -35,6 +35,15 @@ public class CapabilitiesApiTest {
         capabilitiesApi.setCapabilities(capSet);
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(capabilitiesApi));
+    }
+
+    @Test
+    public void createEmptyCapabilitiesApiJson() throws JsonProcessingException {
+        CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
+        capabilitiesApi.setName("neighbour-client");
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writeValueAsString(capabilitiesApi));
+
     }
 
 }

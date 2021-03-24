@@ -2,6 +2,8 @@ package no.vegvesen.ixn.docker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.Network;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,7 +13,7 @@ public class DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(DockerBaseIT.class);
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";
 
-	protected static Path getProjectRelativePath(String relativePathFromProjectRoot) {
+	public static Path getProjectRelativePath(String relativePathFromProjectRoot) {
 		Path projectRoot = getProjectRootPath();
 		logger.debug("Resolving path to project folder [{}] from project root path: [{}]", relativePathFromProjectRoot, projectRoot.toString());
 		Path dockerFilePath = projectRoot.resolve(relativePathFromProjectRoot);
@@ -55,6 +57,13 @@ public class DockerBaseIT {
 		Path imagePath = getProjectRelativePath("key-gen");
 		Path keysOutputPath = getProjectRelativePath("target/test-keys-" + clazz.getSimpleName());
 		return new KeysContainer(imagePath,keysOutputPath,ca_cn,serverOrUserCns);
+	}
+
+	public static PostgreSQLContainer<?> getDbContainer() {
+		return new PostgreSQLContainer<>("postgres:9.6")
+				.withDatabaseName("federation")
+				.withUsername("federation")
+				.withPassword("federation");
 	}
 
 
