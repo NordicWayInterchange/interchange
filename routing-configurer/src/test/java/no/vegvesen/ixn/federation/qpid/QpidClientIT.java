@@ -154,7 +154,8 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " ACCESS VIRTUALHOST name = \"localhost\"");
 		acl.add("ACL ALLOW-LOG interchange CONSUME QUEUE name = \"onramp\"");
 		acl.add("ACL DENY-LOG ALL ALL ALL");
-		LinkedList<String> newAcl = new LinkedList<>(client.addOneConsumeRuleBeforeLastRule("king_harald", "king_harald", acl));
+		String newAclEntry = String.format("ACL ALLOW-LOG king_harald CONSUME QUEUE name = \"king_harald\"");
+		LinkedList<String> newAcl = new LinkedList<>(client.addOneConsumeRuleBeforeLastRule(acl, newAclEntry));
 		assertThat(acl.getFirst()).isEqualTo(newAcl.getFirst());
 		assertThat(acl.getLast()).isEqualTo(newAcl.getLast());
 		assertThat(newAcl.get(newAcl.size() - 2)).contains("king_harald");

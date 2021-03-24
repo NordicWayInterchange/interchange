@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 
 import javax.persistence.*;
@@ -30,6 +31,10 @@ public class ServiceProvider {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "spr_id", foreignKey = @ForeignKey(name = "fk_locsub_spr"))
 	private Set<LocalSubscription> subscriptions = new HashSet<>();
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "priv_channel_id", foreignKey = @ForeignKey(name = "fk_priv_channel"))
+	private Set<PrivateChannel> privateChannels = new HashSet<>();
 
 	private LocalDateTime subscriptionUpdated;
 
@@ -123,6 +128,20 @@ public class ServiceProvider {
 		.collect(Collectors.toSet());
 	}
 
+	public PrivateChannel addPrivateChannel(String clientName) {
+		PrivateChannel newPrivateChannel = new PrivateChannel(clientName, PrivateChannelStatus.REQUESTED);
+		if(privateChannels.contains(newPrivateChannel)){
+			throw new PrivateChannelException("Client already has private channel");
+		} else {
+			privateChannels.add(newPrivateChannel);
+		}
+		return newPrivateChannel;
+	}
+
+	public Set<PrivateChannel> getPrivateChannels() {
+		return privateChannels;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -145,6 +164,7 @@ public class ServiceProvider {
 				", name='" + name + '\'' +
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
+				", privateChannels=" + Arrays.toString(privateChannels.toArray()) +
 				'}';
 	}
 

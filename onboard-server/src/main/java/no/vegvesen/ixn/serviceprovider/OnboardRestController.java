@@ -3,6 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class OnboardRestController {
@@ -205,6 +207,44 @@ public class OnboardRestController {
 		logger.info("Received poll on brokerUrl = {} from Service Provider {} with queueConsumerUser = {}", localSubscription.getBrokerUrl(), serviceProviderName, localSubscription.getQueueConsumerUser());
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionToLocalSubscriptionApi(localSubscription);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+	public PrivateChannelApi addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody PrivateChannelApi clientChannel) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		if(clientChannel == null) {
+			throw new PrivateChannelException("ClientChannel cannot be null");
+		}
+
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
+
+		if (serviceProviderToUpdate == null) {
+			logger.info("The posting Service Provider is new. Converting incoming API object to Service Provider");
+			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
+		}
+
+		PrivateChannel newPrivateChannel = serviceProviderToUpdate.addPrivateChannel(clientChannel.getClientName());
+
+		serviceProviderRepository.save(serviceProviderToUpdate);
+
+		return new PrivateChannelApi(newPrivateChannel.getClientName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+	public PrivateChannelListApi getPrivateChannels(@PathVariable String serviceProviderName) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+
+		List<PrivateChannel> privateChannels = serviceProvider.getPrivateChannels().stream().collect(Collectors.toList());
+		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
+		for(PrivateChannel privateChannel : privateChannels){
+			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getClientName(), privateChannel.getQueueName(), privateChannel.getId()));
+		}
+		return new PrivateChannelListApi(privateChannelsApis);
 	}
 
 	// TODO: Remove

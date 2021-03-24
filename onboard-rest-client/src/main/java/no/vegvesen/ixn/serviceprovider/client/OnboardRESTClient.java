@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
@@ -11,6 +12,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
+import java.util.List;
 
 public class OnboardRESTClient {
 
@@ -68,6 +70,22 @@ public class OnboardRESTClient {
     public LocalSubscriptionApi getSubscription(Integer localSubscriptionId) {
         String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId.toString());
         return restTemplate.getForEntity(url, LocalSubscriptionApi.class).getBody();
+    }
+
+    public PrivateChannelApi addPrivateChannel(PrivateChannelApi privateChannelApi) {
+        HttpHeaders headers =  new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<PrivateChannelApi> entity = new HttpEntity<>(privateChannelApi,headers);
+        return restTemplate.exchange(server + "/" + user + "/privatechannels", HttpMethod.POST, entity, PrivateChannelApi.class).getBody();
+    }
+
+    public PrivateChannelListApi getPrivateChannels() {
+        String url = String.format("%s/%s/privatechannels/", server, user);
+        return restTemplate.getForEntity(url, PrivateChannelListApi.class).getBody();
+    }
+
+    public void deletePrivateChannel(Integer privateChannelId) {
+
     }
 }
 

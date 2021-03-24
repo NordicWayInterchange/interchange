@@ -13,6 +13,7 @@ import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,6 +215,48 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
 		assertThat(client.queueExists(serviceProvider.getName())).isTrue();
+	}
+
+	@Test
+	public void setUpQueueForPrivateChannels() {
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setName("my-private-service-provider");
+
+		serviceProvider.addPrivateChannel("my-client");
+
+		router.syncPrivateChannels(serviceProvider);
+
+		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
+
+		PrivateChannel privateChannel = serviceProvider.getPrivateChannels().stream().findFirst().get();
+
+		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		assertThat(client.queueExists(privateChannel.getQueueName())).isTrue();
+		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(privateChannel.getClientName());
+		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(serviceProvider.getName());
+	}
+
+	@Test
+	public void tearDownQueueForPrivateChannels() {
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setName("my-private-service-provider-1");
+
+		serviceProvider.addPrivateChannel("my-client-1");
+
+		router.syncPrivateChannels(serviceProvider);
+
+		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
+
+		PrivateChannel privateChannel = serviceProvider.getPrivateChannels().stream().findFirst().get();
+
+		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
+
+		router.syncPrivateChannels(serviceProvider);
+
+		assertThat(client.queueExists(privateChannel.getQueueName())).isFalse();
+		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(privateChannel.getClientName());
+		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
+
 	}
 
    	public SSLContext setUpTestSslContext(String s) {

@@ -83,6 +83,15 @@
           }
         },
         {
+          "objectType": "VIRTUALHOST",
+          "identity": "clients-private-channels",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
+          }
+        },
+        {
           "objectType": "QUEUE",
           "identity": "interchange",
           "operation": "CONSUME",

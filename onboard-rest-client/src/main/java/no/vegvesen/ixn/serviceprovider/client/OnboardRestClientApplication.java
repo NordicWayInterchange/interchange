@@ -3,6 +3,7 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -26,7 +27,9 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.AddServiceProviderSubscription.class,
         OnboardRestClientApplication.DeleteServiceProviderCapability.class,
         OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
-        OnboardRestClientApplication.GetSubscription.class
+        OnboardRestClientApplication.GetSubscription.class,
+        OnboardRestClientApplication.AddPrivateChannel.class,
+        OnboardRestClientApplication.GetPrivateChannels.class
 })
 public class OnboardRestClientApplication implements Callable<Integer> {
 
@@ -173,6 +176,42 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             LocalSubscriptionApi subscription = client.getSubscription(subscriptionId);
             System.out.printf("Subscription %d successfully polled with brokerUrl %s %n", subscriptionId, subscription.getBrokerUrl());
+            return 0;
+        }
+    }
+
+    @Command(name = "addprivatechannel", description = "Adding name for client to set up private channel")
+    static class AddPrivateChannel implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Option(names = {"-f","--filename"}, description = "The json file for the clientName")
+        File file;
+
+        @Override
+        public Integer call() throws IOException {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            PrivateChannelApi privateChannel = mapper.readValue(file,PrivateChannelApi.class);
+            PrivateChannelApi result = client.addPrivateChannel(privateChannel);
+            System.out.println(mapper.writeValueAsString(result));
+            return 0;
+        }
+    }
+
+    @Command(name = "getprivatechannels", description = "Get the serviceProvider private channels to clients")
+    static class GetPrivateChannels implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Override
+        public Integer call() throws IOException {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            PrivateChannelListApi result = client.getPrivateChannels();
+            System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
     }
