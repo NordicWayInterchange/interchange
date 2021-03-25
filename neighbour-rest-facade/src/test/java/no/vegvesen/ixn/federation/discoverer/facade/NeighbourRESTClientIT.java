@@ -3,12 +3,14 @@ package no.vegvesen.ixn.federation.discoverer.facade;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.KeysContainer;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -19,7 +21,7 @@ import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//@Disabled
+@Disabled
 @Testcontainers
 public class NeighbourRESTClientIT {
 
@@ -52,31 +54,17 @@ public class NeighbourRESTClientIT {
             .withNetworkAliases(NEIGHBOUR_SERVER);
 
     @Test
-    public void testFoo() throws IOException, InterruptedException {
+    @Order(2)
+    public void testPostSubscriptions() throws IOException, InterruptedException {
         assertThat(neighbourServer.isRunning()).isTrue();
         assertThat(databaseContainer.isRunning()).isTrue();
-        System.out.println(databaseContainer.getJdbcUrl());
 
-        GenericContainer<?> commandContainer = new GenericContainer<>(new ImageFromDockerfile()
-                .withDockerfileFromBuilder( builder ->
-                        builder
-                                .from("alpine:latest")
-                                .run("apk add --no-cache curl")
-                                .build()))
-                .withClasspathResourceMapping(Paths.get("unknown-json").toString(),
-                        "/files",
-                        BindMode.READ_ONLY)
-                .withFileSystemBind(keysContainer.getKeyFolderOnHost().toString(),"/jks",BindMode.READ_ONLY)
-                .withNetwork(network)
-                .withNetworkAliases(NEIGHBOUR_CLIENT)
-                .withCommand("top")
-                .dependsOn(neighbourServer);
-        commandContainer.start();
+        GenericContainer<?> commandContainer = createExecContainer();
         System.out.println("Wait here....");
         ExecResult result = commandContainer.execInContainer("curl", "-X",
                 "POST",
                 "-d",
-                "@/files/sample.json",
+                "@/files/subscription_request.json",
                 "-H",
                 "Content-Type: application/json",
                 "--cacert",
@@ -94,6 +82,51 @@ public class NeighbourRESTClientIT {
 
     }
 
+    @Test
+    @Order(1)
+    public void testPostCapabilties() throws IOException, InterruptedException {
+        GenericContainer<?> commandContainer = createExecContainer();
+        System.out.println("Wait here....");
+        ExecResult result = commandContainer.execInContainer("curl", "-X",
+                "POST",
+                "-d",
+                "@/files/capability_post.json",
+                "-H",
+                "Content-Type: application/json",
+                "--cacert",
+                "/jks/top-ca.crt",
+                "--cert",
+                "/jks/" + NEIGHBOUR_CLIENT + ".crt",
+                "--key",
+                "/jks/" + NEIGHBOUR_CLIENT + ".key",
+                "--insecure",
+                "https://" + NEIGHBOUR_SERVER + "/capabilities");
+        System.out.println(result.getExitCode());
+        System.out.println(result.getStderr());
+        System.out.println(result.getStdout());
+        commandContainer.stop();
+
+    }
+
+    public GenericContainer<?> createExecContainer() {
+        GenericContainer<?> commandContainer = new GenericContainer<>(new ImageFromDockerfile()
+                .withDockerfileFromBuilder(builder ->
+                        builder
+                                .from("alpine:latest")
+                                .run("apk add --no-cache curl")
+                                .build()))
+                .withClasspathResourceMapping(Paths.get("unknown-json").toString(),
+                        "/files",
+                        BindMode.READ_ONLY)
+                .withFileSystemBind(keysContainer.getKeyFolderOnHost().toString(), "/jks", BindMode.READ_ONLY)
+                .withNetwork(network)
+                .withNetworkAliases(NEIGHBOUR_CLIENT)
+                .withCommand("top")
+                .dependsOn(neighbourServer);
+        commandContainer.start();
+        return commandContainer;
+    }
+
 
 
      private static GenericContainer createNeighbourContainer() {
@@ -107,6 +140,7 @@ public class NeighbourRESTClientIT {
          public NeighbourServerContainer(Path keysFolderOnHost) {
             super(new ImageFromDockerfile("neighbour-server-app")
                     .withFileFromPath(".",DockerBaseIT.getProjectRelativePath("neighbour-server-app")));
+            this.waitingFor(Wait.forLogMessage(".*Started NeighbourRestApiApplication in.*",1));
              this.keysFolderOnHost = keysFolderOnHost;
          }
 

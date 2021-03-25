@@ -34,7 +34,7 @@ public class CapabilitiesApiTest {
         capSet.add(iviType128Pictograms557_559_612);
         capabilitiesApi.setCapabilities(capSet);
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writeValueAsString(capabilitiesApi));
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilitiesApi));
     }
 
     @Test
@@ -42,7 +42,7 @@ public class CapabilitiesApiTest {
         CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
         capabilitiesApi.setName("neighbour-client");
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writeValueAsString(capabilitiesApi));
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilitiesApi));
 
     }
 
