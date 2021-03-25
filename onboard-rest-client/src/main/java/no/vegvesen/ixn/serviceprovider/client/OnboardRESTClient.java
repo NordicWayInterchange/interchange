@@ -79,13 +79,13 @@ public class OnboardRESTClient {
         return restTemplate.exchange(server + "/" + user + "/privatechannels", HttpMethod.POST, entity, PrivateChannelApi.class).getBody();
     }
 
+    public void deletePrivateChannel(Integer privateChannelId) {
+        restTemplate.delete(String.format("%s/%s/privatechannels/%s", server, user, privateChannelId));
+    }
+
     public PrivateChannelListApi getPrivateChannels() {
         String url = String.format("%s/%s/privatechannels/", server, user);
         return restTemplate.getForEntity(url, PrivateChannelListApi.class).getBody();
-    }
-
-    public void deletePrivateChannel(Integer privateChannelId) {
-
     }
 }
 

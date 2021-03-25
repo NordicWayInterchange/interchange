@@ -229,8 +229,7 @@ public class QpidClient {
 
 	public void addWriteAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
-		String newAclEntry = String.format("ACL ALLOW-LOG foo PUBLISH EXCHANGE name=\"\" routingKey=\"%s\"", queue);
-		//String newAclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE routingkey = \"%s\" name =\"\"", subscriberName, queue);
+		String newAclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE routingkey = \"%s\" name =\"\"", subscriberName, queue);
 		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(aclRules, newAclEntry);
 
 		StringBuilder newAclRules1 = new StringBuilder();
@@ -248,7 +247,6 @@ public class QpidClient {
 
 	List<String> addOneConsumeRuleBeforeLastRule(List<String> aclRulesLegacyFormat, String newAclEntry) {
 		LinkedList<String> aclRules = new LinkedList<>(aclRulesLegacyFormat);
-		//String newAclEntry = String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", subscriberName, newConsumeQueue);
 		aclRules.add(aclRules.size()-1, newAclEntry); // add the new rule before the last rule "DENY ALL"
 		logger.debug("new acl rules {}", aclRules);
 		return aclRules;
@@ -275,7 +273,7 @@ public class QpidClient {
 
 	public void removeWriteAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
-		String aclEntry = String.format("ACL ALLOW-LOG foo PUBLISH EXCHANGE name=\"\" routingKey=\"%s\"", queue);
+		String aclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE routingkey = \"%s\" name =\"\"", subscriberName, queue);
 
 		StringBuilder newAclRules1 = new StringBuilder();
 		for (String aclRule : aclRules) {

@@ -215,7 +215,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		if(clientChannel == null) {
-			throw new PrivateChannelException("ClientChannel cannot be null");
+			throw new PrivateChannelException("Client channel cannot be null");
 		}
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
@@ -228,8 +228,32 @@ public class OnboardRestController {
 		PrivateChannel newPrivateChannel = serviceProviderToUpdate.addPrivateChannel(clientChannel.getClientName());
 
 		serviceProviderRepository.save(serviceProviderToUpdate);
-
+		OnboardMDCUtil.removeLogVariables();
 		return new PrivateChannelApi(newPrivateChannel.getClientName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
+	public RedirectView deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable Integer privateChannelId) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
+
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProviderToUpdate == null) {
+			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
+		}
+
+		serviceProviderToUpdate.setPrivateChannelToTearDown(privateChannelId);
+
+		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
+		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+		logger.debug("Updated Service Provider: {}", saved.toString());
+
+		RedirectView redirect = new RedirectView("/{serviceProviderName}/privatechannels/");
+		OnboardMDCUtil.removeLogVariables();
+		return redirect;
+
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)

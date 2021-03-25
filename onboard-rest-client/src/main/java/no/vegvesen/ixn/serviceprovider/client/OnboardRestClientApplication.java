@@ -29,7 +29,8 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
         OnboardRestClientApplication.GetSubscription.class,
         OnboardRestClientApplication.AddPrivateChannel.class,
-        OnboardRestClientApplication.GetPrivateChannels.class
+        OnboardRestClientApplication.GetPrivateChannels.class,
+        OnboardRestClientApplication.DeleteServiceProviderPrivateChannel.class
 })
 public class OnboardRestClientApplication implements Callable<Integer> {
 
@@ -196,6 +197,24 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             PrivateChannelApi privateChannel = mapper.readValue(file,PrivateChannelApi.class);
             PrivateChannelApi result = client.addPrivateChannel(privateChannel);
             System.out.println(mapper.writeValueAsString(result));
+            return 0;
+        }
+    }
+
+    @Command(name = "deleteprivatechannel", description = "Delete a service provider private channel to a client")
+    static class DeleteServiceProviderPrivateChannel implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The ID of the subscription to delete")
+        Integer privateChannelId;
+
+        @Override
+        public Integer call(){
+            OnboardRESTClient client = parentCommand.createClient();
+            client.deletePrivateChannel(privateChannelId);
+            System.out.printf("Private channel with id %d deleted successfully%n",privateChannelId);
             return 0;
         }
     }

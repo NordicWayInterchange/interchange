@@ -8,7 +8,7 @@ docker run \
     --dns=172.28.1.1 \
     -v ${PWD}/../tmp/keys:/keys \
     -e URL=amqps://local.bouvetinterchange.eu \
-    -e QUEUE=onramp \
+    -e QUEUE=$1 \
     -e KEY_STORE_PATH=/keys/king_olav.bouvetinterchange.eu.p12 \
     -e KEY_STORE_PASS=password \
     -e KEY_PASS=password \
