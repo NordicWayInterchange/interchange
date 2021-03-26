@@ -10,7 +10,7 @@ public class PrivateChannel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "privchannel_seq")
-    @Column(name="priv_channel_id")
+    @Column(name="id")
     private Integer id;
 
     @Enumerated(EnumType.STRING)
