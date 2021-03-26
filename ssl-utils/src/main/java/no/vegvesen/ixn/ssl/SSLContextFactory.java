@@ -37,7 +37,7 @@ public class SSLContextFactory {
 			tmf.init(ts);
 
 			// Get the SSLContext to help create SSLSocketFactory
-			final SSLContext sslContext = SSLContext.getInstance("TLS");
+			final SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
 			sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 			return sslContext;
 		} catch (final GeneralSecurityException e) {
