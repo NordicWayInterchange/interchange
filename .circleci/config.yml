@@ -1,7 +1,8 @@
 version: 2.1
 executors:
   my-machine:
-    machine: true
+    machine:
+      image: ubuntu-2004:202101-01
     working_directory: ~/interchange
   helm3-gcloud:
     working_directory: ~/interchange
