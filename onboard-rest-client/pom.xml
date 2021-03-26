@@ -68,6 +68,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>onboard-server-app</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
         </dependency>
