@@ -15,6 +15,7 @@ jobs:
       - checkout
       - run: sudo apt-get update
       - run: sudo apt-get -y install openjdk-8-jdk
+      - run: sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
       - run:
           name: Build and run integration tests
           command: |
