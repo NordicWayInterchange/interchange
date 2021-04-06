@@ -30,7 +30,7 @@ jobs:
           branch: federation-master
           name: Push maven build
           command: |
-            mvn -DskipTests=true -s .circleci.settings.xml deploy -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            javac -version && mvn -DskipTests=true -s .circleci.settings.xml deploy -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
   docker-build-push-bouvet:
     executor: my-machine
     steps:
