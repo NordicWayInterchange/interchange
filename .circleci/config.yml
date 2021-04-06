@@ -13,6 +13,8 @@ jobs:
     executor: my-machine
     steps:
       - checkout
+      - run: sudo apt-get update
+      - run: sudo apt-get -y install openjdk-8-jdk
       - run:
           name: Build and run integration tests
           command: |
