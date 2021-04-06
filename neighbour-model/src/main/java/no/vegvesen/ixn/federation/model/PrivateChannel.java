@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "private_channel")
+@Table(name = "private_channels")
 public class PrivateChannel {
 
     @Id

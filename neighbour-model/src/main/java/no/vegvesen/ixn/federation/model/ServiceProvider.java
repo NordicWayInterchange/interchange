@@ -153,6 +153,17 @@ public class ServiceProvider {
 		return privateChannels;
 	}
 
+	public PrivateChannel getPrivateChannelById(Integer id) throws PrivateChannelException {
+
+		for (PrivateChannel privateChannel : privateChannels) {
+			if (privateChannel.getId().equals(id)) {
+				return privateChannel;
+			}
+		}
+
+		throw new PrivateChannelException("Could not find private channel with id " + id);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

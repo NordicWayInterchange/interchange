@@ -76,7 +76,9 @@ public class OnboardRESTClient {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<PrivateChannelApi> entity = new HttpEntity<>(privateChannelApi,headers);
-        return restTemplate.exchange(server + "/" + user + "/privatechannels", HttpMethod.POST, entity, PrivateChannelApi.class).getBody();
+        String url = server + "/" + user + "/privatechannels";
+        System.out.println(url);
+        return restTemplate.exchange(url, HttpMethod.POST, entity, PrivateChannelApi.class).getBody();
     }
 
     public void deletePrivateChannel(Integer privateChannelId) {

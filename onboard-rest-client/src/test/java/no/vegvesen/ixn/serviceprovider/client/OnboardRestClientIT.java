@@ -6,10 +6,7 @@ import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -151,9 +148,16 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
         PrivateChannelListApi privateChannels = client.getPrivateChannels();
 
+        client.deletePrivateChannel(2);
+
+        PrivateChannelListApi privateChannels1 = client.getPrivateChannels();
+
         System.out.println(objectMapper.writeValueAsString(addedPrivateChannel1));
         System.out.println(objectMapper.writeValueAsString(addedPrivateChannel2));
         System.out.println(objectMapper.writeValueAsString(privateChannels));
+        System.out.println("--------------------------------------------------");
+        System.out.println(objectMapper.writeValueAsString(privateChannels1));
+        assertThat(client.getPrivateChannels().getPrivateChannelApis()).hasSize(1);
 
 
     }

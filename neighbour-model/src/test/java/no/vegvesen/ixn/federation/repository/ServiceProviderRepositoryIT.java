@@ -220,6 +220,19 @@ public class ServiceProviderRepositoryIT {
 
 		repository.save(sp1);
 
+		System.out.println(repository.findByName("my-client-1").getPrivateChannels());
+
 		assertThat(repository.findByName(sp1.getName()).getPrivateChannels()).hasSize(2);
+
+		sp1.getPrivateChannels().remove(sp1.getPrivateChannels().stream()
+				.filter(privateChannel -> privateChannel.getClientName().equals("my-client-3"))
+				.findFirst()
+				.get());
+
+		repository.save(sp1);
+
+		assertThat(repository.findByName(sp1.getName()).getPrivateChannels()).hasSize(1);
+
+		System.out.println(repository.findByName("my-client-1").getPrivateChannels());
 	}
 }

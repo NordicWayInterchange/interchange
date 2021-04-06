@@ -181,6 +181,7 @@ public class ServiceProviderRouter {
                     qpidClient.addReadAccess(clientName, queueName);
                     privateChannel.setStatus(PrivateChannelStatus.CREATED);
                     logger.info("Creating queue {} for client {}", queueName, clientName);
+                    repository.save(serviceProvider);
                 }
                 if(privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
                     if(groupMemberNames.contains(serviceProvider.getName()) && privateChannelsWithStatusCreated.isEmpty()){
@@ -188,13 +189,14 @@ public class ServiceProviderRouter {
                         logger.debug("Removing member {} from group {}", serviceProvider.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     }
                     qpidClient.removeMemberFromGroup(clientName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                    logger.debug("Removing member {} from group {}", clientName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                    logger.info("Removing member {} from group {}", clientName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     qpidClient.removeWriteAccess(clientName, queueName);
                     qpidClient.removeWriteAccess(serviceProvider.getName(), queueName);
                     qpidClient.removeReadAccess(clientName, queueName);
                     qpidClient.removeReadAccess(serviceProvider.getName(), queueName);
                     logger.info("Tearing down queue {} for client {}", queueName, clientName);
                     qpidClient.removeQueue(queueName);
+                    repository.save(serviceProvider);
                 }
             }
             Set<PrivateChannel> privateChannelsToRemove = serviceProvider.getPrivateChannels()
