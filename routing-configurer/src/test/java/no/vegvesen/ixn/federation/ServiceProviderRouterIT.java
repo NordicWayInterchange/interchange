@@ -14,6 +14,7 @@ import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,7 +226,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addPrivateChannel("my-client");
 
 		router.syncPrivateChannels(serviceProvider);
-		System.out.println(serviceProvider.getPrivateChannelById(1));
 
 		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
 
@@ -269,7 +269,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addPrivateChannel("my-client-12");
 
 		router.syncPrivateChannels(serviceProvider);
-		System.out.println(serviceProvider.getPrivateChannels());
 
 		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(2);
 
@@ -283,8 +282,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(privateChannel.getClientName());
 		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(serviceProvider.getName());
 		assertThat(serviceProvider.getPrivateChannels()).hasSize(1);
-		System.out.println("-----------------------------------");
-		System.out.println(serviceProvider.getPrivateChannels());
 	}
 
    	public SSLContext setUpTestSslContext(String s) {

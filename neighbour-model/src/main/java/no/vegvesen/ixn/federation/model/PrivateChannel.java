@@ -16,7 +16,7 @@ public class PrivateChannel {
     @Enumerated(EnumType.STRING)
     private PrivateChannelStatus status;
 
-    @Column(columnDefinition="TEXT")
+    @Column
     private String clientName;
 
     @Column
