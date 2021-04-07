@@ -139,29 +139,6 @@ public class OnboardRestClientIT extends DockerBaseIT {
 		assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscriptions())).hasSize(0);
     }
 
-    @Test
-    public void deletePrivateChannel() throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        PrivateChannelApi addedPrivateChannel1 = client.addPrivateChannel(new PrivateChannelApi("my-client-1"));
-        PrivateChannelApi addedPrivateChannel2 = client.addPrivateChannel(new PrivateChannelApi("my-client-2"));
-
-        PrivateChannelListApi privateChannels = client.getPrivateChannels();
-
-        client.deletePrivateChannel(2);
-
-        PrivateChannelListApi privateChannels1 = client.getPrivateChannels();
-
-        System.out.println(objectMapper.writeValueAsString(addedPrivateChannel1));
-        System.out.println(objectMapper.writeValueAsString(addedPrivateChannel2));
-        System.out.println(objectMapper.writeValueAsString(privateChannels));
-        System.out.println("--------------------------------------------------");
-        System.out.println(objectMapper.writeValueAsString(privateChannels1));
-        assertThat(client.getPrivateChannels().getPrivateChannelApis()).hasSize(1);
-
-
-    }
-
 
     private List<LocalSubscriptionApi> filterOutTearDownSubscriptions(List<LocalSubscriptionApi> subscriptions) {
         return subscriptions.stream().filter(sub -> !sub.getStatus().equals(LocalSubscriptionStatusApi.TEAR_DOWN)).collect(Collectors.toList());

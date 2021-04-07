@@ -241,7 +241,7 @@ public class OnboardRestController {
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProviderToUpdate == null) {
-			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
+			throw new NotFoundException("The Service Provider trying to delete a private channel does not exist in the database. No private channels to delete.");
 		}
 
 		serviceProviderToUpdate.setPrivateChannelToTearDown(privateChannelId);
@@ -262,6 +262,9 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProvider == null) {
+			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
+		}
 
 		List<PrivateChannel> privateChannels = serviceProvider.getPrivateChannels().stream().collect(Collectors.toList());
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();

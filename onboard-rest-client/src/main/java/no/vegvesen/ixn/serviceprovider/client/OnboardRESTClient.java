@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
@@ -12,7 +11,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
-import java.util.List;
 
 public class OnboardRESTClient {
 

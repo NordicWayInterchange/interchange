@@ -3,7 +3,6 @@ package no.vegvesen.ixn.serviceprovider.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -30,7 +29,7 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.GetSubscription.class,
         OnboardRestClientApplication.AddPrivateChannel.class,
         OnboardRestClientApplication.GetPrivateChannels.class,
-        OnboardRestClientApplication.DeleteServiceProviderPrivateChannel.class
+        OnboardRestClientApplication.DeletePrivateChannel.class
 })
 public class OnboardRestClientApplication implements Callable<Integer> {
 
@@ -202,7 +201,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
     }
 
     @Command(name = "deleteprivatechannel", description = "Delete a service provider private channel to a client")
-    static class DeleteServiceProviderPrivateChannel implements Callable<Integer> {
+    static class DeletePrivateChannel implements Callable<Integer> {
 
         @ParentCommand
         OnboardRestClientApplication parentCommand;

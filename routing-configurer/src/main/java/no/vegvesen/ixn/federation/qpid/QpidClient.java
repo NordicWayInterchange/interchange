@@ -229,7 +229,7 @@ public class QpidClient {
 
 	public void addWriteAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
-		String newAclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE routingkey = \"%s\" name =\"\"", subscriberName, queue);
+		String newAclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE routingkey = \"%s\" name = \"\"", subscriberName, queue);
 		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(aclRules, newAclEntry);
 
 		StringBuilder newAclRules1 = new StringBuilder();
