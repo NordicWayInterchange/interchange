@@ -166,14 +166,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String subscriberName = "king_harald";
 		String queueName = "king_harald";
 
-		LinkedList<String> acl = new LinkedList<>();
-		acl.add("ACL ALLOW-LOG interchange ALL ALL");
-		acl.add("ACL ALLOW-LOG administrators ALL ALL");
-		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " PUBLISH EXCHANGE routingkey = \"onramp\" name = \"\"");
-		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " ACCESS VIRTUALHOST name = \"localhost\"");
-		acl.add("ACL ALLOW-LOG interchange CONSUME QUEUE name = \"onramp\"");
-		acl.add("ACL DENY-LOG ALL ALL ALL");
-
 		client.addReadAccess(subscriberName, queueName);
 
 		List<String> newAclRules = client.getACL();
@@ -187,15 +179,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void readAccessIsRemoved() {
 		String subscriberName = "king_harald";
 		String queueName = "king_harald";
-
-		LinkedList<String> acl = new LinkedList<>();
-		acl.add("ACL ALLOW-LOG interchange ALL ALL");
-		acl.add("ACL ALLOW-LOG administrators ALL ALL");
-		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " PUBLISH EXCHANGE routingkey = \"onramp\" name = \"\"");
-		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " ACCESS VIRTUALHOST name = \"localhost\"");
-		acl.add("ACL ALLOW-LOG interchange CONSUME QUEUE name = \"onramp\"");
-		acl.add("ACL DENY-LOG ALL ALL ALL");
-		acl.add("ACL ALLOW-LOG king_harald CONSUME QUEUE name = \"king_harald\"");
 
 		client.removeReadAccess(subscriberName, queueName);
 
@@ -211,14 +194,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String subscriberName = "king_harald";
 		String queueName = "king_harald";
 
-		LinkedList<String> acl = new LinkedList<>();
-		acl.add("ACL ALLOW-LOG interchange ALL ALL");
-		acl.add("ACL ALLOW-LOG administrators ALL ALL");
-		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " PUBLISH EXCHANGE routingkey = \"onramp\" name = \"\"");
-		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " ACCESS VIRTUALHOST name = \"localhost\"");
-		acl.add("ACL ALLOW-LOG interchange CONSUME QUEUE name = \"onramp\"");
-		acl.add("ACL DENY-LOG ALL ALL ALL");
-
 		client.addWriteAccess(subscriberName, queueName);
 
 		List<String> newAclRules = client.getACL();
@@ -226,21 +201,13 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String newAclEntry = String.format("ACL ALLOW-LOG king_harald PUBLISH EXCHANGE routingkey = \"king_harald\" name = \"\"");
 
 		assertThat(newAclRules.get(newAclRules.size() - 2)).isEqualTo(newAclEntry);
+		client.removeWriteAccess(subscriberName, queueName);
 	}
 
 	@Test
 	public void writeAccessIsRemoved() {
 		String subscriberName = "king_harald";
 		String queueName = "king_harald";
-
-		LinkedList<String> acl = new LinkedList<>();
-		acl.add("ACL ALLOW-LOG interchange ALL ALL");
-		acl.add("ACL ALLOW-LOG administrators ALL ALL");
-		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " PUBLISH EXCHANGE routingkey = \"onramp\" name = \"\"");
-		acl.add("ACL ALLOW-LOG " + SERVICE_PROVIDERS_GROUP_NAME + " ACCESS VIRTUALHOST name = \"localhost\"");
-		acl.add("ACL ALLOW-LOG interchange CONSUME QUEUE name = \"onramp\"");
-		acl.add("ACL DENY-LOG ALL ALL ALL");
-		acl.add("ACL ALLOW-LOG king_harald PUBLISH EXCHANGE routingkey = \"king_harald\" name = \"\"");
 
 		client.removeWriteAccess(subscriberName, queueName);
 
