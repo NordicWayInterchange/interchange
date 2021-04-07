@@ -190,7 +190,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void WriteAccessIsAdded() {
+	public void writeAccessIsAdded() {
 		String subscriberName = "king_harald";
 		String queueName = "king_harald";
 
@@ -201,7 +201,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String newAclEntry = String.format("ACL ALLOW-LOG king_harald PUBLISH EXCHANGE routingkey = \"king_harald\" name = \"\"");
 
 		assertThat(newAclRules.get(newAclRules.size() - 2)).isEqualTo(newAclEntry);
-		client.removeWriteAccess(subscriberName, queueName);
 	}
 
 	@Test
