@@ -229,7 +229,7 @@ public class QpidClient {
 
 	public void addWriteAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
-		String newAclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE routingkey = \"%s\" name = \"\"", subscriberName, queue);
+		String newAclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE name = \"\" routingkey = \"%s\"", subscriberName, queue);
 		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(aclRules, newAclEntry);
 
 		StringBuilder newAclRules1 = new StringBuilder();
@@ -273,11 +273,11 @@ public class QpidClient {
 
 	public void removeWriteAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
-		String aclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE routingkey = \"%s\" name = \"\"", subscriberName, queue);
+		//String aclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE name = \"\" routingkey = \"%s\"", subscriberName, queue);
 
 		StringBuilder newAclRules1 = new StringBuilder();
 		for (String aclRule : aclRules) {
-			if(!aclRule.equals(aclEntry)) {
+			if(!matchWriteAcl(aclRule, subscriberName, queue)) {
 				newAclRules1.append(aclRule).append("\r\n");
 			}
 		}
@@ -288,6 +288,15 @@ public class QpidClient {
 		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
 		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
 		logger.info("Removed write access to {} for Subscriber {}", queue, subscriberName);
+	}
+
+	public boolean matchWriteAcl(String aclRule, String subscriberName, String queue) {
+		if(aclRule.startsWith(String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE", subscriberName)) &&
+			aclRule.contains("name = \"\"") &&
+			aclRule.contains(String.format("routingkey = \"%s\"", queue))){
+			return true;
+		}
+		return false;
 	}
 
 	List<String> getACL() {
