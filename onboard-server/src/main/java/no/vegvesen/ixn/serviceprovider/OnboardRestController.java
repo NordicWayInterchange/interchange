@@ -225,11 +225,11 @@ public class OnboardRestController {
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
 		}
 
-		PrivateChannel newPrivateChannel = serviceProviderToUpdate.addPrivateChannel(clientChannel.getClientName());
+		PrivateChannel newPrivateChannel = serviceProviderToUpdate.addPrivateChannel(clientChannel.getPeerName());
 
 		serviceProviderRepository.save(serviceProviderToUpdate);
 		OnboardMDCUtil.removeLogVariables();
-		return new PrivateChannelApi(newPrivateChannel.getClientName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
+		return new PrivateChannelApi(newPrivateChannel.getPeerName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
@@ -269,7 +269,7 @@ public class OnboardRestController {
 		List<PrivateChannel> privateChannels = serviceProvider.getPrivateChannels().stream().collect(Collectors.toList());
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
 		for(PrivateChannel privateChannel : privateChannels){
-			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getClientName(), privateChannel.getQueueName(), privateChannel.getId()));
+			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
 		}
 		return new PrivateChannelListApi(privateChannelsApis);
 	}

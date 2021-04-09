@@ -231,7 +231,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(client.queueExists(privateChannel.getQueueName())).isTrue();
-		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(privateChannel.getClientName());
+		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(privateChannel.getPeerName());
 		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(serviceProvider.getName());
 	}
 
@@ -253,7 +253,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncPrivateChannels(serviceProvider);
 
 		assertThat(client.queueExists(privateChannel.getQueueName())).isFalse();
-		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(privateChannel.getClientName());
+		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(privateChannel.getPeerName());
 		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
 		assertThat(serviceProvider.getPrivateChannels()).hasSize(0);
 	}
@@ -277,7 +277,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncPrivateChannels(serviceProvider);
 
 		assertThat(client.queueExists(privateChannel.getQueueName())).isFalse();
-		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(privateChannel.getClientName());
+		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).doesNotContain(privateChannel.getPeerName());
 		assertThat(client.getGroupMemberNames(QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME)).contains(serviceProvider.getName());
 		assertThat(serviceProvider.getPrivateChannels()).hasSize(1);
 	}

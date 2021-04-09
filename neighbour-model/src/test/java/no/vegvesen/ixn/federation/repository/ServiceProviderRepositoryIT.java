@@ -241,7 +241,7 @@ public class ServiceProviderRepositoryIT {
 		assertThat(repository.findByName(sp1.getName()).getPrivateChannels()).hasSize(2);
 
 		sp1.getPrivateChannels().remove(sp1.getPrivateChannels().stream()
-				.filter(privateChannel -> privateChannel.getClientName().equals("my-client-3"))
+				.filter(privateChannel -> privateChannel.getPeerName().equals("my-client-3"))
 				.findFirst()
 				.get());
 

@@ -17,7 +17,7 @@ public class PrivateChannel {
     private PrivateChannelStatus status;
 
     @Column
-    private String clientName;
+    private String peerName;
 
     @Column
     private String queueName;
@@ -26,8 +26,8 @@ public class PrivateChannel {
         this.queueName = UUID.randomUUID().toString();
     }
 
-    public PrivateChannel(String clientName, PrivateChannelStatus status) {
-        this.clientName = clientName;
+    public PrivateChannel(String peerName, PrivateChannelStatus status) {
+        this.peerName = peerName;
         this.status = status;
         this.queueName = UUID.randomUUID().toString();
     }
@@ -40,12 +40,12 @@ public class PrivateChannel {
         this.id = id;
     }
 
-    public String getClientName() {
-        return clientName;
+    public String getPeerName() {
+        return peerName;
     }
 
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
+    public void setPeerName(String peerName) {
+        this.peerName = peerName;
     }
 
     public PrivateChannelStatus getStatus() {
@@ -69,13 +69,13 @@ public class PrivateChannel {
         if (this == o) return true;
         if (!(o instanceof PrivateChannel)) return false;
         PrivateChannel that = (PrivateChannel) o;
-        return clientName.equals(that.clientName) &&
+        return peerName.equals(that.peerName) &&
                 queueName.equals(that.queueName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clientName, queueName);
+        return Objects.hash(peerName, queueName);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class PrivateChannel {
         return "PrivateChannel{" +
                 "id=" + id +
                 ", status=" + status +
-                ", clientName='" + clientName + '\'' +
+                ", peerName='" + peerName + '\'' +
                 ", queueName='" + queueName + '\'' +
                 '}';
     }

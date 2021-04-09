@@ -3,20 +3,20 @@ package no.vegvesen.ixn.serviceprovider.model;
 public class PrivateChannelApi {
 
     private Integer id;
-    private String clientName;
+    private String peerName;
     private String queueName;
 
     public PrivateChannelApi() {
 
     }
 
-    public PrivateChannelApi(String clientName) {
-        this.clientName = clientName;
+    public PrivateChannelApi(String peerName) {
+        this.peerName = peerName;
     }
 
-    public PrivateChannelApi(String clientName, String queueName, Integer id) {
+    public PrivateChannelApi(String peerName, String queueName, Integer id) {
         this.id = id;
-        this.clientName = clientName;
+        this.peerName = peerName;
         this.queueName = queueName;
     }
 
@@ -28,12 +28,12 @@ public class PrivateChannelApi {
         this.id = id;
     }
 
-    public String getClientName() {
-        return clientName;
+    public String getPeerName() {
+        return peerName;
     }
 
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
+    public void setPeerName(String peerName) {
+        this.peerName = peerName;
     }
 
     public String getQueueName() {
