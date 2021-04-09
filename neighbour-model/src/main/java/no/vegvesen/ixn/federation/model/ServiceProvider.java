@@ -128,8 +128,8 @@ public class ServiceProvider {
 		.collect(Collectors.toSet());
 	}
 
-	public PrivateChannel addPrivateChannel(String clientName) {
-		PrivateChannel newPrivateChannel = new PrivateChannel(clientName, PrivateChannelStatus.REQUESTED);
+	public PrivateChannel addPrivateChannel(String peerName) {
+		PrivateChannel newPrivateChannel = new PrivateChannel(peerName, PrivateChannelStatus.REQUESTED);
 		if(privateChannels.contains(newPrivateChannel)){
 			throw new PrivateChannelException("Client already has private channel");
 		} else {

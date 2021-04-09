@@ -186,7 +186,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @ParentCommand
         OnboardRestClientApplication parentCommand;
 
-        @Option(names = {"-f","--filename"}, description = "The json file for the clientName")
+        @Option(names = {"-f","--filename"}, description = "The json file for the peerName")
         File file;
 
         @Override
