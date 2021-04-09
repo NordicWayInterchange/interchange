@@ -198,11 +198,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		List<String> newAclRules = client.getACL();
 
-		//String newAclEntry = String.format("ACL ALLOW-LOG king_harald PUBLISH EXCHANGE name = \"\" routingkey = \"king_harald\"");
-
-		assertThat(newAclRules.get(newAclRules.size() - 2)).startsWith("ACL ALLOW-LOG king_harald PUBLISH EXCHANGE");
-		assertThat(newAclRules.get(newAclRules.size() - 2)).contains("name = \"\"");
-		assertThat(newAclRules.get(newAclRules.size() - 2)).contains("routingkey = \"king_harald\"");
+		assertThat(writeAccessIsInAclRules(newAclRules, subscriberName, queueName)).isTrue();
 	}
 
 	@Test
@@ -214,11 +210,18 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		List<String> newAclRules = client.getACL();
 
-		String deletedAclEntry = String.format("ACL ALLOW-LOG king_harald PUBLISH EXCHANGE name = \"\" routingkey = \"king_harald\"");
-		String deletedAclEntry1 = String.format("ACL ALLOW-LOG king_harald PUBLISH EXCHANGE routingkey = \"king_harald\" name = \"\"");
+		assertThat(writeAccessIsInAclRules(newAclRules, subscriberName, queueName)).isFalse();
+	}
 
-		assertThat(newAclRules).doesNotContain(deletedAclEntry);
-		assertThat(newAclRules).doesNotContain(deletedAclEntry1);
+	public boolean writeAccessIsInAclRules(List<String> aclRules, String subscriberName, String queueName) {
+		for (String rule : aclRules) {
+			if(rule.startsWith(String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE", subscriberName)) &&
+				rule.contains("name = \"\"") &&
+				rule.contains(String.format("routingkey = \"%s\"", queueName))){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Test

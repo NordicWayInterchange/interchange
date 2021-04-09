@@ -273,7 +273,6 @@ public class QpidClient {
 
 	public void removeWriteAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
-		//String aclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE name = \"\" routingkey = \"%s\"", subscriberName, queue);
 
 		StringBuilder newAclRules1 = new StringBuilder();
 		for (String aclRule : aclRules) {
