@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -62,6 +63,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+			qpidContainer.followOutput(new Slf4jLogConsumer(logger));
 			String httpsUrl = "https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT);
 			String httpUrl = "http://localhost:" + qpidContainer.getMappedPort(8080);
 			logger.info("server url: " + httpsUrl);
