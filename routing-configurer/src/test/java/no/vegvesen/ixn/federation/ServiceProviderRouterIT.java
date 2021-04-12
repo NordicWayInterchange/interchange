@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -44,23 +45,26 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
+	private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
+
 	private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
 
 	@Container
 	private static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
-    @SuppressWarnings("rawtypes")
+	@SuppressWarnings("rawtypes")
 	@Container
     public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
 			.dependsOn(keyContainer);
 
-    private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
     private static String AMQPS_URL;
 
  	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+		    //need to set the logg follower somewhere, this seems like a "good" place to do it for now
+			qpidContainer.followOutput(new Slf4jLogConsumer(logger));
 			String httpsUrl = "https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT);
 			String httpUrl = "http://localhost:" + qpidContainer.getMappedPort(8080);
 			logger.info("server url: " + httpsUrl);
