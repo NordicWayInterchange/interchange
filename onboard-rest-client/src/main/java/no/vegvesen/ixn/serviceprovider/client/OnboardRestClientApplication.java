@@ -26,7 +26,10 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.AddServiceProviderSubscription.class,
         OnboardRestClientApplication.DeleteServiceProviderCapability.class,
         OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
-        OnboardRestClientApplication.GetSubscription.class
+        OnboardRestClientApplication.GetSubscription.class,
+        OnboardRestClientApplication.AddPrivateChannel.class,
+        OnboardRestClientApplication.GetPrivateChannels.class,
+        OnboardRestClientApplication.DeletePrivateChannel.class
 })
 public class OnboardRestClientApplication implements Callable<Integer> {
 
@@ -173,6 +176,60 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             LocalSubscriptionApi subscription = client.getSubscription(subscriptionId);
             System.out.printf("Subscription %d successfully polled with brokerUrl %s %n", subscriptionId, subscription.getBrokerUrl());
+            return 0;
+        }
+    }
+
+    @Command(name = "addprivatechannel", description = "Adding name for client to set up private channel")
+    static class AddPrivateChannel implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Option(names = {"-f","--filename"}, description = "The json file for the peerName")
+        File file;
+
+        @Override
+        public Integer call() throws IOException {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            PrivateChannelApi privateChannel = mapper.readValue(file,PrivateChannelApi.class);
+            PrivateChannelApi result = client.addPrivateChannel(privateChannel);
+            System.out.println(mapper.writeValueAsString(result));
+            return 0;
+        }
+    }
+
+    @Command(name = "deleteprivatechannel", description = "Delete a service provider private channel to a client")
+    static class DeletePrivateChannel implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The ID of the subscription to delete")
+        Integer privateChannelId;
+
+        @Override
+        public Integer call(){
+            OnboardRESTClient client = parentCommand.createClient();
+            client.deletePrivateChannel(privateChannelId);
+            System.out.printf("Private channel with id %d deleted successfully%n",privateChannelId);
+            return 0;
+        }
+    }
+
+    @Command(name = "getprivatechannels", description = "Get the serviceProvider private channels to clients")
+    static class GetPrivateChannels implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Override
+        public Integer call() throws IOException {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            PrivateChannelListApi result = client.getPrivateChannels();
+            System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
     }

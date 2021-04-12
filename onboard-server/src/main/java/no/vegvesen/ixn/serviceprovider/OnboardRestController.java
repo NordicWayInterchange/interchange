@@ -3,6 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class OnboardRestController {
@@ -205,6 +207,71 @@ public class OnboardRestController {
 		logger.info("Received poll on brokerUrl = {} from Service Provider {} with queueConsumerUser = {}", localSubscription.getBrokerUrl(), serviceProviderName, localSubscription.getQueueConsumerUser());
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionToLocalSubscriptionApi(localSubscription);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+	public PrivateChannelApi addPrivateChannel(@PathVariable String serviceProviderName, @RequestBody PrivateChannelApi clientChannel) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		if(clientChannel == null) {
+			throw new PrivateChannelException("Client channel cannot be null");
+		}
+
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
+
+		if (serviceProviderToUpdate == null) {
+			logger.info("The posting Service Provider is new. Converting incoming API object to Service Provider");
+			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
+		}
+
+		PrivateChannel newPrivateChannel = serviceProviderToUpdate.addPrivateChannel(clientChannel.getPeerName());
+
+		serviceProviderRepository.save(serviceProviderToUpdate);
+		OnboardMDCUtil.removeLogVariables();
+		return new PrivateChannelApi(newPrivateChannel.getPeerName(), newPrivateChannel.getQueueName(), newPrivateChannel.getId());
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
+	public RedirectView deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable Integer privateChannelId) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
+
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProviderToUpdate == null) {
+			throw new NotFoundException("The Service Provider trying to delete a private channel does not exist in the database. No private channels to delete.");
+		}
+
+		serviceProviderToUpdate.setPrivateChannelToTearDown(privateChannelId);
+
+		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
+		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+		logger.debug("Updated Service Provider: {}", saved.toString());
+
+		RedirectView redirect = new RedirectView("/{serviceProviderName}/privatechannels/");
+		OnboardMDCUtil.removeLogVariables();
+		return redirect;
+
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
+	public PrivateChannelListApi getPrivateChannels(@PathVariable String serviceProviderName) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProvider == null) {
+			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
+		}
+
+		List<PrivateChannel> privateChannels = serviceProvider.getPrivateChannels().stream().collect(Collectors.toList());
+		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
+		for(PrivateChannel privateChannel : privateChannels){
+			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
+		}
+		return new PrivateChannelListApi(privateChannelsApis);
 	}
 
 	// TODO: Remove

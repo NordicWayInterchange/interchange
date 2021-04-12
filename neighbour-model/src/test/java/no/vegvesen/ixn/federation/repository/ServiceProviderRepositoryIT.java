@@ -208,4 +208,45 @@ public class ServiceProviderRepositoryIT {
 
 		assertThat(savedSub.isCreateNewQueue()).isTrue();
 	}
+
+	@Test
+	public void addMultiplePrivateChannels() {
+		ServiceProvider sp1 = new ServiceProvider("my-client-1");
+		ServiceProvider sp2 = new ServiceProvider("my-client-2");
+		ServiceProvider sp3 = new ServiceProvider("my-client-3");
+
+		sp1.addPrivateChannel(sp2.getName());
+		sp1.addPrivateChannel(sp3.getName());
+
+		repository.save(sp1);
+
+		System.out.println(repository.findByName("my-client-1").getPrivateChannels());
+
+		assertThat(repository.findByName(sp1.getName()).getPrivateChannels()).hasSize(2);
+	}
+
+	@Test
+	public void addMultiplePrivateChannelsAndRemoverOne() {
+		ServiceProvider sp1 = new ServiceProvider("my-client-1");
+		ServiceProvider sp2 = new ServiceProvider("my-client-2");
+		ServiceProvider sp3 = new ServiceProvider("my-client-3");
+
+		sp1.addPrivateChannel(sp2.getName());
+		sp1.addPrivateChannel(sp3.getName());
+
+		repository.save(sp1);
+
+		System.out.println(repository.findByName("my-client-1").getPrivateChannels());
+
+		assertThat(repository.findByName(sp1.getName()).getPrivateChannels()).hasSize(2);
+
+		sp1.getPrivateChannels().remove(sp1.getPrivateChannels().stream()
+				.filter(privateChannel -> privateChannel.getPeerName().equals("my-client-3"))
+				.findFirst()
+				.get());
+
+		repository.save(sp1);
+
+		assertThat(repository.findByName(sp1.getName()).getPrivateChannels()).hasSize(1);
+	}
 }

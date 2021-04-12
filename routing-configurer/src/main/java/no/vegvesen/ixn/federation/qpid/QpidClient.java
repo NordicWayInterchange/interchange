@@ -25,6 +25,7 @@ public class QpidClient {
 	public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
 	public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";
 	public static final String REMOTE_SERVICE_PROVIDERS_GROUP_NAME = "remote-service-providers";
+	public static final String CLIENTS_PRIVATE_CHANNELS_GROUP_NAME = "clients-private-channels";
 	public final static long MAX_TTL_8_DAYS = 691_200_000L;
 
 
@@ -210,7 +211,8 @@ public class QpidClient {
 
 	public void addReadAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
-		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(subscriberName, queue, aclRules);
+		String newAclEntry = String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", subscriberName, queue);
+		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(aclRules, newAclEntry);
 
 		StringBuilder newAclRules1 = new StringBuilder();
 		for (String aclRule : aclRules1) {
@@ -225,12 +227,75 @@ public class QpidClient {
 		logger.info("Added read access to {} for Subscriber {}", queue, subscriberName);
 	}
 
-	List<String> addOneConsumeRuleBeforeLastRule(String subscriberName, String newConsumeQueue, List<String> aclRulesLegacyFormat) {
+	public void addWriteAccess(String subscriberName, String queue) {
+		List<String> aclRules = getACL();
+		String newAclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE name = \"\" routingkey = \"%s\"", subscriberName, queue);
+		List<String> aclRules1 = addOneConsumeRuleBeforeLastRule(aclRules, newAclEntry);
+
+		StringBuilder newAclRules1 = new StringBuilder();
+		for (String aclRule : aclRules1) {
+			newAclRules1.append(aclRule).append("\r\n");
+		}
+		String newAclRules = newAclRules1.toString();
+
+		JSONObject base64EncodedAcl = new JSONObject();
+		base64EncodedAcl.put("path", "data:text/plain;base64," + Base64.getEncoder().encodeToString(newAclRules.getBytes()));
+		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
+		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
+		logger.info("Added write access to {} for Subscriber {}", queue, subscriberName);
+	}
+
+	List<String> addOneConsumeRuleBeforeLastRule(List<String> aclRulesLegacyFormat, String newAclEntry) {
 		LinkedList<String> aclRules = new LinkedList<>(aclRulesLegacyFormat);
-		String newAclEntry = String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", subscriberName, newConsumeQueue);
 		aclRules.add(aclRules.size()-1, newAclEntry); // add the new rule before the last rule "DENY ALL"
 		logger.debug("new acl rules {}", aclRules);
 		return aclRules;
+	}
+
+	public void removeReadAccess(String subscriberName, String queue) {
+		List<String> aclRules = getACL();
+		String aclEntry = String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", subscriberName, queue);
+
+		StringBuilder newAclRules1 = new StringBuilder();
+		for (String aclRule : aclRules) {
+			if(!aclRule.equals(aclEntry)) {
+				newAclRules1.append(aclRule).append("\r\n");
+			}
+		}
+		String newAclRules = newAclRules1.toString();
+
+		JSONObject base64EncodedAcl = new JSONObject();
+		base64EncodedAcl.put("path", "data:text/plain;base64," + Base64.getEncoder().encodeToString(newAclRules.getBytes()));
+		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
+		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
+		logger.info("Removed read access to {} for Subscriber {}", queue, subscriberName);
+	}
+
+	public void removeWriteAccess(String subscriberName, String queue) {
+		List<String> aclRules = getACL();
+
+		StringBuilder newAclRules1 = new StringBuilder();
+		for (String aclRule : aclRules) {
+			if(!matchWriteAcl(aclRule, subscriberName, queue)) {
+				newAclRules1.append(aclRule).append("\r\n");
+			}
+		}
+		String newAclRules = newAclRules1.toString();
+
+		JSONObject base64EncodedAcl = new JSONObject();
+		base64EncodedAcl.put("path", "data:text/plain;base64," + Base64.getEncoder().encodeToString(newAclRules.getBytes()));
+		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
+		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
+		logger.info("Removed write access to {} for Subscriber {}", queue, subscriberName);
+	}
+
+	public boolean matchWriteAcl(String aclRule, String subscriberName, String queue) {
+		if(aclRule.startsWith(String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE", subscriberName)) &&
+			aclRule.contains("name = \"\"") &&
+			aclRule.contains(String.format("routingkey = \"%s\"", queue))){
+			return true;
+		}
+		return false;
 	}
 
 	List<String> getACL() {

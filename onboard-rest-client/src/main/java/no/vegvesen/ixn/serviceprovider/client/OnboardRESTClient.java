@@ -69,6 +69,24 @@ public class OnboardRESTClient {
         String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId.toString());
         return restTemplate.getForEntity(url, LocalSubscriptionApi.class).getBody();
     }
+
+    public PrivateChannelApi addPrivateChannel(PrivateChannelApi privateChannelApi) {
+        HttpHeaders headers =  new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<PrivateChannelApi> entity = new HttpEntity<>(privateChannelApi,headers);
+        String url = server + "/" + user + "/privatechannels";
+        System.out.println(url);
+        return restTemplate.exchange(url, HttpMethod.POST, entity, PrivateChannelApi.class).getBody();
+    }
+
+    public void deletePrivateChannel(Integer privateChannelId) {
+        restTemplate.delete(String.format("%s/%s/privatechannels/%s", server, user, privateChannelId));
+    }
+
+    public PrivateChannelListApi getPrivateChannels() {
+        String url = String.format("%s/%s/privatechannels/", server, user);
+        return restTemplate.getForEntity(url, PrivateChannelListApi.class).getBody();
+    }
 }
 
 

@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
@@ -17,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
+import static no.vegvesen.ixn.federation.qpid.QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME;
 
 @Component
 public class ServiceProviderRouter {
@@ -42,6 +41,7 @@ public class ServiceProviderRouter {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
+            syncPrivateChannels(serviceProvider);
             Set<LocalSubscription> newSubscriptions = new HashSet<>();
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
 
@@ -151,6 +151,60 @@ public class ServiceProviderRouter {
     private void removeServiceProviderFromGroup(String name, String groupName) {
         logger.debug("Removing member {} from group {}", name,groupName);
         qpidClient.removeMemberFromGroup(name,groupName);
+    }
+
+    public void syncPrivateChannels(ServiceProvider serviceProvider) {
+        List<String> groupMemberNames = qpidClient.getGroupMemberNames(CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+        if(!serviceProvider.getPrivateChannels().isEmpty()) {
+            Set<PrivateChannel> privateChannelsWithStatusCreated = serviceProvider.getPrivateChannels()
+                    .stream()
+                    .filter(s -> s.getStatus().equals(PrivateChannelStatus.CREATED))
+                    .collect(Collectors.toSet());
+
+            if(!groupMemberNames.contains(serviceProvider.getName())) {
+                qpidClient.addMemberToGroup(serviceProvider.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                logger.debug("Adding member {} to group {}", serviceProvider.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+            }
+
+            for(PrivateChannel privateChannel : serviceProvider.getPrivateChannels()) {
+                String peerName = privateChannel.getPeerName();
+                String queueName = privateChannel.getQueueName();
+
+                if(privateChannel.getStatus().equals(PrivateChannelStatus.REQUESTED)) {
+                    qpidClient.addMemberToGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                    logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                    qpidClient.createQueue(queueName);
+                    logger.info("Creating queue {}", queueName);
+                    qpidClient.addWriteAccess(serviceProvider.getName(), queueName);
+                    qpidClient.addWriteAccess(peerName, queueName);
+                    qpidClient.addReadAccess(serviceProvider.getName(), queueName);
+                    qpidClient.addReadAccess(peerName, queueName);
+                    privateChannel.setStatus(PrivateChannelStatus.CREATED);
+                    logger.info("Creating queue {} for client {}", queueName, peerName);
+                }
+                if(privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
+                    if(groupMemberNames.contains(serviceProvider.getName()) && privateChannelsWithStatusCreated.isEmpty()){
+                        qpidClient.removeMemberFromGroup(serviceProvider.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                        logger.debug("Removing member {} from group {}", serviceProvider.getName(), CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                    }
+                    qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                    logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                    qpidClient.removeWriteAccess(peerName, queueName);
+                    qpidClient.removeWriteAccess(serviceProvider.getName(), queueName);
+                    qpidClient.removeReadAccess(peerName, queueName);
+                    qpidClient.removeReadAccess(serviceProvider.getName(), queueName);
+                    logger.info("Tearing down queue {} for client {}", queueName, peerName);
+                    qpidClient.removeQueue(queueName);
+                }
+            }
+            Set<PrivateChannel> privateChannelsToRemove = serviceProvider.getPrivateChannels()
+                    .stream()
+                    .filter(s -> s.getStatus().equals(PrivateChannelStatus.TEAR_DOWN))
+                    .collect(Collectors.toSet());
+
+            serviceProvider.getPrivateChannels().removeAll(privateChannelsToRemove);
+            repository.save(serviceProvider);
+        }
     }
 
 }

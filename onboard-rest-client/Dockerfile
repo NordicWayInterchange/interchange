@@ -14,4 +14,6 @@ ADD denm_se_datatype.json /
 ADD capability_dat_no.json /
 ADD localSubscription_dat_no.json /
 ADD false_localSubscription_dat_no.json /
+ADD local_private_channel.json /
+ADD remote_private_channel.json /
 ENTRYPOINT ["/entrypoint.sh"]
