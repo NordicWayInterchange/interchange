@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.serviceprovider.model;
+package no.vegvesen.ixn;
 
 import java.util.List;
 
@@ -6,13 +6,12 @@ public class MessageApi {
 
     //Common application properties
     private String messageText;
-    private List<String> quadTreeTiles;
+    private String quadTreeTiles;
     private String originatingCountry;
     private String publisherId;
     private double latitude;
     private double longitude;
     private String protocolVersion;
-    private String timestamp;
     private String serviceType;
 
     //DATEX2 application properties
@@ -40,11 +39,11 @@ public class MessageApi {
         this.messageText = messageText;
     }
 
-    public List<String> getQuadTreeTiles() {
+    public String getQuadTreeTiles() {
         return quadTreeTiles;
     }
 
-    public void setQuadTreeTiles(List<String> quadTreeTiles) {
+    public void setQuadTreeTiles(String quadTreeTiles) {
         this.quadTreeTiles = quadTreeTiles;
     }
 
@@ -86,14 +85,6 @@ public class MessageApi {
 
     public void setProtocolVersion(String protocolVersion) {
         this.protocolVersion = protocolVersion;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
     }
 
     public String getServiceType() {
@@ -158,5 +149,26 @@ public class MessageApi {
 
     public void setIviContainer(String iviContainer) {
         this.iviContainer = iviContainer;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageApi{" +
+                "messageText='" + messageText + '\'' +
+                ", quadTreeTiles=" + quadTreeTiles +
+                ", originatingCountry='" + originatingCountry + '\'' +
+                ", publisherId='" + publisherId + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", protocolVersion='" + protocolVersion + '\'' +
+                ", serviceType='" + serviceType + '\'' +
+                ", publicationType='" + publicationType + '\'' +
+                ", publicationSubType='" + publicationSubType + '\'' +
+                ", causeCode='" + causeCode + '\'' +
+                ", subCauseCode='" + subCauseCode + '\'' +
+                ", iviType=" + iviType +
+                ", pictogramCategoryCode=" + pictogramCategoryCode +
+                ", iviContainer='" + iviContainer + '\'' +
+                '}';
     }
 }

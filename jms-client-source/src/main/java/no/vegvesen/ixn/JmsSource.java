@@ -36,4 +36,8 @@ public class JmsSource implements CommandLineRunner {
             s.send("Dette er en test, FISK!", "NO", ",01220123");
         }
     }
+
+    public void sendMessage() {
+
+    }
 }

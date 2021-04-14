@@ -18,6 +18,7 @@ import javax.jms.Session;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class Source implements AutoCloseable {
 
@@ -284,6 +285,39 @@ public class Source implements AutoCloseable {
 		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
 		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
 		sendNonPersistentMessage(message, Message.DEFAULT_TIME_TO_LIVE);
+	}
+
+	public void sendDatexMessageFromFile(
+			String messageText,
+			String quadTreeTiles,
+			String originatingCountry,
+			String publisherId,
+			double latitude,
+			double longitude,
+			String protocolVersion,
+			String serviceType,
+			String publicationType,
+			String publicationSubType
+	) throws JMSException {
+		if (quadTreeTiles != null && !quadTreeTiles.startsWith(",")) {
+			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
+		}
+
+		JmsTextMessage message = createTextMessage(messageText);
+		message.getFacade().setUserId("localhost");
+		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), quadTreeTiles);
+		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
+		//message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), publisherId);
+		//message.setDoubleProperty(MessageProperty.LATITUDE.getName(), latitude);
+		//message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), longitude);
+		//message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), protocolVersion);
+		//message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), serviceType);
+		//message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
+		//message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), publicationSubType);
+
+		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
+		sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
 	}
 
 	public MessageProducer createProducer() throws JMSException, NamingException {
