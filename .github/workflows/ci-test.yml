@@ -1,0 +1,12 @@
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches-ignore:
+      - federation-master
+
+jobs:
+  my-first-job:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello, World!"
