@@ -3,6 +3,8 @@ package no.vegvesen.ixn;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @ConfigurationProperties(prefix ="source")
 public class JmsSourceProperties {
@@ -43,6 +45,11 @@ public class JmsSourceProperties {
      * Trust store password
      */
     private String trustStorepass;
+
+    /**
+     * Message json file name
+     */
+    private String messageFileName;
 
     public String getUrl() {
         return url;
@@ -98,5 +105,13 @@ public class JmsSourceProperties {
 
     public void setTrustStorepass(String trustStorepass) {
         this.trustStorepass = trustStorepass;
+    }
+
+    public String getMessageFileName() {
+        return messageFileName;
+    }
+
+    public void setMessageFileName(String messageFileName) {
+        this.messageFileName = messageFileName;
     }
 }

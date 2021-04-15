@@ -9,5 +9,6 @@ java \
     -Dsource.keypass=${KEY_PASS} \
     -Dsource.trustStorepath=${TRUST_STORE_PATH} \
     -Dsource.trustStorepass=${TRUST_STORE_PASS} \
+    -Dsource.messageFileName=${MESSAGE_FILE_NAME}\
     -jar jms-client-source.jar
 

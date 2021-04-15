@@ -18,7 +18,6 @@ import javax.jms.Session;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 public class Source implements AutoCloseable {
 
@@ -97,7 +96,7 @@ public class Source implements AutoCloseable {
 	}
 
 	public void sendTextMessage(JmsTextMessage message, long timeToLive) throws JMSException {
-		logger.info("Message: {}", message);
+		logger.info("Message: {}", message.getText());
 		producer.send(message,  DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
 	}
 
@@ -308,14 +307,13 @@ public class Source implements AutoCloseable {
 		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
 		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), quadTreeTiles);
 		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-		//message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), publisherId);
-		//message.setDoubleProperty(MessageProperty.LATITUDE.getName(), latitude);
-		//message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), longitude);
-		//message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), protocolVersion);
-		//message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), serviceType);
-		//message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
-		//message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), publicationSubType);
-
+		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), publisherId);
+		message.setDoubleProperty(MessageProperty.LATITUDE.getName(), latitude);
+		message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), longitude);
+		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), protocolVersion);
+		message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), serviceType);
+		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
+		message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), publicationSubType);
 		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
 		sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
 	}

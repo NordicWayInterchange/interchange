@@ -4,12 +4,25 @@
       "messageText": "First message",
       "quadTreeTiles": ",01220123",
       "originatingCountry": "NO",
-      "publisherId": "Some Norwegian publisher",
-      "longitude": 1222.0,
-      "latitude": 1222.0,
-      "protocolVersion": "DATEX2:2.3",
-      "publicationType": "SituationPublication",
-      "publicationSubType": "WinterDrivingManagement, ReroutingManagement"
+      "publisherId": "NO-12345",
+      "longitude": 13.334253,
+      "latitude": 60.352374,
+      "protocolVersion": "DATEX2;2.3",
+      "serviceType": "some-datex-service-type",
+      "publicationType": "Obstruction",
+      "publicationSubType": "WinterDrivingManagement"
+    },
+    {
+      "messageText": "Second message",
+      "quadTreeTiles": ",01220123",
+      "originatingCountry": "NO",
+      "publisherId": "NO-12345",
+      "longitude": 13.334253,
+      "latitude": 60.352374,
+      "protocolVersion": "DATEX2;2.3",
+      "serviceType": "some-datex-service-type",
+      "publicationType": "Obstruction",
+      "publicationSubType": "WinterDrivingManagement"
     }
   ]
 }

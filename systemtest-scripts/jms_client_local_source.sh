@@ -14,5 +14,6 @@ docker run \
     -e KEY_PASS=password \
     -e TRUST_STORE_PATH=/keys/truststore.jks \
     -e TRUST_STORE_PASS=password \
+    -e MESSAGE_FILE_NAME=$1 \
     --link local_qpid:local.bouvetinterchange.eu \
     jms_client_source
