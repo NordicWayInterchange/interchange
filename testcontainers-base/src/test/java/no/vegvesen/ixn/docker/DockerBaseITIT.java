@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.docker;
 
 import org.junit.jupiter.api.Test;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
@@ -10,12 +11,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 class DockerBaseITIT {
-	static Path testKeysFolder = DockerBaseIT.generateKeys(DockerBaseITIT.class, "my_ca", "localhost");
+
+	@Container
+	static KeysContainer keysContainer = DockerBaseIT.getKeyContainer(DockerBaseITIT.class,"my_ca","my-host");
 
 	@Test
 	void generateCaAndOneServerKeyWhichCanBeReadInTheDockerHostFileSystem(){
-		assertThat(testKeysFolder).isNotNull();
-		assertThat(testKeysFolder.toFile()).exists();
-		assertThat(new File(testKeysFolder.toAbsolutePath().toString() + "/localhost.p12")).exists();
+		assertThat(keysContainer.getKeyFolderOnHost()).isNotNull();
+		assertThat(keysContainer.getKeyFolderOnHost()).exists();
+		assertThat(keysContainer.getKeyFolderOnHost().resolve("my-host.p12")).exists();
 	}
 }
