@@ -50,16 +50,14 @@ public class DockerBaseIT {
 	}
 
 	protected static GenericContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
-		String spaceSeparatedKeyCns = String.join(" ", serverOrUserCns);
-		return new GenericContainer(
-				new ImageFromDockerfile("key-gen", false)
-						.withFileFromPath(".", getFolderPath("key-gen")))
-				.withFileSystemBind(testKeysPath.toString(), "/jks/keys", BindMode.READ_WRITE)
-				.withEnv("CA_CN", ca)
-				.withEnv("KEY_CNS", spaceSeparatedKeyCns)
-				.withEnv("KEYS_DIR", "/jks/keys")
-				.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy())
-				.waitingFor(Wait.forLogMessage(".*CERT GENERATION DONE.*\\n",1));
+        return new KeysContainer(getFolderPath("key-gen"),testKeysPath,ca,serverOrUserCns);
+
+	}
+
+	protected static KeysContainer getKeyContainer(Class<?> clazz, String ca, String ... serverOrUserCns) {
+		Path imagePath = getFolderPath("key-gen");
+		Path keysOutputPath = getFolderPath("target/test-keys-" + clazz.getSimpleName());
+		return new KeysContainer(imagePath,keysOutputPath,ca,serverOrUserCns);
 	}
 
 	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {

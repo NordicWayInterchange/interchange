@@ -17,7 +17,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.xml.ws.Service;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,10 +31,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
 
-	private static Path testKeysPath = generateKeys(QpidClientIT.class, "my_ca", "localhost", "routing_configurer");
+	private static Path testKeysPath = getFolderPath("target/test-keys" + QpidClientIT.class.getSimpleName());
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
+	private static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer");
+
+	@Container
+	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+            .dependsOn(keyContainer);
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 	private static Integer MAPPED_HTTPS_PORT;
