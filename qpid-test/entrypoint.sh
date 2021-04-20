@@ -40,7 +40,7 @@ verifyExternalName() {
     fi
 }
 
-verifyExternalName
+#verifyExternalName
 
 ${QPID_HOME}/bin/qpid-server
 
