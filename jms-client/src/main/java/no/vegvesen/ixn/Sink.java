@@ -48,7 +48,6 @@ public class Sink implements MessageListener, AutoCloseable {
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, newListener);
 	}
 
-
     public void start() throws JMSException, NamingException {
 		this.consumer = createConsumer();
 		consumer.setMessageListener(this);
@@ -130,5 +129,12 @@ public class Sink implements MessageListener, AutoCloseable {
 			logger.error("Could not set exceptionListener {}", exceptionListener, e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	public MessageConsumer getConsumer() {
+    	if (consumer == null) {
+    		throw new IllegalStateException("Consumer has not been created");
+		}
+    	return consumer;
 	}
 }

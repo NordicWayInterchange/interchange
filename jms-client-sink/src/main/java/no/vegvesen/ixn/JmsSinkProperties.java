@@ -42,6 +42,12 @@ public class JmsSinkProperties {
      */
     private String truststorePass;
 
+    /**
+     * File name of output file
+     */
+    private String messageFileName;
+
+
     public String getUrl() {
         return url;
     }
@@ -96,5 +102,13 @@ public class JmsSinkProperties {
 
     public void setTruststorePass(String truststorePass) {
         this.truststorePass = truststorePass;
+    }
+
+    public String getMessageFileName() {
+        return messageFileName;
+    }
+
+    public void setMessageFileName(String messageFileName) {
+        this.messageFileName = messageFileName;
     }
 }
