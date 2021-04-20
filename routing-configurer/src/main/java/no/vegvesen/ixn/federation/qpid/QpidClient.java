@@ -54,6 +54,12 @@ public class QpidClient {
 		this.restTemplate = restTemplate;
 	}
 
+	/**
+	 * NOTE: This wiring means that the restTemplate from QpidClientConfig#qpidRestTemplate() is used.
+	 * At the time of writing, this switches off host name verification in TLS.
+	 * @param restTemplate
+	 * @param routingConfigurerProperties
+	 */
 	@Autowired
 	public QpidClient(@Qualifier("qpidRestTemplate") RestTemplate restTemplate, RoutingConfigurerProperties routingConfigurerProperties) {
 		this(routingConfigurerProperties.getBaseUrl(), routingConfigurerProperties.getVhost(), restTemplate);
