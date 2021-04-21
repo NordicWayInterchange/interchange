@@ -313,4 +313,9 @@ public class QpidClient {
 		}
 		return Arrays.asList(aclRulesS.split("\\r?\\n"));
 	}
+
+	//For testing purposes
+	public RestTemplate getRestTemplate() {
+		return restTemplate;
+	}
 }
