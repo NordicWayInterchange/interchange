@@ -1,13 +1,12 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.KeysContainer;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -24,27 +23,26 @@ import static org.assertj.core.api.Assertions.fail;
 @Testcontainers
 public class SourceSinkIT extends QpidDockerBaseIT {
 
-    @Container
-	static KeysContainer keysContainer = DockerBaseIT.getKeyContainer(SourceSinkIT.class,"my_ca", "localhost", "king_harald");
+
+
+	@Container
+	static KeysContainer keysContainer = getKeyContainer(SourceSinkIT.class,"my_ca","localhost","king_harald");
 
 	@SuppressWarnings("rawtypes")
 	@Container
-	public final GenericContainer qpidContainer = getQpidTestContainer("qpid",
+	public final QpidContainer qpidContainer = getQpidTestContainer("qpid",
 			keysContainer.getKeyFolderOnHost(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost")
-			.dependsOn(keysContainer);
-
+			"localhost");
 	private String URL;
 	private SSLContext KING_HARALD_SSL_CONTEXT;
 
 	@BeforeEach
 	public void setUp() {
-		Integer mappedPort = qpidContainer.getMappedPort(5671);
-		URL = String.format("amqps://localhost:%s/", mappedPort);
+		URL = qpidContainer.getAmqpsUrl();
 		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),"king_harald.p12", "truststore.jks");
 	}
 
@@ -126,12 +124,6 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		assertThat(receive).isNotNull();
 	}
 
-	@Test
-	public void convertImageToBytes() throws IOException {
-		ImageSource source = new ImageSource(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
-		byte[] byteArray = source.convertImageToByteArray("src/images/cabin_view.jpg");
-		assertThat(byteArray[0]).isInstanceOf(Byte.class);
-	}
 
 	//TODO how about doing this from different threads?
 	@Test

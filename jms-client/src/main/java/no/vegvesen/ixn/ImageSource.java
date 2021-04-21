@@ -54,7 +54,7 @@ public class ImageSource extends Source{
         sendNonPersistentBytesMessage(message, Message.DEFAULT_TIME_TO_LIVE);
     }
 
-    public byte[] convertImageToByteArray(String imageName) throws IOException {
+    public static byte[] convertImageToByteArray(String imageName) throws IOException {
         File image = new File(imageName);
         byte [] bytes = Files.readAllBytes(image.toPath());
         return bytes;

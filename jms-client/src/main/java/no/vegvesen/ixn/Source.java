@@ -100,6 +100,10 @@ public class Source implements AutoCloseable {
 		producer.send(message,  DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
 	}
 
+	public void sendTextMessage(JmsTextMessage message) throws JMSException {
+		this.sendTextMessage(message,Message.DEFAULT_TIME_TO_LIVE);
+	}
+
 	public void sendBytesMessage(JmsBytesMessage message, long timeToLive) throws JMSException {
 		logger.info("Message: {}", message);
 		producer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
@@ -144,6 +148,10 @@ public class Source implements AutoCloseable {
 		return (JmsTextMessage) session.createTextMessage(msg);
 	}
 
+	public JmsTextMessage createTextMessage() throws JMSException {
+		return (JmsTextMessage) session.createTextMessage();
+	}
+
 	public JmsBytesMessage createBytesMessage() throws JMSException {
 		return (JmsBytesMessage) session.createBytesMessage();
 	}
@@ -174,26 +182,6 @@ public class Source implements AutoCloseable {
 		sendNonPersistentMessage(message, timeToLive);
 	}
 
-	public void sendDenmByteMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
-		JmsBytesMessage message = createBytesMessage();
-		message.getFacade().setUserId("localhost");
-		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), "DENM");
-		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
-		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DENM:1.2.2");
-		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
-		message.setDoubleProperty(MessageProperty.LATITUDE.getName(), 60.352374);
-		message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), 13.334253);
-		message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), "some-denm-service-type");
-		message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), "3");
-		message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), "6");
-		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
-
-		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		message.writeBytes(bytemessage);
-		sendBytesMessage(message, Message.DEFAULT_TIME_TO_LIVE);
-	}
-
 	public void sendNonPersistentDenmByteMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
 		JmsBytesMessage message = createBytesMessage();
 		message.getFacade().setUserId("localhost");
@@ -212,26 +200,6 @@ public class Source implements AutoCloseable {
 		sendNonPersistentBytesMessage(message, Message.DEFAULT_TIME_TO_LIVE);
 	}
 
-	public void sendIviByteMessage (String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
-		JmsBytesMessage message = createBytesMessage();
-		message.getFacade().setUserId("localhost");
-		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), "IVI");
-		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
-		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "IVI:1.2");
-		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
-		message.setDoubleProperty(MessageProperty.LATITUDE.getName(), 60.352374);
-		message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), 13.334253);
-		message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), "some-ivi-service-type");
-		message.setStringProperty(MessageProperty.IVI_TYPE.getName(), "128");
-		message.setStringProperty(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), "557");
-		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
-
-		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		message.writeBytes(bytemessage);
-		sendBytesMessage(message, Message.DEFAULT_TIME_TO_LIVE);
-	}
-
 	public void sendNonPersistentIviByteMessage (String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
 		JmsBytesMessage message = createBytesMessage();
 		message.getFacade().setUserId("localhost");
@@ -248,47 +216,6 @@ public class Source implements AutoCloseable {
 		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
 		message.writeBytes(bytemessage);
 		sendNonPersistentBytesMessage(message, Message.DEFAULT_TIME_TO_LIVE);
-	}
-
-	public void sendTextMessageWithUnknownMessageHeader(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
-		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
-			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
-		}
-
-		JmsTextMessage message = createTextMessage(messageText);
-		message.getFacade().setUserId("localhost");
-		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "Norwegian Public Roads Administration");
-		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-12345");
-		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Obstruction");
-		message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), "WinterDrivingManagement");
-		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "DATEX2;2.3");
-		message.setDoubleProperty(MessageProperty.LATITUDE.getName(), 60.352374);
-		message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), 13.334253);
-		message.setStringProperty("fishyBusiness", "fishTaco");
-		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
-		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
-		sendTextMessage(message, Message.DEFAULT_TIME_TO_LIVE);
-	}
-
-	public void sendMessageWithoutAllMandatoryMessageProperties(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
-		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
-			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
-		}
-
-		JmsTextMessage message = createTextMessage(messageText);
-		message.getFacade().setUserId("localhost");
-		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "Norwegian Public Roads Administration");
-		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
-		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
-		sendNonPersistentMessage(message, Message.DEFAULT_TIME_TO_LIVE);
-	}
-
-	public MessageProducer createProducer() throws JMSException, NamingException {
-    	this.start();
-    	return this.session.createProducer(this.queueS);
 	}
 
 	public void setExceptionListener(ExceptionListener exceptionListener) throws JMSException {
