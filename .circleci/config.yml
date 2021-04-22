@@ -117,7 +117,7 @@ workflows:
       #    - build
       - docker-build-push-bouvet:
           requires:
-            - docker-build-push-svv
+            - build
       - maven-deploy:
           filters:
             branches:
