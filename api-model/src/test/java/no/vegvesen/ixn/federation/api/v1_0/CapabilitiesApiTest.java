@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class CapabilitiesApiTest {
 
     @Test
@@ -37,4 +39,12 @@ public class CapabilitiesApiTest {
         System.out.println(mapper.writeValueAsString(capabilitiesApi));
     }
 
+    @Test
+    public void capabilitiesWithUnknownField() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = "{\"version\":\"1.1\",\"foo\":\"bar\",\"name\":\"test\",\"capabilities\":[]}";
+        CapabilitiesApi result = mapper.readValue(json,CapabilitiesApi.class);
+        assertThat(result.getName()).isEqualTo("test");
+        assertThat(result.getCapabilities()).isEmpty();
+    }
 }

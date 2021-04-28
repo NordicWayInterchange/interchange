@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -21,6 +22,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.CapabilityApi.*;
 		@JsonSubTypes.Type(value = IviCapabilityApi.class, name = IVI),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CapabilityApi {
 	public static final String DATEX_2 = "DATEX2";
 	public static final String DENM = "DENM";

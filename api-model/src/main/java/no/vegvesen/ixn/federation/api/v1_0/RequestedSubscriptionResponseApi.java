@@ -1,10 +1,12 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestedSubscriptionResponseApi {
 
     private String id;
