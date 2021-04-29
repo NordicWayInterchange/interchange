@@ -1,8 +1,11 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Objects;
 import java.util.Set;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionRequestApi {
     private String version = "1.0";
     private String name;

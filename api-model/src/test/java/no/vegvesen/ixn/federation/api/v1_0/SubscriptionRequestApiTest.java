@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class SubscriptionRequestTest {
+public class SubscriptionRequestApiTest {
 
     @Test
     public void subscriptionRequestOneSingleSubscriptionWithOnlySelector() throws JsonProcessingException {
@@ -34,7 +34,15 @@ public class SubscriptionRequestTest {
                 new HashSet<>(Arrays.asList(sub1,sub2)));
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(requestApi));
+    }
 
+    @Test
+    public void testUnknownJsonFields() throws JsonProcessingException {
+        SubscriptionRequestApi example = new SubscriptionRequestApi("test",new HashSet<>());
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writeValueAsString(example));
+        String input = "{\"version\":\"1.0\",\"foo\":\"bar\",\"name\":\"test\",\"subscriptions\":[]}";
+        SubscriptionRequestApi result = mapper.readValue(input,SubscriptionRequestApi.class);
 
     }
 }

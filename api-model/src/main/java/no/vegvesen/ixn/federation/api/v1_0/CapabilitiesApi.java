@@ -1,9 +1,11 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.HashSet;
 import java.util.Set;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CapabilitiesApi {
 
 	private String version = "1.1";
