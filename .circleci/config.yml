@@ -19,7 +19,7 @@ jobs:
       - run:
           name: Build and run integration tests
           command: |
-            javac -version && mvn verify -B
+            mvn verify -Dhttps.protocol=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - persist_to_workspace:
           root: ~/interchange
           paths:
