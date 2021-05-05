@@ -39,8 +39,8 @@ serial            = ca/serial
 RANDFILE          = ca/private/.rand
 
 # The root key and root certificate.
-private_key       = ca/private/ca.$DOMAINNAME.key.pem
-certificate       = ca/certs/ca.$DOMAINNAME.crt.pem
+private_key       = ca/private/$KEY_FILE
+certificate       = ca/certs/$CERT_FILE
 
 # For certificate revocation lists.
 crlnumber         = ca/crlnumber
@@ -158,10 +158,7 @@ EOF
 
 openssl genrsa -out ca/private/$KEY_FILE 4096
 openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/$KEY_FILE -out ca/certs/$CERT_FILE -days 3650 -set_serial 0 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY_CODE}"
-if [ ! -d "/ca_keys/ca" ]; then
-  mkdir /ca_keys/ca
-fi
-cp ca/private/$KEY_FILE /ca_keys/ca/
-cp ca/certs/$CERT_FILE /ca_keys/ca/
+cp ca/private/$KEY_FILE /ca_keys/
+cp ca/certs/$CERT_FILE /ca_keys/
 echo "CA Key generation done"
 

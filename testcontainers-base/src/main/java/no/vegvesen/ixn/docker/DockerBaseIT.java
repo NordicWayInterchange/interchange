@@ -55,16 +55,20 @@ public class DockerBaseIT {
 
 	protected static KeysContainer getKeyContainer(Class<?> clazz, String ca, String ... serverOrUserCns) {
 		Path imagePath = getFolderPath("key-gen");
-		Path keysOutputPath = getTestPrefixedOutputPath(clazz);
+		Path keysOutputPath = getTargetFolderPathForTestClass(clazz);
 		return new KeysContainer(imagePath,keysOutputPath,ca,serverOrUserCns);
 	}
 
 	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
-		Path path = getFolderPath("target/test-keys-" + clazz.getSimpleName());
+		Path path = getTargetFolderPathForTestClass(clazz);
 		try (KeysContainer keyContainer = getKeyContainer(path, ca_cn, serverOrUserCns)) {
 			keyContainer.start();
 		}
 		return path;
+	}
+
+	public static Path getTargetFolderPathForTestClass(Class clazz) {
+		return getFolderPath("target/test-keys-" + clazz.getSimpleName());
 	}
 
 
