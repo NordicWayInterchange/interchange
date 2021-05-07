@@ -19,6 +19,7 @@ container.
  * More stages
  * Known paths for containers
  * testcontainers for testing each step
+ * Are there other files we should keep track of? index.txt-files are somehow used as database of issued keys.
 
 ###Generate CA keys
 The container persists the keys to a volume bound to the ca_keys subfolder in this folder. 
