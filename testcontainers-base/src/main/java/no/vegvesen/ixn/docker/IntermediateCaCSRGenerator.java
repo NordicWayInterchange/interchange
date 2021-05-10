@@ -28,7 +28,5 @@ public class IntermediateCaCSRGenerator extends GenericContainer<IntermediateCaC
         this.withFileSystemBind(keysFolder.toString(),KEYS_INTERNAL_FOLDER);
         this.withCommand(intermediateDomain,countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
-        //this.waitingFor(Wait.forLogMessage(".*Certificate Signing Request file created.*",1));
-
     }
 }

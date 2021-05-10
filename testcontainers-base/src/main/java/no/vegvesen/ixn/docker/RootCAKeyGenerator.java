@@ -28,6 +28,5 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
         this.withFileSystemBind(keysFolder.toString(),"/ca_keys");
         this.withCommand(caDomain,countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
-        //this.waitingFor(Wait.forLogMessage(".*CA Key generation done.*\\n",1));
     }
 }
