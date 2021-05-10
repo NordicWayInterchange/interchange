@@ -160,5 +160,5 @@ EOF
 openssl req -nodes -config openssl_intermediate.cnf -new -newkey rsa:4096 -keyout ca/intermediate/private/int.$DOMAINNAME.key.pem -out ca/intermediate/csr/int.$DOMAINNAME.csr -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY}"
 cp ca/intermediate/private/int.$DOMAINNAME.key.pem /int_keys/
 cp ca/intermediate/csr/int.$DOMAINNAME.csr /int_keys/
-
+chmod ugo+rwx /int_keys/*
 echo Certificate Signing Request file created: ca/intermediate/csr/int.$DOMAINNAME.csr
