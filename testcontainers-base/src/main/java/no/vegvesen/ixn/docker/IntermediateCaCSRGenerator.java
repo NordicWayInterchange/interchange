@@ -1,10 +1,12 @@
 package no.vegvesen.ixn.docker;
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
+import java.time.Duration;
 
 public class IntermediateCaCSRGenerator extends GenericContainer<IntermediateCaCSRGenerator> {
 
@@ -25,7 +27,8 @@ public class IntermediateCaCSRGenerator extends GenericContainer<IntermediateCaC
     protected void configure() {
         this.withFileSystemBind(keysFolder.toString(),KEYS_INTERNAL_FOLDER);
         this.withCommand(intermediateDomain,countryCode);
-        this.waitingFor(Wait.forLogMessage(".*Certificate Signing Request file created.*",1));
+        this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
+        //this.waitingFor(Wait.forLogMessage(".*Certificate Signing Request file created.*",1));
 
     }
 }
