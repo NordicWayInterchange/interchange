@@ -2,11 +2,6 @@ package no.vegvesen.ixn.docker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.startupcheck.IndefiniteWaitOneShotStartupCheckStrategy;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,7 +44,7 @@ public class DockerBaseIT {
 		return projectRoot;
 	}
 
-	protected static GenericContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
+	protected static KeysContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
         return new KeysContainer(getFolderPath("key-gen"),testKeysPath,ca,serverOrUserCns);
 
 	}
@@ -62,8 +57,9 @@ public class DockerBaseIT {
 
 	public static Path generateKeys(Class clazz, String ca_cn, String... serverOrUserCns) {
 		Path path = getFolderPath("target/test-keys-" + clazz.getSimpleName());
-		GenericContainer keyContainer = getKeyContainer(path, ca_cn, serverOrUserCns);
-		keyContainer.start();
+		try (KeysContainer keyContainer = getKeyContainer(path, ca_cn, serverOrUserCns)) {
+			keyContainer.start();
+		}
 		return path;
 	}
 

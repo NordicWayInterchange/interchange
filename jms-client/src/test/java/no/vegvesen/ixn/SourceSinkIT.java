@@ -1,5 +1,7 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.docker.DockerBaseIT;
+import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +16,6 @@ import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -22,17 +23,20 @@ import static org.assertj.core.api.Assertions.fail;
 @Testcontainers
 public class SourceSinkIT extends QpidDockerBaseIT {
 
-	static Path testKeysPath = generateKeys(SourceSinkIT.class,"my_ca", "localhost", "king_harald");
+    @Container
+	static KeysContainer keysContainer = DockerBaseIT.getKeyContainer(SourceSinkIT.class,"my_ca", "localhost", "king_harald");
 
 	@SuppressWarnings("rawtypes")
 	@Container
 	public final GenericContainer qpidContainer = getQpidTestContainer("qpid",
-			testKeysPath,
+			keysContainer.getKeyFolderOnHost(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost");
+			"localhost")
+			.dependsOn(keysContainer);
+
 	private String URL;
 	private SSLContext KING_HARALD_SSL_CONTEXT;
 
@@ -40,7 +44,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	public void setUp() {
 		Integer mappedPort = qpidContainer.getMappedPort(5671);
 		URL = String.format("amqps://localhost:%s/", mappedPort);
-		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext(testKeysPath,"king_harald.p12", "truststore.jks");
+		KING_HARALD_SSL_CONTEXT = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),"king_harald.p12", "truststore.jks");
 	}
 
 	@Test
@@ -128,6 +132,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		assertThat(byteArray[0]).isInstanceOf(Byte.class);
 	}
 
+	//TODO how about doing this from different threads?
 	@Test
 	public void sendNonPersistentBytesMessageWithImage() throws JMSException, NamingException, IOException {
 		ImageSource source = new ImageSource(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
