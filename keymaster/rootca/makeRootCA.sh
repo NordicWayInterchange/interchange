@@ -160,5 +160,6 @@ openssl genrsa -out ca/private/$KEY_FILE 4096
 openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/$KEY_FILE -out ca/certs/$CERT_FILE -days 3650 -set_serial 0 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY_CODE}"
 cp ca/private/$KEY_FILE /ca_keys/
 cp ca/certs/$CERT_FILE /ca_keys/
+chmod ugo+rwx /ca_keys/*
 echo "CA Key generation done"
 
