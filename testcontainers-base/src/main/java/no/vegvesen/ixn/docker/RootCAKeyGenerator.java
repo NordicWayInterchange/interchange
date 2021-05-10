@@ -1,10 +1,12 @@
 package no.vegvesen.ixn.docker;
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
+import java.time.Duration;
 
 public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
 
@@ -25,6 +27,7 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
     protected void configure() {
         this.withFileSystemBind(keysFolder.toString(),"/ca_keys");
         this.withCommand(caDomain,countryCode);
-        this.waitingFor(Wait.forLogMessage(".*CA Key generation done.*\\n",1));
+        this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
+        //this.waitingFor(Wait.forLogMessage(".*CA Key generation done.*\\n",1));
     }
 }
