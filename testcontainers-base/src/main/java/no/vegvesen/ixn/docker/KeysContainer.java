@@ -7,6 +7,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
+import java.time.Duration;
 
 public class KeysContainer extends GenericContainer<KeysContainer> {
 
@@ -28,8 +29,7 @@ public class KeysContainer extends GenericContainer<KeysContainer> {
         this.withEnv("CA_CN",caName);
         this.withEnv("KEY_CNS",String.join(" ",serverOrUserCns));
         this.withEnv("KEYS_DIR","/jks/keys");
-        this.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy());
-        this.waitingFor(Wait.forLogMessage(".*CERT GENERATION DONE.*\\n",1));
+        this.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
     }
 
     public Path getKeyFolderOnHost() {
