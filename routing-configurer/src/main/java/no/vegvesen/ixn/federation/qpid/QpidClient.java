@@ -215,6 +215,7 @@ public class QpidClient {
 		postQpid(groupsUrl, jsonString, groupName);
 	}
 
+	//TODO This is implemented in QpidAcl#addQueueReadAccess
 	public void addReadAccess(String subscriberName, String queue) {
 		List<String> aclRules = getACL();
 		String newAclEntry = String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", subscriberName, queue);
@@ -314,8 +315,24 @@ public class QpidClient {
 		return Arrays.asList(aclRulesS.split("\\r?\\n"));
 	}
 
+	public QpidAcl getQpidAcl() {
+		ResponseEntity<String> aclRulesResponse = restTemplate.getForEntity(aclRulesUrl + "/extractRules", String.class);
+		String aclRulesS = aclRulesResponse.getBody();
+		logger.debug("acl extractRules return code {}, body {}", aclRulesResponse.getStatusCodeValue(), aclRulesS);
+		return new QpidAcl(aclRulesS);
+
+	}
+
 	//For testing purposes
 	public RestTemplate getRestTemplate() {
 		return restTemplate;
+	}
+
+	public void postQpidAcl(QpidAcl acl) {
+		JSONObject base64EncodedAcl = new JSONObject();
+		base64EncodedAcl.put("path", "data:text/plain;base64," + Base64.getEncoder().encodeToString(acl.aclAsString().getBytes()));
+		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
+		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
+		logger.info("Rules posted to qpid");
 	}
 }

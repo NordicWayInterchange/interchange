@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.qpid.QpidAcl;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
@@ -154,8 +155,8 @@ public class ServiceProviderRouter {
     }
 
     public void syncPrivateChannels(ServiceProvider serviceProvider) {
-        List<String> groupMemberNames = qpidClient.getGroupMemberNames(CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
         if(!serviceProvider.getPrivateChannels().isEmpty()) {
+            List<String> groupMemberNames = qpidClient.getGroupMemberNames(CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
             Set<PrivateChannel> privateChannelsWithStatusCreated = serviceProvider.getPrivateChannels()
                     .stream()
                     .filter(s -> s.getStatus().equals(PrivateChannelStatus.CREATED))
@@ -175,10 +176,16 @@ public class ServiceProviderRouter {
                     logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     qpidClient.createQueue(queueName);
                     logger.info("Creating queue {}", queueName);
-                    qpidClient.addWriteAccess(serviceProvider.getName(), queueName);
-                    qpidClient.addWriteAccess(peerName, queueName);
-                    qpidClient.addReadAccess(serviceProvider.getName(), queueName);
-                    qpidClient.addReadAccess(peerName, queueName);
+                    QpidAcl acl = qpidClient.getQpidAcl();
+                    acl.addQueueWriteAccess(serviceProvider.getName(),queueName);
+                    acl.addQueueWriteAccess(peerName,queueName);
+                    acl.addQueueReadAccess(serviceProvider.getName(), queueName);
+                    acl.addQueueReadAccess(peerName,queueName);
+                    //qpidClient.addWriteAccess(serviceProvider.getName(), queueName);
+                    //qpidClient.addWriteAccess(peerName, queueName);
+                    //qpidClient.addReadAccess(serviceProvider.getName(), queueName);
+                    //qpidClient.addReadAccess(peerName, queueName);
+                    qpidClient.postQpidAcl(acl);
                     privateChannel.setStatus(PrivateChannelStatus.CREATED);
                     logger.info("Creating queue {} for client {}", queueName, peerName);
                 }
