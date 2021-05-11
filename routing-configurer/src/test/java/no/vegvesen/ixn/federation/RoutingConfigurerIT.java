@@ -51,7 +51,6 @@ import static org.assertj.core.api.Assertions.fail;
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 
-	//private static Path testKeysPath = generateKeys(RoutingConfigurerIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
 	private static Path testKeysPath = getFolderPath("target/test-keys" + RoutingConfigurerIT.class.getSimpleName());
 
 	@Container
@@ -62,9 +61,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
             .dependsOn(keyContainer);
 
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
+
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
+
 	private static String AMQPS_URL;
+
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -97,12 +99,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	@MockBean
 	ServiceProviderRepository serviceProviderRepository;
 
-	ServiceProviderRouter serviceProviderRouter;
-
-	@BeforeEach
-	void setUp() {
-		serviceProviderRouter = new ServiceProviderRouter(serviceProviderRepository, client);
-	}
 
 	@Test
 	public void neighbourWithOneBindingIsCreated() {
@@ -212,23 +208,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).doesNotContain(toreDownNeighbour.getName());
 	}
 
-	@Test
-	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
-		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new DatexCapability(null, "NO", null, null, null)));
-		serviceProvider.setCapabilities(capabilities);
-
-		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
-		routingConfigurer.checkForServiceProvidersToSetupRoutingFor();
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
-
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
-		routingConfigurer.checkForServiceProvidersToSetupRoutingFor();
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
-
-		routingConfigurer.checkForServiceProvidersToSetupRoutingFor();
-	}
 
 	@Test
 	public void addingOneSubscriptionResultsInOneBindKey() {

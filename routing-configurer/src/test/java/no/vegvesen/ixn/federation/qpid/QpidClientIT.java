@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import no.vegvesen.ixn.docker.KeysContainer;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -12,12 +14,9 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.web.client.RestTemplate;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,47 +24,44 @@ import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+/**
+ * This is a test for some of the managing of Qpid through the HTTP(S) interface. This test uses a different name for the hostname for the qpid container. We use "testhost", but
+ * the actual hostname would normally end up as something like "localhost".
+ */
 @SuppressWarnings("rawtypes")
 @SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
 @ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
 @Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
 
-	private static Path testKeysPath = getFolderPath("target/test-keys" + QpidClientIT.class.getSimpleName());
 
 	@Container
-	private static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer");
+	private static KeysContainer keyContainer = getKeyContainer(QpidClientIT.class,"my_ca", "testhost", "routing_configurer");
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "testhost.p12", "password", "truststore.jks", "password","localhost")
             .dependsOn(keyContainer);
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
-	private static Integer MAPPED_HTTPS_PORT;
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			String httpsUrl = "https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT);
-			String httpUrl = "http://localhost:" + qpidContainer.getMappedPort(8080);
+			String httpsUrl = qpidContainer.getHttpsUrl();
 			logger.info("server url: " + httpsUrl);
-			logger.info("server url: " + httpUrl);
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
+					"test.ssl.trust-store=" + keyContainer.getKeyFolderOnHost().resolve("truststore.jks"),
+					"test.ssl.key-store=" +  keyContainer.getKeyFolderOnHost().resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
-			MAPPED_HTTPS_PORT = qpidContainer.getMappedPort(HTTPS_PORT);
 		}
 	}
 
 	@Autowired
 	QpidClient client;
 
-	@Autowired
-	RestTemplate restTemplate;
 
 	@Test
 	public void pingQpid() {
@@ -226,12 +222,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 			}
 		}
 		return false;
-	}
-
-	@Test
-	public void httpsConnectionToQpidRestServerInsideTheClusterDoesNotVerifyServerName() {
-		QpidClient localhostAddressedWithIpAddress = new QpidClient("https://127.0.0.1:" + MAPPED_HTTPS_PORT, "localhost", restTemplate);
-		localhostAddressedWithIpAddress.ping();
 	}
 
 	@Test

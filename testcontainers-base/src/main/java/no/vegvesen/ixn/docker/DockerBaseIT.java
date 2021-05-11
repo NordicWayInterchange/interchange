@@ -44,6 +44,10 @@ public class DockerBaseIT {
 		return projectRoot;
 	}
 
+	protected static Path getTestPrefixedOutputPath(Class<?> clazz) {
+		return getFolderPath("target/test-keys-" + clazz.getSimpleName());
+	}
+
 	protected static KeysContainer getKeyContainer(Path testKeysPath, String ca, String... serverOrUserCns){
         return new KeysContainer(getFolderPath("key-gen"),testKeysPath,ca,serverOrUserCns);
 
@@ -51,7 +55,7 @@ public class DockerBaseIT {
 
 	protected static KeysContainer getKeyContainer(Class<?> clazz, String ca, String ... serverOrUserCns) {
 		Path imagePath = getFolderPath("key-gen");
-		Path keysOutputPath = getFolderPath("target/test-keys-" + clazz.getSimpleName());
+		Path keysOutputPath = getTestPrefixedOutputPath(clazz);
 		return new KeysContainer(imagePath,keysOutputPath,ca,serverOrUserCns);
 	}
 

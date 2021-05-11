@@ -1,7 +1,8 @@
 version: 2.1
 executors:
   my-machine:
-    machine: true
+    machine:
+      image: ubuntu-2004:202101-01
     working_directory: ~/interchange
   helm3-gcloud:
     working_directory: ~/interchange
@@ -12,10 +13,14 @@ jobs:
     executor: my-machine
     steps:
       - checkout
+      - run: sudo apt-get update
+      - run: sudo apt-get -y install openjdk-8-jdk
+      - run: sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
+      - run: mvn -version
       - run:
           name: Build and run integration tests
           command: |
-            mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+            mvn verify -Dmaven.wagon.http.retryhandler.requestSentEnabled=true -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
       - persist_to_workspace:
           root: ~/interchange
           paths:
@@ -108,12 +113,12 @@ workflows:
   build_and_docker_push:
     jobs:
       - build
-      - docker-build-push-svv:
-          requires:
-          - build
+      #- docker-build-push-svv:
+      #    requires:
+      #    - build
       - docker-build-push-bouvet:
           requires:
-            - docker-build-push-svv
+            - build
       - maven-deploy:
           filters:
             branches:

@@ -13,6 +13,7 @@ import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -286,7 +287,23 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(serviceProvider.getPrivateChannels()).hasSize(1);
 	}
 
-   	public SSLContext setUpTestSslContext(String s) {
+	@Test
+	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
+		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed");
+		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
+				Collections.singleton(new DatexCapability(null, "NO", null, null, null)));
+		serviceProvider.setCapabilities(capabilities);
+
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		Assertions.assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
+
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		Assertions.assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
+	}
+
+
+	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
 				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));

@@ -1,6 +1,8 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.properties.MessageProperty;
+import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +81,15 @@ public class AccessControlIT extends QpidDockerBaseIT {
 	public void KingHaraldCanNotSendToNwEx() throws Exception {
 		Source nwEx = new Source(getQpidURI(), NW_EX, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		nwEx.start();
-		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> nwEx.send("Not allowed") );
+		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> {
+			JmsTextMessage message = nwEx.createTextMessage();
+			message.setText("Not Allowed");
+			message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(),"SE");
+			nwEx.sendTextMessage(message);
+
+		});
+
+
 	}
 
 
