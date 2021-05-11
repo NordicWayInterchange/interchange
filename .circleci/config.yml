@@ -113,9 +113,9 @@ workflows:
   build_and_docker_push:
     jobs:
       - build
-      #- docker-build-push-svv:
-      #    requires:
-      #    - build
+      - docker-build-push-svv:
+          requires:
+          - build
       - docker-build-push-bouvet:
           requires:
             - build

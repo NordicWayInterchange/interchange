@@ -36,7 +36,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost");
+			"localhost").dependsOn(keysContainer);
+
 	private String URL;
 	private SSLContext KING_HARALD_SSL_CONTEXT;
 
