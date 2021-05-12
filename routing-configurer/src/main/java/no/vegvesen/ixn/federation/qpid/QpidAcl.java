@@ -62,4 +62,8 @@ public class QpidAcl {
         }
         return sb.toString();
     }
+
+    public boolean containsRule(String rule) {
+        return aclRules.contains(rule);
+    }
 }
