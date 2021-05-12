@@ -9,17 +9,21 @@ executors:
     docker:
       - image: martient/cloud-sdk-helm
 jobs:
-  build:
+  build-java:
     executor: my-machine
     steps:
+      - run: sudo apt-get update && sudo apt-get -y install openjdk-8-jdk && sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
       - checkout
-      - run: sudo apt-get update
-      - run: sudo apt-get -y install openjdk-8-jdk
-      - run: sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
+      - restore_cache:
+          key: 'interchange-{{ checksum "pom.xml" }}'
       - run:
           name: Build and run integration tests
           command: |
             mvn verify -Dmaven.wagon.http.retryhandler.requestSentEnabled=true -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+      - save_cache:
+          key: 'interchange-{{ checksum "pom.xml" }}'
+          paths:
+            - ~/.m2/repository
       - persist_to_workspace:
           root: ~/interchange
           paths:
@@ -27,6 +31,8 @@ jobs:
   maven-deploy:
     executor: my-machine
     steps:
+      - restore_cache:
+          key: 'interchange-{{ checksum "pom.xml" }}'
       - attach_workspace:
           at: ~/interchange
       - run:
@@ -34,6 +40,10 @@ jobs:
           name: Push maven build
           command: |
             mvn -DskipTests=true -s .circleci.settings.xml deploy -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+      - save_cache:
+          key: 'interchange-{{ checksum "pom.xml" }}'
+          paths:
+            - ~/.m2/repository
   docker-build-push-bouvet:
     executor: my-machine
     steps:
@@ -111,13 +121,10 @@ workflows:
   version: 2.1
   build_and_docker_push:
     jobs:
-      - build
-      - docker-build-push-svv:
-          requires:
-          - build
+      - build-java
       - docker-build-push-bouvet:
           requires:
-            - build
+            - build-java
       - maven-deploy:
           filters:
             branches:
@@ -125,6 +132,9 @@ workflows:
                 - federation-master
           requires:
             - docker-build-push-bouvet
+      - docker-build-push-svv:
+          requires:
+          - docker-build-push-bouvet
       - helm-package-charts:
           filters:
             branches:
