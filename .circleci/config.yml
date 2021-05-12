@@ -28,34 +28,6 @@ jobs:
           root: ~/interchange
           paths:
             - ./*
-
-#workflows:
-#  build_and_docker_push:
-#    jobs:
-#      - prepare-java
-#      - maven/test:
-#          app_src_directory: ~/interchange
-#          executor: my-machine
-#          command: install -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
-#          requires:
-#              - prepare-java
-
-#jobs:
-#  build:
-#    executor: my-machine
-#    steps:
-#      - checkout
-#      - run: sudo apt-get update
-#      - run: sudo apt-get -y install openjdk-8-jdk
-#      - run: sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
-#      - run:
-#          name: Build and run integration tests
-#          command: |
-#            mvn verify -Dmaven.wagon.http.retryhandler.requestSentEnabled=true -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
-#      - persist_to_workspace:
-#          root: ~/interchange
-#          paths:
-#            - ./*
   maven-deploy:
     executor: my-machine
     steps:
@@ -150,31 +122,30 @@ workflows:
   build_and_docker_push:
     jobs:
       - build-java
-#      - docker-build-push-svv:
-#          requires:
-#          - build
-#      - docker-build-push-bouvet:
-#          requires:
-#            - build
+      - docker-build-push-bouvet:
+          requires:
+            - build-java
       - maven-deploy:
           filters:
             branches:
               only:
                 - federation-master
           requires:
-            - build-java
-#      - helm-package-charts:
-#          filters:
-#            branches:
-#              only:
-#                - federation-master
-#          requires:
-#            - docker-build-push-svv
-#      - helm-publish-charts:
-#          filters:
-#            branches:
-#              only:
-#                - federation-master
-#          requires:
-#            - helm-package-charts
-#
+            - docker-build-push-bouvet
+      - docker-build-push-svv:
+          requires:
+          - docker-build-push-bouvet
+      - helm-package-charts:
+          filters:
+            branches:
+              only:
+                - federation-master
+          requires:
+            - docker-build-push-svv
+      - helm-publish-charts:
+          filters:
+            branches:
+              only:
+                - federation-master
+          requires:
+            - helm-package-charts
