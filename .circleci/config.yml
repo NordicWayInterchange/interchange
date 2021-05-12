@@ -20,10 +20,11 @@ jobs:
 workflows:
   build_and_docker_push:
     jobs:
+      - prepare-java
       - maven/test:
           app_src_directory: ~/interchange
           executor: my-machine
-          command: verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+          command: install -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
 #jobs:
 #  build:
 #    executor: my-machine
