@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.qpid;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 public class QpidAcl {
     LinkedList<String> aclRules;
@@ -16,13 +15,13 @@ public class QpidAcl {
         return aclRules.size();
     }
 
+    public String get(int i) {
+        return aclRules.get(i);
+    }
+
     public void addQueueReadAccess(String memberOrGroupName, String queue) {
         String newAclEntry= String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", memberOrGroupName, queue);
         addNextToLast(newAclEntry);
-    }
-
-    public String get(int i) {
-        return aclRules.get(i);
     }
 
     /**
@@ -32,8 +31,23 @@ public class QpidAcl {
      * @param queue
      */
     public void addQueueWriteAccess(String memberOrGroupName, String queue) {
-        String newAclEntry = String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE name = \"\" routingkey = \"%s\"", memberOrGroupName, queue);
-        addNextToLast(newAclEntry);
+        addNextToLast(createQueueWriteAccessRule(memberOrGroupName,queue));
+    }
+
+    public boolean removeQueueReadAccess(String memberOrGroupName, String queue) {
+        return aclRules.remove(createQeueReadAccessRule(memberOrGroupName,queue));
+    }
+
+    public boolean removeQueueWriteAccess(String memberOrGroupName, String queue) {
+        return aclRules.remove(createQueueWriteAccessRule(memberOrGroupName,queue));
+    }
+
+    static String createQueueWriteAccessRule(String memberOrGroupName, String queue) {
+        return String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE name = \"\" routingkey = \"%s\"", memberOrGroupName, queue);
+    }
+
+    static String createQeueReadAccessRule(String memberOrGroupName, String queue) {
+        return String.format("ACL ALLOW-LOG %s CONSUME QUEUE name = \"%s\"", memberOrGroupName, queue);
     }
 
 

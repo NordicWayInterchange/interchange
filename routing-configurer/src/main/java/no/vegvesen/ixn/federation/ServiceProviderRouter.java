@@ -181,10 +181,6 @@ public class ServiceProviderRouter {
                     acl.addQueueWriteAccess(peerName,queueName);
                     acl.addQueueReadAccess(serviceProvider.getName(), queueName);
                     acl.addQueueReadAccess(peerName,queueName);
-                    //qpidClient.addWriteAccess(serviceProvider.getName(), queueName);
-                    //qpidClient.addWriteAccess(peerName, queueName);
-                    //qpidClient.addReadAccess(serviceProvider.getName(), queueName);
-                    //qpidClient.addReadAccess(peerName, queueName);
                     qpidClient.postQpidAcl(acl);
                     privateChannel.setStatus(PrivateChannelStatus.CREATED);
                     logger.info("Creating queue {} for client {}", queueName, peerName);
@@ -196,10 +192,12 @@ public class ServiceProviderRouter {
                     }
                     qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                     logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                    qpidClient.removeWriteAccess(peerName, queueName);
-                    qpidClient.removeWriteAccess(serviceProvider.getName(), queueName);
-                    qpidClient.removeReadAccess(peerName, queueName);
-                    qpidClient.removeReadAccess(serviceProvider.getName(), queueName);
+                    QpidAcl acl = qpidClient.getQpidAcl();
+                    acl.removeQueueWriteAccess(peerName,queueName);
+                    acl.removeQueueWriteAccess(serviceProvider.getName(), queueName);
+                    acl.removeQueueReadAccess(peerName,queueName);
+                    acl.removeQueueReadAccess(serviceProvider.getName(), queueName);
+                    qpidClient.postQpidAcl(acl);
                     logger.info("Tearing down queue {} for client {}", queueName, peerName);
                     qpidClient.removeQueue(queueName);
                 }
