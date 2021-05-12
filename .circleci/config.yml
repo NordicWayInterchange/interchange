@@ -153,7 +153,7 @@ workflows:
   build_and_docker_push:
     jobs:
       - prepare-java
-      - build-java
+      - build-java:
           requires:
             - prepare-java
 #      - docker-build-push-svv:
