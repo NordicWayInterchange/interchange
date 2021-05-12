@@ -9,13 +9,10 @@ executors:
     docker:
       - image: martient/cloud-sdk-helm
 jobs:
-  prepare-java:
-    executor: my-machine
-    steps:
-      - run: sudo apt-get update && sudo apt-get -y install openjdk-8-jdk && sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
   build-java:
     executor: my-machine
     steps:
+      - run: sudo apt-get update && sudo apt-get -y install openjdk-8-jdk && sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
       - checkout
       - restore_cache:
           key: 'interchange-{{ checksum "pom.xml" }}'
@@ -152,10 +149,7 @@ workflows:
   version: 2.1
   build_and_docker_push:
     jobs:
-      - prepare-java
-      - build-java:
-          requires:
-            - prepare-java
+      - build-java
 #      - docker-build-push-svv:
 #          requires:
 #          - build
