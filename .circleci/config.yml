@@ -25,6 +25,9 @@ workflows:
           app_src_directory: ~/interchange
           executor: my-machine
           command: install -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+          requires:
+              - prepare-java
+
 #jobs:
 #  build:
 #    executor: my-machine
