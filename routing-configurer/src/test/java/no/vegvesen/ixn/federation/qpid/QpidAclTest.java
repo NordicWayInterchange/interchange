@@ -87,6 +87,15 @@ public class QpidAclTest {
     }
 
     @Test
+    public void testRemoveQueueWriteAccessAttributesSwitched() {
+        QpidAcl qpidAcl = new QpidAcl(aclRulesWithQueueWriteAccess);
+        assertThat(qpidAcl.removeQueueWriteAccess("service-providers","onramp")).isTrue();
+
+
+    }
+
+
+    @Test
     public void testRemoveReadAccess() {
         QpidAcl qpidAcl = new QpidAcl(aclRulesWithQueueReadAccess);
         assertThat(qpidAcl.removeQueueReadAccess("my_reading_client","some_queue")).isTrue();
@@ -95,4 +104,5 @@ public class QpidAclTest {
         assertThat(qpidAcl.get(7)).isEqualTo("ACL DENY-LOG ALL ALL ALL");
 
     }
+
 }

@@ -255,4 +255,16 @@ public class QpidClient {
 		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
 		logger.info("Rules posted to qpid");
 	}
+
+/*
+	public boolean matchWriteAcl(String aclRule, String subscriberName, String queue) {
+		if(aclRule.startsWith(String.format("ACL ALLOW-LOG %s PUBLISH EXCHANGE", subscriberName)) &&
+				aclRule.contains("name = \"\"") &&
+				aclRule.contains(String.format("routingkey = \"%s\"", queue))){
+			return true;
+		}
+		return false;
+	}
+ */
+
 }
