@@ -64,6 +64,12 @@ public class QpidAcl {
     }
 
     public boolean containsRule(String rule) {
-        return aclRules.contains(rule);
+        AclRule aclRule = new AclRule(rule);
+        for (String ruleTomatch : aclRules) {
+            if (new AclRule(ruleTomatch).equals(aclRule)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

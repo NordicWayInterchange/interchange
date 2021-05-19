@@ -152,6 +152,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(acl.containsRule(QpidAcl.createQeueReadAccessRule(subscriberName,queueName))).isFalse();
 	}
 
+	//TODO this test fails intermittently when the properties in the ACL changes order.
 	@Test
 	public void writeAccessIsAdded() {
 		String subscriberName = "king_harald";
@@ -159,6 +160,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		client.addWriteAccess(subscriberName, queueName);
 		QpidAcl acl = client.getQpidAcl();
+		//This will not work if the properties have changed place in the list
 		assertThat(acl.containsRule(QpidAcl.createQueueWriteAccessRule(subscriberName,queueName))).isTrue();
 	}
 
