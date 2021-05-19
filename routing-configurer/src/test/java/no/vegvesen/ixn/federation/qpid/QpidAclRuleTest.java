@@ -53,4 +53,10 @@ public class QpidAclRuleTest {
         assertThat(ruleFromText).isEqualTo(ruleFromPieces);
     }
 
+    @Test
+    public void twoRulesWithPropertiesOrderReversedAreEqual() {
+        AclRule rule = new AclRule("ACL ALLOW-LOG service-providers PUBLISH EXCHANGE routingkey = \"onramp\" name = \"\"");
+        AclRule changedRule = new AclRule("ACL ALLOW-LOG service-providers PUBLISH EXCHANGE name = \"\" routingkey = \"onramp\"");
+        assertThat(rule).isEqualTo(changedRule);
+    }
 }
