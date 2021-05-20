@@ -39,7 +39,7 @@ public class QpidAclTest {
 
     @Test
     public void testDefaultACLRules() {
-        QpidAcl aclList = new QpidAcl(aclRules);
+        QpidAcl aclList = QpidAcl.parseRules(aclRules);
         assertThat(aclList.size()).isEqualTo(8);
     }
 
@@ -58,7 +58,7 @@ public class QpidAclTest {
 
     @Test
     public void testAddQueueReadAccess() {
-        QpidAcl aclList = new QpidAcl(aclRules);
+        QpidAcl aclList = QpidAcl.parseRules(aclRules);
         aclList.addQueueReadAccess("my_reading_client","onramp");
         assertThat(aclList.size()).isEqualTo(9);
         assertThat(aclList.get(0)).isEqualTo(AclRule.parse("ACL ALLOW-LOG interchange ALL ALL"));
@@ -68,7 +68,7 @@ public class QpidAclTest {
 
     @Test
     public void testAddQueueWriteAccess() {
-        QpidAcl aclList = new QpidAcl(aclRules);
+        QpidAcl aclList = QpidAcl.parseRules(aclRules);
         aclList.addQueueWriteAccess("my_writing_client","my_private_queue");
         assertThat(aclList.size()).isEqualTo(9);
         assertThat(aclList.get(0)).isEqualTo(AclRule.parse("ACL ALLOW-LOG interchange ALL ALL"));
@@ -79,7 +79,7 @@ public class QpidAclTest {
 
     @Test
     public void testRemoveQueueWriteAccess() {
-        QpidAcl qpidAcl = new QpidAcl(aclRulesWithQueueWriteAccess);
+        QpidAcl qpidAcl = QpidAcl.parseRules(aclRulesWithQueueWriteAccess);
         assertThat(qpidAcl.removeQueueWriteAccess("my_writing_client","my_private_queue")).isTrue();
         assertThat(qpidAcl.size()).isEqualTo(8);
         assertThat(qpidAcl.get(0)).isEqualTo(AclRule.parse("ACL ALLOW-LOG interchange ALL ALL"));
@@ -88,7 +88,7 @@ public class QpidAclTest {
 
     @Test
     public void testRemoveQueueWriteAccessAttributesSwitched() {
-        QpidAcl qpidAcl = new QpidAcl(aclRulesWithQueueWriteAccess);
+        QpidAcl qpidAcl = QpidAcl.parseRules(aclRulesWithQueueWriteAccess);
         assertThat(qpidAcl.removeQueueWriteAccess("service-providers","onramp")).isTrue();
 
 
@@ -97,7 +97,7 @@ public class QpidAclTest {
 
     @Test
     public void testRemoveReadAccess() {
-        QpidAcl qpidAcl = new QpidAcl(aclRulesWithQueueReadAccess);
+        QpidAcl qpidAcl = QpidAcl.parseRules(aclRulesWithQueueReadAccess);
         assertThat(qpidAcl.removeQueueReadAccess("my_reading_client","some_queue")).isTrue();
         assertThat(qpidAcl.size()).isEqualTo(8);
         assertThat(qpidAcl.get(0)).isEqualTo(AclRule.parse("ACL ALLOW-LOG interchange ALL ALL"));

@@ -244,7 +244,7 @@ public class QpidClient {
 		ResponseEntity<String> aclRulesResponse = restTemplate.getForEntity(aclRulesUrl + "/extractRules", String.class);
 		String aclRulesS = aclRulesResponse.getBody();
 		logger.debug("acl extractRules return code {}, body {}", aclRulesResponse.getStatusCodeValue(), aclRulesS);
-		return new QpidAcl(aclRulesS);
+		return QpidAcl.parseRules(aclRulesS);
 
 	}
 

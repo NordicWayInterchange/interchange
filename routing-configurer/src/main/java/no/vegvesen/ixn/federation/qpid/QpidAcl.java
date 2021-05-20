@@ -9,8 +9,8 @@ public class QpidAcl {
     LinkedList<AclRule> aclRules;
 
 
-    public QpidAcl(String aclRules) {
-        this.aclRules = new LinkedList<>(Arrays.asList(createRules(aclRules.split("\\r?\\n"))));
+    public QpidAcl(LinkedList<AclRule> rules) {
+        this.aclRules = rules;
     }
 
     public int size() {
@@ -25,13 +25,7 @@ public class QpidAcl {
         addNextToLast(createQeueReadAccessRule(memberOrGroupName,queue));
     }
 
-    /**
-     * NOTE this acl is a bit strange, as we are allowing to publis to an exchange, not queue, with routingKey = queue name.
-     * This is a qpid workaround since it has not been possible to write to queues in AMQP 0.X
-     * @param memberOrGroupName
-     * @param queue
-     */
-    public void addQueueWriteAccess(String memberOrGroupName, String queue) {
+   public void addQueueWriteAccess(String memberOrGroupName, String queue) {
         addNextToLast(createQueueWriteAccessRule(memberOrGroupName,queue));
     }
 
@@ -43,6 +37,12 @@ public class QpidAcl {
         return aclRules.remove(createQueueWriteAccessRule(memberOrGroupName,queue));
     }
 
+    /**
+     * NOTE this acl is a bit strange, as we are allowing to publish to an exchange, not queue, with routingKey = queue name.
+     * This is a qpid workaround since it has not been possible to write to queues in AMQP 0.X
+     * @param memberOrGroupName
+     * @param queue
+     */
     static AclRule createQueueWriteAccessRule(String memberOrGroupName, String queue) {
         Map<String,String> props = new HashMap<>();
         props.put("routingkey",queue);
@@ -54,6 +54,10 @@ public class QpidAcl {
         Map<String, String> props = new HashMap<>();
         props.put("name",queue);
         return new AclRule("ALLOW-LOG",memberOrGroupName,"CONSUME","QUEUE",props);
+    }
+
+    public static QpidAcl parseRules(String aclRules) {
+        return new QpidAcl(new LinkedList<>(Arrays.asList(createRules(aclRules))));
     }
 
 
@@ -73,10 +77,11 @@ public class QpidAcl {
         return aclRules.contains(rule);
     }
 
-    private AclRule[] createRules(String[] rules) {
-        AclRule[] newRules = new AclRule[rules.length];
-        for (int i = 0; i < rules.length; i++) {
-            newRules[i] = AclRule.parse(rules[i]);
+    private static AclRule[] createRules(String rules) {
+        String[] ruleLines = rules.split("\\r?\\n");
+        AclRule[] newRules = new AclRule[ruleLines.length];
+        for (int i = 0; i < ruleLines.length; i++) {
+            newRules[i] = AclRule.parse(ruleLines[i]);
         }
         return newRules;
 
