@@ -46,14 +46,14 @@ public class QpidAclTest {
     @Test
     public void testCreateQueueWriteAccessRule() {
         assertThat(QpidAcl.createQueueWriteAccessRule("my_writing_client","my_private_queue"))
-                .isEqualTo("ACL ALLOW-LOG my_writing_client PUBLISH EXCHANGE name = \"\" routingkey = \"my_private_queue\"");
+                .isEqualTo(new AclRule("ACL ALLOW-LOG my_writing_client PUBLISH EXCHANGE name = \"\" routingkey = \"my_private_queue\""));
 
     }
 
     @Test
     public void testCreateQueueReadAccessRule() {
         assertThat(QpidAcl.createQeueReadAccessRule("my_reading_client","my_queue"))
-                .isEqualTo("ACL ALLOW-LOG my_reading_client CONSUME QUEUE name = \"my_queue\"");
+                .isEqualTo(new AclRule("ACL ALLOW-LOG my_reading_client CONSUME QUEUE name = \"my_queue\""));
     }
 
     @Test
@@ -61,9 +61,9 @@ public class QpidAclTest {
         QpidAcl aclList = new QpidAcl(aclRules);
         aclList.addQueueReadAccess("my_reading_client","onramp");
         assertThat(aclList.size()).isEqualTo(9);
-        assertThat(aclList.get(0)).isEqualTo("ACL ALLOW-LOG interchange ALL ALL");
-        assertThat(aclList.get(7)).isEqualTo("ACL ALLOW-LOG my_reading_client CONSUME QUEUE name = \"onramp\"");
-        assertThat(aclList.get(8)).isEqualTo("ACL DENY-LOG ALL ALL ALL");
+        assertThat(aclList.get(0)).isEqualTo(new AclRule("ACL ALLOW-LOG interchange ALL ALL"));
+        assertThat(aclList.get(7)).isEqualTo(new AclRule("ACL ALLOW-LOG my_reading_client CONSUME QUEUE name = \"onramp\""));
+        assertThat(aclList.get(8)).isEqualTo(new AclRule("ACL DENY-LOG ALL ALL ALL"));
     }
 
     @Test
@@ -71,9 +71,9 @@ public class QpidAclTest {
         QpidAcl aclList = new QpidAcl(aclRules);
         aclList.addQueueWriteAccess("my_writing_client","my_private_queue");
         assertThat(aclList.size()).isEqualTo(9);
-        assertThat(aclList.get(0)).isEqualTo("ACL ALLOW-LOG interchange ALL ALL");
-        assertThat(aclList.get(7)).isEqualTo("ACL ALLOW-LOG my_writing_client PUBLISH EXCHANGE name = \"\" routingkey = \"my_private_queue\"");
-        assertThat(aclList.get(8)).isEqualTo("ACL DENY-LOG ALL ALL ALL");
+        assertThat(aclList.get(0)).isEqualTo(new AclRule("ACL ALLOW-LOG interchange ALL ALL"));
+        assertThat(aclList.get(7)).isEqualTo(new AclRule("ACL ALLOW-LOG my_writing_client PUBLISH EXCHANGE name = \"\" routingkey = \"my_private_queue\""));
+        assertThat(aclList.get(8)).isEqualTo(new AclRule("ACL DENY-LOG ALL ALL ALL"));
 
     }
 
@@ -82,8 +82,8 @@ public class QpidAclTest {
         QpidAcl qpidAcl = new QpidAcl(aclRulesWithQueueWriteAccess);
         assertThat(qpidAcl.removeQueueWriteAccess("my_writing_client","my_private_queue")).isTrue();
         assertThat(qpidAcl.size()).isEqualTo(8);
-        assertThat(qpidAcl.get(0)).isEqualTo("ACL ALLOW-LOG interchange ALL ALL");
-        assertThat(qpidAcl.get(7)).isEqualTo("ACL DENY-LOG ALL ALL ALL");
+        assertThat(qpidAcl.get(0)).isEqualTo(new AclRule("ACL ALLOW-LOG interchange ALL ALL"));
+        assertThat(qpidAcl.get(7)).isEqualTo(new AclRule("ACL DENY-LOG ALL ALL ALL"));
     }
 
     @Test
@@ -100,8 +100,8 @@ public class QpidAclTest {
         QpidAcl qpidAcl = new QpidAcl(aclRulesWithQueueReadAccess);
         assertThat(qpidAcl.removeQueueReadAccess("my_reading_client","some_queue")).isTrue();
         assertThat(qpidAcl.size()).isEqualTo(8);
-        assertThat(qpidAcl.get(0)).isEqualTo("ACL ALLOW-LOG interchange ALL ALL");
-        assertThat(qpidAcl.get(7)).isEqualTo("ACL DENY-LOG ALL ALL ALL");
+        assertThat(qpidAcl.get(0)).isEqualTo(new AclRule("ACL ALLOW-LOG interchange ALL ALL"));
+        assertThat(qpidAcl.get(7)).isEqualTo(new AclRule("ACL DENY-LOG ALL ALL ALL"));
 
     }
 
