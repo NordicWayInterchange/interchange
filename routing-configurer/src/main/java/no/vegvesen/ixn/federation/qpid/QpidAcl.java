@@ -76,7 +76,7 @@ public class QpidAcl {
     private AclRule[] createRules(String[] rules) {
         AclRule[] newRules = new AclRule[rules.length];
         for (int i = 0; i < rules.length; i++) {
-            newRules[i] = new AclRule(rules[i]);
+            newRules[i] = AclRule.parse(rules[i]);
         }
         return newRules;
 

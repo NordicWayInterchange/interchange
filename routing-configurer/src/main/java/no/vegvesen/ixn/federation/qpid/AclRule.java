@@ -12,12 +12,6 @@ public class AclRule {
     private String object;
     private Map<String,String> properties;
 
-
-    public AclRule(String ruleString) {
-        properties = new HashMap<>();
-        parse(ruleString);
-    }
-
     public AclRule(String permission,String userOrGroupName, String action, String object, Map<String,String> properties) {
         this.permission = permission;
         this.userOrGroupName = userOrGroupName;
@@ -46,36 +40,6 @@ public class AclRule {
         return Collections.unmodifiableMap(properties);
     }
 
-    public boolean isQueueWriteRule() {
-        return action.equals("PUBLISH") && object.equals("EXCHANGE");
-    }
-
-    public String getQueueName() {
-        if (isQueueWriteRule()) {
-            return properties.get("routingkey");
-        } else {
-            return properties.get("name");
-
-        }
-    }
-
-    private void parse(String ruleString) {
-       String[] tokens = ruleString.split(" ");
-       //first token should be "ACL"
-       permission = tokens[1];
-       userOrGroupName = tokens[2];
-       action = tokens[3];
-       object = tokens[4];
-
-       String[] propertyTokens = Arrays.copyOfRange(tokens,5,tokens.length);
-       for (int i = 0; i < (propertyTokens.length - 2); i = i + 3) {
-           String propertyName = propertyTokens[i].replace("\"","");
-           //i + 1 should be '='
-           String tokenName = propertyTokens[i + 2].replace("\"","");
-           properties.put(propertyName,tokenName);
-       }
-    }
-
     public String toRuleString() {
         StringBuilder builder = new StringBuilder("ACL")
                 .append(" ")
@@ -95,6 +59,42 @@ public class AclRule {
                     .append("\"");
         }
         return builder.toString();
+    }
+
+    public static AclRule parse(String ruleString) {
+        String[] tokens = ruleString.split(" ");
+        //first token should be "ACL"
+        String permission = tokens[1];
+        String userOrGroupName = tokens[2];
+        String action = tokens[3];
+        String object = tokens[4];
+
+        Map<String, String> properties = new HashMap<>();
+        String[] propertyTokens = Arrays.copyOfRange(tokens,5,tokens.length);
+        for (int i = 0; i < (propertyTokens.length - 2); i = i + 3) {
+            String propertyName = propertyTokens[i].replace("\"","");
+            //i + 1 should be '='
+            String tokenName = propertyTokens[i + 2].replace("\"","");
+            properties.put(propertyName,tokenName);
+        }
+        return new AclRule(permission,userOrGroupName,action,object,properties);
+    }
+
+    /**
+     * Convenience method to get the user for queueWrite and queueRead
+     * @return
+     */
+    public static String getQueueName(AclRule rule) {
+        if (isQueueWriteRule(rule)) {
+            return rule.getProperties().get("routingkey");
+        } else {
+            return rule.getProperties().get("name");
+
+        }
+    }
+
+    public static boolean isQueueWriteRule(AclRule rule) {
+        return rule.getAction().equals("PUBLISH") && rule.getObject().equals("EXCHANGE");
     }
 
     @Override

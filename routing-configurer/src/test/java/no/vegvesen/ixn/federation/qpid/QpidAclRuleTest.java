@@ -14,37 +14,37 @@ public class QpidAclRuleTest {
 
     @Test
     public void userOrGroupNameForQueueWriteRule() {
-       AclRule aclRule = new AclRule(publishQueueRule);
+       AclRule aclRule = AclRule.parse(publishQueueRule);
        assertThat(aclRule.getUserOrGroup()).isEqualTo("service-providers");
-       AclRule reversed = new AclRule(publishQueueReversedProperties);
+       AclRule reversed = AclRule.parse(publishQueueReversedProperties);
        assertThat(reversed.getUserOrGroup()).isEqualTo("my_writing_client");
     }
 
     @Test
     public void isQueueWriteRule() {
-        AclRule aclRule = new AclRule(publishQueueRule);
-        assertThat(aclRule.isQueueWriteRule()).isTrue();
-        AclRule reversed = new AclRule(publishQueueReversedProperties);
-        assertThat(reversed.isQueueWriteRule()).isTrue();
+        AclRule aclRule = AclRule.parse(publishQueueRule);
+        assertThat(AclRule.isQueueWriteRule(aclRule)).isTrue();
+        AclRule reversed = AclRule.parse(publishQueueReversedProperties);
+        assertThat(AclRule.isQueueWriteRule(reversed)).isTrue();
     }
 
     @Test
     public void queueNameForQueueWriteRule() {
-        AclRule aclRule = new AclRule(publishQueueRule);
-        assertThat(aclRule.getQueueName()).isEqualTo("onramp");
-        AclRule reversed = new AclRule(publishQueueReversedProperties);
-        assertThat(reversed.getQueueName()).isEqualTo("my_private_queue");
+        AclRule aclRule = AclRule.parse(publishQueueRule);
+        assertThat(AclRule.getQueueName(aclRule)).isEqualTo("onramp");
+        AclRule reversed = AclRule.parse(publishQueueReversedProperties);
+        assertThat(AclRule.getQueueName(reversed)).isEqualTo("my_private_queue");
     }
 
     @Test
     public void allowAllAclTest() {
-        AclRule rule = new AclRule(allowAllAcl);
+        AclRule rule = AclRule.parse(allowAllAcl);
         assertThat(rule.toRuleString()).isEqualTo("ACL ALLOW-LOG administrators ALL ALL");
     }
 
     @Test
     public void createRuleFromTextAndParts() {
-        AclRule ruleFromText = new AclRule(publishQueueRule);
+        AclRule ruleFromText = AclRule.parse(publishQueueRule);
         HashMap<String,String> properties = new HashMap<>();
         properties.put("name","");
         properties.put("routingkey","onramp");
@@ -55,8 +55,8 @@ public class QpidAclRuleTest {
 
     @Test
     public void twoRulesWithPropertiesOrderReversedAreEqual() {
-        AclRule rule = new AclRule("ACL ALLOW-LOG service-providers PUBLISH EXCHANGE routingkey = \"onramp\" name = \"\"");
-        AclRule changedRule = new AclRule("ACL ALLOW-LOG service-providers PUBLISH EXCHANGE name = \"\" routingkey = \"onramp\"");
+        AclRule rule = AclRule.parse("ACL ALLOW-LOG service-providers PUBLISH EXCHANGE routingkey = \"onramp\" name = \"\"");
+        AclRule changedRule = AclRule.parse("ACL ALLOW-LOG service-providers PUBLISH EXCHANGE name = \"\" routingkey = \"onramp\"");
         assertThat(rule).isEqualTo(changedRule);
     }
 }
