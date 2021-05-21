@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.docker.KeysContainer;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
@@ -24,7 +26,6 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -51,14 +52,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
 
 	@Container
-	private static GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
+	private static KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@SuppressWarnings("rawtypes")
 	@Container
-    public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
 			.dependsOn(keyContainer);
 
-    private static String AMQPS_URL;
 
  	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -66,11 +66,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 		    //need to set the logg follower somewhere, this seems like a "good" place to do it for now
 			qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-			String httpsUrl = "https://localhost:" + qpidContainer.getMappedPort(HTTPS_PORT);
-			String httpUrl = "http://localhost:" + qpidContainer.getMappedPort(8080);
+			String httpsUrl = qpidContainer.getHttpsUrl();
+			String httpUrl = qpidContainer.getHttpUrl();
 			logger.info("server url: " + httpsUrl);
 			logger.info("server url: " + httpUrl);
-			AMQPS_URL = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
@@ -121,12 +120,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(king_gustaf));
 
 		SSLContext kingGustafSslContext = setUpTestSslContext("king_gustaf.p12");
-		Sink readKingGustafQueue = new Sink(AMQPS_URL, "king_gustaf", kingGustafSslContext);
+		String amqpsUrl = qpidContainer.getAmqpsUrl();
+		Sink readKingGustafQueue = new Sink(amqpsUrl, "king_gustaf", kingGustafSslContext);
 		readKingGustafQueue.start();
-		Source writeOnrampQueue = new Source(AMQPS_URL, "onramp", kingGustafSslContext);
+		Source writeOnrampQueue = new Source(amqpsUrl, "onramp", kingGustafSslContext);
 		writeOnrampQueue.start();
 		try {
-			Sink readDlqueue = new Sink(AMQPS_URL, "onramp", kingGustafSslContext);
+			Sink readDlqueue = new Sink(amqpsUrl, "onramp", kingGustafSslContext);
 			readDlqueue.start();
 			fail("Should not allow king_gustaf to read from queue not granted access on (onramp)");
 		} catch (Exception ignore) {
