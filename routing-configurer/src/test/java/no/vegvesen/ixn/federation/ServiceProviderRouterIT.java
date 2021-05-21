@@ -112,7 +112,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
 	}
 
-	//TODO this might be in a different test altogether..
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
