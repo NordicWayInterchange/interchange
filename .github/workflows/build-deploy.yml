@@ -20,12 +20,18 @@ jobs:
           distribution: 'adopt'
       - name: Build with Maven and run integration tests
         run: mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
-      - name: Save cache
+        # Step that does cache save and restore
+      - name: Save and restore cache
         id: maven-cache
         uses: actions/cache@v2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            s${{ runner.os }}-maven-
+            ${{ runner.os }}-maven-
+      - name: Persist to workspace
+        uses: actions/upload-artifact@v2
+        with:
+          name: interchange
+          path: ./*
 
