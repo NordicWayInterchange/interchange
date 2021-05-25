@@ -35,3 +35,21 @@ jobs:
           name: interchange
           path: ./*
 
+  maven-deploy:
+    runs-on: ubuntu-latest
+
+    default:
+      run:
+        shell: bash
+
+    steps:
+      - name: Download persisted wokspace
+        uses: actions/download-artifact@v2
+        with:
+          name: interchange
+
+workflows:
+  version: 2.1
+  build-and-deploy:
+    jobs:
+      - build
