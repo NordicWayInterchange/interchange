@@ -23,8 +23,9 @@ jobs:
       - name: Save cache
         id: maven-cache
         uses: actions/cache@v2
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            s${{ runner.os }}-maven-
 
