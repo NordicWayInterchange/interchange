@@ -47,9 +47,3 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: interchange
-
-workflows:
-  version: 2.1
-  build-and-deploy:
-    jobs:
-      - build
