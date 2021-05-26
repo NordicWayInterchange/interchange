@@ -49,3 +49,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: interchange
+      - name: Authenticate
+        run: echo $BOUVET_GITHUB_ACTIONS  | gcloud auth activate-service-account --key-file=-
+      - name: Indicate success
+        run: echo Success
