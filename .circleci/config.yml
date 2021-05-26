@@ -9,6 +9,9 @@ executors:
     docker:
       - image: martient/cloud-sdk-helm
 jobs:
+  dummy:
+    steps:
+      - run: echo dummy
   build-java:
     executor: my-machine
     steps:
@@ -116,4 +119,4 @@ workflows:
   version: 2.1
   build_and_docker_push:
     jobs:
-      - build-java
+      - dummy

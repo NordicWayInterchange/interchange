@@ -54,8 +54,7 @@ jobs:
         with:
           project_id: ${{ secrets.BOUVET_PROJECT_ID }}
           service_account_key: ${{ secrets.BOUVET_GITHUB_ACTIONS  }}
-      - name: Test
-        run: gcloud info
-
+      - name: Setup docker
+        run: gcloud docker --authorize-only
       - name: Indicate success
         run: echo Success
