@@ -58,5 +58,3 @@ jobs:
         run: gcloud auth configure-docker
       - name: Build and upload Docker images
         run: chmod +x build-push-images.sh && ./build-push-images.sh eu.gcr.io/nw-shared-w3ml
-      - name: Indicate success
-        run: echo Success
