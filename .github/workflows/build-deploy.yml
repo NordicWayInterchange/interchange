@@ -19,7 +19,7 @@ jobs:
           java-version: '8'
           distribution: 'adopt'
       - name: Build with Maven and run integration tests
-        run: mvn verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
+        run: mvn package -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -B
         # Step that does cache save and restore
       - name: Save and restore cache
         id: maven-cache
