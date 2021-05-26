@@ -50,6 +50,12 @@ jobs:
         with:
           name: interchange
       - name: Authenticate
-        run: echo ${{ secrets.BOUVET_GITHUB_ACTIONS }}  | gcloud auth activate-service-account --key-file=-
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ BOUVET_PROJECT_ID }}
+          service_account_key: ${{ BOUVET_SA_KEY  }}
+      - name: Test
+        run: gcloud info
+
       - name: Indicate success
         run: echo Success
