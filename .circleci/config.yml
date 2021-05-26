@@ -10,8 +10,11 @@ executors:
       - image: martient/cloud-sdk-helm
 jobs:
   dummy:
+    executor: my-machine
     steps:
-      - run: echo dummy
+      - run:
+          name: Foo
+          command: echo foo
   build-java:
     executor: my-machine
     steps:
