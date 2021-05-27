@@ -20,6 +20,9 @@ public class ListenerEndpoint {
     @JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_listener_endpoints_message_connection"))
     private Connection messageConnection;
 
+    private int maxBandwidth;
+    private int maxMessageRate;
+
 
     public ListenerEndpoint() { }
 
@@ -28,6 +31,15 @@ public class ListenerEndpoint {
         this.brokerUrl = brokerUrl;
         this.queue = queue;
         this.messageConnection = messageConnection;
+    }
+
+    public ListenerEndpoint(String neighbourName, String brokerUrl, String queue, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
+        this.neighbourName = neighbourName;
+        this.brokerUrl = brokerUrl;
+        this.queue = queue;
+        this.messageConnection = messageConnection;
+        this.maxBandwidth = maxBandwidth;
+        this.maxMessageRate = maxMessageRate;
     }
 
     public String getNeighbourName() { return neighbourName; }
@@ -46,6 +58,22 @@ public class ListenerEndpoint {
 
     public void setMessageConnection (Connection messageConnection) { this.messageConnection = messageConnection; }
 
+    public int getMaxBandwidth() {
+        return maxBandwidth;
+    }
+
+    public void setMaxBandwidth(int maxBandwidth) {
+        this.maxBandwidth = maxBandwidth;
+    }
+
+    public int getMaxMessageRate() {
+        return maxMessageRate;
+    }
+
+    public void setMaxMessageRate(int maxMessageRate) {
+        this.maxMessageRate = maxMessageRate;
+    }
+
     @Override
     public String toString() {
         return "ListenerEndpoint{" +
@@ -54,6 +82,8 @@ public class ListenerEndpoint {
                 ", brokerUrl='" + brokerUrl + '\'' +
                 ", queue='" + queue + '\'' +
                 ", messageConnection=" + messageConnection +
+                ", maxBandwidth=" + maxBandwidth +
+                ", maxMessageRate=" + maxMessageRate +
                 '}';
     }
 
