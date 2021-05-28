@@ -4,7 +4,10 @@ if [ "$#" -ne 2 ]; then
     echo "USAGE: $0 <intermediateCA domain name> <country code (upper case)>"
     exit 1
 fi
-if [ ! -d "int_keys" ]; then
+
+INTERNAL_KEYS_FOLDER="/int_keys"
+
+if [ ! -d "$INTERNAL_KEYS_FOLDER" ]; then
   echo "Output folder does not exist. Is it mapped properly?"
   exit 1
 fi
@@ -158,7 +161,7 @@ EOF
 
 #create CSR:
 openssl req -nodes -config openssl_intermediate.cnf -new -newkey rsa:4096 -keyout ca/intermediate/private/int.$DOMAINNAME.key.pem -out ca/intermediate/csr/int.$DOMAINNAME.csr -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY}"
-cp ca/intermediate/private/int.$DOMAINNAME.key.pem /int_keys/
-cp ca/intermediate/csr/int.$DOMAINNAME.csr /int_keys/
-chmod ugo+rwx /int_keys/*
+cp ca/intermediate/private/int.$DOMAINNAME.key.pem $INTERNAL_KEYS_FOLDER/
+cp ca/intermediate/csr/int.$DOMAINNAME.csr $INTERNAL_KEYS_FOLDER/
+chmod ugo+rwx $INTERNAL_KEYS_FOLDER/*
 echo Certificate Signing Request file created: ca/intermediate/csr/int.$DOMAINNAME.csr
