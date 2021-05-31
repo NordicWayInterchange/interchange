@@ -25,7 +25,7 @@ public class QpidClientConfig {
 
 
 		public QpidClientRetryLogger() {
-			super(3,true);
+			super(3,false);
 		}
 
 		@Override
