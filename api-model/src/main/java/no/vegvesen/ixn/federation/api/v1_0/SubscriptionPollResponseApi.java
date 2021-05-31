@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionPollResponseApi {
@@ -15,12 +16,17 @@ public class SubscriptionPollResponseApi {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueConsumerUser;
+
     private String path;
     private SubscriptionStatusApi status;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
+    //@JsonInclude(JsonInclude.Include.NON_NULL)
     private String messageBrokerUrl;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
+    //@JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueName;
+
+    private Set<BrokerApi> brokers;
 
     public SubscriptionPollResponseApi() {
     }
@@ -107,19 +113,28 @@ public class SubscriptionPollResponseApi {
         this.queueName = queueName;
     }
 
+    public Set<BrokerApi> getBrokers() {
+        return brokers;
+    }
+
+    public void setBrokers(Set<BrokerApi> brokers) {
+        this.brokers = brokers;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof SubscriptionPollResponseApi)) return false;
         SubscriptionPollResponseApi that = (SubscriptionPollResponseApi) o;
-        return createNewQueue == that.createNewQueue &&
-                Objects.equals(id, that.id) &&
-                Objects.equals(selector, that.selector) &&
-                Objects.equals(queueConsumerUser, that.queueConsumerUser) &&
-                Objects.equals(path, that.path) &&
+        return id.equals(that.id) &&
+                selector.equals(that.selector) &&
+                createNewQueue.equals(that.createNewQueue) &&
+                queueConsumerUser.equals(that.queueConsumerUser) &&
+                path.equals(that.path) &&
                 status == that.status &&
                 Objects.equals(messageBrokerUrl, that.messageBrokerUrl) &&
-                Objects.equals(queueName, that.queueName);
+                Objects.equals(queueName, that.queueName) &&
+                Objects.equals(brokers, that.brokers);
     }
 
     @Override
@@ -131,7 +146,8 @@ public class SubscriptionPollResponseApi {
                 path,
                 status,
                 messageBrokerUrl,
-                queueName);
+                queueName,
+                brokers);
     }
 
     @Override
