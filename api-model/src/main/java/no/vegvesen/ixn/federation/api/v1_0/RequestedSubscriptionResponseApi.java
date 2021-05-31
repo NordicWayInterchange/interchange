@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import java.time.LocalTime;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,8 +18,10 @@ public class RequestedSubscriptionResponseApi {
 
     @JsonInclude(Include.NON_NULL)
     private String queueConsumerUser; //optional, defaults to CN of requesting interchange
+
     private String path;
     private SubscriptionStatusApi status;
+    private LocalTime lastUpdatedTimestamp;
 
     public RequestedSubscriptionResponseApi() {
     }
@@ -37,6 +40,16 @@ public class RequestedSubscriptionResponseApi {
         this.status = status;
         this.createNewQueue = createNewQueue;
         this.queueConsumerUser = queueConsumerUser;
+    }
+
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser, LocalTime lastUpdatedTimestamp) {
+        this.id = id;
+        this.selector = selector;
+        this.path = path;
+        this.status = status;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
     public String getId() {
@@ -87,6 +100,14 @@ public class RequestedSubscriptionResponseApi {
         this.status = status;
     }
 
+    public LocalTime getLastUpdatedTimestamp() {
+        return lastUpdatedTimestamp;
+    }
+
+    public void setLastUpdatedTimestamp(LocalTime lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -114,6 +135,7 @@ public class RequestedSubscriptionResponseApi {
                 ", queueConsumerUser='" + queueConsumerUser + '\'' +
                 ", path='" + path + '\'' +
                 ", status=" + status +
+                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 '}';
     }
 }
