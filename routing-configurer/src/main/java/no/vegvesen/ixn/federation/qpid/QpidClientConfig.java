@@ -15,7 +15,16 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLKeyException;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLProtocolException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class QpidClientConfig {
@@ -24,8 +33,19 @@ public class QpidClientConfig {
 		private final Logger logger = LoggerFactory.getLogger(QpidClientRetryLogger.class);
 
 
+		/**
+		 * We keep getting intermittent SSLHandshake exceptions. Take that specific exception out of the list of
+		 * non-retryable exceptions, which means that we need to explicitly list all the subclasses of SSLException,
+		 * except the one we want retryable (SSLHandshakeException)
+		 */
 		public QpidClientRetryLogger() {
-			super(3,false);
+			super(3,false, Arrays.asList(
+					InterruptedIOException.class,
+					UnknownHostException.class,
+					ConnectException.class,
+					SSLKeyException.class,
+					SSLPeerUnverifiedException.class,
+					SSLProtocolException.class));
 		}
 
 		@Override
