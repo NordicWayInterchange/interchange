@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.time.LocalTime;
 import java.util.Objects;
 import java.util.Set;
 
@@ -25,6 +26,8 @@ public class SubscriptionPollResponseApi {
 
     //@JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueName;
+
+    private LocalTime lastUpdatedTimestamp;
 
     private Set<BrokerApi> brokers;
 
@@ -113,6 +116,14 @@ public class SubscriptionPollResponseApi {
         this.queueName = queueName;
     }
 
+    public LocalTime getLastUpdatedTimestamp() {
+        return lastUpdatedTimestamp;
+    }
+
+    public void setLastUpdatedTimestamp(LocalTime lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
     public Set<BrokerApi> getBrokers() {
         return brokers;
     }
@@ -134,6 +145,7 @@ public class SubscriptionPollResponseApi {
                 status == that.status &&
                 Objects.equals(messageBrokerUrl, that.messageBrokerUrl) &&
                 Objects.equals(queueName, that.queueName) &&
+                Objects.equals(lastUpdatedTimestamp, that.lastUpdatedTimestamp) &&
                 Objects.equals(brokers, that.brokers);
     }
 
@@ -147,6 +159,7 @@ public class SubscriptionPollResponseApi {
                 status,
                 messageBrokerUrl,
                 queueName,
+                lastUpdatedTimestamp,
                 brokers);
     }
 
@@ -161,6 +174,8 @@ public class SubscriptionPollResponseApi {
                 ", status=" + status +
                 ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
                 ", queueName='" + queueName + '\'' +
+                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", brokers=" + brokers +
                 '}';
     }
 }
