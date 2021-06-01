@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation.model;
 
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "subscriptions")
@@ -25,11 +27,14 @@ public class Subscription {
 
 	private String queue;
 
-
 	@Column(columnDefinition = "boolean default false")
 	private boolean createNewQueue = false;
 
 	private String queueConsumerUser;
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "brokreq_id", foreignKey = @ForeignKey(name = "fk_brok_subreq"))
+	private Set<Broker> brokers = new HashSet<>();
 
 	public Subscription() {
 	}
@@ -140,6 +145,14 @@ public class Subscription {
 		this.queueConsumerUser = queueConsumerUser;
 	}
 
+	public Set<Broker> getBrokers() {
+		return brokers;
+	}
+
+	public void setBrokers(Set<Broker> brokers) {
+		this.brokers = brokers;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null) return false;
@@ -168,6 +181,7 @@ public class Subscription {
 				", queue='" + queue + '\'' +
 				", createNewQueue='" + createNewQueue + '\'' +
 				", queueConsumerUser='" + queueConsumerUser + '\'' +
+				", brokers=" + brokers +
 				'}';
 	}
 
