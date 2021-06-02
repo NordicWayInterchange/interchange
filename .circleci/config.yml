@@ -50,6 +50,11 @@ jobs:
           key: 'interchange-{{ checksum "pom.xml" }}'
           paths:
             - ~/.m2/repository
+  docker-build-push-bouvet:
+    executor: my-machine
+    steps:
+      - attach_workspace:
+          at: ~/interchange
       - run:
           name: Build and push containers to Bouvet
           command: |
@@ -122,4 +127,29 @@ workflows:
   version: 2.1
   build_and_docker_push:
     jobs:
-      - dummy
+      - build-java:
+          filters:
+            branches:
+              only:
+                - federation-master
+      - docker-build-push-svv:
+          filters:
+            branches:
+              only:
+                - federation-master
+          requires:
+          - build-java
+      - helm-package-charts:
+          filters:
+            branches:
+              only:
+                - federation-master
+          requires:
+            - docker-build-push-svv
+      - helm-publish-charts:
+          filters:
+            branches:
+              only:
+                - federation-master
+          requires:
+            - helm-package-charts
