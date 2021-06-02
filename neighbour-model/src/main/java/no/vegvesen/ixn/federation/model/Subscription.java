@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.model;
 
 
 import javax.persistence.*;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,6 +36,8 @@ public class Subscription {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "brokreq_id", foreignKey = @ForeignKey(name = "fk_brok_subreq"))
 	private Set<Broker> brokers = new HashSet<>();
+
+	private LocalTime lastUpdatedTimestamp;
 
 	public Subscription() {
 	}
@@ -143,6 +146,14 @@ public class Subscription {
 
 	public void setQueueConsumerUser(String queueConsumerUser) {
 		this.queueConsumerUser = queueConsumerUser;
+	}
+
+	public LocalTime getLastUpdatedTimestamp() {
+		return lastUpdatedTimestamp;
+	}
+
+	public void setLastUpdatedTimestamp(LocalTime lastUpdatedTimestamp) {
+		this.lastUpdatedTimestamp = lastUpdatedTimestamp;
 	}
 
 	public Set<Broker> getBrokers() {
