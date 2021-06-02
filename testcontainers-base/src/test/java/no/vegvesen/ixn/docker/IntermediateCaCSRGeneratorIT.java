@@ -15,7 +15,7 @@ public class IntermediateCaCSRGeneratorIT {
 
     @Container
     private IntermediateCaCSRGenerator generator = new IntermediateCaCSRGenerator(
-            DockerBaseIT.getFolderPath("keymaster").resolve("intermediateca"),
+            DockerBaseIT.getFolderPath("keymaster").resolve("intermediateca/csr"),
             targetPath,
             "test2.no",
             "NO");
