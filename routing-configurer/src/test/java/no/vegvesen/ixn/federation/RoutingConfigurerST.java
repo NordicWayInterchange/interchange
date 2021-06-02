@@ -14,7 +14,6 @@ import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.util.Sets;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.when;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -46,12 +44,12 @@ import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("rawtypes")
 @SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, ServiceProviderRouter.class})
-@ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
+@ContextConfiguration(initializers = {RoutingConfigurerST.Initializer.class})
 @Testcontainers
-public class RoutingConfigurerIT extends QpidDockerBaseIT {
+public class RoutingConfigurerST extends QpidDockerBaseIT {
 
 
-	private static Path testKeysPath = getFolderPath("target/test-keys" + RoutingConfigurerIT.class.getSimpleName());
+	private static Path testKeysPath = getFolderPath("target/test-keys" + RoutingConfigurerST.class.getSimpleName());
 
 	@Container
 	public static final GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
@@ -60,7 +58,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
             .dependsOn(keyContainer);
 
-	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
+	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerST.class);
 
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
