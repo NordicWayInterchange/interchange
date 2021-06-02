@@ -80,6 +80,7 @@ public class SubscriptionTransformer {
 						s.getPath(),
 						false,
 						s.getQueueConsumerUser());
+				subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
 				subscriptions.add(subscription);
 			} else {
 				Subscription subscription = new Subscription(Integer.parseInt(s.getId()),
@@ -88,6 +89,7 @@ public class SubscriptionTransformer {
 						s.getPath(),
 						s.isCreateNewQueue(),
 						s.getQueueConsumerUser());
+				subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
 				subscriptions.add(subscription);
 			}
 		}
