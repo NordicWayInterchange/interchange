@@ -34,7 +34,7 @@ public class Subscription {
 	private String queueConsumerUser;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "brokreq_id", foreignKey = @ForeignKey(name = "fk_brok_subreq"))
+	@JoinColumn(name = "brok_id", foreignKey = @ForeignKey(name = "fk_brok_sub"))
 	private Set<Broker> brokers = new HashSet<>();
 
 	private LocalTime lastUpdatedTimestamp;
@@ -160,8 +160,11 @@ public class Subscription {
 		return brokers;
 	}
 
-	public void setBrokers(Set<Broker> brokers) {
-		this.brokers = brokers;
+	public void setBrokers(Set<Broker> newBrokers) {
+		this.brokers.clear();
+		if (newBrokers != null) {
+			this.brokers.addAll(newBrokers);
+		}
 	}
 
 	@Override

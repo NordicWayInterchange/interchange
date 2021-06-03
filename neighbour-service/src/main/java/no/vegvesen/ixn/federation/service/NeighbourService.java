@@ -426,10 +426,16 @@ public class NeighbourService {
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
 						subscription.setCreateNewQueue(polledSubscription.isCreateNewQueue());
 						subscription.setQueueConsumerUser(polledSubscription.getQueueConsumerUser());
+						subscription.setBrokers(polledSubscription.getBrokers());
+						subscription.setLastUpdatedTimestamp(polledSubscription.getLastUpdatedTimestamp());
 						neighbour.getControlConnection().okConnection();
 						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
-							if (!subscription.isCreateNewQueue()) {
-								createListenerEndpoint(polledSubscription, neighbour);
+							if (!polledSubscription.isCreateNewQueue()) {
+								if(polledSubscription.getBrokerUrl() != null && polledSubscription.getQueue() != null) {
+									createListenerEndpoint(polledSubscription.getBrokerUrl(), polledSubscription.getQueue(), neighbour);
+								} else {
+									createListenerEndpointFromBrokersList(neighbour, polledSubscription.getBrokers());
+								}
 							}
 						}
 						//utvide med ListenerEndpoint lookup + lage ny om det trengs
@@ -451,10 +457,16 @@ public class NeighbourService {
 		}
 	}
 
-	public void createListenerEndpoint(Subscription subscription, Neighbour neighbour) {
-		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue()) == null){
-			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue(), new Connection()));
-			logger.info("ListenerEnpoint was saved: {}", savedListenerEndpoint.toString());
+	public void createListenerEndpoint(String brokerUrl, String queueName, Neighbour neighbour) {
+		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), brokerUrl, queueName) == null){
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), brokerUrl, queueName, new Connection()));
+			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
+		}
+	}
+
+	public void createListenerEndpointFromBrokersList(Neighbour neighbour, Set<Broker> brokers) {
+		for(Broker broker : brokers) {
+			createListenerEndpoint(broker.getMessageBrokerUrl(), broker.getQueueName(), neighbour);
 		}
 	}
 
