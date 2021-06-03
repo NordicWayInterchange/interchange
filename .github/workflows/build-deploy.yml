@@ -33,7 +33,7 @@ jobs:
           name: interchange
           path: ./*
 
-  maven-deploy:
+  docker-push-bouvet:
     runs-on: ubuntu-latest
     needs: build
     defaults:
