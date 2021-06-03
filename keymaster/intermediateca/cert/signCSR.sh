@@ -6,14 +6,24 @@ if [ "$#" -ne 4 ]; then
 fi
 
 csrPath=$1
-if [ ! -f "$1" ]; then
-  echo "Input file $1 not found"
+if [ ! -f "$csrPath" ]; then
+  echo "Input file $1 not found. Exiting."
 	exit 1
 fi
 
 DOMAINNAME=$2
+
 CA_CERT=$3
+if [ ! -f "$CA_CERT" ]; then
+  echo "CA certificate not found. Exiting."
+  exit 1
+fi
+
 CA_KEY=$4
+if [ ! -f "$CA_KEY" ]; then
+  echo "CA key not found. Exiting."
+  exit 1
+fi
 
 if [ ! -d "ca/intermediate" ]; then
 	mkdir -p ca/intermediate/certs
@@ -161,6 +171,8 @@ openssl ca -config openssl_root.cnf -extensions v3_intermediate_ca -days 3650 -n
 CAcert=$(find ca/certs/ -name "ca*")
 
 cat ca/intermediate/certs/int.$DOMAINNAME.crt.pem $CAcert > ca/intermediate/certs/chain.$DOMAINNAME.crt.pem
+#TODO wee might have to copy the CA cert as well!
+cp  ca/intermediate/certs/chain.$DOMAINNAME.crt.pem /keys_out/
 echo Cert signing complete.
 
 
