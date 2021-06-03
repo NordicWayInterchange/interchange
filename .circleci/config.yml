@@ -9,6 +9,12 @@ executors:
     docker:
       - image: martient/cloud-sdk-helm
 jobs:
+  dummy:
+    executor: my-machine
+    steps:
+      - run:
+          name: Foo
+          command: echo foo
   build-java:
     executor: my-machine
     steps:
@@ -121,20 +127,18 @@ workflows:
   version: 2.1
   build_and_docker_push:
     jobs:
-      - build-java
-      - docker-build-push-bouvet:
-          requires:
-            - build-java
-      - maven-deploy:
+      - build-java:
+          filters:
+            branches:
+              only:
+                - federation-master
+      - docker-build-push-svv:
           filters:
             branches:
               only:
                 - federation-master
           requires:
-            - docker-build-push-bouvet
-      - docker-build-push-svv:
-          requires:
-          - docker-build-push-bouvet
+          - build-java
       - helm-package-charts:
           filters:
             branches:

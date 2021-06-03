@@ -139,37 +139,26 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		QpidAcl acl = client.getQpidAcl();
 		assertThat(acl.containsRule(QpidAcl.createQeueReadAccessRule(subscriberName,queueName))).isTrue();
-	}
 
-	@Test
-	public void readAccessIsRemoved() {
-		String subscriberName = "king_harald";
-		String queueName = "king_harald";
 
 		client.removeReadAccess(subscriberName, queueName);
 
-		QpidAcl acl = client.getQpidAcl();
+		acl = client.getQpidAcl();
 		assertThat(acl.containsRule(QpidAcl.createQeueReadAccessRule(subscriberName,queueName))).isFalse();
 	}
 
 	@Test
 	public void writeAccessIsAdded() {
-		String subscriberName = "king_harald";
-		String queueName = "king_harald";
+		String subscriberName = "catfish";
+		String queueName = "catfish";
 
 		client.addWriteAccess(subscriberName, queueName);
 		QpidAcl acl = client.getQpidAcl();
 		assertThat(acl.containsRule(QpidAcl.createQueueWriteAccessRule(subscriberName,queueName))).isTrue();
-	}
-
-	@Test
-	public void writeAccessIsRemoved() {
-		String subscriberName = "king_harald";
-		String queueName = "king_harald";
 
 		client.removeWriteAccess(subscriberName, queueName);
 
-		QpidAcl acl = client.getQpidAcl();
+		acl = client.getQpidAcl();
 		assertThat(acl.containsRule(QpidAcl.createQueueWriteAccessRule(subscriberName,queueName))).isFalse();
 	}
 }
