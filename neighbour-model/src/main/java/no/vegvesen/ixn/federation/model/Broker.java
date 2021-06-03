@@ -58,6 +58,14 @@ public class Broker {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public boolean isTheSameAsListenerEndpoint(ListenerEndpoint listenerEndpoint) {
+        if(queueName.equals(listenerEndpoint.getQueue()) && messageBrokerUrl.equals(listenerEndpoint.getBrokerUrl())){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
