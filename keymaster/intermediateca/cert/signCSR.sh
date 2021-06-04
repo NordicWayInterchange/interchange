@@ -171,7 +171,6 @@ openssl ca -config openssl_root.cnf -extensions v3_intermediate_ca -days 3650 -n
 CAcert=$(find ca/certs/ -name "ca*")
 
 cat ca/intermediate/certs/int.$DOMAINNAME.crt.pem $CAcert > ca/intermediate/certs/chain.$DOMAINNAME.crt.pem
-#TODO wee might have to copy the CA cert as well!
 cp  ca/intermediate/certs/chain.$DOMAINNAME.crt.pem /keys_out/
 echo Cert signing complete.
 

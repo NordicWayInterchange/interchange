@@ -43,16 +43,17 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
      */
     @Override
     protected void configure() {
+        String caCertPathInContainer = CA_IN_FOLDER + caCert.getFileName().toString();
+        String caKeyPathInContainer = CA_IN_FOLDER + caKey.getFileName().toString();
         this.withFileSystemBind(csrPathOnHost,
                 csrPathInContainer,
                 BindMode.READ_ONLY);
-        String caCertPathInContainer = CA_IN_FOLDER + caCert.getFileName().toString();
         this.withFileSystemBind(caCert.toString(), caCertPathInContainer,
                 BindMode.READ_ONLY);
-        this.withFileSystemBind(caKey.toString(), CA_IN_FOLDER + caKey.getFileName().toString(),
+        this.withFileSystemBind(caKey.toString(), caKeyPathInContainer,
                 BindMode.READ_ONLY);
         this.withFileSystemBind(targetPath.toString(), KEYS_OUT_FOLDER,BindMode.READ_WRITE);
-        this.withCommand(csrPathInContainer,domainName,caCertPathInContainer);
+        this.withCommand(csrPathInContainer,domainName,caCertPathInContainer,caKeyPathInContainer);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
     }
 }
