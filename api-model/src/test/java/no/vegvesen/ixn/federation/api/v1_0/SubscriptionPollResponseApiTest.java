@@ -50,6 +50,8 @@ public class SubscriptionPollResponseApiTest {
         BrokerApi broker1 = new BrokerApi("client1queue", "amqps://a.c-its-interchange.eu:5671");
         BrokerApi broker2 = new BrokerApi("client2queue", "amqps://b.c-its-interchange.eu:5671");
 
+        responseApi.seteTag("myETag");
+
         responseApi.setBrokers(Sets.newLinkedHashSet(broker1, broker2));
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(responseApi));
