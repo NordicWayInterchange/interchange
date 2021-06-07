@@ -21,13 +21,13 @@ public class SubscriptionPollResponseApi {
     private String path;
     private SubscriptionStatusApi status;
 
-    //@JsonInclude(JsonInclude.Include.NON_NULL)
     private String messageBrokerUrl;
 
-    //@JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueName;
 
     private LocalTime lastUpdatedTimestamp;
+
+    private String eTag;
 
     private Set<BrokerApi> brokers;
 
@@ -124,6 +124,14 @@ public class SubscriptionPollResponseApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
+    public String geteTag() {
+        return eTag;
+    }
+
+    public void seteTag(String eTag) {
+        this.eTag = eTag;
+    }
+
     public Set<BrokerApi> getBrokers() {
         return brokers;
     }
@@ -146,6 +154,7 @@ public class SubscriptionPollResponseApi {
                 Objects.equals(messageBrokerUrl, that.messageBrokerUrl) &&
                 Objects.equals(queueName, that.queueName) &&
                 Objects.equals(lastUpdatedTimestamp, that.lastUpdatedTimestamp) &&
+                Objects.equals(eTag, that.eTag) &&
                 Objects.equals(brokers, that.brokers);
     }
 
@@ -160,6 +169,7 @@ public class SubscriptionPollResponseApi {
                 messageBrokerUrl,
                 queueName,
                 lastUpdatedTimestamp,
+                eTag,
                 brokers);
     }
 
@@ -175,6 +185,7 @@ public class SubscriptionPollResponseApi {
                 ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
                 ", queueName='" + queueName + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", eTag='" + eTag + '\'' +
                 ", brokers=" + brokers +
                 '}';
     }
