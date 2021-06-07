@@ -313,6 +313,34 @@ public class NeighbourService {
 		return calculatedSubscriptions;
 	}
 
+	public void pollSubscriptionsWithStatusCreated(NeighbourFacade neighbourFacade) {
+		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+				SubscriptionStatus.CREATED);
+		for (Neighbour neighbour : neighboursToPoll) {
+			try {
+				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
+				if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
+					pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions(), neighbourFacade);
+				}
+			} catch (Exception e) {
+				logger.error("Unknown error while polling subscriptions timestamp for one neighbour");
+			}
+		}
+	}
+
+	public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
+		try {
+			for (Subscription subscription : subscriptions) {
+				if(!subscription.getBrokers().isEmpty()) {
+					Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
+
+				}
+			}
+		} catch (SubscriptionPollException e) {
+
+		}
+	}
+
 	public void pollSubscriptions(NeighbourFacade neighbourFacade) {
 		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
 				SubscriptionStatus.REQUESTED,

@@ -71,6 +71,14 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 	}
 
 	@Override
+	public Subscription pollSubscriptionLastUpdatedTime(Subscription subscription, Neighbour neighbour) {
+    	String url = neighbour.getControlChannelUrl(subscription.getPath());
+    	String name = neighbour.getName();
+		logger.info("Polling last updated timestamp for subscription to {} with URL: {}", name, url);
+    	return null;
+	}
+
+	@Override
 	public void deleteSubscription (Neighbour neighbour, Subscription subscription) {
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
     	String neighbourName = neighbour.getName();
