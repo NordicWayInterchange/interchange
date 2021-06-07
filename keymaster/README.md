@@ -1,4 +1,4 @@
-#Keymaster
+# Keymaster
 
 The keymaster is responsible for generating keys and certs for CA, signing (and possibly issue) 
 keys for Interchanges, as well as signing CSRs for Service Providers. 
@@ -15,7 +15,7 @@ The keymaster is a set of containers that each runs one of the following stages:
 Input and output folders are expected to be exposed to the container at given filesystem paths, specified for each 
 container.
 
-###TODO 
+### TODO 
  * More stages
  * Known paths for containers
  * testcontainers for testing each step

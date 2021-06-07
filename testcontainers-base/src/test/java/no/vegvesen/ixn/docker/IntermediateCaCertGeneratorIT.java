@@ -29,7 +29,6 @@ public class IntermediateCaCertGeneratorIT {
     @Test
     public void checkInputPathExists() {
         assertThat(containerOutPath.resolve("chain.intermediate-test-domain.no.crt.pem")).exists();
-
     }
 
 }
