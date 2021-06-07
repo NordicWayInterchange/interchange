@@ -22,6 +22,7 @@ public class RequestedSubscriptionResponseApi {
     private String path;
     private SubscriptionStatusApi status;
     private LocalTime lastUpdatedTimestamp;
+    private String eTag;
 
     public RequestedSubscriptionResponseApi() {
     }
@@ -108,6 +109,14 @@ public class RequestedSubscriptionResponseApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
+    public String geteTag() {
+        return eTag;
+    }
+
+    public void seteTag(String eTag) {
+        this.eTag = eTag;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -136,6 +145,7 @@ public class RequestedSubscriptionResponseApi {
                 ", path='" + path + '\'' +
                 ", status=" + status +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", eTag='" + eTag + '\'' +
                 '}';
     }
 }
