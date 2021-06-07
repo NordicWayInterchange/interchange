@@ -83,6 +83,11 @@ public class NeighbourDiscoverer {
 		neighbourService.pollSubscriptions(neighbourFacade);
 	}
 
+	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
+	public void schedulePollSubscriptionsWithStatusCreated() {
+		neighbourService.pollSubscriptionsWithStatusCreated(neighbourFacade);
+	}
+
 	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void updateLocalSubscriptions() {
 		serviceProviderService.updateLocalSubscriptions();
