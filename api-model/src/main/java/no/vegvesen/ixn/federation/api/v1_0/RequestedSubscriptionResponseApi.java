@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import java.time.LocalTime;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,7 +20,7 @@ public class RequestedSubscriptionResponseApi {
 
     private String path;
     private SubscriptionStatusApi status;
-    private LocalTime lastUpdatedTimestamp;
+    private long lastUpdatedTimestamp;
     private String eTag;
 
     public RequestedSubscriptionResponseApi() {
@@ -43,7 +42,7 @@ public class RequestedSubscriptionResponseApi {
         this.queueConsumerUser = queueConsumerUser;
     }
 
-    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser, LocalTime lastUpdatedTimestamp) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser, long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.path = path;
@@ -101,11 +100,11 @@ public class RequestedSubscriptionResponseApi {
         this.status = status;
     }
 
-    public LocalTime getLastUpdatedTimestamp() {
+    public long getLastUpdatedTimestamp() {
         return lastUpdatedTimestamp;
     }
 
-    public void setLastUpdatedTimestamp(LocalTime lastUpdatedTimestamp) {
+    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
