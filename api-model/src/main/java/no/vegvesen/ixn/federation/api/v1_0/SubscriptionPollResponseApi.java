@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.time.LocalTime;
 import java.util.Objects;
 import java.util.Set;
 
@@ -25,7 +24,7 @@ public class SubscriptionPollResponseApi {
 
     private String queueName;
 
-    private LocalTime lastUpdatedTimestamp;
+    private long lastUpdatedTimestamp;
 
     private String eTag;
 
@@ -116,11 +115,11 @@ public class SubscriptionPollResponseApi {
         this.queueName = queueName;
     }
 
-    public LocalTime getLastUpdatedTimestamp() {
+    public long getLastUpdatedTimestamp() {
         return lastUpdatedTimestamp;
     }
 
-    public void setLastUpdatedTimestamp(LocalTime lastUpdatedTimestamp) {
+    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
