@@ -5,8 +5,8 @@ if [ "$#" -ne 2 ]; then
     echo "USAGE: $0 <ca-domainname> <country code (upper case)>"
     exit 1
 fi
-
-if [ ! -d "ca_keys" ]; then
+KEYS_OUT_DIR="/ca_keys"
+if [ ! -d "$KEYS_OUT_DIR" ]; then
 	echo "Could not find ca-keys directory to write keys to, exiting"
 	exit 1
 fi
@@ -158,8 +158,8 @@ EOF
 
 openssl genrsa -out ca/private/$KEY_FILE 4096
 openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/$KEY_FILE -out ca/certs/$CERT_FILE -days 3650 -set_serial 0 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY_CODE}"
-cp ca/private/$KEY_FILE /ca_keys/
-cp ca/certs/$CERT_FILE /ca_keys/
-chmod ugo+rwx /ca_keys/*
+cp ca/private/$KEY_FILE "$KEYS_OUT_DIR"
+cp ca/certs/$CERT_FILE "$KEYS_OUT_DIR"
+chmod ugo+rwx "$KEYS_OUT_DIR"*
 echo "CA Key generation done"
 
