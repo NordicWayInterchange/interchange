@@ -39,6 +39,8 @@ public class Subscription {
 
 	private LocalTime lastUpdatedTimestamp;
 
+	private String eTag;
+
 	public Subscription() {
 	}
 
@@ -156,6 +158,14 @@ public class Subscription {
 		this.lastUpdatedTimestamp = lastUpdatedTimestamp;
 	}
 
+	public String geteTag() {
+		return eTag;
+	}
+
+	public void seteTag(String eTag) {
+		this.eTag = eTag;
+	}
+
 	public Set<Broker> getBrokers() {
 		return brokers;
 	}
@@ -195,6 +205,8 @@ public class Subscription {
 				", queue='" + queue + '\'' +
 				", createNewQueue='" + createNewQueue + '\'' +
 				", queueConsumerUser='" + queueConsumerUser + '\'' +
+				", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+				", eTag='" + eTag + '\'' +
 				", brokers=" + brokers +
 				'}';
 	}
