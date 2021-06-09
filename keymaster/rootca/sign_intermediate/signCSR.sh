@@ -1,27 +1,46 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
-    echo no domainname for the root ca
-    echo "USAGE: $0 <ca-domainname> <country code (upper case)>"
-    exit 1
-fi
-KEYS_OUT_DIR="/ca_keys"
-if [ ! -d "$KEYS_OUT_DIR" ]; then
-	echo "Could not find ca-keys directory to write keys to, exiting"
+if [ "$#" -ne 5 ]; then
+	echo "Usage: $0 <path/to/csrFile.csr> <intermediateCA domain name> <path/to/ca_cert> <path_to_ca_key> <country code>"
 	exit 1
 fi
 
-mkdir -p ca/{newcerts,certs,crl,private,requests}
-touch ca/index.txt
-touch ca/index.txt.attr
-echo '1000' > ca/serial
+csrPath=$1
+if [ ! -f "$csrPath" ]; then
+  echo "Input file $1 not found. Exiting."
+	exit 1
+fi
 
-#echo Enter domain name for the rootCA:
-DOMAINNAME=$1
-COUNTRY_CODE=$2
-KEY_FILE=ca.$DOMAINNAME.key.pem
-CERT_FILE=ca.$DOMAINNAME.crt.pem
+DOMAINNAME=$2
 
+CA_CERT=$3
+if [ ! -f "$CA_CERT" ]; then
+  echo "CA certificate not found. Exiting."
+  exit 1
+fi
+
+CA_KEY=$4
+if [ ! -f "$CA_KEY" ]; then
+  echo "CA key not found. Exiting."
+  exit 1
+fi
+COUNTRY_CODE=$5
+
+if [ ! -d "ca/newcerts" ]; then
+  mkdir -p ca/newcerts
+fi
+
+if [ ! -d "ca/intermediate" ]; then
+	mkdir -p ca/intermediate/certs
+fi
+
+if [ ! -f "ca/index.txt" ]; then
+	touch ca/index.txt
+	touch ca/index.txt.attr
+	echo '1000'  > ca/serial
+fi
+CERT_OUT_FILE=ca/intermediate/certs/int.$DOMAINNAME.crt.pem
+CERT_BUNDLE=ca/intermediate/certs/chain.$DOMAINNAME.crt.pem
 cat << EOF > openssl_root.cnf
 # OpenSSL root CA configuration file.
 [ ca ]
@@ -39,8 +58,8 @@ serial            = ca/serial
 RANDFILE          = ca/private/.rand
 
 # The root key and root certificate.
-private_key       = ca/private/$KEY_FILE
-certificate       = ca/certs/$CERT_FILE
+private_key       = $CA_KEY
+certificate       = $CA_CERT
 
 # For certificate revocation lists.
 crlnumber         = ca/crlnumber
@@ -156,10 +175,12 @@ keyUsage = critical, digitalSignature
 extendedKeyUsage = critical, OCSPSigning
 EOF
 
-openssl genrsa -out ca/private/$KEY_FILE 4096
-openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/$KEY_FILE -out ca/certs/$CERT_FILE -days 3650 -set_serial 0 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY_CODE}"
-cp ca/private/$KEY_FILE "$KEYS_OUT_DIR"
-cp ca/certs/$CERT_FILE "$KEYS_OUT_DIR"
-chmod ugo+rwx "$KEYS_OUT_DIR"*
-echo "CA Key generation done"
+openssl ca -batch -config openssl_root.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha512 -in $csrPath -out "$CERT_OUT_FILE"
+
+cat "$CERT_OUT_FILE" "$CA_CERT" > "$CERT_BUNDLE"
+cp  "$CERT_BUNDLE" /keys_out/
+cp "$CERT_OUT_FILE" /keys_out/
+echo Cert signing complete.
+
+
 

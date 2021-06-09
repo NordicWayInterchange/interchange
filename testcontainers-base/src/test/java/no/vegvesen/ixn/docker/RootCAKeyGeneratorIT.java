@@ -17,7 +17,7 @@ public class RootCAKeyGeneratorIT {
 
     @Container
     private RootCAKeyGenerator keysGenerator = new RootCAKeyGenerator(
-            DockerBaseIT.getFolderPath("keymaster").resolve("rootca"),
+            DockerBaseIT.getFolderPath("keymaster").resolve("rootca/newca"),
             targetPath,
             "test.no",
             "NO");

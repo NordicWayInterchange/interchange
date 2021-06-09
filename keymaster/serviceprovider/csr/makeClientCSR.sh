@@ -56,7 +56,7 @@ EOF
 ident=$1
 country=$2
 
-openssl req -out client/csr/$ident.csr.pem -newkey rsa:2048 -nodes -keyout client/private/$ident.key.pem -config openssl_csr_san.cnf -subj "/CN=${ident}/O=Nordic Way/C=$country"
+openssl req -out client/csr/$ident.csr.pem -newkey rsa:2048 -nodes -keyout client/private/$ident.key.pem -config openssl_csr_san.cnf -subj "/emailAddress=test@test.no/CN=${ident}/O=Nordic Way/C=$country"
 cp client/private/$ident.key.pem $INTERNAL_KEYS_FOLDER/
 cp client/csr/$ident.csr.pem $INTERNAL_KEYS_FOLDER/
 chmod ugo+rwx $INTERNAL_KEYS_FOLDER/*

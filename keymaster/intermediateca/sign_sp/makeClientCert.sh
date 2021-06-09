@@ -1,89 +1,88 @@
 #!/bin/bash
 
+#Fully Qualified Domain Name
 if [ "$#" -ne 5 ]; then
-	echo "Usage: $0 <path/to/csrFile.csr> <intermediateCA domain name> <path/to/ca_cert> <path_to_ca_key> <country code>"
-	exit 1
+    echo Illegal number of arguments.
+    echo "USAGE: $0 <path/to/csrFile.csr> <client-identifier> <path/to/intermediate/ca.crt.pem> <path/to/intermediate/ca.key.pem> <path/to/intermediate/chain.crt.pem>"
+    exit 1
+fi
+#TODO check the rest of the arguments
+CSRFILE=$1
+ident=$2
+INTERMEDIATE_CA_CERT=$3
+INTERMEDIATE_CA_KEY=$4
+INTERMEDIATE_CA_CHAIN=$5
+OUTPUT_PATH="/cert_out/"
+CERT_OUT="ca/intermediate/certs/$ident.crt.pem"
+SP_CERT_CHAIN="ca/intermediate/certs/chain.$ident.crt.pem"
+#if [ ! -f "$CRSFILE" ]; then
+#        echo could not find CRS for $ident. Exiting.
+#        exit 1
+#fi
+if [ ! -f "$INTERMEDIATE_CA_CERT" ]; then
+        echo could not find cert for intermediate CA. Exiting.
+        exit 1
 fi
 
-csrPath=$1
-if [ ! -f "$csrPath" ]; then
-  echo "Input file $1 not found. Exiting."
-	exit 1
+if [ ! -f "$INTERMEDIATE_CA_KEY" ]; then
+        echo could not find key for intermediate CA. Exiting.
+        exit 1
 fi
-
-DOMAINNAME=$2
-
-CA_CERT=$3
-if [ ! -f "$CA_CERT" ]; then
-  echo "CA certificate not found. Exiting."
-  exit 1
+if [ ! -d "$OUTPUT_PATH" ]; then
+        echo Output path does not exist. Is it mapped properly?
+        exit 1
 fi
-
-CA_KEY=$4
-if [ ! -f "$CA_KEY" ]; then
-  echo "CA key not found. Exiting."
-  exit 1
-fi
-COUNTRY_CODE=$5
-
-if [ ! -d "ca/newcerts" ]; then
-  mkdir -p ca/newcerts
-fi
-
 if [ ! -d "ca/intermediate" ]; then
-	mkdir -p ca/intermediate/certs
+	mkdir -p ca/intermediate/{certs,newcerts,crl,private}
+  touch ca/intermediate/index.txt
+	touch ca/intermediate/index.txt.attr
+	echo '1000'  > ca/intermediate/serial
 fi
 
-if [ ! -f "ca/index.txt" ]; then
-	touch ca/index.txt
-	touch ca/index.txt.attr
-	echo '1000'  > ca/serial
-fi
-CERT_OUT_FILE=ca/intermediate/certs/int.$DOMAINNAME.crt.pem
-CERT_BUNDLE=ca/intermediate/certs/chain.$DOMAINNAME.crt.pem
-cat << EOF > openssl_root.cnf
-# OpenSSL root CA configuration file.
+cat << EOF > openssl_intermediate.cnf
+# OpenSSL intermediate CA configuration file.
 [ ca ]
 # man ca
 default_ca = CA_default
 
 [ CA_default ]
 # Directory and file locations.
-dir               = ca
-certs             = ca/certs
-crl_dir           = ca/crl
-new_certs_dir     = ca/newcerts
-database          = ca/index.txt
-serial            = ca/serial
-RANDFILE          = ca/private/.rand
+dir               = ca/intermediate
+certs             = ca/intermediate/certs
+crl_dir           = ca/intermediate/crl
+new_certs_dir     = ca/intermediate/newcerts
+database          = ca/intermediate/index.txt
+serial            = ca/intermediate/serial
+RANDFILE          = ca/intermediate/private/.rand
+
 
 # The root key and root certificate.
-private_key       = $CA_KEY
-certificate       = $CA_CERT
+private_key       = $INTERMEDIATE_CA_KEY
+certificate       = $INTERMEDIATE_CA_CERT
 
 # For certificate revocation lists.
-crlnumber         = ca/crlnumber
-crl               = ca/crl/ca.$DOMAINNAME.crl.pem
-crl_extensions    = crl_ext
+crlnumber         = ca/intermediate/crlnumber
+crl               = ca/intermediate/crl/crlfile
 default_crl_days  = 30
 
 # SHA-1 is deprecated, so use SHA-2 instead.
 default_md        = sha512
+
 name_opt          = ca_default
 cert_opt          = ca_default
-default_days      = 375
+default_days      = 3650
 preserve          = no
-policy            = policy_strict
+
+#Ensure that the extensione in the CSR make it to the signed certificate (like subjectAltNames)
+copy_extensions   = copy
+policy            = policy_loose
 
 [ policy_strict ]
 # The root CA should only sign intermediate certificates that match.
 # See the POLICY FORMAT section of 'man ca'.
-#changed from match
-countryName             = optional
-#changed from match
-stateOrProvinceName     = optional
-#changed from match
-organizationName        = supplied
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
 organizationalUnitName  = optional
 commonName              = supplied
 emailAddress            = optional
@@ -121,12 +120,12 @@ commonName                      = Common Name
 emailAddress                    = Email Address
 
 # Optionally, specify some defaults.
-#countryName_default             = [2 letter contry code]
+#countryName_default             = [2 letter code]
 #stateOrProvinceName_default     = [State or Province]
 #localityName_default            = [City or Town]
-#0.organizationName_default      = [Name of the organization]
+#0.organizationName_default      = [Organization]
 #organizationalUnitName_default  = [Unit]
-#emailAddress_default            = [your email address]
+#emailAddress_default            = [Your email address]
 
 [ v3_ca ]
 # Extensions for a typical CA ('man x509v3_config').
@@ -147,7 +146,6 @@ keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 basicConstraints = CA:FALSE
 nsCertType = client, email
 nsComment = "OpenSSL Generated Client Certificate"
-subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer
 keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage = clientAuth, emailProtection
@@ -155,12 +153,12 @@ extendedKeyUsage = clientAuth, emailProtection
 [ server_cert ]
 # Extensions for server certificates ('man x509v3_config').
 basicConstraints = CA:FALSE
-nsCertType = server
+nsCertType = server, client
 nsComment = "OpenSSL Generated Server Certificate"
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer:always
-keyUsage = critical, digitalSignature, keyEncipherment
-extendedKeyUsage = serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment, nonRepudiation
+extendedKeyUsage = serverAuth, clientAuth
 
 [ crl_ext ]
 # Extension for CRLs ('man x509v3_config').
@@ -175,11 +173,11 @@ keyUsage = critical, digitalSignature
 extendedKeyUsage = critical, OCSPSigning
 EOF
 
-openssl ca -batch -config openssl_root.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha512 -in $csrPath -out "$CERT_OUT_FILE"
-
-cat "$CERT_OUT_FILE" "$CA_CERT" > "$CERT_BUNDLE"
-cp  "$CERT_BUNDLE" /keys_out/
-echo Cert signing complete.
-
-
+openssl ca -batch -config openssl_intermediate.cnf -extensions usr_cert -days 3750 -notext -md sha512 -in $CSRFILE -out $CERT_OUT
+#TODO need both the cert and the chain from the CA
+chmod -R ugo+rwx ca/
+cat $CERT_OUT $INTERMEDIATE_CA_CHAIN > $SP_CERT_CHAIN
+cp  $CERT_OUT $OUTPUT_PATH
+cp  $SP_CERT_CHAIN $OUTPUT_PATH
+echo Service Provider Cert signing complete
 
