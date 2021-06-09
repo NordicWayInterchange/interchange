@@ -17,6 +17,7 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
     private Path caCert;
     private Path caKey;
     private Path targetPath;
+    private String countryCode;
     private String domainName;
     private String csrPathOnHost;
 
@@ -25,6 +26,7 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
                                        String domainName,
                                        Path caCert,
                                        Path caKey,
+                                       String countryCode,
                                        Path targetPath) {
         super(new ImageFromDockerfile("intermediate-ca-cert-generator")
                 .withFileFromPath(".",dockerFilePath));
@@ -35,6 +37,7 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
         this.caCert = caCert;
         this.caKey = caKey;
         this.targetPath = targetPath;
+        this.countryCode = countryCode;
     }
 
     /**
@@ -53,7 +56,7 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
         this.withFileSystemBind(caKey.toString(), caKeyPathInContainer,
                 BindMode.READ_ONLY);
         this.withFileSystemBind(targetPath.toString(), KEYS_OUT_FOLDER,BindMode.READ_WRITE);
-        this.withCommand(csrPathInContainer,domainName,caCertPathInContainer,caKeyPathInContainer);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
+        this.withCommand(csrPathInContainer,domainName,caCertPathInContainer,caKeyPathInContainer,countryCode);
     }
 }

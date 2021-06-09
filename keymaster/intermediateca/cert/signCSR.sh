@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ "$#" -ne 4 ]; then
-	echo "Usage: $0 <path/to/csrFile.csr> <intermediateCA domain name> <path/to/ca_cert> <path_to_ca_key>"
+if [ "$#" -ne 5 ]; then
+	echo "Usage: $0 <path/to/csrFile.csr> <intermediateCA domain name> <path/to/ca_cert> <path_to_ca_key> <country code>"
 	exit 1
 fi
 
@@ -24,14 +24,23 @@ if [ ! -f "$CA_KEY" ]; then
   echo "CA key not found. Exiting."
   exit 1
 fi
+COUNTRY_CODE=$5
+
+if [ ! -d "ca/newcerts" ]; then
+  mkdir -p ca/newcerts
+fi
 
 if [ ! -d "ca/intermediate" ]; then
 	mkdir -p ca/intermediate/certs
-	touch ca/intermediate/index.txt
-	touch ca/intermediate/index.txt.attr
 fi
 
-
+if [ ! -f "ca/index.txt" ]; then
+	touch ca/index.txt
+	touch ca/index.txt.attr
+	echo '1000'  > ca/serial
+fi
+CERT_OUT_FILE=ca/intermediate/certs/int.$DOMAINNAME.crt.pem
+CERT_BUNDLE=ca/intermediate/certs/chain.$DOMAINNAME.crt.pem
 cat << EOF > openssl_root.cnf
 # OpenSSL root CA configuration file.
 [ ca ]
@@ -166,12 +175,10 @@ keyUsage = critical, digitalSignature
 extendedKeyUsage = critical, OCSPSigning
 EOF
 
-openssl ca -config openssl_root.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha512 -in $csrPath -out ca/intermediate/certs/int.$DOMAINNAME.crt.pem
-#TODO we need to think about this, will it work for multiple nodes?
-CAcert=$(find ca/certs/ -name "ca*")
+openssl ca -batch -config openssl_root.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha512 -in $csrPath -out "$CERT_OUT_FILE"
 
-cat ca/intermediate/certs/int.$DOMAINNAME.crt.pem $CAcert > ca/intermediate/certs/chain.$DOMAINNAME.crt.pem
-cp  ca/intermediate/certs/chain.$DOMAINNAME.crt.pem /keys_out/
+cat "$CERT_OUT_FILE" "$CA_CERT" > "$CERT_BUNDLE"
+cp  "$CERT_BUNDLE" /keys_out/
 echo Cert signing complete.
 
 
