@@ -279,4 +279,23 @@ public class NeighbourRepositoryIT {
 
 	}
 
+	@Test
+	public void addSubscriptionWithBrokersList() {
+		Subscription sub = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, false, "");
+		Broker broker = new Broker("my-queue","my-broker");
+		sub.setBrokers(Sets.newLinkedHashSet(broker));
+
+		Set<Subscription> subs = Sets.newLinkedHashSet(sub);
+		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subs);
+		Neighbour neighbour = new Neighbour("my-neighbour", new Capabilities(), new SubscriptionRequest(), subscriptions);
+
+		repository.save(neighbour);
+
+		Neighbour savedNeighbour = repository.findByName("my-neighbour");
+
+		Subscription savedSub = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
+
+		assertThat(savedSub.getBrokers()).hasSize(1);
+	}
+
 }
