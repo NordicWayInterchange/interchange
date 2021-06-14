@@ -425,6 +425,51 @@ class NeighbourServiceTest {
 		verify(listenerEndpointRepository, times(0)).delete(any(ListenerEndpoint.class));
 	}
 
+	@Test
+	public void listenerEndpointsAreSavedFromBrokersList() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("my-neighbour");
+
+		Broker broker1 = new Broker("my-queue-1", "my-broker-1");
+		Broker broker2 = new Broker("my-queue-2", "my-broker-2");
+
+		Set<Broker> brokers = new HashSet<>(Sets.newSet(broker1, broker2));
+
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-1", "my-queue-1")).thenReturn(null);
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-2", "my-queue-2")).thenReturn(null);
+
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-broker-1", "my-queue-1", new Connection());
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-broker-2", "my-queue-2", new Connection());
+
+		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
+		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
+
+		neighbourService.createListenerEndpointFromBrokersList(neighbour, brokers);
+
+		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
+	}
+
+	@Test
+	public void listenerEndpointsAreRemoverFromBrokersList() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("my-neighbour");
+
+		Broker broker1 = new Broker("my-queue-1", "my-broker-1");
+		Broker broker2 = new Broker("my-queue-2", "my-broker-2");
+
+		Set<Broker> brokers = new HashSet<>(Sets.newSet(broker1, broker2));
+
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-broker-1", "my-queue-1", new Connection());
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-broker-2", "my-queue-2", new Connection());
+
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-1", "my-queue-1")).thenReturn(listenerEndpoint1);
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-2", "my-queue-2")).thenReturn(listenerEndpoint2);
+
+		neighbourService.tearDownListenerEndpointsFromBrokersList(neighbour, brokers);
+
+		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
+	}
+
 	private Capability getDatexCapability(String country) {
 		return new DatexCapability(null, country, null, null, null);
 	}
