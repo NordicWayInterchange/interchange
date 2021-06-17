@@ -33,7 +33,7 @@ jobs:
           name: interchange
           path: ./*
 
-  docker-push-bouvet:
+  docker-push-svv:
     runs-on: ubuntu-latest
     needs: build
     defaults:
@@ -47,9 +47,9 @@ jobs:
       - name: Authenticate
         uses: google-github-actions/setup-gcloud@master
         with:
-          project_id: ${{ secrets.BOUVET_PROJECT_ID }}
-          service_account_key: ${{ secrets.BOUVET_GITHUB_ACTIONS  }}
+          project_id: nw-shared-w3ml
+          service_account_key: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
       - name: Setup docker
         run: gcloud auth configure-docker
       - name: Build and upload Docker images
-        run: chmod +x build-push-images.sh && ./build-push-images.sh eu.gcr.io/nordic-way-aad182cc
+        run: chmod +x build-push-images.sh && ./build-push-images.sh eu.gcr.io/nw-shared-w3ml
