@@ -53,3 +53,30 @@ jobs:
         run: gcloud auth configure-docker
       - name: Build and upload Docker images
         run: chmod +x build-push-images.sh && ./build-push-images.sh eu.gcr.io/nw-shared-w3ml
+
+  helm-package-charts:
+    runs-on: ubuntu-latest
+    needs: docer-push-svv
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Download persisted wokspace
+        uses: actions/download-artifact@v2
+        with:
+          name: interchange
+      - name: Setup helm
+        uses: azure/setup-helm@v1
+      - name: Package charts
+        run: |
+          helm package interchange/helm/interchange -d interchange/target/helm
+          helm package interchange/helm/basic-interchange -d interchange/target/helm
+          helm repo index interchange/target/helm
+      - name: Authenticate
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: nw-shared-w3ml
+          ervice_account_key: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
+      - name: Publish charts
+        run: |
+          gsutil cp -r interchange/target/helm/ gs://nordic_way_helm_repository
