@@ -56,7 +56,7 @@ jobs:
 
   helm-package-charts:
     runs-on: ubuntu-latest
-    needs: docer-push-svv
+    needs: docker-push-svv
     defaults:
       run:
         shell: bash
