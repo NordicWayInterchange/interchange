@@ -73,7 +73,7 @@ jobs:
         run: |
           helm package helm/interchange -d target/helm
           helm package helm/basic-interchange -d target/helm
-          helm repo index interchange/target/helm
+          helm repo index target/helm
       - name: Authenticate
         uses: google-github-actions/setup-gcloud@master
         with:
@@ -81,4 +81,4 @@ jobs:
           service_account_key: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
       - name: Publish charts
         run: |
-          gsutil cp -r interchange/target/helm/ gs://nordic_way_helm_repository
+          gsutil cp -r target/helm/ gs://nordic_way_helm_repository
