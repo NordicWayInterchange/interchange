@@ -67,10 +67,12 @@ jobs:
           name: interchange
       - name: Setup helm
         uses: azure/setup-helm@v1
+      - name: Where am I?
+        run: pwd
       - name: Package charts
         run: |
-          helm package interchange/helm/interchange -d interchange/target/helm
-          helm package interchange/helm/basic-interchange -d interchange/target/helm
+          helm package helm/interchange -d target/helm
+          helm package helm/basic-interchange -d target/helm
           helm repo index interchange/target/helm
       - name: Authenticate
         uses: google-github-actions/setup-gcloud@master
