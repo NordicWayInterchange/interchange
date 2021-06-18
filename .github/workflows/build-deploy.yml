@@ -76,7 +76,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@master
         with:
           project_id: nw-shared-w3ml
-          ervice_account_key: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
+          service_account_key: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
       - name: Publish charts
         run: |
           gsutil cp -r interchange/target/helm/ gs://nordic_way_helm_repository
