@@ -20,7 +20,7 @@ public class MessageCollector {
     private ListenerEndpointRepository listenerEndpointRepository;
 
     //NOTE: This is implicitly thread safe. If more than one thread can access the listeners map, the implementation of the listener Map will have to change.
-    private Map<String, MessageCollectorListener> listeners;
+    private Map<ListenerEndpoint, MessageCollectorListener> listeners;
     private Logger logger = LoggerFactory.getLogger(MessageCollector.class);
 
 
@@ -40,12 +40,12 @@ public class MessageCollector {
 
 
     private void checkListenerList() {
-        Set<String> remoteNames = listeners.keySet();
-        for (String remoteName : remoteNames) {
-            MessageCollectorListener listener = listeners.get(remoteName);
+        Set<ListenerEndpoint> listenerEndpoints = listeners.keySet();
+        for (ListenerEndpoint listenerEndpoint : listenerEndpoints) {
+            MessageCollectorListener listener = listeners.get(listenerEndpoint);
             if (! listener.isRunning()) {
-                listeners.remove(remoteName);
-                logger.info("Removed stopped listener {}", remoteName);
+                listeners.remove(listenerEndpoint);
+                logger.info("Removed stopped listener {} with brokerUrl {}", listenerEndpoint.getNeighbourName(), listenerEndpoint.getBrokerUrl());
             }
         }
 
@@ -53,33 +53,36 @@ public class MessageCollector {
 
     public void setupConnectionsToNewNeighbours() {
         List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAll();
-        List<String> interchangeNames = new ArrayList<>();
+        Set<ListenerEndpoint> interchangeListenerEndpoints = new HashSet<>();
 
         for (ListenerEndpoint listenerEndpoint : listenerEndpoints) {
             String neighbourName = listenerEndpoint.getNeighbourName();
-            interchangeNames.add(neighbourName);
-            if (!listeners.containsKey(neighbourName)) {
+            String brokerUrl = listenerEndpoint.getBrokerUrl();
+            interchangeListenerEndpoints.add(listenerEndpoint);
+            if (!listeners.containsKey(listenerEndpoint)) {
                 setUpConnectionToNeighbour(listenerEndpoint);
             }
             else {
-                if (listeners.get(neighbourName).isRunning()) {
-                    logger.debug("Listener for {} is still running with no changes", neighbourName);
+                if (listeners.get(listenerEndpoint).isRunning()) {
+                    logger.debug("Listener for {} with brokerUrl {} is still running with no changes", neighbourName, brokerUrl);
                 } else {
-                    logger.debug("Non-running listener detected, name {}", neighbourName);
+                    logger.debug("Non-running listener detected, name {} with brokerUrl {}", neighbourName, brokerUrl);
                 }
             }
 
         }
 
-        List<String> listenerKeysToRemove = new ArrayList<>();
+        List<ListenerEndpoint> listenerKeysToRemove = new ArrayList<>();
 
-        for (String ixnName : listeners.keySet()) {
-            if (!interchangeNames.contains(ixnName)) {
-                logger.info("Listener for {} is now being removed",ixnName);
-                MessageCollectorListener toRemove = listeners.get(ixnName);
-                logger.debug("Tearing down {}", ixnName);
+        for (ListenerEndpoint listenerEndpoint : listeners.keySet()) {
+            if (!interchangeListenerEndpoints.contains(listenerEndpoint)) {
+                String neighbourName = listenerEndpoint.getNeighbourName();
+                String brokerUrl = listenerEndpoint.getBrokerUrl();
+                logger.info("Listener for {} with brokerUrl {} is now being removed", neighbourName, brokerUrl);
+                MessageCollectorListener toRemove = listeners.get(listenerEndpoint);
+                logger.debug("Tearing down listener for {} with brokerUrl {}", neighbourName, brokerUrl);
                 toRemove.teardown();
-                listenerKeysToRemove.add(ixnName);
+                listenerKeysToRemove.add(listenerEndpoint);
             }
         }
 
@@ -90,21 +93,21 @@ public class MessageCollector {
         String name = listenerEndpoint.getNeighbourName();
         if(listenerEndpoint.getMessageConnection().canBeContacted(backoffProperties)) {
             try {
-                logger.info("Setting up connection to ixn with name {}, URL {}", name, listenerEndpoint.getBrokerUrl());
+                logger.info("Setting up connection to ixn with name {}, brokerUrl {}", name, listenerEndpoint.getBrokerUrl());
                 MessageCollectorListener messageListener = collectorCreator.setupCollection(listenerEndpoint);
-                listeners.put(name, messageListener);
+                listeners.put(listenerEndpoint, messageListener);
                 listenerEndpoint.getMessageConnection().okConnection();
             } catch (MessageCollectorException e) {
-                logger.warn("Tried to create connection to {}, but failed with exception.", name, e);
+                logger.warn("Tried to create connection to {} with brokerUrl {}, but failed with exception.", name, listenerEndpoint.getBrokerUrl(), e);
                 listenerEndpoint.getMessageConnection().failedConnection(backoffProperties.getNumberOfAttempts());
             }
         }
         else {
-            logger.info("Too soon to connect to {}", name);
+            logger.info("Too soon to connect to {} with brokerUrl {}", name, listenerEndpoint.getBrokerUrl());
         }
     }
 
-    Map<String, MessageCollectorListener> getListeners() {
+    Map<ListenerEndpoint, MessageCollectorListener> getListeners() {
         return listeners;
     }
 }

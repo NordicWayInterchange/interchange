@@ -24,12 +24,12 @@ public class MessageCollectorTest {
         ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
         when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(one, two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
-        when(collectorCreator.setupCollection(one)).thenThrow(new MessageCollectorException("Expected exception"));
+        when(collectorCreator.setupCollection(eq(one))).thenThrow(new MessageCollectorException("Expected exception"));
 
         Source source = mock(Source.class);
         Sink sink = mock(Sink.class);
 
-        when(collectorCreator.setupCollection(two)).thenReturn(new MessageCollectorListener(sink,source));
+        when(collectorCreator.setupCollection(eq(two))).thenReturn(new MessageCollectorListener(sink,source));
 
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
         collector.runSchedule();
@@ -37,7 +37,7 @@ public class MessageCollectorTest {
         verify(collectorCreator,times(2)).setupCollection(any());
 
         assertThat(collector.getListeners()).size().isEqualTo(1);
-        assertThat(collector.getListeners()).containsKeys("two");
+        assertThat(collector.getListeners()).containsKeys(two);
 
     }
 
@@ -49,20 +49,75 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("", "", "", messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("", "", "", messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "broker-one", "queue-one", messageConnectionOne);
+        ListenerEndpoint two = new ListenerEndpoint("two", "broker-two", "queue-two", messageConnectionTwo);
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
         ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
         when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(one, two));
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
-        when(collectorCreator.setupCollection(one)).thenThrow(new MessageCollectorException("Expected exception"));
-        when(collectorCreator.setupCollection(two)).thenReturn(mock(MessageCollectorListener.class));
+        when(collectorCreator.setupCollection(eq(one))).thenThrow(new MessageCollectorException("Expected exception"));
+        when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
+
 
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
         collector.runSchedule();
 
+        verify(messageConnectionOne,times(1)).failedConnection(anyInt());
+        verify(messageConnectionTwo,times(1)).okConnection();
+    }
+
+    @Test
+    public void testTwoListenersAreCreatedForOneNeighbourWithTwoBrokers() {
+        Connection messageConnectionOne = mock(Connection.class);
+        when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
+
+        Connection messageConnectionTwo = mock(Connection.class);
+        when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
+
+        ListenerEndpoint one = new ListenerEndpoint("one", "broker-one", "queue-one", messageConnectionOne);
+        ListenerEndpoint two = new ListenerEndpoint("one", "broker-two", "queue-two", messageConnectionTwo);
+
+        GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+
+        ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+        when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(one, two));
+        CollectorCreator collectorCreator = mock(CollectorCreator.class);
+        when(collectorCreator.setupCollection(eq(one))).thenReturn(mock(MessageCollectorListener.class));
+        when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
+
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+        collector.runSchedule();
+
+        assertThat(collector.getListeners()).size().isEqualTo(2);
+        verify(messageConnectionOne,times(1)).okConnection();
+        verify(messageConnectionTwo,times(1)).okConnection();
+    }
+
+    @Test
+    public void testOneListenerIsCreatedForOneNeighbourWithTwoBrokersOneFailing() {
+        Connection messageConnectionOne = mock(Connection.class);
+        when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
+
+        Connection messageConnectionTwo = mock(Connection.class);
+        when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
+
+        ListenerEndpoint one = new ListenerEndpoint("one", "broker-one", "queue-one", messageConnectionOne);
+        ListenerEndpoint two = new ListenerEndpoint("one", "broker-two", "queue-two", messageConnectionTwo);
+
+        GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+
+        ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+        when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(one, two));
+        CollectorCreator collectorCreator = mock(CollectorCreator.class);
+        when(collectorCreator.setupCollection(eq(one))).thenThrow(new MessageCollectorException("Expected exception"));
+        when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
+
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+        collector.runSchedule();
+
+        assertThat(collector.getListeners()).size().isEqualTo(1);
         verify(messageConnectionOne,times(1)).failedConnection(anyInt());
         verify(messageConnectionTwo,times(1)).okConnection();
     }
