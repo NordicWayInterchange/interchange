@@ -35,7 +35,7 @@ commonName                 = Common Name (e.g. server FQDN or YOUR name)
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1	= FQDN
+DNS.1	= $FQDN
 #DNS.2	= [Any variation of F.Q.D.N]
 #DNS.3	= [Any variation of F.Q.D.N]
 EOF
