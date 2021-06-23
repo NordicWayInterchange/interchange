@@ -343,8 +343,8 @@ public class NeighbourService {
 		try {
 			for (Subscription subscription : subscriptions) {
 				try {
-					if (!subscription.getBrokers().isEmpty()) {
-						Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
+					Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
+					if (!lastUpdatedSubscription.getBrokers().isEmpty() || !subscription.getBrokers().equals(lastUpdatedSubscription.getBrokers())) {
 						if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
 							logger.info("Polled updated subscription with id {}", subscription.getId());
 							Set<Broker> wantedBrokers = lastUpdatedSubscription.getBrokers();
