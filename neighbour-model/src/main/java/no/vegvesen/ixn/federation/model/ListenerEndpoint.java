@@ -94,13 +94,12 @@ public class ListenerEndpoint {
         ListenerEndpoint that = (ListenerEndpoint) o;
         return neighbourName.equals(that.neighbourName) &&
                 brokerUrl.equals(that.brokerUrl) &&
-                queue.equals(that.queue) &&
-                messageConnection.equals(that.messageConnection);
+                queue.equals(that.queue);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(neighbourName, brokerUrl, queue, messageConnection);
+        return Objects.hash(neighbourName, brokerUrl, queue);
     }
 
 }

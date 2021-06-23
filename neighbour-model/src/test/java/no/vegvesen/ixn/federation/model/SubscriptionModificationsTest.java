@@ -47,4 +47,14 @@ class SubscriptionModificationsTest {
 		assertThat(modifications.getNewSubscriptions()).contains(sub3).hasSize(1);
 	}
 
+	@Test
+	void addBrokersToSubscription() {
+		Subscription sub = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, false, "");
+		Broker broker1 = new Broker("queue-1", "broker-1");
+		Broker broker2 = new Broker("queue-2", "broker-2");
+		sub.setBrokers(Sets.newSet(broker1, broker2));
+
+		assertThat(sub.getBrokers()).hasSize(2);
+	}
+
 }
