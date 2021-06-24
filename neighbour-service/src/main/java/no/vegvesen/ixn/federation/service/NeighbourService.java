@@ -343,23 +343,25 @@ public class NeighbourService {
 		try {
 			for (Subscription subscription : subscriptions) {
 				try {
-					Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
-					if (!lastUpdatedSubscription.getBrokers().isEmpty() || !subscription.getBrokers().equals(lastUpdatedSubscription.getBrokers())) {
-						if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
-							logger.info("Polled updated subscription with id {}", subscription.getId());
-							Set<Broker> wantedBrokers = lastUpdatedSubscription.getBrokers();
-							Set<Broker> existingBrokers = subscription.getBrokers();
+					if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
+						Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
+						if (!lastUpdatedSubscription.getBrokers().isEmpty() || !subscription.getBrokers().equals(lastUpdatedSubscription.getBrokers())) {
+							if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
+								logger.info("Polled updated subscription with id {}", subscription.getId());
+								Set<Broker> wantedBrokers = lastUpdatedSubscription.getBrokers();
+								Set<Broker> existingBrokers = subscription.getBrokers();
 
-							Set<Broker> brokersToRemove = new HashSet<>(existingBrokers);
-							brokersToRemove.removeAll(wantedBrokers);
-							tearDownListenerEndpointsFromBrokersList(neighbour, brokersToRemove);
+								Set<Broker> brokersToRemove = new HashSet<>(existingBrokers);
+								brokersToRemove.removeAll(wantedBrokers);
+								tearDownListenerEndpointsFromBrokersList(neighbour, brokersToRemove);
 
-							Set<Broker> additionalBrokers = new HashSet<>(wantedBrokers);
-							additionalBrokers.removeAll(existingBrokers);
-							createListenerEndpointFromBrokersList(neighbour, additionalBrokers);
-							subscription.setBrokers(wantedBrokers);
-						} else {
-							logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
+								Set<Broker> additionalBrokers = new HashSet<>(wantedBrokers);
+								additionalBrokers.removeAll(existingBrokers);
+								createListenerEndpointFromBrokersList(neighbour, additionalBrokers);
+								subscription.setBrokers(wantedBrokers);
+							} else {
+								logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
+							}
 						}
 					}
 				} catch (SubscriptionPollException e) {
