@@ -7,7 +7,7 @@ import java.util.List;
 public class DnsClient {
 
     public static void main(String[] args) {
-        String domainName = "itsinterchange.eu";
+        String domainName = "pilotinterchange.eu";
         if (args.length > 0) {
            domainName = args[0];
         }
