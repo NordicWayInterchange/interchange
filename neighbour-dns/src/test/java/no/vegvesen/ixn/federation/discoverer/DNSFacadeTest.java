@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.model.Neighbour;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {DNSFacade.class, DNSProperties.class})
 @EnableConfigurationProperties
+@Disabled("This test is dependent on an actual public DNS, and breaks. Need to fix")
 public class DNSFacadeTest {
 
 	@Autowired
