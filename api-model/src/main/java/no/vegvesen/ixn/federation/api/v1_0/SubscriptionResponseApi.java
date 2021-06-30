@@ -7,7 +7,7 @@ import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionResponseApi {
-    private String version = "1.0";
+    private String version = "1.1NW3";
     private String name;
     private Set<RequestedSubscriptionResponseApi> subscriptions;
 
