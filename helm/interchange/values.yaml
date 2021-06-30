@@ -45,3 +45,5 @@ qpid:
   # - name: odin
   #   binding: "originatingCountry='valhalla'"
   #   user: king_harald
+haproxy:
+  image_version: haproxy:2.3
