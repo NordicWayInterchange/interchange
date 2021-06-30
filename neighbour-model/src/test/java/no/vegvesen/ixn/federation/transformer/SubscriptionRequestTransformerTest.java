@@ -100,7 +100,7 @@ public class SubscriptionRequestTransformerTest {
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 
 		SubscriptionResponseApi response = subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi("bouvet", Collections.singleton(subscription));
-		assertThat(response.getVersion()).isEqualTo("1.0");
+		assertThat(response.getVersion()).isEqualTo("1.1NW3");
 		assertThat(response.getName()).isEqualTo("bouvet");
 		assertThat(response.getSubscriptions()).hasSize(1);
 
