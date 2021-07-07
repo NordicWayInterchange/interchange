@@ -29,7 +29,8 @@ public class LocalSubscription {
 
     private String queueConsumerUser;
 
-    private String brokerUrl;
+    //private String brokerUrl;
+    private Broker broker;
 
     public LocalSubscription() {
 
@@ -106,13 +107,13 @@ public class LocalSubscription {
         this.queueConsumerUser = queueConsumerUser;
     }
 
-    public String getBrokerUrl() {
-        return brokerUrl;
-    }
+    //public String getBrokerUrl() {
+    //    return brokerUrl;
+    //}
 
-    public void setBrokerUrl(String brokerUrl) {
-        this.brokerUrl = brokerUrl;
-    }
+    //public void setBrokerUrl(String brokerUrl) {
+    //    this.brokerUrl = brokerUrl;
+    //}
 
     //TODO lag et objekt av selector??
     public String bindKey() {
@@ -160,5 +161,13 @@ public class LocalSubscription {
 
     public LocalDateTime getLastUpdated() {
         return lastUpdated;
+    }
+
+    public void setBroker(Broker broker) {
+        this.broker = broker;
+    }
+
+    public Broker getBroker() {
+        return broker;
     }
 }
