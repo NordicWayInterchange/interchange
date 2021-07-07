@@ -23,9 +23,7 @@ public class Subscription {
 
 	private int numberOfPolls = 0;
 
-	private String brokerUrl;
 
-	private String queue;
 
 	@Column(columnDefinition = "boolean default false")
 	private boolean createNewQueue = false;
@@ -69,18 +67,6 @@ public class Subscription {
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
-		this.brokerUrl = brokerUrl;
-		this.queue = queue;
-		this.createNewQueue = createNewQueue;
-		this.queueConsumerUser = queueConsumerUser;
-	}
-
-	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String brokerUrl, String queue, boolean createNewQueue, String queueConsumerUser) {
-		this.subscriptionStatus = subscriptionStatus;
-		this.selector = selector;
-		this.path = path;
-		this.brokerUrl = brokerUrl;
-		this.queue = queue;
 		this.createNewQueue = createNewQueue;
 		this.queueConsumerUser = queueConsumerUser;
 	}
@@ -125,13 +111,13 @@ public class Subscription {
 		this.numberOfPolls = numberOfPolls;
 	}
 
-	public void setBrokerUrl(String brokerUrl) { this.brokerUrl = brokerUrl; }
+	//public void setBrokerUrl(String brokerUrl) { this.brokerUrl = brokerUrl; }
 
-	public String getBrokerUrl() { return brokerUrl; }
+	//public String getBrokerUrl() { return brokerUrl; }
 
-	public void setQueue(String queue) { this.queue = queue; }
+	//public void setQueue(String queue) { this.queue = queue; }
 
-	public String getQueue() { return queue; }
+	//public String getQueue() { return queue; }
 
 	public boolean isCreateNewQueue() {
 		return createNewQueue;
@@ -200,8 +186,8 @@ public class Subscription {
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +
 				", numberOfPolls=" + numberOfPolls +
-				", brokerUrl='" + brokerUrl + '\'' +
-				", queue='" + queue + '\'' +
+				//", brokerUrl='" + brokerUrl + '\'' +
+				//", queue='" + queue + '\'' +
 				", createNewQueue='" + createNewQueue + '\'' +
 				", queueConsumerUser='" + queueConsumerUser + '\'' +
 				", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
