@@ -6,22 +6,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SubscriptionPollResponseApiTest {
 
     @Test
     public void createValidJson() throws JsonProcessingException {
+        BrokerApi broker = new BrokerApi("client1queue","amqps://b.c-its-interchange.eu:5671");
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
                 "1",
                 "messageType='DENM' AND originatingCountry='NO'",
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,
-                "amqps://b.c-its-interchange.eu:5671",
-                "client1queue",
                 true,
-                "client1"
+                "client1",
+                Collections.singleton(broker)
         );
+
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(responseApi));
     }
@@ -37,22 +40,18 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void createValidJsonWithBrokers() throws JsonProcessingException {
+        BrokerApi broker1 = new BrokerApi("client1queue", "amqps://a.c-its-interchange.eu:5671");
+        BrokerApi broker2 = new BrokerApi("client2queue", "amqps://b.c-its-interchange.eu:5671");
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
                 "1",
                 "messageType='DENM' AND originatingCountry='NO'",
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,
-                null,
-                null,
                 false,
-                "neighbour1"
+                "neighbour1",
+                Sets.newLinkedHashSet(broker1,broker2)
         );
-        BrokerApi broker1 = new BrokerApi("client1queue", "amqps://a.c-its-interchange.eu:5671");
-        BrokerApi broker2 = new BrokerApi("client2queue", "amqps://b.c-its-interchange.eu:5671");
-
         responseApi.seteTag("myETag");
-
-        responseApi.setBrokers(Sets.newLinkedHashSet(broker1, broker2));
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(responseApi));
     }
@@ -63,6 +62,7 @@ public class SubscriptionPollResponseApiTest {
         ObjectMapper mapper = new ObjectMapper();
 
         SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);
-        System.out.println(result.toString());
+        //System.out.println(result.toString());
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
     }
 }
