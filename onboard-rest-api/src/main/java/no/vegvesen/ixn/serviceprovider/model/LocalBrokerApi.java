@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import no.vegvesen.ixn.federation.api.v1_0.BrokerApi;
 
 import java.util.Objects;
 
