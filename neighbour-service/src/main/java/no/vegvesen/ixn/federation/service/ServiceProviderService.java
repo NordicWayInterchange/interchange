@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class ServiceProviderService {
 
     // hent ServiceProvidere som har LocalSubscriptions med createNewQueue og status ACCEPTED lokalt.
     //for hver ServiceProvider: finn naboen med OurRequestedSubscriptions, matche (subscriptionStatus = CREATED) og sette status CREATED og brokerUrl på LocalSubscription
-    public void updateLocalSubscriptions() {
+    public void updateLocalSubscriptions(Self self) {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for(ServiceProvider serviceProvider : serviceProviders) {
@@ -50,6 +51,10 @@ public class ServiceProviderService {
                             for(Broker broker : brokers){
                                 localBrokers.add(brokerToLocalBroker(broker));
                             }
+                            serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
+                        }
+                        if(localSubscription.getSelector().equals(subscription.getSelector()) && !localSubscription.isCreateNewQueue()){
+                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(new LocalBroker(serviceProvider.getName(), self.getMessageChannelUrl())));
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         }
                     }
