@@ -45,6 +45,22 @@ public class SubscriptionPollResponseApi {
         this.status = status;
     }
 
+    public SubscriptionPollResponseApi(String id,
+                                       String selector,
+                                       String path,
+                                       SubscriptionStatusApi status,
+                                       Boolean createNewQueue,
+                                       String queueConsumerUser,
+                                       Set<BrokerApi> brokers) {
+        this.id = id;
+        this.selector = selector;
+        this.path = path;
+        this.status = status;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
+        this.brokers = brokers;
+    }
+
     public String getId() {
         return id;
     }
