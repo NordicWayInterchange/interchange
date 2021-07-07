@@ -285,7 +285,7 @@ public class NeighbourService {
 		List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
 		Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
 
-		Set<String> brokerUrlList = subscriptions.stream().map(Subscription::getBrokerUrl).collect(Collectors.toSet());
+		Set<String> brokerUrlList = subscriptions.stream().flatMap(subscription -> subscription.getBrokers().stream()).map(Broker::getMessageBrokerUrl).collect(Collectors.toSet());
 
 		for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
 			if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
@@ -406,8 +406,6 @@ public class NeighbourService {
 
 						// Throws SubscriptionPollException if unsuccessful
 						Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
-						subscription.setBrokerUrl(polledSubscription.getBrokerUrl());
-						subscription.setQueue(polledSubscription.getQueue());
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
 						subscription.setCreateNewQueue(polledSubscription.isCreateNewQueue());
@@ -417,11 +415,7 @@ public class NeighbourService {
 						neighbour.getControlConnection().okConnection();
 						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
 							if (!polledSubscription.isCreateNewQueue()) {
-								if(polledSubscription.getBrokers().isEmpty()) {
-									createListenerEndpoint(polledSubscription.getBrokerUrl(), polledSubscription.getQueue(), neighbour);
-								} else {
-									createListenerEndpointFromBrokersList(neighbour, polledSubscription.getBrokers());
-								}
+								createListenerEndpointFromBrokersList(neighbour, polledSubscription.getBrokers());
 							}
 						}
 						//utvide med ListenerEndpoint lookup + lage ny om det trengs

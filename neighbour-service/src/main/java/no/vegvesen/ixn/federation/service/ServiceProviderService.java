@@ -9,10 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @ConfigurationPropertiesScan
@@ -44,9 +43,9 @@ public class ServiceProviderService {
                         if(localSubscription.getSelector().equals(subscription.getSelector()) &&
                             localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser()) &&
                             localSubscription.isCreateNewQueue()){
-                            if(subscription.getBrokerUrl() != null){
-                                serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, subscription.getBrokerUrl());
-                            }
+                            Set<Broker> brokers = subscription.getBrokers();
+                            ArrayList<Broker> list = new ArrayList<>(brokers);
+                            serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, list.get(0).getMessageBrokerUrl());
                         }
                     }
                 }

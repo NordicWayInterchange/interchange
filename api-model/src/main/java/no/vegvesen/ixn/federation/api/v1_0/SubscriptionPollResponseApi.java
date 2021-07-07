@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -20,15 +21,12 @@ public class SubscriptionPollResponseApi {
     private String path;
     private SubscriptionStatusApi status;
 
-    private String messageBrokerUrl;
-
-    private String queueName;
 
     private long lastUpdatedTimestamp;
 
     private String eTag;
 
-    private Set<BrokerApi> brokers;
+    private Set<BrokerApi> brokers = Collections.emptySet();
 
     public SubscriptionPollResponseApi() {
     }
@@ -37,8 +35,6 @@ public class SubscriptionPollResponseApi {
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
-                                       String messageBrokerUrl,
-                                       String queueName,
                                        Boolean createNewQueue,
                                        String queueConsumerUser) {
         this.id = id;
@@ -47,8 +43,6 @@ public class SubscriptionPollResponseApi {
         this.queueConsumerUser = queueConsumerUser;
         this.path = path;
         this.status = status;
-        this.messageBrokerUrl = messageBrokerUrl;
-        this.queueName = queueName;
     }
 
     public String getId() {
@@ -99,22 +93,6 @@ public class SubscriptionPollResponseApi {
         this.status = status;
     }
 
-    public String getMessageBrokerUrl() {
-        return messageBrokerUrl;
-    }
-
-    public void setMessageBrokerUrl(String messageBrokerUrl) {
-        this.messageBrokerUrl = messageBrokerUrl;
-    }
-
-    public String getQueueName() {
-        return queueName;
-    }
-
-    public void setQueueName(String queueName) {
-        this.queueName = queueName;
-    }
-
     public long getLastUpdatedTimestamp() {
         return lastUpdatedTimestamp;
     }
@@ -150,8 +128,6 @@ public class SubscriptionPollResponseApi {
                 queueConsumerUser.equals(that.queueConsumerUser) &&
                 path.equals(that.path) &&
                 status == that.status &&
-                Objects.equals(messageBrokerUrl, that.messageBrokerUrl) &&
-                Objects.equals(queueName, that.queueName) &&
                 Objects.equals(lastUpdatedTimestamp, that.lastUpdatedTimestamp) &&
                 Objects.equals(eTag, that.eTag) &&
                 Objects.equals(brokers, that.brokers);
@@ -165,8 +141,6 @@ public class SubscriptionPollResponseApi {
                 queueConsumerUser,
                 path,
                 status,
-                messageBrokerUrl,
-                queueName,
                 lastUpdatedTimestamp,
                 eTag,
                 brokers);
@@ -181,8 +155,6 @@ public class SubscriptionPollResponseApi {
                 ", queueConsumerUser='" + queueConsumerUser + '\'' +
                 ", path='" + path + '\'' +
                 ", status=" + status +
-                ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
-                ", queueName='" + queueName + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", eTag='" + eTag + '\'' +
                 ", brokers=" + brokers +
