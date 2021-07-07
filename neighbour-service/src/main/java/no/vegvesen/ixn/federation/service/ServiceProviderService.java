@@ -46,14 +46,20 @@ public class ServiceProviderService {
                             //}
                             //TODO assume only one broker
                             Set<Broker> brokers = subscription.getBrokers();
-                            ArrayList<Broker> list = new ArrayList<>(brokers);
-                            Broker broker = list.get(0);
-                            serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, broker.getMessageBrokerUrl(),broker.getQueueName());
+                            Set<LocalBroker> localBrokers = new HashSet<>();
+                            for(Broker broker : brokers){
+                                localBrokers.add(brokerToLocalBroker(broker));
+                            }
+                            serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         }
                     }
                 }
             }
             serviceProviderRepository.save(serviceProvider);
         }
+    }
+
+    public LocalBroker brokerToLocalBroker(Broker broker) {
+        return new LocalBroker(broker.getQueueName(), broker.getMessageBrokerUrl());
     }
 }

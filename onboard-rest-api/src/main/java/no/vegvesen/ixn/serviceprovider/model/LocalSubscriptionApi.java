@@ -1,11 +1,14 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import java.util.Collections;
+import java.util.Set;
+
 public class LocalSubscriptionApi {
     private Integer id;
     private LocalSubscriptionStatusApi status;
     private String selector;
     private Boolean createNewQueue;
-    private String brokerUrl;
+    private Set<LocalBrokerApi> localBrokers = Collections.emptySet();
 
     public LocalSubscriptionApi() {
     }
@@ -16,12 +19,12 @@ public class LocalSubscriptionApi {
         this.selector = selector;
     }
 
-    public LocalSubscriptionApi(Integer id, LocalSubscriptionStatusApi status, String selector, Boolean createNewQueue, String brokerUrl) {
+    public LocalSubscriptionApi(Integer id, LocalSubscriptionStatusApi status, String selector, Boolean createNewQueue, Set<LocalBrokerApi> localBrokers) {
         this.id = id;
         this.status = status;
         this.selector = selector;
         this.createNewQueue = createNewQueue;
-        this.brokerUrl = brokerUrl;
+        this.localBrokers = localBrokers;
     }
 
     public Integer getId() {
@@ -56,11 +59,11 @@ public class LocalSubscriptionApi {
         this.createNewQueue = createNewQueue;
     }
 
-    public String getBrokerUrl(){
-        return brokerUrl;
+    public Set<LocalBrokerApi> getLocalBrokers(){
+        return localBrokers;
     }
 
-    public void setBrokerUrl(String brokerUrl) {
-        this.brokerUrl = brokerUrl;
+    public void setBrokerUrl(Set<LocalBrokerApi> localBrokers) {
+        this.localBrokers = localBrokers;
     }
 }
