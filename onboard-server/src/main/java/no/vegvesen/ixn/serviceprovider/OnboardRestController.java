@@ -204,7 +204,7 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s -> s.getSub_id().equals(subscriptionId)).findFirst().get();
-		logger.info("Received poll on brokerUrl = {} from Service Provider {} with queueConsumerUser = {}", localSubscription.getBroker().getMessageBrokerUrl(), serviceProviderName, localSubscription.getQueueConsumerUser());
+		logger.info("Received poll from Service Provider {} with queueConsumerUser = {}", serviceProviderName, localSubscription.getQueueConsumerUser());
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionToLocalSubscriptionApi(localSubscription);
 	}

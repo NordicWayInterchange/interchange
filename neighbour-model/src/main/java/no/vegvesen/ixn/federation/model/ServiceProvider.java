@@ -104,11 +104,11 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void updateSubscriptionWithBrokerUrl(LocalSubscription subscription, String brokerUrl,String queueName) {
+	public void updateSubscriptionWithBrokerUrl(LocalSubscription subscription, Set<LocalBroker> localBrokers) {
 		for(LocalSubscription localSubscription : subscriptions) {
 			if (localSubscription.getSelector().equals(subscription.getSelector()) &&
 					localSubscription.isCreateNewQueue()){
-				localSubscription.setBroker(new Broker(queueName,brokerUrl));
+				localSubscription.setBrokers(localBrokers);
 			}
 		}
 	}
