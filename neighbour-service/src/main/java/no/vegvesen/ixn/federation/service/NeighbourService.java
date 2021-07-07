@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import net.bytebuddy.asm.Advice;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,6 +45,7 @@ public class NeighbourService {
 	private GracefulBackoffProperties backoffProperties;
 	private NeighbourDiscovererProperties discovererProperties;
 	private InterchangeNodeProperties interchangeNodeProperties;
+	private final OutgoingNeighbourService outgoingNeighbourService;
 
 	@Autowired
 	public NeighbourService(NeighbourRepository neighbourRepository,
@@ -61,6 +60,7 @@ public class NeighbourService {
 		this.discovererProperties = discovererProperties;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
+		this.outgoingNeighbourService = new OutgoingNeighbourService(neighbourRepository, interchangeNodeProperties,backoffProperties,discovererProperties,listenerEndpointRepository);
 	}
 
 
@@ -197,12 +197,7 @@ public class NeighbourService {
 	}
 
 	public void capabilityExchangeWithNeighbours(Self self, NeighbourFacade neighbourFacade) {
-		logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
-		List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
-				Capabilities.CapabilitiesStatus.UNKNOWN,
-				Capabilities.CapabilitiesStatus.KNOWN,
-				Capabilities.CapabilitiesStatus.FAILED);
-		capabilityExchange(neighboursForCapabilityExchange, self, neighbourFacade);
+        outgoingNeighbourService.capabilityExchangeWithNeighbours(self,neighbourFacade);
 	}
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
@@ -231,6 +226,7 @@ public class NeighbourService {
 		}
 	}
 
+	//TODO this is used in a test, so left. Remove, and update to a more specific test
 	void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self, NeighbourFacade neighbourFacade) {
 		for (Neighbour neighbour : neighboursForCapabilityExchange) {
 			try {
@@ -253,6 +249,7 @@ public class NeighbourService {
 		}
 	}
 
+	//TODO this is used in a test, so left. Remove, and update to a more specific test
 	private void postCapabilities(Self self, Neighbour neighbour, NeighbourFacade neighbourFacade) {
 		try {
 			Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, self);
@@ -272,29 +269,10 @@ public class NeighbourService {
 	}
 
 	public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self, NeighbourFacade neighbourFacade) {
-		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
-
-		for (Neighbour neighbour : neighboursForSubscriptionRequest) {
-			try {
-				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
-					if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
-						postSubscriptionRequest(neighbour, self, neighbourFacade);
-					} else {
-						logger.debug("No need to calculateCustomSubscriptionForNeighbour based on timestamps on local subscriptions, neighbour capabilities, last subscription request");
-					}
-				} else {
-					logger.warn("Neighbour has neither capabilities nor subscriptions");
-				}
-			} catch (Exception e) {
-				logger.error("Exception when evaluating subscriptions for neighbour", e);
-			}
-			finally {
-				NeighbourMDCUtil.removeLogVariables();
-			}
-		}
+        outgoingNeighbourService.evaluateAndPostSubscriptionRequest(neighboursForSubscriptionRequest,self,neighbourFacade);
 	}
 
+	//TODO this is used in a test, so left. Remove, and update to a more specific test
 	public void postSubscriptionRequest (Neighbour neighbour, Self self, NeighbourFacade neighbourFacade) {
 		logger.info("Found neighbour for subscription request: {}", neighbour.getName());
 		Set<Subscription> wantedSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
@@ -333,32 +311,10 @@ public class NeighbourService {
 	}
 
 	public void deleteSubscriptions (NeighbourFacade neighbourFacade) {
-		List<Neighbour> neighbours = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN);
-		for (Neighbour neighbour : neighbours) {
-			if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-				Set<Subscription> subscriptionsToDelete = new HashSet<>();
-				for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
-					if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
-						try{
-						neighbourFacade.deleteSubscription(neighbour, subscription);
-						subscriptionsToDelete.add(subscription);
-						} catch(SubscriptionDeleteException e) {
-							logger.error("Exception when deleting subscription {} to neighbour {}", subscription.getId(), neighbour.getName(), e);
-						}
-					}
-				}
-				neighbour.getOurRequestedSubscriptions().getSubscriptions().removeAll(subscriptionsToDelete);
-				if (neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
-					neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.EMPTY);
-					logger.info("SubscriptionRequest is empty, setting SubscriptionRequestStatus to SubscriptionRequestStatus.EMPTY");
-				}
-				tearDownListenerEndpoints(neighbour);
-				neighbourRepository.save(neighbour);
-				logger.debug("Saving updated neighbour: {}", neighbour.toString());
-			}
-		}
+		outgoingNeighbourService.deleteSubscriptions(neighbourFacade);
 	}
 
+	//TODO this is used in a test, so left. Remove, and update to a more specific test
 	public void tearDownListenerEndpoints(Neighbour neighbour) {
 		List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
 		Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
@@ -373,6 +329,7 @@ public class NeighbourService {
 		}
 	}
 
+	//TODO this is used in a test, so left. Remove, and update to a more specific test
 	Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<LocalSubscription> localSubscriptions) {
 		logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
 		Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
@@ -392,70 +349,7 @@ public class NeighbourService {
 	}
 
 	public void pollSubscriptions(NeighbourFacade neighbourFacade) {
-		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
-				SubscriptionStatus.REQUESTED,
-				SubscriptionStatus.ACCEPTED,
-				SubscriptionStatus.FAILED);
-		for (Neighbour neighbour : neighboursToPoll) {
-			try {
-				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-				if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-					pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling(), neighbourFacade);
-				}
-			} catch (Exception e) {
-				logger.error("Unknown error while polling subscriptions for one neighbour");
-			}
-			finally {
-				NeighbourMDCUtil.removeLogVariables();
-			}
-		}
-	}
-
-	private void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
-		try {
-			for (Subscription subscription : subscriptions) {
-				try {
-					if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
-						logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
-
-						// Throws SubscriptionPollException if unsuccessful
-						Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
-						subscription.setBrokerUrl(polledSubscription.getBrokerUrl());
-						subscription.setQueue(polledSubscription.getQueue());
-						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
-						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
-						subscription.setCreateNewQueue(polledSubscription.isCreateNewQueue());
-						subscription.setQueueConsumerUser(polledSubscription.getQueueConsumerUser());
-						neighbour.getControlConnection().okConnection();
-						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
-							if (!subscription.isCreateNewQueue()) {
-								createListenerEndpoint(polledSubscription, neighbour);
-							}
-						}
-						//utvide med ListenerEndpoint lookup + lage ny om det trengs
-						logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
-					} else {
-						// Number of poll attempts exceeds allowed number of poll attempts.
-						subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-						logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
-					}
-				} catch (SubscriptionPollException e) {
-					subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
-					neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
-					logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
-				}
-			}
-		} finally {
-			logger.info("Saving updated neighbour: {}", neighbour.toString());
-			neighbourRepository.save(neighbour);
-		}
-	}
-
-	public void createListenerEndpoint(Subscription subscription, Neighbour neighbour) {
-		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue()) == null){
-			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue(), new Connection()));
-			logger.info("ListenerEnpoint was saved: {}", savedListenerEndpoint.toString());
-		}
+		outgoingNeighbourService.pollSubscriptions(neighbourFacade);
 	}
 
 	public List<Neighbour> listNeighboursToConsumeMessagesFrom() {
@@ -463,20 +357,7 @@ public class NeighbourService {
 	}
 
 	public void retryUnreachable(Self self, NeighbourFacade neighbourFacade) {
-		List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
-		if (!unreachableNeighbours.isEmpty()) {
-			logger.info("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
-			for (Neighbour neighbour : unreachableNeighbours) {
-				try {
-					NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-					postCapabilities(self, neighbour, neighbourFacade);
-				} catch (Exception e) {
-					logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
-				} finally {
-					NeighbourMDCUtil.removeLogVariables();
-				}
-			}
-		}
+        outgoingNeighbourService.retryUnreachable(self,neighbourFacade);
 	}
 
 	public List<Neighbour> findNeighboursToTearDownRoutingFor() {
@@ -509,4 +390,5 @@ public class NeighbourService {
 		Set<Subscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),subscriptions);
 	}
+
 }

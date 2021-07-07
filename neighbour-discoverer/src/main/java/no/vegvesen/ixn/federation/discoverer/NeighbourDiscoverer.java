@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.discoverer;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.service.OutgoingNeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import no.vegvesen.ixn.onboard.SelfService;
@@ -45,6 +46,7 @@ public class NeighbourDiscoverer {
 		this.selfService = selfService;
 		this.neighbourFacade = neighbourFacade;
 		this.serviceProviderService = serviceProviderService;
+
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), null);
 	}
 
