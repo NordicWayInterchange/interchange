@@ -331,7 +331,7 @@ public class NeighbourService {
 					pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions(), neighbourFacade);
 				}
 			} catch (Exception e) {
-				logger.error("Unknown error while polling subscriptions timestamp for one neighbour");
+				logger.error("Unknown error while polling subscription with status CREATED",e);
 			}
 			finally {
 				NeighbourMDCUtil.removeLogVariables();
