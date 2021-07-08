@@ -74,7 +74,7 @@ public class SubscriptionTransformer {
 		List<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionResponseApi s : subscriptionResponseApis) {
 			if (s.isCreateNewQueue() == null) {
-				Subscription subscription = new Subscription(Integer.parseInt(s.getId()),
+				Subscription subscription = new Subscription(
 						subscriptionStatusApiToSubscriptionStatus(s.getStatus()),
 						s.getSelector(),
 						s.getPath(),
@@ -86,7 +86,7 @@ public class SubscriptionTransformer {
 				}
 				subscriptions.add(subscription);
 			} else {
-				Subscription subscription = new Subscription(Integer.parseInt(s.getId()),
+				Subscription subscription = new Subscription(
 						subscriptionStatusApiToSubscriptionStatus(s.getStatus()),
 						s.getSelector(),
 						s.getPath(),
