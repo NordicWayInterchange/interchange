@@ -55,6 +55,14 @@ public class Subscription {
 		this.queueConsumerUser = queueConsumerUser;
 	}
 
+	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String queueConsumerUser) {
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+		this.path = path;
+		this.createNewQueue = createNewQueue;
+		this.queueConsumerUser = queueConsumerUser;
+	}
+
 	public Subscription(String selector, SubscriptionStatus subscriptionStatus, boolean createNewQueue, String queueConsumerUser) {
 		this.selector = selector;
 		this.subscriptionStatus = subscriptionStatus;
