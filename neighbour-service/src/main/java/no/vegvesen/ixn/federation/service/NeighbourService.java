@@ -389,7 +389,7 @@ public class NeighbourService {
 					pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling(), neighbourFacade);
 				}
 			} catch (Exception e) {
-				logger.error("Unknown error while polling subscriptions for one neighbour");
+				logger.error("Unknown error while polling subscriptions for one neighbour",e);
 			}
 			finally {
 				NeighbourMDCUtil.removeLogVariables();
