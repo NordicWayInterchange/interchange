@@ -8,7 +8,7 @@ import java.util.Objects;
 public class LocalBroker {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "broker_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "local_broker_seq")
     @Column(name = "id")
     private Integer id;
 
@@ -83,7 +83,7 @@ public class LocalBroker {
 
     @Override
     public String toString() {
-        return "Broker{" +
+        return "LocalBroker{" +
                 "id=" + id +
                 ", queueName='" + queueName + '\'' +
                 ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
