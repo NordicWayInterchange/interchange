@@ -42,6 +42,14 @@ public class RequestedSubscriptionResponseApi {
         this.queueConsumerUser = queueConsumerUser;
     }
 
+    public RequestedSubscriptionResponseApi(String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser) {
+        this.selector = selector;
+        this.path = path;
+        this.status = status;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
+    }
+
     public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser, long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;

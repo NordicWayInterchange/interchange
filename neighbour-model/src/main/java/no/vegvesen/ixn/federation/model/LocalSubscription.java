@@ -4,7 +4,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "local_subscriptions")
@@ -29,7 +32,11 @@ public class LocalSubscription {
 
     private String queueConsumerUser;
 
-    private String brokerUrl;
+    //private String brokerUrl;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "locbrok_id", foreignKey = @ForeignKey(name = "fk_locbrok_sub"))
+    private Set<LocalBroker> localBrokers = new HashSet<>();
 
     public LocalSubscription() {
 
@@ -106,12 +113,23 @@ public class LocalSubscription {
         this.queueConsumerUser = queueConsumerUser;
     }
 
-    public String getBrokerUrl() {
-        return brokerUrl;
+    //public String getBrokerUrl() {
+    //    return brokerUrl;
+    //}
+
+    //public void setBrokerUrl(String brokerUrl) {
+    //    this.brokerUrl = brokerUrl;
+    //}
+
+    public Set<LocalBroker> getLocalBrokers() {
+        return localBrokers;
     }
 
-    public void setBrokerUrl(String brokerUrl) {
-        this.brokerUrl = brokerUrl;
+    public void setBrokers(Set<LocalBroker> newLocalBrokers) {
+        this.localBrokers.clear();
+        if (newLocalBrokers != null) {
+            this.localBrokers.addAll(newLocalBrokers);
+        }
     }
 
     //TODO lag et objekt av selector??

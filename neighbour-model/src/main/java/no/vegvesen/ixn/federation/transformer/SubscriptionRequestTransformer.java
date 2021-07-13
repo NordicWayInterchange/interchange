@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,7 +49,6 @@ public class SubscriptionRequestTransformer {
 
 	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
 		Subscription subscription = new Subscription();
-		subscription.setId(Integer.parseInt(subscriptionApi.getId()));
 		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
 		subscription.setSelector(subscriptionApi.getSelector());
 		subscription.setPath(subscriptionApi.getPath());
@@ -62,28 +62,22 @@ public class SubscriptionRequestTransformer {
 			subscription.setCreateNewQueue(subscriptionApi.isCreateNewQueue());
 		}
 
-		if(subscriptionApi.getBrokers() == null) {
-			subscription.setBrokerUrl(subscriptionApi.getMessageBrokerUrl());
-			subscription.setQueue(subscriptionApi.getQueueName());
-		} else {
-			Set<Broker> brokers = new HashSet<>();
-			for(BrokerApi brokerApi : subscriptionApi.getBrokers()){
-				Broker broker = new Broker(brokerApi.getQueueName(), brokerApi.getMessageBrokerUrl());
-				if(brokerApi.getMaxBandwidth() != null && brokerApi.getMaxMessageRate() != null) {
-					broker.setMaxBandwidth(brokerApi.getMaxBandwidth());
-					broker.setMaxMessageRate(brokerApi.getMaxMessageRate());
-				}
-				brokers.add(broker);
+		Set<Broker> brokers = new HashSet<>();
+		for(BrokerApi brokerApi : subscriptionApi.getBrokers()){
+			Broker broker = new Broker(brokerApi.getQueueName(), brokerApi.getMessageBrokerUrl());
+			if(brokerApi.getMaxBandwidth() != null && brokerApi.getMaxMessageRate() != null) {
+				broker.setMaxBandwidth(brokerApi.getMaxBandwidth());
+				broker.setMaxMessageRate(brokerApi.getMaxMessageRate());
 			}
-			subscription.setBrokers(brokers);
+			brokers.add(broker);
 		}
+		subscription.setBrokers(brokers);
 		return subscription;
 
 	}
 
 	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelUrl) {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
-		response.setId(subscription.getId().toString());
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
@@ -93,8 +87,11 @@ public class SubscriptionRequestTransformer {
 			response.setQueueConsumerUser(subscription.getQueueConsumerUser());
 		}
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			response.setMessageBrokerUrl(messageChannelUrl);
-			response.setQueueName(neighbourName);
+			BrokerApi broker = new BrokerApi(
+					neighbourName,
+					messageChannelUrl
+			);
+			response.setBrokers(Collections.singleton(broker));
 		}
 		return response;
 	}

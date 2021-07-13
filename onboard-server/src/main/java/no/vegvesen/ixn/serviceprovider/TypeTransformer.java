@@ -1,18 +1,28 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.model.Capability;
+import no.vegvesen.ixn.federation.model.LocalBroker;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TypeTransformer {
     public LocalSubscriptionStatusApi transformLocalSubscriptionStatusToLocalSubscriptionStatusApi(LocalSubscriptionStatus subscriptionStatus) {
         return LocalSubscriptionStatusApi.valueOf(subscriptionStatus.name());
+    }
+
+    public Set<LocalBrokerApi> transformListOfLocalBrokersToListOfLocalBrokersApi(Set<LocalBroker> localBrokers) {
+        Set<LocalBrokerApi> localBrokerApis = new HashSet<>();
+        for(LocalBroker localBroker : localBrokers){
+            LocalBrokerApi localBrokerApi = new LocalBrokerApi(
+                    localBroker.getQueueName(),
+                    localBroker.getMessageBrokerUrl()
+            );
+            localBrokerApis.add(localBrokerApi);
+        }
+        return localBrokerApis;
     }
 
     public LocalSubscriptionApi transformLocalSubscriptionToLocalSubscriptionApi(LocalSubscription localSubscription) {
@@ -20,7 +30,7 @@ public class TypeTransformer {
                 transformLocalSubscriptionStatusToLocalSubscriptionStatusApi(localSubscription.getStatus()),
                 localSubscription.getSelector(),
                 localSubscription.isCreateNewQueue(),
-                localSubscription.getBrokerUrl());
+                transformListOfLocalBrokersToListOfLocalBrokersApi(localSubscription.getLocalBrokers()));
     }
 
     public LocalSubscriptionListApi transformLocalSubscriptionListToLocalSubscriptionListApi(Set<LocalSubscription> subscriptions) {

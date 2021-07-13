@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,7 +87,8 @@ public class SubscriptionRequestTransformerTest {
 		String path = "myName/subscriptions/1";
 		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path, false, "");
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, brokerUrl);
-		assertThat(responseApi.getMessageBrokerUrl()).isEqualTo(brokerUrl);
+		assertThat(responseApi.getBrokers().size()).isEqualTo(1);
+		assertThat(new ArrayList<>(responseApi.getBrokers()).get(0).getMessageBrokerUrl()).isEqualTo(brokerUrl);
 	}
 
 	@Test

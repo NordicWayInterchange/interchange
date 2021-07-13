@@ -175,7 +175,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() {
             OnboardRESTClient client = parentCommand.createClient();
             LocalSubscriptionApi subscription = client.getSubscription(subscriptionId);
-            System.out.printf("Subscription %d successfully polled with brokerUrl %s %n", subscriptionId, subscription.getBrokerUrl());
+            System.out.printf("Subscription %d successfully polled with %n", subscriptionId);
             return 0;
         }
     }

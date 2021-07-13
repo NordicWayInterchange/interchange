@@ -386,7 +386,10 @@ class NeighbourServiceTest {
 		neighbour.setName("neighbour");
 
 		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
-		sub1.setBrokerUrl("broker-1");
+		Set<Broker> brokers = new HashSet<>();
+		Broker broker = new Broker("queue-1","broker-1");
+		brokers.add(broker);
+		sub1.setBrokers(brokers);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(sub1));
@@ -407,10 +410,16 @@ class NeighbourServiceTest {
 		neighbour.setName("neighbour");
 
 		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
-		sub1.setBrokerUrl("broker-1");
+		Set<Broker> brokers = new HashSet<>();
+		Broker broker = new Broker("queue-1","broker-1");
+		brokers.add(broker);
+		sub1.setBrokers(brokers);
 
 		Subscription sub2 = new Subscription(2, SubscriptionStatus.CREATED, "originatingCountry = 'SE'", "/neighbour/subscriptions/2", false, "");
-		sub2.setBrokerUrl("broker-2");
+		Set<Broker> brokers2 = new HashSet<>();
+		Broker broker2 = new Broker("queue-2","broker-2");
+		brokers2.add(broker2);
+		sub2.setBrokers(brokers2);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Sets.newSet(sub1, sub2));
