@@ -49,7 +49,6 @@ public class SubscriptionRequestTransformer {
 
 	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
 		Subscription subscription = new Subscription();
-		subscription.setId(Integer.parseInt(subscriptionApi.getId()));
 		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
 		subscription.setSelector(subscriptionApi.getSelector());
 		subscription.setPath(subscriptionApi.getPath());
@@ -79,7 +78,6 @@ public class SubscriptionRequestTransformer {
 
 	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelUrl) {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
-		response.setId(subscription.getId().toString());
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
