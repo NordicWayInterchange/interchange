@@ -38,6 +38,7 @@ public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
 		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
         ListenerEndpoint remote = mock(ListenerEndpoint.class);
         when(remote.getBrokerUrl()).thenReturn(remoteAmqpsUrl);
+        when(remote.getQueue()).thenReturn("localhost");
         MessageCollectorListener remoteForwardListener = collectorCreator.setupCollection(remote);
         remoteContainer.stop();
 
