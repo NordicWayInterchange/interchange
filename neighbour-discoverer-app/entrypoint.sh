@@ -6,6 +6,7 @@ LOG_LEVELS=${LOG_LEVELS:-" "}
 
 java -Dspring.datasource.url=${POSTGRES_URI} \
      -Ddns.domain-name=${DOMAIN_NAME}\
+     -Djdk.tls.client.protocols="TLSv1.3"
      -Djavax.net.ssl.trustStore=${TRUST_STORE} \
      -Djavax.net.ssl.trustStorePassword=${TRUST_STORE_PASSWORD} \
      -Djavax.net.ssl.trustStoreType=JKS \
