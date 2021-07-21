@@ -415,6 +415,8 @@ public class NeighbourService {
 	}
 
 	//TODO have to have a look at this again. The problem is that we might have non-updated subscriptions on the neighbour side, but for some reason not set it up on our side. The lastUpdated prevents us from setting it up again.
+	//need to somehow check is the listenerEndpoint is already there before checking the updated timestamp.
+	//It's already done in createListenerEndpointOneNeighbour, but should probably be done earlier. This
 	public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
 		try {
 			for (Subscription subscription : subscriptions) {
