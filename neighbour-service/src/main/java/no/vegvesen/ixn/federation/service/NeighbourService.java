@@ -26,10 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -417,6 +414,7 @@ public class NeighbourService {
 		}
 	}
 
+	//TODO have to have a look at this again. The problem is that we might have non-updated subscriptions on the neighbour side, but for some reason not set it up on our side. The lastUpdated prevents us from setting it up again.
 	public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
 		try {
 			for (Subscription subscription : subscriptions) {
@@ -424,7 +422,7 @@ public class NeighbourService {
 					if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
 						Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
 						if (!lastUpdatedSubscription.getBrokers().isEmpty() || !subscription.getBrokers().equals(lastUpdatedSubscription.getBrokers())) {
-							if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
+							//if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
 								logger.info("Polled updated subscription with id {}", subscription.getId());
 								Set<Broker> wantedBrokers = lastUpdatedSubscription.getBrokers();
 								Set<Broker> existingBrokers = subscription.getBrokers();
@@ -437,9 +435,9 @@ public class NeighbourService {
 								additionalBrokers.removeAll(existingBrokers);
 								createListenerEndpointFromBrokersList(neighbour, additionalBrokers);
 								subscription.setBrokers(wantedBrokers);
-							} else {
-								logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
-							}
+							//} else {
+							//	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
+							//}
 						}
 					}
 				} catch (SubscriptionPollException e) {
@@ -492,7 +490,9 @@ public class NeighbourService {
 						subscription.setLastUpdatedTimestamp(polledSubscription.getLastUpdatedTimestamp());
 						neighbour.getControlConnection().okConnection();
 						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
+							logger.info("Subscription for neighbour {} with path {} is CREATED",neighbour.getName(),subscription.getPath());
 							if (!polledSubscription.isCreateNewQueue()) {
+								logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getBrokers());
 								createListenerEndpointFromBrokersList(neighbour, polledSubscription.getBrokers());
 							}
 						}
