@@ -16,6 +16,7 @@ ENV QPID_HOME="/usr/local/qpid"
 ENV VHOST_FILE="/config/vhost.json"
 ENV PASSWD_FILE="/config/passwd"
 ENV GROUPS_FILE="/config/groups"
+ENV QPID_OPTS="-Djdk.tls.client.protocols=\"TLSv1.3\""
 ADD config.json ${QPID_WORK}
 ADD entrypoint.sh /
 RUN chmod ug+x entrypoint.sh
