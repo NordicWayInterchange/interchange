@@ -68,7 +68,7 @@ public class RoutingConfigurer {
 	}
 
 	//Both neighbour and service providers binds to nwEx to receive local messages
-	//Service provider also binds to fedEx to receive messages from neighbours
+	//Service provider also binds to incomingExchange to receive messages from neighbours
 	//This avoids loop of messages
 	private void setupRouting(List<Neighbour> readyToSetupRouting) {
 		for (Neighbour subscriber : readyToSetupRouting) {

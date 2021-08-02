@@ -11,7 +11,7 @@
       ]
     },
     {
-      "name": "fedEx",
+      "name": "incomingExchange",
       "type": "headers",
       "durable": true,
       "durableBindings": [

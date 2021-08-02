@@ -49,7 +49,7 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 	public void stoppingLocalContainerStopsListener() {
 		String remoteAmqpsUrl = String.format("amqps://localhost:%s", remoteContainer.getMappedPort(AMQPS_PORT));
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "localhost.p12", "truststore.jks");
-		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "fedEx");
+		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "incomingExchange");
 		ListenerEndpoint remote = mock(ListenerEndpoint.class);
 		when(remote.getBrokerUrl()).thenReturn(remoteAmqpsUrl);
 		when(remote.getQueue()).thenReturn("localhost");
