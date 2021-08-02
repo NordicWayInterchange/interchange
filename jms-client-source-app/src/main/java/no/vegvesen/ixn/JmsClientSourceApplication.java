@@ -49,7 +49,9 @@ public class JmsClientSourceApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             try(Source source = parentCommand.createClient()){
                 source.start();
-                source.send("Dette er en test, FISK!", "NO", ",01220123");
+                source.sendPersistentMonotchMessage();
+            } catch (Exception e){
+                e.printStackTrace();
             }
             return 0;
         }

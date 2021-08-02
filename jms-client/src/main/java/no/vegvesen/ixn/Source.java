@@ -1,6 +1,7 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
@@ -93,6 +94,24 @@ public class Source implements AutoCloseable {
         message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
         message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
         sendNonPersistentMessage(message,Message.DEFAULT_TIME_TO_LIVE);
+	}
+
+	public void sendPersistentMonotchMessage() throws JMSException {
+		JmsBytesMessage message = createBytesMessage();
+		message.getFacade().setUserId("anna");
+		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), DenmDataTypeApi.DENM);
+		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), "NO-123");
+		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
+		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), "1.0");
+		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), ",12003");
+		message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), "6");
+		message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), "76");
+
+		String messageText = "{}";
+
+		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+		message.writeBytes(bytemessage);
+		sendBytesMessage(message, Message.DEFAULT_TIME_TO_LIVE);
 	}
 
 	public void sendTextMessage(JmsTextMessage message, long timeToLive) throws JMSException {
