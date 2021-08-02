@@ -68,7 +68,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@BeforeEach
 	public void setUp() {
-		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to nwEx
+		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to outgoingExchange
 		List<String> administrators = qpidClient.getGroupMemberNames("administrators");
 		if (!administrators.contains("king_gustaf")) {
 			qpidClient.addMemberToGroup("king_gustaf", "administrators");
@@ -115,14 +115,14 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		Neighbour king_gustaf = new Neighbour("king_gustaf", null, new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Sets.newLinkedHashSet(subscription)), null);
 		qpidClient.createQueue(king_gustaf.getName());
 		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());
-		qpidClient.addBinding(subscription.getSelector(), king_gustaf.getName(), subscription.bindKey(), "nwEx");
+		qpidClient.addBinding(subscription.getSelector(), king_gustaf.getName(), subscription.bindKey(), "outgoingExchange");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 
 		Sink sink = new Sink(AMQPS_URL, "king_gustaf", sslContext);
 		MessageConsumer consumer = sink.createConsumer();
 
-		Source source = new Source(AMQPS_URL, "nwEx", sslContext);
+		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
 		source.start();
 		source.sendNonPersistent("fisk", "NO", messageQuadTreeTiles);
 
@@ -157,14 +157,14 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'Datex2' and originatingCountry= 'NO' and quadTree like '%,abcdef%"));
 		qpidClient.createQueue(king_gustaf.getName());
 		qpidClient.addReadAccess(king_gustaf.getName(), king_gustaf.getName());
-		qpidClient.addBinding(subscription.toSelector(), king_gustaf.getName(), ""+subscription.toSelector().hashCode(), "nwEx");
+		qpidClient.addBinding(subscription.toSelector(), king_gustaf.getName(), ""+subscription.toSelector().hashCode(), "outgoingExchange");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 
 		Sink sink = new Sink(AMQPS_URL, "king_gustaf", sslContext);
 		MessageConsumer consumer = sink.createConsumer();
 
-		Source source = new Source(AMQPS_URL, "nwEx", sslContext);
+		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
 		source.start();
 		source.sendNonPersistent("fisk", "NO", messageQuadTreeTiles);
 

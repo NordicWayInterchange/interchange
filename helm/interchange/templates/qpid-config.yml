@@ -51,7 +51,7 @@ data:
           ]
         },
         {
-          "name": "nwEx",
+          "name": "outgoingExchange",
           "type": "headers",
           "durable": true,
           "durableBindings": [

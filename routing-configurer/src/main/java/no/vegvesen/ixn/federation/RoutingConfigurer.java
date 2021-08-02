@@ -67,7 +67,7 @@ public class RoutingConfigurer {
 		}
 	}
 
-	//Both neighbour and service providers binds to nwEx to receive local messages
+	//Both neighbour and service providers binds to outgoingExchange to receive local messages
 	//Service provider also binds to incomingExchange to receive messages from neighbours
 	//This avoids loop of messages
 	private void setupRouting(List<Neighbour> readyToSetupRouting) {
@@ -84,7 +84,7 @@ public class RoutingConfigurer {
 				for (Subscription subscription : acceptedSubscriptions){
 					createQueue(subscription.getQueueConsumerUser());
 					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getQueueConsumerUser());
-					bindRemoteServiceProvider("nwEx", subscription.getQueueConsumerUser(), subscription);
+					bindRemoteServiceProvider("outgoingExchange", subscription.getQueueConsumerUser(), subscription);
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 					logger.info("Set up routing for service provider {}", subscription.getQueueConsumerUser());
 				}
@@ -92,7 +92,7 @@ public class RoutingConfigurer {
 					createQueue(neighbour.getName());
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
 					Set<Subscription> acceptedSubscriptionsWithoutCreateNewQueue = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithoutCreateNewQueue();
-					bindSubscriptions("nwEx", neighbour, acceptedSubscriptionsWithoutCreateNewQueue);
+					bindSubscriptions("outgoingExchange", neighbour, acceptedSubscriptionsWithoutCreateNewQueue);
 					for (Subscription subscription : acceptedSubscriptionsWithoutCreateNewQueue) {
 						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 					}
@@ -103,7 +103,7 @@ public class RoutingConfigurer {
 				createQueue(neighbour.getName());
 				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
-				bindSubscriptions("nwEx", neighbour, acceptedSubscriptions);
+				bindSubscriptions("outgoingExchange", neighbour, acceptedSubscriptions);
 				for (Subscription subscription : acceptedSubscriptions) {
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 				}

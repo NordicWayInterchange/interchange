@@ -12,10 +12,10 @@ box "<size:22>Interchange B</size>" #LightBlue
 
 
 queue A
-queue nwEx
+queue outgoingExchange
 database "message \nbroker" as server_broker
-activate nwEx
-nwEx -> A: A subscription
+activate outgoingExchange
+outgoingExchange -> A: A subscription
 activate A
 end box
 

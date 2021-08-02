@@ -32,17 +32,17 @@ public class IxnMessageConsumer implements MessageListener, ExceptionListener {
 
 	private static Logger logger = LoggerFactory.getLogger(IxnMessageConsumer.class);
 	private final Sink onrampConsumer;
-	private final Source nwExProducer;
+	private final Source outgoingExchangeProducer;
 	private final Source dlQueueProducer;
 	private AtomicBoolean running;
 	private final MessageValidator messageValidator;
 
 	public IxnMessageConsumer(Sink onrampConsumer,
-							  Source nwExProducer,
+							  Source outgoingExchangeProducer,
 							  Source dlQueueProducer,
 							  MessageValidator messageValidator) {
 		this.onrampConsumer = onrampConsumer;
-		this.nwExProducer = nwExProducer;
+		this.outgoingExchangeProducer = outgoingExchangeProducer;
 		this.dlQueueProducer = dlQueueProducer;
 		this.messageValidator = messageValidator;
 		this.running = new AtomicBoolean(true);
@@ -57,9 +57,9 @@ public class IxnMessageConsumer implements MessageListener, ExceptionListener {
 			running.set(false);
 		}
 
-		logger.info("Closing nwExProducer");
+		logger.info("Closing outgoingExchangeProducer");
 		try {
-			nwExProducer.close();
+			outgoingExchangeProducer.close();
 		} catch (Exception ignore) {
 		}
 
@@ -86,7 +86,7 @@ public class IxnMessageConsumer implements MessageListener, ExceptionListener {
 		try {
 			MDCUtil.setLogVariables(message);
 			if (messageValidator.isValid(message)) {
-				MessageForwardUtil.send(nwExProducer.getProducer(), message);
+				MessageForwardUtil.send(outgoingExchangeProducer.getProducer(), message);
 			} else {
 				logger.warn("Sending bad message to dead letter queue. Invalid message.");
 				MessageForwardUtil.send(dlQueueProducer.getProducer(), message);

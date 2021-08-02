@@ -18,7 +18,7 @@ import javax.naming.NamingException;
 public class IxnMessageConsumerCreator {
 	public static final String ONRAMP = "onramp";
 	public static final String DLQUEUE = "dlqueue";
-	public static final String NWEXCHANGE = "nwEx";
+	public static final String OUTGOINGEXCHANGE = "outgoingExchange";
 
     private Logger logger = LoggerFactory.getLogger(IxnMessageConsumerCreator.class);
 	private final String amqpUrl;
@@ -38,17 +38,17 @@ public class IxnMessageConsumerCreator {
 	}
 
     public IxnMessageConsumer setupConsumer() throws JMSException, NamingException {
-		logger.debug("setting up consumer for onramp and producers for nwEx and dlqueue");
+		logger.debug("setting up consumer for onramp and producers for outgoingExchange and dlqueue");
     	Source dlQueue = new BasicAuthSource(amqpUrl, DLQUEUE, username, password);
-    	Source nwEx = new BasicAuthSource(amqpUrl, NWEXCHANGE, username, password);
+    	Source outgoingExchange = new BasicAuthSource(amqpUrl, OUTGOINGEXCHANGE, username, password);
 		Sink onramp = new BasicAuthSink(amqpUrl, ONRAMP, username, password);
-		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, nwEx, dlQueue, messageValidator);
+		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, outgoingExchange, dlQueue, messageValidator);
 		onramp.startWithMessageListener(consumer);
 		onramp.setExceptionListener(consumer);
 		dlQueue.start();
 		dlQueue.setExceptionListener(consumer);
-		nwEx.start();
-		nwEx.setExceptionListener(consumer);
+		outgoingExchange.start();
+		outgoingExchange.setExceptionListener(consumer);
 		return consumer;
     }
 
