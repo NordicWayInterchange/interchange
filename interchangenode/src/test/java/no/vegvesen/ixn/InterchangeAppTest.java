@@ -21,12 +21,12 @@ import static org.mockito.Mockito.*;
 public class InterchangeAppTest {
 
     @Mock
-	MessageProducer nwExProducer;
+	MessageProducer outgoingExchangeProducer;
     @Mock
 	MessageProducer dlQueueProducer;
 
     @Mock
-	Source nwEx;
+	Source outgoingExchange;
     @Mock
 	Source dlQueue;
     @Mock
@@ -34,8 +34,8 @@ public class InterchangeAppTest {
 
     @Test
     public void validMessageIsSent() throws JMSException {
-		when(nwEx.getProducer()).thenReturn(nwExProducer);
-		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, nwEx, dlQueue,  new MessageValidator());
+		when(outgoingExchange.getProducer()).thenReturn(outgoingExchangeProducer);
+		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, outgoingExchange, dlQueue,  new MessageValidator());
         Message message = MessageTestDouble.createMessage(
                 "NO00001",
                 "NO",
@@ -47,13 +47,13 @@ public class InterchangeAppTest {
         MessageValidator validator = new MessageValidator();
         assertThat(validator.isValid(message)).isTrue();
         consumer.onMessage(message);
-        verify(nwExProducer, times(1)).send(any(Message.class), anyInt(), anyInt(), anyLong());
+        verify(outgoingExchangeProducer, times(1)).send(any(Message.class), anyInt(), anyInt(), anyLong());
     }
 
     @Test
     public void receivedMessageWithoutOriginatingCountrySendsToDlQueue() throws JMSException {
 		when(dlQueue.getProducer()).thenReturn(dlQueueProducer);
-		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, nwEx, dlQueue,  new MessageValidator());
+		IxnMessageConsumer consumer = new IxnMessageConsumer(onramp, outgoingExchange, dlQueue,  new MessageValidator());
         Message message = MessageTestDouble.createMessage(
                 "NO00001",
                 null,

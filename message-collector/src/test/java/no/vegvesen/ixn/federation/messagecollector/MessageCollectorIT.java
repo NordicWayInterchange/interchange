@@ -79,7 +79,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
-				"fedEx");
+				"incomingExchange");
 
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
@@ -113,7 +113,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
-				"fedEx");
+				"incomingExchange");
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 

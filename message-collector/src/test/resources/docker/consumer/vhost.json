@@ -4,7 +4,7 @@
   "modelVersion": "7.0",
   "exchanges": [
     {
-      "name": "fedEx",
+      "name": "incomingExchange",
       "type": "headers",
       "durable": true,
       "durableBindings": [

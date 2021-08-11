@@ -40,7 +40,7 @@ public class AccessControlIT extends QpidDockerBaseIT {
 	private static final String SE_OUT = "SE-out";
 	private static final String NO_OUT = "NO-out";
 	private static final String ONRAMP = "onramp";
-	private static final String NW_EX = "nwEx";
+	private static final String OUTGOING_EXCHANGE = "outgoingExchange";
 	private static final String TEST_OUT = "test-out";
 
 	@SuppressWarnings("rawtypes")
@@ -78,14 +78,14 @@ public class AccessControlIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void KingHaraldCanNotSendToNwEx() throws Exception {
-		Source nwEx = new Source(getQpidURI(), NW_EX, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
-		nwEx.start();
+	public void KingHaraldCanNotSendToOutgoingExchange() throws Exception {
+		Source outgoingExchange = new Source(getQpidURI(), OUTGOING_EXCHANGE, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
+		outgoingExchange.start();
 		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> {
-			JmsTextMessage message = nwEx.createTextMessage();
+			JmsTextMessage message = outgoingExchange.createTextMessage();
 			message.setText("Not Allowed");
 			message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(),"SE");
-			nwEx.sendTextMessage(message);
+			outgoingExchange.sendTextMessage(message);
 
 		});
 

@@ -26,7 +26,7 @@ data:
       "modelVersion": "7.0",
       "exchanges": [
         {
-          "name" : "fedEx",
+          "name" : "incomingExchange",
           "type" : "headers",
           "durable" : true,
           "durableBindings": [
@@ -51,7 +51,7 @@ data:
           ]
         },
         {
-          "name": "nwEx",
+          "name": "outgoingExchange",
           "type": "headers",
           "durable": true,
           "durableBindings": [

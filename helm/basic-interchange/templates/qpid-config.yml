@@ -21,7 +21,7 @@ data:
       "modelVersion": "7.0",
       "exchanges": [
         {
-          "name": "nwEx",
+          "name": "outgoingExchange",
           "type": "headers",
           "durable": true,
           "durableBindings": [

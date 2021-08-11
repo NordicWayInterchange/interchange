@@ -14,7 +14,7 @@ public class CollectorProperties {
 	/**
 	 * Write queue on he local node. Collector will write messages to this queue or exchange
 	 */
-	private String writequeue = "fedEx";
+	private String writequeue = "incomingExchange";
 
 	/**
 	 * Time, in milliseconds, how often the message collector service will look for new or existing neighbours to connect or reconnect to.<br/>

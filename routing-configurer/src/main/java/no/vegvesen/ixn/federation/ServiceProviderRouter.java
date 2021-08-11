@@ -120,8 +120,8 @@ public class ServiceProviderRouter {
     private void removeBindingIfExists(String name, LocalSubscription subscription) {
         if (qpidClient.queueExists(name)) {
             if (qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
-                qpidClient.unbindBindKey(name, subscription.bindKey(), "nwEx");
-                qpidClient.unbindBindKey(name, subscription.bindKey(), "fedEx");
+                qpidClient.unbindBindKey(name, subscription.bindKey(), "outgoingExchange");
+                qpidClient.unbindBindKey(name, subscription.bindKey(), "incomingExchange");
             }
         }
     }
@@ -129,8 +129,8 @@ public class ServiceProviderRouter {
     private void optionallyAddQueueBindings(String name, LocalSubscription subscription) {
         if (!qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
             logger.debug("Adding bindings to the queue {}", name);
-            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "nwEx");
-            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "fedEx");
+            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "outgoingExchange");
+            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "incomingExchange");
         }
     }
 

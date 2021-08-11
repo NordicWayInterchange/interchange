@@ -3,7 +3,7 @@ skinparam sequenceMessage Align center
 
 box "<size:22>Interchange A</size>" #LightGrey
 database "broker" as client_broker
-queue fedEx
+queue incomingExchange
 database "Database" as client_db
 Actor "Message\nCollector" as C
 end box
@@ -12,10 +12,10 @@ box "<size:22>Interchange B</size>" #LightBlue
 
 
 queue A
-queue nwEx
+queue outgoingExchange
 database "message \nbroker" as server_broker
-activate nwEx
-nwEx -> A: A subscription
+activate outgoingExchange
+outgoingExchange -> A: A subscription
 activate A
 end box
 
@@ -27,6 +27,6 @@ C -> C: Setup message listener
 
 activate C
 C -> A: listen for messages to A
-C -> fedEx: send to fedEx
+C -> incomingExchange: send to incomingExchange
 
 @enduml

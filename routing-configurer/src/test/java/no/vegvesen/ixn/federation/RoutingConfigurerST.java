@@ -171,17 +171,17 @@ public class RoutingConfigurerST extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void newNeighbourCanNeitherWriteToFedExNorOnramp() throws JMSException, NamingException {
+	public void newNeighbourCanNeitherWriteToIncomingExchangeNorOnramp() throws JMSException, NamingException {
 		HashSet<Subscription> subscriptions = new HashSet<>();
 		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, false, ""));
 		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions), null);
 		routingConfigurer.setupNeighbourRouting(nordea);
 		SSLContext nordeaSslContext = setUpTestSslContext("nordea.p12");
 		try {
-			Source writeFedExExchange = new Source(AMQPS_URL, "fedEx", nordeaSslContext);
-			writeFedExExchange.start();
-			writeFedExExchange.send("Ordinary business at the Nordea office.");
-			fail("Should not allow neighbour nordea to write on (fedEx)");
+			Source writeIncomingExchange = new Source(AMQPS_URL, "incomingExchange", nordeaSslContext);
+			writeIncomingExchange.start();
+			writeIncomingExchange.send("Ordinary business at the Nordea office.");
+			fail("Should not allow neighbour nordea to write on (incomingExchange)");
 		} catch (JMSException ignore) {
 		}
 		try {
