@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk8:alpine
+FROM java:8-alpine
 
 RUN apk add --no-cache bash openssl jq
 
