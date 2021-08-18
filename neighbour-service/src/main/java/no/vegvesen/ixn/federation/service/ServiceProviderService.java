@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
@@ -36,31 +35,37 @@ public class ServiceProviderService {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for(ServiceProvider serviceProvider : serviceProviders) {
-            for(Neighbour neighbour : neighbours) {
-                for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
-                    for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
-                        if(localSubscription.getSelector().equals(subscription.getSelector()) &&
-                            localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser()) &&
-                            localSubscription.isCreateNewQueue()){
+            updateServiceProviderSubscriptionsWithBrokerUrl(neighbours, serviceProvider, self.getMessageChannelUrl());
+            serviceProviderRepository.save(serviceProvider);
+        }
+    }
+
+    public void updateServiceProviderSubscriptionsWithBrokerUrl(List<Neighbour> neighbours, ServiceProvider serviceProvider, String messageBrokerUrl) {
+        for(Neighbour neighbour : neighbours) {
+            for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
+                for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
+                    if (localSubscription.getSelector().equals(subscription.getSelector())) {
+                        if (localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser()) &&
+                                localSubscription.isCreateNewQueue()) {
                             //if(subscription.getBrokerUrl() != null){
-                                //serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, subscription.getBrokerUrl());
+                            //serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, subscription.getBrokerUrl());
                             //}
                             //TODO assume only one broker
                             Set<Broker> brokers = subscription.getBrokers();
                             Set<LocalBroker> localBrokers = new HashSet<>();
-                            for(Broker broker : brokers){
+                            for (Broker broker : brokers) {
                                 localBrokers.add(brokerToLocalBroker(broker));
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         }
-                        if(localSubscription.getSelector().equals(subscription.getSelector()) && !localSubscription.isCreateNewQueue()){
-                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(new LocalBroker(serviceProvider.getName(), self.getMessageChannelUrl())));
+                        if (!localSubscription.isCreateNewQueue()) {
+                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(new LocalBroker(serviceProvider.getName(), messageBrokerUrl)));
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         }
+                        //TODO still an option here, createNewQueue == true, local.queueConsumerUser != subs.queueConsumerUser
                     }
                 }
             }
-            serviceProviderRepository.save(serviceProvider);
         }
     }
 
