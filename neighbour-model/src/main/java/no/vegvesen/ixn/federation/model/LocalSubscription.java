@@ -75,6 +75,15 @@ public class LocalSubscription {
         this.lastUpdated = lastUpdated;
     }
 
+    public LocalSubscription(Integer sub_id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, boolean createNewQueue, String queueConsumerUser, Set<LocalBroker> localBrokers) {
+        this.sub_id = sub_id;
+        this.status = status;
+        this.selector = selector;
+        this.lastUpdated = lastUpdated;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
+        this.localBrokers = localBrokers;
+    }
 
     public void setStatus(LocalSubscriptionStatus status) {
         this.status = status;
