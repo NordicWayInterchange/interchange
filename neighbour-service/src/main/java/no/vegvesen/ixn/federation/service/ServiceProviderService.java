@@ -40,29 +40,29 @@ public class ServiceProviderService {
         }
     }
 
-    public void updateServiceProviderSubscriptionsWithBrokerUrl(List<Neighbour> neighbours, ServiceProvider serviceProvider, String messageBrokerUrl) {
+    public void updateServiceProviderSubscriptionsWithBrokerUrl(List<Neighbour> neighbours, ServiceProvider serviceProvider, String localMessageBrokerUrl) {
         for(Neighbour neighbour : neighbours) {
             for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
                 for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
                     if (localSubscription.getSelector().equals(subscription.getSelector())) {
-                        if (localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser()) &&
-                                localSubscription.isCreateNewQueue()) {
-                            //if(subscription.getBrokerUrl() != null){
-                            //serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, subscription.getBrokerUrl());
-                            //}
-                            //TODO assume only one broker
+                        if (localSubscription.isCreateNewQueue()) {
+                            if (!localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser())) {
+                                throw new IllegalStateException("createNewQueue requested, but subscription user is not the same as the local subscription user");
+                            }
+                            //TODO What about changes to brokers? We also write ALL service provider Brokers every time!
                             Set<Broker> brokers = subscription.getBrokers();
                             Set<LocalBroker> localBrokers = new HashSet<>();
                             for (Broker broker : brokers) {
                                 localBrokers.add(brokerToLocalBroker(broker));
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
-                        }
-                        if (!localSubscription.isCreateNewQueue()) {
-                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(new LocalBroker(serviceProvider.getName(), messageBrokerUrl)));
+                        } else {
+                            if (localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser())) {
+                                throw new IllegalStateException("createNewQueue = false, local subscription user = subscription user");
+                            }
+                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl)));
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         }
-                        //TODO still an option here, createNewQueue == true, local.queueConsumerUser != subs.queueConsumerUser
                     }
                 }
             }
