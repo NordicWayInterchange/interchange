@@ -127,7 +127,7 @@ public class ServiceProviderServiceTest {
                                 selector,
                                 "local-node/subscriptions/1",
                                 false,
-                                neighbourName,
+                                null, //QueueconsumerUser is most often null from other node.
                                 Collections.singleton(new Broker(
                                         localNodeName,
                                         "amqps://messages.node-A.eu"
@@ -155,6 +155,9 @@ public class ServiceProviderServiceTest {
         serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider, localMessageBrokerUrl);
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.getLocalBrokers()).hasSize(1).allMatch(b -> localMessageBrokerUrl.equals(b.getMessageBrokerUrl()));
+        assertThat(subscription.getLocalBrokers())
+                .hasSize(1)
+                .allMatch(b -> localMessageBrokerUrl.equals(b.getMessageBrokerUrl()))
+                .allMatch(b -> serviceProviderName.equals(b.getQueueName()));
     }
 }
