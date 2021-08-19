@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
@@ -36,31 +35,40 @@ public class ServiceProviderService {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for(ServiceProvider serviceProvider : serviceProviders) {
-            for(Neighbour neighbour : neighbours) {
-                for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
-                    for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
-                        if(localSubscription.getSelector().equals(subscription.getSelector()) &&
-                            localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser()) &&
-                            localSubscription.isCreateNewQueue()){
-                            //if(subscription.getBrokerUrl() != null){
-                                //serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, subscription.getBrokerUrl());
-                            //}
-                            //TODO assume only one broker
+            updateServiceProviderSubscriptionsWithBrokerUrl(neighbours, serviceProvider, self.getMessageChannelUrl());
+            serviceProviderRepository.save(serviceProvider);
+        }
+    }
+
+    public void updateServiceProviderSubscriptionsWithBrokerUrl(List<Neighbour> neighbours, ServiceProvider serviceProvider, String localMessageBrokerUrl) {
+        for(Neighbour neighbour : neighbours) {
+            for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
+                for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
+                    if (localSubscription.getSelector().equals(subscription.getSelector())) {
+                        if (localSubscription.isCreateNewQueue()) {
+                            if (!localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser())) {
+                                throw new IllegalStateException("createNewQueue requested, but subscription user is not the same as the local subscription user");
+                            }
+                            //TODO What about changes to brokers? We also write ALL service provider Brokers every time!
                             Set<Broker> brokers = subscription.getBrokers();
                             Set<LocalBroker> localBrokers = new HashSet<>();
-                            for(Broker broker : brokers){
+                            for (Broker broker : brokers) {
+                                logger.info("Adding local broker {} with createNewQueue true, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
                                 localBrokers.add(brokerToLocalBroker(broker));
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
-                        }
-                        if(localSubscription.getSelector().equals(subscription.getSelector()) && !localSubscription.isCreateNewQueue()){
-                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(new LocalBroker(serviceProvider.getName(), self.getMessageChannelUrl())));
+                        } else {
+                            if (localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser())) {
+                                throw new IllegalStateException("createNewQueue = false, local subscription user = subscription user");
+                            }
+                            LocalBroker broker = new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl);
+                            logger.info("Adding local broker {} with createNewQueue false, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
+                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(broker));
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         }
                     }
                 }
             }
-            serviceProviderRepository.save(serviceProvider);
         }
     }
 
