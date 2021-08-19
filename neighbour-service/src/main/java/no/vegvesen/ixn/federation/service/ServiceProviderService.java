@@ -53,6 +53,7 @@ public class ServiceProviderService {
                             Set<Broker> brokers = subscription.getBrokers();
                             Set<LocalBroker> localBrokers = new HashSet<>();
                             for (Broker broker : brokers) {
+                                logger.info("Adding local broker {} with createNewQueue true, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
                                 localBrokers.add(brokerToLocalBroker(broker));
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
@@ -60,7 +61,9 @@ public class ServiceProviderService {
                             if (localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser())) {
                                 throw new IllegalStateException("createNewQueue = false, local subscription user = subscription user");
                             }
-                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl)));
+                            LocalBroker broker = new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl);
+                            logger.info("Adding local broker {} with createNewQueue false, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
+                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(broker));
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         }
                     }
