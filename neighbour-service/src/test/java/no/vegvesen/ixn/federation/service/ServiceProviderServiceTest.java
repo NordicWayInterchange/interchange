@@ -76,7 +76,7 @@ public class ServiceProviderServiceTest {
                                true,
                                serviceProviderName,
                                Collections.singleton(new Broker(
-                                       localNodeName,
+                                       serviceProviderName,
                                        "amqps://messages.node-A.eu"
                                ))
                        ))
@@ -101,9 +101,10 @@ public class ServiceProviderServiceTest {
         serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider,"amqps://messages.local-node");
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.getLocalBrokers()).hasSize(1);
-        LocalBroker broker = subscription.getLocalBrokers().stream().findFirst().get();
-        assertThat(broker.getMessageBrokerUrl()).isEqualTo("amqps://messages.node-A.eu");
+        assertThat(subscription.getLocalBrokers())
+                .hasSize(1)
+                .allMatch(b -> "amqps://messages.node-A.eu".equals(b.getMessageBrokerUrl()))
+                .allMatch(b -> serviceProviderName.equals(b.getQueueName()));
     }
 
     @Test
@@ -150,12 +151,10 @@ public class ServiceProviderServiceTest {
                 new HashSet<>(),
                 LocalDateTime.now()
         );
-        String localMessageBrokerUrl = "amqps://messages.local-node";
+        final String localMessageBrokerUrl = "amqps://messages.local-node";
         serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider, localMessageBrokerUrl);
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.getLocalBrokers()).hasSize(1);
-        LocalBroker broker = subscription.getLocalBrokers().stream().findFirst().get();
-        assertThat(broker.getMessageBrokerUrl()).isEqualTo(localMessageBrokerUrl);
+        assertThat(subscription.getLocalBrokers()).hasSize(1).allMatch(b -> localMessageBrokerUrl.equals(b.getMessageBrokerUrl()));
     }
 }
