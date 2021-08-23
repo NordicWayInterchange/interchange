@@ -11,19 +11,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SelectorApiTest {
 
-    @Test
-    public void someConstructorBasedTests() {
-        assertThat(new SelectorApi("A",null).isCreateNewQueue()).isFalse();
-        assertThat(new SelectorApi("B",false).isCreateNewQueue()).isFalse();
-        assertThat(new SelectorApi("C",true).isCreateNewQueue()).isTrue();
-    }
 
     @Test
     public void testGenerateSelectorApi() throws JsonProcessingException {
-        SelectorApi api = new SelectorApi(
-                "countryCode = 'NO' and messageType = 'DENM'",
-                null
-        );
+        SelectorApi api = new SelectorApi("countryCode = 'NO' and messageType = 'DENM'");
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(api));
     }

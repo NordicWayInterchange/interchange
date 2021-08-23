@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -109,42 +111,48 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
-	public LocalSubscriptionApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody SelectorApi selector) {
+	public SubscriptionsPostResponseApi addSubscriptions(@PathVariable String serviceProviderName, @RequestBody SubscriptionsPostRequestApi requestApi) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		//check the name of hte request
+		//check the version of the request
 
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
-
-		if (selector == null) {
-			throw new SubscriptionRequestException("Bad api object for Subscription Request. The DataTypeApi object was null. Nothing to add.");
+		for (SelectorApi selectorApi : requestApi.getSubscriptions()) {
+			if (selectorApi.getSelector() == null) {
+				throw new SubscriptionRequestException("Bad api object for Subscription Request. The Selector object was null.");
+			}
 		}
 
-		logger.info("Service provider {} Incoming subscription createNewQueue {} and selector {}", serviceProviderName,selector.isCreateNewQueue(), selector.getSelector());
+		logger.info("Service provider {} Incoming subscription selector {}", serviceProviderName, requestApi.getSubscriptions());
 
-		LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,selector);
+		//LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,selector);
+		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+		for (SelectorApi subscription : requestApi.getSubscriptions()) {
+			LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(subscription);
+			localSubscriptions.add(localSubscription);
+		}
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProviderToUpdate == null) {
 			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
 		}
-		serviceProviderToUpdate.addLocalSubscription(localSubscription);
+		serviceProviderToUpdate.addLocalSubscriptions(localSubscriptions);
 
 		// Save updated Service Provider in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 
 
-		//find the newly saved subscription from the database
-		LocalSubscription savedSubscription= saved
+		//find the newly saved subscriptions from the database
+		Set<LocalSubscription> savedSubscriptions = saved
 				.getSubscriptions()
 				.stream()
-				.filter(subscription -> subscription.equals(localSubscription))
-				.findFirst()
-				.orElseThrow(() -> new IllegalStateException("Something went wrong. Could not find localSubscription after saving"));
-
+				.filter(subscription -> localSubscriptions.contains(subscription))
+				.collect(Collectors.toSet());
 		OnboardMDCUtil.removeLogVariables();
-		return typeTransformer.transformLocalSubscriptionToLocalSubscriptionApi(savedSubscription);
+		return typeTransformer.transformLocalSubscriptionsToSubscriptionPostResponseApi(serviceProviderName,savedSubscriptions);
 	}
 
 

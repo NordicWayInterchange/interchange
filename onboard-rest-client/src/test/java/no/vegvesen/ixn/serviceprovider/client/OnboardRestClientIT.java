@@ -18,6 +18,7 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("rawtypes")
 public class OnboardRestClientIT extends DockerBaseIT {
 
-	private static Logger log = LoggerFactory.getLogger(OnboardRestClientIT.class);
-	private static Path testKeysPath = generateKeys(OnboardRestClientIT.class, "my_ca", "localhost", "onboard");
+    private static Logger log = LoggerFactory.getLogger(OnboardRestClientIT.class);
+    private static Path testKeysPath = generateKeys(OnboardRestClientIT.class, "my_ca", "localhost", "onboard");
 
     public static Network network;
 
@@ -38,6 +39,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
                     .withPassword("federation");
 
     public static GenericContainer onboardServer;
+    public static final String USER = "onboard";
 
     @BeforeAll
     public static void startUp() {
@@ -47,21 +49,21 @@ public class OnboardRestClientIT extends DockerBaseIT {
                 .withNetworkAliases("database")
                 .start();
         onboardServer = new GenericContainer(
-                    new ImageFromDockerfile()
-                            .withFileFromPath(".",
-                                    getFolderPath("onboard-server-app")
-                            )
-                    )
-                    .withNetwork(network)
-                    .withFileSystemBind(testKeysPath.toString(),"/jks", BindMode.READ_ONLY)
-                    .withEnv("KEY_STORE","/jks/localhost.p12")
-                    .withEnv("KEY_STORE_PASSWORD","password")
-                    .withEnv("TRUST_STORE_PASSWORD","password")
-                    .withEnv("TRUST_STORE","/jks/truststore.jks")
-                    .withEnv("SERVER_NAME","localhost")
-                    .withEnv("SP_CHNL_PORT","8899")
-                    .withEnv("POSTGRES_URI","jdbc:postgresql://database/federation")
-                    .withExposedPorts(8899);
+                new ImageFromDockerfile()
+                        .withFileFromPath(".",
+                                getFolderPath("onboard-server-app")
+                        )
+        )
+                .withNetwork(network)
+                .withFileSystemBind(testKeysPath.toString(), "/jks", BindMode.READ_ONLY)
+                .withEnv("KEY_STORE", "/jks/localhost.p12")
+                .withEnv("KEY_STORE_PASSWORD", "password")
+                .withEnv("TRUST_STORE_PASSWORD", "password")
+                .withEnv("TRUST_STORE", "/jks/truststore.jks")
+                .withEnv("SERVER_NAME", "localhost")
+                .withEnv("SP_CHNL_PORT", "8899")
+                .withEnv("POSTGRES_URI", "jdbc:postgresql://database/federation")
+                .withExposedPorts(8899);
         onboardServer
                 .start();
         onboardServer.followOutput(logConsumer);
@@ -79,7 +81,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @BeforeEach
     public void setUp() {
-        client = new OnboardRESTClient(sslContext,"https://localhost:" + onboardServer.getMappedPort(8899),"onboard");
+        client = new OnboardRESTClient(sslContext, "https://localhost:" + onboardServer.getMappedPort(8899), USER);
     }
 
 
@@ -94,7 +96,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
         assertThat(newCapabilities.getCapabilities()).hasSize(1);
 
-		LocalCapability localDataType = newCapabilities.getCapabilities().iterator().next();
+        LocalCapability localDataType = newCapabilities.getCapabilities().iterator().next();
         Integer id = localDataType.getId();
         client.deleteCapability(id);
 
@@ -104,7 +106,9 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     @Test
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
-		client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
+
+        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+        client.addSubscription(new SubscriptionsPostRequestApi(USER, Collections.singleton(selectorApi)));
 
         LocalSubscriptionListApi localSubscriptions = client.getServiceProviderSubscriptions();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -116,27 +120,30 @@ public class OnboardRestClientIT extends DockerBaseIT {
         LocalSubscriptionApi idSubToDelete = filtered.get(0);
 
         client.deleteSubscriptions(idSubToDelete.getId());
-		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
-		List<LocalSubscriptionApi> filteredAfterDelete = filterOutTearDownSubscriptions(afterDelete.getSubscriptions());
+        LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
+        List<LocalSubscriptionApi> filteredAfterDelete = filterOutTearDownSubscriptions(afterDelete.getSubscriptions());
         assertThat(filteredAfterDelete).hasSize(0);
-	}
+    }
 
     @Test
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-		LocalSubscriptionApi addedSubscription = client.addSubscription(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
+        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+        SubscriptionsPostResponseApi addedSubscription = client.addSubscription(
+                new SubscriptionsPostRequestApi(USER,Collections.singleton(selectorApi))
+        );
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
         LocalCapabilityList capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
-		LocalSubscriptionListApi serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptions();
-		for (LocalSubscriptionApi subscription : serviceProviderSubscriptionRequest.getSubscriptions()) {
-			System.out.println("deleting subscription " + subscription.getId());
-			client.deleteSubscriptions(subscription.getId());
-		}
-		LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
-		assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscriptions())).hasSize(0);
+        LocalSubscriptionListApi serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptions();
+        for (LocalSubscriptionApi subscription : serviceProviderSubscriptionRequest.getSubscriptions()) {
+            System.out.println("deleting subscription " + subscription.getId());
+            client.deleteSubscriptions(subscription.getId());
+        }
+        LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
+        assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscriptions())).hasSize(0);
     }
 
 

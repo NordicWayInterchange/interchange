@@ -18,6 +18,5 @@ public class OnboardRestClientTest {
         ObjectMapper mapper = new ObjectMapper();
         SelectorApi subscription = mapper.readValue(file,SelectorApi.class);
 
-        assertThat(subscription.isCreateNewQueue()).isTrue();
     }
 }
