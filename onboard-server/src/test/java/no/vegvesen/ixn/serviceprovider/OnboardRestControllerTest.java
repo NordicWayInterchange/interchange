@@ -8,7 +8,7 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.onboard.SelfService;
-import no.vegvesen.ixn.serviceprovider.model.SelectorApi;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -144,10 +146,25 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
-		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'", false);
+		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'");
+		SubscriptionsPostRequestApi requestApi = new SubscriptionsPostRequestApi(
+				firstServiceProvider,
+				Collections.singleton(selectorApi)
+		);
 
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(selectorApi);
-		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
+		//TODO this is dirty!
+		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
+			Object argument = i.getArguments()[0];
+			ServiceProvider s = (ServiceProvider) argument;
+			s.setId(1);
+			int j = 0;
+			for (LocalSubscription subscription : s.getSubscriptions()) {
+				subscription.setSub_id(j++);
+				subscription.setLastUpdated(LocalDateTime.now());
+			}
+			return s;
+		});
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
 		mockMvc.perform(
@@ -275,9 +292,13 @@ public class OnboardRestControllerTest {
 		String secondServiceProviderName = "SecondServiceProvider";
 		mockCertificate(secondServiceProviderName);
 
-		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'", false);
+		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'");
+		SubscriptionsPostRequestApi requestApi = new SubscriptionsPostRequestApi(
+				firstServiceProviderName,
+				Collections.singleton(selectorApi)
+		);
 
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(selectorApi);
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProviderName))

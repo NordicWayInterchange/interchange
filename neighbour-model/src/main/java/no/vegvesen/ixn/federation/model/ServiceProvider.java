@@ -94,6 +94,11 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
+	public void addLocalSubscriptions(Set<LocalSubscription> subscriptions) {
+		this.subscriptions.addAll(subscriptions);
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
 	public void setSubscriptions(Set<LocalSubscription> subscriptions) {
 		this.subscriptions = subscriptions;
 	}

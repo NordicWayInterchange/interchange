@@ -6,6 +6,9 @@ import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.util.*;
 
 public class TypeTransformer {
@@ -50,10 +53,40 @@ public class TypeTransformer {
 	}
 
 
-	public LocalSubscription transformSelectorApiToLocalSubscription(String serviceProviderName, SelectorApi selectorApi) {
+	public LocalSubscription transformSelectorApiToLocalSubscription(SelectorApi selectorApi) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                selectorApi.getSelector(),
-                selectorApi.isCreateNewQueue(),
-                serviceProviderName);
+                selectorApi.getSelector());
+    }
+
+    public SubscriptionsPostResponseApi transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
+        return new SubscriptionsPostResponseApi(serviceProviderName,tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(serviceProviderName,localSubscriptions));
+    }
+
+    private Set<SubscriptionsPostResponseSubscriptionApi> tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
+        Set<SubscriptionsPostResponseSubscriptionApi> result = new HashSet<>();
+        for (LocalSubscription subscription : localSubscriptions) {
+            result.add(new SubscriptionsPostResponseSubscriptionApi(
+                    subscription.getSub_id().toString(),
+                    String.format("/%s/subscription/%s",serviceProviderName,subscription.getSub_id().toString()),
+                    subscription.getSelector(),
+                    ZonedDateTime.of(subscription.getLastUpdated(),ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                    transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())
+                    )
+            );
+        }
+        return null;
+    }
+
+    private LocalActorSubscriptionStatusApi transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {
+        switch (status) {
+            case REQUESTED:
+                return LocalActorSubscriptionStatusApi.REQUESTED;
+            case CREATED:
+                return LocalActorSubscriptionStatusApi.CREATED;
+            case TEAR_DOWN:
+                return LocalActorSubscriptionStatusApi.NOT_VALID;
+            default:
+                return LocalActorSubscriptionStatusApi.ILLEGAL;
+        }
     }
 }

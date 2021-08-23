@@ -28,7 +28,7 @@ public class LocalSubscription {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
-    private boolean createNewQueue;
+    private boolean createNewQueue = false;
 
     private String queueConsumerUser;
 
@@ -187,5 +187,13 @@ public class LocalSubscription {
 
     public LocalDateTime getLastUpdated() {
         return lastUpdated;
+    }
+
+    public void setSub_id(Integer sub_id) {
+        this.sub_id = sub_id;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

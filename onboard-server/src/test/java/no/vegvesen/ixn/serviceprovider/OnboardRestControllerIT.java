@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -62,7 +63,10 @@ public class OnboardRestControllerIT {
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
-        restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
+        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+
+        SubscriptionsPostRequestApi requestApi = new SubscriptionsPostRequestApi(serviceProviderName, Collections.singleton(selectorApi));
+        restController.addSubscriptions(serviceProviderName, requestApi);
 
         LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -80,7 +84,11 @@ public class OnboardRestControllerIT {
 	@Test
 	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
-		restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
+        SubscriptionsPostRequestApi requestApi = new SubscriptionsPostRequestApi(
+		        serviceProviderName,
+                Collections.singleton(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"))
+        );
+        restController.addSubscriptions(serviceProviderName, requestApi);
 
 		LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
 		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -100,7 +108,8 @@ public class OnboardRestControllerIT {
 	@Test
     void testAddingLocalSubscriptionWithCreateNewQueue() {
         String serviceProviderName = "service-provider-create-new-queue";
-        restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", true));
+        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+        restController.addSubscriptions(serviceProviderName, new SubscriptionsPostRequestApi(serviceProviderName,Collections.singleton(selectorApi)));
 
         LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -121,8 +130,8 @@ public class OnboardRestControllerIT {
     @Test
     void testAddingLocalSubscriptionWithCreateNewQueueAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
-        LocalSubscriptionApi serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", true));
+        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+        SubscriptionsPostResponseApi serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new SubscriptionsPostRequestApi(serviceProviderName,Collections.singleton(selectorApi)));
 
-        assertThat(serviceProviderSubscriptions.isCreateNewQueue()).isTrue();
     }
 }
