@@ -53,9 +53,10 @@ public class TypeTransformer {
 	}
 
 
-	public LocalSubscription transformSelectorApiToLocalSubscription(SelectorApi selectorApi) {
+	public LocalSubscription transformSelectorApiToLocalSubscription(String serviceProviderName, SelectorApi selectorApi) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                selectorApi.getSelector());
+                selectorApi.getSelector(),
+                serviceProviderName);
     }
 
     public SubscriptionsPostResponseApi transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
@@ -65,11 +66,12 @@ public class TypeTransformer {
     private Set<SubscriptionsPostResponseSubscriptionApi> tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         Set<SubscriptionsPostResponseSubscriptionApi> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
+            long lastModified = subscription.getLastUpdated() == null ? 0 : ZonedDateTime.of(subscription.getLastUpdated(),ZoneId.systemDefault()).toInstant().toEpochMilli();
             result.add(new SubscriptionsPostResponseSubscriptionApi(
                     subscription.getSub_id().toString(),
                     String.format("/%s/subscription/%s",serviceProviderName,subscription.getSub_id().toString()),
                     subscription.getSelector(),
-                    ZonedDateTime.of(subscription.getLastUpdated(),ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                    lastModified,
                     transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())
                     )
             );
