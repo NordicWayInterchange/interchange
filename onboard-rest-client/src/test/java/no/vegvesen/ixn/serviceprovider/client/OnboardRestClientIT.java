@@ -20,6 +20,7 @@ import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,20 +109,20 @@ public class OnboardRestClientIT extends DockerBaseIT {
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
 
         SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        client.addSubscription(new SubscriptionsPostRequestApi(USER, Collections.singleton(selectorApi)));
+        client.addSubscription(new AddSubscriptionsRequest(USER, Collections.singleton(selectorApi)));
 
-        LocalSubscriptionListApi localSubscriptions = client.getServiceProviderSubscriptions();
+        ListSubscriptionsResponse localSubscriptions = client.getServiceProviderSubscriptions();
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(localSubscriptions));
 
         assertThat(localSubscriptions).isNotNull();
-        List<LocalSubscriptionApi> filtered = filterOutTearDownSubscriptions(localSubscriptions.getSubscriptions());
+        List<LocalActorSubscription> filtered = filterOutTearDownSubscriptions(localSubscriptions.getSubscriptions());
         assertThat(filtered).isNotNull().hasSize(1);
-        LocalSubscriptionApi idSubToDelete = filtered.get(0);
+        LocalActorSubscription idSubToDelete = filtered.get(0);
 
-        client.deleteSubscriptions(idSubToDelete.getId());
-        LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
-        List<LocalSubscriptionApi> filteredAfterDelete = filterOutTearDownSubscriptions(afterDelete.getSubscriptions());
+        client.deleteSubscriptions(Integer.parseInt(idSubToDelete.getId()));
+        ListSubscriptionsResponse afterDelete = client.getServiceProviderSubscriptions();
+        List<LocalActorSubscription> filteredAfterDelete = filterOutTearDownSubscriptions(afterDelete.getSubscriptions());
         assertThat(filteredAfterDelete).hasSize(0);
     }
 
@@ -129,26 +130,26 @@ public class OnboardRestClientIT extends DockerBaseIT {
     public void addSubscriptionAskForCapabilities() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        SubscriptionsPostResponseApi addedSubscription = client.addSubscription(
-                new SubscriptionsPostRequestApi(USER,Collections.singleton(selectorApi))
+        AddSubscriptionsResponse addedSubscription = client.addSubscription(
+                new AddSubscriptionsRequest(USER,Collections.singleton(selectorApi))
         );
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
         LocalCapabilityList capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
-        LocalSubscriptionListApi serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptions();
-        for (LocalSubscriptionApi subscription : serviceProviderSubscriptionRequest.getSubscriptions()) {
+        ListSubscriptionsResponse serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptions();
+        for (LocalActorSubscription subscription : serviceProviderSubscriptionRequest.getSubscriptions()) {
             System.out.println("deleting subscription " + subscription.getId());
-            client.deleteSubscriptions(subscription.getId());
+            client.deleteSubscriptions(Integer.parseInt(subscription.getId()));
         }
-        LocalSubscriptionListApi afterDelete = client.getServiceProviderSubscriptions();
+        ListSubscriptionsResponse afterDelete = client.getServiceProviderSubscriptions();
         assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscriptions())).hasSize(0);
     }
 
 
-    private List<LocalSubscriptionApi> filterOutTearDownSubscriptions(List<LocalSubscriptionApi> subscriptions) {
-        return subscriptions.stream().filter(sub -> !sub.getStatus().equals(LocalSubscriptionStatusApi.TEAR_DOWN)).collect(Collectors.toList());
+    private List<LocalActorSubscription> filterOutTearDownSubscriptions(Set<LocalActorSubscription> subscriptions) {
+        return subscriptions.stream().filter(sub -> !sub.getStatus().equals(LocalActorSubscriptionStatusApi.NOT_VALID)).collect(Collectors.toList());
     }
 
 }

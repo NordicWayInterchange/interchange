@@ -3,15 +3,15 @@ package no.vegvesen.ixn.serviceprovider.model;
 import java.util.Objects;
 import java.util.Set;
 
-public class SubscriptionsPostResponseApi {
+public class AddSubscriptionsResponse {
     private String version = "1.0";
     private String name;
-    private Set<SubscriptionsPostResponseSubscriptionApi> subscriptions;
+    private Set<LocalActorSubscription> subscriptions;
 
-    public SubscriptionsPostResponseApi() {
+    public AddSubscriptionsResponse() {
     }
 
-    public SubscriptionsPostResponseApi(String name, Set<SubscriptionsPostResponseSubscriptionApi> subscriptions) {
+    public AddSubscriptionsResponse(String name, Set<LocalActorSubscription> subscriptions) {
         this.name = name;
         this.subscriptions = subscriptions;
     }
@@ -32,11 +32,11 @@ public class SubscriptionsPostResponseApi {
         this.name = name;
     }
 
-    public Set<SubscriptionsPostResponseSubscriptionApi> getSubscriptions() {
+    public Set<LocalActorSubscription> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<SubscriptionsPostResponseSubscriptionApi> subscriptions) {
+    public void setSubscriptions(Set<LocalActorSubscription> subscriptions) {
         this.subscriptions = subscriptions;
     }
 
@@ -44,7 +44,7 @@ public class SubscriptionsPostResponseApi {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SubscriptionsPostResponseApi that = (SubscriptionsPostResponseApi) o;
+        AddSubscriptionsResponse that = (AddSubscriptionsResponse) o;
         return Objects.equals(version, that.version) && Objects.equals(name, that.name) && Objects.equals(subscriptions, that.subscriptions);
     }
 
