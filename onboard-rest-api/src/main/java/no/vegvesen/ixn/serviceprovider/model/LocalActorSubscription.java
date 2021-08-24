@@ -2,7 +2,7 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import java.util.Objects;
 
-public class SubscriptionsPostResponseSubscriptionApi {
+public class LocalActorSubscription {
     String id;
     String version = "1.0";
     String path;
@@ -10,7 +10,10 @@ public class SubscriptionsPostResponseSubscriptionApi {
     long lastUpdatedTimeStamp;
     LocalActorSubscriptionStatusApi status;
 
-    public SubscriptionsPostResponseSubscriptionApi(String id, String path, String selector, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status) {
+    public LocalActorSubscription() {
+    }
+
+    public LocalActorSubscription(String id, String path, String selector, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -70,7 +73,7 @@ public class SubscriptionsPostResponseSubscriptionApi {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SubscriptionsPostResponseSubscriptionApi that = (SubscriptionsPostResponseSubscriptionApi) o;
+        LocalActorSubscription that = (LocalActorSubscription) o;
         return lastUpdatedTimeStamp == that.lastUpdatedTimeStamp && Objects.equals(id, that.id) && Objects.equals(version, that.version) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
     }
 

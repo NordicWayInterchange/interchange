@@ -52,7 +52,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderCapabilities.getCapabilities()).hasSize(1);
 
         //Test that we don't mess up subscriptions and capabilities
-        LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(0);
 
         LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
@@ -65,17 +65,17 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "serviceprovider";
         SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
 
-        SubscriptionsPostRequestApi requestApi = new SubscriptionsPostRequestApi(serviceProviderName, Collections.singleton(selectorApi));
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(selectorApi));
         restController.addSubscriptions(serviceProviderName, requestApi);
 
-        LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 
 		ServiceProvider afterAddSubscription = serviceProviderRepository.findByName(serviceProviderName);
 		assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
-		LocalSubscriptionApi subscriptionApi = serviceProviderSubscriptions.getSubscriptions().get(0);
-        restController.deleteSubscription(serviceProviderName,subscriptionApi.getId());
+		LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().get();
+        restController.deleteSubscription(serviceProviderName,Integer.parseInt(subscriptionApi.getId()));
 
 		ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
 		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
@@ -84,13 +84,13 @@ public class OnboardRestControllerIT {
 	@Test
 	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
-        SubscriptionsPostRequestApi requestApi = new SubscriptionsPostRequestApi(
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 		        serviceProviderName,
                 Collections.singleton(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"))
         );
         restController.addSubscriptions(serviceProviderName, requestApi);
 
-		LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+		ListSubscriptionsResponse serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
 		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 		ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
 		Optional<LocalDateTime> subscriptionUpdated = savedSP.getSubscriptionUpdated();
@@ -109,9 +109,9 @@ public class OnboardRestControllerIT {
     void testAddingLocalSubscriptionWithCreateNewQueue() {
         String serviceProviderName = "service-provider-create-new-queue";
         SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        restController.addSubscriptions(serviceProviderName, new SubscriptionsPostRequestApi(serviceProviderName,Collections.singleton(selectorApi)));
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
 
-        LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 
         ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
@@ -122,8 +122,8 @@ public class OnboardRestControllerIT {
         //assertThat(subscription.isCreateNewQueue()).isTrue();
         assertThat(subscription.getQueueConsumerUser()).isEqualTo(serviceProviderName);
 
-        LocalSubscriptionListApi subscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
-        List<LocalSubscriptionApi> localSubscriptionApis = subscriptions.getSubscriptions();
+        ListSubscriptionsResponse subscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();
         assertThat(localSubscriptionApis.size()).isEqualTo(1);
         //TODO same as above, cannot set createNewQueue to true through the API
         //assertThat(localSubscriptionApis.get(0).isCreateNewQueue()).isTrue();
@@ -133,7 +133,7 @@ public class OnboardRestControllerIT {
     void testAddingLocalSubscriptionWithCreateNewQueueAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
         SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        SubscriptionsPostResponseApi serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new SubscriptionsPostRequestApi(serviceProviderName,Collections.singleton(selectorApi)));
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
 
     }
 }

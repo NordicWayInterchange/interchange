@@ -6,9 +6,9 @@ import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoField;
 import java.util.*;
 
 public class TypeTransformer {
@@ -36,15 +36,26 @@ public class TypeTransformer {
                 transformListOfLocalBrokersToListOfLocalBrokersApi(localSubscription.getLocalBrokers()));
     }
 
-    public LocalSubscriptionListApi transformLocalSubscriptionListToLocalSubscriptionListApi(Set<LocalSubscription> subscriptions) {
-	    List<LocalSubscriptionApi> subscriptionApis = new ArrayList<>();
-	    for (LocalSubscription subscription : subscriptions) {
-	        subscriptionApis.add(transformLocalSubscriptionToLocalSubscriptionApi(subscription));
-        }
-        return new LocalSubscriptionListApi(subscriptionApis);
+    public ListSubscriptionsResponse transformLocalSubscriptionsToListSubscriptionResponse(String name, Set<LocalSubscription> subscriptions) {
+        return new ListSubscriptionsResponse(name,transformLocalSubscriptionsToLocalActorSubscription(name,subscriptions));
+
     }
 
-	public LocalCapabilityList transformToLocalCapabilityList(Set<Capability> capabilities) {
+    private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
+        Set<LocalActorSubscription> result = new HashSet<>();
+        for (LocalSubscription subscription : subscriptions) {
+            String sub_id = subscription.getSub_id() == null ? null : subscription.getSub_id().toString();
+            result.add(new LocalActorSubscription(
+                    sub_id,
+                    createSubscriptionPath(name,sub_id),
+                    subscription.getSelector(),
+                    transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
+                    transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())));
+        }
+        return result;
+    }
+
+    public LocalCapabilityList transformToLocalCapabilityList(Set<Capability> capabilities) {
 		List<LocalCapability> idList = new LinkedList<>();
 		for (Capability capability : capabilities) {
 			idList.add(new LocalCapability(capability.getId(), capability.toApi()));
@@ -59,24 +70,32 @@ public class TypeTransformer {
                 serviceProviderName);
     }
 
-    public SubscriptionsPostResponseApi transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
-        return new SubscriptionsPostResponseApi(serviceProviderName,tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(serviceProviderName,localSubscriptions));
+    public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
+        return new AddSubscriptionsResponse(serviceProviderName,tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(serviceProviderName,localSubscriptions));
     }
 
-    private Set<SubscriptionsPostResponseSubscriptionApi> tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
-        Set<SubscriptionsPostResponseSubscriptionApi> result = new HashSet<>();
+    private Set<LocalActorSubscription> tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
+        Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
-            long lastModified = subscription.getLastUpdated() == null ? 0 : ZonedDateTime.of(subscription.getLastUpdated(),ZoneId.systemDefault()).toInstant().toEpochMilli();
-            result.add(new SubscriptionsPostResponseSubscriptionApi(
-                    subscription.getSub_id().toString(),
-                    String.format("/%s/subscription/%s",serviceProviderName,subscription.getSub_id().toString()),
+            String subscriptionId = subscription.getSub_id().toString();
+            result.add(new LocalActorSubscription(
+                    subscriptionId,
+                    createSubscriptionPath(serviceProviderName, subscriptionId),
                     subscription.getSelector(),
-                    lastModified,
+                    transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
                     transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())
                     )
             );
         }
-        return null;
+        return result;
+    }
+
+    private String createSubscriptionPath(String serviceProviderName, String subscriptionId) {
+        return String.format("/%s/subscriptions/%s", serviceProviderName, subscriptionId);
+    }
+
+    private long transformLocalDateTimeToEpochMili(LocalDateTime lastUpdated) {
+        return lastUpdated == null ? 0 : ZonedDateTime.of(lastUpdated, ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     private LocalActorSubscriptionStatusApi transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {

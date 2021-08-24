@@ -44,21 +44,21 @@ public class OnboardRESTClient {
     }
 
 
-    public LocalSubscriptionListApi getServiceProviderSubscriptions() {
+    public ListSubscriptionsResponse getServiceProviderSubscriptions() {
 		String url = String.format("%s/%s/subscriptions/", server, user);
-		return restTemplate.getForEntity(url, LocalSubscriptionListApi.class).getBody();
+		return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
     }
 
     public void deleteSubscriptions(Integer localSubscriptionId) {
         restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId));
     }
 
-    public SubscriptionsPostResponseApi addSubscription(SubscriptionsPostRequestApi subscription) {
+    public AddSubscriptionsResponse addSubscription(AddSubscriptionsRequest subscription) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<SubscriptionsPostRequestApi> entity = new HttpEntity<>(subscription,headers);
+        HttpEntity<AddSubscriptionsRequest> entity = new HttpEntity<>(subscription,headers);
 		String url = String.format("/%s/subscriptions", user) ;
-		return restTemplate.exchange(server + url, HttpMethod.POST, entity, SubscriptionsPostResponseApi.class).getBody();
+		return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddSubscriptionsResponse.class).getBody();
     }
 
     public void deleteCapability(Integer capabilityId) {

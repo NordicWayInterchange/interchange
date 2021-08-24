@@ -23,7 +23,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -147,7 +146,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'");
-		SubscriptionsPostRequestApi requestApi = new SubscriptionsPostRequestApi(
+		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProvider,
 				Collections.singleton(selectorApi)
 		);
@@ -242,7 +241,7 @@ public class OnboardRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().is3xxRedirection());
+				.andExpect(status().is2xxSuccessful());
 	}
 
 	@Test
@@ -293,7 +292,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(secondServiceProviderName);
 
 		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'");
-		SubscriptionsPostRequestApi requestApi = new SubscriptionsPostRequestApi(
+		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProviderName,
 				Collections.singleton(selectorApi)
 		);
