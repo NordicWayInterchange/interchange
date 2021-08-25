@@ -120,7 +120,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         assertThat(filtered).isNotNull().hasSize(1);
         LocalActorSubscription idSubToDelete = filtered.get(0);
 
-        client.deleteSubscriptions(Integer.parseInt(idSubToDelete.getId()));
+        client.deleteSubscriptions(idSubToDelete.getId());
         ListSubscriptionsResponse afterDelete = client.getServiceProviderSubscriptions();
         List<LocalActorSubscription> filteredAfterDelete = filterOutTearDownSubscriptions(afterDelete.getSubscriptions());
         assertThat(filteredAfterDelete).hasSize(0);
@@ -141,7 +141,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         ListSubscriptionsResponse serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptions();
         for (LocalActorSubscription subscription : serviceProviderSubscriptionRequest.getSubscriptions()) {
             System.out.println("deleting subscription " + subscription.getId());
-            client.deleteSubscriptions(Integer.parseInt(subscription.getId()));
+            client.deleteSubscriptions(subscription.getId());
         }
         ListSubscriptionsResponse afterDelete = client.getServiceProviderSubscriptions();
         assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscriptions())).hasSize(0);

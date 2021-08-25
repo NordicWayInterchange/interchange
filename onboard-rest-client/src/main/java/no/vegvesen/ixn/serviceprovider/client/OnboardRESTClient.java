@@ -49,7 +49,7 @@ public class OnboardRESTClient {
 		return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
     }
 
-    public void deleteSubscriptions(Integer localSubscriptionId) {
+    public void deleteSubscriptions(String localSubscriptionId) {
         restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId));
     }
 
@@ -65,9 +65,9 @@ public class OnboardRESTClient {
 		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, user, capabilityId));
     }
 
-    public LocalSubscriptionApi getSubscription(Integer localSubscriptionId) {
+    public GetSubscriptionResponse getSubscription(Integer localSubscriptionId) {
         String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId.toString());
-        return restTemplate.getForEntity(url, LocalSubscriptionApi.class).getBody();
+        return restTemplate.getForEntity(url, GetSubscriptionResponse.class).getBody();
     }
 
     public PrivateChannelApi addPrivateChannel(PrivateChannelApi privateChannelApi) {
