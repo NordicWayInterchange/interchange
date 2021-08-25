@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -151,7 +152,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         OnboardRestClientApplication parentCommand;
 
         @Parameters(index = "0", description = "The ID of the subscription to delete")
-        Integer subscriptionId;
+        String subscriptionId;
 
         @Override
         public Integer call(){
@@ -172,10 +173,12 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         Integer subscriptionId;
 
         @Override
-        public Integer call() {
+        public Integer call() throws JsonProcessingException {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalSubscriptionApi subscription = client.getSubscription(subscriptionId);
+            GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
             System.out.printf("Subscription %d successfully polled with %n", subscriptionId);
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
             return 0;
         }
     }
