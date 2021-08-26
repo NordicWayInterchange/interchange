@@ -4,7 +4,6 @@ import java.util.Objects;
 
 public class LocalActorSubscription {
     String id;
-    String version = "1.0";
     String path;
     String selector;
     long lastUpdatedTimeStamp;
@@ -27,14 +26,6 @@ public class LocalActorSubscription {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     public String getPath() {
@@ -74,11 +65,22 @@ public class LocalActorSubscription {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalActorSubscription that = (LocalActorSubscription) o;
-        return lastUpdatedTimeStamp == that.lastUpdatedTimeStamp && Objects.equals(id, that.id) && Objects.equals(version, that.version) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
+        return lastUpdatedTimeStamp == that.lastUpdatedTimeStamp && Objects.equals(id, that.id) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, version, path, selector, lastUpdatedTimeStamp, status);
+        return Objects.hash(id, path, selector, lastUpdatedTimeStamp, status);
+    }
+
+    @Override
+    public String toString() {
+        return "LocalActorSubscription{" +
+                "id='" + id + '\'' +
+                ", path='" + path + '\'' +
+                ", selector='" + selector + '\'' +
+                ", lastUpdatedTimeStamp=" + lastUpdatedTimeStamp +
+                ", status=" + status +
+                '}';
     }
 }

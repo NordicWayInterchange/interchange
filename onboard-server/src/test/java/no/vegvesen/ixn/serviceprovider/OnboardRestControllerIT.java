@@ -17,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -52,7 +51,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderCapabilities.getCapabilities()).hasSize(1);
 
         //Test that we don't mess up subscriptions and capabilities
-        ListSubscriptionsResponse serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(0);
 
         LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
@@ -68,7 +67,7 @@ public class OnboardRestControllerIT {
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(selectorApi));
         restController.addSubscriptions(serviceProviderName, requestApi);
 
-        ListSubscriptionsResponse serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 
 		ServiceProvider afterAddSubscription = serviceProviderRepository.findByName(serviceProviderName);
@@ -90,7 +89,7 @@ public class OnboardRestControllerIT {
         );
         restController.addSubscriptions(serviceProviderName, requestApi);
 
-		ListSubscriptionsResponse serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+		ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
 		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 		ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
 		Optional<LocalDateTime> subscriptionUpdated = savedSP.getSubscriptionUpdated();
@@ -111,7 +110,7 @@ public class OnboardRestControllerIT {
         SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
         restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
 
-        ListSubscriptionsResponse serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 
         ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
@@ -122,7 +121,7 @@ public class OnboardRestControllerIT {
         //assertThat(subscription.isCreateNewQueue()).isTrue();
         assertThat(subscription.getQueueConsumerUser()).isEqualTo(serviceProviderName);
 
-        ListSubscriptionsResponse subscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        ListSubscriptionsResponse subscriptions = restController.listSubscriptions(serviceProviderName);
         Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();
         assertThat(localSubscriptionApis.size()).isEqualTo(1);
         //TODO same as above, cannot set createNewQueue to true through the API

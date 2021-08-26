@@ -199,7 +199,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ListSubscriptionsResponse getServiceProviderSubscriptions(@PathVariable String serviceProviderName) {
+	public ListSubscriptionsResponse listSubscriptions(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(serviceProviderName,serviceProvider.getSubscriptions());
@@ -215,7 +215,6 @@ public class OnboardRestController {
 		logger.info("Received poll from Service Provider {} with queueConsumerUser = {}", serviceProviderName, localSubscription.getQueueConsumerUser());
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProviderName,localSubscription);
-		//return typeTransformer.transformLocalSubscriptionToLocalSubscriptionApi(localSubscription);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/privatechannels", produces = MediaType.APPLICATION_JSON_VALUE)
