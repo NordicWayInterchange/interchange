@@ -32,7 +32,6 @@ public class LocalSubscription {
 
     private String queueConsumerUser;
 
-    //private String brokerUrl;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locbrok_id", foreignKey = @ForeignKey(name = "fk_locbrok_sub"))
@@ -128,13 +127,6 @@ public class LocalSubscription {
         this.queueConsumerUser = queueConsumerUser;
     }
 
-    //public String getBrokerUrl() {
-    //    return brokerUrl;
-    //}
-
-    //public void setBrokerUrl(String brokerUrl) {
-    //    this.brokerUrl = brokerUrl;
-    //}
 
     public Set<LocalBroker> getLocalBrokers() {
         return localBrokers;

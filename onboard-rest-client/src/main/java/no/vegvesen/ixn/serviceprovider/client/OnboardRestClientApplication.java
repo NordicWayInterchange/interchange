@@ -122,7 +122,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             ObjectMapper mapper = new ObjectMapper();
             AddSubscriptionsRequest requestApi = mapper.readValue(file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
-            System.out.println(mapper.writeValueAsString(result));
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
     }
@@ -158,7 +158,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call(){
             OnboardRESTClient client = parentCommand.createClient();
             client.deleteSubscriptions(subscriptionId);
-            System.out.printf("Subscription %d deleted successfully%n",subscriptionId);
+            System.out.printf("Subscription %s deleted successfully%n",subscriptionId);
             return 0;
         }
     }

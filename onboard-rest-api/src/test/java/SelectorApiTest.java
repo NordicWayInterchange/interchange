@@ -6,58 +6,115 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SelectorApiTest {
 
 
     @Test
     public void testGenerateSelectorApi() throws JsonProcessingException {
-        SelectorApi api = new SelectorApi("countryCode = 'NO' and messageType = 'DENM'");
+        SelectorApi api = new SelectorApi("countryCode = 'SE' and messageType = 'DENM'");
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(api));
     }
 
+    @Test
+    public void addSingleSubscriptionTest() throws JsonProcessingException {
+        Set<SelectorApi> selectors = new HashSet<>();
+        selectors.add(new SelectorApi("countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                "kyrre",
+                selectors
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
+    }
+
+    @Test
+    public void addSubscriptionRequest() throws JsonProcessingException {
+        Set<SelectorApi> selectors = new HashSet<>();
+        selectors.add(new SelectorApi("countryCode = 'NO' and messageType = 'DENM'"));
+        selectors.add(new SelectorApi("countryCode = 'SE' and messageType = 'DENM'"));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                "serviceprovider1",
+                selectors
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
+    }
 
     @Test
     public void addSubscriptionsResponse() throws JsonProcessingException {
-        LocalSubscriptionApi api = new LocalSubscriptionApi(
-                1,
-                LocalSubscriptionStatusApi.REQUESTED,
+        Set<LocalActorSubscription> subscriptions = new HashSet<>();
+        subscriptions.add(new LocalActorSubscription("1",
+                "/serviceprovider1/subscriptions/1",
                 "countryCode = 'NO' and messageType = 'DENM'",
-                Boolean.FALSE,
-                Collections.singleton(new LocalBrokerApi(
-                        "myQueue",
-                        "amqps://myserver",
-                        0,
-                        0
-                ))
+                System.currentTimeMillis(),
+                LocalActorSubscriptionStatusApi.REQUESTED));
+        subscriptions.add(new LocalActorSubscription("2",
+                "/serviceprovider1/subscriptions/2",
+                "countryCode = 'SE' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                LocalActorSubscriptionStatusApi.REQUESTED
+                ));
+        AddSubscriptionsResponse response = new AddSubscriptionsResponse(
+                "serviceprovider1",
+                subscriptions
+
         );
+
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(api));
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
 
     }
 
     @Test
     public void listSubscriptionsResponse() throws JsonProcessingException {
-        LocalSubscriptionListApi api = new LocalSubscriptionListApi(Arrays.asList(
-                new LocalSubscriptionApi(
-                        1,
-                        LocalSubscriptionStatusApi.CREATED,
-                        "countryCode = 'NO' and messageType = 'DENM'",
-                        Boolean.FALSE,
-                        Collections.singleton(new LocalBrokerApi(
-                                "myQueue",
-                                "amqps://myserver",
-                                0,
-                                0)
-                        )
-                )
+        Set<LocalActorSubscription> subscriptions = new HashSet<>();
+        subscriptions.add(new LocalActorSubscription("1",
+                "/serviceprovider1/subscriptions/1",
+                "countryCode = 'NO' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                LocalActorSubscriptionStatusApi.CREATED));
+        subscriptions.add(new LocalActorSubscription("2",
+                "/serviceprovider1/subscriptions/2",
+                "countryCode = 'SE' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                LocalActorSubscriptionStatusApi.CREATED
         ));
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(api));
+        ListSubscriptionsResponse response = new ListSubscriptionsResponse(
+                "serviceprovider1",
+                subscriptions
 
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+
+    }
+
+    @Test
+    public void getSubscriptionResponse() throws JsonProcessingException {
+        Set<Endpoint> endpoints = new HashSet<>();
+        endpoints.add(new Endpoint(
+                "amqps://myserver",
+                "serviceprovider1-1",
+                0,
+                0
+        ));
+        GetSubscriptionResponse response = new GetSubscriptionResponse(
+                "1",
+                "/serviceprovider1/subscriptions/1",
+                "countryCode = 'NO' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                LocalActorSubscriptionStatusApi.CREATED,
+                endpoints
+
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
     @Test
