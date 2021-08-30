@@ -35,6 +35,7 @@ public class TypeTransformer {
                 capability.toApi());
     }
 
+
     public ListSubscriptionsResponse transformLocalSubscriptionsToListSubscriptionResponse(String name, Set<LocalSubscription> subscriptions) {
         return new ListSubscriptionsResponse(name,transformLocalSubscriptionsToLocalActorSubscription(name,subscriptions));
 
@@ -154,7 +155,7 @@ public class TypeTransformer {
         return new GetCapabilityResponse(
                 capabilityId,
                 createCapabilitiesPath(serviceProviderName,capabilityId),
-                capabilityToLocalCapability(serviceProviderName,capability)
+                capability.toApi()
         );
     }
 }

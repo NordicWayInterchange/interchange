@@ -7,12 +7,12 @@ import java.util.Objects;
 public class GetCapabilityResponse {
     private String id;
     private String path;
-    private LocalActorCapability definition;
+    private CapabilityApi definition;
 
     public GetCapabilityResponse() {
     }
 
-    public GetCapabilityResponse(String id, String path, LocalActorCapability definition) {
+    public GetCapabilityResponse(String id, String path, CapabilityApi definition) {
         this.id = id;
         this.path = path;
         this.definition = definition;
@@ -34,11 +34,11 @@ public class GetCapabilityResponse {
         this.path = path;
     }
 
-    public LocalActorCapability getDefinition() {
+    public CapabilityApi getDefinition() {
         return definition;
     }
 
-    public void setDefinition(LocalActorCapability definition) {
+    public void setDefinition(CapabilityApi definition) {
         this.definition = definition;
     }
 

@@ -39,8 +39,8 @@ public class OnboardRESTClient {
         return restTemplate.exchange(server + "/" + user + "/capabilities", HttpMethod.POST, entity, AddCapabilitiesResponse.class).getBody();
     }
 
-    public LocalCapabilityList getServiceProviderCapabilities() {
-        return restTemplate.getForEntity(server + "/" + user + "/capabilities", LocalCapabilityList.class).getBody();
+    public ListCapabilitiesResponse getServiceProviderCapabilities() {
+        return restTemplate.getForEntity(server + "/" + user + "/capabilities", ListCapabilitiesResponse.class).getBody();
     }
 
 
@@ -61,7 +61,7 @@ public class OnboardRESTClient {
 		return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddSubscriptionsResponse.class).getBody();
     }
 
-    public void deleteCapability(Integer capabilityId) {
+    public void deleteCapability(String capabilityId) {
 		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, user, capabilityId));
     }
 
