@@ -4,20 +4,13 @@ import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SelectorApiTest {
+public class OnboardRestAPIDocumentationTest {
 
 
-    @Test
-    public void testGenerateSelectorApi() throws JsonProcessingException {
-        SelectorApi api = new SelectorApi("countryCode = 'SE' and messageType = 'DENM'");
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(api));
-    }
 
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
@@ -117,6 +110,7 @@ public class SelectorApiTest {
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
+    //TODO
     @Test
     public void createDENMCapability() throws JsonProcessingException {
         DenmCapabilityApi api = new DenmCapabilityApi(
@@ -134,28 +128,32 @@ public class SelectorApiTest {
     }
 
     @Test
-    public void localCapabilityApi() throws JsonProcessingException {
-        LocalCapability api = new LocalCapability(
-                1,
-                new DenmCapabilityApi(
-                        "NPRA",
-                        "NO",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+    public void addCapabilitiesRequest() throws JsonProcessingException {
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+                "sp-1",
+                Collections.singleton(
+                        new DenmCapabilityApi(
+                                "NPRA",
+                                "NO",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton("6")
+                        )
                 )
         );
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(api));
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
 
     }
 
     @Test
-    public void localCapabilityList() throws JsonProcessingException {
-        LocalCapabilityList api = new LocalCapabilityList(
-                Arrays.asList(
-                        new LocalCapability(
-                                1,
+    public void addCapabilitiesResponse() throws JsonProcessingException {
+        AddCapabilitiesResponse response = new AddCapabilitiesResponse(
+                "sp-1",
+                Collections.singleton(
+                        new LocalActorCapability(
+                                "1",
+                                "/sp-1/capabilities/1",
                                 new DenmCapabilityApi(
                                         "NPRA",
                                         "NO",
@@ -167,6 +165,46 @@ public class SelectorApiTest {
                 )
         );
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(api));
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+
+    @Test
+    public void listCapabilitiesResponse() throws JsonProcessingException {
+        ListCapabilitiesResponse response = new ListCapabilitiesResponse(
+                "sp-1",
+                Collections.singleton(
+                        new LocalActorCapability(
+                                "1",
+                                "/spi-1/capabilities/1",
+                                new DenmCapabilityApi(
+                                        "NPRA",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("1234"),
+                                        Collections.singleton("6")
+                                )
+                        )
+                )
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+
+    @Test
+    public void getCapabilityResponse() throws JsonProcessingException {
+        GetCapabilityResponse response = new GetCapabilityResponse(
+                "1",
+                "/sp-1/capabilities/1",
+                new DenmCapabilityApi(
+                        "NPRA",
+                        "NO",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                )
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+
     }
 }

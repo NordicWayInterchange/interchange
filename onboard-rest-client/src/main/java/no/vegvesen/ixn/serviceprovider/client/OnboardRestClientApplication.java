@@ -64,7 +64,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalCapabilityList serviceProviderCapabilities = client.getServiceProviderCapabilities();
+            ListCapabilitiesResponse serviceProviderCapabilities = client.getServiceProviderCapabilities();
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(serviceProviderCapabilities));
             return 0;
@@ -134,7 +134,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         OnboardRestClientApplication parentCommand;
 
         @Parameters(index = "0", description = "The ID of the capability to delete")
-        Integer capabilityId;
+        String capabilityId;
 
         @Override
         public Integer call() {

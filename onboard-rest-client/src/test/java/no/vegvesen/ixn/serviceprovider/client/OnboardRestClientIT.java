@@ -97,12 +97,12 @@ public class OnboardRestClientIT extends DockerBaseIT {
         client.addCapability(request);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        LocalCapabilityList newCapabilities = client.getServiceProviderCapabilities();
+        ListCapabilitiesResponse newCapabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(newCapabilities));
         assertThat(newCapabilities.getCapabilities()).hasSize(1);
 
-        LocalCapability localDataType = newCapabilities.getCapabilities().iterator().next();
-        Integer id = localDataType.getId();
+        LocalActorCapability localActorCapability = newCapabilities.getCapabilities().iterator().next();
+        String id = localActorCapability.getId();
         client.deleteCapability(id);
 
         newCapabilities = client.getServiceProviderCapabilities();
@@ -139,7 +139,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         );
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
-        LocalCapabilityList capabilities = client.getServiceProviderCapabilities();
+        ListCapabilitiesResponse capabilities = client.getServiceProviderCapabilities();
         System.out.println(objectMapper.writeValueAsString(capabilities));
 
         ListSubscriptionsResponse serviceProviderSubscriptionRequest = client.getServiceProviderSubscriptions();
