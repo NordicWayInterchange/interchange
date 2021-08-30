@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
@@ -44,7 +43,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-	public LocalCapability addCapabilities(@PathVariable String serviceProviderName, @RequestBody CapabilityApi capabilityApi) {
+	public AddCapabilitiesResponse addCapabilities(@PathVariable String serviceProviderName, @RequestBody AddCapabilitiesRequest capabilityApi) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -55,7 +54,7 @@ public class OnboardRestController {
 		}
 
 
-		Capability newLocalCapability = capabilityApiTransformer.capabilityApiToCapability(capabilityApi);
+		Set<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 
 		if (serviceProviderToUpdate == null) {
@@ -63,30 +62,36 @@ public class OnboardRestController {
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
 		}
 
-		serviceProviderToUpdate.getCapabilities().addDataType(newLocalCapability);
+		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
+		for (Capability newLocalCapability : newLocalCapabilities) {
+			capabilities.addDataType(newLocalCapability);
+		}
 		logger.info("Service provider to update: {}", serviceProviderToUpdate.toString());
 
 		// Save the Service Provider representation in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
-		Capability addedCapability = null;
-		for (Capability capability : saved.getCapabilities().getCapabilities()) {
-			if (capability.equals(newLocalCapability)) {
-				addedCapability = capability;
-			}
-		}
+		//TODO test this with regard to ID's
+		Set<Capability> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
+		addedCapabilities.retainAll(newLocalCapabilities);
 
-
+		AddCapabilitiesResponse response = TypeTransformer.addCapabilitiesResponse(serviceProviderName,addedCapabilities);
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		OnboardMDCUtil.removeLogVariables();
-		LocalCapability localCapability = null;
-		if (addedCapability != null) {
-			localCapability = new LocalCapability(addedCapability.getId(), addedCapability.toApi());
-		}
-		return localCapability;
+		return response;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ListCapabilitiesResponse listCapabilities(@PathVariable String serviceProviderName) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(serviceProviderName,serviceProvider.getCapabilities().getCapabilities());
+		OnboardMDCUtil.removeLogVariables();
+		return response;
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/capabilities/{capabilityId}")
-	public RedirectView deleteCapability(@PathVariable String serviceProviderName, @PathVariable Integer capabilityId ) {
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void deleteCapability(@PathVariable String serviceProviderName, @PathVariable Integer capabilityId ) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -106,9 +111,21 @@ public class OnboardRestController {
 		serviceProviderRepository.save(serviceProviderToUpdate);
 
 		logger.info("Updated Service Provider: {}", serviceProviderToUpdate.toString());
-		RedirectView redirectView = new RedirectView("/{serviceProviderName}/capabilities");
 		OnboardMDCUtil.removeLogVariables();
-		return redirectView;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities/{capabilityId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public GetCapabilityResponse getServiceProviderCapability(@PathVariable String serviceProviderName, @PathVariable Integer capabilityId) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		Capability capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
+				c.getId().equals(capabilityId))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, serviceProviderName)));
+		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(serviceProviderName,capability);
+		OnboardMDCUtil.removeLogVariables();
+		return response;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
@@ -180,15 +197,6 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-	public LocalCapabilityList getServiceProviderCapabilities(@PathVariable String serviceProviderName) {
-		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
-		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
-		LocalCapabilityList localDataTypeList = typeTransformer.transformToLocalCapabilityList(serviceProvider.getCapabilities().getCapabilities());
-		OnboardMDCUtil.removeLogVariables();
-		return localDataTypeList;
-	}
-
 	private ServiceProvider checkAndGetServiceProvider(String serviceProviderName) {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
@@ -211,7 +219,10 @@ public class OnboardRestController {
 	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable String serviceProviderName, @PathVariable Integer subscriptionId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
-		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s -> s.getSub_id().equals(subscriptionId)).findFirst().get();
+		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
+				s.getSub_id().equals(subscriptionId))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,serviceProviderName)));
 		logger.info("Received poll from Service Provider {} with queueConsumerUser = {}", serviceProviderName, localSubscription.getQueueConsumerUser());
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProviderName,localSubscription);

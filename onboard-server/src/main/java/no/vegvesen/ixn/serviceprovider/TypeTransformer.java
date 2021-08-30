@@ -1,9 +1,8 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.model.Capability;
-import no.vegvesen.ixn.federation.model.LocalBroker;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
 import java.time.LocalDateTime;
@@ -12,6 +11,29 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 public class TypeTransformer {
+
+    public static AddCapabilitiesResponse addCapabilitiesResponse(String serviceProviderName, Set<Capability> capabilities) {
+        return new AddCapabilitiesResponse(
+               serviceProviderName,
+               capabilitySetToLocalActorCapability(serviceProviderName,capabilities)
+        );
+    }
+
+    private static Set<LocalActorCapability> capabilitySetToLocalActorCapability(String serviceProviderName, Set<Capability> capabilities) {
+        Set<LocalActorCapability> result = new HashSet<>();
+        for (Capability capability : capabilities) {
+            result.add(capabilityToLocalCapability(serviceProviderName,capability));
+        }
+        return result;
+    }
+
+    private static LocalActorCapability capabilityToLocalCapability(String serviceProviderName, Capability capability) {
+        String id = capability.getId().toString();
+        return new LocalActorCapability(
+                id,
+                createCapabilitiesPath(serviceProviderName, id),
+                capability.toApi());
+    }
 
     public ListSubscriptionsResponse transformLocalSubscriptionsToListSubscriptionResponse(String name, Set<LocalSubscription> subscriptions) {
         return new ListSubscriptionsResponse(name,transformLocalSubscriptionsToLocalActorSubscription(name,subscriptions));
@@ -32,16 +54,8 @@ public class TypeTransformer {
         return result;
     }
 
-    public LocalCapabilityList transformToLocalCapabilityList(Set<Capability> capabilities) {
-		List<LocalCapability> idList = new LinkedList<>();
-		for (Capability capability : capabilities) {
-			idList.add(new LocalCapability(capability.getId(), capability.toApi()));
-		}
-		return new LocalCapabilityList(idList);
-	}
 
-
-	public LocalSubscription transformSelectorApiToLocalSubscription(String serviceProviderName, SelectorApi selectorApi) {
+    public LocalSubscription transformSelectorApiToLocalSubscription(String serviceProviderName, SelectorApi selectorApi) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
                 selectorApi.getSelector(),
                 serviceProviderName);
@@ -73,6 +87,10 @@ public class TypeTransformer {
 
     private String createSubscriptionPath(String serviceProviderName, String subscriptionId) {
         return String.format("/%s/subscriptions/%s", serviceProviderName, subscriptionId);
+    }
+
+    private static String createCapabilitiesPath(String serviceProviderName, String capabilityId) {
+        return String.format("/%s/capabilities/%s", serviceProviderName, capabilityId);
     }
 
     private long transformLocalDateTimeToEpochMili(LocalDateTime lastUpdated) {
@@ -112,5 +130,31 @@ public class TypeTransformer {
             default:
                 return LocalActorSubscriptionStatusApi.ILLEGAL;
         }
+    }
+
+    public Set<Capability> capabilitiesRequestToCapabilities(CapabilityToCapabilityApiTransformer capabilityApiTransformer, AddCapabilitiesRequest capabilitiesRequest) {
+        Set<Capability> capabilities = new HashSet<>();
+        for (CapabilityApi capabilityApi : capabilitiesRequest.getCapabilities()) {
+            Capability capability = capabilityApiTransformer.capabilityApiToCapability(capabilityApi);
+            capabilities.add(capability);
+
+        }
+        return capabilities;
+    }
+
+    public ListCapabilitiesResponse listCapabilitiesResponse(String serviceProviderName, Set<Capability> capabilities) {
+        return new ListCapabilitiesResponse(
+                serviceProviderName,
+                capabilitySetToLocalActorCapability(serviceProviderName,capabilities)
+        );
+    }
+
+    public GetCapabilityResponse getCapabilityResponse(String serviceProviderName, Capability capability) {
+        String capabilityId = capability.getId().toString();
+        return new GetCapabilityResponse(
+                capabilityId,
+                createCapabilitiesPath(serviceProviderName,capabilityId),
+                capabilityToLocalCapability(serviceProviderName,capability)
+        );
     }
 }

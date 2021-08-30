@@ -90,7 +90,11 @@ public class OnboardRestClientIT extends DockerBaseIT {
     public void addCapabilityCheckAndDelete() throws JsonProcessingException {
 
         DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
-        client.addCapability(datexNO);
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+                USER,
+                Collections.singleton(datexNO)
+        );
+        client.addCapability(request);
 
         ObjectMapper objectMapper = new ObjectMapper();
         LocalCapabilityList newCapabilities = client.getServiceProviderCapabilities();

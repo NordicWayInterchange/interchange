@@ -32,11 +32,11 @@ public class OnboardRESTClient {
         this.user = user;
     }
 
-    public LocalCapability addCapability(CapabilityApi capability) {
+    public AddCapabilitiesResponse addCapability(AddCapabilitiesRequest capability) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<CapabilityApi> entity = new HttpEntity<>(capability,headers);
-        return restTemplate.exchange(server + "/" + user + "/capabilities", HttpMethod.POST, entity, LocalCapability.class).getBody();
+        HttpEntity<AddCapabilitiesRequest> entity = new HttpEntity<>(capability,headers);
+        return restTemplate.exchange(server + "/" + user + "/capabilities", HttpMethod.POST, entity, AddCapabilitiesResponse.class).getBody();
     }
 
     public LocalCapabilityList getServiceProviderCapabilities() {

@@ -45,17 +45,40 @@ public class OnboardRestControllerIT {
         DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
         String serviceProviderName = "serviceprovider";
 
-        LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
+        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
+        AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
+                serviceProviderName,
+                Collections.singleton(datexNO)
+        ));
         assertThat(addedCapability).isNotNull();
-		LocalCapabilityList serviceProviderCapabilities = restController.getServiceProviderCapabilities(serviceProviderName);
+		ListCapabilitiesResponse serviceProviderCapabilities = restController.listCapabilities(serviceProviderName);
         assertThat(serviceProviderCapabilities.getCapabilities()).hasSize(1);
 
         //Test that we don't mess up subscriptions and capabilities
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(0);
 
-        LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
-        restController.deleteCapability(serviceProviderName, saved.getId());
+        LocalActorCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
+        //LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
+        restController.deleteCapability(serviceProviderName, Integer.parseInt(saved.getId()));
+    }
+
+    @Test
+    public void testGettingCapability() {
+        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        String serviceProviderName = "serviceprovider";
+
+        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
+        AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
+                serviceProviderName,
+                Collections.singleton(datexNO)
+        ));
+        assertThat(addedCapability).isNotNull();
+        LocalActorCapability capability = addedCapability.getCapabilities().stream().findFirst()
+                .orElseThrow(() -> new AssertionError("No capabilities in response"));
+        GetCapabilityResponse response = restController.getServiceProviderCapability(serviceProviderName,Integer.parseInt(capability.getId()));
+        assertThat(response.getId()).isEqualTo(capability.getId());
+
     }
 
     @Test
