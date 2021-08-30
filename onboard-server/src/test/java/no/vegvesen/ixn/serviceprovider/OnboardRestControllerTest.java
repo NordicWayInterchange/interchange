@@ -78,14 +78,28 @@ public class OnboardRestControllerTest {
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
 		DatexCapabilityApi datexNo = new DatexCapabilityApi("NO");
-		String datexNoString = objectMapper.writeValueAsString(datexNo);
-		String capabilitiesPath = String.format("/%s/capabilities", firstServiceProvider);
+		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+				firstServiceProvider,
+				Collections.singleton(datexNo)
+		);
+		String datexNoString = objectMapper.writeValueAsString(request);
 
-		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
+			Object argument = i.getArgument(0);
+			ServiceProvider s = (ServiceProvider) argument;
+			Set<Capability> capabilities = s.getCapabilities().getCapabilities();
+			int id = 0;
+			for (Capability capability : capabilities) {
+				if (capability.getId() == null) {
+					capability.setId(id++);
+				}
+			}
+			return s;
+		});
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
 		mockMvc.perform(
-				post(capabilitiesPath)
+				post(String.format("/%s/capabilities", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(datexNoString))
@@ -118,7 +132,7 @@ public class OnboardRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().is3xxRedirection());
+				.andExpect(status().is2xxSuccessful());
 	}
 
 	@Test
@@ -127,9 +141,14 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		DatexCapabilityApi datexFi = new DatexCapabilityApi("FI");
+		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+				"SecondServiceProvider",
+                Collections.singleton(datexFi)
+
+		);
 		String capabilitiesPath = String.format("/%s/capabilities", "SecondServiceProvider");
 
-		String datexFiString = objectMapper.writeValueAsString(datexFi);
+		String datexFiString = objectMapper.writeValueAsString(request);
 
 		mockMvc.perform(
 				post(capabilitiesPath)

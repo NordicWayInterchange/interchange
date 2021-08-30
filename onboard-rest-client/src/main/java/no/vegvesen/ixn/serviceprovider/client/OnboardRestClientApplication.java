@@ -84,8 +84,8 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws IOException {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            CapabilityApi capability = mapper.readValue(file,CapabilityApi.class);
-            LocalCapability result = client.addCapability(capability);
+            AddCapabilitiesRequest capability = mapper.readValue(file,AddCapabilitiesRequest.class);
+            AddCapabilitiesResponse result = client.addCapability(capability);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
