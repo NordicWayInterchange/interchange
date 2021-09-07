@@ -1,7 +1,8 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-public enum LocalSubscriptionStatusApi {
+public enum LocalActorSubscriptionStatusApi {
     REQUESTED,
     CREATED,
-    TEAR_DOWN
+    ILLEGAL,
+    NOT_VALID
 }

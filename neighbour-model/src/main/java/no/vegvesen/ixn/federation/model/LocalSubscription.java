@@ -28,11 +28,10 @@ public class LocalSubscription {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
-    private boolean createNewQueue;
+    private boolean createNewQueue = false;
 
     private String queueConsumerUser;
 
-    //private String brokerUrl;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locbrok_id", foreignKey = @ForeignKey(name = "fk_locbrok_sub"))
@@ -40,6 +39,12 @@ public class LocalSubscription {
 
     public LocalSubscription() {
 
+    }
+
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String queueConsumerUser) {
+        this.status = status;
+        this.selector = selector;
+        this.queueConsumerUser = queueConsumerUser;
     }
 
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
@@ -122,13 +127,6 @@ public class LocalSubscription {
         this.queueConsumerUser = queueConsumerUser;
     }
 
-    //public String getBrokerUrl() {
-    //    return brokerUrl;
-    //}
-
-    //public void setBrokerUrl(String brokerUrl) {
-    //    this.brokerUrl = brokerUrl;
-    //}
 
     public Set<LocalBroker> getLocalBrokers() {
         return localBrokers;
@@ -187,5 +185,13 @@ public class LocalSubscription {
 
     public LocalDateTime getLastUpdated() {
         return lastUpdated;
+    }
+
+    public void setSub_id(Integer sub_id) {
+        this.sub_id = sub_id;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

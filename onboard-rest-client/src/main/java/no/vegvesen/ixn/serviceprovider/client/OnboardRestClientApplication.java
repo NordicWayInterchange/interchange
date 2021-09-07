@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -63,7 +64,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalCapabilityList serviceProviderCapabilities = client.getServiceProviderCapabilities();
+            ListCapabilitiesResponse serviceProviderCapabilities = client.getServiceProviderCapabilities();
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(serviceProviderCapabilities));
             return 0;
@@ -83,8 +84,8 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws IOException {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            CapabilityApi capability = mapper.readValue(file,CapabilityApi.class);
-            LocalCapability result = client.addCapability(capability);
+            AddCapabilitiesRequest capability = mapper.readValue(file,AddCapabilitiesRequest.class);
+            AddCapabilitiesResponse result = client.addCapability(capability);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
@@ -99,7 +100,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalSubscriptionListApi subscriptions = client.getServiceProviderSubscriptions();
+            ListSubscriptionsResponse subscriptions = client.getServiceProviderSubscriptions();
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(subscriptions));
             return 0;
@@ -119,9 +120,9 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            SelectorApi subscription = mapper.readValue(file,SelectorApi.class);
-            LocalSubscriptionApi result = client.addSubscription(subscription);
-            System.out.println(mapper.writeValueAsString(result));
+            AddSubscriptionsRequest requestApi = mapper.readValue(file, AddSubscriptionsRequest.class);
+            AddSubscriptionsResponse result = client.addSubscription(requestApi);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
     }
@@ -133,7 +134,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         OnboardRestClientApplication parentCommand;
 
         @Parameters(index = "0", description = "The ID of the capability to delete")
-        Integer capabilityId;
+        String capabilityId;
 
         @Override
         public Integer call() {
@@ -151,13 +152,13 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         OnboardRestClientApplication parentCommand;
 
         @Parameters(index = "0", description = "The ID of the subscription to delete")
-        Integer subscriptionId;
+        String subscriptionId;
 
         @Override
         public Integer call(){
             OnboardRESTClient client = parentCommand.createClient();
             client.deleteSubscriptions(subscriptionId);
-            System.out.printf("Subscription %d deleted successfully%n",subscriptionId);
+            System.out.printf("Subscription %s deleted successfully%n",subscriptionId);
             return 0;
         }
     }
@@ -172,10 +173,12 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         Integer subscriptionId;
 
         @Override
-        public Integer call() {
+        public Integer call() throws JsonProcessingException {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalSubscriptionApi subscription = client.getSubscription(subscriptionId);
+            GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
             System.out.printf("Subscription %d successfully polled with %n", subscriptionId);
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
             return 0;
         }
     }
