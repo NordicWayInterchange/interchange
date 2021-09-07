@@ -293,6 +293,34 @@ public class OnboardRestController {
 		return new PrivateChannelListApi(privateChannelsApis);
 	}
 
+	//TODO implement!
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
+	public AddDeliveriesResponse addDeliveries(String serviceProviderName, AddDeliveriesRequest request) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		return new AddDeliveriesResponse();
+	}
+
+
+	//TODO implement!
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ListDeliveriesResponse listDeliveries(String serviceProviderName) {
+		 return new ListDeliveriesResponse();
+	}
+
+	//TODO implement!
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries/{deliveryId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public GetDeliveryResponse getDelivery(String serviceProviderName, String deliveryId) {
+		return new GetDeliveryResponse();
+	}
+
+	//TODO implement!
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/deliveries/{deliveryId}")
+	public void deleteDeliverry(String deliveryId) {
+
+	}
+
 	// TODO: Remove
 	@RequestMapping(method = RequestMethod.GET, path = "/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<ServiceProvider> getServiceProviders() {
