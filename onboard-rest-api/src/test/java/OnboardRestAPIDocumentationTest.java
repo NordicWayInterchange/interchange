@@ -99,7 +99,7 @@ public class OnboardRestAPIDocumentationTest {
         GetSubscriptionResponse response = new GetSubscriptionResponse(
                 "1",
                 "/serviceprovider1/subscriptions/1",
-                "countryCode = 'NO' and messageType = 'DENM'",
+                "originatingCountry = 'NO' and messageType = 'DENM'",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
                 endpoints
@@ -206,5 +206,70 @@ public class OnboardRestAPIDocumentationTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
 
+    }
+
+    @Test
+    public void addDelieriesRequest() throws JsonProcessingException {
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                "sp-1",
+                Collections.singleton(new SelectorApi(
+                        "originatingCountry = 'NO' and messageType = 'DENM'"
+                ))
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
+    }
+
+    @Test
+    public void addDeliveriesResponse() throws JsonProcessingException {
+        AddDeliveriesResponse response = new AddDeliveriesResponse(
+                "sp-1",
+                Collections.singleton(new Delivery(
+                        "1",
+                        "/sp-1/deliveries/1",
+                        "originatingCountry = 'NO' and messageType = 'DENM'",
+                        System.currentTimeMillis(),
+                        DeliveryStatus.REQUESTED
+                ))
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+
+    @Test
+    public void listDeliveriesResponse() throws JsonProcessingException {
+        ListDeliveriesResponse response = new ListDeliveriesResponse(
+                "sp-1",
+                Collections.singleton(new Delivery(
+                        "1",
+                        "/sp-1/deliveries/1",
+                        "originatingCountry = 'NO' and messageType = 'DENM'",
+                        System.currentTimeMillis(),
+                        DeliveryStatus.CREATED
+
+                ))
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+
+
+    @Test
+    public void getDeliveryResponse() throws JsonProcessingException {
+        GetDeliveryResponse response = new GetDeliveryResponse(
+                "1",
+                Collections.singleton(new DeliveryEndpoint(
+                        "/sp-1/deliveries/1",
+                        "sp1-1",
+                        "originatingCountry = 'NO' and messageType = 'DENM'"
+                )),
+                "/sp-1/deliveries/1",
+                "originatingCountry = 'NO' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                DeliveryStatus.CREATED
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 }
