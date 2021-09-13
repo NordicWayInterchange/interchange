@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
@@ -68,6 +67,29 @@ public class OnboardRESTClient {
     public GetSubscriptionResponse getSubscription(Integer localSubscriptionId) {
         String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId.toString());
         return restTemplate.getForEntity(url, GetSubscriptionResponse.class).getBody();
+    }
+
+    public AddDeliveriesResponse addServiceProviderDeliveries(AddDeliveriesRequest request) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddDeliveriesRequest> entity = new HttpEntity<>(request,headers);
+        String url = String.format("/%s/deliveries", user) ;
+        return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddDeliveriesResponse.class).getBody();
+    }
+
+    public ListDeliveriesResponse listServiceProviderDeliveries() {
+        String url = String.format("%s/%s/deliveries",server,user);
+        return restTemplate.getForEntity(url,ListDeliveriesResponse.class).getBody();
+    }
+
+    public GetDeliveryResponse getDelivery(String deliveryId) {
+        String url = String.format("%s/%s/deliveries/%s",server,user,deliveryId);
+        return restTemplate.getForEntity(url,GetDeliveryResponse.class).getBody();
+    }
+
+    public void deleteDelivery(String id) {
+        String url = String.format("%s/%s/deliveries/%s",server,user,id);
+        restTemplate.delete(url);
     }
 
     public PrivateChannelApi addPrivateChannel(PrivateChannelApi privateChannelApi) {
