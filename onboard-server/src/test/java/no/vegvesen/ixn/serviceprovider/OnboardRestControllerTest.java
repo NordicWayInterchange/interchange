@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
@@ -31,8 +32,7 @@ import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -108,7 +108,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	void deletingExistingCapabilitiesReturnsStatusOk() throws Exception {
+	void deletingExistingCapabilitiesReturnsNoContent() throws Exception {
 		String serviceProviderName = "Second Service Provider";
 		mockCertificate(serviceProviderName);
 
@@ -132,7 +132,7 @@ public class OnboardRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().is2xxSuccessful());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -231,7 +231,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	void deletingSubscriptionReturnsStatusRedirectToRefreshTheCurrentSubscriptions() throws Exception {
+	void deletingSubscriptionReturnsNoContent() throws Exception {
 		String firstServiceProviderName = "FirstServiceProvider";
 		mockCertificate(firstServiceProviderName);
 
@@ -260,7 +260,7 @@ public class OnboardRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().is2xxSuccessful());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -339,6 +339,63 @@ public class OnboardRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(capabilityApiToServerJson))
 				.andDo(print())
-				.andExpect(status().is4xxClientError());
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void postingDeliveryReturnsStatusOk() throws Exception {
+		String firstServiceProvider = "First Service Provider";
+		mockCertificate(firstServiceProvider);
+		AddDeliveriesRequest request = new AddDeliveriesRequest(
+				firstServiceProvider,
+				Collections.singleton(new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'"))
+		);
+
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		mockMvc.perform(
+				post(String.format("/%s/deliveries",firstServiceProvider))
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestBody))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void listingDeliveriesReturnsStatusOk() throws Exception {
+		String firstServiceProvider = "First Service Provider";
+		mockCertificate(firstServiceProvider);
+		mockMvc.perform(
+				get(String.format("/%s/deliveries",firstServiceProvider))
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+
+	}
+
+	@Test
+	public void getDeliveryThatExistsReturnsStatusOk() throws Exception {
+		String firstServiceProvider = "First Service Provider";
+		String deliveryId = "1";
+		mockCertificate(firstServiceProvider);
+		mockMvc.perform(
+				get(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void deleteDeliveryReturnsNoContent() throws Exception {
+
+		String firstServiceProvider = "First Service Provider";
+		String deliveryId = "1";
+		mockCertificate(firstServiceProvider);
+		mockMvc.perform(
+				delete(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNoContent());
+
 	}
 }
