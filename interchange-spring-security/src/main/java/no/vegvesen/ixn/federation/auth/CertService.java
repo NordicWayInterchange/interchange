@@ -17,8 +17,8 @@ public class CertService{
 		String commonName = principal.getName();
 
 		if (!commonName.equals(apiName)) {
-			logger.error("Received capability post from neighbour {}, but CN on certificate was {}. Rejecting...", apiName, commonName);
-			String errorMessage = "Received capability post from neighbour %s, but CN on certificate was %s. Rejecting...";
+			logger.error("Received request for {}, but CN on certificate was {}. Rejecting...", apiName, commonName);
+			String errorMessage = "Received request for %s, but CN on certificate was %s. Rejecting...";
 			throw new CNAndApiObjectMismatchException(String.format(errorMessage, apiName, commonName));
 		}
 	}

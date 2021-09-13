@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -290,34 +291,49 @@ public class OnboardRestController {
 		for(PrivateChannel privateChannel : privateChannels){
 			privateChannelsApis.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
 		}
+		OnboardMDCUtil.removeLogVariables();
 		return new PrivateChannelListApi(privateChannelsApis);
 	}
 
 	//TODO implement!
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-	public AddDeliveriesResponse addDeliveries(String serviceProviderName, AddDeliveriesRequest request) {
+	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, AddDeliveriesRequest request) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
+		OnboardMDCUtil.removeLogVariables();
 		return new AddDeliveriesResponse();
 	}
 
 
 	//TODO implement!
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ListDeliveriesResponse listDeliveries(String serviceProviderName) {
+	public ListDeliveriesResponse listDeliveries(@PathVariable String serviceProviderName) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		OnboardMDCUtil.removeLogVariables();
 		 return new ListDeliveriesResponse();
 	}
 
 	//TODO implement!
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries/{deliveryId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetDeliveryResponse getDelivery(String serviceProviderName, String deliveryId) {
+	public GetDeliveryResponse getDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		OnboardMDCUtil.removeLogVariables();
 		return new GetDeliveryResponse();
 	}
 
 	//TODO implement!
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/deliveries/{deliveryId}")
-	public void deleteDeliverry(String deliveryId) {
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
+	public void deleteDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
+		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		OnboardMDCUtil.removeLogVariables();
 
 	}
 
