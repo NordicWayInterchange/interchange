@@ -151,6 +151,29 @@ public class OnboardRestClientIT extends DockerBaseIT {
         assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscriptions())).hasSize(0);
     }
 
+    @Test
+    public void callAddDeliveriesSucceeds() {
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                USER,
+                Collections.singleton(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"))
+        );
+        AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
+        //TODO check the actual response details
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    public void callListDeliveriesSucceeds() {
+        ListDeliveriesResponse response = client.listServiceProviderDeliveries();
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    public void callGetDeliverySucceeds() {
+        //TODO have to actually add a delivery, and get it's ID before doing the GET on the new ID
+        GetDeliveryResponse response = client.getDelivery("1");
+        assertThat(response).isNotNull();
+    }
 
     private List<LocalActorSubscription> filterOutTearDownSubscriptions(Set<LocalActorSubscription> subscriptions) {
         return subscriptions.stream().filter(sub -> !sub.getStatus().equals(LocalActorSubscriptionStatusApi.NOT_VALID)).collect(Collectors.toList());
