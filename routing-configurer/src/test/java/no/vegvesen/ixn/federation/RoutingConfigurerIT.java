@@ -44,12 +44,12 @@ import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("rawtypes")
 @SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, ServiceProviderRouter.class})
-@ContextConfiguration(initializers = {RoutingConfigurerST.Initializer.class})
+@ContextConfiguration(initializers = {RoutingConfigurerIT.Initializer.class})
 @Testcontainers
-public class RoutingConfigurerST extends QpidDockerBaseIT {
+public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 
-	private static Path testKeysPath = getFolderPath("target/test-keys" + RoutingConfigurerST.class.getSimpleName());
+	private static Path testKeysPath = getFolderPath("target/test-keys" + RoutingConfigurerIT.class.getSimpleName());
 
 	@Container
 	public static final GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
@@ -58,7 +58,7 @@ public class RoutingConfigurerST extends QpidDockerBaseIT {
 	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
             .dependsOn(keyContainer);
 
-	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerST.class);
+	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
 
 	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());

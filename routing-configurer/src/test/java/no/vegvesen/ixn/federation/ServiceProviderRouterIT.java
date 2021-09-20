@@ -42,14 +42,14 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 @SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
-@ContextConfiguration(initializers = {ServiceProviderRouterST.Initializer.class})
+@ContextConfiguration(initializers = {ServiceProviderRouterIT.Initializer.class})
 @Testcontainers
-public class ServiceProviderRouterST extends QpidDockerBaseIT {
+public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
-	private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterST.class);
+	private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
 
-	private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterST.class.getSimpleName());
+	private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
 
 	@Container
 	private static KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
