@@ -42,10 +42,13 @@ class NeighbourServiceTest {
 	private String myName = "bouvet.itsinterchange.eu";
 
 	NeighbourService neighbourService;
+	CapabilitiesService capabilitiesService;
 
 	@BeforeEach
 	void setUp() {
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, new InterchangeNodeProperties(myName, "5671"), listenerEndpointRepository);
+		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, interchangeNodeProperties, listenerEndpointRepository);
+		capabilitiesService = new CapabilitiesService(neighbourRepository,dnsFacade,interchangeNodeProperties,backoffProperties);
 	}
 
 	@Test
@@ -65,7 +68,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
+		CapabilitiesApi response = capabilitiesService.incomingCapabilities(ericsson, new Self("bouvet"));
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
@@ -110,7 +113,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		neighbourService.incomingCapabilities(ericsson, new Self(myName));
+		capabilitiesService.incomingCapabilities(ericsson, new Self(myName));
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 	}
@@ -126,7 +129,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		Throwable thrown = catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, new Self("some-node-name")));
+		Throwable thrown = catchThrowable(() -> capabilitiesService.incomingCapabilities(unknownNeighbour, new Self("some-node-name")));
 
 		assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 		verify(dnsFacade, times(1)).lookupNeighbours();
@@ -176,14 +179,14 @@ class NeighbourServiceTest {
 	@Test
 	public void findBouvetExists() {
 		when(dnsFacade.lookupNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
-		Neighbour neighbour = neighbourService.findNeighbour("bouveta-fed.itsinterchange.eu");
+		Neighbour neighbour = capabilitiesService.findNeighbour("bouveta-fed.itsinterchange.eu");
 		assertThat(neighbour).isNotNull();
 	}
 
 	@Test
 	public void findNotDefinedDoesNotExists() {
 		when(dnsFacade.lookupNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
-		Throwable thrown = catchThrowable(() -> neighbourService.findNeighbour("no-such-interchange.itsinterchange.eu"));
+		Throwable thrown = catchThrowable(() -> capabilitiesService.findNeighbour("no-such-interchange.itsinterchange.eu"));
 		assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 	}
 

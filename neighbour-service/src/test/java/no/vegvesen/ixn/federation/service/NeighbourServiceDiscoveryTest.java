@@ -27,7 +27,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {NeighbourService.class, InterchangeNodeProperties.class, GracefulBackoffProperties.class})
+@SpringBootTest(classes = {NeighbourService.class, CapabilitiesService.class, InterchangeNodeProperties.class, GracefulBackoffProperties.class})
 public class NeighbourServiceDiscoveryTest {
 
 	@MockBean
@@ -48,6 +48,9 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Autowired
 	private NeighbourService neighbourService;
+
+	@Autowired
+	private CapabilitiesService capabilitiesService;
 
 	private Self self;
 
@@ -133,7 +136,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		doReturn(self).when(selfService).fetchSelf();
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		capabilitiesService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -167,7 +170,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.getControlConnection().setConnectionStatus(ConnectionStatus.FAILED);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		capabilitiesService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		verify(neighbourFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), any() );
 	}
@@ -221,7 +224,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		capabilitiesService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		verify(neighbourFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), any());
 	}
@@ -277,7 +280,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		capabilitiesService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		assertThat(ericsson.getControlConnection().getBackoffAttempts()).isEqualTo(1);
 	}
@@ -297,7 +300,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neighbourService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		capabilitiesService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
 
 		assertThat(ericsson.getControlConnection().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 		verify(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any());
@@ -496,7 +499,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
 		when(neighbourFacade.postCapabilitiesToCapabilities(any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
 
-		neighbourService.retryUnreachable(self, neighbourFacade);
+		capabilitiesService.retryUnreachable(self, neighbourFacade);
 
 		verify(neighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 	}

@@ -53,6 +53,9 @@ public class NeighbourDiscovererIT {
 	NeighbourService neighbourService;
 
 	@Autowired
+	CapabilitiesService capabilitiesService;
+
+	@Autowired
 	NeighbourRepository repository;
 
 	@Autowired
@@ -103,7 +106,7 @@ public class NeighbourDiscovererIT {
 		Self self = selfService.fetchSelf();
 		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 
-		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
+		capabilitiesService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
 		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any() );
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
@@ -114,7 +117,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Sets.newLinkedHashSet(new DatexCapabilityApi("NO"))), selfService.fetchSelf());
+		capabilitiesService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Sets.newLinkedHashSet(new DatexCapabilityApi("NO"))), selfService.fetchSelf());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -130,7 +133,7 @@ public class NeighbourDiscovererIT {
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any())).thenReturn(c1);
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any() )).thenReturn(c2);
 
-		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
+		capabilitiesService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
