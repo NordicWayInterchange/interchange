@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.service.CapabilitiesService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import no.vegvesen.ixn.onboard.SelfService;
@@ -26,16 +27,19 @@ public class NeighbourRestController {
 	private final NeighbourService neighbourService;
 	private final SelfService selfService;
 	private final CertService certService;
+	private final CapabilitiesService capabilitiesService;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
 	@Autowired
 	public NeighbourRestController(NeighbourService neighbourService,
 								   CertService certService,
-								   SelfService selfService) {
+								   SelfService selfService,
+								   CapabilitiesService capabilitiesService) {
 		this.neighbourService = neighbourService;
 		this.certService = certService;
 		this.selfService = selfService;
+		this.capabilitiesService = capabilitiesService;
 	}
 
 	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -115,7 +119,7 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.info("Common name of certificate matches Neighbour name in capability api object.");
 
-		CapabilitiesApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, selfService.fetchSelf());
+		CapabilitiesApi capabilitiesApiResponse = capabilitiesService.incomingCapabilities(neighbourCapabilities, selfService.fetchSelf());
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();
 		return capabilitiesApiResponse;

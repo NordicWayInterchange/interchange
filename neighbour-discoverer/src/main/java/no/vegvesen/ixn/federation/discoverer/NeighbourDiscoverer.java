@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.service.CapabilitiesService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
@@ -34,17 +35,20 @@ public class NeighbourDiscoverer {
 	private final SelfService selfService;
 	private final NeighbourRESTFacade neighbourFacade;
 	private final ServiceProviderService serviceProviderService;
+	private final CapabilitiesService capabilitiesService;
 
 
 	@Autowired
 	NeighbourDiscoverer(NeighbourService neighbourService,
 						SelfService selfService,
 						NeighbourRESTFacade neighbourFacade,
-						ServiceProviderService serviceProviderService) {
+						ServiceProviderService serviceProviderService,
+						CapabilitiesService capabilitiesService) {
 		this.neighbourService = neighbourService;
 		this.selfService = selfService;
 		this.neighbourFacade = neighbourFacade;
 		this.serviceProviderService = serviceProviderService;
+		this.capabilitiesService = capabilitiesService;
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), null);
 	}
 
@@ -56,12 +60,12 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void scheduleCapabilityExchangeWithNeighbours() {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
-		neighbourService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), neighbourFacade);
+		capabilitiesService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), neighbourFacade);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
 	public void scheduleUnreachableRetry() {
-		neighbourService.retryUnreachable(selfService.fetchSelf(), neighbourFacade);
+		capabilitiesService.retryUnreachable(selfService.fetchSelf(), neighbourFacade);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
