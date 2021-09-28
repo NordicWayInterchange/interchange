@@ -32,7 +32,7 @@ public class ImageSource extends Source{
         message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
 
         message.writeBytes(convertImageToByteArray(imageName));
-        sendBytesMessage(message, Message.DEFAULT_TIME_TO_LIVE);
+        send(message, Message.DEFAULT_TIME_TO_LIVE);
     }
 
     public void sendNonPersistentByteMessageWithImage(String originatingCountry, String messageQuadTreeTiles, String imageName) throws JMSException, IOException {
@@ -51,7 +51,7 @@ public class ImageSource extends Source{
         message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
 
         message.writeBytes(convertImageToByteArray(imageName));
-        sendNonPersistentBytesMessage(message, Message.DEFAULT_TIME_TO_LIVE);
+        sendNonPersistentMessage(message, Message.DEFAULT_TIME_TO_LIVE);
     }
 
     public static byte[] convertImageToByteArray(String imageName) throws IOException {

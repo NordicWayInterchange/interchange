@@ -4,6 +4,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 
 import javax.jms.JMSException;
@@ -108,10 +109,10 @@ public class FederationSystemST {
 	private void sendOneMessageReconnect(Source sourceSpOne, int i, long timeToLive) throws InterruptedException, JMSException {
 		String messageText = "message " + i + " " + randomString(1024 * 200);
 		try {
-			sourceSpOne.send(messageText, "NO", timeToLive);
+			sourceSpOne.send(sourceSpOne.getJmsTextMessage(messageText, "NO"), timeToLive);
 		} catch (JMSException e) {
 			reconnectProducer(sourceSpOne);
-			sourceSpOne.send(messageText, "NO", timeToLive);
+			sourceSpOne.send(sourceSpOne.getJmsTextMessage(messageText, "NO"), timeToLive);
 		}
 	}
 

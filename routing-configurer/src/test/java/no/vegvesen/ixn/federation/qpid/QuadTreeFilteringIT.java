@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.apache.qpid.jms.message.JmsMessage;
 import org.assertj.core.util.Maps;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -124,7 +125,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
 		source.start();
-		source.sendNonPersistent("fisk", "NO", messageQuadTreeTiles);
+		JmsMessage message = source.createDatex2TextMessage("fisk", "NO", messageQuadTreeTiles);
+		source.sendNonPersistentMessage(message);
 
 		Message receivedMessage = consumer.receive(1000);
 		sink.close();
@@ -166,8 +168,8 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
 		source.start();
-		source.sendNonPersistent("fisk", "NO", messageQuadTreeTiles);
-
+		JmsMessage message = source.createDatex2TextMessage("fisk", "NO", messageQuadTreeTiles);
+		source.sendNonPersistentMessage(message);
 		Message receivedMessage = consumer.receive(1000);
 		sink.close();
 		source.close();

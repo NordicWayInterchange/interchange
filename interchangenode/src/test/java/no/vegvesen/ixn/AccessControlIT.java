@@ -85,7 +85,7 @@ public class AccessControlIT extends QpidDockerBaseIT {
 			JmsTextMessage message = outgoingExchange.createTextMessage();
 			message.setText("Not Allowed");
 			message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(),"SE");
-			outgoingExchange.sendTextMessage(message);
+			outgoingExchange.send(message);
 
 		});
 

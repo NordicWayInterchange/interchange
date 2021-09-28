@@ -3,6 +3,7 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.qpid.jms.message.JmsTextMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -33,7 +34,8 @@ public class JmsSource implements CommandLineRunner {
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
         try(Source s = new Source(properties.getUrl(),properties.getSendQueue(),sslContext)) {
             s.start();
-            s.send("Dette er en test, FISK!", "NO", ",01220123");
+            JmsTextMessage message = s.createTextMessage("Dette er en test, FISK!", "NO", ",01220123");
+            s.send(message);
         }
     }
 }

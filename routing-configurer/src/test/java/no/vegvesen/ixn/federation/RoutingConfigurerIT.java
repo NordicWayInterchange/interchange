@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.qpid.jms.message.JmsTextMessage;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -180,14 +181,16 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		try {
 			Source writeIncomingExchange = new Source(AMQPS_URL, "incomingExchange", nordeaSslContext);
 			writeIncomingExchange.start();
-			writeIncomingExchange.send("Ordinary business at the Nordea office.");
+			JmsTextMessage message = writeIncomingExchange.createTextMessage("Ordinary business at the Nordea office.", "SE", null);
+			writeIncomingExchange.send(message);
 			fail("Should not allow neighbour nordea to write on (incomingExchange)");
 		} catch (JMSException ignore) {
 		}
 		try {
 			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
 			writeOnramp.start();
-			writeOnramp.send("Make Nordea great again!");
+			JmsTextMessage message = writeOnramp.createTextMessage("Make Nordea great again!");
+			writeOnramp.send(message);
 
 			fail("Should not allow nordea to write on (onramp)");
 		} catch (JMSException ignore) {

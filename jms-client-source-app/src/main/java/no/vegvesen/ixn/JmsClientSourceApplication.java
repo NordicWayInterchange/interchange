@@ -4,6 +4,7 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.qpid.jms.message.JmsMessage;
 import picocli.CommandLine;
 import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.Command;
@@ -49,7 +50,8 @@ public class JmsClientSourceApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             try(Source source = parentCommand.createClient()){
                 source.start();
-                source.sendPersistentMonotchMessage();
+                JmsMessage message = source.createMonotchMessage();
+                source.sendNonPersistentMessage(message);
             } catch (Exception e){
                 e.printStackTrace();
             }

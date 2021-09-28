@@ -117,6 +117,14 @@ public class QpidClient {
 		String jsonString = json.toString();
 		postQpid(queuesURL, jsonString, "/");
 	}
+	public void _createDirectExchange(String exchangeName) {
+		JSONObject json = new JSONObject();
+		json.put("name", exchangeName);
+		json.put("durable", true);
+		json.put("type","direct");
+		String jsonString = json.toString();
+		postQpid(exchangesURL, jsonString, "/");
+	}
 
 	public boolean queueExists(String queueName) {
 		return lookupQueueId(queueName) != null;

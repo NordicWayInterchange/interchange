@@ -146,7 +146,7 @@ public class DebugClient implements MessageListener {
 			message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
 			printWithColor(BROWN, " sending message");
 			printWithColor(BLACK, " ");
-			send.sendTextMessage(message, TIME_TO_LIVE_THIRTY_SECONDS);
+			send.send(message, TIME_TO_LIVE_THIRTY_SECONDS);
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}

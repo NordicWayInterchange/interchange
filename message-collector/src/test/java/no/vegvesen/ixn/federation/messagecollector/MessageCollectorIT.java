@@ -8,6 +8,8 @@ import no.vegvesen.ixn.federation.model.Connection;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import org.apache.qpid.jms.message.JmsMessage;
+import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -90,7 +92,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
-		source.sendNonPersistent("fishy fishy", "SE", 8000L);
+		JmsMessage senderMessage = source.getTextMessage("fishy fishy", "SE");
+		source.sendNonPersistentMessage(senderMessage, 8000L);
 
 		Message message = consumer.receive(2000);
 		assertThat(message).withFailMessage("Expected message is not routed").isNotNull();
@@ -119,7 +122,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
 		source.start();
-		source.sendNonPersistent("fishy fishy", "SE", 1000L);
+		JmsTextMessage senderMessage = source.getJmsTextMessage("fishy fishy", "SE");
+		source.sendNonPersistentMessage(senderMessage, 1000L);
 
 		Thread.sleep(2000); // wait for the message to expire with extra margin
 
