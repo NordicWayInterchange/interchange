@@ -4,6 +4,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 
@@ -109,11 +110,27 @@ public class FederationSystemST {
 	private void sendOneMessageReconnect(Source sourceSpOne, int i, long timeToLive) throws InterruptedException, JMSException {
 		String messageText = "message " + i + " " + randomString(1024 * 200);
 		try {
-			sourceSpOne.send(sourceSpOne.getJmsTextMessage(messageText, "NO"), timeToLive);
+			JmsMessage message = getJmsMessage(sourceSpOne, messageText);
+			sourceSpOne.send(message, timeToLive);
 		} catch (JMSException e) {
 			reconnectProducer(sourceSpOne);
-			sourceSpOne.send(sourceSpOne.getJmsTextMessage(messageText, "NO"), timeToLive);
+			JmsMessage message = getJmsMessage(sourceSpOne, messageText);
+			sourceSpOne.send(message, timeToLive);
 		}
+	}
+
+	private JmsMessage getJmsMessage(Source sourceSpOne, String messageText) throws JMSException {
+		return sourceSpOne.createMessageBuilder()
+				.textMessage(messageText)
+				.userId("localhost")
+				.messageType(Datex2DataTypeApi.DATEX_2)
+				.publicationType("Obstruction")
+				.protocolVersion("DATEX2;2.3")
+				.latitude(60.352374)
+				.longitude(13.334253)
+				.originatingCountry("NO")
+				.timestamp(System.currentTimeMillis())
+				.build();
 	}
 
 	private void reconnectProducer(Source sourceSpOne) throws InterruptedException{

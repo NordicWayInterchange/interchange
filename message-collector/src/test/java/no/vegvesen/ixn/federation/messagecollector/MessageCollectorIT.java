@@ -4,12 +4,12 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.Connection;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -92,8 +92,17 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
-		JmsMessage senderMessage = source.getTextMessage("fishy fishy", "SE");
-		source.sendNonPersistentMessage(senderMessage, 8000L);
+		source.sendNonPersistentMessage(source.createMessageBuilder()
+				.textMessage("fishy fishy")
+				.userId("localhost")
+				.messageType(Datex2DataTypeApi.DATEX_2)
+				.publicationType("Obstruction")
+				.protocolVersion( "DATEX2;2.3")
+				.latitude(60.352374)
+				.longitude(13.334253)
+				.originatingCountry("SE")
+				.timestamp(System.currentTimeMillis())
+				.build(), 8000L);
 
 		Message message = consumer.receive(2000);
 		assertThat(message).withFailMessage("Expected message is not routed").isNotNull();
@@ -122,7 +131,18 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
 		source.start();
-		JmsMessage senderMessage = source.getJmsTextMessage("fishy fishy", "SE");
+		JmsMessage message1 = source.createMessageBuilder()
+				.textMessage("fishy fishy")
+				.userId("localhost")
+				.messageType(Datex2DataTypeApi.DATEX_2)
+				.publicationType("Obstruction")
+				.protocolVersion("DATEX2;2.3")
+				.latitude(60.352374)
+				.longitude(13.334253)
+				.originatingCountry("SE")
+				.timestamp(System.currentTimeMillis())
+				.build();
+		JmsMessage senderMessage = message1;
 		source.sendNonPersistentMessage(senderMessage, 1000L);
 
 		Thread.sleep(2000); // wait for the message to expire with extra margin

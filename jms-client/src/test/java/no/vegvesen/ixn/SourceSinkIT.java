@@ -3,7 +3,8 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import org.apache.qpid.jms.message.JmsBytesMessage;
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -81,7 +83,21 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	public void queueMaxTtlIsRespected() throws JMSException, NamingException, InterruptedException {
 		Source kingHaraldTestQueueSource = new Source(URL, "expiry-queue", KING_HARALD_SSL_CONTEXT);
 		kingHaraldTestQueueSource.start();
-		JmsMessage message = kingHaraldTestQueueSource.createDatex2TextMessage("fisk","SE",null);
+		if (null != null && !((String) null).startsWith(",")) {
+			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
+		}
+		JmsMessage message = kingHaraldTestQueueSource.createMessageBuilder()
+				.textMessage("fisk")
+				.userId("localhost")
+				.messageType(Datex2DataTypeApi.DATEX_2)
+				.publicationType("Obstruction")
+				.protocolVersion("DATEX2;2.3")
+				.latitude(60.352374)
+				.longitude(13.334253)
+				.originatingCountry("SE")
+				.quadTreeTiles(null)
+				.timestamp(System.currentTimeMillis())
+				.build();
 		kingHaraldTestQueueSource.sendNonPersistentMessage(message);
 
 		Thread.sleep(2000); // let the message expire on the queue with queue declaration "maximumMessageTtl": 1000
@@ -105,8 +121,20 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	public void sendNonPersistentDenmByteMessage() throws JMSException, NamingException {
 		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		source.start();
-		JmsMessage message = source.createDenmByteMessage("FIIIIIISK!", "NO", "");
-		source.sendNonPersistentMessage(message);
+		byte[] bytemessage = "FIIIIIISK!".getBytes(StandardCharsets.UTF_8);
+		source.sendNonPersistentMessage(source.createMessageBuilder()
+				.bytesMessage(bytemessage)
+				.userId("localhost")
+				.messageType("DENM")
+				.publisherId("NO-12345")
+				.protocolVersion("DENM:1.2.2")
+				.originatingCountry("NO")
+				.quadTreeTiles("")
+				.serviceType("some-denm-service-type")
+				.causeCode( "3")
+				.subCauseCode("6")
+				.timestamp(System.currentTimeMillis())
+				.build());
 
 		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testConsumer = sink.createConsumer();
@@ -120,11 +148,22 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		source.start();
 
-		source.sendNonPersistentMessage(source.createIviBytesMessage(
-				"FIIIIIISK!",
-				"NO",
-				"")
-		);
+		byte[] bytemessage = "FIIIIIISK!".getBytes(StandardCharsets.UTF_8);
+		JmsMessage message = source.createMessageBuilder()
+				.bytesMessage(bytemessage)
+				.userId("localhost")
+				.messageType("IVI")
+				.publisherId("NO-12345")
+				.protocolVersion("IVI:1.2")
+				.originatingCountry("NO")
+				.quadTreeTiles("")
+				.serviceType("some-ivi-service-type")
+				.timestamp(System.currentTimeMillis())
+				.stringProperty(MessageProperty.IVI_TYPE.getName(), "128")
+				.stringProperty(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), "557")
+				.build();
+
+		source.sendNonPersistentMessage(message);
 
 		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testConsumer = sink.createConsumer();

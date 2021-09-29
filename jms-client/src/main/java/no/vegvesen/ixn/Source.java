@@ -1,8 +1,5 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
@@ -12,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
-import java.nio.charset.StandardCharsets;
 
 public class Source implements AutoCloseable {
 
@@ -46,132 +42,6 @@ public class Source implements AutoCloseable {
 
 	public MessageBuilder createMessageBuilder() {
 		return new MessageBuilder(session);
-	}
-
-	public JmsMessage createTextMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
-		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
-			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
-		}
-
-		JmsMessage message = new MessageBuilder(session).
-				textMessage(messageText)
-				.userId("localhost")
-				.publisherId("NO-12345")
-				.messageType(Datex2DataTypeApi.DATEX_2)
-				.publicationType("Obstruction")
-				.publicationSubType("WinterDrivingManagement")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry(originatingCountry)
-				.quadTreeTiles(messageQuadTreeTiles)
-				.timestamp(System.currentTimeMillis())
-				.build();
-		return message;
-	}
-
-	public JmsMessage getJmsTextMessage(String messageText, String originatingCountry) throws JMSException {
-		JmsMessage message = new MessageBuilder(session)
-				.textMessage(messageText)
-				.userId("localhost")
-				.messageType(Datex2DataTypeApi.DATEX_2)
-				.publicationType("Obstruction")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry(originatingCountry)
-				.timestamp(System.currentTimeMillis())
-				.build();
-		return message;
-	}
-
-	public JmsMessage createDatex2TextMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
-		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
-			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
-		}
-		JmsMessage message = new MessageBuilder(session)
-				.textMessage(messageText)
-				.userId("localhost")
-				.messageType(Datex2DataTypeApi.DATEX_2)
-				.publicationType("Obstruction")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry(originatingCountry)
-				.quadTreeTiles(messageQuadTreeTiles)
-				.timestamp(System.currentTimeMillis())
-				.build();
-		return message;
-	}
-
-	public JmsMessage createMonotchMessage() throws JMSException {
-		String messageText = "{}";
-		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		JmsMessage message = new MessageBuilder(session)
-				.bytesMessage(bytemessage)
-				.userId("anna")
-				.messageType(DenmDataTypeApi.DENM)
-				.publisherId("NO-123")
-				.originatingCountry("NO")
-				.protocolVersion("1.0")
-				.quadTreeTiles(",12003")
-				.causeCode("6")
-				.subCauseCode("76")
-				.build();
-
-		return message;
-	}
-
-	public JmsMessage getTextMessage(String messageText, String originatingCountry) throws JMSException {
-		JmsMessage message = new MessageBuilder(session)
-				.textMessage(messageText)
-				.userId("localhost")
-				.messageType(Datex2DataTypeApi.DATEX_2)
-				.publicationType("Obstruction")
-				.protocolVersion( "DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry(originatingCountry)
-				.timestamp(System.currentTimeMillis())
-				.build();
-		return message;
-	}
-
-	public JmsMessage createDenmByteMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
-		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		JmsMessage message = new MessageBuilder(session)
-				.bytesMessage(bytemessage)
-				.userId("localhost")
-				.messageType("DENM")
-				.publisherId("NO-12345")
-				.protocolVersion("DENM:1.2.2")
-				.originatingCountry(originatingCountry)
-				.quadTreeTiles(messageQuadTreeTiles)
-				.serviceType("some-denm-service-type")
-				.causeCode( "3")
-				.subCauseCode("6")
-				.timestamp(System.currentTimeMillis())
-				.build();
-		return message;
-	}
-
-	public JmsMessage createIviBytesMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
-		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		JmsMessage message = new MessageBuilder(session)
-				.bytesMessage(bytemessage)
-				.userId("localhost")
-				.messageType("IVI")
-				.publisherId("NO-12345")
-				.protocolVersion("IVI:1.2")
-				.originatingCountry(originatingCountry)
-				.quadTreeTiles(messageQuadTreeTiles)
-				.serviceType("some-ivi-service-type")
-				.timestamp(System.currentTimeMillis())
-				.stringProperty(MessageProperty.IVI_TYPE.getName(), "128")
-				.stringProperty(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), "557")
-				.build();
-
-		return message;
 	}
 
 

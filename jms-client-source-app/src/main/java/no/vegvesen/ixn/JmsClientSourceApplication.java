@@ -1,6 +1,7 @@
 package no.vegvesen.ixn;
 
 
+import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -12,6 +13,7 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Option;
 
 import javax.net.ssl.SSLContext;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
 @Command(name = "jmsclientsource", description = "JMS Client Source Application", subcommands = {
@@ -50,8 +52,20 @@ public class JmsClientSourceApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             try(Source source = parentCommand.createClient()){
                 source.start();
-                JmsMessage message = source.createMonotchMessage();
-                source.sendNonPersistentMessage(message);
+                String messageText = "{}";
+                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                        .bytesMessage(bytemessage)
+                        .userId("anna")
+                        .messageType(DenmDataTypeApi.DENM)
+                        .publisherId("NO-123")
+                        .originatingCountry("NO")
+                        .protocolVersion("1.0")
+                        .quadTreeTiles(",12003")
+                        .causeCode("6")
+                        .subCauseCode("76")
+                        .build());
             } catch (Exception e){
                 e.printStackTrace();
             }

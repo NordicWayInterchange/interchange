@@ -1,10 +1,10 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.apache.qpid.jms.message.JmsTextMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -36,8 +36,20 @@ public class JmsSource implements CommandLineRunner {
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
         try(Source s = new Source(properties.getUrl(),properties.getSendQueue(),sslContext)) {
             s.start();
-            JmsMessage message = s.createTextMessage("Dette er en test, FISK!", "NO", ",01220123");
-            s.send(message);
+            s.send(s.createMessageBuilder()
+                    .textMessage("Dette er en test, FISK!")
+                    .userId("localhost")
+                    .publisherId("NO-12345")
+                    .messageType(Datex2DataTypeApi.DATEX_2)
+                    .publicationType("Obstruction")
+                    .publicationSubType("WinterDrivingManagement")
+                    .protocolVersion("DATEX2;2.3")
+                    .latitude(60.352374)
+                    .longitude(13.334253)
+                    .originatingCountry("NO")
+                    .quadTreeTiles(",01220123")
+                    .timestamp(System.currentTimeMillis())
+                    .build());
         }
     }
 }

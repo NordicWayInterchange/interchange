@@ -5,6 +5,7 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
+import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -125,7 +126,22 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
 		source.start();
-		JmsMessage message = source.createDatex2TextMessage("fisk", "NO", messageQuadTreeTiles);
+        if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
+            throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
+        }
+        JmsMessage message1 = source.createMessageBuilder()
+                .textMessage("fisk")
+                .userId("localhost")
+                .messageType(Datex2DataTypeApi.DATEX_2)
+                .publicationType("Obstruction")
+                .protocolVersion("DATEX2;2.3")
+                .latitude(60.352374)
+                .longitude(13.334253)
+                .originatingCountry("NO")
+                .quadTreeTiles(messageQuadTreeTiles)
+                .timestamp(System.currentTimeMillis())
+                .build();
+        JmsMessage message = message1;
 		source.sendNonPersistentMessage(message);
 
 		Message receivedMessage = consumer.receive(1000);
@@ -168,7 +184,22 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
 		source.start();
-		JmsMessage message = source.createDatex2TextMessage("fisk", "NO", messageQuadTreeTiles);
+        if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
+            throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
+        }
+        JmsMessage message1 = source.createMessageBuilder()
+                .textMessage("fisk")
+                .userId("localhost")
+                .messageType(Datex2DataTypeApi.DATEX_2)
+                .publicationType("Obstruction")
+                .protocolVersion("DATEX2;2.3")
+                .latitude(60.352374)
+                .longitude(13.334253)
+                .originatingCountry("NO")
+                .quadTreeTiles(messageQuadTreeTiles)
+                .timestamp(System.currentTimeMillis())
+                .build();
+        JmsMessage message = message1;
 		source.sendNonPersistentMessage(message);
 		Message receivedMessage = consumer.receive(1000);
 		sink.close();
