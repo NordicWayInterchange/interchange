@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.net.ssl.SSLContext;
 
+/* TODO this class looks like it might be cruft. Find out where, if anywhere, this is used! */
 @SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
 public class JmsSource implements CommandLineRunner {
 

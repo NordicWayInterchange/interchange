@@ -44,12 +44,16 @@ public class Source implements AutoCloseable {
 		connection = ixnContext.createConnection(sslContext);
 	}
 
+	public MessageBuilder createMessageBuilder() {
+		return new MessageBuilder(session);
+	}
+
 	public JmsMessage createTextMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
 		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
 			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
 		}
 
-		JmsMessage message = new MessageBuilder().
+		JmsMessage message = new MessageBuilder(session).
 				textMessage(messageText)
 				.userId("localhost")
 				.publisherId("NO-12345")
@@ -67,7 +71,7 @@ public class Source implements AutoCloseable {
 	}
 
 	public JmsMessage getJmsTextMessage(String messageText, String originatingCountry) throws JMSException {
-		JmsMessage message = new MessageBuilder()
+		JmsMessage message = new MessageBuilder(session)
 				.textMessage(messageText)
 				.userId("localhost")
 				.messageType(Datex2DataTypeApi.DATEX_2)
@@ -85,7 +89,7 @@ public class Source implements AutoCloseable {
 		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
 			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
 		}
-		JmsMessage message = new MessageBuilder()
+		JmsMessage message = new MessageBuilder(session)
 				.textMessage(messageText)
 				.userId("localhost")
 				.messageType(Datex2DataTypeApi.DATEX_2)
@@ -103,7 +107,7 @@ public class Source implements AutoCloseable {
 	public JmsMessage createMonotchMessage() throws JMSException {
 		String messageText = "{}";
 		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		JmsMessage message = new MessageBuilder()
+		JmsMessage message = new MessageBuilder(session)
 				.bytesMessage(bytemessage)
 				.userId("anna")
 				.messageType(DenmDataTypeApi.DENM)
@@ -119,7 +123,7 @@ public class Source implements AutoCloseable {
 	}
 
 	public JmsMessage getTextMessage(String messageText, String originatingCountry) throws JMSException {
-		JmsMessage message = new MessageBuilder()
+		JmsMessage message = new MessageBuilder(session)
 				.textMessage(messageText)
 				.userId("localhost")
 				.messageType(Datex2DataTypeApi.DATEX_2)
@@ -135,7 +139,7 @@ public class Source implements AutoCloseable {
 
 	public JmsMessage createDenmByteMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
 		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		JmsMessage message = new MessageBuilder()
+		JmsMessage message = new MessageBuilder(session)
 				.bytesMessage(bytemessage)
 				.userId("localhost")
 				.messageType("DENM")
@@ -153,7 +157,7 @@ public class Source implements AutoCloseable {
 
 	public JmsMessage createIviBytesMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
 		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		JmsMessage message = new MessageBuilder()
+		JmsMessage message = new MessageBuilder(session)
 				.bytesMessage(bytemessage)
 				.userId("localhost")
 				.messageType("IVI")
@@ -168,101 +172,6 @@ public class Source implements AutoCloseable {
 				.build();
 
 		return message;
-	}
-
-	private class MessageBuilder {
-		private JmsMessage message;
-
-		public JmsMessage build() {
-			return message;
-		}
-
-		public MessageBuilder textMessage(String text) throws JMSException {
-			message = (JmsMessage) session.createTextMessage(text);
-			return this;
-		}
-
-		public MessageBuilder bytesMessage(byte[] messageBody) throws JMSException {
-			JmsBytesMessage bytesMessage = (JmsBytesMessage) session.createBytesMessage();
-			bytesMessage.writeBytes(messageBody);
-			message = bytesMessage;
-			return this;
-		}
-
-		public MessageBuilder userId(String user) {
-			message.getFacade().setUserId(user);
-			return this;
-		}
-
-		public MessageBuilder messageType(String messageType) throws JMSException {
-			message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), messageType);
-			return this;
-		}
-
-		public MessageBuilder publisherId(String publisher) throws JMSException {
-			message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), publisher);
-			return this;
-		}
-
-		public MessageBuilder protocolVersion(String version) throws JMSException {
-			message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), version);
-			return this;
-		}
-
-		public MessageBuilder originatingCountry(String originatingCountry) throws JMSException {
-			message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-			return this;
-		}
-
-		public MessageBuilder quadTreeTiles(String messageQuadTreeTiles) throws JMSException {
-			message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
-			return this;
-		}
-
-		public MessageBuilder serviceType(String serviceType) throws JMSException {
-			message.setStringProperty(MessageProperty.SERVICE_TYPE.getName(), serviceType);
-			return this;
-		}
-
-		public MessageBuilder timestamp(long currentTimeMillis) throws JMSException {
-			message.setLongProperty(MessageProperty.TIMESTAMP.getName(), currentTimeMillis);
-			return this;
-		}
-
-		public MessageBuilder stringProperty(String name, String value) throws JMSException {
-			message.setStringProperty(name,value);
-			return this;
-		}
-
-		public MessageBuilder causeCode(String causeCode) throws JMSException {
-			message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), causeCode);
-			return this;
-		}
-
-		public MessageBuilder subCauseCode(String subCauseCode) throws JMSException {
-			message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), subCauseCode);
-			return this;
-		}
-
-		public MessageBuilder publicationType(String publicationType) throws JMSException {
-			message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
-			return this;
-		}
-
-		public MessageBuilder latitude(double latitude) throws JMSException {
-			message.setDoubleProperty(MessageProperty.LATITUDE.getName(), latitude);
-			return this;
-		}
-
-		public MessageBuilder longitude(double longitude) throws JMSException {
-			message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), longitude);
-			return this;
-		}
-
-		public MessageBuilder publicationSubType(String subType) throws JMSException {
-			message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), subType);
-			return this;
-		}
 	}
 
 

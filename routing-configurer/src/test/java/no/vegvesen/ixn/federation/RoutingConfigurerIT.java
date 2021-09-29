@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
@@ -186,9 +187,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		try {
 			Source writeIncomingExchange = new Source(AMQPS_URL, "incomingExchange", nordeaSslContext);
 			writeIncomingExchange.start();
-			writeIncomingExchange.send(writeIncomingExchange.
-					createTextMessage("Ordinary business at the Nordea office.", "SE", null)
-			);
+			JmsMessage message = writeIncomingExchange
+					.createMessageBuilder()
+					.textMessage("Ordinary business at the Nordea office.")
+					.originatingCountry("SE")
+					.build();
+			writeIncomingExchange.send(message);
 			fail("Should not allow neighbour nordea to write on (incomingExchange)");
 		} catch (JMSException ignore) {
 		}
