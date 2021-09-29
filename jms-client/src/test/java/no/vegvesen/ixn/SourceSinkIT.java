@@ -120,8 +120,11 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		source.start();
 
-		JmsBytesMessage message = source.createIviBytesMessage("FIIIIIISK!", "NO", "");
-		source.sendNonPersistentMessage(message);
+		source.sendNonPersistentMessage(source.createIviBytesMessage(
+				"FIIIIIISK!",
+				"NO",
+				"")
+		);
 
 		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testConsumer = sink.createConsumer();

@@ -9,14 +9,7 @@ import org.apache.qpid.jms.message.JmsTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.Connection;
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
+import javax.jms.*;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
@@ -51,36 +44,40 @@ public class Source implements AutoCloseable {
 		connection = ixnContext.createConnection(sslContext);
 	}
 
-	public JmsTextMessage createTextMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
+	public JmsMessage createTextMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
 		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
 			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
 		}
 
-		JmsTextMessage message = createTextMessage(messageText);
-		userId(message, "localhost");
-		publisherId(message, "NO-12345");
-		messageType(message, Datex2DataTypeApi.DATEX_2);
-		publicationType(message, "Obstruction");
-		publicationSubType(message, "WinterDrivingManagement");
-		protocolVersion(message, "DATEX2;2.3");
-		latitude(message, 60.352374);
-		longitude(message, 13.334253);
-		originatingCountry(message, originatingCountry);
-		quadTreeTiles(message, messageQuadTreeTiles);
-		timestamp(message, System.currentTimeMillis());
+		JmsMessage message = new MessageBuilder().
+				textMessage(messageText)
+				.userId("localhost")
+				.publisherId("NO-12345")
+				.messageType(Datex2DataTypeApi.DATEX_2)
+				.publicationType("Obstruction")
+				.publicationSubType("WinterDrivingManagement")
+				.protocolVersion("DATEX2;2.3")
+				.latitude(60.352374)
+				.longitude(13.334253)
+				.originatingCountry(originatingCountry)
+				.quadTreeTiles(messageQuadTreeTiles)
+				.timestamp(System.currentTimeMillis())
+				.build();
 		return message;
 	}
 
-	public JmsTextMessage getJmsTextMessage(String messageText, String originatingCountry) throws JMSException {
-		JmsTextMessage message = createTextMessage(messageText);
-		userId(message, "localhost");
-		messageType(message, Datex2DataTypeApi.DATEX_2);
-		publicationType(message, "Obstruction");
-		protocolVersion(message, "DATEX2;2.3");
-		latitude(message, 60.352374);
-		longitude(message, 13.334253);
-		originatingCountry(message, originatingCountry);
-		timestamp(message, System.currentTimeMillis());
+	public JmsMessage getJmsTextMessage(String messageText, String originatingCountry) throws JMSException {
+		JmsMessage message = new MessageBuilder()
+				.textMessage(messageText)
+				.userId("localhost")
+				.messageType(Datex2DataTypeApi.DATEX_2)
+				.publicationType("Obstruction")
+				.protocolVersion("DATEX2;2.3")
+				.latitude(60.352374)
+				.longitude(13.334253)
+				.originatingCountry(originatingCountry)
+				.timestamp(System.currentTimeMillis())
+				.build();
 		return message;
 	}
 
@@ -88,39 +85,40 @@ public class Source implements AutoCloseable {
 		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
 			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
 		}
-
-		JmsTextMessage message = createTextMessage(messageText);
-		userId(message, "localhost");
-		messageType(message, Datex2DataTypeApi.DATEX_2);
-		publicationType(message, "Obstruction");
-		protocolVersion(message, "DATEX2;2.3");
-		latitude(message, 60.352374);
-		longitude(message, 13.334253);
-		originatingCountry(message, originatingCountry);
-		quadTreeTiles(message, messageQuadTreeTiles);
-		timestamp(message, System.currentTimeMillis());
+		JmsMessage message = new MessageBuilder()
+				.textMessage(messageText)
+				.userId("localhost")
+				.messageType(Datex2DataTypeApi.DATEX_2)
+				.publicationType("Obstruction")
+				.protocolVersion("DATEX2;2.3")
+				.latitude(60.352374)
+				.longitude(13.334253)
+				.originatingCountry(originatingCountry)
+				.quadTreeTiles(messageQuadTreeTiles)
+				.timestamp(System.currentTimeMillis())
+				.build();
 		return message;
 	}
 
-	public JmsBytesMessage createMonotchMessage() throws JMSException {
-		JmsBytesMessage message = createBytesMessage();
-		userId(message,"anna");
-		messageType(message, DenmDataTypeApi.DENM);
-		publisherId(message, "NO-123");
-		originatingCountry(message, "NO");
-		protocolVersion(message, "1.0");
-		quadTreeTiles(message, ",12003");
-		causeCode(message, "6");
-		subCauseCode(message, "76");
-
+	public JmsMessage createMonotchMessage() throws JMSException {
 		String messageText = "{}";
-
 		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		message.writeBytes(bytemessage);
+		JmsMessage message = new MessageBuilder()
+				.bytesMessage(bytemessage)
+				.userId("anna")
+				.messageType(DenmDataTypeApi.DENM)
+				.publisherId("NO-123")
+				.originatingCountry("NO")
+				.protocolVersion("1.0")
+				.quadTreeTiles(",12003")
+				.causeCode("6")
+				.subCauseCode("76")
+				.build();
+
 		return message;
 	}
 
-	public JmsTextMessage getTextMessage(String messageText, String originatingCountry) throws JMSException {
+	public JmsMessage getTextMessage(String messageText, String originatingCountry) throws JMSException {
 		JmsMessage message = new MessageBuilder()
 				.textMessage(messageText)
 				.userId("localhost")
@@ -132,12 +130,13 @@ public class Source implements AutoCloseable {
 				.originatingCountry(originatingCountry)
 				.timestamp(System.currentTimeMillis())
 				.build();
-		return (JmsTextMessage) message;
+		return message;
 	}
 
-	public JmsBytesMessage createDenmByteMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
+	public JmsMessage createDenmByteMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
+		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
 		JmsMessage message = new MessageBuilder()
-				.bytesMessage()
+				.bytesMessage(bytemessage)
 				.userId("localhost")
 				.messageType("DENM")
 				.publisherId("NO-12345")
@@ -149,15 +148,13 @@ public class Source implements AutoCloseable {
 				.subCauseCode("6")
 				.timestamp(System.currentTimeMillis())
 				.build();
-		JmsBytesMessage result = (JmsBytesMessage) message;
-		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		result.writeBytes(bytemessage);
-		return result;
+		return message;
 	}
 
-	public JmsBytesMessage createIviBytesMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
+	public JmsMessage createIviBytesMessage(String messageText, String originatingCountry, String messageQuadTreeTiles) throws JMSException {
+		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
 		JmsMessage message = new MessageBuilder()
-				.bytesMessage()
+				.bytesMessage(bytemessage)
 				.userId("localhost")
 				.messageType("IVI")
 				.publisherId("NO-12345")
@@ -170,10 +167,7 @@ public class Source implements AutoCloseable {
 				.stringProperty(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), "557")
 				.build();
 
-		JmsBytesMessage result = (JmsBytesMessage) message;
-		byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-		result.writeBytes(bytemessage);
-		return result;
+		return message;
 	}
 
 	private class MessageBuilder {
@@ -183,18 +177,15 @@ public class Source implements AutoCloseable {
 			return message;
 		}
 
-		public MessageBuilder textMessage() throws JMSException {
-			message = (JmsMessage) session.createTextMessage();
-			return this;
-		}
-
 		public MessageBuilder textMessage(String text) throws JMSException {
 			message = (JmsMessage) session.createTextMessage(text);
 			return this;
 		}
 
-		public MessageBuilder bytesMessage() throws JMSException {
-			message = (JmsMessage) session.createBytesMessage();
+		public MessageBuilder bytesMessage(byte[] messageBody) throws JMSException {
+			JmsBytesMessage bytesMessage = (JmsBytesMessage) session.createBytesMessage();
+			bytesMessage.writeBytes(messageBody);
+			message = bytesMessage;
 			return this;
 		}
 
@@ -267,58 +258,11 @@ public class Source implements AutoCloseable {
 			message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), longitude);
 			return this;
 		}
-	}
 
-	private void timestamp(JmsMessage message, long value) throws JMSException {
-		message.setLongProperty(MessageProperty.TIMESTAMP.getName(), value);
-	}
-
-	private void originatingCountry(JmsMessage message, String originatingCountry) throws JMSException {
-		message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-	}
-
-	private void longitude(JmsMessage message, double value) throws JMSException {
-		message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), value);
-	}
-
-	private void latitude(JmsMessage message, double value) throws JMSException {
-		message.setDoubleProperty(MessageProperty.LATITUDE.getName(), value);
-	}
-
-	private void protocolVersion(JmsMessage message, String value) throws JMSException {
-		message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), value);
-	}
-
-	private void publicationType(JmsMessage message, String value) throws JMSException {
-		message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), value);
-	}
-
-	private void userId(JmsMessage message, String userId) {
-		message.getFacade().setUserId(userId);
-	}
-
-	private void messageType(JmsMessage message, String messageType) throws JMSException {
-		message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), messageType);
-	}
-
-	private void quadTreeTiles(JmsMessage message, String messageQuadTreeTiles) throws JMSException {
-		message.setStringProperty(MessageProperty.QUAD_TREE.getName(), messageQuadTreeTiles);
-	}
-
-	private void publicationSubType(JmsMessage message, String winterDrivingManagement) throws JMSException {
-		message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), winterDrivingManagement);
-	}
-
-	private void publisherId(JmsMessage message, String value) throws JMSException {
-		message.setStringProperty(MessageProperty.PUBLISHER_ID.getName(), value);
-	}
-
-	private void subCauseCode(JmsBytesMessage message, String value) throws JMSException {
-		message.setStringProperty(MessageProperty.SUB_CAUSE_CODE.getName(), value);
-	}
-
-	private void causeCode(JmsBytesMessage message, String value) throws JMSException {
-		message.setStringProperty(MessageProperty.CAUSE_CODE.getName(), value);
+		public MessageBuilder publicationSubType(String subType) throws JMSException {
+			message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), subType);
+			return this;
+		}
 	}
 
 

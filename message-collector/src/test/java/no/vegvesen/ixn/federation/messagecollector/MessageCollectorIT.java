@@ -122,7 +122,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
 		source.start();
-		JmsTextMessage senderMessage = source.getJmsTextMessage("fishy fishy", "SE");
+		JmsMessage senderMessage = source.getJmsTextMessage("fishy fishy", "SE");
 		source.sendNonPersistentMessage(senderMessage, 1000L);
 
 		Thread.sleep(2000); // wait for the message to expire with extra margin

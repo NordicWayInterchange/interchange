@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
+import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -175,14 +176,19 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	public void newNeighbourCanNeitherWriteToIncomingExchangeNorOnramp() throws JMSException, NamingException {
 		HashSet<Subscription> subscriptions = new HashSet<>();
 		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, false, ""));
-		Neighbour nordea = new Neighbour("nordea", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions), null);
+		Neighbour nordea = new Neighbour(
+				"nordea",
+				new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()),
+				new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions),
+				null);
 		routingConfigurer.setupNeighbourRouting(nordea);
 		SSLContext nordeaSslContext = setUpTestSslContext("nordea.p12");
 		try {
 			Source writeIncomingExchange = new Source(AMQPS_URL, "incomingExchange", nordeaSslContext);
 			writeIncomingExchange.start();
-			JmsTextMessage message = writeIncomingExchange.createTextMessage("Ordinary business at the Nordea office.", "SE", null);
-			writeIncomingExchange.send(message);
+			writeIncomingExchange.send(writeIncomingExchange.
+					createTextMessage("Ordinary business at the Nordea office.", "SE", null)
+			);
 			fail("Should not allow neighbour nordea to write on (incomingExchange)");
 		} catch (JMSException ignore) {
 		}
