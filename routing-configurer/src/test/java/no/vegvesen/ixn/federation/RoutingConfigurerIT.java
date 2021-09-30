@@ -199,7 +199,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		try {
 			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
 			writeOnramp.start();
-			JmsTextMessage message = writeOnramp.createTextMessage("Make Nordea great again!");
+			JmsMessage message = writeOnramp.createMessageBuilder().textMessage("Make Nordea great again!").build();
 			writeOnramp.send(message);
 
 			fail("Should not allow nordea to write on (onramp)");

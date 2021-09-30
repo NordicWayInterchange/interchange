@@ -135,15 +135,17 @@ public class DebugClient implements MessageListener {
 
 	private void sendMessage(String originatingCountry, String msg) {
 		try {
-			JmsTextMessage message = send.createTextMessage(msg);
-			message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
-			message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), Datex2DataTypeApi.DATEX_2 + ";2.3");
-			message.setStringProperty(MessageProperty.PUBLICATION_TYPE.getName(), "Conditions");
-			message.setDoubleProperty(MessageProperty.LATITUDE.getName(), 63.0);
-			message.setDoubleProperty(MessageProperty.LONGITUDE.getName(), 10.0);
-			message.setStringProperty(MessageProperty.QUAD_TREE.getName(), QuadTreeTool.lonLatToQuadTree(10.0d,63.0d));
-			message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-			message.setLongProperty(MessageProperty.TIMESTAMP.getName(), System.currentTimeMillis());
+			JmsMessage message = send.createMessageBuilder()
+					.textMessage(msg)
+					.messageType(Datex2DataTypeApi.DATEX_2)
+					.protocolVersion(Datex2DataTypeApi.DATEX_2 + ";2.3")
+					.publicationType("Conditions")
+					.latitude(63.0)
+					.longitude(10.0)
+					.quadTreeTiles(QuadTreeTool.lonLatToQuadTree(10.0d,63.0d))
+					.originatingCountry(originatingCountry)
+					.timestamp(System.currentTimeMillis())
+					.build();
 			printWithColor(BROWN, " sending message");
 			printWithColor(BLACK, " ");
 			send.send(message, TIME_TO_LIVE_THIRTY_SECONDS);

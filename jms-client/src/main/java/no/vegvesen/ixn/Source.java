@@ -1,8 +1,6 @@
 package no.vegvesen.ixn;
 
-import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.apache.qpid.jms.message.JmsTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,18 +84,6 @@ public class Source implements AutoCloseable {
 		session = null;
 		producer = null;
 		queueS = null;
-	}
-
-	public JmsTextMessage createTextMessage(String msg) throws JMSException {
-		return (JmsTextMessage) session.createTextMessage(msg);
-	}
-
-	public JmsTextMessage createTextMessage() throws JMSException {
-		return (JmsTextMessage) session.createTextMessage();
-	}
-
-	public JmsBytesMessage createBytesMessage() throws JMSException {
-		return (JmsBytesMessage) session.createBytesMessage();
 	}
 
 	public void setExceptionListener(ExceptionListener exceptionListener) throws JMSException {

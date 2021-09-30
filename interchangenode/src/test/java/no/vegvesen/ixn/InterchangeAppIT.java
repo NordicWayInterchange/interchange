@@ -2,6 +2,7 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.messaging.IxnMessageConsumerCreator;
+import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -74,16 +75,18 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 	    try (Source source = new Source(sendUrl,"onramp", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
             source.start();
             logger.debug("Sending message");
-            JmsTextMessage textMessage = source.createTextMessage("Yo!");
-            textMessage.setStringProperty("messageType", "DATEX2");
-            textMessage.setStringProperty("publisherId","SVV");
-            textMessage.setStringProperty("originatingCountry","NO");
-            textMessage.setStringProperty("protocolVersion","DATEX2:1.0");
-            textMessage.setStringProperty("quadTree","abc");
+            JmsMessage textMessage = source.createMessageBuilder()
+                    .textMessage("Yo!")
+                    .messageType("DATEX2")
+                    .publisherId("SVV")
+                    .originatingCountry("NO")
+                    .protocolVersion("DATEX2:1.0")
+                    .quadTreeTiles("abc")
+                    .latitude(10.0)
+                    .longitude(63.0)
+                    .publicationType("SituationPublication")
+                    .build();
 
-            textMessage.setStringProperty("latitude","10.0");
-            textMessage.setStringProperty("longitude","63.0");
-            textMessage.setStringProperty("publicationType","SituationPublication");
 
             try (Sink sink = new Sink(getQpidURI(), "NO-out", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
 
@@ -112,14 +115,17 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 	    try (Source source = new Source(sendUrl,"NO-private", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
             source.start();
             logger.debug("Sending message");
-            JmsTextMessage textMessage = source.createTextMessage("Yo!");
-            textMessage.setStringProperty("messageType", "DATEX2");
-            textMessage.setStringProperty("publisherName","SVV");
-            textMessage.setStringProperty("originatingCountry","NO");
-            textMessage.setStringProperty("protocolVersion","DATEX2:1.0");
-            textMessage.setStringProperty("latitude","10.0");
-            textMessage.setStringProperty("longitude","63.0");
-            textMessage.setStringProperty("publicationType","SituationPublication");
+            //JmsTextMessage textMessage = source.createTextMessage("Yo!");
+            JmsMessage textMessage = source.createMessageBuilder()
+                    .textMessage("Yo!")
+                    .messageType("DATEX2")
+                    .publisherId("SVV")
+                    .originatingCountry("NO")
+                    .protocolVersion("DATEX2:1.0")
+                    .latitude(10.0)
+                    .longitude(63.0)
+                    .publicationType("SituationPublication")
+                    .build();
 
             source.sendNonPersistentMessage(textMessage, 9999L);
             long estimateExpiry = System.currentTimeMillis() + 9999L;

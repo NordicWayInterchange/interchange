@@ -54,7 +54,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	public void explicitExpiryIsReceived() throws JMSException, NamingException {
 		Source kingHaraldTestQueueSource = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		kingHaraldTestQueueSource.start();
-		JmsTextMessage fisk = kingHaraldTestQueueSource.createTextMessage("fisk");
+		JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder().textMessage("fisk").build();
 		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
 
 		Sink kingHaraldTestQueueSink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
@@ -68,7 +68,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	public void expiredMessageIsNotDelivered() throws JMSException, NamingException, InterruptedException {
 		Source kingHaraldTestQueueSource = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		kingHaraldTestQueueSource.start();
-		JmsTextMessage fisk = kingHaraldTestQueueSource.createTextMessage("fisk");
+		JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder().textMessage("fisk").build();
 		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 200);
 
 		Thread.sleep(1000);
