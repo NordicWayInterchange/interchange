@@ -4,7 +4,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Test;
 
@@ -123,7 +123,7 @@ public class FederationSystemST {
 		return sourceSpOne.createMessageBuilder()
 				.textMessage(messageText)
 				.userId("localhost")
-				.messageType(Datex2DataTypeApi.DATEX_2)
+				.messageType(Constants.DATEX_2)
 				.publicationType("Obstruction")
 				.protocolVersion("DATEX2;2.3")
 				.latitude(60.352374)

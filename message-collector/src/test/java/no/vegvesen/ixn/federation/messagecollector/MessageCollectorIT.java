@@ -4,7 +4,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.Connection;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
@@ -95,7 +95,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		source.sendNonPersistentMessage(source.createMessageBuilder()
 				.textMessage("fishy fishy")
 				.userId("localhost")
-				.messageType(Datex2DataTypeApi.DATEX_2)
+				.messageType(Constants.DATEX_2)
 				.publicationType("Obstruction")
 				.protocolVersion( "DATEX2;2.3")
 				.latitude(60.352374)
@@ -134,7 +134,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		JmsMessage message1 = source.createMessageBuilder()
 				.textMessage("fishy fishy")
 				.userId("localhost")
-				.messageType(Datex2DataTypeApi.DATEX_2)
+				.messageType(Constants.DATEX_2)
 				.publicationType("Obstruction")
 				.protocolVersion("DATEX2;2.3")
 				.latitude(60.352374)

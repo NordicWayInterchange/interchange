@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -172,7 +172,7 @@ public class NeighbourRepositoryIT {
 	@NonNull
 	private HashMap<String, String> getDatexHeaders(String originatingCountry, String publicationType, String publicationSubType) {
 		HashMap<String, String> datexHeaders = new HashMap<>();
-		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Datex2DataTypeApi.DATEX_2);
+		datexHeaders.put(MessageProperty.MESSAGE_TYPE.getName(), Constants.DATEX_2);
 		datexHeaders.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
 		if (publicationType != null) {
 			datexHeaders.put(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);

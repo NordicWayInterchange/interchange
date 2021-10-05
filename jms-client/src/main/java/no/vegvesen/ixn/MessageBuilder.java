@@ -1,6 +1,6 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -43,7 +43,7 @@ public class MessageBuilder {
     }
 
     public MessageBuilder datex2MessageType() throws JMSException {
-       message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(),Datex2DataTypeApi.DATEX_2);
+       message.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), Constants.DATEX_2);
        return this;
     }
 

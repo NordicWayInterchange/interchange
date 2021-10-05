@@ -1,11 +1,10 @@
 package no.vegvesen.ixn;
 
 
-import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.apache.qpid.jms.message.JmsMessage;
 import picocli.CommandLine;
 import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.Command;
@@ -58,7 +57,7 @@ public class JmsClientSourceApplication implements Callable<Integer> {
                 source.sendNonPersistentMessage(source.createMessageBuilder()
                         .bytesMessage(bytemessage)
                         .userId("anna")
-                        .messageType(DenmDataTypeApi.DENM)
+                        .messageType(Constants.DENM)
                         .publisherId("NO-123")
                         .originatingCountry("NO")
                         .protocolVersion("1.0")

@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.service;
 
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
@@ -87,7 +87,7 @@ public class NeighbourDiscovererIT {
 
 		checkForNewNeighbours();
 		performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(neighbour1, neighbour2, c1, c2);
-		Subscription requestedSubscription = performSubscriptionRequest(neighbour1, neighbour2, Sets.newLinkedHashSet(getDataType(Datex2DataTypeApi.DATEX_2, "NO")));
+		Subscription requestedSubscription = performSubscriptionRequest(neighbour1, neighbour2, Sets.newLinkedHashSet(getDataType(Constants.DATEX_2, "NO")));
 		performSubscriptionPolling(neighbour1, requestedSubscription);
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();

@@ -18,10 +18,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -137,6 +134,10 @@ public class OnboardRestController {
 		//check the version of the request
 
 		logger.info("Subscription - Received POST from Service Provider: {}", serviceProviderName);
+		if (Objects.isNull(requestApi.getSubscriptions())) {
+			throw new SubscriptionRequestException("Bad api object for Subscription Request. No selectors.");
+
+		}
 		for (SelectorApi selectorApi : requestApi.getSubscriptions()) {
 			if (selectorApi.getSelector() == null) {
 				throw new SubscriptionRequestException("Bad api object for Subscription Request. The Selector object was null.");

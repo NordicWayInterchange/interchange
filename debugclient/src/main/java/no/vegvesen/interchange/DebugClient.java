@@ -5,7 +5,7 @@ import no.vegvesen.ixn.BasicAuthSink;
 import no.vegvesen.ixn.BasicAuthSource;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -137,8 +137,8 @@ public class DebugClient implements MessageListener {
 		try {
 			JmsMessage message = send.createMessageBuilder()
 					.textMessage(msg)
-					.messageType(Datex2DataTypeApi.DATEX_2)
-					.protocolVersion(Datex2DataTypeApi.DATEX_2 + ";2.3")
+					.messageType(Constants.DATEX_2)
+					.protocolVersion(Constants.DATEX_2 + ";2.3")
 					.publicationType("Conditions")
 					.latitude(63.0)
 					.longitude(10.0)

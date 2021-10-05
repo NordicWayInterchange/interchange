@@ -1,10 +1,9 @@
 package no.vegvesen.ixn;
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
-import org.apache.qpid.jms.message.JmsMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -40,7 +39,7 @@ public class JmsSource implements CommandLineRunner {
                     .textMessage("Dette er en test, FISK!")
                     .userId("localhost")
                     .publisherId("NO-12345")
-                    .messageType(Datex2DataTypeApi.DATEX_2)
+                    .messageType(Constants.DATEX_2)
                     .publicationType("Obstruction")
                     .publicationSubType("WinterDrivingManagement")
                     .protocolVersion("DATEX2;2.3")

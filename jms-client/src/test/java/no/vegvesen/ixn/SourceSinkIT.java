@@ -3,10 +3,9 @@ package no.vegvesen.ixn;
 import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -89,7 +88,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		JmsMessage message = kingHaraldTestQueueSource.createMessageBuilder()
 				.textMessage("fisk")
 				.userId("localhost")
-				.messageType(Datex2DataTypeApi.DATEX_2)
+				.messageType(Constants.DATEX_2)
 				.publicationType("Obstruction")
 				.protocolVersion("DATEX2;2.3")
 				.latitude(60.352374)

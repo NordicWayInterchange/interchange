@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
@@ -199,10 +196,15 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
-		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
+		AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+				firstServiceProvider,
+				Collections.singleton(new SelectorApi(
+						"originatingCountry = 'NO'"
+				))
+		);
 
-		String validJson = objectMapper.writeValueAsString(subscriptionApi);
-		String invalidJson = validJson.replaceAll("messageType", "someMessyType");
+		String validJson = objectMapper.writeValueAsString(request);
+		String invalidJson = validJson.replaceAll("selector", "noASelector");
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -218,8 +220,8 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
-		DataTypeApi subscriptionApi = new DataTypeApi();
-		String emptySubscription = objectMapper.writeValueAsString(subscriptionApi);
+		AddSubscriptionsRequest request = new AddSubscriptionsRequest();
+		String emptySubscription = objectMapper.writeValueAsString(request);
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
