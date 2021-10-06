@@ -36,8 +36,6 @@ public class Subscription {
 
 	private long lastUpdatedTimestamp;
 
-	private String eTag;
-
 	public Subscription() {
 	}
 
@@ -129,14 +127,6 @@ public class Subscription {
 		this.numberOfPolls = numberOfPolls;
 	}
 
-	//public void setBrokerUrl(String brokerUrl) { this.brokerUrl = brokerUrl; }
-
-	//public String getBrokerUrl() { return brokerUrl; }
-
-	//public void setQueue(String queue) { this.queue = queue; }
-
-	//public String getQueue() { return queue; }
-
 	public boolean isCreateNewQueue() {
 		return createNewQueue;
 	}
@@ -159,14 +149,6 @@ public class Subscription {
 
 	public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
 		this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-	}
-
-	public String geteTag() {
-		return eTag;
-	}
-
-	public void seteTag(String eTag) {
-		this.eTag = eTag;
 	}
 
 	public Set<Broker> getBrokers() {
@@ -204,12 +186,9 @@ public class Subscription {
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +
 				", numberOfPolls=" + numberOfPolls +
-				//", brokerUrl='" + brokerUrl + '\'' +
-				//", queue='" + queue + '\'' +
 				", createNewQueue='" + createNewQueue + '\'' +
 				", queueConsumerUser='" + queueConsumerUser + '\'' +
 				", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
-				", eTag='" + eTag + '\'' +
 				", brokers=" + brokers +
 				'}';
 	}
