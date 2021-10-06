@@ -268,10 +268,10 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
-		Map<String, String> props = Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2");
-		props.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
-		props.put(MessageProperty.QUAD_TREE.getName(), "abcdef");
-		DataType datexNoAbcdef = new DataType(props);
+		DataType datexNoAbcdef = new DataType()
+				.messageType("DATEX2")
+				.originatingCountry("NO")
+				.quadTree("abcdef");
 		String dataTypeSelector = datexNoAbcdef.toSelector();
 		System.out.println(dataTypeSelector);
 		String kingGustaf = "king_gustaf";
@@ -282,10 +282,10 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void sendMessageWhereQuadTreeTileIsLongerThanEighteen() throws Exception {
-		Map<String, String> props = Maps.newHashMap(MessageProperty.MESSAGE_TYPE.getName(), "DATEX2");
-		props.put(MessageProperty.ORIGINATING_COUNTRY.getName(), "NO");
-		props.put(MessageProperty.QUAD_TREE.getName(), "abcdefghijklmnopqrs");
-		DataType datexNoAbcdef = new DataType(props);
+		DataType datexNoAbcdef = new DataType()
+				.messageType("DATEX2")
+				.originatingCountry("NO")
+				.quadTree("abcdefghijklmnopqrs");
 		String selector = datexNoAbcdef.toSelector();
 		String kingGustaf = "king_gustaf";
 		String messageQuadTreeTiles = ",abcdefghijklmnopqrs,cdefghijklmnop";

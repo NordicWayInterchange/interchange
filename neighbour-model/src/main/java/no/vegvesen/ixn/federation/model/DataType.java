@@ -2,12 +2,9 @@ package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,6 +15,10 @@ public class DataType {
 
 	public DataType(Map<String, String> values) {
 		this.values = new HashMap<>(values);
+	}
+
+	public DataType() {
+
 	}
 
 	public Map<String, String> getValues() {
@@ -108,6 +109,21 @@ public class DataType {
 			}
 			return String.format("(%s)", String.join(" OR ", arraySelectors));
 		}
+	}
+
+	public DataType originatingCountry(String country) {
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(),country);
+		return this;
+	}
+
+	public DataType messageType(String messageType) {
+		values.put(MessageProperty.MESSAGE_TYPE.getName(),messageType);
+		return this;
+	}
+
+	public DataType quadTree(String quadTree) {
+		values.put(MessageProperty.QUAD_TREE.getName(),quadTree);
+		return this;
 	}
 }
 
