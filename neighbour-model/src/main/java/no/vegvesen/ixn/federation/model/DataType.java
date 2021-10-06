@@ -11,48 +11,13 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "data_types")
 public class DataType {
 
 	private static Logger logger = LoggerFactory.getLogger(DataType.class);
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_seq")
-	@Column(name = "id")
-	private Integer data_id;
-
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "data_type_values", joinColumns = @JoinColumn(name = "dat_id", foreignKey = @ForeignKey(name="fk_datval_dat")))
-	@MapKeyColumn(name = "property")
-	@Column(name = "value")
 	private Map<String, String> values = new HashMap<>();
-
-	@Column
-	@UpdateTimestamp
-	private LocalDateTime lastUpdated;
-
-	public DataType() {
-	}
-
 
 	public DataType(Map<String, String> values) {
 		this.values = new HashMap<>(values);
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		DataType dataType = (DataType) o;
-
-		return Objects.equals(values, dataType.values);
-	}
-
-	@Override
-	public int hashCode() {
-		return values != null ? values.hashCode() : 0;
 	}
 
 	public Map<String, String> getValues() {
@@ -143,15 +108,6 @@ public class DataType {
 			}
 			return String.format("(%s)", String.join(" OR ", arraySelectors));
 		}
-	}
-
-	@Override
-	public String toString() {
-		return "DataType{" +
-				"data_id=" + data_id +
-				", values=" + values +
-				", lastUpdated=" + lastUpdated +
-				'}';
 	}
 }
 

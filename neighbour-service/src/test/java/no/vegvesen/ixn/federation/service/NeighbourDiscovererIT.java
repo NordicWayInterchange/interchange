@@ -6,12 +6,21 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.Capability;
+import no.vegvesen.ixn.federation.model.DatexCapability;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Self;
+import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
+import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -23,10 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.net.ssl.SSLContext;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,7 +93,26 @@ public class NeighbourDiscovererIT {
 
 		checkForNewNeighbours();
 		performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(neighbour1, neighbour2, c1, c2);
-		Subscription requestedSubscription = performSubscriptionRequest(neighbour1, neighbour2, Sets.newLinkedHashSet(getDataType(Constants.DATEX_2, "NO")));
+		String selector = String.format("messageType = %s and originatingCountry = 'NO'", Constants.DATEX_2);
+		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(
+				SubscriptionRequestStatus.REQUESTED,
+				new HashSet<>(Arrays.asList(
+						new Subscription(selector,SubscriptionStatus.ACCEPTED),
+						new Subscription(selector,SubscriptionStatus.ACCEPTED)
+				))
+		);
+		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptionRequestResponse);
+
+		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf(), mockNeighbourFacade);
+
+		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
+		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
+
+		Neighbour found1 = repository.findByName(neighbour1.getName());
+		assertThat(found1).isNotNull();
+		assertThat(found1.getNeighbourRequestedSubscriptions()).isNotNull();
+		assertThat(found1.getSubscriptionsForPolling()).hasSize(1);
+		Subscription requestedSubscription = found1.getSubscriptionsForPolling().iterator().next();
 		performSubscriptionPolling(neighbour1, requestedSubscription);
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
@@ -140,22 +165,6 @@ public class NeighbourDiscovererIT {
 		assertThat(known).hasSize(2);
 	}
 
-	private Subscription performSubscriptionRequest(Neighbour neighbour1, Neighbour neighbour2, Set<DataType> subs) {
-		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs.stream().map(dataType -> new Subscription(dataType.toSelector(), SubscriptionStatus.ACCEPTED, false, "")).collect(Collectors.toSet()));
-		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptionRequestResponse);
-
-		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf(), mockNeighbourFacade);
-
-		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
-		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
-
-		Neighbour found1 = repository.findByName(neighbour1.getName());
-		assertThat(found1).isNotNull();
-		assertThat(found1.getNeighbourRequestedSubscriptions()).isNotNull();
-		assertThat(found1.getSubscriptionsForPolling()).hasSize(1);
-		return found1.getSubscriptionsForPolling().iterator().next();
-	}
-
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
 		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED, false, ""));
 		neighbourService.pollSubscriptions(mockNeighbourFacade);
@@ -166,12 +175,5 @@ public class NeighbourDiscovererIT {
 		assertThat(found1.getOurRequestedSubscriptions().getSubscriptions().iterator().next().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.CREATED);
 	}
 
-
-	static DataType getDataType(String messageType, String originatingCountry) {
-		DataType dataType = new DataType();
-		dataType.getValues().put(MessageProperty.MESSAGE_TYPE.getName(), messageType);
-		dataType.getValues().put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-		return dataType;
-	}
 
 }
