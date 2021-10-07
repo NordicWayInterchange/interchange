@@ -81,9 +81,6 @@ public class SubscriptionTransformer {
 						false,
 						s.getQueueConsumerUser());
 				subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
-				if(s.geteTag() != null){
-					subscription.seteTag(s.geteTag());
-				}
 				subscriptions.add(subscription);
 			} else {
 				Subscription subscription = new Subscription(
@@ -93,9 +90,6 @@ public class SubscriptionTransformer {
 						s.isCreateNewQueue(),
 						s.getQueueConsumerUser());
 				subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
-				if(s.geteTag() != null){
-					subscription.seteTag(s.geteTag());
-				}
 				subscriptions.add(subscription);
 			}
 		}

@@ -53,9 +53,6 @@ public class SubscriptionRequestTransformer {
 		subscription.setSelector(subscriptionApi.getSelector());
 		subscription.setPath(subscriptionApi.getPath());
 		subscription.setLastUpdatedTimestamp(subscriptionApi.getLastUpdatedTimestamp());
-		if(subscriptionApi.geteTag() != null) {
-			subscription.seteTag(subscriptionApi.geteTag());
-		}
 		if(subscriptionApi.isCreateNewQueue() == null){
 			subscription.setCreateNewQueue(false);
 		} else {

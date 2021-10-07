@@ -24,7 +24,6 @@ public class SubscriptionPollResponseApi {
 
     private long lastUpdatedTimestamp;
 
-    private String eTag;
 
     private Set<BrokerApi> brokers = Collections.emptySet();
 
@@ -117,14 +116,6 @@ public class SubscriptionPollResponseApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public String geteTag() {
-        return eTag;
-    }
-
-    public void seteTag(String eTag) {
-        this.eTag = eTag;
-    }
-
     public Set<BrokerApi> getBrokers() {
         return brokers;
     }
@@ -145,7 +136,6 @@ public class SubscriptionPollResponseApi {
                 path.equals(that.path) &&
                 status == that.status &&
                 Objects.equals(lastUpdatedTimestamp, that.lastUpdatedTimestamp) &&
-                Objects.equals(eTag, that.eTag) &&
                 Objects.equals(brokers, that.brokers);
     }
 
@@ -158,7 +148,6 @@ public class SubscriptionPollResponseApi {
                 path,
                 status,
                 lastUpdatedTimestamp,
-                eTag,
                 brokers);
     }
 
@@ -172,7 +161,6 @@ public class SubscriptionPollResponseApi {
                 ", path='" + path + '\'' +
                 ", status=" + status +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
-                ", eTag='" + eTag + '\'' +
                 ", brokers=" + brokers +
                 '}';
     }

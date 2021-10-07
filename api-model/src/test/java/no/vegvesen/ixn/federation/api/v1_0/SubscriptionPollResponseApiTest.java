@@ -51,7 +51,6 @@ public class SubscriptionPollResponseApiTest {
                 "neighbour1",
                 Sets.newLinkedHashSet(broker1,broker2)
         );
-        responseApi.seteTag("myETag");
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(responseApi));
     }
@@ -62,7 +61,6 @@ public class SubscriptionPollResponseApiTest {
         ObjectMapper mapper = new ObjectMapper();
 
         SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);
-        //System.out.println(result.toString());
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
     }
 }
