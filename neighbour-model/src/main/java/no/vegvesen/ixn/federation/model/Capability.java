@@ -25,6 +25,8 @@ public abstract class Capability {
 	@Column(name = "quadrant")
 	private final Set<String> quadTree = new HashSet<>();
 
+	private RedirectStatus redirect;
+
 	public Capability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
 		this.publisherId = publisherId;
 		this.originatingCountry = originatingCountry;
@@ -32,6 +34,16 @@ public abstract class Capability {
 		if (quadTree != null) {
 			this.quadTree.addAll(quadTree);
 		}
+	}
+
+	public Capability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect) {
+		this.publisherId = publisherId;
+		this.originatingCountry = originatingCountry;
+		this.protocolVersion = protocolVersion;
+		if (quadTree != null) {
+			this.quadTree.addAll(quadTree);
+		}
+		this.redirect = redirect;
 	}
 
 	public Capability() {
@@ -80,6 +92,14 @@ public abstract class Capability {
 		return id;
 	}
 
+	public RedirectStatus getRedirect() {
+		return redirect;
+	}
+
+	public void setRedirect(RedirectStatus redirect) {
+		this.redirect = redirect;
+	}
+
 	public abstract Map<String, String> getSingleValues();
 
 	protected Map<String, String> getSingleValuesBase(String messageType) {
@@ -109,6 +129,7 @@ public abstract class Capability {
 				", originatingCountry='" + originatingCountry + '\'' +
 				", protocolVersion='" + protocolVersion + '\'' +
 				", quadTree=" + quadTree +
+				", redirect=" + redirect +
 				'}';
 	}
 }

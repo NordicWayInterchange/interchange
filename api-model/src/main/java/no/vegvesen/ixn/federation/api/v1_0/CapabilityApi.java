@@ -33,6 +33,7 @@ public class CapabilityApi {
 	private String originatingCountry;
 	private String protocolVersion;
 	private final Set<String> quadTree = new HashSet<>();
+	private RedirectStatusApi redirect;
 
 	public CapabilityApi() {
 	}
@@ -48,6 +49,20 @@ public class CapabilityApi {
 		if (quadTree != null) {
 			this.quadTree.addAll(quadTree);
 		}
+	}
+
+	public CapabilityApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect) {
+		if (messageType == null) {
+			throw new IllegalArgumentException("messageType can not be null");
+		}
+		this.messageType = messageType;
+		this.publisherId = publisherId;
+		this.originatingCountry = originatingCountry;
+		this.protocolVersion = protocolVersion;
+		if (quadTree != null) {
+			this.quadTree.addAll(quadTree);
+		}
+		this.redirect = redirect;
 	}
 
 	public String getOriginatingCountry() {
@@ -97,6 +112,13 @@ public class CapabilityApi {
 		this.protocolVersion = protocolVersion;
 	}
 
+	public RedirectStatusApi getRedirect() {
+		return redirect;
+	}
+
+	public void setRedirect(RedirectStatusApi redirect) {
+		this.redirect = redirect;
+	}
 
 	@Override
 	public String toString() {
@@ -106,6 +128,7 @@ public class CapabilityApi {
 				", originatingCountry='" + originatingCountry + '\'' +
 				", protocolVersion='" + protocolVersion + '\'' +
 				", quadTree=" + quadTree +
+				", redirect=" + redirect +
 				'}';
 	}
 }

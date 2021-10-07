@@ -23,6 +23,13 @@ public class DatexCapability extends Capability{
 		}
 	}
 
+	public DatexCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect, Set<String> publicationTypes) {
+		super(publisherId, originatingCountry, protocolVersion, quadTree, redirect);
+		if (publicationTypes != null) {
+			this.publicationTypes.addAll(publicationTypes);
+		}
+	}
+
 	public DatexCapability() {
 	}
 

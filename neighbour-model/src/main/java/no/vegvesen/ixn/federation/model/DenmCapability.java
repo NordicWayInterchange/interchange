@@ -21,6 +21,11 @@ public class DenmCapability extends Capability {
 		this.causeCodes.addAll(causeCodes);
 	}
 
+	public DenmCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect, Set<String> causeCodes) {
+		super(publisherId, originatingCountry, protocolVersion, quadTree, redirect);
+		this.causeCodes.addAll(causeCodes);
+	}
+
 	public DenmCapability() {
 	}
 

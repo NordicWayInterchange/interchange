@@ -18,6 +18,13 @@ public class DatexCapabilityApi extends CapabilityApi {
 		}
 	}
 
+	public DatexCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Set<String> publicationType) {
+		super(DATEX_2, publisherId, originatingCountry, protocolVersion, quadTree, redirect);
+		if (publicationType != null) {
+			this.publicationType.addAll(publicationType);
+		}
+	}
+
 	public DatexCapabilityApi(String originatingCountry){
 		this(null, originatingCountry, null, Collections.emptySet(), Collections.emptySet());
 	}
