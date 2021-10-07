@@ -7,10 +7,8 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.properties.MessageProperty;
-import org.assertj.core.util.Maps;
+import no.vegvesen.ixn.federation.utils.SelectorBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -29,7 +27,6 @@ import javax.jms.MessageConsumer;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -80,36 +77,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		String selector = "(originatingCountry = 'NO') and (quadTree like '%,abcdefgh%')";
 		String kingGustaf = "king_gustaf";
-		qpidClient.createQueue(kingGustaf);
-		qpidClient.addReadAccess(kingGustaf, kingGustaf);
-		qpidClient.addBinding(selector, kingGustaf, Integer.toString(selector.hashCode()), "outgoingExchange");
-
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
-
-		Sink sink = new Sink(AMQPS_URL, kingGustaf, sslContext);
-		MessageConsumer consumer = sink.createConsumer();
-
-		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
-		source.start();
-		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
-			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
-		}
-		source.sendNonPersistentMessage(source.createMessageBuilder()
-				.textMessage("fisk")
-				.userId("localhost")
-				.messageType(Constants.DATEX_2)
-				.publicationType("Obstruction")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("NO")
-				.quadTreeTiles(messageQuadTreeTiles)
-				.timestamp(System.currentTimeMillis())
-				.build());
-
-		Message receivedMessage = consumer.receive(1000);
-		sink.close();
-		source.close();
+		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
 		assertThat(receivedMessage).isNotNull();
 	}
 
@@ -118,36 +86,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		String selector = "(originatingCountry = 'NO') and (quadTree like '%,cdefghij%')";
 		String kingGustaf = "king_gustaf";
-		qpidClient.createQueue(kingGustaf);
-		qpidClient.addReadAccess(kingGustaf, kingGustaf);
-		qpidClient.addBinding(selector, kingGustaf, Integer.toString(selector.hashCode()), "outgoingExchange");
-
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
-
-		Sink sink = new Sink(AMQPS_URL, kingGustaf, sslContext);
-		MessageConsumer consumer = sink.createConsumer();
-
-		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
-		source.start();
-		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
-			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
-		}
-		source.sendNonPersistentMessage(source.createMessageBuilder()
-				.textMessage("fisk")
-				.userId("localhost")
-				.messageType(Constants.DATEX_2)
-				.publicationType("Obstruction")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("NO")
-				.quadTreeTiles(messageQuadTreeTiles)
-				.timestamp(System.currentTimeMillis())
-				.build());
-
-		Message receivedMessage = consumer.receive(1000);
-		sink.close();
-		source.close();
+		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
 		Message message = receivedMessage;
 		assertThat(message).isNull();
 	}
@@ -157,36 +96,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String messageQuadTreeTiles = ",abcdefghijklmnop";
 		String selector = "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')";
 		String kingGustaf = "king_gustaf";
-		qpidClient.createQueue(kingGustaf);
-		qpidClient.addReadAccess(kingGustaf, kingGustaf);
-		qpidClient.addBinding(selector, kingGustaf, Integer.toString(selector.hashCode()), "outgoingExchange");
-
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
-
-		Sink sink = new Sink(AMQPS_URL, kingGustaf, sslContext);
-		MessageConsumer consumer = sink.createConsumer();
-
-		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
-		source.start();
-		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
-			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
-		}
-		source.sendNonPersistentMessage(source.createMessageBuilder()
-				.textMessage("fisk")
-				.userId("localhost")
-				.messageType(Constants.DATEX_2)
-				.publicationType("Obstruction")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("NO")
-				.quadTreeTiles(messageQuadTreeTiles)
-				.timestamp(System.currentTimeMillis())
-				.build());
-
-		Message receivedMessage = consumer.receive(1000);
-		sink.close();
-		source.close();
+		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
 		assertThat(receivedMessage).isNotNull();
 	}
 
@@ -195,36 +105,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		String selector = "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')";
 		String kingGustaf = "king_gustaf";
-		qpidClient.createQueue(kingGustaf);
-		qpidClient.addReadAccess(kingGustaf, kingGustaf);
-		qpidClient.addBinding(selector, kingGustaf, Integer.toString(selector.hashCode()), "outgoingExchange");
-
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
-
-		Sink sink = new Sink(AMQPS_URL, kingGustaf, sslContext);
-		MessageConsumer consumer = sink.createConsumer();
-
-		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
-		source.start();
-		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
-			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
-		}
-		source.sendNonPersistentMessage(source.createMessageBuilder()
-				.textMessage("fisk")
-				.userId("localhost")
-				.messageType(Constants.DATEX_2)
-				.publicationType("Obstruction")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("NO")
-				.quadTreeTiles(messageQuadTreeTiles)
-				.timestamp(System.currentTimeMillis())
-				.build());
-
-		Message receivedMessage = consumer.receive(1000);
-		sink.close();
-		source.close();
+		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
 		assertThat(receivedMessage).isNull();
 	}
 
@@ -233,47 +114,17 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		String selector = "(originatingCountry = 'SE') and (quadTree like '%,cdefghij%')";
 		String kingGustaf = "king_gustaf";
-		qpidClient.createQueue(kingGustaf);
-		qpidClient.addReadAccess(kingGustaf, kingGustaf);
-		qpidClient.addBinding(selector, kingGustaf, Integer.toString(selector.hashCode()), "outgoingExchange");
-
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
-
-		Sink sink = new Sink(AMQPS_URL, kingGustaf, sslContext);
-		MessageConsumer consumer = sink.createConsumer();
-
-		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
-		source.start();
-		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
-			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
-		}
-		source.sendNonPersistentMessage(source.createMessageBuilder()
-				.textMessage("fisk")
-				.userId("localhost")
-				.messageType(Constants.DATEX_2)
-				.publicationType("Obstruction")
-				.protocolVersion("DATEX2;2.3")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("NO")
-				.quadTreeTiles(messageQuadTreeTiles)
-				.timestamp(System.currentTimeMillis())
-				.build());
-
-		Message receivedMessage = consumer.receive(1000);
-		sink.close();
-		source.close();
+		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
 		assertThat(receivedMessage).isNull();
 	}
 
 	@Test
 	public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
-		DataType datexNoAbcdef = new DataType()
+		SelectorBuilder datexNoAbcdef = new SelectorBuilder()
 				.messageType("DATEX2")
 				.originatingCountry("NO")
 				.quadTree("abcdef");
 		String dataTypeSelector = datexNoAbcdef.toSelector();
-		System.out.println(dataTypeSelector);
 		String kingGustaf = "king_gustaf";
 		String messageQuadTreeTiles = ",abcdefghijklmno,cdefghijklmnop";
 		Message receivedMessage = sendMessageServiceProvider(kingGustaf, dataTypeSelector, messageQuadTreeTiles, "" + dataTypeSelector.hashCode());
@@ -282,7 +133,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	@Test
 	public void sendMessageWhereQuadTreeTileIsLongerThanEighteen() throws Exception {
-		DataType datexNoAbcdef = new DataType()
+		SelectorBuilder datexNoAbcdef = new SelectorBuilder()
 				.messageType("DATEX2")
 				.originatingCountry("NO")
 				.quadTree("abcdefghijklmnopqrs");
@@ -317,6 +168,40 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 				.quadTreeTiles(messageQuadTreeTiles)
 				.timestamp(System.currentTimeMillis())
 				.build());
+		Message receivedMessage = consumer.receive(1000);
+		sink.close();
+		source.close();
+		return receivedMessage;
+	}
+
+	private Message sendNeighbourMessage(String messageQuadTreeTiles, String selector, String kingGustaf) throws Exception {
+		qpidClient.createQueue(kingGustaf);
+		qpidClient.addReadAccess(kingGustaf, kingGustaf);
+		qpidClient.addBinding(selector, kingGustaf, Integer.toString(selector.hashCode()), "outgoingExchange");
+
+		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
+
+		Sink sink = new Sink(AMQPS_URL, kingGustaf, sslContext);
+		MessageConsumer consumer = sink.createConsumer();
+
+		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
+		source.start();
+		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
+			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
+		}
+		source.sendNonPersistentMessage(source.createMessageBuilder()
+				.textMessage("fisk")
+				.userId("localhost")
+				.messageType(Constants.DATEX_2)
+				.publicationType("Obstruction")
+				.protocolVersion("DATEX2;2.3")
+				.latitude(60.352374)
+				.longitude(13.334253)
+				.originatingCountry("NO")
+				.quadTreeTiles(messageQuadTreeTiles)
+				.timestamp(System.currentTimeMillis())
+				.build());
+
 		Message receivedMessage = consumer.receive(1000);
 		sink.close();
 		source.close();

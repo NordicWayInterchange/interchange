@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.model;
+package no.vegvesen.ixn.federation.utils;
 
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;
@@ -8,16 +8,21 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DataType {
 
-	private static Logger logger = LoggerFactory.getLogger(DataType.class);
+/**
+ * NOTE this class is a selector builder, but is retrofitted from an earlier model object.
+ * It is not used in production code, as the selector building is not properly tested.
+ */
+public class SelectorBuilder {
+
+	private static Logger logger = LoggerFactory.getLogger(SelectorBuilder.class);
 	private Map<String, String> values = new HashMap<>();
 
-	public DataType(Map<String, String> values) {
+	public SelectorBuilder(Map<String, String> values) {
 		this.values = new HashMap<>(values);
 	}
 
-	public DataType() {
+	public SelectorBuilder() {
 
 	}
 
@@ -111,17 +116,17 @@ public class DataType {
 		}
 	}
 
-	public DataType originatingCountry(String country) {
+	public SelectorBuilder originatingCountry(String country) {
 		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(),country);
 		return this;
 	}
 
-	public DataType messageType(String messageType) {
+	public SelectorBuilder messageType(String messageType) {
 		values.put(MessageProperty.MESSAGE_TYPE.getName(),messageType);
 		return this;
 	}
 
-	public DataType quadTree(String quadTree) {
+	public SelectorBuilder quadTree(String quadTree) {
 		values.put(MessageProperty.QUAD_TREE.getName(),quadTree);
 		return this;
 	}
