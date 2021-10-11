@@ -79,7 +79,7 @@ public class SubscriptionTransformer {
 						s.getSelector(),
 						s.getPath(),
 						false,
-						s.getQueueConsumerUser());
+						s.getConsumerCommonName());
 				subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
 				subscriptions.add(subscription);
 			} else {
@@ -88,7 +88,7 @@ public class SubscriptionTransformer {
 						s.getSelector(),
 						s.getPath(),
 						s.isCreateNewQueue(),
-						s.getQueueConsumerUser());
+						s.getConsumerCommonName());
 				subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
 				subscriptions.add(subscription);
 			}

@@ -16,7 +16,7 @@ public class RequestedSubscriptionResponseApi {
     private Boolean createNewQueue; //optional, defaults to false
 
     @JsonInclude(Include.NON_NULL)
-    private String queueConsumerUser; //optional, defaults to CN of requesting interchange
+    private String consumerCommonName; //optional, defaults to CN of requesting interchange
 
     private String path;
     private SubscriptionStatusApi status;
@@ -32,30 +32,30 @@ public class RequestedSubscriptionResponseApi {
         this.status = status;
     }
 
-    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String consumerCommonName) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
         this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
     }
 
-    public RequestedSubscriptionResponseApi(String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser) {
+    public RequestedSubscriptionResponseApi(String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String consumerCommonName) {
         this.selector = selector;
         this.path = path;
         this.status = status;
         this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
     }
 
-    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser, long lastUpdatedTimestamp) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String consumerCommonName, long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
         this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
@@ -83,12 +83,12 @@ public class RequestedSubscriptionResponseApi {
         this.createNewQueue = createNewQueue;
     }
 
-    public String getQueueConsumerUser() {
-        return queueConsumerUser;
+    public String getConsumerCommonName() {
+        return consumerCommonName;
     }
 
-    public void setQueueConsumerUser(String queueConsumerUser) {
-        this.queueConsumerUser = queueConsumerUser;
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     public String getPath() {
@@ -123,14 +123,14 @@ public class RequestedSubscriptionResponseApi {
         return createNewQueue == that.createNewQueue &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(selector, that.selector) &&
-                Objects.equals(queueConsumerUser, that.queueConsumerUser) &&
+                Objects.equals(consumerCommonName, that.consumerCommonName) &&
                 Objects.equals(path, that.path) &&
                 status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, selector, createNewQueue, queueConsumerUser, path, status);
+        return Objects.hash(id, selector, createNewQueue, consumerCommonName, path, status);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class RequestedSubscriptionResponseApi {
                 "id='" + id + '\'' +
                 ", selector='" + selector + '\'' +
                 ", createNewQueue=" + createNewQueue +
-                ", queueConsumerUser='" + queueConsumerUser + '\'' +
+                ", queueConsumerUser='" + consumerCommonName + '\'' +
                 ", path='" + path + '\'' +
                 ", status=" + status +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
