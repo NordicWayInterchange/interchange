@@ -20,13 +20,13 @@ public class SubscriptionTransformer {
 				Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(),
 						SubscriptionStatus.REQUESTED,
 						false,
-						subscriptionRequestApi.getQueueConsumerUser());
+						subscriptionRequestApi.getConsumerCommonName());
 				subscriptions.add(subscription);
 			} else {
 				Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(),
 						SubscriptionStatus.REQUESTED,
 						subscriptionRequestApi.getCreateNewQueue(),
-						subscriptionRequestApi.getQueueConsumerUser());
+						subscriptionRequestApi.getConsumerCommonName());
 				subscriptions.add(subscription);
 			}
 		}

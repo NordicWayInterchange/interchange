@@ -14,7 +14,7 @@ public class RequestedSubscriptionApiTest {
         String example = "{\"selector\":\"messageType = 'DENM'\",\"createNewQueue\":true,\"foo\":\"bar\"}";
         RequestedSubscriptionApi result = mapper.readValue(example,RequestedSubscriptionApi.class);
         assertThat(result.getCreateNewQueue()).isTrue();
-        assertThat(result.getQueueConsumerUser()).isNull();
+        assertThat(result.getConsumerCommonName()).isNull();
 
     }
 }
