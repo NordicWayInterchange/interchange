@@ -5,8 +5,7 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.DenmCapability;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
@@ -123,7 +122,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         return source.createMessageBuilder()
                 .bytesMessage(bytemessage)
                 .userId("anna")
-                .messageType(DenmDataTypeApi.DENM)
+                .messageType(Constants.DENM)
                 .publisherId("NO-123")
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
@@ -137,7 +136,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         return source.createMessageBuilder()
                 .textMessage("Yo")
                 .userId("localhost")
-                .messageType(Datex2DataTypeApi.DATEX_2)
+                .messageType(Constants.DATEX_2)
                 .publicationType("Obstruction")
                 .protocolVersion("DATEX2;2.3")
                 .latitude(60.352374)
