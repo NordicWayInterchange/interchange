@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -82,11 +81,11 @@ public class RoutingConfigurer {
 			if(neighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()){
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithCreateNewQueue();
 				for (Subscription subscription : acceptedSubscriptions){
-					createQueue(subscription.getQueueConsumerUser());
-					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getQueueConsumerUser());
-					bindRemoteServiceProvider("outgoingExchange", subscription.getQueueConsumerUser(), subscription);
+					createQueue(subscription.getConsumerCommonName());
+					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
+					bindRemoteServiceProvider("outgoingExchange", subscription.getConsumerCommonName(), subscription);
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-					logger.info("Set up routing for service provider {}", subscription.getQueueConsumerUser());
+					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 				}
 				if(!neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithoutCreateNewQueue().isEmpty()){
 					createQueue(neighbour.getName());

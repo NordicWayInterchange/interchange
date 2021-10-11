@@ -28,7 +28,7 @@ public class Subscription {
 	@Column(columnDefinition = "boolean default false")
 	private boolean createNewQueue = false;
 
-	private String queueConsumerUser;
+	private String consumerCommonName;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "brok_id", foreignKey = @ForeignKey(name = "fk_brok_sub"))
@@ -44,47 +44,47 @@ public class Subscription {
 		this.subscriptionStatus = subscriptionStatus;
 	}
 
-	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String queueConsumerUser) {
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String consumerCommonName) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
 		this.createNewQueue = createNewQueue;
-		this.queueConsumerUser = queueConsumerUser;
+		this.consumerCommonName = consumerCommonName;
 	}
 
-	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String queueConsumerUser,Set<Broker> brokers) {
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String consumerCommonName, Set<Broker> brokers) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
 		this.createNewQueue = createNewQueue;
-		this.queueConsumerUser = queueConsumerUser;
+		this.consumerCommonName = consumerCommonName;
 		this.brokers = brokers;
 	}
 
-	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String queueConsumerUser) {
+	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String consumerCommonName) {
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
 		this.createNewQueue = createNewQueue;
-		this.queueConsumerUser = queueConsumerUser;
+		this.consumerCommonName = consumerCommonName;
 	}
 
-	public Subscription(String selector, SubscriptionStatus subscriptionStatus, boolean createNewQueue, String queueConsumerUser) {
+	public Subscription(String selector, SubscriptionStatus subscriptionStatus, boolean createNewQueue, String consumerCommonName) {
 		this.selector = selector;
 		this.subscriptionStatus = subscriptionStatus;
 		this.createNewQueue = createNewQueue;
-		this.queueConsumerUser = queueConsumerUser;
+		this.consumerCommonName = consumerCommonName;
 	}
 
-	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String brokerUrl, String queue, boolean createNewQueue, String queueConsumerUser) {
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String brokerUrl, String queue, boolean createNewQueue, String consumerCommonName) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
 		this.createNewQueue = createNewQueue;
-		this.queueConsumerUser = queueConsumerUser;
+		this.consumerCommonName = consumerCommonName;
 	}
 
 	public SubscriptionStatus getSubscriptionStatus() {
@@ -135,12 +135,12 @@ public class Subscription {
 		this.createNewQueue = createNewQueue;
 	}
 
-	public String getQueueConsumerUser() {
-		return queueConsumerUser;
+	public String getConsumerCommonName() {
+		return consumerCommonName;
 	}
 
-	public void setQueueConsumerUser(String queueConsumerUser) {
-		this.queueConsumerUser = queueConsumerUser;
+	public void setConsumerCommonName(String queueConsumerUser) {
+		this.consumerCommonName = queueConsumerUser;
 	}
 
 	public long getLastUpdatedTimestamp() {
@@ -187,7 +187,7 @@ public class Subscription {
 				", path='" + path + '\'' +
 				", numberOfPolls=" + numberOfPolls +
 				", createNewQueue='" + createNewQueue + '\'' +
-				", queueConsumerUser='" + queueConsumerUser + '\'' +
+				", consumerCommonName='" + consumerCommonName + '\'' +
 				", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
 				", brokers=" + brokers +
 				'}';

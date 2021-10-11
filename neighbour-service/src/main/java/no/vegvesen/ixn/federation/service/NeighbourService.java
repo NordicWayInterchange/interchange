@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import net.bytebuddy.asm.Advice;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
@@ -409,7 +407,7 @@ public class NeighbourService {
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
 						subscription.setCreateNewQueue(polledSubscription.isCreateNewQueue());
-						subscription.setQueueConsumerUser(polledSubscription.getQueueConsumerUser());
+						subscription.setConsumerCommonName(polledSubscription.getConsumerCommonName());
 						subscription.setBrokers(polledSubscription.getBrokers());
 						subscription.setLastUpdatedTimestamp(polledSubscription.getLastUpdatedTimestamp());
 						neighbour.getControlConnection().okConnection();

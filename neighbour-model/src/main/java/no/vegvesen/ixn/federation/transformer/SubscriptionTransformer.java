@@ -40,7 +40,7 @@ public class SubscriptionTransformer {
 		for (Subscription s : subscriptions) {
 			RequestedSubscriptionApi subscriptionRequestApi = new RequestedSubscriptionApi(s.getSelector(),
 					s.isCreateNewQueue(),
-					s.getQueueConsumerUser());
+					s.getConsumerCommonName());
 			subscriptionRequestApis.add(subscriptionRequestApi);
 		}
 		return new HashSet<>(subscriptionRequestApis);
@@ -55,7 +55,7 @@ public class SubscriptionTransformer {
 					s.getPath(),
 					subscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()),
 					s.isCreateNewQueue(),
-					s.getQueueConsumerUser());
+					s.getConsumerCommonName());
 			subscriptionResponses.add(responseApi);
 		}
 		return new HashSet<>(subscriptionResponses);

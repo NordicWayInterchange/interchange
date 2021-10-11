@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -132,12 +131,12 @@ public class SubscriptionRequest {
 
 	public boolean hasOtherConsumerCommonName(String consumerCommonName) {
 		return subscription.stream()
-				.anyMatch(s -> !s.getQueueConsumerUser().equals(consumerCommonName));
+				.anyMatch(s -> !s.getConsumerCommonName().equals(consumerCommonName));
 	}
 
 	public Set<Subscription> getAcceptedSubscriptionsWithOtherConsumerCommonName(String consumerCommonName) {
 		return getAcceptedSubscriptions().stream()
-				.filter(s -> !s.getQueueConsumerUser().equals(consumerCommonName))
+				.filter(s -> !s.getConsumerCommonName().equals(consumerCommonName))
 				.collect(Collectors.toSet());
 	}
 
