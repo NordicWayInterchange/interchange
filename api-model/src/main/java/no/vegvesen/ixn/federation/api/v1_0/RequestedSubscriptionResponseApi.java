@@ -139,7 +139,7 @@ public class RequestedSubscriptionResponseApi {
                 "id='" + id + '\'' +
                 ", selector='" + selector + '\'' +
                 ", createNewQueue=" + createNewQueue +
-                ", queueConsumerUser='" + consumerCommonName + '\'' +
+                ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", path='" + path + '\'' +
                 ", status=" + status +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +

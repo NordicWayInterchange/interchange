@@ -35,7 +35,7 @@ public class SubscriptionPollResponseApiTest {
         ObjectMapper mapper = new ObjectMapper();
         SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);
         assertThat(result.getId()).isEqualTo("1");
-        assertThat(result.getQueueConsumerUser()).isEqualTo("client1");
+        assertThat(result.getConsumerCommonName()).isEqualTo("client1");
     }
 
     @Test
