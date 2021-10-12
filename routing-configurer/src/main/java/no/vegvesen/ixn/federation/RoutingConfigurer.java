@@ -90,9 +90,9 @@ public class RoutingConfigurer {
 				if(!neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(neighbour.getName()).isEmpty()){
 					createQueue(neighbour.getName());
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
-					Set<Subscription> acceptedSubscriptionsWithoutCreateNewQueue = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(neighbour.getName());
-					bindSubscriptions("outgoingExchange", neighbour, acceptedSubscriptionsWithoutCreateNewQueue);
-					for (Subscription subscription : acceptedSubscriptionsWithoutCreateNewQueue) {
+					Set<Subscription> acceptedSubscriptionsConsumerCommonNameAsIxnName = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(neighbour.getName());
+					bindSubscriptions("outgoingExchange", neighbour, acceptedSubscriptionsConsumerCommonNameAsIxnName);
+					for (Subscription subscription : acceptedSubscriptionsConsumerCommonNameAsIxnName) {
 						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 					}
 					logger.info("Set up routing for neighbour {}", neighbour.getName());

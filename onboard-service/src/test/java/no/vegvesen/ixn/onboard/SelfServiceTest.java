@@ -178,7 +178,7 @@ class SelfServiceTest {
 	}
 
 	@Test
-	void addLocalSubscriptionWithCreateNewQueueFromServiceProvider() {
+	void addLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameFromServiceProvider() {
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 		LocalSubscription subscription1 = new LocalSubscription(LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "my-service-provider");
 		LocalSubscription subscription2 = new LocalSubscription(LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "");

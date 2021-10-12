@@ -238,7 +238,7 @@ public class NeighbourRepositoryIT {
 	}
 
 	@Test
-	public void addSubscriptionWhereCreateNewQueueIsTrue() {
+	public void addSubscriptionWhereConsumerCommonNameIsSameAsServiceProviderName() {
 		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "sp-true")));
 		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
 		Neighbour neighbour = new Neighbour("neighbour-for-queue-true", new Capabilities(), subscriptions, new SubscriptionRequest());
@@ -250,7 +250,7 @@ public class NeighbourRepositoryIT {
 	}
 
 	@Test
-	public void addSubscriptionWhereCreateNewQueueIsFalse() {
+	public void addSubscriptionWhereconsumerCommonNameIsSameAsIxnName() {
 		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "neighbour-for-queue-false")));
 		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
 		Neighbour neighbour = new Neighbour("neighbour-for-queue-false", new Capabilities(), subscriptions, new SubscriptionRequest());
@@ -262,7 +262,7 @@ public class NeighbourRepositoryIT {
 	}
 
 	@Test
-	public void addSubscriptionWhereOneCreateNewQueueIsTrueAndOneIsFalse() {
+	public void addSubscriptionWhereConsumerCommonNameAsBothIxnNameAndServiceProviderName() {
 		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "sp-queue-true");
 		Subscription sub2 = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "neighbour-for-queue-true-and-false");
 		Set<Subscription> subs = Sets.newLinkedHashSet(sub1, sub2);

@@ -35,7 +35,7 @@ class SubscriptionModificationsTest {
 	}
 
 	@Test
-	void addSubscriptionWithAndWithoutCreateNewQueue() {
+	void addSubscriptionWithAndWithConsumerCommonNameAsIxnName() {
 		Subscription sub1 = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, "");
 		Subscription sub2 = new Subscription("dataType = 'denm'", SubscriptionStatus.ACCEPTED);
 		Set<Subscription> firstSet = Sets.newSet(sub1, sub2);

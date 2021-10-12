@@ -188,7 +188,7 @@ public class ServiceProviderRepositoryIT {
 	}
 
 	@Test
-	public void testThatServiceProviderSavesLocalSubscriptionWithCreateNewQueue() {
+	public void testThatServiceProviderSavesLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
 		String name = "my-service-provider";
 		ServiceProvider sp = new ServiceProvider(name);
 

@@ -183,7 +183,7 @@ public class NeighbourServiceIT {
     }
 
     @Test
-    public void incomingSubscriptionWithCreateNewQueue() {
+    public void incomingSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         Neighbour neighbour = new Neighbour();
         String neighbourName = "my-service-provider-wants-direct-subscription";
         neighbour.setName(neighbourName);

@@ -50,8 +50,8 @@ public class ServiceProviderRouter {
                 newSubscription.ifPresent(newSubscriptions::add);
             }
 
-            //making a set of LocalSubscriptions that has createNewQueue = true
-            Set<LocalSubscription> hasCreateNewQueue = newSubscriptions
+            //making a set of LocalSubscriptions that has consumerCommonName same as ServiceProvider name
+            Set<LocalSubscription> consumerCommonNameAsServiceProviderName = newSubscriptions
                     .stream()
                     .filter(s -> s.getConsumerCommonName().equals(name))
                     .collect(Collectors.toSet());
@@ -65,7 +65,7 @@ public class ServiceProviderRouter {
             }
 
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
-                if (serviceProvider.hasCapabilities() || (newSubscriptions.size() > hasCreateNewQueue.size())) {
+                if (serviceProvider.hasCapabilities() || (newSubscriptions.size() > consumerCommonNameAsServiceProviderName.size())) {
                     optionallyAddServiceProviderToGroup(groupMemberNames,name);
                 }
             } else {

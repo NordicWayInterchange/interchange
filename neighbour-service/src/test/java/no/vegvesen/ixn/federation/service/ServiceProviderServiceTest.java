@@ -55,7 +55,7 @@ public class ServiceProviderServiceTest {
     }
 
     @Test
-    public void testUpdateServiceProviderSubscriptionWithLocalBrokerUrlCreateNewQueue() {
+    public void testUpdateServiceProviderSubscriptionWithLocalBrokerUrlAndConsumerCommonNameSameAsServiceProviderName() {
         ServiceProviderService serviceProviderService = new ServiceProviderService(neighbourRepository,serviceProviderRepository);
         String neighbourName = "node-A";
         String selector = "a = b";
@@ -106,7 +106,7 @@ public class ServiceProviderServiceTest {
     }
 
     @Test
-    public void testUpdateServiceProviderSubscriptionWithLocalBrokerUrlNonCreateNewQueue() {
+    public void testUpdateServiceProviderSubscriptionWithLocalBrokerUrlWithConsumerCommonNameSameAsIxnName() {
         ServiceProviderService serviceProviderService = new ServiceProviderService(neighbourRepository,serviceProviderRepository);
         String neighbourName = "node-A";
         String selector = "a = b";

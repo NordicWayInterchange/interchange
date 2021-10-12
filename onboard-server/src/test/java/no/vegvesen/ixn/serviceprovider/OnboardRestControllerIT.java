@@ -128,7 +128,7 @@ public class OnboardRestControllerIT {
 	}
 
 	@Test
-    void testAddingLocalSubscriptionWithCreateNewQueue() {
+    void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
         SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
         restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
@@ -140,19 +140,15 @@ public class OnboardRestControllerIT {
         Set<LocalSubscription> localSubscriptions = savedSP.getSubscriptions();
         assertThat(localSubscriptions).hasSize(1);
         LocalSubscription subscription = localSubscriptions.stream().findFirst().get();
-        //TODO we cannot set createNewQueue through the API.
-        //assertThat(subscription.isCreateNewQueue()).isTrue();
         assertThat(subscription.getConsumerCommonName()).isEqualTo(serviceProviderName);
 
         ListSubscriptionsResponse subscriptions = restController.listSubscriptions(serviceProviderName);
         Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();
         assertThat(localSubscriptionApis.size()).isEqualTo(1);
-        //TODO same as above, cannot set createNewQueue to true through the API
-        //assertThat(localSubscriptionApis.get(0).isCreateNewQueue()).isTrue();
     }
 
     @Test
-    void testAddingLocalSubscriptionWithCreateNewQueueAndGetApiObject() {
+    void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
         SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
         AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
