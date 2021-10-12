@@ -191,7 +191,7 @@ public class NeighbourServiceIT {
         repository.save(neighbour);
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi(neighbourName,new HashSet<>(Arrays.asList(
-                new RequestedSubscriptionApi("messageType='DATEX2' AND originatingCountry = 'NO'",true,"service-provider")
+                new RequestedSubscriptionApi("messageType='DATEX2' AND originatingCountry = 'NO'","service-provider")
         )));
 
         service.incomingSubscriptionRequest(subscriptionRequestApi);
@@ -199,7 +199,7 @@ public class NeighbourServiceIT {
         Neighbour persistedNeighbour = repository.findByName(neighbourName);
         assertThat(persistedNeighbour.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
         Subscription subscription = persistedNeighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.isCreateNewQueue()).isTrue();
+        assertThat(subscription.getConsumerCommonName().equals("service-provider")).isTrue();
     }
 
 }

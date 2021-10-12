@@ -12,9 +12,6 @@ public class RequestedSubscriptionApi {
     private String selector;
 
     @JsonInclude(Include.NON_NULL)
-    private Boolean createNewQueue; //optional, thus an object
-
-    @JsonInclude(Include.NON_NULL)
     private String consumerCommonName;
 
     public RequestedSubscriptionApi() {
@@ -24,9 +21,8 @@ public class RequestedSubscriptionApi {
         this.selector = selector;
     }
 
-    public RequestedSubscriptionApi(String selector, Boolean createNewQueue, String consumerCommonName) {
+    public RequestedSubscriptionApi(String selector, String consumerCommonName) {
         this.selector = selector;
-        this.createNewQueue = createNewQueue;
         this.consumerCommonName = consumerCommonName;
     }
 
@@ -36,14 +32,6 @@ public class RequestedSubscriptionApi {
 
     public void setSelector(String selector) {
         this.selector = selector;
-    }
-
-    public Boolean getCreateNewQueue() {
-        return createNewQueue;
-    }
-
-    public void setCreateNewQueue(Boolean createNewQueue) {
-        this.createNewQueue = createNewQueue;
     }
 
     public String getConsumerCommonName() {
@@ -60,20 +48,18 @@ public class RequestedSubscriptionApi {
         if (o == null || getClass() != o.getClass()) return false;
         RequestedSubscriptionApi that = (RequestedSubscriptionApi) o;
         return Objects.equals(selector, that.selector) &&
-                Objects.equals(createNewQueue, that.createNewQueue) &&
                 Objects.equals(consumerCommonName, that.consumerCommonName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selector, createNewQueue, consumerCommonName);
+        return Objects.hash(selector, consumerCommonName);
     }
 
     @Override
     public String toString() {
         return "RequestedSubscriptionApi{" +
                 "selector='" + selector + '\'' +
-                ", createNewQueue=" + createNewQueue +
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 '}';
     }

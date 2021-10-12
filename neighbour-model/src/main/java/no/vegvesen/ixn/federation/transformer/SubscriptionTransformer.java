@@ -13,22 +13,15 @@ import java.util.Set;
 @Component
 public class SubscriptionTransformer {
 
-	public Set<Subscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request) {
+	public Set<Subscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request, String ixnName) {
 		ArrayList<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
-			if(subscriptionRequestApi.getCreateNewQueue() == null) {
-				Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(),
-						SubscriptionStatus.REQUESTED,
-						false,
-						subscriptionRequestApi.getConsumerCommonName());
-				subscriptions.add(subscription);
-			} else {
-				Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(),
-						SubscriptionStatus.REQUESTED,
-						subscriptionRequestApi.getCreateNewQueue(),
-						subscriptionRequestApi.getConsumerCommonName());
-				subscriptions.add(subscription);
-			}
+			Subscription subscription = new Subscription(
+					subscriptionRequestApi.getSelector(),
+					SubscriptionStatus.REQUESTED,
+					false,
+					subscriptionRequestApi.getConsumerCommonName());
+			subscriptions.add(subscription);
 		}
 		return new HashSet<>(subscriptions);
 
@@ -39,7 +32,6 @@ public class SubscriptionTransformer {
 		List<RequestedSubscriptionApi> subscriptionRequestApis = new ArrayList<>();
 		for (Subscription s : subscriptions) {
 			RequestedSubscriptionApi subscriptionRequestApi = new RequestedSubscriptionApi(s.getSelector(),
-					s.isCreateNewQueue(),
 					s.getConsumerCommonName());
 			subscriptionRequestApis.add(subscriptionRequestApi);
 		}

@@ -49,11 +49,10 @@ public class ApiModelRestDocumentationTest {
     @Test
     public void postSubscriptionRequest() throws JsonProcessingException {
         SubscriptionRequestApi request = new SubscriptionRequestApi(
-                "sp-1",
+                "node-1",
                 Collections.singleton(
                         new RequestedSubscriptionApi(
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
-                                false,
                                 "node-1"
                         )
                 )
