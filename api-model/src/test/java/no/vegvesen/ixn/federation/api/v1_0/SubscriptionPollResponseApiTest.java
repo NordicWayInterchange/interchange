@@ -31,7 +31,7 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void parseUnknownJsonField() throws JsonProcessingException {
-        String input = "{\"id\":\"1\",\"foo\":\"bar\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"createNewQueue\":true,\"queueConsumerUser\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"queueName\":\"client1queue\"}";
+        String input = "{\"id\":\"1\",\"foo\":\"bar\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"createNewQueue\":true,\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"queueName\":\"client1queue\"}";
         ObjectMapper mapper = new ObjectMapper();
         SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);
         assertThat(result.getId()).isEqualTo("1");
