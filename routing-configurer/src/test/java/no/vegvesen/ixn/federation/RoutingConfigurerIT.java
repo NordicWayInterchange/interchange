@@ -103,7 +103,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithOneBindingIsCreated() {
-		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED, false, "flounder"));
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED, "flounder"));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupNeighbourRouting(flounder);
@@ -112,8 +112,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithTwoBindingsIsCreated() {
-		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED, false, "halibut");
-		Subscription s2 = new Subscription("b = c", SubscriptionStatus.ACCEPTED, false, "halibut");
+		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED, "halibut");
+		Subscription s2 = new Subscription("b = c", SubscriptionStatus.ACCEPTED, "halibut");
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
@@ -123,8 +123,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithTwoBindingsAndOnlyOneIsAcceptedIsCreated() {
-		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED, false, "salmon");
-		Subscription s2 = new Subscription("b = c", SubscriptionStatus.REJECTED, false, "salmon");
+		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED, "salmon");
+		Subscription s2 = new Subscription("b = c", SubscriptionStatus.REJECTED, "salmon");
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour salmon = new Neighbour("salmon", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
@@ -138,7 +138,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourIsBothCreatedAndUpdated() {
-		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED, false, "seabass"));
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED, "seabass"));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupNeighbourRouting(seabass);
@@ -149,15 +149,15 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourCanUnbindSubscription() {
-		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED, false, "trout");
-		Subscription s2 = new Subscription("b = c", SubscriptionStatus.ACCEPTED, false, "trout");
+		Subscription s1 = new Subscription("a = b", SubscriptionStatus.ACCEPTED, "trout");
+		Subscription s2 = new Subscription("b = c", SubscriptionStatus.ACCEPTED, "trout");
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupNeighbourRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
-		subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED, false, "trout"));
+		subscriptions = Sets.newLinkedHashSet(new Subscription("a = b", SubscriptionStatus.ACCEPTED, "trout"));
 		subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
@@ -176,7 +176,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	@Test
 	public void newNeighbourCanNeitherWriteToIncomingExchangeNorOnramp() throws JMSException, NamingException {
 		HashSet<Subscription> subscriptions = new HashSet<>();
-		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, false, "nordea"));
+		subscriptions.add(new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "nordea"));
 		Neighbour nordea = new Neighbour(
 				"nordea",
 				new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()),
@@ -225,7 +225,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		HashSet<Subscription> subs = new HashSet<>();
 		subs.add(new Subscription("(quadTree like '%,01230122%') " +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, false, "hammershark"));
+				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "hammershark"));
 
 		Neighbour hammershark = new Neighbour("hammershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
@@ -239,7 +239,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		HashSet<Subscription> subs = new HashSet<>();
 		subs.add(new Subscription("(quadTree like '%,01230122%') " +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, false, "tigershark"));
+				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "tigershark"));
 
 		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
@@ -249,7 +249,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		subs.add(new Subscription("(quadTree like '%,01230122%') " +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, false, "tigershark"));
+				"AND originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "tigershark"));
 
 		tigershark.setNeighbourRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs));
 		routingConfigurer.setupNeighbourRouting(tigershark);
@@ -263,7 +263,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		HashSet<Subscription> subs = new HashSet<>();
 		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, false, "whaleshark"));
+				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "whaleshark"));
 
 		Neighbour whaleshark = new Neighbour("whaleshark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
@@ -279,7 +279,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		HashSet<Subscription> subs = new HashSet<>();
 		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, true, "remote-service-provider"));
+				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "remote-service-provider"));
 
 		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
@@ -292,7 +292,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		HashSet<Subscription> subs = new HashSet<>();
 		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, false, "neigh-false"));
+				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "neigh-false"));
 
 		Neighbour neigh = new Neighbour("neigh-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
@@ -306,11 +306,11 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		HashSet<Subscription> subs = new HashSet<>();
 		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, true, "remote-service-provider"));
+				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "remote-service-provider"));
 
 		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, false, "neigh-true-and-false"));
+				"AND originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "neigh-true-and-false"));
 
 		Neighbour neigh = new Neighbour("neigh-true-and-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 

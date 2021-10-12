@@ -125,10 +125,6 @@ public class SubscriptionRequest {
 		return unwantedBindKeys;
 	}
 
-	public boolean hasCreateNewQueue() {
-		return subscription.stream().filter(Subscription::isCreateNewQueue).collect(Collectors.counting()) > 0;
-	}
-
 	public boolean hasOtherConsumerCommonName(String ixnName) {
 		return subscription.stream()
 				.anyMatch(s -> !s.getConsumerCommonName().equals(ixnName));
@@ -143,18 +139,6 @@ public class SubscriptionRequest {
 	public Set<Subscription> getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(String ixnName) {
 		return getAcceptedSubscriptions().stream()
 				.filter(s -> s.getConsumerCommonName().equals(ixnName))
-				.collect(Collectors.toSet());
-	}
-
-	public Set<Subscription> getAcceptedSubscriptionsWithCreateNewQueue() {
-		return getAcceptedSubscriptions().stream()
-				.filter(Subscription::isCreateNewQueue)
-				.collect(Collectors.toSet());
-	}
-
-	public Set<Subscription> getAcceptedSubscriptionsWithoutCreateNewQueue() {
-		return getAcceptedSubscriptions().stream()
-				.filter(s -> s.isCreateNewQueue() == false)
 				.collect(Collectors.toSet());
 	}
 }

@@ -73,7 +73,6 @@ public class ServiceProviderServiceTest {
                                SubscriptionStatus.CREATED,
                                selector,
                                "local-node/subscriptions/1",
-                               true,
                                serviceProviderName,
                                Collections.singleton(new Broker(
                                        serviceProviderName,
@@ -126,7 +125,6 @@ public class ServiceProviderServiceTest {
                                 SubscriptionStatus.CREATED,
                                 selector,
                                 "local-node/subscriptions/1",
-                                false,
                                 null, //QueueconsumerUser is most often null from other node.
                                 Collections.singleton(new Broker(
                                         localNodeName,

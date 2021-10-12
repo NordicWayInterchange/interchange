@@ -23,11 +23,6 @@ public class Subscription {
 
 	private int numberOfPolls = 0;
 
-
-
-	@Column(columnDefinition = "boolean default false")
-	private boolean createNewQueue = false;
-
 	private String consumerCommonName;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -44,46 +39,33 @@ public class Subscription {
 		this.subscriptionStatus = subscriptionStatus;
 	}
 
-	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String consumerCommonName) {
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
-		this.createNewQueue = createNewQueue;
 		this.consumerCommonName = consumerCommonName;
 	}
 
-	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String consumerCommonName, Set<Broker> brokers) {
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Broker> brokers) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
-		this.createNewQueue = createNewQueue;
 		this.consumerCommonName = consumerCommonName;
 		this.brokers = brokers;
 	}
 
-	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, boolean createNewQueue, String consumerCommonName) {
+	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
-		this.createNewQueue = createNewQueue;
 		this.consumerCommonName = consumerCommonName;
 	}
 
-	public Subscription(String selector, SubscriptionStatus subscriptionStatus, boolean createNewQueue, String consumerCommonName) {
+	public Subscription(String selector, SubscriptionStatus subscriptionStatus, String consumerCommonName) {
 		this.selector = selector;
 		this.subscriptionStatus = subscriptionStatus;
-		this.createNewQueue = createNewQueue;
-		this.consumerCommonName = consumerCommonName;
-	}
-
-	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String brokerUrl, String queue, boolean createNewQueue, String consumerCommonName) {
-		this.id = id;
-		this.subscriptionStatus = subscriptionStatus;
-		this.selector = selector;
-		this.path = path;
-		this.createNewQueue = createNewQueue;
 		this.consumerCommonName = consumerCommonName;
 	}
 
@@ -125,14 +107,6 @@ public class Subscription {
 
 	public void setNumberOfPolls(int numberOfPolls) {
 		this.numberOfPolls = numberOfPolls;
-	}
-
-	public boolean isCreateNewQueue() {
-		return createNewQueue;
-	}
-
-	public void setCreateNewQueue(boolean createNewQueue) {
-		this.createNewQueue = createNewQueue;
 	}
 
 	public String getConsumerCommonName() {
@@ -186,7 +160,6 @@ public class Subscription {
 				", selector='" + selector + '\'' +
 				", path='" + path + '\'' +
 				", numberOfPolls=" + numberOfPolls +
-				", createNewQueue='" + createNewQueue + '\'' +
 				", consumerCommonName='" + consumerCommonName + '\'' +
 				", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
 				", brokers=" + brokers +

@@ -11,11 +11,11 @@ class SubscriptionModificationsTest {
 
 	@Test
 	void newSubscriptionsIsCalculated() {
-		Subscription sub1 = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, false, "");
-		Subscription sub2 = new Subscription("dataType = 'denm'", SubscriptionStatus.ACCEPTED, false, "");
+		Subscription sub1 = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, "");
+		Subscription sub2 = new Subscription("dataType = 'denm'", SubscriptionStatus.ACCEPTED, "");
 		Set<Subscription> firstSet = Sets.newSet(sub1, sub2);
 
-		Subscription sub3 = new Subscription("dataType = 'ivi'", SubscriptionStatus.ACCEPTED, false, "");
+		Subscription sub3 = new Subscription("dataType = 'ivi'", SubscriptionStatus.ACCEPTED, "");
 		Set<Subscription> secondSet = Sets.newSet(sub1, sub2, sub3);
 
 		SubscriptionModifications modifications = new SubscriptionModifications(firstSet, secondSet);
@@ -24,9 +24,9 @@ class SubscriptionModificationsTest {
 
 	@Test
 	void removeSubscriptionsIsCalculated() {
-		Subscription sub1 = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, false, "");
-		Subscription sub2 = new Subscription("dataType = 'denm'", SubscriptionStatus.ACCEPTED, false, "");
-		Subscription sub3 = new Subscription("dataType = 'ivi'", SubscriptionStatus.ACCEPTED, false, "");
+		Subscription sub1 = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, "");
+		Subscription sub2 = new Subscription("dataType = 'denm'", SubscriptionStatus.ACCEPTED, "");
+		Subscription sub3 = new Subscription("dataType = 'ivi'", SubscriptionStatus.ACCEPTED, "");
 		Set<Subscription> firstSet = Sets.newSet(sub1, sub2, sub3);
 
 		Set<Subscription> secondSet = Sets.newSet(sub1, sub2);
@@ -36,11 +36,11 @@ class SubscriptionModificationsTest {
 
 	@Test
 	void addSubscriptionWithAndWithoutCreateNewQueue() {
-		Subscription sub1 = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, false, "");
+		Subscription sub1 = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, "");
 		Subscription sub2 = new Subscription("dataType = 'denm'", SubscriptionStatus.ACCEPTED);
 		Set<Subscription> firstSet = Sets.newSet(sub1, sub2);
 
-		Subscription sub3 = new Subscription("dataType = 'ivi'", SubscriptionStatus.ACCEPTED, false, null);
+		Subscription sub3 = new Subscription("dataType = 'ivi'", SubscriptionStatus.ACCEPTED, null);
 		Set<Subscription> secondSet = Sets.newSet(sub1, sub2, sub3);
 
 		SubscriptionModifications modifications = new SubscriptionModifications(firstSet, secondSet);
@@ -49,7 +49,7 @@ class SubscriptionModificationsTest {
 
 	@Test
 	void addBrokersToSubscription() {
-		Subscription sub = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, false, "");
+		Subscription sub = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, "");
 		Broker broker1 = new Broker("queue-1", "broker-1");
 		Broker broker2 = new Broker("queue-2", "broker-2");
 		sub.setBrokers(Sets.newSet(broker1, broker2));

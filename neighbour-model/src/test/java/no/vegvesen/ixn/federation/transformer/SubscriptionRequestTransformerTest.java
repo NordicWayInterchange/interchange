@@ -35,7 +35,7 @@ public class SubscriptionRequestTransformerTest {
 	public void subscriptonsToRequestedSubscriptionResponseApi() {
 		String name = "myNode";
 		String selector = "originatingCountry = 'NO'";
-		Subscription one = new Subscription(selector, SubscriptionStatus.REQUESTED, false, "");
+		Subscription one = new Subscription(selector, SubscriptionStatus.REQUESTED, "");
 
 		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(name, Collections.singleton(one));
 		assertThat(requestApi.getName()).isEqualTo(name);
@@ -66,9 +66,8 @@ public class SubscriptionRequestTransformerTest {
 		String thisNodeName = "myName";
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
-		boolean createNewQueue = false;
-		String queueConsumerUser = "myName";
-		Subscription subscription = new Subscription(1,SubscriptionStatus.REQUESTED,selector,path, createNewQueue, queueConsumerUser);
+		String consumerCommonName = "myName";
+		Subscription subscription = new Subscription(1,SubscriptionStatus.REQUESTED,selector,path,consumerCommonName);
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, thisNodeName);
 		assertThat(responseApi.getPath()).isEqualTo(path);
 		assertThat(responseApi.getSelector()).isEqualTo(selector);
@@ -85,7 +84,7 @@ public class SubscriptionRequestTransformerTest {
 		String brokerUrl = "amqps://myName";
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
-		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path, false, "");
+		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path, "myNeighbour");
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, brokerUrl);
 		assertThat(responseApi.getBrokers().size()).isEqualTo(1);
 		assertThat(new ArrayList<>(responseApi.getBrokers()).get(0).getMessageBrokerUrl()).isEqualTo(brokerUrl);

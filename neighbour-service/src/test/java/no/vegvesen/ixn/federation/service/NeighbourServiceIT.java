@@ -41,15 +41,15 @@ public class NeighbourServiceIT {
                 new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet()),
                 new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,
                         Sets.newLinkedHashSet(
-                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, false, ""))));
+                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "interchangeA"))));
         Neighbour interchangeB = new Neighbour("interchangeB",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED,
                         Sets.newLinkedHashSet(
-                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, false, ""))),
+                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "interchangeA"))),
                 new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED,
                         Sets.newLinkedHashSet(
-                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, false, ""))));
+                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "interchangeA"))));
         repository.save(interchangeA);
         repository.save(interchangeB);
 

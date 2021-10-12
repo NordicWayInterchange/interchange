@@ -19,7 +19,6 @@ public class SubscriptionTransformer {
 			Subscription subscription = new Subscription(
 					subscriptionRequestApi.getSelector(),
 					SubscriptionStatus.REQUESTED,
-					false,
 					subscriptionRequestApi.getConsumerCommonName());
 			subscriptions.add(subscription);
 		}
@@ -68,7 +67,6 @@ public class SubscriptionTransformer {
 					subscriptionStatusApiToSubscriptionStatus(s.getStatus()),
 					s.getSelector(),
 					s.getPath(),
-					false,
 					s.getConsumerCommonName());
 			subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
 			subscriptions.add(subscription);
