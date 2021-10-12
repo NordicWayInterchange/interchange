@@ -78,8 +78,8 @@ public class RoutingConfigurer {
 	void setupNeighbourRouting(Neighbour neighbour) {
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
-			if(neighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()){
-				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithCreateNewQueue();
+			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
+				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 				for (Subscription subscription : acceptedSubscriptions){
 					createQueue(subscription.getConsumerCommonName());
 					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
@@ -87,10 +87,10 @@ public class RoutingConfigurer {
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 				}
-				if(!neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithoutCreateNewQueue().isEmpty()){
+				if(!neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(neighbour.getName()).isEmpty()){
 					createQueue(neighbour.getName());
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
-					Set<Subscription> acceptedSubscriptionsWithoutCreateNewQueue = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithoutCreateNewQueue();
+					Set<Subscription> acceptedSubscriptionsWithoutCreateNewQueue = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(neighbour.getName());
 					bindSubscriptions("outgoingExchange", neighbour, acceptedSubscriptionsWithoutCreateNewQueue);
 					for (Subscription subscription : acceptedSubscriptionsWithoutCreateNewQueue) {
 						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
