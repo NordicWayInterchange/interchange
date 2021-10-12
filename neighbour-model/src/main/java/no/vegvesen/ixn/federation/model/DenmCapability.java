@@ -34,6 +34,11 @@ public class DenmCapability extends Capability {
 		return new DenmCapabilityApi(this.getPublisherId(), this.getOriginatingCountry(), this.getProtocolVersion(), this.getQuadTree(), this.getCauseCodes());
 	}
 
+	@Override
+	public String messageType() {
+		return CapabilityApi.DENM;
+	}
+
 	public Set<String> getCauseCodes() {
 		return causeCodes;
 	}

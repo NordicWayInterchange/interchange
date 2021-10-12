@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.utils;
+package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;
@@ -18,23 +18,11 @@ public class SelectorBuilder {
 	private static Logger logger = LoggerFactory.getLogger(SelectorBuilder.class);
 	private Map<String, String> values = new HashMap<>();
 
-	public SelectorBuilder(Map<String, String> values) {
-		this.values = new HashMap<>(values);
-	}
-
 	public SelectorBuilder() {
 
 	}
 
-	public Map<String, String> getValues() {
-		return values;
-	}
-
-	public void setValues(Map<String, String> values) {
-		this.values = values;
-	}
-
-	public String getPropertyValue(MessageProperty property) {
+	private String getPropertyValue(MessageProperty property) {
 		return this.values.get(property.getName());
 	}
 
@@ -53,7 +41,7 @@ public class SelectorBuilder {
 				.collect(Collectors.toList());
 	}
 
-	public Set<String> getPropertyValueAsSet(MessageProperty messageProperty) {
+	private Set<String> getPropertyValueAsSet(MessageProperty messageProperty) {
 		List<String> propertyValueAsList = getPropertyValueAsList(messageProperty);
 		if (propertyValueAsList.isEmpty()) {
 			return Collections.emptySet();
@@ -126,8 +114,48 @@ public class SelectorBuilder {
 		return this;
 	}
 
+	/**
+	 * Adds string form of quadTree, usually from message headers
+	 * @param quadTree
+	 * @return
+	 */
 	public SelectorBuilder quadTree(String quadTree) {
 		values.put(MessageProperty.QUAD_TREE.getName(),quadTree);
+		return this;
+	}
+
+	/**
+	 * Adds a set of individual quadtrees, ususally from a Capability
+	 * @param quadTrees
+	 * @return
+	 */
+	public SelectorBuilder quadTree(Set<String> quadTrees) {
+		values.put(MessageProperty.QUAD_TREE.getName(), String.join(",",quadTrees));
+		return this;
+	}
+
+	public SelectorBuilder publisherId(String publisherId) {
+		values.put(MessageProperty.PUBLISHER_ID.getName(), publisherId);
+		return this;
+	}
+
+	public SelectorBuilder protocolVersion(String protocolVersion) {
+		values.put(MessageProperty.PROTOCOL_VERSION.getName(), protocolVersion);
+		return this;
+	}
+
+	public SelectorBuilder iviTypes(Set<String> iviTypes) {
+		values.put(MessageProperty.IVI_TYPE.getName(), String.join(",",iviTypes));
+		return this;
+	}
+
+	public SelectorBuilder causeCodes(Set<String> causeCodes) {
+		values.put(MessageProperty.CAUSE_CODE.getName(), String.join(",",causeCodes));
+		return this;
+	}
+
+	public SelectorBuilder publicationTypes(Set<String> publicationTypes) {
+		values.put(MessageProperty.PUBLICATION_TYPE.getName(), String.join(",",publicationTypes));
 		return this;
 	}
 }

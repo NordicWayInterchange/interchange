@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.utils;
 
+import no.vegvesen.ixn.federation.SelectorBuilder;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

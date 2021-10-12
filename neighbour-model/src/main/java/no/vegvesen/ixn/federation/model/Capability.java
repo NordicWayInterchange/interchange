@@ -99,6 +99,7 @@ public abstract class Capability {
 
 	public abstract CapabilityApi toApi();
 
+	public abstract String messageType();
 
 	@Override
 	public String toString() {

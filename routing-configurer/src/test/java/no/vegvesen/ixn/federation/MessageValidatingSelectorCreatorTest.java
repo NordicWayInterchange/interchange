@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.federation.model.Capability;
+import no.vegvesen.ixn.federation.model.DatexCapability;
 import no.vegvesen.ixn.federation.model.DenmCapability;
 import no.vegvesen.ixn.federation.model.IviCapability;
 import org.junit.Test;
@@ -14,8 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MessageValidatingSelectorCreatorTest {
     @Test
     public void testCreatingDENMValidator() {
-        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String selector = creator.makeSelector(new DenmCapability(
+        String selector = MessageValidatingSelectorCreator.makeSelector(new DenmCapability(
                 "NO-123",
                 "NO",
                 "1.0",
@@ -26,15 +25,14 @@ public class MessageValidatingSelectorCreatorTest {
         assertThat(selector).contains("messageType = 'DENM'");
         assertThat(selector).contains("originatingCountry = 'NO'");
         assertThat(selector).contains("protocolVersion = '1.0'");
-        assertThat(selector).contains("quadTree is not null");
-        assertThat(selector).contains("causeCode is not null");
+        assertThat(selector).contains("quadTree like");
+        assertThat(selector).contains("causeCode =");
         System.out.println(selector);
     }
 
     @Test
     public void createIviMessageValidator() {
-        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
-        String selector = creator.makeSelector(new IviCapability(
+        String selector = MessageValidatingSelectorCreator.makeSelector(new IviCapability(
                 "NO-123",
                 "NO",
                 "1.0",
@@ -45,8 +43,28 @@ public class MessageValidatingSelectorCreatorTest {
         assertThat(selector).contains("publisherId = 'NO-123'");
         assertThat(selector).contains("originatingCountry = 'NO'");
         assertThat(selector).contains("protocolVersion = '1.0'");
-        assertThat(selector).contains("quadTree is not null");
-        assertThat(selector).contains("iviType is not null");
+        assertThat(selector).contains("quadTree like");
+        assertThat(selector).contains("iviType = ");
+        System.out.println(selector);
+    }
 
+    @Test
+    public void createDatexMessageValidator() {
+        String selector = MessageValidatingSelectorCreator.makeSelector(
+                new DatexCapability(
+                        "NO-123",
+                        "NO",
+                        "1.0",
+                        new HashSet<>(Arrays.asList("1")),
+                        new HashSet<>(Arrays.asList("Weather","OtherStuff"))
+                )
+        );
+        assertThat(selector).contains("messageType = 'DATEX2'");
+        assertThat(selector).contains("publisherId = 'NO-123'");
+        assertThat(selector).contains("originatingCountry = 'NO'");
+        assertThat(selector).contains("protocolVersion = '1.0'");
+        assertThat(selector).contains("quadTree like");
+        assertThat(selector).contains("publicationType =");
+        System.out.println(selector);
     }
 }
