@@ -114,7 +114,6 @@ public class ApiModelRestDocumentationTest {
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "/subscription/1",
                 SubscriptionStatusApi.CREATED,
-                false,
                 "node-1",
                 Collections.singleton(
                         new BrokerApi(

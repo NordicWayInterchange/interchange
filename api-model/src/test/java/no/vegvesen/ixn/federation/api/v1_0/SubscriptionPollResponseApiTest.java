@@ -20,7 +20,6 @@ public class SubscriptionPollResponseApiTest {
                 "messageType='DENM' AND originatingCountry='NO'",
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,
-                true,
                 "client1",
                 Collections.singleton(broker)
         );
@@ -31,7 +30,7 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void parseUnknownJsonField() throws JsonProcessingException {
-        String input = "{\"id\":\"1\",\"foo\":\"bar\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"createNewQueue\":true,\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"queueName\":\"client1queue\"}";
+        String input = "{\"id\":\"1\",\"foo\":\"bar\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"queueName\":\"client1queue\"}";
         ObjectMapper mapper = new ObjectMapper();
         SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);
         assertThat(result.getId()).isEqualTo("1");
@@ -47,7 +46,6 @@ public class SubscriptionPollResponseApiTest {
                 "messageType='DENM' AND originatingCountry='NO'",
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,
-                false,
                 "neighbour1",
                 Sets.newLinkedHashSet(broker1,broker2)
         );
@@ -57,7 +55,7 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void parseBrokersToObject() throws JsonProcessingException {
-        String input = "{\"id\":\"1\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"createNewQueue\":false,\"queueConsumerUser\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":null,\"queueName\":null,\"brokers\":[{\"queueName\":\"client1queue\",\"messageBrokerUrl\":\"amqps://a.c-its-interchange.eu:5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"queueName\":\"client2queue\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
+        String input = "{\"id\":\"1\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"queueConsumerUser\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":null,\"queueName\":null,\"brokers\":[{\"queueName\":\"client1queue\",\"messageBrokerUrl\":\"amqps://a.c-its-interchange.eu:5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"queueName\":\"client2queue\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
         ObjectMapper mapper = new ObjectMapper();
 
         SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);

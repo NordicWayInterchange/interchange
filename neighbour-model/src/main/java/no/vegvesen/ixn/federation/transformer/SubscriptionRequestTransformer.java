@@ -53,11 +53,7 @@ public class SubscriptionRequestTransformer {
 		subscription.setSelector(subscriptionApi.getSelector());
 		subscription.setPath(subscriptionApi.getPath());
 		subscription.setLastUpdatedTimestamp(subscriptionApi.getLastUpdatedTimestamp());
-		if(subscriptionApi.isCreateNewQueue() == null){
-			subscription.setCreateNewQueue(false);
-		} else {
-			subscription.setCreateNewQueue(subscriptionApi.isCreateNewQueue());
-		}
+		subscription.setConsumerCommonName(subscriptionApi.getConsumerCommonName());
 
 		Set<Broker> brokers = new HashSet<>();
 		for(BrokerApi brokerApi : subscriptionApi.getBrokers()){
@@ -79,10 +75,7 @@ public class SubscriptionRequestTransformer {
 		response.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
-		if (subscription.isCreateNewQueue()) {
-			response.setCreateNewQueue(subscription.isCreateNewQueue());
-			response.setConsumerCommonName(subscription.getConsumerCommonName());
-		}
+		response.setConsumerCommonName(response.getConsumerCommonName());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			BrokerApi broker = new BrokerApi(
 					neighbourName,

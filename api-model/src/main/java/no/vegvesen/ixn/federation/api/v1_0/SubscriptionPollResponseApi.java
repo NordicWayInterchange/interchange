@@ -13,9 +13,6 @@ public class SubscriptionPollResponseApi {
     private String selector;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Boolean createNewQueue;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String consumerCommonName;
 
     private String path;
@@ -34,11 +31,9 @@ public class SubscriptionPollResponseApi {
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
-                                       Boolean createNewQueue,
                                        String consumerCommonName) {
         this.id = id;
         this.selector = selector;
-        this.createNewQueue = createNewQueue;
         this.consumerCommonName = consumerCommonName;
         this.path = path;
         this.status = status;
@@ -48,14 +43,12 @@ public class SubscriptionPollResponseApi {
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
-                                       Boolean createNewQueue,
                                        String consumerCommonName,
                                        Set<BrokerApi> brokers) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
-        this.createNewQueue = createNewQueue;
         this.consumerCommonName = consumerCommonName;
         this.brokers = brokers;
     }
@@ -74,14 +67,6 @@ public class SubscriptionPollResponseApi {
 
     public void setSelector(String selector) {
         this.selector = selector;
-    }
-
-    public Boolean isCreateNewQueue() {
-        return createNewQueue;
-    }
-
-    public void setCreateNewQueue(Boolean createNewQueue) {
-        this.createNewQueue = createNewQueue;
     }
 
     public String getConsumerCommonName() {
@@ -131,7 +116,6 @@ public class SubscriptionPollResponseApi {
         SubscriptionPollResponseApi that = (SubscriptionPollResponseApi) o;
         return id.equals(that.id) &&
                 selector.equals(that.selector) &&
-                createNewQueue.equals(that.createNewQueue) &&
                 consumerCommonName.equals(that.consumerCommonName) &&
                 path.equals(that.path) &&
                 status == that.status &&
@@ -143,7 +127,6 @@ public class SubscriptionPollResponseApi {
     public int hashCode() {
         return Objects.hash(id,
                 selector,
-                createNewQueue,
                 consumerCommonName,
                 path,
                 status,
@@ -156,7 +139,6 @@ public class SubscriptionPollResponseApi {
         return "SubscriptionPollResponseApi{" +
                 "id='" + id + '\'' +
                 ", selector='" + selector + '\'' +
-                ", createNewQueue=" + createNewQueue +
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", path='" + path + '\'' +
                 ", status=" + status +
