@@ -129,14 +129,20 @@ public class SubscriptionRequest {
 		return subscription.stream().filter(Subscription::isCreateNewQueue).collect(Collectors.counting()) > 0;
 	}
 
-	public boolean hasOtherConsumerCommonName(String consumerCommonName) {
+	public boolean hasOtherConsumerCommonName(String ixnName) {
 		return subscription.stream()
-				.anyMatch(s -> !s.getConsumerCommonName().equals(consumerCommonName));
+				.anyMatch(s -> !s.getConsumerCommonName().equals(ixnName));
 	}
 
-	public Set<Subscription> getAcceptedSubscriptionsWithOtherConsumerCommonName(String consumerCommonName) {
+	public Set<Subscription> getAcceptedSubscriptionsWithOtherConsumerCommonName(String ixnName) {
 		return getAcceptedSubscriptions().stream()
-				.filter(s -> !s.getConsumerCommonName().equals(consumerCommonName))
+				.filter(s -> !s.getConsumerCommonName().equals(ixnName))
+				.collect(Collectors.toSet());
+	}
+
+	public Set<Subscription> getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(String ixnName) {
+		return getAcceptedSubscriptions().stream()
+				.filter(s -> s.getConsumerCommonName().equals(ixnName))
 				.collect(Collectors.toSet());
 	}
 
