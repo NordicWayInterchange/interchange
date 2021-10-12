@@ -4,7 +4,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -28,9 +27,7 @@ public class LocalSubscription {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
-    private boolean createNewQueue = false;
-
-    private String queueConsumerUser;
+    private String consumerCommonName;
 
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -41,22 +38,15 @@ public class LocalSubscription {
 
     }
 
-    public LocalSubscription(LocalSubscriptionStatus status, String selector, String queueConsumerUser) {
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.status = status;
         this.selector = selector;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
         this.selector = selector;
-    }
-
-    public LocalSubscription(LocalSubscriptionStatus status, String selector, boolean createNewQueue, String queueConsumerUser) {
-        this.status = status;
-        this.selector = selector;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
@@ -65,12 +55,11 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, boolean createNewQueue, String queueConsumerUser) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.sub_id = id;
         this.status = status;
         this.selector = selector;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
@@ -80,13 +69,12 @@ public class LocalSubscription {
         this.lastUpdated = lastUpdated;
     }
 
-    public LocalSubscription(Integer sub_id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, boolean createNewQueue, String queueConsumerUser, Set<LocalBroker> localBrokers) {
+    public LocalSubscription(Integer sub_id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalBroker> localBrokers) {
         this.sub_id = sub_id;
         this.status = status;
         this.selector = selector;
         this.lastUpdated = lastUpdated;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
         this.localBrokers = localBrokers;
     }
 
@@ -111,20 +99,12 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
-    public boolean isCreateNewQueue() {
-        return createNewQueue;
+    public String getConsumerCommonName() {
+        return consumerCommonName;
     }
 
-    public void setCreateNewQueue(boolean createNewQueue) {
-        this.createNewQueue = createNewQueue;
-    }
-
-    public String getQueueConsumerUser() {
-        return queueConsumerUser;
-    }
-
-    public void setQueueConsumerUser(String queueConsumerUser) {
-        this.queueConsumerUser = queueConsumerUser;
+    public void setConsumerCommonName(String queueConsumerUser) {
+        this.consumerCommonName = queueConsumerUser;
     }
 
 
@@ -151,13 +131,12 @@ public class LocalSubscription {
         LocalSubscription that = (LocalSubscription) o;
         return status == that.status &&
                 Objects.equals(selector, that.selector) &&
-                createNewQueue == that.createNewQueue &&
-                Objects.equals(queueConsumerUser, that.queueConsumerUser);
+                Objects.equals(consumerCommonName, that.consumerCommonName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status, selector, createNewQueue, queueConsumerUser);
+        return Objects.hash(status, selector, consumerCommonName);
     }
 
     public Integer getSub_id() {
@@ -170,8 +149,7 @@ public class LocalSubscription {
                 "sub_id=" + sub_id +
                 ", status=" + status +
                 ", selector=" + selector +
-                ", createNewQueue=" + createNewQueue +
-                ", queueConsumerUser=" + queueConsumerUser +
+                ", queueConsumerUser=" + consumerCommonName +
                 '}';
     }
 
@@ -179,7 +157,7 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(sub_id, newStatus, selector,createNewQueue,queueConsumerUser);
+            return new LocalSubscription(sub_id, newStatus, selector, consumerCommonName);
         }
     }
 

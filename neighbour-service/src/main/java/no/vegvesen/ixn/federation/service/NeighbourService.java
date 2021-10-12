@@ -308,7 +308,7 @@ public class NeighbourService {
 		for (LocalSubscription subscription : existingSubscriptions) {
 			Subscription newSubscription = new Subscription(subscription.getSelector(),
 					SubscriptionStatus.REQUESTED,
-					subscription.getQueueConsumerUser());
+					subscription.getConsumerCommonName());
 			calculatedSubscriptions.add(newSubscription);
 		}
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);

@@ -91,26 +91,26 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
 		ServiceProvider nordea = new ServiceProvider("nordea");
-		nordea.addLocalSubscription(createSubscription("DATEX2", "NO"));
+		nordea.addLocalSubscription(createSubscription("DATEX2", "NO", ""));
 		router.syncServiceProviders(Arrays.asList(nordea));
 		Set<String> nordeaBindKeys = client.getQueueBindKeys("nordea");
 		assertThat(nordeaBindKeys).hasSize(1);
 
-		nordea.addLocalSubscription(createSubscription("DATEX2", "FI"));
+		nordea.addLocalSubscription(createSubscription("DATEX2", "FI", ""));
 		router.syncServiceProviders(Arrays.asList(nordea));
 		nordeaBindKeys = client.getQueueBindKeys("nordea");
 		assertThat(nordeaBindKeys).hasSize(2);
 	}
 
-	private LocalSubscription createSubscription(String messageType, String originatingCountry) {
+	private LocalSubscription createSubscription(String messageType, String originatingCountry, String consumerCommonName) {
 		String selector = "messageType = '" + messageType + "' and originatingCountry = '" + originatingCountry +"'";
-		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
+		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, consumerCommonName);
 	}
 
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,""));
+		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"", ""));
 
 		router.syncServiceProviders(Arrays.asList(king_gustaf));
 
@@ -131,7 +131,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void subscriberToreDownWillBeRemovedFromSubscribFederatedInterchangesGroup() {
 		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
-		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "");
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "", "");
 		toreDownServiceProvider.addLocalSubscription(subscription);
 
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
@@ -188,9 +188,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", true, "my-service-provider1");
+				"AND originatingCountry = 'NO'", "my-service-provider-3");
 
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider-3");
 		serviceProvider.addLocalSubscription(sub);
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
@@ -202,13 +202,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'NO'", true, "my-service-provider");
+						"AND originatingCountry = 'NO'", "my-service-provider");
 		LocalSubscription sub2 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'SE'", false, "");
+						"AND originatingCountry = 'SE'", "");
 
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider2");
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 		serviceProvider.addLocalSubscription(sub1);
 		serviceProvider.addLocalSubscription(sub2);
 		router.syncServiceProviders(Arrays.asList(serviceProvider));

@@ -53,7 +53,7 @@ public class ServiceProviderRouter {
             //making a set of LocalSubscriptions that has createNewQueue = true
             Set<LocalSubscription> hasCreateNewQueue = newSubscriptions
                     .stream()
-                    .filter(LocalSubscription::isCreateNewQueue)
+                    .filter(s -> s.getConsumerCommonName().equals(name))
                     .collect(Collectors.toSet());
 
             //remove the queue and group member if we have no more subscriptions
@@ -90,7 +90,7 @@ public class ServiceProviderRouter {
         switch (subscription.getStatus()) {
             case REQUESTED:
 			case CREATED:
-			    if (subscription.isCreateNewQueue()) {
+			    if (subscription.getConsumerCommonName().equals(name)) {
                     newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
                 } else {
 				    newSubscription = onRequested(name, subscription);

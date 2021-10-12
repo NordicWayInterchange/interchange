@@ -142,7 +142,7 @@ public class OnboardRestControllerIT {
         LocalSubscription subscription = localSubscriptions.stream().findFirst().get();
         //TODO we cannot set createNewQueue through the API.
         //assertThat(subscription.isCreateNewQueue()).isTrue();
-        assertThat(subscription.getQueueConsumerUser()).isEqualTo(serviceProviderName);
+        assertThat(subscription.getConsumerCommonName()).isEqualTo(serviceProviderName);
 
         ListSubscriptionsResponse subscriptions = restController.listSubscriptions(serviceProviderName);
         Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();

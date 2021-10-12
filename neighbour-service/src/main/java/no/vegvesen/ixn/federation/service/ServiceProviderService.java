@@ -45,8 +45,8 @@ public class ServiceProviderService {
             for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
                 for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
                     if (localSubscription.getSelector().equals(subscription.getSelector())) {
-                        if (localSubscription.isCreateNewQueue()) {
-                            if (!localSubscription.getQueueConsumerUser().equals(subscription.getConsumerCommonName())) {
+                        if (localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
+                            if (!localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
                                 throw new IllegalStateException("createNewQueue requested, but subscription user is not the same as the local subscription user");
                             }
                             //TODO What about changes to brokers? We also write ALL service provider Brokers every time!
@@ -58,7 +58,7 @@ public class ServiceProviderService {
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         } else {
-                            if (localSubscription.getQueueConsumerUser().equals(subscription.getConsumerCommonName())) {
+                            if (localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
                                 throw new IllegalStateException("createNewQueue = false, local subscription user = subscription user");
                             }
                             LocalBroker broker = new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl);
