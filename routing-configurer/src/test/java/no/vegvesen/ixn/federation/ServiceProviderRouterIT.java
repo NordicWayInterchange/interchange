@@ -103,11 +103,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	private LocalSubscription createSubscription(String messageType, String originatingCountry) {
-		DataType dataType = new DataType();
-		HashMap<String, String> values = new HashMap<>();
-		values.put(MessageProperty.MESSAGE_TYPE.getName(), messageType);
-		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), originatingCountry);
-		dataType.setValues(values);
 		String selector = "messageType = '" + messageType + "' and originatingCountry = '" + originatingCountry +"'";
 		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
 	}

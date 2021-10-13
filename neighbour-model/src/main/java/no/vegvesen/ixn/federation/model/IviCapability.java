@@ -39,6 +39,11 @@ public class IviCapability extends Capability {
 	}
 
 	@Override
+	public String messageType() {
+		return CapabilityApi.IVI;
+	}
+
+	@Override
 	public String toString() {
 		return "IviCapability{" +
 				"iviTypes=" + iviTypes +

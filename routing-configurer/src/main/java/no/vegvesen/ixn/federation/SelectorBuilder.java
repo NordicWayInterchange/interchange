@@ -1,69 +1,28 @@
-package no.vegvesen.ixn.federation.model;
+package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "data_types")
-public class DataType {
 
-	private static Logger logger = LoggerFactory.getLogger(DataType.class);
+/**
+ * NOTE this class is a selector builder, but is retrofitted from an earlier model object.
+ * It is not used in production code, as the selector building is not properly tested.
+ */
+public class SelectorBuilder {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dat_seq")
-	@Column(name = "id")
-	private Integer data_id;
-
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "data_type_values", joinColumns = @JoinColumn(name = "dat_id", foreignKey = @ForeignKey(name="fk_datval_dat")))
-	@MapKeyColumn(name = "property")
-	@Column(name = "value")
+	private static Logger logger = LoggerFactory.getLogger(SelectorBuilder.class);
 	private Map<String, String> values = new HashMap<>();
 
-	@Column
-	@UpdateTimestamp
-	private LocalDateTime lastUpdated;
+	public SelectorBuilder() {
 
-	public DataType() {
 	}
 
-
-	public DataType(Map<String, String> values) {
-		this.values = new HashMap<>(values);
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		DataType dataType = (DataType) o;
-
-		return Objects.equals(values, dataType.values);
-	}
-
-	@Override
-	public int hashCode() {
-		return values != null ? values.hashCode() : 0;
-	}
-
-	public Map<String, String> getValues() {
-		return values;
-	}
-
-	public void setValues(Map<String, String> values) {
-		this.values = values;
-	}
-
-	public String getPropertyValue(MessageProperty property) {
+	private String getPropertyValue(MessageProperty property) {
 		return this.values.get(property.getName());
 	}
 
@@ -82,7 +41,7 @@ public class DataType {
 				.collect(Collectors.toList());
 	}
 
-	public Set<String> getPropertyValueAsSet(MessageProperty messageProperty) {
+	private Set<String> getPropertyValueAsSet(MessageProperty messageProperty) {
 		List<String> propertyValueAsList = getPropertyValueAsList(messageProperty);
 		if (propertyValueAsList.isEmpty()) {
 			return Collections.emptySet();
@@ -145,13 +104,59 @@ public class DataType {
 		}
 	}
 
-	@Override
-	public String toString() {
-		return "DataType{" +
-				"data_id=" + data_id +
-				", values=" + values +
-				", lastUpdated=" + lastUpdated +
-				'}';
+	public SelectorBuilder originatingCountry(String country) {
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(),country);
+		return this;
+	}
+
+	public SelectorBuilder messageType(String messageType) {
+		values.put(MessageProperty.MESSAGE_TYPE.getName(),messageType);
+		return this;
+	}
+
+	/**
+	 * Adds string form of quadTree, usually from message headers
+	 * @param quadTree
+	 * @return
+	 */
+	public SelectorBuilder quadTree(String quadTree) {
+		values.put(MessageProperty.QUAD_TREE.getName(),quadTree);
+		return this;
+	}
+
+	/**
+	 * Adds a set of individual quadtrees, ususally from a Capability
+	 * @param quadTrees
+	 * @return
+	 */
+	public SelectorBuilder quadTree(Set<String> quadTrees) {
+		values.put(MessageProperty.QUAD_TREE.getName(), String.join(",",quadTrees));
+		return this;
+	}
+
+	public SelectorBuilder publisherId(String publisherId) {
+		values.put(MessageProperty.PUBLISHER_ID.getName(), publisherId);
+		return this;
+	}
+
+	public SelectorBuilder protocolVersion(String protocolVersion) {
+		values.put(MessageProperty.PROTOCOL_VERSION.getName(), protocolVersion);
+		return this;
+	}
+
+	public SelectorBuilder iviTypes(Set<String> iviTypes) {
+		values.put(MessageProperty.IVI_TYPE.getName(), String.join(",",iviTypes));
+		return this;
+	}
+
+	public SelectorBuilder causeCodes(Set<String> causeCodes) {
+		values.put(MessageProperty.CAUSE_CODE.getName(), String.join(",",causeCodes));
+		return this;
+	}
+
+	public SelectorBuilder publicationTypes(Set<String> publicationTypes) {
+		values.put(MessageProperty.PUBLICATION_TYPE.getName(), String.join(",",publicationTypes));
+		return this;
 	}
 }
 

@@ -48,6 +48,11 @@ public class DatexCapability extends Capability{
 	}
 
 	@Override
+	public String messageType() {
+		return CapabilityApi.DATEX_2;
+	}
+
+	@Override
 	public String toString() {
 		return "DatexCapability{" +
 				"publicationTypes=" + publicationTypes +
