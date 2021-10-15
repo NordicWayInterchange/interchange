@@ -45,7 +45,7 @@ public class SelfService {
 
 	}
 
-	Set<Capability> calculateSelfCapabilities(Iterable<ServiceProvider> serviceProviders) {
+	public Set<Capability> calculateSelfCapabilities(Iterable<ServiceProvider> serviceProviders) {
 		logger.info("Calculating Self capabilities...");
 		Set<Capability> localCapabilities = new HashSet<>();
 

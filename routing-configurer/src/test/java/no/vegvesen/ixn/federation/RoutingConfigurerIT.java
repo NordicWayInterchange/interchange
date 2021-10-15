@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -99,6 +100,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@MockBean
 	ServiceProviderRepository serviceProviderRepository;
+
+	@MockBean
+	SelfService selfService;
 
 
 	@Test

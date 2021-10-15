@@ -1,11 +1,9 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.federation.model.SubscriptionStatus;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +25,14 @@ public class RoutingConfigurer {
 	private final NeighbourService neighbourService;
 	private final QpidClient qpidClient;
 	private final ServiceProviderRouter serviceProviderRouter;
+	private final SelfService selfService;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, SelfService selfService) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
+		this.selfService = selfService;
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -76,17 +76,19 @@ public class RoutingConfigurer {
 	}
 
 	void setupNeighbourRouting(Neighbour neighbour) {
+		Set<Capability> ourCapabalities = selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders());
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
-				for (Subscription subscription : acceptedSubscriptions){
+				setUpRedirectedRouting(neighbour, acceptedSubscriptions);
+				/*for (Subscription subscription : acceptedSubscriptions){
 					createQueue(subscription.getConsumerCommonName());
 					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
 					bindRemoteServiceProvider("outgoingExchange", subscription.getConsumerCommonName(), subscription);
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
-				}
+				}*/
 				if(!neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(neighbour.getName()).isEmpty()){
 					createQueue(neighbour.getName());
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
@@ -115,7 +117,7 @@ public class RoutingConfigurer {
 	}
 
 	private void bindSubscriptions(String exchange, Neighbour neighbour, Set<Subscription> acceptedSubscriptions) {
-		unbindOldUnwantedBindings(neighbour, exchange);
+		unbindOldUnwantedBindings(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions(), exchange);
 		for (Subscription subscription : acceptedSubscriptions) {
 			qpidClient.addBinding(subscription.getSelector(), neighbour.getName(), subscription.bindKey(), exchange);
 		}
@@ -125,12 +127,21 @@ public class RoutingConfigurer {
 		qpidClient.addBinding(acceptedSubscription.getSelector(), commonName, acceptedSubscription.bindKey(), exchange);
 	}
 
-	private void unbindOldUnwantedBindings(Neighbour neighbour, String exchangeName) {
-		String name = neighbour.getName();
-		Set<String> existingBindKeys = qpidClient.getQueueBindKeys(name);
-		Set<String> unwantedBindKeys = neighbour.getNeighbourRequestedSubscriptions().getUnwantedBindKeys(existingBindKeys);
+	private void unbindOldUnwantedBindings(String neighbourName, SubscriptionRequest neighbourRequestedSubscriptions, String exchangeName) {
+		Set<String> existingBindKeys = qpidClient.getQueueBindKeys(neighbourName);
+		Set<String> unwantedBindKeys = neighbourRequestedSubscriptions.getUnwantedBindKeys(existingBindKeys);
 		for (String unwantedBindKey : unwantedBindKeys) {
-			qpidClient.unbindBindKey(name, unwantedBindKey, exchangeName);
+			qpidClient.unbindBindKey(neighbourName, unwantedBindKey, exchangeName);
+		}
+	}
+
+	private void setUpRedirectedRouting(Neighbour neighbour, Set<Subscription> subscriptions) {
+		for (Subscription subscription : subscriptions){
+			createQueue(subscription.getConsumerCommonName());
+			addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
+			bindRemoteServiceProvider("outgoingExchange", subscription.getConsumerCommonName(), subscription);
+			subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+			logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 		}
 	}
 
