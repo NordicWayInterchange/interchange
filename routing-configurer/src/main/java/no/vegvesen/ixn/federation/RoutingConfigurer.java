@@ -81,7 +81,7 @@ public class RoutingConfigurer {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
-				setUpRedirectedRouting(neighbour, acceptedSubscriptions);
+				setUpRedirectedRouting(acceptedSubscriptions);
 				/*for (Subscription subscription : acceptedSubscriptions){
 					createQueue(subscription.getConsumerCommonName());
 					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
@@ -93,7 +93,7 @@ public class RoutingConfigurer {
 					createQueue(neighbour.getName());
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
 					Set<Subscription> acceptedSubscriptionsConsumerCommonNameAsIxnName = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(neighbour.getName());
-					bindSubscriptions("outgoingExchange", neighbour, acceptedSubscriptionsConsumerCommonNameAsIxnName);
+					bindSubscriptions("outgoingExchange", neighbour.getName(), acceptedSubscriptionsConsumerCommonNameAsIxnName, neighbour.getNeighbourRequestedSubscriptions());
 					for (Subscription subscription : acceptedSubscriptionsConsumerCommonNameAsIxnName) {
 						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 					}
@@ -104,7 +104,7 @@ public class RoutingConfigurer {
 				createQueue(neighbour.getName());
 				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
-				bindSubscriptions("outgoingExchange", neighbour, acceptedSubscriptions);
+				bindSubscriptions("outgoingExchange", neighbour.getName(), acceptedSubscriptions, neighbour.getNeighbourRequestedSubscriptions());
 				for (Subscription subscription : acceptedSubscriptions) {
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 				}
@@ -116,10 +116,10 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void bindSubscriptions(String exchange, Neighbour neighbour, Set<Subscription> acceptedSubscriptions) {
-		unbindOldUnwantedBindings(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions(), exchange);
+	private void bindSubscriptions(String exchange, String neighbourName, Set<Subscription> acceptedSubscriptions, SubscriptionRequest neighbourRequestedSubscriptions) {
+		unbindOldUnwantedBindings(neighbourName, neighbourRequestedSubscriptions, exchange);
 		for (Subscription subscription : acceptedSubscriptions) {
-			qpidClient.addBinding(subscription.getSelector(), neighbour.getName(), subscription.bindKey(), exchange);
+			qpidClient.addBinding(subscription.getSelector(), neighbourName, subscription.bindKey(), exchange);
 		}
 	}
 
@@ -135,7 +135,7 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void setUpRedirectedRouting(Neighbour neighbour, Set<Subscription> subscriptions) {
+	private void setUpRedirectedRouting(Set<Subscription> subscriptions) {
 		for (Subscription subscription : subscriptions){
 			createQueue(subscription.getConsumerCommonName());
 			addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
