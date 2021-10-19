@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
@@ -16,7 +15,6 @@ import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.apache.qpid.jms.message.JmsTextMessage;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -42,8 +40,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptySet;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 
 @SuppressWarnings("rawtypes")
@@ -103,6 +101,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@MockBean
 	SelfService selfService;
+
+	@MockBean
+	ServiceProviderRouter serviceProviderRouter;
 
 
 	@Test
@@ -280,15 +281,21 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setUpQueueForServiceProvider() {
+		Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.MANDATORY, new HashSet<>(Arrays.asList("Road Block")));
+
 		HashSet<Subscription> subs = new HashSet<>();
-		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+		subs.add(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+				"AND publicationType = 'Road Block' " +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "remote-service-provider"));
+				"AND originatingCountry = 'NO' " +
+				"AND protocolVersion = '1.0' " +
+				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "remote-service-provider"));
 
 		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		routingConfigurer.setupNeighbourRouting(neigh);
+		when(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
 
+		routingConfigurer.setupNeighbourRouting(neigh);
 		assertThat(client.queueExists("remote-service-provider")).isTrue();
 	}
 	@Test
@@ -307,21 +314,51 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setUpQueueForServiceProviderAndNeighbour() {
-		HashSet<Subscription> subs = new HashSet<>();
-		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "remote-service-provider"));
+		Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.MANDATORY, new HashSet<>(Arrays.asList("Road Block")));
+		Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Arrays.asList("Road Block")));
 
-		subs.add(new Subscription("((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
+		HashSet<Subscription> subs = new HashSet<>();
+		subs.add(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+				"AND publicationType = 'Road Block' " +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "neigh-true-and-false"));
+				"AND originatingCountry = 'NO' " +
+				"AND protocolVersion = '1.0' " +
+				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "remote-service-provider"));
+
+		subs.add(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+				"AND publicationType = 'Road Block' " +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'SE' " +
+				"AND protocolVersion = '1.0' " +
+				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "neigh-true-and-false"));
 
 		Neighbour neigh = new Neighbour("neigh-true-and-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		routingConfigurer.setupNeighbourRouting(neigh);
+		when(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap1, cap2)));
 
+		routingConfigurer.setupNeighbourRouting(neigh);
+		System.out.println(MessageValidatingSelectorCreator.makeSelector(cap1));
+		System.out.println(MessageValidatingSelectorCreator.makeSelector(cap2));
 		assertThat(client.queueExists("remote-service-provider")).isTrue();
 		assertThat(client.queueExists(neigh.getName())).isTrue();
+	}
+
+	@Test
+	public void selectorsAreProperlyMappedToCapability(){
+		Capability cap1 = new DatexCapability("NO-12345", "NO", "1.0", new HashSet<>(Arrays.asList("01230122")), RedirectStatus.MANDATORY, new HashSet<>(Arrays.asList("Road Block")));
+		Capability cap2 = new DatexCapability("NO-12345", "NO", "1.0", new HashSet<>(Arrays.asList("01230122")), RedirectStatus.OPTIONAL, new HashSet<>(Arrays.asList("Road Block")));
+		Capability cap3 = new DenmCapability("NO-12345", "NO", "1.0", new HashSet<>(Arrays.asList("01230123")), RedirectStatus.MANDATORY, new HashSet<>(Arrays.asList("2")));
+
+		Set<Capability> capabilities = new HashSet<Capability>(Arrays.asList(cap1, cap2, cap3));
+
+		HashMap<String, List<Capability>> map = routingConfigurer.createSelectorToCapabilityMapping(capabilities);
+
+		String selector1 = MessageValidatingSelectorCreator.makeSelector(cap1);
+		String selector2 = MessageValidatingSelectorCreator.makeSelector(cap3);
+
+		assertThat(map.size()).isEqualTo(2);
+		assertThat(map.get(selector1).size()).isEqualTo(2);
+		assertThat(map.get(selector2).size()).isEqualTo(1);
 	}
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
