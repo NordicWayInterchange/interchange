@@ -77,7 +77,6 @@ public class RoutingConfigurer {
 
 	void setupNeighbourRouting(Neighbour neighbour) {
 		HashMap<String, List<Capability>> capabilityMapping = createSelectorToCapabilityMapping(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()));
-		//Set<Capability> ourCapabalities = selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders());
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){

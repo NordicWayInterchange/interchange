@@ -429,6 +429,46 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(map.get(selector2).size()).isEqualTo(1);
 	}
 
+	@Test
+	public void routingIsNotSetUpWhenTryingToRedirect() {
+		Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.MANDATORY, new HashSet<>(Arrays.asList("Road Block")));
+
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+				"AND publicationType = 'Road Block' " +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO' " +
+				"AND protocolVersion = '1.0' " +
+				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "cod"));
+
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
+		Neighbour cod = new Neighbour("cod", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+
+		when(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		routingConfigurer.setupNeighbourRouting(cod);
+		assertThat(client.queueExists(cod.getName())).isFalse();
+		assertThat(cod.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
+	}
+
+	@Test
+	public void routingIsNotSetUpWhenRedirectIsNotAvailable() {
+		Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
+
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+				"AND publicationType = 'Road Block' " +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO' " +
+				"AND protocolVersion = '1.0' " +
+				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "no-clownfish"));
+
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
+		Neighbour clownfish = new Neighbour("clownfish", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
+
+		when(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		routingConfigurer.setupNeighbourRouting(clownfish);
+		assertThat(client.queueExists(clownfish.getName())).isFalse();
+		assertThat(clownfish.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
+	}
+
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");
 		Sink neighbourSink = new Sink(AMQPS_URL, neighbourQueue, localhostSslContext);
