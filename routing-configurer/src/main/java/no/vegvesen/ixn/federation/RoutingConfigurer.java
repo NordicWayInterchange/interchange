@@ -121,25 +121,6 @@ public class RoutingConfigurer {
 						logger.info("Set up routing for neighbour {}", neighbour.getName());
 					}
 				}
-
-				//setUpRedirectedRouting(acceptedSubscriptions);
-				/*for (Subscription subscription : acceptedSubscriptions){
-					createQueue(subscription.getConsumerCommonName());
-					addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
-					bindRemoteServiceProvider("outgoingExchange", subscription.getConsumerCommonName(), subscription);
-					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-					logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
-				}*/
-				/*if(!neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(neighbour.getName()).isEmpty()){
-					createQueue(neighbour.getName());
-					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
-					Set<Subscription> acceptedSubscriptionsConsumerCommonNameAsIxnName = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(neighbour.getName());
-					bindSubscriptions("outgoingExchange", neighbour.getName(), acceptedSubscriptionsConsumerCommonNameAsIxnName, neighbour.getNeighbourRequestedSubscriptions());
-					for (Subscription subscription : acceptedSubscriptionsConsumerCommonNameAsIxnName) {
-						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-					}
-					logger.info("Set up routing for neighbour {}", neighbour.getName());
-				}*/
 				neighbourService.saveSetupRouting(neighbour);
 			} else {
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
@@ -165,16 +146,6 @@ public class RoutingConfigurer {
 					logger.info("Set up routing for neighbour {}", neighbour.getName());
 				}
 				neighbourService.saveSetupRouting(neighbour);
-
-				/*createQueue(neighbour.getName());
-				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
-				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
-				bindSubscriptions("outgoingExchange", neighbour.getName(), acceptedSubscriptions, neighbour.getNeighbourRequestedSubscriptions());
-				for (Subscription subscription : acceptedSubscriptions) {
-					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-				}
-				logger.info("Set up routing for neighbour {}", neighbour.getName());
-				neighbourService.saveSetupRouting(neighbour);*/
 			}
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
