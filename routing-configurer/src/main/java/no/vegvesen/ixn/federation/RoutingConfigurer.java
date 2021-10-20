@@ -80,9 +80,9 @@ public class RoutingConfigurer {
 		//Set<Capability> ourCapabalities = selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders());
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
-			Set<Subscription> allAcceptedSubscriptions = new HashSet<>();
-			allAcceptedSubscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
+				Set<Subscription> allAcceptedSubscriptions = new HashSet<>();
+				allAcceptedSubscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 				for(Subscription subscription : acceptedSubscriptions){
 					String subscriptionSelector = subscription.getSelector();
@@ -114,10 +114,12 @@ public class RoutingConfigurer {
 							}
 						}
 					}
-					createQueue(neighbour.getName());
-					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
-					bindSubscriptions("outgoingExchange", neighbour.getName(), allAcceptedSubscriptions, neighbour.getNeighbourRequestedSubscriptions());
-					logger.info("Set up routing for neighbour {}", neighbour.getName());
+					if(!subscriptionsToSetUpRoutingFor.isEmpty()){
+						createQueue(neighbour.getName());
+						addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
+						bindSubscriptions("outgoingExchange", neighbour.getName(), subscriptionsToSetUpRoutingFor, neighbour.getNeighbourRequestedSubscriptions());
+						logger.info("Set up routing for neighbour {}", neighbour.getName());
+					}
 				}
 
 				//setUpRedirectedRouting(acceptedSubscriptions);
@@ -140,7 +142,31 @@ public class RoutingConfigurer {
 				}*/
 				neighbourService.saveSetupRouting(neighbour);
 			} else {
-				createQueue(neighbour.getName());
+				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
+				Set<Subscription> subscriptionsToSetUpRoutingFor = new HashSet<>();
+				for(Subscription subscription : acceptedSubscriptions){
+					String subscriptionSelector = subscription.getSelector();
+					List<Capability> matchingCapabilities = capabilityMapping.get(subscriptionSelector);
+					for(Capability cap : matchingCapabilities){
+						if(cap.getRedirect().equals(RedirectStatus.MANDATORY)){
+							subscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
+							logger.info("Routing for subscription is ILLEGAL");
+						} else{
+							subscriptionsToSetUpRoutingFor.add(subscription);
+							subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+						}
+					}
+				}
+				//TODO: Are we supposed to set up routing for Neighbour with an empty SubscriptionRequest?
+				if(!subscriptionsToSetUpRoutingFor.isEmpty()){
+					createQueue(neighbour.getName());
+					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
+					bindSubscriptions("outgoingExchange", neighbour.getName(), subscriptionsToSetUpRoutingFor, neighbour.getNeighbourRequestedSubscriptions());
+					logger.info("Set up routing for neighbour {}", neighbour.getName());
+				}
+				neighbourService.saveSetupRouting(neighbour);
+
+				/*createQueue(neighbour.getName());
 				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
 				bindSubscriptions("outgoingExchange", neighbour.getName(), acceptedSubscriptions, neighbour.getNeighbourRequestedSubscriptions());
@@ -148,7 +174,7 @@ public class RoutingConfigurer {
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 				}
 				logger.info("Set up routing for neighbour {}", neighbour.getName());
-				neighbourService.saveSetupRouting(neighbour);
+				neighbourService.saveSetupRouting(neighbour);*/
 			}
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
