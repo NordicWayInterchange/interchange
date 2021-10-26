@@ -68,7 +68,7 @@ public class NeighbourServiceIT {
 
         SubscriptionResponseApi responseApi = service.incomingSubscriptionRequest(
                 new SubscriptionRequestApi("myNeighbour",
-                        Collections.singleton(new RequestedSubscriptionApi("originatingCountry = 'NO'")))
+                        Collections.singleton(new RequestedSubscriptionApi("originatingCountry = 'NO'", "myNeighbour")))
         );
         Set<RequestedSubscriptionResponseApi> subscriptions = responseApi.getSubscriptions();
         assertThat(subscriptions.size()).isEqualTo(1);
@@ -94,8 +94,8 @@ public class NeighbourServiceIT {
         neighbour.setName("my-neighbour2");
         repository.save(neighbour);
 
-        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
-        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'");
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour2");
+        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'", "my-neighbour2");
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour2", new HashSet<>(Arrays.asList(sub1, sub2)));
 
@@ -113,8 +113,8 @@ public class NeighbourServiceIT {
         neighbour.setName("my-neighbour3");
         repository.save(neighbour);
 
-        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
-        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'");
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour3");
+        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'", "my-neighbour3");
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour3", new HashSet<>(Arrays.asList(sub1, sub2)));
 
@@ -136,7 +136,7 @@ public class NeighbourServiceIT {
         neighbour.setName("my-neighbour4");
         repository.save(neighbour);
 
-        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour4");
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour4", new HashSet<>(Collections.singleton(sub1)));
 
@@ -158,8 +158,8 @@ public class NeighbourServiceIT {
         neighbour.setName("my-neighbour5");
         repository.save(neighbour);
 
-        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
-        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'");
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour5");
+        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'", "my-neighbour5");
 
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour5", new HashSet<>(Arrays.asList(sub1, sub2)));
@@ -171,7 +171,7 @@ public class NeighbourServiceIT {
 
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
 
-        RequestedSubscriptionApi sub3 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='FI'");
+        RequestedSubscriptionApi sub3 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='FI'", "my-neighbour5");
 
         SubscriptionRequestApi subscriptionRequestApi2 = new SubscriptionRequestApi("my-neighbour5", new HashSet<>(Collections.singleton(sub3)));
 
