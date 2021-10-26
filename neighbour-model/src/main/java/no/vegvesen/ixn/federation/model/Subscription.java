@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.model;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -138,18 +139,16 @@ public class Subscription {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null) return false;
 		if (this == o) return true;
 		if (!(o instanceof Subscription)) return false;
-
 		Subscription that = (Subscription) o;
-
-		return selector.equals(that.selector);
+		return selector.equals(that.selector) &&
+				consumerCommonName.equals(that.consumerCommonName);
 	}
 
 	@Override
 	public int hashCode() {
-		return selector.hashCode();
+		return Objects.hash(selector, consumerCommonName);
 	}
 
 	@Override

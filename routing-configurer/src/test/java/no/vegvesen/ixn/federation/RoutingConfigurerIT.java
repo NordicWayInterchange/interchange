@@ -405,28 +405,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		when(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap1, cap2)));
 
 		routingConfigurer.setupNeighbourRouting(neigh);
-		System.out.println(MessageValidatingSelectorCreator.makeSelector(cap1));
-		System.out.println(MessageValidatingSelectorCreator.makeSelector(cap2));
 		assertThat(client.queueExists("remote-service-provider")).isTrue();
 		assertThat(client.queueExists(neigh.getName())).isTrue();
-	}
-
-	@Test
-	public void selectorsAreProperlyMappedToCapability(){
-		Capability cap1 = new DatexCapability("NO-12345", "NO", "1.0", new HashSet<>(Arrays.asList("01230122")), RedirectStatus.MANDATORY, new HashSet<>(Arrays.asList("Road Block")));
-		Capability cap2 = new DatexCapability("NO-12345", "NO", "1.0", new HashSet<>(Arrays.asList("01230122")), RedirectStatus.OPTIONAL, new HashSet<>(Arrays.asList("Road Block")));
-		Capability cap3 = new DenmCapability("NO-12345", "NO", "1.0", new HashSet<>(Arrays.asList("01230123")), RedirectStatus.MANDATORY, new HashSet<>(Arrays.asList("2")));
-
-		Set<Capability> capabilities = new HashSet<Capability>(Arrays.asList(cap1, cap2, cap3));
-
-		HashMap<String, List<Capability>> map = routingConfigurer.createSelectorToCapabilityMapping(capabilities);
-
-		String selector1 = MessageValidatingSelectorCreator.makeSelector(cap1);
-		String selector2 = MessageValidatingSelectorCreator.makeSelector(cap3);
-
-		assertThat(map.size()).isEqualTo(2);
-		assertThat(map.get(selector1).size()).isEqualTo(2);
-		assertThat(map.get(selector2).size()).isEqualTo(1);
 	}
 
 	@Test
@@ -467,6 +447,34 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		routingConfigurer.setupNeighbourRouting(clownfish);
 		assertThat(client.queueExists(clownfish.getName())).isFalse();
 		assertThat(clownfish.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
+	}
+
+	@Test
+	public void setUpQueueForServiceProviderAndNeighbourForOneCapability() {
+		Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Arrays.asList("Road Block")));
+
+		HashSet<Subscription> subs = new HashSet<>();
+		subs.add(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+				"AND publicationType = 'Road Block' " +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO' " +
+				"AND protocolVersion = '1.0' " +
+				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "remote-sp"));
+
+		subs.add(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+				"AND publicationType = 'Road Block' " +
+				"AND messageType = 'DATEX2' " +
+				"AND originatingCountry = 'NO' " +
+				"AND protocolVersion = '1.0' " +
+				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "neigh-both"));
+
+		Neighbour neigh = new Neighbour("neigh-both", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+
+		when(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap1)));
+
+		routingConfigurer.setupNeighbourRouting(neigh);
+		assertThat(client.queueExists("remote-sp")).isTrue();
+		assertThat(client.queueExists(neigh.getName())).isTrue();
 	}
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {

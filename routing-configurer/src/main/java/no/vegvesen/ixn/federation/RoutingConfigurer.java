@@ -77,10 +77,9 @@ public class RoutingConfigurer {
 	}
 
 	void setupNeighbourRouting(Neighbour neighbour) {
-		HashMap<String, List<Capability>> capabilityMapping = createSelectorToCapabilityMapping(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()));
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
-			removeBindingsForSubscriptionsWithStatusResubscribe(neighbour.getNeighbourRequestedSubscriptions().getResubscribeSubscriptions(), neighbour.getName(), "outgoingExchange");
+			//removeBindingsForSubscriptionsWithStatusResubscribe(neighbour.getNeighbourRequestedSubscriptions().getResubscribeSubscriptions(), neighbour.getName(), "outgoingExchange");
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
 				Set<Subscription> allAcceptedSubscriptions = new HashSet<>();
 				allAcceptedSubscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
@@ -185,15 +184,6 @@ public class RoutingConfigurer {
 		bindRemoteServiceProvider("outgoingExchange", subscription.getConsumerCommonName(), subscription);
 		subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 		logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
-	}
-
-	public HashMap<String, List<Capability>> createSelectorToCapabilityMapping(Set<Capability> capabilities) {
-		HashMap<String, List<Capability>> mapping = new HashMap<>();
-		for(Capability cap : capabilities){
-			String selector = MessageValidatingSelectorCreator.makeSelector(cap);
-			mapping.computeIfAbsent(selector, k -> new ArrayList<>()).add(cap);
-		}
-		return mapping;
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
