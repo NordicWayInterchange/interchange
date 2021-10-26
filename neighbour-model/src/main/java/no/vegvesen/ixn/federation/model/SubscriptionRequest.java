@@ -99,6 +99,12 @@ public class SubscriptionRequest {
 				.collect(Collectors.toSet());
 	}
 
+	public Set<Subscription> getResubscribeSubscriptions() {
+		return getSubscriptions().stream()
+				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE))
+				.collect(Collectors.toSet());
+	}
+
 	public Optional<LocalDateTime> getSuccessfulRequest() {
 		return Optional.ofNullable(successfulRequest);
 	}

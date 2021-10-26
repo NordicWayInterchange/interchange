@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -79,14 +80,14 @@ public class RoutingConfigurer {
 		HashMap<String, List<Capability>> capabilityMapping = createSelectorToCapabilityMapping(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()));
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
+			removeBindingsForSubscriptionsWithStatusResubscribe(neighbour.getNeighbourRequestedSubscriptions().getResubscribeSubscriptions(), neighbour.getName(), "outgoingExchange");
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
 				Set<Subscription> allAcceptedSubscriptions = new HashSet<>();
 				allAcceptedSubscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 				for(Subscription subscription : acceptedSubscriptions){
-					String subscriptionSelector = subscription.getSelector();
-					List<Capability> matchingCapabilities = capabilityMapping.get(subscriptionSelector);
-					for(Capability cap : matchingCapabilities){
+					Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()), subscription);
+					for(Capability cap : matchingCaps){
 						if(cap.getRedirect().equals(RedirectStatus.MANDATORY)){
 							setUpRedirectedRouting(subscription);
 						} else if(cap.getRedirect().equals(RedirectStatus.OPTIONAL)){
@@ -101,9 +102,8 @@ public class RoutingConfigurer {
 				if(!allAcceptedSubscriptions.isEmpty()){
 					Set<Subscription> subscriptionsToSetUpRoutingFor = new HashSet<>();
 					for(Subscription subscription : allAcceptedSubscriptions){
-						String subscriptionSelector = subscription.getSelector();
-						List<Capability> matchingCapabilities = capabilityMapping.get(subscriptionSelector);
-						for(Capability cap : matchingCapabilities){
+						Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()), subscription);
+						for(Capability cap : matchingCaps){
 							if(cap.getRedirect().equals(RedirectStatus.MANDATORY)){
 								subscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
 								logger.info("Routing for subscription is ILLEGAL");
@@ -125,9 +125,8 @@ public class RoutingConfigurer {
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
 				Set<Subscription> subscriptionsToSetUpRoutingFor = new HashSet<>();
 				for(Subscription subscription : acceptedSubscriptions){
-					String subscriptionSelector = subscription.getSelector();
-					List<Capability> matchingCapabilities = capabilityMapping.get(subscriptionSelector);
-					for(Capability cap : matchingCapabilities){
+					Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()), subscription);
+					for(Capability cap : matchingCaps){
 						if(cap.getRedirect().equals(RedirectStatus.MANDATORY)){
 							subscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
 							logger.info("Routing for subscription is ILLEGAL");
@@ -167,6 +166,16 @@ public class RoutingConfigurer {
 		Set<String> unwantedBindKeys = neighbourRequestedSubscriptions.getUnwantedBindKeys(existingBindKeys);
 		for (String unwantedBindKey : unwantedBindKeys) {
 			qpidClient.unbindBindKey(neighbourName, unwantedBindKey, exchangeName);
+		}
+	}
+
+	private void removeBindingsForSubscriptionsWithStatusResubscribe(Set<Subscription> subscriptions, String neighbourName, String exchangeName) {
+		for(Subscription sub : subscriptions){
+			qpidClient.unbindBindKey(sub.getConsumerCommonName(), sub.bindKey(), exchangeName);
+			sub.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
+			if(!sub.getConsumerCommonName().equals(neighbourName)){
+				qpidClient.removeQueue(sub.getConsumerCommonName());
+			}
 		}
 	}
 

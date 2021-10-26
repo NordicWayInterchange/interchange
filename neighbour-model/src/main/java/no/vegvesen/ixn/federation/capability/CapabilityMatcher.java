@@ -113,5 +113,27 @@ public class CapabilityMatcher {
 		return evaluatedSelector;
 	}
 
-
+	public static Set<Capability> matchCapabilityToSubscriptionSelector(Set<Capability> capabilities, Subscription subscriptionSelector) {
+		Set<Capability> matches = new HashSet<>();
+		for (Capability capability : capabilities) {
+			String whiteSpaceTrimmedSelector = subscriptionSelector.getSelector().replaceAll(REGEX_ALL_WHITESPACE, " ");
+			String quadTreeEvaluatedSelector = evaluateQuadTreeMatch(whiteSpaceTrimmedSelector, capability.getQuadTree());
+			JMSSelectorFilter selectorFilter = JMSSelectorFilterFactory.get(quadTreeEvaluatedSelector);
+			boolean match = false;
+			if (capability instanceof DatexCapability) {
+				match = matchDatex((DatexCapability) capability, selectorFilter);
+			} else if (capability instanceof DenmCapability) {
+				match = matchDenm((DenmCapability) capability, selectorFilter);
+			} else if (capability instanceof IviCapability) {
+				match = matchIvi((IviCapability) capability, selectorFilter);
+			} else {
+				logger.warn("Unknown Capability type {} ", capability.getClass().getName());
+			}
+			if (match) {
+				logger.debug("Selector [{}] matches capability {}", subscriptionSelector, capability);
+				matches.add(capability);
+			}
+		}
+		return matches;
+	}
 }
