@@ -8,7 +8,7 @@ public class IviCapabilityApi extends CapabilityApi {
 	private Set<String> iviType = new HashSet<>();
 
 	public IviCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> iviType) {
-		super(IVI, publisherId, originatingCountry, protocolVersion, quadTree);
+		super(Constants.IVI, publisherId, originatingCountry, protocolVersion, quadTree);
 		if (iviType != null) {
 			this.iviType.addAll(iviType);
 		}

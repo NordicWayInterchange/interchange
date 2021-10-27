@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 
 import javax.persistence.*;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Entity
-@DiscriminatorValue(CapabilityApi.DATEX_2)
+@DiscriminatorValue(Constants.DATEX_2)
 public class DatexCapability extends Capability{
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "capability_publications", joinColumns = @JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_cappub_cap")))
@@ -46,7 +47,7 @@ public class DatexCapability extends Capability{
 
 	@Override
 	public Map<String, String> getSingleValues() {
-		return getSingleValuesBase(CapabilityApi.DATEX_2);
+		return getSingleValuesBase(Constants.DATEX_2);
 	}
 
 	@Override
@@ -56,7 +57,7 @@ public class DatexCapability extends Capability{
 
 	@Override
 	public String messageType() {
-		return CapabilityApi.DATEX_2;
+		return Constants.DATEX_2;
 	}
 
 	@Override

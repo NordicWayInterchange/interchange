@@ -8,7 +8,7 @@ public class DenmCapabilityApi extends CapabilityApi {
 	private Set<String> causeCode = new HashSet<>();
 
 	public DenmCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> causeCode) {
-		super(DENM, publisherId, originatingCountry, protocolVersion, quadTree);
+		super(Constants.DENM, publisherId, originatingCountry, protocolVersion, quadTree);
 		if (causeCode != null) {
 			this.causeCode.addAll(causeCode);
 		}

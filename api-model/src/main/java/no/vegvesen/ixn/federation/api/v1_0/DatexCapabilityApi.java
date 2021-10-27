@@ -12,7 +12,7 @@ public class DatexCapabilityApi extends CapabilityApi {
 	}
 
 	public DatexCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> publicationType) {
-		super(DATEX_2, publisherId, originatingCountry, protocolVersion, quadTree);
+		super(Constants.DATEX_2, publisherId, originatingCountry, protocolVersion, quadTree);
 		if (publicationType != null) {
 			this.publicationType.addAll(publicationType);
 		}
