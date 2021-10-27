@@ -15,7 +15,7 @@ public class DenmCapabilityApi extends CapabilityApi {
 	}
 
 	public DenmCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Set<String> causeCode) {
-		super(DENM, publisherId, originatingCountry, protocolVersion, quadTree, redirect);
+		super(Constants.DENM, publisherId, originatingCountry, protocolVersion, quadTree, redirect);
 		if (causeCode != null) {
 			this.causeCode.addAll(causeCode);
 		}
