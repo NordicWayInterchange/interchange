@@ -17,22 +17,20 @@ import static no.vegvesen.ixn.federation.api.v1_0.CapabilityApi.*;
 		visible = true,
 		property = "messageType")
 @JsonSubTypes({
-		@JsonSubTypes.Type(value = DatexCapabilityApi.class, name = DATEX_2),
-		@JsonSubTypes.Type(value = DenmCapabilityApi.class, name = DENM),
-		@JsonSubTypes.Type(value = IviCapabilityApi.class, name = IVI),
+		@JsonSubTypes.Type(value = DatexCapabilityApi.class, name = Constants.DATEX_2),
+		@JsonSubTypes.Type(value = DenmCapabilityApi.class, name = Constants.DENM),
+		@JsonSubTypes.Type(value = IviCapabilityApi.class, name = Constants.IVI),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CapabilityApi {
-	public static final String DATEX_2 = "DATEX2";
-	public static final String DENM = "DENM";
-	public static final String IVI = "IVI";
 
 	private String messageType;
 	private String publisherId;
 	private String originatingCountry;
 	private String protocolVersion;
 	private final Set<String> quadTree = new HashSet<>();
+	private RedirectStatusApi redirect;
 
 	public CapabilityApi() {
 	}
@@ -48,6 +46,20 @@ public class CapabilityApi {
 		if (quadTree != null) {
 			this.quadTree.addAll(quadTree);
 		}
+	}
+
+	public CapabilityApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect) {
+		if (messageType == null) {
+			throw new IllegalArgumentException("messageType can not be null");
+		}
+		this.messageType = messageType;
+		this.publisherId = publisherId;
+		this.originatingCountry = originatingCountry;
+		this.protocolVersion = protocolVersion;
+		if (quadTree != null) {
+			this.quadTree.addAll(quadTree);
+		}
+		this.redirect = redirect;
 	}
 
 	public String getOriginatingCountry() {
@@ -97,6 +109,13 @@ public class CapabilityApi {
 		this.protocolVersion = protocolVersion;
 	}
 
+	public RedirectStatusApi getRedirect() {
+		return redirect;
+	}
+
+	public void setRedirect(RedirectStatusApi redirect) {
+		this.redirect = redirect;
+	}
 
 	@Override
 	public String toString() {
@@ -106,6 +125,7 @@ public class CapabilityApi {
 				", originatingCountry='" + originatingCountry + '\'' +
 				", protocolVersion='" + protocolVersion + '\'' +
 				", quadTree=" + quadTree +
+				", redirect=" + redirect +
 				'}';
 	}
 }

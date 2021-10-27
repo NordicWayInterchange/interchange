@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.util;
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.jms.*;
@@ -8,7 +8,6 @@ import javax.jms.IllegalStateException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @SuppressWarnings("RedundantThrows")
 public class MessageTestDouble implements Message {
@@ -336,7 +335,7 @@ public class MessageTestDouble implements Message {
         return createMessage(publisher,
                 originatingCountry,
                 protocolVersion,
-				Datex2DataTypeApi.DATEX_2,
+				Constants.DATEX_2,
                 quadTree,
                 additionalProperties);
     }

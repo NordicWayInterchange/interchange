@@ -2,12 +2,15 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.model.Broker;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -40,48 +43,45 @@ public class SubscriptionRequestTransformer {
 	}
 
 	public SubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions()));
+		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 		return subscriptionRequest;
 	}
 
 	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
-		if (subscriptionApi.isCreateNewQueue() == null) {
-			Subscription subscription = new Subscription(Integer.parseInt(subscriptionApi.getId()),
-					subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()),
-					subscriptionApi.getSelector(),
-					subscriptionApi.getPath(),
-					false,
-					subscriptionApi.getQueueConsumerUser());
-			subscription.setBrokerUrl(subscriptionApi.getMessageBrokerUrl());
-			subscription.setQueue(subscriptionApi.getQueueName());
-			return subscription;
-		} else {
-			Subscription subscription = new Subscription(Integer.parseInt(subscriptionApi.getId()),
-					subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()),
-					subscriptionApi.getSelector(),
-					subscriptionApi.getPath(),
-					subscriptionApi.isCreateNewQueue(),
-					subscriptionApi.getQueueConsumerUser());
-			subscription.setBrokerUrl(subscriptionApi.getMessageBrokerUrl());
-			subscription.setQueue(subscriptionApi.getQueueName());
-			return subscription;
+		Subscription subscription = new Subscription();
+		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
+		subscription.setSelector(subscriptionApi.getSelector());
+		subscription.setPath(subscriptionApi.getPath());
+		subscription.setLastUpdatedTimestamp(subscriptionApi.getLastUpdatedTimestamp());
+		subscription.setConsumerCommonName(subscriptionApi.getConsumerCommonName());
+
+		Set<Broker> brokers = new HashSet<>();
+		for(BrokerApi brokerApi : subscriptionApi.getBrokers()){
+			Broker broker = new Broker(brokerApi.getQueueName(), brokerApi.getMessageBrokerUrl());
+			if(brokerApi.getMaxBandwidth() != null && brokerApi.getMaxMessageRate() != null) {
+				broker.setMaxBandwidth(brokerApi.getMaxBandwidth());
+				broker.setMaxMessageRate(brokerApi.getMaxMessageRate());
+			}
+			brokers.add(broker);
 		}
+		subscription.setBrokers(brokers);
+		return subscription;
+
 	}
 
 	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelUrl) {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
-		response.setId(subscription.getId().toString());
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
-		if (subscription.isCreateNewQueue()) {
-			response.setCreateNewQueue(subscription.isCreateNewQueue());
-			response.setQueueConsumerUser(subscription.getQueueConsumerUser());
-		}
+		response.setConsumerCommonName(response.getConsumerCommonName());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			response.setMessageBrokerUrl(messageChannelUrl);
-			response.setQueueName(neighbourName);
+			BrokerApi broker = new BrokerApi(
+					neighbourName,
+					messageChannelUrl
+			);
+			response.setBrokers(Collections.singleton(broker));
 		}
 		return response;
 	}

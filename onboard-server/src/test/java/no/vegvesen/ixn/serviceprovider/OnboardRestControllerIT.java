@@ -16,7 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -45,33 +45,59 @@ public class OnboardRestControllerIT {
         DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
         String serviceProviderName = "serviceprovider";
 
-        LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
+        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
+        AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
+                serviceProviderName,
+                Collections.singleton(datexNO)
+        ));
         assertThat(addedCapability).isNotNull();
-		LocalCapabilityList serviceProviderCapabilities = restController.getServiceProviderCapabilities(serviceProviderName);
+		ListCapabilitiesResponse serviceProviderCapabilities = restController.listCapabilities(serviceProviderName);
         assertThat(serviceProviderCapabilities.getCapabilities()).hasSize(1);
 
         //Test that we don't mess up subscriptions and capabilities
-        LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(0);
 
-        LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
-        restController.deleteCapability(serviceProviderName, saved.getId());
+        LocalActorCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
+        //LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
+        restController.deleteCapability(serviceProviderName, Integer.parseInt(saved.getId()));
+    }
+
+    @Test
+    public void testGettingCapability() {
+        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        String serviceProviderName = "serviceprovider";
+
+        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
+        AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
+                serviceProviderName,
+                Collections.singleton(datexNO)
+        ));
+        assertThat(addedCapability).isNotNull();
+        LocalActorCapability capability = addedCapability.getCapabilities().stream().findFirst()
+                .orElseThrow(() -> new AssertionError("No capabilities in response"));
+        GetCapabilityResponse response = restController.getServiceProviderCapability(serviceProviderName,Integer.parseInt(capability.getId()));
+        assertThat(response.getId()).isEqualTo(capability.getId());
+
     }
 
     @Test
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
-        restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
+        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
 
-        LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(selectorApi));
+        restController.addSubscriptions(serviceProviderName, requestApi);
+
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 
 		ServiceProvider afterAddSubscription = serviceProviderRepository.findByName(serviceProviderName);
 		assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
-		LocalSubscriptionApi subscriptionApi = serviceProviderSubscriptions.getSubscriptions().get(0);
-        restController.deleteSubscription(serviceProviderName,subscriptionApi.getId());
+		LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().get();
+        restController.deleteSubscription(serviceProviderName,Integer.parseInt(subscriptionApi.getId()));
 
 		ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
 		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
@@ -80,9 +106,13 @@ public class OnboardRestControllerIT {
 	@Test
 	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
-		restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", false));
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
+		        serviceProviderName,
+                Collections.singleton(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"))
+        );
+        restController.addSubscriptions(serviceProviderName, requestApi);
 
-		LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+		ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
 		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 		ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
 		Optional<LocalDateTime> subscriptionUpdated = savedSP.getSubscriptionUpdated();
@@ -98,31 +128,30 @@ public class OnboardRestControllerIT {
 	}
 
 	@Test
-    void testAddingLocalSubscriptionWithCreateNewQueue() {
+    void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
-        restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", true));
+        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
 
-        LocalSubscriptionListApi serviceProviderSubscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
+        ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
 
         ServiceProvider savedSP = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalSubscription> localSubscriptions = savedSP.getSubscriptions();
         assertThat(localSubscriptions).hasSize(1);
         LocalSubscription subscription = localSubscriptions.stream().findFirst().get();
-        assertThat(subscription.isCreateNewQueue()).isTrue();
-        assertThat(subscription.getQueueConsumerUser()).isEqualTo(serviceProviderName);
+        assertThat(subscription.getConsumerCommonName()).isEqualTo(serviceProviderName);
 
-        LocalSubscriptionListApi subscriptions = restController.getServiceProviderSubscriptions(serviceProviderName);
-        List<LocalSubscriptionApi> localSubscriptionApis = subscriptions.getSubscriptions();
+        ListSubscriptionsResponse subscriptions = restController.listSubscriptions(serviceProviderName);
+        Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();
         assertThat(localSubscriptionApis.size()).isEqualTo(1);
-        assertThat(localSubscriptionApis.get(0).isCreateNewQueue()).isTrue();
     }
 
     @Test
-    void testAddingLocalSubscriptionWithCreateNewQueueAndGetApiObject() {
+    void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
-        LocalSubscriptionApi serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'", true));
+        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
 
-        assertThat(serviceProviderSubscriptions.isCreateNewQueue()).isTrue();
     }
 }

@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.IviCapabilityApi;
 
 import javax.persistence.*;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Entity
-@DiscriminatorValue(CapabilityApi.IVI)
+@DiscriminatorValue(Constants.IVI)
 public class IviCapability extends Capability {
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "capability_ivitypes", joinColumns = @JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_capivi_cap")))
@@ -18,6 +19,11 @@ public class IviCapability extends Capability {
 
 	public IviCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> iviTypes) {
 		super(publisherId, originatingCountry, protocolVersion, quadTree);
+		this.iviTypes.addAll(iviTypes);
+	}
+
+	public IviCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect, Set<String> iviTypes) {
+		super(publisherId, originatingCountry, protocolVersion, quadTree, redirect);
 		this.iviTypes.addAll(iviTypes);
 	}
 
@@ -30,12 +36,17 @@ public class IviCapability extends Capability {
 
 	@Override
 	public Map<String, String> getSingleValues() {
-		return getSingleValuesBase(CapabilityApi.IVI);
+		return getSingleValuesBase(Constants.IVI);
 	}
 
 	@Override
 	public CapabilityApi toApi() {
 		return new IviCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getIviTypes());
+	}
+
+	@Override
+	public String messageType() {
+		return Constants.IVI;
 	}
 
 	@Override

@@ -74,4 +74,15 @@ public class ListenerEndpointIT {
         assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(listenerEndpoint);
         assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(listenerEndpoint);
     }
+
+    @Test
+    public void saveMultipleListenerEndpointsFromSameNeighbour(){
+        ListenerEndpoint lisend1 = new ListenerEndpoint("neighbourName", "brokerUrl-1", "queue-1", new Connection());
+        ListenerEndpoint lisend2 = new ListenerEndpoint("neighbourName", "brokerUrl-2", "queue-2", new Connection());
+
+        repository.save(lisend1);
+        repository.save(lisend2);
+
+        assertThat(repository.findAllByNeighbourName("neighbourName")).hasSize(2);
+    }
 }

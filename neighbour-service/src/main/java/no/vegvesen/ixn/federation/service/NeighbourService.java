@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import net.bytebuddy.asm.Advice;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
@@ -26,10 +24,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -285,13 +280,21 @@ public class NeighbourService {
 		List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
 		Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
 
-		Set<String> brokerUrlList = subscriptions.stream().map(Subscription::getBrokerUrl).collect(Collectors.toSet());
+		Set<String> brokerUrlList = subscriptions.stream().flatMap(subscription -> subscription.getBrokers().stream()).map(Broker::getMessageBrokerUrl).collect(Collectors.toSet());
 
 		for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
 			if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
 				listenerEndpointRepository.delete(listenerEndpoint);
 				logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), listenerEndpoint.getBrokerUrl(), listenerEndpoint.getQueue());
 			}
+		}
+	}
+
+	public void tearDownListenerEndpointsFromBrokersList(Neighbour neighbour, Set<Broker> brokers) {
+		for(Broker broker : brokers) {
+			ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), broker.getMessageBrokerUrl(), broker.getQueueName());
+			listenerEndpointRepository.delete(listenerEndpoint);
+			logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), broker.getMessageBrokerUrl(), broker.getQueueName());
 		}
 	}
 
@@ -305,12 +308,70 @@ public class NeighbourService {
 		for (LocalSubscription subscription : existingSubscriptions) {
 			Subscription newSubscription = new Subscription(subscription.getSelector(),
 					SubscriptionStatus.REQUESTED,
-					subscription.isCreateNewQueue(),
-					subscription.getQueueConsumerUser());
+					subscription.getConsumerCommonName());
 			calculatedSubscriptions.add(newSubscription);
 		}
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
 		return calculatedSubscriptions;
+	}
+
+	public void pollSubscriptionsWithStatusCreated(NeighbourFacade neighbourFacade) {
+		List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+				SubscriptionStatus.CREATED);
+		for (Neighbour neighbour : neighboursToPoll) {
+			try {
+				NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
+				if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
+					pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions(), neighbourFacade);
+				}
+			} catch (Exception e) {
+				logger.error("Unknown error while polling subscription with status CREATED",e);
+			}
+			finally {
+				NeighbourMDCUtil.removeLogVariables();
+			}
+		}
+	}
+
+	//TODO have to have a look at this again. The problem is that we might have non-updated subscriptions on the neighbour side, but for some reason not set it up on our side. The lastUpdated prevents us from setting it up again.
+	//need to somehow check is the listenerEndpoint is already there before checking the updated timestamp.
+	//It's already done in createListenerEndpointOneNeighbour, but should probably be done earlier. This
+	public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
+		try {
+			for (Subscription subscription : subscriptions) {
+				try {
+					if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
+						Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
+						if (!lastUpdatedSubscription.getBrokers().isEmpty() || !subscription.getBrokers().equals(lastUpdatedSubscription.getBrokers())) {
+							//if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
+								logger.info("Polled updated subscription with id {}", subscription.getId());
+								Set<Broker> wantedBrokers = lastUpdatedSubscription.getBrokers();
+								Set<Broker> existingBrokers = subscription.getBrokers();
+
+								Set<Broker> brokersToRemove = new HashSet<>(existingBrokers);
+								brokersToRemove.removeAll(wantedBrokers);
+								tearDownListenerEndpointsFromBrokersList(neighbour, brokersToRemove);
+
+								Set<Broker> additionalBrokers = new HashSet<>(wantedBrokers);
+								additionalBrokers.removeAll(existingBrokers);
+								createListenerEndpointFromBrokersList(neighbour, additionalBrokers);
+								subscription.setBrokers(wantedBrokers);
+							//} else {
+							//	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
+							//}
+						}
+					}
+				} catch (SubscriptionPollException e) {
+					subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
+					neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
+					logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
+				}
+			}
+		}
+		finally {
+			logger.info("Saving updated neighbour: {}", neighbour.toString());
+			neighbourRepository.save(neighbour);
+		}
 	}
 
 	public void pollSubscriptions(NeighbourFacade neighbourFacade) {
@@ -325,7 +386,7 @@ public class NeighbourService {
 					pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling(), neighbourFacade);
 				}
 			} catch (Exception e) {
-				logger.error("Unknown error while polling subscriptions for one neighbour");
+				logger.error("Unknown error while polling subscriptions for one neighbour",e);
 			}
 			finally {
 				NeighbourMDCUtil.removeLogVariables();
@@ -342,16 +403,17 @@ public class NeighbourService {
 
 						// Throws SubscriptionPollException if unsuccessful
 						Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
-						subscription.setBrokerUrl(polledSubscription.getBrokerUrl());
-						subscription.setQueue(polledSubscription.getQueue());
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
-						subscription.setCreateNewQueue(polledSubscription.isCreateNewQueue());
-						subscription.setQueueConsumerUser(polledSubscription.getQueueConsumerUser());
+						subscription.setConsumerCommonName(polledSubscription.getConsumerCommonName());
+						subscription.setBrokers(polledSubscription.getBrokers());
+						subscription.setLastUpdatedTimestamp(polledSubscription.getLastUpdatedTimestamp());
 						neighbour.getControlConnection().okConnection();
 						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
-							if (!subscription.isCreateNewQueue()) {
-								createListenerEndpoint(polledSubscription, neighbour);
+							logger.info("Subscription for neighbour {} with path {} is CREATED",neighbour.getName(),subscription.getPath());
+							if (polledSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+								logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getBrokers());
+								createListenerEndpointFromBrokersList(neighbour, polledSubscription.getBrokers());
 							}
 						}
 						//utvide med ListenerEndpoint lookup + lage ny om det trengs
@@ -373,10 +435,16 @@ public class NeighbourService {
 		}
 	}
 
-	public void createListenerEndpoint(Subscription subscription, Neighbour neighbour) {
-		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue()) == null){
-			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), subscription.getBrokerUrl(), subscription.getQueue(), new Connection()));
-			logger.info("ListenerEnpoint was saved: {}", savedListenerEndpoint.toString());
+	public void createListenerEndpoint(String brokerUrl, String queueName, Neighbour neighbour) {
+		if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), brokerUrl, queueName) == null){
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), brokerUrl, queueName, new Connection()));
+			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
+		}
+	}
+
+	public void createListenerEndpointFromBrokersList(Neighbour neighbour, Set<Broker> brokers) {
+		for(Broker broker : brokers) {
+			createListenerEndpoint(broker.getMessageBrokerUrl(), broker.getQueueName(), neighbour);
 		}
 	}
 

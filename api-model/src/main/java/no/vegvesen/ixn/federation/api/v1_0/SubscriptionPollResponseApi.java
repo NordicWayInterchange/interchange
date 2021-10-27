@@ -3,7 +3,9 @@ package no.vegvesen.ixn.federation.api.v1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionPollResponseApi {
@@ -11,16 +13,16 @@ public class SubscriptionPollResponseApi {
     private String selector;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Boolean createNewQueue;
+    private String consumerCommonName;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String queueConsumerUser;
     private String path;
     private SubscriptionStatusApi status;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String messageBrokerUrl;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String queueName;
+
+
+    private long lastUpdatedTimestamp;
+
+
+    private Set<BrokerApi> brokers = Collections.emptySet();
 
     public SubscriptionPollResponseApi() {
     }
@@ -29,18 +31,26 @@ public class SubscriptionPollResponseApi {
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
-                                       String messageBrokerUrl,
-                                       String queueName,
-                                       Boolean createNewQueue,
-                                       String queueConsumerUser) {
+                                       String consumerCommonName) {
         this.id = id;
         this.selector = selector;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
         this.path = path;
         this.status = status;
-        this.messageBrokerUrl = messageBrokerUrl;
-        this.queueName = queueName;
+    }
+
+    public SubscriptionPollResponseApi(String id,
+                                       String selector,
+                                       String path,
+                                       SubscriptionStatusApi status,
+                                       String consumerCommonName,
+                                       Set<BrokerApi> brokers) {
+        this.id = id;
+        this.selector = selector;
+        this.path = path;
+        this.status = status;
+        this.consumerCommonName = consumerCommonName;
+        this.brokers = brokers;
     }
 
     public String getId() {
@@ -59,20 +69,12 @@ public class SubscriptionPollResponseApi {
         this.selector = selector;
     }
 
-    public Boolean isCreateNewQueue() {
-        return createNewQueue;
+    public String getConsumerCommonName() {
+        return consumerCommonName;
     }
 
-    public void setCreateNewQueue(Boolean createNewQueue) {
-        this.createNewQueue = createNewQueue;
-    }
-
-    public String getQueueConsumerUser() {
-        return queueConsumerUser;
-    }
-
-    public void setQueueConsumerUser(String queueConsumerUser) {
-        this.queueConsumerUser = queueConsumerUser;
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     public String getPath() {
@@ -91,47 +93,45 @@ public class SubscriptionPollResponseApi {
         this.status = status;
     }
 
-    public String getMessageBrokerUrl() {
-        return messageBrokerUrl;
+    public long getLastUpdatedTimestamp() {
+        return lastUpdatedTimestamp;
     }
 
-    public void setMessageBrokerUrl(String messageBrokerUrl) {
-        this.messageBrokerUrl = messageBrokerUrl;
+    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public String getQueueName() {
-        return queueName;
+    public Set<BrokerApi> getBrokers() {
+        return brokers;
     }
 
-    public void setQueueName(String queueName) {
-        this.queueName = queueName;
+    public void setBrokers(Set<BrokerApi> brokers) {
+        this.brokers = brokers;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof SubscriptionPollResponseApi)) return false;
         SubscriptionPollResponseApi that = (SubscriptionPollResponseApi) o;
-        return createNewQueue == that.createNewQueue &&
-                Objects.equals(id, that.id) &&
-                Objects.equals(selector, that.selector) &&
-                Objects.equals(queueConsumerUser, that.queueConsumerUser) &&
-                Objects.equals(path, that.path) &&
+        return id.equals(that.id) &&
+                selector.equals(that.selector) &&
+                consumerCommonName.equals(that.consumerCommonName) &&
+                path.equals(that.path) &&
                 status == that.status &&
-                Objects.equals(messageBrokerUrl, that.messageBrokerUrl) &&
-                Objects.equals(queueName, that.queueName);
+                Objects.equals(lastUpdatedTimestamp, that.lastUpdatedTimestamp) &&
+                Objects.equals(brokers, that.brokers);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id,
                 selector,
-                createNewQueue,
-                queueConsumerUser,
+                consumerCommonName,
                 path,
                 status,
-                messageBrokerUrl,
-                queueName);
+                lastUpdatedTimestamp,
+                brokers);
     }
 
     @Override
@@ -139,12 +139,11 @@ public class SubscriptionPollResponseApi {
         return "SubscriptionPollResponseApi{" +
                 "id='" + id + '\'' +
                 ", selector='" + selector + '\'' +
-                ", createNewQueue=" + createNewQueue +
-                ", queueConsumerUser='" + queueConsumerUser + '\'' +
+                ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", path='" + path + '\'' +
                 ", status=" + status +
-                ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
-                ", queueName='" + queueName + '\'' +
+                ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", brokers=" + brokers +
                 '}';
     }
 }

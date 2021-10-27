@@ -46,6 +46,21 @@ public class ServiceProvider {
 		this.name = name;
 	}
 
+	public ServiceProvider(Integer id,
+						   String name,
+						   Capabilities capabilities,
+						   Set<LocalSubscription> subscriptions,
+						   Set<PrivateChannel> privateChannels,
+						   LocalDateTime subscriptionUpdated) {
+
+		this.id = id;
+		this.name = name;
+		this.capabilities = capabilities;
+		this.subscriptions = subscriptions;
+		this.privateChannels = privateChannels;
+		this.subscriptionUpdated = subscriptionUpdated;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -74,8 +89,13 @@ public class ServiceProvider {
 		return subscriptions;
 	}
 
-	public void addLocalSubscription(LocalSubscription subscription) {
+	public void  addLocalSubscription(LocalSubscription subscription) {
 		subscriptions.add(subscription);
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
+	public void addLocalSubscriptions(Set<LocalSubscription> subscriptions) {
+		this.subscriptions.addAll(subscriptions);
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
@@ -104,11 +124,10 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void updateSubscriptionWithBrokerUrl(LocalSubscription subscription, String brokerUrl) {
+	public void updateSubscriptionWithBrokerUrl(LocalSubscription subscription, Set<LocalBroker> localBrokers) {
 		for(LocalSubscription localSubscription : subscriptions) {
-			if (localSubscription.getSelector().equals(subscription.getSelector()) &&
-					localSubscription.isCreateNewQueue()){
-				localSubscription.setBrokerUrl(brokerUrl);
+			if (localSubscription.getSelector().equals(subscription.getSelector())){
+				localSubscription.setBrokers(localBrokers);
 			}
 		}
 	}

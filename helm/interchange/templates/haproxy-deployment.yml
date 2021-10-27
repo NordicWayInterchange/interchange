@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: haproxy
-        image: haproxy:2.3
+        image: {{ .Values.haproxy.image_version }}
         ports:
         - name: amqps
           containerPort: {{ .Values.self.message_channel_port }}

@@ -1,14 +1,12 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.onboard.SelfService;
-import no.vegvesen.ixn.serviceprovider.model.SelectorApi;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,15 +21,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.io.File;
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -77,14 +75,28 @@ public class OnboardRestControllerTest {
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
 		DatexCapabilityApi datexNo = new DatexCapabilityApi("NO");
-		String datexNoString = objectMapper.writeValueAsString(datexNo);
-		String capabilitiesPath = String.format("/%s/capabilities", firstServiceProvider);
+		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+				firstServiceProvider,
+				Collections.singleton(datexNo)
+		);
+		String datexNoString = objectMapper.writeValueAsString(request);
 
-		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
+			Object argument = i.getArgument(0);
+			ServiceProvider s = (ServiceProvider) argument;
+			Set<Capability> capabilities = s.getCapabilities().getCapabilities();
+			int id = 0;
+			for (Capability capability : capabilities) {
+				if (capability.getId() == null) {
+					capability.setId(id++);
+				}
+			}
+			return s;
+		});
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
 		mockMvc.perform(
-				post(capabilitiesPath)
+				post(String.format("/%s/capabilities", firstServiceProvider))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(datexNoString))
@@ -93,7 +105,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	void deletingExistingCapabilitiesReturnsStatusOk() throws Exception {
+	void deletingExistingCapabilitiesReturnsNoContent() throws Exception {
 		String serviceProviderName = "Second Service Provider";
 		mockCertificate(serviceProviderName);
 
@@ -117,7 +129,7 @@ public class OnboardRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().is3xxRedirection());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -126,9 +138,14 @@ public class OnboardRestControllerTest {
 		mockCertificate("First Service Provider");
 
 		DatexCapabilityApi datexFi = new DatexCapabilityApi("FI");
+		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+				"SecondServiceProvider",
+                Collections.singleton(datexFi)
+
+		);
 		String capabilitiesPath = String.format("/%s/capabilities", "SecondServiceProvider");
 
-		String datexFiString = objectMapper.writeValueAsString(datexFi);
+		String datexFiString = objectMapper.writeValueAsString(request);
 
 		mockMvc.perform(
 				post(capabilitiesPath)
@@ -144,10 +161,25 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
-		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'", false);
+		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'");
+		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
+				firstServiceProvider,
+				Collections.singleton(selectorApi)
+		);
 
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(selectorApi);
-		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
+		//TODO this is dirty!
+		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
+			Object argument = i.getArguments()[0];
+			ServiceProvider s = (ServiceProvider) argument;
+			s.setId(1);
+			int j = 0;
+			for (LocalSubscription subscription : s.getSubscriptions()) {
+				subscription.setSub_id(j++);
+				subscription.setLastUpdated(LocalDateTime.now());
+			}
+			return s;
+		});
 		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
 		mockMvc.perform(
@@ -164,10 +196,15 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
-		DataTypeApi subscriptionApi = new Datex2DataTypeApi("SE");
+		AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+				firstServiceProvider,
+				Collections.singleton(new SelectorApi(
+						"originatingCountry = 'NO'"
+				))
+		);
 
-		String validJson = objectMapper.writeValueAsString(subscriptionApi);
-		String invalidJson = validJson.replaceAll("messageType", "someMessyType");
+		String validJson = objectMapper.writeValueAsString(request);
+		String invalidJson = validJson.replaceAll("selector", "noASelector");
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -183,8 +220,8 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
-		DataTypeApi subscriptionApi = new DataTypeApi();
-		String emptySubscription = objectMapper.writeValueAsString(subscriptionApi);
+		AddSubscriptionsRequest request = new AddSubscriptionsRequest();
+		String emptySubscription = objectMapper.writeValueAsString(request);
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -196,7 +233,7 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	void deletingSubscriptionReturnsStatusRedirectToRefreshTheCurrentSubscriptions() throws Exception {
+	void deletingSubscriptionReturnsNoContent() throws Exception {
 		String firstServiceProviderName = "FirstServiceProvider";
 		mockCertificate(firstServiceProviderName);
 
@@ -225,7 +262,7 @@ public class OnboardRestControllerTest {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().is3xxRedirection());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -275,9 +312,13 @@ public class OnboardRestControllerTest {
 		String secondServiceProviderName = "SecondServiceProvider";
 		mockCertificate(secondServiceProviderName);
 
-		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'", false);
+		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'");
+		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
+				firstServiceProviderName,
+				Collections.singleton(selectorApi)
+		);
 
-		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(selectorApi);
+		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProviderName))
@@ -300,6 +341,63 @@ public class OnboardRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(capabilityApiToServerJson))
 				.andDo(print())
-				.andExpect(status().is4xxClientError());
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void postingDeliveryReturnsStatusOk() throws Exception {
+		String firstServiceProvider = "First Service Provider";
+		mockCertificate(firstServiceProvider);
+		AddDeliveriesRequest request = new AddDeliveriesRequest(
+				firstServiceProvider,
+				Collections.singleton(new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'"))
+		);
+
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		mockMvc.perform(
+				post(String.format("/%s/deliveries",firstServiceProvider))
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestBody))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void listingDeliveriesReturnsStatusOk() throws Exception {
+		String firstServiceProvider = "First Service Provider";
+		mockCertificate(firstServiceProvider);
+		mockMvc.perform(
+				get(String.format("/%s/deliveries",firstServiceProvider))
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+
+	}
+
+	@Test
+	public void getDeliveryThatExistsReturnsStatusOk() throws Exception {
+		String firstServiceProvider = "First Service Provider";
+		String deliveryId = "1";
+		mockCertificate(firstServiceProvider);
+		mockMvc.perform(
+				get(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void deleteDeliveryReturnsNoContent() throws Exception {
+
+		String firstServiceProvider = "First Service Provider";
+		String deliveryId = "1";
+		mockCertificate(firstServiceProvider);
+		mockMvc.perform(
+				delete(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNoContent());
+
 	}
 }

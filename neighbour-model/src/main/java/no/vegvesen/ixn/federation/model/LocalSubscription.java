@@ -4,7 +4,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "local_subscriptions")
@@ -25,26 +27,26 @@ public class LocalSubscription {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
-    private boolean createNewQueue;
+    private String consumerCommonName;
 
-    private String queueConsumerUser;
 
-    private String brokerUrl;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "locbrok_id", foreignKey = @ForeignKey(name = "fk_locbrok_sub"))
+    private Set<LocalBroker> localBrokers = new HashSet<>();
 
     public LocalSubscription() {
 
     }
 
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
+        this.status = status;
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
+    }
+
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
         this.selector = selector;
-    }
-
-    public LocalSubscription(LocalSubscriptionStatus status, String selector, boolean createNewQueue, String queueConsumerUser) {
-        this.status = status;
-        this.selector = selector;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
@@ -53,12 +55,11 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, boolean createNewQueue, String queueConsumerUser) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.sub_id = id;
         this.status = status;
         this.selector = selector;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
@@ -68,6 +69,14 @@ public class LocalSubscription {
         this.lastUpdated = lastUpdated;
     }
 
+    public LocalSubscription(Integer sub_id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalBroker> localBrokers) {
+        this.sub_id = sub_id;
+        this.status = status;
+        this.selector = selector;
+        this.lastUpdated = lastUpdated;
+        this.consumerCommonName = consumerCommonName;
+        this.localBrokers = localBrokers;
+    }
 
     public void setStatus(LocalSubscriptionStatus status) {
         this.status = status;
@@ -90,28 +99,24 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
-    public boolean isCreateNewQueue() {
-        return createNewQueue;
+    public String getConsumerCommonName() {
+        return consumerCommonName;
     }
 
-    public void setCreateNewQueue(boolean createNewQueue) {
-        this.createNewQueue = createNewQueue;
+    public void setConsumerCommonName(String queueConsumerUser) {
+        this.consumerCommonName = queueConsumerUser;
     }
 
-    public String getQueueConsumerUser() {
-        return queueConsumerUser;
+
+    public Set<LocalBroker> getLocalBrokers() {
+        return localBrokers;
     }
 
-    public void setQueueConsumerUser(String queueConsumerUser) {
-        this.queueConsumerUser = queueConsumerUser;
-    }
-
-    public String getBrokerUrl() {
-        return brokerUrl;
-    }
-
-    public void setBrokerUrl(String brokerUrl) {
-        this.brokerUrl = brokerUrl;
+    public void setBrokers(Set<LocalBroker> newLocalBrokers) {
+        this.localBrokers.clear();
+        if (newLocalBrokers != null) {
+            this.localBrokers.addAll(newLocalBrokers);
+        }
     }
 
     //TODO lag et objekt av selector??
@@ -126,13 +131,12 @@ public class LocalSubscription {
         LocalSubscription that = (LocalSubscription) o;
         return status == that.status &&
                 Objects.equals(selector, that.selector) &&
-                createNewQueue == that.createNewQueue &&
-                Objects.equals(queueConsumerUser, that.queueConsumerUser);
+                Objects.equals(consumerCommonName, that.consumerCommonName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status, selector, createNewQueue, queueConsumerUser);
+        return Objects.hash(status, selector, consumerCommonName);
     }
 
     public Integer getSub_id() {
@@ -145,8 +149,7 @@ public class LocalSubscription {
                 "sub_id=" + sub_id +
                 ", status=" + status +
                 ", selector=" + selector +
-                ", createNewQueue=" + createNewQueue +
-                ", queueConsumerUser=" + queueConsumerUser +
+                ", queueConsumerUser=" + consumerCommonName +
                 '}';
     }
 
@@ -154,11 +157,19 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(sub_id, newStatus, selector,createNewQueue,queueConsumerUser);
+            return new LocalSubscription(sub_id, newStatus, selector, consumerCommonName);
         }
     }
 
     public LocalDateTime getLastUpdated() {
         return lastUpdated;
+    }
+
+    public void setSub_id(Integer sub_id) {
+        this.sub_id = sub_id;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

@@ -76,6 +76,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 			client._createQueue("torsk"); //create some queue that already exists
 			//
 		});
+		client.removeQueue("torsk");
 	}
 
 	@Test
@@ -128,6 +129,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		List<String> userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 
 		assertThat(userNames).contains(newUser);
+		client.removeMemberFromGroup(newUser,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
+		assertThat(userNames).doesNotContain(newUser);
 	}
 
 	@Test

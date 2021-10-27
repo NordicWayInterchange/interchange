@@ -1,4 +1,3 @@
 {
   "selector": "messageType = 'DATEX2' AND originatingCountry = 'NO' AND (quadTree like '%,01220123%')",
-  "createNewQueue": false
 }

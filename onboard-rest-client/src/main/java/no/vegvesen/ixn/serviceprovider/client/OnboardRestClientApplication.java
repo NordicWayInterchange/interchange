@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -26,6 +27,10 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.AddServiceProviderSubscription.class,
         OnboardRestClientApplication.DeleteServiceProviderCapability.class,
         OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
+        OnboardRestClientApplication.AddDeliveries.class,
+        OnboardRestClientApplication.ListDeliveries.class,
+        OnboardRestClientApplication.GetDelivery.class,
+        OnboardRestClientApplication.DeleteDelivery.class,
         OnboardRestClientApplication.GetSubscription.class,
         OnboardRestClientApplication.AddPrivateChannel.class,
         OnboardRestClientApplication.GetPrivateChannels.class,
@@ -63,7 +68,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalCapabilityList serviceProviderCapabilities = client.getServiceProviderCapabilities();
+            ListCapabilitiesResponse serviceProviderCapabilities = client.getServiceProviderCapabilities();
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(serviceProviderCapabilities));
             return 0;
@@ -83,8 +88,8 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws IOException {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            CapabilityApi capability = mapper.readValue(file,CapabilityApi.class);
-            LocalCapability result = client.addCapability(capability);
+            AddCapabilitiesRequest capability = mapper.readValue(file,AddCapabilitiesRequest.class);
+            AddCapabilitiesResponse result = client.addCapability(capability);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
@@ -99,7 +104,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalSubscriptionListApi subscriptions = client.getServiceProviderSubscriptions();
+            ListSubscriptionsResponse subscriptions = client.getServiceProviderSubscriptions();
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(subscriptions));
             return 0;
@@ -119,9 +124,9 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            SelectorApi subscription = mapper.readValue(file,SelectorApi.class);
-            LocalSubscriptionApi result = client.addSubscription(subscription);
-            System.out.println(mapper.writeValueAsString(result));
+            AddSubscriptionsRequest requestApi = mapper.readValue(file, AddSubscriptionsRequest.class);
+            AddSubscriptionsResponse result = client.addSubscription(requestApi);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
     }
@@ -133,7 +138,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         OnboardRestClientApplication parentCommand;
 
         @Parameters(index = "0", description = "The ID of the capability to delete")
-        Integer capabilityId;
+        String capabilityId;
 
         @Override
         public Integer call() {
@@ -151,13 +156,13 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         OnboardRestClientApplication parentCommand;
 
         @Parameters(index = "0", description = "The ID of the subscription to delete")
-        Integer subscriptionId;
+        String subscriptionId;
 
         @Override
         public Integer call(){
             OnboardRESTClient client = parentCommand.createClient();
             client.deleteSubscriptions(subscriptionId);
-            System.out.printf("Subscription %d deleted successfully%n",subscriptionId);
+            System.out.printf("Subscription %s deleted successfully%n",subscriptionId);
             return 0;
         }
     }
@@ -172,10 +177,86 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         Integer subscriptionId;
 
         @Override
-        public Integer call() {
+        public Integer call() throws JsonProcessingException {
             OnboardRESTClient client = parentCommand.createClient();
-            LocalSubscriptionApi subscription = client.getSubscription(subscriptionId);
-            System.out.printf("Subscription %d successfully polled with brokerUrl %s %n", subscriptionId, subscription.getBrokerUrl());
+            GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
+            System.out.printf("Subscription %d successfully polled with %n", subscriptionId);
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
+            return 0;
+        }
+    }
+
+    @Command(name = "adddeliveries", description = "Add deliveries for service provider")
+    static class AddDeliveries implements Callable<Integer> {
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Option(names = {"-f","--filename"}, description = "The deliveries json file")
+        File file;
+
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            AddDeliveriesRequest request = mapper.readValue(file,AddDeliveriesRequest.class);
+            AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+            return 0;
+        }
+    }
+
+    @Command(name = "listdeliveries", description = "List deliveries for service provider")
+    static class ListDeliveries implements Callable<Integer> {
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            ListDeliveriesResponse response = client.listServiceProviderDeliveries();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+            return 0;
+        }
+    }
+
+    @Command(name = "getdelivery", description = "Get a single delivery")
+    static class GetDelivery implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The ID of the delivery to get")
+        String deliveryId;
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient  client = parentCommand.createClient();
+            GetDeliveryResponse response = client.getDelivery(deliveryId);
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+            return 0;
+        }
+    }
+
+    @Command(name = "deletedelivery", description = "Delete a single delivery")
+   static class DeleteDelivery implements  Callable<Integer> {
+
+        @ParentCommand
+       OnboardRestClientApplication parentCommand;
+
+       @Parameters(index = "0", description = "The ID of the delivery to delete")
+       String deliveryId;
+
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient  client = parentCommand.createClient();
+            client.deleteCapability(deliveryId);
+            System.out.println(String.format("Delivery %s has been deleted",deliveryId));
             return 0;
         }
     }

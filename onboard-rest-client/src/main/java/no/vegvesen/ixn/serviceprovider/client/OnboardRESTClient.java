@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
@@ -32,42 +31,65 @@ public class OnboardRESTClient {
         this.user = user;
     }
 
-    public LocalCapability addCapability(CapabilityApi capability) {
+    public AddCapabilitiesResponse addCapability(AddCapabilitiesRequest capability) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<CapabilityApi> entity = new HttpEntity<>(capability,headers);
-        return restTemplate.exchange(server + "/" + user + "/capabilities", HttpMethod.POST, entity, LocalCapability.class).getBody();
+        HttpEntity<AddCapabilitiesRequest> entity = new HttpEntity<>(capability,headers);
+        return restTemplate.exchange(server + "/" + user + "/capabilities", HttpMethod.POST, entity, AddCapabilitiesResponse.class).getBody();
     }
 
-    public LocalCapabilityList getServiceProviderCapabilities() {
-        return restTemplate.getForEntity(server + "/" + user + "/capabilities", LocalCapabilityList.class).getBody();
+    public ListCapabilitiesResponse getServiceProviderCapabilities() {
+        return restTemplate.getForEntity(server + "/" + user + "/capabilities", ListCapabilitiesResponse.class).getBody();
     }
 
 
-    public LocalSubscriptionListApi getServiceProviderSubscriptions() {
+    public ListSubscriptionsResponse getServiceProviderSubscriptions() {
 		String url = String.format("%s/%s/subscriptions/", server, user);
-		return restTemplate.getForEntity(url, LocalSubscriptionListApi.class).getBody();
+		return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
     }
 
-    public void deleteSubscriptions(Integer localSubscriptionId) {
+    public void deleteSubscriptions(String localSubscriptionId) {
         restTemplate.delete(String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId));
     }
 
-    public LocalSubscriptionApi addSubscription(SelectorApi subscription) {
+    public AddSubscriptionsResponse addSubscription(AddSubscriptionsRequest subscription) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<SelectorApi> entity = new HttpEntity<>(subscription,headers);
+        HttpEntity<AddSubscriptionsRequest> entity = new HttpEntity<>(subscription,headers);
 		String url = String.format("/%s/subscriptions", user) ;
-		return restTemplate.exchange(server + url, HttpMethod.POST, entity, LocalSubscriptionApi.class).getBody();
+		return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddSubscriptionsResponse.class).getBody();
     }
 
-    public void deleteCapability(Integer capabilityId) {
+    public void deleteCapability(String capabilityId) {
 		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, user, capabilityId));
     }
 
-    public LocalSubscriptionApi getSubscription(Integer localSubscriptionId) {
+    public GetSubscriptionResponse getSubscription(Integer localSubscriptionId) {
         String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId.toString());
-        return restTemplate.getForEntity(url, LocalSubscriptionApi.class).getBody();
+        return restTemplate.getForEntity(url, GetSubscriptionResponse.class).getBody();
+    }
+
+    public AddDeliveriesResponse addServiceProviderDeliveries(AddDeliveriesRequest request) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddDeliveriesRequest> entity = new HttpEntity<>(request,headers);
+        String url = String.format("/%s/deliveries", user) ;
+        return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddDeliveriesResponse.class).getBody();
+    }
+
+    public ListDeliveriesResponse listServiceProviderDeliveries() {
+        String url = String.format("%s/%s/deliveries",server,user);
+        return restTemplate.getForEntity(url,ListDeliveriesResponse.class).getBody();
+    }
+
+    public GetDeliveryResponse getDelivery(String deliveryId) {
+        String url = String.format("%s/%s/deliveries/%s",server,user,deliveryId);
+        return restTemplate.getForEntity(url,GetDeliveryResponse.class).getBody();
+    }
+
+    public void deleteDelivery(String id) {
+        String url = String.format("%s/%s/deliveries/%s",server,user,id);
+        restTemplate.delete(url);
     }
 
     public PrivateChannelApi addPrivateChannel(PrivateChannelApi privateChannelApi) {

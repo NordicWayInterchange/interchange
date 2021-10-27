@@ -7,6 +7,8 @@ import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -96,6 +98,31 @@ class CapabilityMatcherTest {
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED," \n\t\n\n messageType = 'DATEX2' and \tquadTree \r\n\t\n\n like \t\t '%,01210%'\r\n")));
 		assertThat(commonInterest).isNotEmpty();
+	}
+
+	@Test
+	public void testDenmCapability() {
+		Set<String> quadTreeTiles = new HashSet<>();
+		quadTreeTiles.add("12001");
+		quadTreeTiles.add("12003");
+		DenmCapability capability = new DenmCapability(
+				"SE-00001",
+				"SE",
+				"DENM:1.3.1",
+				quadTreeTiles,
+				Collections.singleton("42")
+		);
+		LocalSubscription subscription = new LocalSubscription(
+				52,
+				LocalSubscriptionStatus.CREATED,
+				"originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'",
+				"kyrre"
+		);
+		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+				Sets.newLinkedHashSet(capability),
+				Sets.newLinkedHashSet(subscription)
+		);
+		assertThat(commonInterest).hasSize(1);
 	}
 
 }

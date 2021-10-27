@@ -84,7 +84,7 @@ class NeighbourServiceTest {
 
 		// Mock saving Neighbour to Neighbour repository
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
-		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED, false, "");
+		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED, "ericsson");
 		firstSubscription.setPath("/ericsson/subscriptions/1");
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
 		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
@@ -146,7 +146,7 @@ class NeighbourServiceTest {
 
 		// Mock saving Neighbour to Neighbour repository
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
-		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED, false, "");
+		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED, "ericsson");
 		firstSubscription.setId(1);
 		Set<Subscription> subscriptions = Sets.newSet(firstSubscription);
 		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
@@ -253,10 +253,10 @@ class NeighbourServiceTest {
 	public void noSubscriptionsAreAddedWhenLocalSubscriptionsAndCapabilitiesAreTheSame() {
 		Self self = new Self("self");
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'"));
+		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", "self"));
 		self.setLocalSubscriptions(localSubscriptions);
 
-		Subscription subscription = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
+		Subscription subscription = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "self");
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));
@@ -276,7 +276,7 @@ class NeighbourServiceTest {
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'SE'"));
 		self.setLocalSubscriptions(localSubscriptions);
 
-		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
+		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "self");
 
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
 		existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
@@ -284,7 +284,7 @@ class NeighbourServiceTest {
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newSet(getDatexCapability("NO"), getDatexCapability("SE")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), existingSubscriptions);
 
-		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", false, "");
+		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "self");
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, new HashSet<>(Collections.singleton(subscription2))));
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
@@ -297,11 +297,11 @@ class NeighbourServiceTest {
 	public void subscriptionsAreRemovedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
 		Self self = new Self("self");
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'"));
+		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", "self"));
 		self.setLocalSubscriptions(localSubscriptions);
 
-		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
-		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", false, "");
+		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "self");
+		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "self");
 
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
 		existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
@@ -323,9 +323,9 @@ class NeighbourServiceTest {
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'"));
 		self.setLocalSubscriptions(localSubscriptions);
 
-		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
-		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", false, "");
-		Subscription subscription3 = new Subscription(3, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'FI'", "/neighbour/subscriptions/3", false, "");
+		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "self");
+		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "self");
+		Subscription subscription3 = new Subscription(3, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'FI'", "/neighbour/subscriptions/3", "self");
 
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
 		existingSubscriptions.setSubscriptions(new HashSet<>(Arrays.asList(subscription1, subscription2)));
@@ -345,8 +345,8 @@ class NeighbourServiceTest {
 	public void deleteSubscriptionWhenItHasSubscriptionStatusTear_Down () {
 		Neighbour neighbour = new Neighbour();
 
-		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
-		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", false, "");
+		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
+		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "");
 		subscription1.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
 		subscription2.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
 
@@ -367,7 +367,7 @@ class NeighbourServiceTest {
 	public void subscriptionRequestGetStatusEmptyWhenAllSubscriptionsAreDeleted () {
 		Neighbour neighbour = new Neighbour();
 
-		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
+		Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
 		subscription1.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
 
 		SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
@@ -388,8 +388,11 @@ class NeighbourServiceTest {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("neighbour");
 
-		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
-		sub1.setBrokerUrl("broker-1");
+		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
+		Set<Broker> brokers = new HashSet<>();
+		Broker broker = new Broker("queue-1","broker-1");
+		brokers.add(broker);
+		sub1.setBrokers(brokers);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(sub1));
@@ -409,11 +412,17 @@ class NeighbourServiceTest {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("neighbour");
 
-		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", false, "");
-		sub1.setBrokerUrl("broker-1");
+		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
+		Set<Broker> brokers = new HashSet<>();
+		Broker broker = new Broker("queue-1","broker-1");
+		brokers.add(broker);
+		sub1.setBrokers(brokers);
 
-		Subscription sub2 = new Subscription(2, SubscriptionStatus.CREATED, "originatingCountry = 'SE'", "/neighbour/subscriptions/2", false, "");
-		sub2.setBrokerUrl("broker-2");
+		Subscription sub2 = new Subscription(2, SubscriptionStatus.CREATED, "originatingCountry = 'SE'", "/neighbour/subscriptions/2", "");
+		Set<Broker> brokers2 = new HashSet<>();
+		Broker broker2 = new Broker("queue-2","broker-2");
+		brokers2.add(broker2);
+		sub2.setBrokers(brokers2);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Sets.newSet(sub1, sub2));
@@ -426,6 +435,51 @@ class NeighbourServiceTest {
 		neighbourService.tearDownListenerEndpoints(neighbour);
 
 		verify(listenerEndpointRepository, times(0)).delete(any(ListenerEndpoint.class));
+	}
+
+	@Test
+	public void listenerEndpointsAreSavedFromBrokersList() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("my-neighbour");
+
+		Broker broker1 = new Broker("my-queue-1", "my-broker-1");
+		Broker broker2 = new Broker("my-queue-2", "my-broker-2");
+
+		Set<Broker> brokers = new HashSet<>(Sets.newSet(broker1, broker2));
+
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-1", "my-queue-1")).thenReturn(null);
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-2", "my-queue-2")).thenReturn(null);
+
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-broker-1", "my-queue-1", new Connection());
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-broker-2", "my-queue-2", new Connection());
+
+		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
+		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
+
+		neighbourService.createListenerEndpointFromBrokersList(neighbour, brokers);
+
+		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
+	}
+
+	@Test
+	public void listenerEndpointsAreRemoverFromBrokersList() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("my-neighbour");
+
+		Broker broker1 = new Broker("my-queue-1", "my-broker-1");
+		Broker broker2 = new Broker("my-queue-2", "my-broker-2");
+
+		Set<Broker> brokers = new HashSet<>(Sets.newSet(broker1, broker2));
+
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-broker-1", "my-queue-1", new Connection());
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-broker-2", "my-queue-2", new Connection());
+
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-1", "my-queue-1")).thenReturn(listenerEndpoint1);
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-2", "my-queue-2")).thenReturn(listenerEndpoint2);
+
+		neighbourService.tearDownListenerEndpointsFromBrokersList(neighbour, brokers);
+
+		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
 	}
 
 	private Capability getDatexCapability(String country) {

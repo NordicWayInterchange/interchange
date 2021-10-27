@@ -71,6 +71,17 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 	}
 
 	@Override
+	public Subscription pollSubscriptionLastUpdatedTime(Subscription subscription, Neighbour neighbour) {
+    	String url = neighbour.getControlChannelUrl(subscription.getPath());
+    	String name = neighbour.getName();
+		logger.info("Polling last updated timestamp for subscription to {} with URL: {}", name, url);
+		SubscriptionPollResponseApi subscriptionApi = neighbourRESTClient.doPollSubscriptionStatus(url,name);
+		Subscription returnSubscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(subscriptionApi);
+		logger.debug("Received response object: {}", returnSubscription.toString());
+    	return returnSubscription;
+	}
+
+	@Override
 	public void deleteSubscription (Neighbour neighbour, Subscription subscription) {
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
     	String neighbourName = neighbour.getName();

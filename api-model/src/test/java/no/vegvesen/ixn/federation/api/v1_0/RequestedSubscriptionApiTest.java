@@ -11,10 +11,9 @@ public class RequestedSubscriptionApiTest {
     @Test
     public void testUnknownFieldInJson() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        String example = "{\"selector\":\"messageType = 'DENM'\",\"createNewQueue\":true,\"foo\":\"bar\"}";
+        String example = "{\"selector\":\"messageType = 'DENM'\",\"foo\":\"bar\"}";
         RequestedSubscriptionApi result = mapper.readValue(example,RequestedSubscriptionApi.class);
-        assertThat(result.getCreateNewQueue()).isTrue();
-        assertThat(result.getQueueConsumerUser()).isNull();
+        assertThat(result.getConsumerCommonName()).isNull();
 
     }
 }

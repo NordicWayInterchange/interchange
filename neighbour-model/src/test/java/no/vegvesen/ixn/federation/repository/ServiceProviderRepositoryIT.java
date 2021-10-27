@@ -188,11 +188,11 @@ public class ServiceProviderRepositoryIT {
 	}
 
 	@Test
-	public void testThatServiceProviderSavesLocalSubscriptionWithCreateNewQueue() {
+	public void testThatServiceProviderSavesLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
 		String name = "my-service-provider";
 		ServiceProvider sp = new ServiceProvider(name);
 
-		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'", true, name);
+		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'", name);
 		sp.addLocalSubscription(sub);
 
 		repository.save(sp);
@@ -206,7 +206,7 @@ public class ServiceProviderRepositoryIT {
 				.findFirst()
 				.get();
 
-		assertThat(savedSub.isCreateNewQueue()).isTrue();
+		assertThat(savedSub.getConsumerCommonName().equals(name)).isTrue();
 	}
 
 	@Test

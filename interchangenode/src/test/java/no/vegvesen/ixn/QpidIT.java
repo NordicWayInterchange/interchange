@@ -2,6 +2,7 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.bouncycastle.asn1.x500.style.RFC4519Style;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.naming.NamingException;
 import java.nio.file.Path;
@@ -93,20 +95,21 @@ public class QpidIT extends QpidDockerBaseIT {
 	}
 
 	private void sendMessage(String publisher, String originatingCountry, String protocolVersion, String messageType, float latitude, float longitude, String body, long timeToLive, Map<String,String> additionalValues) throws JMSException {
-		JmsTextMessage outgoingMessage = producer.createTextMessage(body);
-		outgoingMessage.setFloatProperty("latitude", latitude);
-		outgoingMessage.setFloatProperty("longitude", longitude);
-		outgoingMessage.setStringProperty("publisherId", publisher);
-		outgoingMessage.setStringProperty("originatingCountry", originatingCountry);
-		outgoingMessage.setStringProperty("protocolVersion", protocolVersion);
-		outgoingMessage.setStringProperty("quadTree","abc");
-		outgoingMessage.setStringProperty(MessageProperty.MESSAGE_TYPE.getName(), messageType);
+		MessageBuilder builder = producer.createMessageBuilder()
+				.textMessage(body)
+				.latitude(latitude)
+				.longitude(longitude)
+				.publisherId(publisher)
+				.originatingCountry(originatingCountry)
+				.protocolVersion(protocolVersion)
+				.quadTreeTiles("abc")
+				.messageType(messageType);
+
 		for (Map.Entry<String,String> entry : additionalValues.entrySet()) {
-			outgoingMessage.setStringProperty(entry.getKey(), entry.getValue());
+			builder.stringProperty(entry.getKey(), entry.getValue());
 
 		}
-		outgoingMessage.setText(body);
-		producer.sendNonPersistentMessage(outgoingMessage, timeToLive);
+		producer.sendNonPersistentMessage(builder.build(), timeToLive);
 
 	}
 	public void sendBadMessage(String messageId, String country, float lat, float lon) throws JMSException {

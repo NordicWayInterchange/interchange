@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.Datex2DataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.DenmDataTypeApi;
-import no.vegvesen.ixn.federation.api.v1_0.IviDataTypeApi;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +25,13 @@ public class MessageValidator {
 		}
 		Set<String> mandatoryPropertyNames;
 		switch (messageType) {
-			case Datex2DataTypeApi.DATEX_2:
+			case Constants.DATEX_2:
 				mandatoryPropertyNames = MessageProperty.mandatoryDatex2PropertyNames;
 				break;
-			case DenmDataTypeApi.DENM:
+			case Constants.DENM:
 				mandatoryPropertyNames = MessageProperty.mandatoryDenmPropertyNames;
 				break;
-			case IviDataTypeApi.IVI:
+			case Constants.IVI:
 				mandatoryPropertyNames = MessageProperty.mandatoryIviPropertyNames;
 				break;
 			default:

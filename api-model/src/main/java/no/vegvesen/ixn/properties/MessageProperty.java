@@ -44,7 +44,7 @@ public class MessageProperty {
 			SERVICE_TYPE
 	);
 
-	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.STRING);
+	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.STRING_ARRAY);
 	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", true, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> denmApplicationProperties = Arrays.asList(
 			CAUSE_CODE,

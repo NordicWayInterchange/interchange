@@ -2,6 +2,7 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -82,10 +83,11 @@ public class AccessControlIT extends QpidDockerBaseIT {
 		Source outgoingExchange = new Source(getQpidURI(), OUTGOING_EXCHANGE, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		outgoingExchange.start();
 		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> {
-			JmsTextMessage message = outgoingExchange.createTextMessage();
-			message.setText("Not Allowed");
-			message.setStringProperty(MessageProperty.ORIGINATING_COUNTRY.getName(),"SE");
-			outgoingExchange.sendTextMessage(message);
+			JmsMessage message = outgoingExchange.createMessageBuilder()
+					.textMessage("Not Allowed")
+					.originatingCountry("SE")
+					.build();
+			outgoingExchange.send(message);
 
 		});
 
