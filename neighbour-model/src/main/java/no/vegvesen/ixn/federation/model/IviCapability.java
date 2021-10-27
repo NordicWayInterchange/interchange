@@ -21,6 +21,11 @@ public class IviCapability extends Capability {
 		this.iviTypes.addAll(iviTypes);
 	}
 
+	public IviCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect, Set<String> iviTypes) {
+		super(publisherId, originatingCountry, protocolVersion, quadTree, redirect);
+		this.iviTypes.addAll(iviTypes);
+	}
+
 	public IviCapability() {
 	}
 

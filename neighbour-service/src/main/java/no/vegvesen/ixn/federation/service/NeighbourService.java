@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import net.bytebuddy.asm.Advice;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
@@ -310,8 +308,7 @@ public class NeighbourService {
 		for (LocalSubscription subscription : existingSubscriptions) {
 			Subscription newSubscription = new Subscription(subscription.getSelector(),
 					SubscriptionStatus.REQUESTED,
-					subscription.isCreateNewQueue(),
-					subscription.getQueueConsumerUser());
+					subscription.getConsumerCommonName());
 			calculatedSubscriptions.add(newSubscription);
 		}
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
@@ -408,14 +405,13 @@ public class NeighbourService {
 						Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
 						subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
 						subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
-						subscription.setCreateNewQueue(polledSubscription.isCreateNewQueue());
-						subscription.setQueueConsumerUser(polledSubscription.getQueueConsumerUser());
+						subscription.setConsumerCommonName(polledSubscription.getConsumerCommonName());
 						subscription.setBrokers(polledSubscription.getBrokers());
 						subscription.setLastUpdatedTimestamp(polledSubscription.getLastUpdatedTimestamp());
 						neighbour.getControlConnection().okConnection();
 						if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
 							logger.info("Subscription for neighbour {} with path {} is CREATED",neighbour.getName(),subscription.getPath());
-							if (!polledSubscription.isCreateNewQueue()) {
+							if (polledSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 								logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getBrokers());
 								createListenerEndpointFromBrokersList(neighbour, polledSubscription.getBrokers());
 							}

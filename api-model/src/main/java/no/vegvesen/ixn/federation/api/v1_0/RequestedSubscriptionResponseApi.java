@@ -13,10 +13,7 @@ public class RequestedSubscriptionResponseApi {
     private String selector;
 
     @JsonInclude(Include.NON_NULL)
-    private Boolean createNewQueue; //optional, defaults to false
-
-    @JsonInclude(Include.NON_NULL)
-    private String queueConsumerUser; //optional, defaults to CN of requesting interchange
+    private String consumerCommonName; //optional, defaults to CN of requesting interchange
 
     private String path;
     private SubscriptionStatusApi status;
@@ -32,30 +29,27 @@ public class RequestedSubscriptionResponseApi {
         this.status = status;
     }
 
-    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
     }
 
-    public RequestedSubscriptionResponseApi(String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser) {
+    public RequestedSubscriptionResponseApi(String selector, String path, SubscriptionStatusApi status, String consumerCommonName) {
         this.selector = selector;
         this.path = path;
         this.status = status;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
     }
 
-    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, Boolean createNewQueue, String queueConsumerUser, long lastUpdatedTimestamp) {
+    public RequestedSubscriptionResponseApi(String id, String selector, String path, SubscriptionStatusApi status, String consumerCommonName, long lastUpdatedTimestamp) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
@@ -75,20 +69,12 @@ public class RequestedSubscriptionResponseApi {
         this.selector = selector;
     }
 
-    public Boolean isCreateNewQueue() {
-        return createNewQueue;
+    public String getConsumerCommonName() {
+        return consumerCommonName;
     }
 
-    public void setCreateNewQueue(Boolean createNewQueue) {
-        this.createNewQueue = createNewQueue;
-    }
-
-    public String getQueueConsumerUser() {
-        return queueConsumerUser;
-    }
-
-    public void setQueueConsumerUser(String queueConsumerUser) {
-        this.queueConsumerUser = queueConsumerUser;
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     public String getPath() {
@@ -120,17 +106,16 @@ public class RequestedSubscriptionResponseApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RequestedSubscriptionResponseApi that = (RequestedSubscriptionResponseApi) o;
-        return createNewQueue == that.createNewQueue &&
-                Objects.equals(id, that.id) &&
+        return Objects.equals(id, that.id) &&
                 Objects.equals(selector, that.selector) &&
-                Objects.equals(queueConsumerUser, that.queueConsumerUser) &&
+                Objects.equals(consumerCommonName, that.consumerCommonName) &&
                 Objects.equals(path, that.path) &&
                 status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, selector, createNewQueue, queueConsumerUser, path, status);
+        return Objects.hash(id, selector, consumerCommonName, path, status);
     }
 
     @Override
@@ -138,8 +123,7 @@ public class RequestedSubscriptionResponseApi {
         return "RequestedSubscriptionResponseApi{" +
                 "id='" + id + '\'' +
                 ", selector='" + selector + '\'' +
-                ", createNewQueue=" + createNewQueue +
-                ", queueConsumerUser='" + queueConsumerUser + '\'' +
+                ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", path='" + path + '\'' +
                 ", status=" + status +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +

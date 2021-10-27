@@ -77,7 +77,7 @@ public class NeighbourDiscovererIT {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
 		Self self = new Self(nodeProperties.getName());
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'"));
+		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", "self"));
 		self.setLocalSubscriptions(localSubscriptions);
 		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 		when(selfService.fetchSelf()).thenReturn(self);
@@ -97,8 +97,8 @@ public class NeighbourDiscovererIT {
 		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(
 				SubscriptionRequestStatus.REQUESTED,
 				new HashSet<>(Arrays.asList(
-						new Subscription(selector,SubscriptionStatus.ACCEPTED),
-						new Subscription(selector,SubscriptionStatus.ACCEPTED)
+						new Subscription(selector,SubscriptionStatus.ACCEPTED, "self"),
+						new Subscription(selector,SubscriptionStatus.ACCEPTED, "self")
 				))
 		);
 		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptionRequestResponse);
@@ -166,7 +166,7 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
-		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED, false, ""));
+		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED, ""));
 		neighbourService.pollSubscriptions(mockNeighbourFacade);
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();

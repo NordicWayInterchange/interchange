@@ -14,6 +14,13 @@ public class IviCapabilityApi extends CapabilityApi {
 		}
 	}
 
+	public IviCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Set<String> iviType) {
+		super(IVI, publisherId, originatingCountry, protocolVersion, quadTree, redirect);
+		if (iviType != null) {
+			this.iviType.addAll(iviType);
+		}
+	}
+
 	public IviCapabilityApi() {
 		this(null, null, null, null, null);
 	}

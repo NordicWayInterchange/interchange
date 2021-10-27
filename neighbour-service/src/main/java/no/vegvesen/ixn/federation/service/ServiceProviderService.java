@@ -27,10 +27,6 @@ public class ServiceProviderService {
         this.serviceProviderRepository = serviceProviderRepository;
     }
 
-
-
-    // hent ServiceProvidere som har LocalSubscriptions med createNewQueue og status ACCEPTED lokalt.
-    //for hver ServiceProvider: finn naboen med OurRequestedSubscriptions, matche (subscriptionStatus = CREATED) og sette status CREATED og brokerUrl på LocalSubscription
     public void updateLocalSubscriptions(Self self) {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         List<Neighbour> neighbours = neighbourRepository.findAll();
@@ -45,24 +41,21 @@ public class ServiceProviderService {
             for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
                 for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
                     if (localSubscription.getSelector().equals(subscription.getSelector())) {
-                        if (localSubscription.isCreateNewQueue()) {
-                            if (!localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser())) {
-                                throw new IllegalStateException("createNewQueue requested, but subscription user is not the same as the local subscription user");
-                            }
+                        if (localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
                             //TODO What about changes to brokers? We also write ALL service provider Brokers every time!
                             Set<Broker> brokers = subscription.getBrokers();
                             Set<LocalBroker> localBrokers = new HashSet<>();
                             for (Broker broker : brokers) {
-                                logger.info("Adding local broker {} with createNewQueue true, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
+                                logger.info("Adding local broker {} with consumerCommonName same as serviceProvider name, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
                                 localBrokers.add(brokerToLocalBroker(broker));
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         } else {
-                            if (localSubscription.getQueueConsumerUser().equals(subscription.getQueueConsumerUser())) {
-                                throw new IllegalStateException("createNewQueue = false, local subscription user = subscription user");
+                            if (localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
+                                throw new IllegalStateException("consumerCommonName is the same as Ixn name, local subscription user = subscription user");
                             }
                             LocalBroker broker = new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl);
-                            logger.info("Adding local broker {} with createNewQueue false, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
+                            logger.info("Adding local broker {} with consumerCommonName the same as Ixn name, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
                             Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(broker));
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         }

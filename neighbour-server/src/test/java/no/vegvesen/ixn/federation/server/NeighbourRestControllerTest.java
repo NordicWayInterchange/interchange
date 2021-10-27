@@ -181,13 +181,13 @@ class NeighbourRestControllerTest {
 
 		// Create incoming subscription request api objcet
 		SubscriptionRequestApi ericsson = new SubscriptionRequestApi(name,
-				Collections.singleton(new RequestedSubscriptionApi(selector, true, "ericsson")));
+				Collections.singleton(new RequestedSubscriptionApi(selector, "sp-ericsson")));
 
 		// Convert to JSON
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		SubscriptionResponseApi response = new SubscriptionResponseApi(name,
-				Collections.singleton(new RequestedSubscriptionResponseApi("1",selector,path,SubscriptionStatusApi.REQUESTED, true, "ericsson")));
+				Collections.singleton(new RequestedSubscriptionResponseApi("1",selector,path,SubscriptionStatusApi.REQUESTED, "sp-ericsson")));
 
 		doReturn(response).when(neighbourService).incomingSubscriptionRequest(any());
 
@@ -207,7 +207,7 @@ class NeighbourRestControllerTest {
 
 		// Create incoming subscription request api object
 		SubscriptionRequestApi ericsson = new SubscriptionRequestApi(name,
-				Collections.singleton(new RequestedSubscriptionApi(selector, true, "ericsson"))
+				Collections.singleton(new RequestedSubscriptionApi(selector, "sp-ericsson"))
 		);
 
 		// Convert to JSON

@@ -13,22 +13,14 @@ import java.util.Set;
 @Component
 public class SubscriptionTransformer {
 
-	public Set<Subscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request) {
+	public Set<Subscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request, String ixnName) {
 		ArrayList<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
-			if(subscriptionRequestApi.getCreateNewQueue() == null) {
-				Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(),
-						SubscriptionStatus.REQUESTED,
-						false,
-						subscriptionRequestApi.getQueueConsumerUser());
-				subscriptions.add(subscription);
-			} else {
-				Subscription subscription = new Subscription(subscriptionRequestApi.getSelector(),
-						SubscriptionStatus.REQUESTED,
-						subscriptionRequestApi.getCreateNewQueue(),
-						subscriptionRequestApi.getQueueConsumerUser());
-				subscriptions.add(subscription);
-			}
+			Subscription subscription = new Subscription(
+					subscriptionRequestApi.getSelector(),
+					SubscriptionStatus.REQUESTED,
+					subscriptionRequestApi.getConsumerCommonName());
+			subscriptions.add(subscription);
 		}
 		return new HashSet<>(subscriptions);
 
@@ -39,8 +31,7 @@ public class SubscriptionTransformer {
 		List<RequestedSubscriptionApi> subscriptionRequestApis = new ArrayList<>();
 		for (Subscription s : subscriptions) {
 			RequestedSubscriptionApi subscriptionRequestApi = new RequestedSubscriptionApi(s.getSelector(),
-					s.isCreateNewQueue(),
-					s.getQueueConsumerUser());
+					s.getConsumerCommonName());
 			subscriptionRequestApis.add(subscriptionRequestApi);
 		}
 		return new HashSet<>(subscriptionRequestApis);
@@ -54,8 +45,7 @@ public class SubscriptionTransformer {
 					s.getSelector(),
 					s.getPath(),
 					subscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()),
-					s.isCreateNewQueue(),
-					s.getQueueConsumerUser());
+					s.getConsumerCommonName());
 			subscriptionResponses.add(responseApi);
 		}
 		return new HashSet<>(subscriptionResponses);
@@ -73,25 +63,13 @@ public class SubscriptionTransformer {
 	public Set<Subscription> requestedSubscriptionResponseApiToSubscriptions(Set<RequestedSubscriptionResponseApi> subscriptionResponseApis) {
 		List<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionResponseApi s : subscriptionResponseApis) {
-			if (s.isCreateNewQueue() == null) {
-				Subscription subscription = new Subscription(
-						subscriptionStatusApiToSubscriptionStatus(s.getStatus()),
-						s.getSelector(),
-						s.getPath(),
-						false,
-						s.getQueueConsumerUser());
-				subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
-				subscriptions.add(subscription);
-			} else {
-				Subscription subscription = new Subscription(
-						subscriptionStatusApiToSubscriptionStatus(s.getStatus()),
-						s.getSelector(),
-						s.getPath(),
-						s.isCreateNewQueue(),
-						s.getQueueConsumerUser());
-				subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
-				subscriptions.add(subscription);
-			}
+			Subscription subscription = new Subscription(
+					subscriptionStatusApiToSubscriptionStatus(s.getStatus()),
+					s.getSelector(),
+					s.getPath(),
+					s.getConsumerCommonName());
+			subscription.setLastUpdatedTimestamp(s.getLastUpdatedTimestamp());
+			subscriptions.add(subscription);
 		}
 		return new HashSet<>(subscriptions);
 	}

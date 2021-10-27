@@ -49,11 +49,10 @@ public class ApiModelRestDocumentationTest {
     @Test
     public void postSubscriptionRequest() throws JsonProcessingException {
         SubscriptionRequestApi request = new SubscriptionRequestApi(
-                "sp-1",
+                "node-1",
                 Collections.singleton(
                         new RequestedSubscriptionApi(
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
-                                false,
                                 "node-1"
                         )
                 )
@@ -65,14 +64,13 @@ public class ApiModelRestDocumentationTest {
     @Test
     public void subscriptionRequestResponse() throws JsonProcessingException {
         SubscriptionResponseApi response = new SubscriptionResponseApi(
-                "sp-1",
+                "node-1",
                 Collections.singleton(
                         new RequestedSubscriptionResponseApi(
                                 "1",
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/1",
                                 SubscriptionStatusApi.REQUESTED,
-                                false,
                                 "node-1",
                                 System.currentTimeMillis()
                         )
@@ -85,14 +83,13 @@ public class ApiModelRestDocumentationTest {
     @Test
     public void subscriptionRequestResponseWithList() throws JsonProcessingException {
         SubscriptionResponseApi response = new SubscriptionResponseApi(
-                "sp-1",
+                "node-1",
                 new HashSet<>(Arrays.asList(
                         new RequestedSubscriptionResponseApi(
                                 "1",
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/1",
                                 SubscriptionStatusApi.REQUESTED,
-                                false,
                                 "node-1",
                                 System.currentTimeMillis()
                         ),
@@ -101,7 +98,6 @@ public class ApiModelRestDocumentationTest {
                                 "originatingCountry = 'NO' and messageType = 'DENM'",
                                 "/subscription/2",
                                 SubscriptionStatusApi.REQUESTED,
-                                false,
                                 "node-1",
                                 System.currentTimeMillis()
                         )
@@ -118,7 +114,6 @@ public class ApiModelRestDocumentationTest {
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "/subscription/1",
                 SubscriptionStatusApi.CREATED,
-                false,
                 "node-1",
                 Collections.singleton(
                         new BrokerApi(

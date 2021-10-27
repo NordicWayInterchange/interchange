@@ -99,6 +99,12 @@ public class SubscriptionRequest {
 				.collect(Collectors.toSet());
 	}
 
+	public Set<Subscription> getResubscribeSubscriptions() {
+		return getSubscriptions().stream()
+				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE))
+				.collect(Collectors.toSet());
+	}
+
 	public Optional<LocalDateTime> getSuccessfulRequest() {
 		return Optional.ofNullable(successfulRequest);
 	}
@@ -125,19 +131,20 @@ public class SubscriptionRequest {
 		return unwantedBindKeys;
 	}
 
-	public boolean hasCreateNewQueue() {
-		return subscription.stream().filter(Subscription::isCreateNewQueue).collect(Collectors.counting()) > 0;
+	public boolean hasOtherConsumerCommonName(String ixnName) {
+		return subscription.stream()
+				.anyMatch(s -> !s.getConsumerCommonName().equals(ixnName));
 	}
 
-	public Set<Subscription> getAcceptedSubscriptionsWithCreateNewQueue() {
+	public Set<Subscription> getAcceptedSubscriptionsWithOtherConsumerCommonName(String ixnName) {
 		return getAcceptedSubscriptions().stream()
-				.filter(Subscription::isCreateNewQueue)
+				.filter(s -> !s.getConsumerCommonName().equals(ixnName))
 				.collect(Collectors.toSet());
 	}
 
-	public Set<Subscription> getAcceptedSubscriptionsWithoutCreateNewQueue() {
+	public Set<Subscription> getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(String ixnName) {
 		return getAcceptedSubscriptions().stream()
-				.filter(s -> s.isCreateNewQueue() == false)
+				.filter(s -> s.getConsumerCommonName().equals(ixnName))
 				.collect(Collectors.toSet());
 	}
 }

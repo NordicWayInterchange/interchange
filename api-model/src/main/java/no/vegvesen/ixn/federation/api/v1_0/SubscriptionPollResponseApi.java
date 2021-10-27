@@ -13,10 +13,7 @@ public class SubscriptionPollResponseApi {
     private String selector;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Boolean createNewQueue;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String queueConsumerUser;
+    private String consumerCommonName;
 
     private String path;
     private SubscriptionStatusApi status;
@@ -34,12 +31,10 @@ public class SubscriptionPollResponseApi {
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
-                                       Boolean createNewQueue,
-                                       String queueConsumerUser) {
+                                       String consumerCommonName) {
         this.id = id;
         this.selector = selector;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
         this.path = path;
         this.status = status;
     }
@@ -48,15 +43,13 @@ public class SubscriptionPollResponseApi {
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
-                                       Boolean createNewQueue,
-                                       String queueConsumerUser,
+                                       String consumerCommonName,
                                        Set<BrokerApi> brokers) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
         this.brokers = brokers;
     }
 
@@ -76,20 +69,12 @@ public class SubscriptionPollResponseApi {
         this.selector = selector;
     }
 
-    public Boolean isCreateNewQueue() {
-        return createNewQueue;
+    public String getConsumerCommonName() {
+        return consumerCommonName;
     }
 
-    public void setCreateNewQueue(Boolean createNewQueue) {
-        this.createNewQueue = createNewQueue;
-    }
-
-    public String getQueueConsumerUser() {
-        return queueConsumerUser;
-    }
-
-    public void setQueueConsumerUser(String queueConsumerUser) {
-        this.queueConsumerUser = queueConsumerUser;
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     public String getPath() {
@@ -131,8 +116,7 @@ public class SubscriptionPollResponseApi {
         SubscriptionPollResponseApi that = (SubscriptionPollResponseApi) o;
         return id.equals(that.id) &&
                 selector.equals(that.selector) &&
-                createNewQueue.equals(that.createNewQueue) &&
-                queueConsumerUser.equals(that.queueConsumerUser) &&
+                consumerCommonName.equals(that.consumerCommonName) &&
                 path.equals(that.path) &&
                 status == that.status &&
                 Objects.equals(lastUpdatedTimestamp, that.lastUpdatedTimestamp) &&
@@ -143,8 +127,7 @@ public class SubscriptionPollResponseApi {
     public int hashCode() {
         return Objects.hash(id,
                 selector,
-                createNewQueue,
-                queueConsumerUser,
+                consumerCommonName,
                 path,
                 status,
                 lastUpdatedTimestamp,
@@ -156,8 +139,7 @@ public class SubscriptionPollResponseApi {
         return "SubscriptionPollResponseApi{" +
                 "id='" + id + '\'' +
                 ", selector='" + selector + '\'' +
-                ", createNewQueue=" + createNewQueue +
-                ", queueConsumerUser='" + queueConsumerUser + '\'' +
+                ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", path='" + path + '\'' +
                 ", status=" + status +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +

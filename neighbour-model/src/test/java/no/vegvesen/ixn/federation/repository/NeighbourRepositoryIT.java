@@ -41,12 +41,12 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void storedSubscriptionsInAndOutAreSeparated() {
 		Set<Subscription> outbound = new HashSet<>();
-		outbound.add(new Subscription("outbound is true", SubscriptionStatus.CREATED, false, ""));
+		outbound.add(new Subscription("outbound is true", SubscriptionStatus.CREATED, ""));
 		SubscriptionRequest outSubReq = new SubscriptionRequest();
 		outSubReq.setSubscriptions(outbound);
 
 		Set<Subscription> inbound = new HashSet<>();
-		inbound.add(new Subscription("inbound is true", SubscriptionStatus.CREATED, false, ""));
+		inbound.add(new Subscription("inbound is true", SubscriptionStatus.CREATED, ""));
 		SubscriptionRequest inSubReq = new SubscriptionRequest();
 		inSubReq.setSubscriptions(inbound);
 
@@ -86,8 +86,8 @@ public class NeighbourRepositoryIT {
 	public void interchangeReadyToSetupRouting() {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Set<Subscription> requestedSubscriptions = new HashSet<>();
-		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED, false, ""));
-		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.ACCEPTED, false, ""));
+		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED, ""));
+		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.ACCEPTED, ""));
 		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour readyToSetup = new Neighbour("freddy", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
@@ -117,8 +117,8 @@ public class NeighbourRepositoryIT {
 	public void interchangeCanUpdateSubscriptionsSet() {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Set<Subscription> requestedSubscriptions = new HashSet<>();
-		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED, false, ""));
-		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.REQUESTED, false, ""));
+		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED, ""));
+		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.REQUESTED, ""));
 		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour ixnForUpdate = new Neighbour("4update", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
@@ -136,7 +136,7 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void interchangeReadyForForwarding() {
 		Set<Subscription> subscriptions = new HashSet<>();
-		subscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.CREATED, false, ""));
+		subscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.CREATED, ""));
 		SubscriptionRequest outgoing = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions);
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Neighbour ixnForwards = new Neighbour("norwegian-fish", capabilities, outgoing, null);
@@ -229,7 +229,7 @@ public class NeighbourRepositoryIT {
 				"AND (publicationSubType = 'WinterDrivingManagement' OR publicationSubType = 'ReroutingManagement') " +
 				"AND contentType = 'application/xml";
 
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, false, "");
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, "");
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		neighbour.setOurRequestedSubscriptions(subscriptionRequest);
@@ -238,33 +238,33 @@ public class NeighbourRepositoryIT {
 	}
 
 	@Test
-	public void addSubscriptionWhereCreateNewQueueIsTrue() {
-		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, true, "neighbour-for-queue-true")));
+	public void addSubscriptionWhereConsumerCommonNameIsSameAsServiceProviderName() {
+		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "sp-true")));
 		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
 		Neighbour neighbour = new Neighbour("neighbour-for-queue-true", new Capabilities(), subscriptions, new SubscriptionRequest());
 
 		repository.save(neighbour);
 
 		Neighbour savedNeighbour = repository.findByName("neighbour-for-queue-true");
-		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()).isTrue();
+		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())).isTrue();
 	}
 
 	@Test
-	public void addSubscriptionWhereCreateNewQueueIsFalse() {
-		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, false, "")));
+	public void addSubscriptionWhereconsumerCommonNameIsSameAsIxnName() {
+		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "neighbour-for-queue-false")));
 		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
 		Neighbour neighbour = new Neighbour("neighbour-for-queue-false", new Capabilities(), subscriptions, new SubscriptionRequest());
 
 		repository.save(neighbour);
 
 		Neighbour savedNeighbour = repository.findByName("neighbour-for-queue-false");
-		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()).isFalse();
+		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())).isFalse();
 	}
 
 	@Test
-	public void addSubscriptionWhereOneCreateNewQueueIsTrueAndOneIsFalse() {
-		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, true, "neighbour-for-queue-true");
-		Subscription sub2 = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, false, "");
+	public void addSubscriptionWhereConsumerCommonNameAsBothIxnNameAndServiceProviderName() {
+		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "sp-queue-true");
+		Subscription sub2 = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "neighbour-for-queue-true-and-false");
 		Set<Subscription> subs = Sets.newLinkedHashSet(sub1, sub2);
 
 		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
@@ -274,14 +274,14 @@ public class NeighbourRepositoryIT {
 
 		Neighbour savedNeighbour = repository.findByName("neighbour-for-queue-true-and-false");
 
-		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().hasCreateNewQueue()).isTrue();
+		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())).isTrue();
 		assertThat(savedNeighbour.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(2);
 
 	}
 
 	@Test
 	public void addSubscriptionWithBrokersList() {
-		Subscription sub = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, false, "");
+		Subscription sub = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "");
 		Broker broker = new Broker("my-queue","my-broker");
 		sub.setBrokers(Sets.newLinkedHashSet(broker));
 

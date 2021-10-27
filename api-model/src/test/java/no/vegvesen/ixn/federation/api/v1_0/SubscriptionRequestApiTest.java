@@ -27,7 +27,6 @@ public class SubscriptionRequestApiTest {
         );
         RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi(
                 "messageType='DENM' AND originatingCountry='NO'",
-                true,
                 "client1"
         );
         SubscriptionRequestApi requestApi = new SubscriptionRequestApi("a.c-its-interchange.eu",

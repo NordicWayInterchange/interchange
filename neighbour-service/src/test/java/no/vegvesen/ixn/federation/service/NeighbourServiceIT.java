@@ -41,15 +41,15 @@ public class NeighbourServiceIT {
                 new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet()),
                 new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,
                         Sets.newLinkedHashSet(
-                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, false, ""))));
+                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "interchangeA"))));
         Neighbour interchangeB = new Neighbour("interchangeB",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED,
                         Sets.newLinkedHashSet(
-                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, false, ""))),
+                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "interchangeA"))),
                 new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED,
                         Sets.newLinkedHashSet(
-                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, false, ""))));
+                                new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "interchangeA"))));
         repository.save(interchangeA);
         repository.save(interchangeB);
 
@@ -68,7 +68,7 @@ public class NeighbourServiceIT {
 
         SubscriptionResponseApi responseApi = service.incomingSubscriptionRequest(
                 new SubscriptionRequestApi("myNeighbour",
-                        Collections.singleton(new RequestedSubscriptionApi("originatingCountry = 'NO'")))
+                        Collections.singleton(new RequestedSubscriptionApi("originatingCountry = 'NO'", "myNeighbour")))
         );
         Set<RequestedSubscriptionResponseApi> subscriptions = responseApi.getSubscriptions();
         assertThat(subscriptions.size()).isEqualTo(1);
@@ -94,8 +94,8 @@ public class NeighbourServiceIT {
         neighbour.setName("my-neighbour2");
         repository.save(neighbour);
 
-        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
-        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'");
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour2");
+        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'", "my-neighbour2");
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour2", new HashSet<>(Arrays.asList(sub1, sub2)));
 
@@ -113,8 +113,8 @@ public class NeighbourServiceIT {
         neighbour.setName("my-neighbour3");
         repository.save(neighbour);
 
-        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
-        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'");
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour3");
+        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'", "my-neighbour3");
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour3", new HashSet<>(Arrays.asList(sub1, sub2)));
 
@@ -136,7 +136,7 @@ public class NeighbourServiceIT {
         neighbour.setName("my-neighbour4");
         repository.save(neighbour);
 
-        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour4");
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour4", new HashSet<>(Collections.singleton(sub1)));
 
@@ -158,8 +158,8 @@ public class NeighbourServiceIT {
         neighbour.setName("my-neighbour5");
         repository.save(neighbour);
 
-        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'");
-        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'");
+        RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='NO'", "my-neighbour5");
+        RequestedSubscriptionApi sub2 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='SE'", "my-neighbour5");
 
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi("my-neighbour5", new HashSet<>(Arrays.asList(sub1, sub2)));
@@ -171,7 +171,7 @@ public class NeighbourServiceIT {
 
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
 
-        RequestedSubscriptionApi sub3 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='FI'");
+        RequestedSubscriptionApi sub3 = new RequestedSubscriptionApi("messageType='DENM' AND originatingCountry='FI'", "my-neighbour5");
 
         SubscriptionRequestApi subscriptionRequestApi2 = new SubscriptionRequestApi("my-neighbour5", new HashSet<>(Collections.singleton(sub3)));
 
@@ -183,7 +183,7 @@ public class NeighbourServiceIT {
     }
 
     @Test
-    public void incomingSubscriptionWithCreateNewQueue() {
+    public void incomingSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         Neighbour neighbour = new Neighbour();
         String neighbourName = "my-service-provider-wants-direct-subscription";
         neighbour.setName(neighbourName);
@@ -191,7 +191,7 @@ public class NeighbourServiceIT {
         repository.save(neighbour);
 
         SubscriptionRequestApi subscriptionRequestApi = new SubscriptionRequestApi(neighbourName,new HashSet<>(Arrays.asList(
-                new RequestedSubscriptionApi("messageType='DATEX2' AND originatingCountry = 'NO'",true,"service-provider")
+                new RequestedSubscriptionApi("messageType='DATEX2' AND originatingCountry = 'NO'","service-provider")
         )));
 
         service.incomingSubscriptionRequest(subscriptionRequestApi);
@@ -199,7 +199,7 @@ public class NeighbourServiceIT {
         Neighbour persistedNeighbour = repository.findByName(neighbourName);
         assertThat(persistedNeighbour.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
         Subscription subscription = persistedNeighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.isCreateNewQueue()).isTrue();
+        assertThat(subscription.getConsumerCommonName().equals("service-provider")).isTrue();
     }
 
 }

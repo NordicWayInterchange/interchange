@@ -12,10 +12,7 @@ public class RequestedSubscriptionApi {
     private String selector;
 
     @JsonInclude(Include.NON_NULL)
-    private Boolean createNewQueue; //optional, thus an object
-
-    @JsonInclude(Include.NON_NULL)
-    private String queueConsumerUser;
+    private String consumerCommonName;
 
     public RequestedSubscriptionApi() {
     }
@@ -24,10 +21,9 @@ public class RequestedSubscriptionApi {
         this.selector = selector;
     }
 
-    public RequestedSubscriptionApi(String selector, Boolean createNewQueue, String queueConsumerUser) {
+    public RequestedSubscriptionApi(String selector, String consumerCommonName) {
         this.selector = selector;
-        this.createNewQueue = createNewQueue;
-        this.queueConsumerUser = queueConsumerUser;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public String getSelector() {
@@ -38,20 +34,12 @@ public class RequestedSubscriptionApi {
         this.selector = selector;
     }
 
-    public Boolean getCreateNewQueue() {
-        return createNewQueue;
+    public String getConsumerCommonName() {
+        return consumerCommonName;
     }
 
-    public void setCreateNewQueue(Boolean createNewQueue) {
-        this.createNewQueue = createNewQueue;
-    }
-
-    public String getQueueConsumerUser() {
-        return queueConsumerUser;
-    }
-
-    public void setQueueConsumerUser(String queueConsumerUser) {
-        this.queueConsumerUser = queueConsumerUser;
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     @Override
@@ -60,21 +48,19 @@ public class RequestedSubscriptionApi {
         if (o == null || getClass() != o.getClass()) return false;
         RequestedSubscriptionApi that = (RequestedSubscriptionApi) o;
         return Objects.equals(selector, that.selector) &&
-                Objects.equals(createNewQueue, that.createNewQueue) &&
-                Objects.equals(queueConsumerUser, that.queueConsumerUser);
+                Objects.equals(consumerCommonName, that.consumerCommonName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selector, createNewQueue, queueConsumerUser);
+        return Objects.hash(selector, consumerCommonName);
     }
 
     @Override
     public String toString() {
         return "RequestedSubscriptionApi{" +
                 "selector='" + selector + '\'' +
-                ", createNewQueue=" + createNewQueue +
-                ", queueConsumerUser='" + queueConsumerUser + '\'' +
+                ", consumerCommonName='" + consumerCommonName + '\'' +
                 '}';
     }
 }

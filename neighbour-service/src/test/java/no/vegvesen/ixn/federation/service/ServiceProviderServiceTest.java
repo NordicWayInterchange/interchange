@@ -55,7 +55,7 @@ public class ServiceProviderServiceTest {
     }
 
     @Test
-    public void testUpdateServiceProviderSubscriptionWithLocalBrokerUrlCreateNewQueue() {
+    public void testUpdateServiceProviderSubscriptionWithLocalBrokerUrlAndConsumerCommonNameSameAsServiceProviderName() {
         ServiceProviderService serviceProviderService = new ServiceProviderService(neighbourRepository,serviceProviderRepository);
         String neighbourName = "node-A";
         String selector = "a = b";
@@ -73,7 +73,6 @@ public class ServiceProviderServiceTest {
                                SubscriptionStatus.CREATED,
                                selector,
                                "local-node/subscriptions/1",
-                               true,
                                serviceProviderName,
                                Collections.singleton(new Broker(
                                        serviceProviderName,
@@ -87,7 +86,6 @@ public class ServiceProviderServiceTest {
                 LocalSubscriptionStatus.REQUESTED,
                 selector,
                 LocalDateTime.now(),
-                true,
                 serviceProviderName,
                 new HashSet<>());
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -108,7 +106,7 @@ public class ServiceProviderServiceTest {
     }
 
     @Test
-    public void testUpdateServiceProviderSubscriptionWithLocalBrokerUrlNonCreateNewQueue() {
+    public void testUpdateServiceProviderSubscriptionWithLocalBrokerUrlWithConsumerCommonNameSameAsIxnName() {
         ServiceProviderService serviceProviderService = new ServiceProviderService(neighbourRepository,serviceProviderRepository);
         String neighbourName = "node-A";
         String selector = "a = b";
@@ -126,7 +124,6 @@ public class ServiceProviderServiceTest {
                                 SubscriptionStatus.CREATED,
                                 selector,
                                 "local-node/subscriptions/1",
-                                false,
                                 null, //QueueconsumerUser is most often null from other node.
                                 Collections.singleton(new Broker(
                                         localNodeName,
@@ -140,8 +137,7 @@ public class ServiceProviderServiceTest {
                 LocalSubscriptionStatus.REQUESTED,
                 selector,
                 LocalDateTime.now(),
-                false,
-                serviceProviderName,
+                localNodeName,
                 new HashSet<>());
         ServiceProvider serviceProvider = new ServiceProvider(
                 1,

@@ -89,7 +89,7 @@ public class ServiceProvider {
 		return subscriptions;
 	}
 
-	public void addLocalSubscription(LocalSubscription subscription) {
+	public void  addLocalSubscription(LocalSubscription subscription) {
 		subscriptions.add(subscription);
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
