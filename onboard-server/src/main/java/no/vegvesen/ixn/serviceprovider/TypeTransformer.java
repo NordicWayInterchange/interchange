@@ -109,10 +109,12 @@ public class TypeTransformer {
         );
     }
 
-    private Set<Endpoint> transformLocalBrokersToEndpoints(Set<LocalBroker> localBrokers) {
-        Set<Endpoint> result = new HashSet<>();
+    private Set<LocalEndpoint> transformLocalBrokersToEndpoints(Set<LocalBroker> localBrokers) {
+        Set<LocalEndpoint> result = new HashSet<>();
         for (LocalBroker broker : localBrokers) {
-            result.add(new Endpoint(broker.getMessageBrokerUrl(),
+            List<String> hostAndPort = makeHostAndPortOfUrl(broker.getMessageBrokerUrl());
+            result.add(new LocalEndpoint(hostAndPort.get(0),
+                    Integer.parseInt(hostAndPort.get(1)),
                     broker.getQueueName(),
                     broker.getMaxBandwidth(),
                     broker.getMaxMessageRate()));
@@ -157,5 +159,11 @@ public class TypeTransformer {
                 createCapabilitiesPath(serviceProviderName,capabilityId),
                 capability.toApi()
         );
+    }
+
+    public static List<String> makeHostAndPortOfUrl(String url){
+        String strippedUrl = url.replace("amqps://", "");
+        String[] splitUrl = strippedUrl.split(":");
+        return new ArrayList<>(Arrays.asList(splitUrl[0], splitUrl[1]));
     }
 }

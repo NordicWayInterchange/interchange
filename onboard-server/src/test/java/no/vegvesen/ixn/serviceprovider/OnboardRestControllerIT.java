@@ -17,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -157,5 +158,13 @@ public class OnboardRestControllerIT {
         SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
         AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
 
+    }
+
+    @Test
+    public void typeTransformerConvertUrlToHostAndPortProperly() {
+        String url = "amqps://my-interchange:5671";
+        List<String> hostAndPort = TypeTransformer.makeHostAndPortOfUrl(url);
+        assertThat(hostAndPort.get(0)).isEqualTo("my-interchange");
+        assertThat(hostAndPort.get(1)).isEqualTo("5671");
     }
 }

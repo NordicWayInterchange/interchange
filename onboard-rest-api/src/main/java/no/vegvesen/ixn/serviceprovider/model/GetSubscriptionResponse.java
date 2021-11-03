@@ -9,7 +9,7 @@ public class GetSubscriptionResponse {
     private String selector;
     private long lastUpdatedTimestamp;
     private LocalActorSubscriptionStatusApi status;
-    private Set<Endpoint> endpoints;
+    private Set<LocalEndpoint> localEndpoints;
 
     public GetSubscriptionResponse() {
     }
@@ -19,13 +19,13 @@ public class GetSubscriptionResponse {
                                    String selector,
                                    long lastUpdatedTimestamp,
                                    LocalActorSubscriptionStatusApi status,
-                                   Set<Endpoint> endpoints) {
+                                   Set<LocalEndpoint> localEndpoints) {
         this.id = id;
         this.path = path;
         this.selector = selector;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
-        this.endpoints = endpoints;
+        this.localEndpoints = localEndpoints;
     }
 
     public String getId() {
@@ -68,12 +68,12 @@ public class GetSubscriptionResponse {
         this.status = status;
     }
 
-    public Set<Endpoint> getEndpoints() {
-        return endpoints;
+    public Set<LocalEndpoint> getEndpoints() {
+        return localEndpoints;
     }
 
-    public void setEndpoints(Set<Endpoint> endpoints) {
-        this.endpoints = endpoints;
+    public void setEndpoints(Set<LocalEndpoint> localEndpoints) {
+        this.localEndpoints = localEndpoints;
     }
 
     @Override
@@ -81,12 +81,12 @@ public class GetSubscriptionResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GetSubscriptionResponse that = (GetSubscriptionResponse) o;
-        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(id, that.id) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(endpoints, that.endpoints);
+        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(id, that.id) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(localEndpoints, that.localEndpoints);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, path, selector, lastUpdatedTimestamp, status, endpoints);
+        return Objects.hash(id, path, selector, lastUpdatedTimestamp, status, localEndpoints);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class GetSubscriptionResponse {
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
-                ", endpoints=" + endpoints +
+                ", endpoints=" + localEndpoints +
                 '}';
     }
 }
