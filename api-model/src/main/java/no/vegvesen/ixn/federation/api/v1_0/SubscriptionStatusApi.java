@@ -5,5 +5,6 @@ public enum SubscriptionStatusApi {
     CREATED,
     ILLEGAL,
     NOT_VALID,
-    NO_OVERLAP
+    NO_OVERLAP,
+    RESUBSCRIBE
 }
