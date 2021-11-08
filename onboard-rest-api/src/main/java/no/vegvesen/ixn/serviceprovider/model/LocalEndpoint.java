@@ -44,14 +44,14 @@ public class LocalEndpoint {
     }
 
     //TODO: Remove temporary method for Url, probably don't need it for testing purposes
-    public String getUrl() {
+    /*public String getUrl() {
         if(port == null){
             return String.format("amqps://%s:%s", host, "5671");
         }
         else {
             return String.format("amqps://%s:%s", host, port);
         }
-    }
+    }*/
 
     public String getSource() {
         return source;

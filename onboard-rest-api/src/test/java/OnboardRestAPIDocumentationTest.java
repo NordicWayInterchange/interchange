@@ -92,7 +92,7 @@ public class OnboardRestAPIDocumentationTest {
         Set<LocalEndpoint> localEndpoints = new HashSet<>();
         localEndpoints.add(new LocalEndpoint(
                 "myserver",
-                0,
+                5671,
                 "serviceprovider1-1",
                 0,
                 0
