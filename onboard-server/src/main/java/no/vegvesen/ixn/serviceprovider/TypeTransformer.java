@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -162,8 +163,14 @@ public class TypeTransformer {
     }
 
     public static List<String> makeHostAndPortOfUrl(String url){
-        String strippedUrl = url.replace("amqps://", "");
-        String[] splitUrl = strippedUrl.split(":");
-        return new ArrayList<>(Arrays.asList(splitUrl[0], splitUrl[1]));
+        URI uri = URI.create(url);
+        String host = uri.getHost();
+        int port = uri.getPort();
+        if (port == -1){
+            port = 5671;
+        }
+        //String strippedUrl = url.replace("amqps://", "");
+        //String[] splitUrl = strippedUrl.split(":");
+        return new ArrayList<>(Arrays.asList(host, String.valueOf(port)));
     }
 }

@@ -159,12 +159,4 @@ public class OnboardRestControllerIT {
         AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
 
     }
-
-    @Test
-    public void typeTransformerConvertUrlToHostAndPortProperly() {
-        String url = "amqps://my-interchange:5671";
-        List<String> hostAndPort = TypeTransformer.makeHostAndPortOfUrl(url);
-        assertThat(hostAndPort.get(0)).isEqualTo("my-interchange");
-        assertThat(hostAndPort.get(1)).isEqualTo("5671");
-    }
 }
