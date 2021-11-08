@@ -169,8 +169,6 @@ public class TypeTransformer {
         if (port == -1){
             port = 5671;
         }
-        //String strippedUrl = url.replace("amqps://", "");
-        //String[] splitUrl = strippedUrl.split(":");
         return new ArrayList<>(Arrays.asList(host, String.valueOf(port)));
     }
 }
