@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -138,8 +137,8 @@ public class OnboardRestController {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. No selectors.");
 
 		}
-		for (SelectorApi selectorApi : requestApi.getSubscriptions()) {
-			if (selectorApi.getSelector() == null) {
+		for (AddSubscription addSubscription : requestApi.getSubscriptions()) {
+			if (addSubscription.getSelector() == null) {
 				throw new SubscriptionRequestException("Bad api object for Subscription Request. The Selector object was null.");
 			}
 		}
@@ -148,8 +147,8 @@ public class OnboardRestController {
 
 		//LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,selector);
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		for (SelectorApi subscription : requestApi.getSubscriptions()) {
-			LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,subscription);
+		for (AddSubscription subscription : requestApi.getSubscriptions()) {
+			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(serviceProviderName,subscription);
 			localSubscriptions.add(localSubscription);
 		}
 

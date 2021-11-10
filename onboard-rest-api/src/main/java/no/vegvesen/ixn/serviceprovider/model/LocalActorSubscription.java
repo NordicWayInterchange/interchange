@@ -6,6 +6,8 @@ public class LocalActorSubscription {
     String id;
     String path;
     String selector;
+    boolean createNewQueue;
+    String queueConsumerUser;
     long lastUpdatedTimeStamp;
     LocalActorSubscriptionStatusApi status;
 
@@ -16,6 +18,16 @@ public class LocalActorSubscription {
         this.id = id;
         this.path = path;
         this.selector = selector;
+        this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
+        this.status = status;
+    }
+
+    public LocalActorSubscription(String id, String path, String selector, boolean createNewQueue, String queueConsumerUser, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status) {
+        this.id = id;
+        this.path = path;
+        this.selector = selector;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
         this.status = status;
     }
@@ -42,6 +54,22 @@ public class LocalActorSubscription {
 
     public void setSelector(String selector) {
         this.selector = selector;
+    }
+
+    public boolean isCreateNewQueue() {
+        return createNewQueue;
+    }
+
+    public void setCreateNewQueue(boolean createNewQueue) {
+        this.createNewQueue = createNewQueue;
+    }
+
+    public String getQueueConsumerUser() {
+        return queueConsumerUser;
+    }
+
+    public void setQueueConsumerUser(String queueConsumerUser) {
+        this.queueConsumerUser = queueConsumerUser;
     }
 
     public long getLastUpdatedTimeStamp() {
@@ -79,6 +107,8 @@ public class LocalActorSubscription {
                 "id='" + id + '\'' +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
+                ", createNewQueue='" + createNewQueue + '\'' +
+                ", queueConsumerUser='" + queueConsumerUser + '\'' +
                 ", lastUpdatedTimeStamp=" + lastUpdatedTimeStamp +
                 ", status=" + status +
                 '}';

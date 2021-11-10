@@ -6,12 +6,12 @@ import java.util.Set;
 public class AddSubscriptionsRequest {
     private String name;
     private String version = "1.0";
-    private Set<SelectorApi> subscriptions;
+    private Set<AddSubscription> subscriptions;
 
     public AddSubscriptionsRequest() {
     }
 
-    public AddSubscriptionsRequest(String name, Set<SelectorApi> subscriptions) {
+    public AddSubscriptionsRequest(String name, Set<AddSubscription> subscriptions) {
         this.name = name;
         this.subscriptions = subscriptions;
     }
@@ -24,7 +24,7 @@ public class AddSubscriptionsRequest {
         return version;
     }
 
-    public Set<SelectorApi> getSubscriptions() {
+    public Set<AddSubscription> getSubscriptions() {
         return subscriptions;
     }
 
@@ -36,7 +36,7 @@ public class AddSubscriptionsRequest {
         this.version = version;
     }
 
-    public void setSubscriptions(Set<SelectorApi> subscriptions) {
+    public void setSubscriptions(Set<AddSubscription> subscriptions) {
         this.subscriptions = subscriptions;
     }
 

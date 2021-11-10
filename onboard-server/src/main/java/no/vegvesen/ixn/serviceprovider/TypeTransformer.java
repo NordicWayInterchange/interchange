@@ -57,9 +57,10 @@ public class TypeTransformer {
     }
 
 
-    public LocalSubscription transformSelectorApiToLocalSubscription(String serviceProviderName, SelectorApi selectorApi) {
+    public LocalSubscription transformAddSubscriptionToLocalSubscription(String serviceProviderName, AddSubscription addSubscription) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                selectorApi.getSelector(),
+                addSubscription.getSelector().getSelector(),
+                addSubscription.isCreateNewQueue(),
                 serviceProviderName);
     }
 
@@ -79,6 +80,8 @@ public class TypeTransformer {
                     subscriptionId,
                     createSubscriptionPath(serviceProviderName, subscriptionId),
                     subscription.getSelector(),
+                    subscription.isCreateNewQueue(),
+                    subscription.getQueueConsumerUser(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
                     transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())
                     )

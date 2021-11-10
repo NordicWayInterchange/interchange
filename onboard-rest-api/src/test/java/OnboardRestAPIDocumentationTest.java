@@ -14,11 +14,11 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
-        Set<SelectorApi> selectors = new HashSet<>();
-        selectors.add(new SelectorApi("countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"));
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
+        addSubscriptions.add(new AddSubscription(false, new SelectorApi("countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'")));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "kyrre",
-                selectors
+                addSubscriptions
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
@@ -26,12 +26,12 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addSubscriptionRequest() throws JsonProcessingException {
-        Set<SelectorApi> selectors = new HashSet<>();
-        selectors.add(new SelectorApi("countryCode = 'NO' and messageType = 'DENM'"));
-        selectors.add(new SelectorApi("countryCode = 'SE' and messageType = 'DENM'"));
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
+        addSubscriptions.add(new AddSubscription(false, new SelectorApi("countryCode = 'NO' and messageType = 'DENM'")));
+        addSubscriptions.add(new AddSubscription(false, new SelectorApi("countryCode = 'SE' and messageType = 'DENM'")));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "serviceprovider1",
-                selectors
+                addSubscriptions
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
