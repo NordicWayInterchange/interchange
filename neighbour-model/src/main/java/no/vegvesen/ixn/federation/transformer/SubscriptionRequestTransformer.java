@@ -58,6 +58,7 @@ public class SubscriptionRequestTransformer {
 		} else {
 			subscription.setCreateNewQueue(subscriptionApi.isCreateNewQueue());
 		}
+		subscription.setQueueConsumerUser(subscriptionApi.getQueueConsumerUser());
 
 		Set<Broker> brokers = new HashSet<>();
 		for(BrokerApi brokerApi : subscriptionApi.getBrokers()){

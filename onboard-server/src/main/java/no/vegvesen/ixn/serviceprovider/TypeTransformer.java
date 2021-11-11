@@ -50,8 +50,10 @@ public class TypeTransformer {
                     sub_id,
                     createSubscriptionPath(name,sub_id),
                     subscription.getSelector(),
+                    subscription.isCreateNewQueue(),
+                    subscription.getQueueConsumerUser(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())));
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())));
         }
         return result;
     }
@@ -66,13 +68,13 @@ public class TypeTransformer {
 
     public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         return new AddSubscriptionsResponse(serviceProviderName,
-                tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(
+                transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(
                         serviceProviderName,
                         localSubscriptions)
         );
     }
 
-    private Set<LocalActorSubscription> tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
+    private Set<LocalActorSubscription> transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
             String subscriptionId = subscription.getSub_id().toString();
@@ -83,7 +85,7 @@ public class TypeTransformer {
                     subscription.isCreateNewQueue(),
                     subscription.getQueueConsumerUser(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())
                     )
             );
         }
@@ -107,8 +109,10 @@ public class TypeTransformer {
                 localSubscription.getSub_id().toString(),
                 createSubscriptionPath(serviceProviderName,localSubscription.getSub_id().toString()),
                 localSubscription.getSelector(),
+                localSubscription.isCreateNewQueue(),
+                localSubscription.getQueueConsumerUser(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
-                transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
+                transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
                 transformLocalBrokersToEndpoints(localSubscription.getLocalBrokers())
         );
     }
@@ -126,7 +130,7 @@ public class TypeTransformer {
         return result;
     }
 
-    private LocalActorSubscriptionStatusApi transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {
+    private LocalActorSubscriptionStatusApi transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {
         switch (status) {
             case REQUESTED:
                 return LocalActorSubscriptionStatusApi.REQUESTED;

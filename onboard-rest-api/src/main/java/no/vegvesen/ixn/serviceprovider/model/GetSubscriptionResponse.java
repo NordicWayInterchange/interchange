@@ -7,6 +7,8 @@ public class GetSubscriptionResponse {
     private String id;
     private String path;
     private String selector;
+    private boolean createNewQueue = false;
+    private String queueConsumerUser;
     private long lastUpdatedTimestamp;
     private LocalActorSubscriptionStatusApi status;
     private Set<LocalEndpoint> localEndpoints;
@@ -23,6 +25,24 @@ public class GetSubscriptionResponse {
         this.id = id;
         this.path = path;
         this.selector = selector;
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+        this.status = status;
+        this.localEndpoints = localEndpoints;
+    }
+
+    public GetSubscriptionResponse(String id,
+                                   String path,
+                                   String selector,
+                                   boolean createNewQueue,
+                                   String queueConsumerUser,
+                                   long lastUpdatedTimestamp,
+                                   LocalActorSubscriptionStatusApi status,
+                                   Set<LocalEndpoint> localEndpoints) {
+        this.id = id;
+        this.path = path;
+        this.selector = selector;
+        this.createNewQueue = createNewQueue;
+        this.queueConsumerUser = queueConsumerUser;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
         this.localEndpoints = localEndpoints;
@@ -50,6 +70,22 @@ public class GetSubscriptionResponse {
 
     public void setSelector(String selector) {
         this.selector = selector;
+    }
+
+    public boolean isCreateNewQueue() {
+        return createNewQueue;
+    }
+
+    public void setCreateNewQueue(boolean createNewQueue) {
+        this.createNewQueue = createNewQueue;
+    }
+
+    public String getQueueConsumerUser() {
+        return queueConsumerUser;
+    }
+
+    public void setQueueConsumerUser(String queueConsumerUser) {
+        this.queueConsumerUser = queueConsumerUser;
     }
 
     public long getLastUpdatedTimestamp() {
@@ -95,6 +131,8 @@ public class GetSubscriptionResponse {
                 "id='" + id + '\'' +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
+                ", createNewQueue='" + createNewQueue + '\'' +
+                ", queueConsumerUser='" + queueConsumerUser + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
                 ", endpoints=" + localEndpoints +

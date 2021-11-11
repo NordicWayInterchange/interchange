@@ -1,13 +1,20 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 public class LocalActorSubscription {
     String id;
     String path;
     String selector;
-    boolean createNewQueue;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    boolean createNewQueue = false;
+
+    //@JsonInclude(JsonInclude.Include.NON_NULL)
     String queueConsumerUser;
+
     long lastUpdatedTimeStamp;
     LocalActorSubscriptionStatusApi status;
 

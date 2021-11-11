@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class AddSubscription {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     boolean createNewQueue = false;
 
     SelectorApi selector;

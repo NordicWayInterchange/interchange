@@ -24,6 +24,13 @@ public class SelectorApi {
     public String getSelector() {
         return selector;
     }
+
+    @Override
+    public String toString() {
+        return "SelectorApi{" +
+                "selector='" + selector + '\'' +
+                '}';
+    }
 }
 
 
