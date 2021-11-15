@@ -45,6 +45,10 @@ public class SelfService {
 
 	}
 
+	public String fetchInterchangeNodeName() {
+		return interchangeNodeProperties.getName();
+	}
+
 	Set<Capability> calculateSelfCapabilities(Iterable<ServiceProvider> serviceProviders) {
 		logger.info("Calculating Self capabilities...");
 		Set<Capability> localCapabilities = new HashSet<>();

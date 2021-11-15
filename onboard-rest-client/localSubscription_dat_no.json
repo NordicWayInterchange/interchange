@@ -2,7 +2,7 @@
     "version" : "1.0",
     "subscriptions" : [
     {
-      "createNewQueue" : true,
+      "createNewQueue" : false,
       "selector": "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'"
     }]
 }

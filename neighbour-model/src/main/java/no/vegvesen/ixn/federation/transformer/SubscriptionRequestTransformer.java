@@ -82,8 +82,8 @@ public class SubscriptionRequestTransformer {
 		response.setStatus(status);
 		if (subscription.isCreateNewQueue()) {
 			response.setCreateNewQueue(subscription.isCreateNewQueue());
-			response.setQueueConsumerUser(subscription.getQueueConsumerUser());
 		}
+		response.setQueueConsumerUser(subscription.getQueueConsumerUser());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			BrokerApi broker = new BrokerApi(
 					neighbourName,
