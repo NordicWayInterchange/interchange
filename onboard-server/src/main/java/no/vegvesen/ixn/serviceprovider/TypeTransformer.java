@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -50,7 +51,7 @@ public class TypeTransformer {
                     createSubscriptionPath(name,sub_id),
                     subscription.getSelector(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())));
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())));
         }
         return result;
     }
@@ -79,7 +80,7 @@ public class TypeTransformer {
                     createSubscriptionPath(serviceProviderName, subscriptionId),
                     subscription.getSelector(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())
                     )
             );
         }
@@ -104,15 +105,17 @@ public class TypeTransformer {
                 createSubscriptionPath(serviceProviderName,localSubscription.getSub_id().toString()),
                 localSubscription.getSelector(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
-                transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
+                transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
                 transformLocalBrokersToEndpoints(localSubscription.getLocalBrokers())
         );
     }
 
-    private Set<Endpoint> transformLocalBrokersToEndpoints(Set<LocalBroker> localBrokers) {
-        Set<Endpoint> result = new HashSet<>();
+    private Set<LocalEndpoint> transformLocalBrokersToEndpoints(Set<LocalBroker> localBrokers) {
+        Set<LocalEndpoint> result = new HashSet<>();
         for (LocalBroker broker : localBrokers) {
-            result.add(new Endpoint(broker.getMessageBrokerUrl(),
+            List<String> hostAndPort = makeHostAndPortUfUrl(broker.getMessageBrokerUrl());
+            result.add(new LocalEndpoint(hostAndPort.get(0),
+                    Integer.parseInt(hostAndPort.get(1)),
                     broker.getQueueName(),
                     broker.getMaxBandwidth(),
                     broker.getMaxMessageRate()));
@@ -120,7 +123,7 @@ public class TypeTransformer {
         return result;
     }
 
-    private LocalActorSubscriptionStatusApi transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {
+    private LocalActorSubscriptionStatusApi transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {
         switch (status) {
             case REQUESTED:
                 return LocalActorSubscriptionStatusApi.REQUESTED;
@@ -157,5 +160,15 @@ public class TypeTransformer {
                 createCapabilitiesPath(serviceProviderName,capabilityId),
                 capability.toApi()
         );
+    }
+
+    public static List<String> makeHostAndPortUfUrl(String url) {
+        URI uri = URI.create(url);
+        String host = uri.getHost();
+        int port = uri.getPort();
+        if (port == -1){
+            port = 5671;
+        }
+        return new ArrayList<>(Arrays.asList(host, String.valueOf(port)));
     }
 }
