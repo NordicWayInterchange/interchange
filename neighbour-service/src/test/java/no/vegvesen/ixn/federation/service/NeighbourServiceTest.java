@@ -42,13 +42,14 @@ class NeighbourServiceTest {
 	private String myName = "bouvet.itsinterchange.eu";
 
 	NeighbourService neighbourService;
-	CapabilitiesService capabilitiesService;
+	NeigbourDiscoveryService neigbourDiscoveryService;
+
 
 	@BeforeEach
 	void setUp() {
 		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade, backoffProperties, discovererProperties, interchangeNodeProperties, listenerEndpointRepository);
-		capabilitiesService = new CapabilitiesService(neighbourRepository,dnsFacade,interchangeNodeProperties,backoffProperties);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade);
+		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository,interchangeNodeProperties,backoffProperties,discovererProperties);
 	}
 
 	@Test
@@ -68,7 +69,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		CapabilitiesApi response = capabilitiesService.incomingCapabilities(ericsson, new Self("bouvet"));
+		CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
@@ -113,7 +114,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		capabilitiesService.incomingCapabilities(ericsson, new Self(myName));
+		neighbourService.incomingCapabilities(ericsson, new Self(myName));
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 	}
@@ -129,7 +130,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		Throwable thrown = catchThrowable(() -> capabilitiesService.incomingCapabilities(unknownNeighbour, new Self("some-node-name")));
+		Throwable thrown = catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, new Self("some-node-name")));
 
 		assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 		verify(dnsFacade, times(1)).lookupNeighbours();
@@ -179,14 +180,14 @@ class NeighbourServiceTest {
 	@Test
 	public void findBouvetExists() {
 		when(dnsFacade.lookupNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
-		Neighbour neighbour = capabilitiesService.findNeighbour("bouveta-fed.itsinterchange.eu");
+		Neighbour neighbour = neighbourService.findNeighbour("bouveta-fed.itsinterchange.eu");
 		assertThat(neighbour).isNotNull();
 	}
 
 	@Test
 	public void findNotDefinedDoesNotExists() {
 		when(dnsFacade.lookupNeighbours()).thenReturn(Lists.list(new Neighbour("bouveta-fed.itsinterchange.eu", null, null, null)));
-		Throwable thrown = catchThrowable(() -> capabilitiesService.findNeighbour("no-such-interchange.itsinterchange.eu"));
+		Throwable thrown = catchThrowable(() -> neighbourService.findNeighbour("no-such-interchange.itsinterchange.eu"));
 		assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 	}
 
@@ -197,7 +198,7 @@ class NeighbourServiceTest {
 
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
+		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
 
 		assertThat(calculatedSubscription).hasSize(1);
 		assertThat(calculatedSubscription.iterator().next().getSelector()).isEqualTo("originatingCountry = 'NO'");
@@ -210,7 +211,7 @@ class NeighbourServiceTest {
 
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
+		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
 
 		assertThat(calculatedSubscription).hasSize(1);
 		assertThat(calculatedSubscription.iterator().next().getSelector())
@@ -224,7 +225,7 @@ class NeighbourServiceTest {
 		Self selfWithNoSubscriptions = new Self("self");
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = neighbourService.calculateCustomSubscriptionForNeighbour(neighbour, selfWithNoSubscriptions.getLocalSubscriptions());
+		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(neighbour, selfWithNoSubscriptions.getLocalSubscriptions());
 		assertThat(calculatedSubscription).hasSize(0);
 	}
 
@@ -264,7 +265,7 @@ class NeighbourServiceTest {
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), subscriptionRequest);
 
-		neighbourService.postSubscriptionRequest(neighbour, self, neighbourFacade);
+		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self, neighbourFacade);
 		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
 	}
 
@@ -288,7 +289,7 @@ class NeighbourServiceTest {
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, new HashSet<>(Collections.singleton(subscription2))));
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neighbourService.postSubscriptionRequest(neighbour, self, neighbourFacade);
+		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self, neighbourFacade);
 		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
 	}
@@ -310,7 +311,7 @@ class NeighbourServiceTest {
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), existingSubscriptions);
 
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neighbourService.postSubscriptionRequest(neighbour, self, neighbourFacade);
+		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self, neighbourFacade);
 		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionById(2).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
 	}
@@ -335,7 +336,7 @@ class NeighbourServiceTest {
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, new HashSet<>(Collections.singleton(subscription3))));
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neighbourService.postSubscriptionRequest(neighbour, self, neighbourFacade);
+		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self, neighbourFacade);
 		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionById(2).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionById(3).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ACCEPTED);
@@ -358,7 +359,7 @@ class NeighbourServiceTest {
 
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN)).thenReturn(Arrays.asList(neighbour));
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neighbourService.deleteSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.deleteSubscriptions(neighbourFacade);
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 		assertThat(neighbour.getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.ESTABLISHED);
 	}
@@ -378,7 +379,7 @@ class NeighbourServiceTest {
 
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN)).thenReturn(Arrays.asList(neighbour));
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neighbourService.deleteSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.deleteSubscriptions(neighbourFacade);
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
 		assertThat(neighbour.getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
 	}
@@ -402,7 +403,7 @@ class NeighbourServiceTest {
 		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "broker-2", "queue-2", new Connection());
 
 		when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
-		neighbourService.tearDownListenerEndpoints(neighbour);
+		neigbourDiscoveryService.tearDownListenerEndpoints(neighbour);
 
 		verify(listenerEndpointRepository, times(1)).delete(any(ListenerEndpoint.class));
 	}
@@ -432,7 +433,7 @@ class NeighbourServiceTest {
 		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "broker-2", "queue-2", new Connection());
 
 		when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
-		neighbourService.tearDownListenerEndpoints(neighbour);
+		neigbourDiscoveryService.tearDownListenerEndpoints(neighbour);
 
 		verify(listenerEndpointRepository, times(0)).delete(any(ListenerEndpoint.class));
 	}
@@ -456,7 +457,7 @@ class NeighbourServiceTest {
 		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
 
-		neighbourService.createListenerEndpointFromBrokersList(neighbour, brokers);
+		neigbourDiscoveryService.createListenerEndpointFromBrokersList(neighbour, brokers);
 
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
 	}
@@ -477,7 +478,7 @@ class NeighbourServiceTest {
 		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-1", "my-queue-1")).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-2", "my-queue-2")).thenReturn(listenerEndpoint2);
 
-		neighbourService.tearDownListenerEndpointsFromBrokersList(neighbour, brokers);
+		neigbourDiscoveryService.tearDownListenerEndpointsFromBrokersList(neighbour, brokers);
 
 		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
 	}
