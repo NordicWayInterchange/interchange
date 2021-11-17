@@ -4,5 +4,6 @@ public enum LocalActorSubscriptionStatusApi {
     REQUESTED,
     CREATED,
     ILLEGAL,
-    NOT_VALID
+    NOT_VALID,
+    RESUBSCRIBE
 }
