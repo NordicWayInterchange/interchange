@@ -2,33 +2,44 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import java.util.Objects;
 
-public class Endpoint {
-    private String url;
+public class LocalEndpoint {
+    private String host;
+    private int port;
     private String source;
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
-    public Endpoint() {
+    public LocalEndpoint() {
     }
 
-    public Endpoint(String url, String source) {
-        this.url = url;
+    public LocalEndpoint(String host, int port, String source) {
+        this.host = host;
+        this.port = port;
         this.source = source;
     }
 
-    public Endpoint(String url, String source, Integer maxBandwidth, Integer maxMessageRate) {
-        this.url = url;
+    public LocalEndpoint(String host, int port, String source, Integer maxBandwidth, Integer maxMessageRate) {
+        this.host = host;
+        this.port = port;
         this.source = source;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
     }
 
-    public String getUrl() {
-        return url;
+    public String getHost() {
+        return host;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public String getSource() {
@@ -59,19 +70,20 @@ public class Endpoint {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Endpoint endpoint = (Endpoint) o;
-        return Objects.equals(url, endpoint.url) && Objects.equals(source, endpoint.source) && Objects.equals(maxBandwidth, endpoint.maxBandwidth) && Objects.equals(maxMessageRate, endpoint.maxMessageRate);
+        LocalEndpoint localEndpoint = (LocalEndpoint) o;
+        return Objects.equals(host, localEndpoint.host) && Objects.equals(port, localEndpoint.port) &&Objects.equals(source, localEndpoint.source) && Objects.equals(maxBandwidth, localEndpoint.maxBandwidth) && Objects.equals(maxMessageRate, localEndpoint.maxMessageRate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(url, source, maxBandwidth, maxMessageRate);
+        return Objects.hash(host, port, source, maxBandwidth, maxMessageRate);
     }
 
     @Override
     public String toString() {
         return "Endpoint{" +
-                "url='" + url + '\'' +
+                "url='" + host + '\'' +
+                ", port='" + port + '\'' +
                 ", source='" + source + '\'' +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +

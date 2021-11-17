@@ -89,9 +89,10 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void getSubscriptionResponse() throws JsonProcessingException {
-        Set<Endpoint> endpoints = new HashSet<>();
-        endpoints.add(new Endpoint(
+        Set<LocalEndpoint> localEndpoints = new HashSet<>();
+        localEndpoints.add(new LocalEndpoint(
                 "amqps://myserver",
+                5671,
                 "serviceprovider1-1",
                 0,
                 0
@@ -102,7 +103,7 @@ public class OnboardRestAPIDocumentationTest {
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
-                endpoints
+                localEndpoints
 
         );
 
@@ -259,7 +260,8 @@ public class OnboardRestAPIDocumentationTest {
         GetDeliveryResponse response = new GetDeliveryResponse(
                 "1",
                 Collections.singleton(new DeliveryEndpoint(
-                        "/sp-1/deliveries/1",
+                        "amqps://sp-1",
+                        5671,
                         "sp1-1",
                         "originatingCountry = 'NO' and messageType = 'DENM'"
                 )),
