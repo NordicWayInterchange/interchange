@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 @ConfigurationPropertiesScan
 public class SelfService {
 	private static Logger logger = LoggerFactory.getLogger(SelfService.class);
