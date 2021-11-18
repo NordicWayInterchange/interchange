@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -52,7 +53,19 @@ public class DatexCapability extends Capability{
 
 	@Override
 	public CapabilityApi toApi() {
-		return new DatexCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getPublicationTypes());
+		return new DatexCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getPublicationTypes());
+	}
+
+	@Override
+	public RedirectStatusApi toRedirectStatusApi(RedirectStatus status) {
+		switch (status) {
+			case MANDATORY:
+				return RedirectStatusApi.MANDATORY;
+			case NOT_AVAILABLE:
+				return RedirectStatusApi.NOT_AVAILABLE;
+			default:
+				return RedirectStatusApi.OPTIONAL;
+		}
 	}
 
 	@Override

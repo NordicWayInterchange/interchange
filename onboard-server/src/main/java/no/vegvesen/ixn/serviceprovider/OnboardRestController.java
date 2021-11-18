@@ -137,8 +137,8 @@ public class OnboardRestController {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. No selectors.");
 
 		}
-		for (SelectorApi selectorApi : requestApi.getSubscriptions()) {
-			if (selectorApi.getSelector() == null) {
+		for (AddSubscription addSubscription : requestApi.getSubscriptions()) {
+			if (addSubscription.getSelector() == null) {
 				throw new SubscriptionRequestException("Bad api object for Subscription Request. The Selector object was null.");
 			}
 		}
@@ -147,8 +147,8 @@ public class OnboardRestController {
 
 		//LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,selector);
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		for (SelectorApi subscription : requestApi.getSubscriptions()) {
-			LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,subscription);
+		for (AddSubscription subscription : requestApi.getSubscriptions()) {
+			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription);
 			localSubscriptions.add(localSubscription);
 		}
 

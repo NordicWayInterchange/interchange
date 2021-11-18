@@ -18,7 +18,7 @@ import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
 
 @Component
-@ConfigurationPropertiesScan
+@ConfigurationPropertiesScan("no.vegvesen.ixn")
 public class RoutingConfigurer {
 
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);

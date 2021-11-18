@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.IviCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -41,7 +42,19 @@ public class IviCapability extends Capability {
 
 	@Override
 	public CapabilityApi toApi() {
-		return new IviCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getIviTypes());
+		return new IviCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getIviTypes());
+	}
+
+	@Override
+	public RedirectStatusApi toRedirectStatusApi(RedirectStatus status) {
+		switch (status) {
+			case MANDATORY:
+				return RedirectStatusApi.MANDATORY;
+			case NOT_AVAILABLE:
+				return RedirectStatusApi.NOT_AVAILABLE;
+			default:
+				return RedirectStatusApi.OPTIONAL;
+		}
 	}
 
 	@Override
