@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.onboard;
 
 
+import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -106,7 +107,7 @@ class SelfServiceTest {
 
 		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
 
-		Set<Capability> selfCapabilities = selfService.calculateSelfCapabilities(serviceProviders);
+		Set<Capability> selfCapabilities = CapabilityCalculator.calculateSelfCapabilities(serviceProviders);
 
 		assertThat(selfCapabilities).hasSize(3);
 		assertThat(selfCapabilities).containsAll(Stream.of(a, b, c).collect(Collectors.toSet()));
