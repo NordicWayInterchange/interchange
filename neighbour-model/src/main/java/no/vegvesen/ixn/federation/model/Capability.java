@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
 import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.persistence.*;
@@ -118,6 +119,8 @@ public abstract class Capability {
 	}
 
 	public abstract CapabilityApi toApi();
+
+	public abstract RedirectStatusApi toRedirectStatusApi(RedirectStatus status);
 
 	public abstract String messageType();
 

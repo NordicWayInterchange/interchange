@@ -26,7 +26,7 @@ public class DatexCapabilityApi extends CapabilityApi {
 	}
 
 	public DatexCapabilityApi(String originatingCountry){
-		this(null, originatingCountry, null, Collections.emptySet(), Collections.emptySet());
+		this(null, originatingCountry, null, Collections.emptySet(), RedirectStatusApi.OPTIONAL, Collections.emptySet());
 	}
 
 	public Set<String> getPublicationType() {

@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.serviceprovider.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
+import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsRequest;
 import no.vegvesen.ixn.serviceprovider.model.SelectorApi;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +18,7 @@ public class OnboardRestClientTest {
         File file = new File("localSubscription_dat_no.json");
 
         ObjectMapper mapper = new ObjectMapper();
-        SelectorApi subscription = mapper.readValue(file,SelectorApi.class);
+        AddSubscriptionsRequest subscription = mapper.readValue(file,AddSubscriptionsRequest.class);
 
     }
 }

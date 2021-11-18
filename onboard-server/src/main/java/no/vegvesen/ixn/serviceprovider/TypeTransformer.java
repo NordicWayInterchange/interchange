@@ -57,10 +57,10 @@ public class TypeTransformer {
     }
 
 
-    public LocalSubscription transformSelectorApiToLocalSubscription(String serviceProviderName, SelectorApi selectorApi) {
+    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                selectorApi.getSelector(),
-                serviceProviderName);
+                addSubscription.getSelector().getSelector(),
+                addSubscription.getConsumerCommonName());
     }
 
     public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {

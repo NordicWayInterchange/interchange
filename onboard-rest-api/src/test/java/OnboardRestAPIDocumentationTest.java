@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -14,11 +15,11 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
-        Set<SelectorApi> selectors = new HashSet<>();
-        selectors.add(new SelectorApi("countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"));
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
+        addSubscriptions.add(new AddSubscription("ixn", new SelectorApi("countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'")));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "kyrre",
-                selectors
+                addSubscriptions
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
@@ -26,12 +27,12 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addSubscriptionRequest() throws JsonProcessingException {
-        Set<SelectorApi> selectors = new HashSet<>();
-        selectors.add(new SelectorApi("countryCode = 'NO' and messageType = 'DENM'"));
-        selectors.add(new SelectorApi("countryCode = 'SE' and messageType = 'DENM'"));
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
+        addSubscriptions.add(new AddSubscription("ixn1", new SelectorApi("countryCode = 'NO' and messageType = 'DENM'")));
+        addSubscriptions.add(new AddSubscription("ixn1", new SelectorApi("countryCode = 'SE' and messageType = 'DENM'")));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "serviceprovider1",
-                selectors
+                addSubscriptions
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
@@ -119,8 +120,8 @@ public class OnboardRestAPIDocumentationTest {
                 "NO",
                 "1.0",
                 Collections.singleton("1234"),
+                RedirectStatusApi.OPTIONAL,
                 Collections.singleton("6")
-
         );
 
         ObjectMapper mapper = new ObjectMapper();
