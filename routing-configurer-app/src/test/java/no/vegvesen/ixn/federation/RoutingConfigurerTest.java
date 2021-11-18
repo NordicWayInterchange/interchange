@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +26,6 @@ class RoutingConfigurerTest {
 
 	@MockBean
 	ServiceProviderRouter serviceProviderRouter;
-
-	@MockBean
-	SelfService selfService;
 
 	@Autowired
 	RoutingConfigurer routingConfigurer;

@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.onboard;
 
 
+import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -8,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -37,27 +37,13 @@ public class SelfService {
 	public Self fetchSelf() {
 		List<ServiceProvider> serviceProviders = repository.findAll();
 		Self self = new Self(interchangeNodeProperties.getName());
-		self.setLocalCapabilities(calculateSelfCapabilities(serviceProviders));
+		self.setLocalCapabilities(CapabilityCalculator.calculateSelfCapabilities(serviceProviders));
 		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
 		self.setLastUpdatedLocalSubscriptions(calculateLastUpdatedSubscriptions(serviceProviders));
 		self.setLastUpdatedLocalCapabilities(calculateLastUpdatedCapabilities(serviceProviders));
 		self.setMessageChannelPort(interchangeNodeProperties.getMessageChannelPort());
         return self;
 
-	}
-
-	public Set<Capability> calculateSelfCapabilities(Iterable<ServiceProvider> serviceProviders) {
-		logger.info("Calculating Self capabilities...");
-		Set<Capability> localCapabilities = new HashSet<>();
-
-		for (ServiceProvider serviceProvider : serviceProviders) {
-			logger.info("Service provider name: {}", serviceProvider.getName());
-			Set<Capability> serviceProviderCapabilities = serviceProvider.getCapabilities().getCapabilities();
-			logger.info("Service Provider capabilities: {}", serviceProviderCapabilities.toString());
-			localCapabilities.addAll(serviceProviderCapabilities);
-		}
-		logger.info("Calculated Self capabilities: {}", localCapabilities);
-		return localCapabilities;
 	}
 
 	Set<LocalSubscription> calculateSelfSubscriptions(List<ServiceProvider> serviceProviders) {

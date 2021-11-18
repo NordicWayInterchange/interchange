@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.federation;
 
+import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +26,12 @@ public class RoutingConfigurer {
 	private final NeighbourService neighbourService;
 	private final QpidClient qpidClient;
 	private final ServiceProviderRouter serviceProviderRouter;
-	private final SelfService selfService;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, SelfService selfService) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
-		this.selfService = selfService;
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -85,7 +83,7 @@ public class RoutingConfigurer {
 				allAcceptedSubscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 				for(Subscription subscription : acceptedSubscriptions){
-					Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()), subscription);
+					Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()), subscription);
 					for(Capability cap : matchingCaps){
 						if(cap.getRedirect().equals(RedirectStatus.MANDATORY)){
 							setUpRedirectedRouting(subscription);
@@ -101,7 +99,7 @@ public class RoutingConfigurer {
 				if(!allAcceptedSubscriptions.isEmpty()){
 					Set<Subscription> subscriptionsToSetUpRoutingFor = new HashSet<>();
 					for(Subscription subscription : allAcceptedSubscriptions){
-						Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()), subscription);
+						Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()), subscription);
 						for(Capability cap : matchingCaps){
 							if(cap.getRedirect().equals(RedirectStatus.MANDATORY)){
 								subscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
@@ -124,7 +122,9 @@ public class RoutingConfigurer {
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
 				Set<Subscription> subscriptionsToSetUpRoutingFor = new HashSet<>();
 				for(Subscription subscription : acceptedSubscriptions){
-					Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(selfService.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders()), subscription);
+					Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
+					Set<Capability> capabilities = CapabilityCalculator.calculateSelfCapabilities(serviceProviders);
+					Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(capabilities, subscription);
 					for(Capability cap : matchingCaps){
 						if(cap.getRedirect().equals(RedirectStatus.MANDATORY)){
 							subscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
