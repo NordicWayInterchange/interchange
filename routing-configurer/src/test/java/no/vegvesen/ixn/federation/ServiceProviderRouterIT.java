@@ -82,10 +82,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@MockBean
 	ServiceProviderRepository serviceProviderRepository;
 
-	 @Autowired
-	 @Qualifier("getTestExternalSslContext")
-	 SSLContext sslContext;
-
 	@Autowired
 	QpidClient client;
 

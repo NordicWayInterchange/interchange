@@ -114,7 +114,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setName("first");
 		firstServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,Collections.singleton(cap)));
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(firstServiceProvider));
@@ -135,10 +134,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		//ServiceProvider serviceProvider = new ServiceProvider()
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
 
-		//when(serviceProviderRouter.findServiceProviders()).thenReturn();
-		fail("Anna, here you go!");
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(halibut);
 		assertThat(client.queueExists(halibut.getName())).isTrue();
 	}
@@ -155,7 +154,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour salmon = new Neighbour("salmon", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap1, cap2)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(salmon);
 		assertThat(client.queueExists(salmon.getName())).isTrue();
 		Set<String> queueBindKeys = client.getQueueBindKeys(salmon.getName());
@@ -172,8 +174,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
 
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(seabass);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
 		routingConfigurer.setupNeighbourRouting(seabass);
@@ -191,7 +195,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap1, cap2)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
@@ -229,7 +236,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions),
 				null);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(nordea);
 		SSLContext nordeaSslContext = setUpTestSslContext("nordea.p12");
 		try {
@@ -270,7 +280,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(toreDownNeighbour);
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).contains(toreDownNeighbour.getName());
 
@@ -302,7 +315,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour hammershark = new Neighbour("hammershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(hammershark);
 		assertThat(client.queueExists("hammershark")).isTrue();
 		assertThat(client.getQueueBindKeys("hammershark").size()).isEqualTo(1);
@@ -322,7 +338,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap1)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap1)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(tigershark);
 		assertThat(client.queueExists("tigershark")).isTrue();
 		assertThat(client.getQueueBindKeys("tigershark").size()).isEqualTo(1);
@@ -338,7 +357,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		tigershark.setNeighbourRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs));
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap1, cap2)));
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(tigershark);
 		assertThat(client.getQueueBindKeys("tigershark").size()).isEqualTo(2);
 		assertThat(tigershark.getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(2);
@@ -358,8 +379,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
 
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(neigh);
 		assertThat(client.queueExists("remote-service-provider")).isTrue();
 	}
@@ -377,7 +400,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour neigh = new Neighbour("neigh-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(neigh);
 
 		assertThat(client.queueExists(neigh.getName())).isTrue();
@@ -405,8 +431,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour neigh = new Neighbour("neigh-true-and-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap1, cap2)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
 
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(neigh);
 		assertThat(client.queueExists("remote-service-provider")).isTrue();
 		assertThat(client.queueExists(neigh.getName())).isTrue();
@@ -426,7 +454,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour cod = new Neighbour("cod", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(cod);
 		assertThat(client.queueExists(cod.getName())).isFalse();
 		assertThat(cod.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
@@ -446,7 +477,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour clownfish = new Neighbour("clownfish", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 		routingConfigurer.setupNeighbourRouting(clownfish);
 		assertThat(client.queueExists(clownfish.getName())).isFalse();
 		assertThat(clownfish.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
@@ -473,7 +507,10 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour neigh = new Neighbour("neigh-both", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		when(CapabilityCalculator.calculateSelfCapabilities(serviceProviderRouter.findServiceProviders())).thenReturn(new HashSet<>(Arrays.asList(cap1)));
+		ServiceProvider serviceProvider = new ServiceProvider();
+		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap1)));
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));
 
 		routingConfigurer.setupNeighbourRouting(neigh);
 		assertThat(client.queueExists("remote-sp")).isTrue();
