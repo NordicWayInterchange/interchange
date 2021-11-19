@@ -50,6 +50,7 @@ public class TypeTransformer {
                     sub_id,
                     createSubscriptionPath(name,sub_id),
                     subscription.getSelector(),
+                    subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
                     transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())));
         }
@@ -79,6 +80,7 @@ public class TypeTransformer {
                     subscriptionId,
                     createSubscriptionPath(serviceProviderName, subscriptionId),
                     subscription.getSelector(),
+                    subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
                     transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())
                     )

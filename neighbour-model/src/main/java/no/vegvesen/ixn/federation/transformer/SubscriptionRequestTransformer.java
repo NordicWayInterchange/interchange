@@ -75,7 +75,7 @@ public class SubscriptionRequestTransformer {
 		response.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
-		response.setConsumerCommonName(response.getConsumerCommonName());
+		response.setConsumerCommonName(subscription.getConsumerCommonName());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			BrokerApi broker = new BrokerApi(
 					neighbourName,

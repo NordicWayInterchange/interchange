@@ -3,6 +3,8 @@
     "subscriptions" : [
     {
         "consumerCommonName" : "remote.bouvetinterchange.eu",
-        "selector": "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'"
+        "selector" : {
+            "selector" : "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'"
+        }
     }]
 }
