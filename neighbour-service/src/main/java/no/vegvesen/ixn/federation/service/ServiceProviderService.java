@@ -35,7 +35,7 @@ public class ServiceProviderService {
             serviceProviderRepository.save(serviceProvider);
         }
     }
-
+    //TODO: make test for this method
     public void updateServiceProviderSubscriptionsWithBrokerUrl(List<Neighbour> neighbours, ServiceProvider serviceProvider, String localMessageBrokerUrl) {
         for(Neighbour neighbour : neighbours) {
             for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
@@ -51,9 +51,9 @@ public class ServiceProviderService {
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         } else {
-                            if (localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
-                                throw new IllegalStateException("consumerCommonName is the same as Ixn name, local subscription user = subscription user");
-                            }
+                            //if (localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
+                                //throw new IllegalStateException("consumerCommonName is the same as Ixn name, local subscription user = subscription user");
+                            //}
                             LocalBroker broker = new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl);
                             logger.info("Adding local broker {} with consumerCommonName the same as Ixn name, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
                             Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(broker));
