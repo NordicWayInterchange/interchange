@@ -59,7 +59,7 @@ public class NeighbourDiscovererIT {
 	NeighbourService neighbourService;
 
 	@Autowired
-	CapabilitiesService capabilitiesService;
+	NeigbourDiscoveryService neigbourDiscoveryService;
 
 	@Autowired
 	NeighbourRepository repository;
@@ -103,7 +103,7 @@ public class NeighbourDiscovererIT {
 		);
 		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptionRequestResponse);
 
-		neighbourService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf(), mockNeighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf(), mockNeighbourFacade);
 
 		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
 		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
@@ -131,7 +131,7 @@ public class NeighbourDiscovererIT {
 		Self self = selfService.fetchSelf();
 		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 
-		capabilitiesService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
+		neigbourDiscoveryService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
 		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any() );
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
@@ -142,13 +142,13 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		capabilitiesService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Sets.newLinkedHashSet(new DatexCapabilityApi("NO"))), selfService.fetchSelf());
+		neighbourService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Sets.newLinkedHashSet(new DatexCapabilityApi("NO"))), selfService.fetchSelf());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
 
 	private void checkForNewNeighbours() {
-		neighbourService.checkForNewNeighbours();
+		neigbourDiscoveryService.checkForNewNeighbours();
 		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 		assertThat(unknown).hasSize(2);
 		assertThat(repository.findAll()).hasSize(2);
@@ -158,7 +158,7 @@ public class NeighbourDiscovererIT {
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any())).thenReturn(c1);
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any() )).thenReturn(c2);
 
-		capabilitiesService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
+		neigbourDiscoveryService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
@@ -167,7 +167,7 @@ public class NeighbourDiscovererIT {
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
 		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED, ""));
-		neighbourService.pollSubscriptions(mockNeighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
 		assertThat(found1.getOurRequestedSubscriptions()).isNotNull();
