@@ -90,8 +90,8 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void getSubscriptionResponse() throws JsonProcessingException {
-        Set<LocalEndpoint> localEndpoints = new HashSet<>();
-        localEndpoints.add(new LocalEndpoint(
+        Set<LocalEndpointApi> localEndpointApis = new HashSet<>();
+        localEndpointApis.add(new LocalEndpointApi(
                 "amqps://myserver",
                 5671,
                 "serviceprovider1-1",
@@ -104,7 +104,7 @@ public class OnboardRestAPIDocumentationTest {
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
-                localEndpoints
+                localEndpointApis
 
         );
 

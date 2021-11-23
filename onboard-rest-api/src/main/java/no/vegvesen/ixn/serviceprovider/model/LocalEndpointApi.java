@@ -2,23 +2,23 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import java.util.Objects;
 
-public class LocalEndpoint {
+public class LocalEndpointApi {
     private String host;
     private int port;
     private String source;
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
-    public LocalEndpoint() {
+    public LocalEndpointApi() {
     }
 
-    public LocalEndpoint(String host, int port, String source) {
+    public LocalEndpointApi(String host, int port, String source) {
         this.host = host;
         this.port = port;
         this.source = source;
     }
 
-    public LocalEndpoint(String host, int port, String source, Integer maxBandwidth, Integer maxMessageRate) {
+    public LocalEndpointApi(String host, int port, String source, Integer maxBandwidth, Integer maxMessageRate) {
         this.host = host;
         this.port = port;
         this.source = source;
@@ -70,8 +70,8 @@ public class LocalEndpoint {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LocalEndpoint localEndpoint = (LocalEndpoint) o;
-        return Objects.equals(host, localEndpoint.host) && Objects.equals(port, localEndpoint.port) &&Objects.equals(source, localEndpoint.source) && Objects.equals(maxBandwidth, localEndpoint.maxBandwidth) && Objects.equals(maxMessageRate, localEndpoint.maxMessageRate);
+        LocalEndpointApi localEndpointApi = (LocalEndpointApi) o;
+        return Objects.equals(host, localEndpointApi.host) && Objects.equals(port, localEndpointApi.port) &&Objects.equals(source, localEndpointApi.source) && Objects.equals(maxBandwidth, localEndpointApi.maxBandwidth) && Objects.equals(maxMessageRate, localEndpointApi.maxMessageRate);
     }
 
     @Override
