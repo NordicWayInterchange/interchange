@@ -66,13 +66,13 @@ public class TypeTransformer {
 
     public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         return new AddSubscriptionsResponse(serviceProviderName,
-                tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(
+                transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(
                         serviceProviderName,
                         localSubscriptions)
         );
     }
 
-    private Set<LocalActorSubscription> tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
+    private Set<LocalActorSubscription> transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
             String subscriptionId = subscription.getSub_id().toString();
@@ -108,11 +108,11 @@ public class TypeTransformer {
                 localSubscription.getSelector(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
                 transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
-                transformLocalBrokersToEndpoints(localSubscription.getLocalBrokers())
+                transformLocalBrokersToLocalEndpointApis(localSubscription.getLocalBrokers())
         );
     }
 
-    private Set<LocalEndpointApi> transformLocalBrokersToEndpoints(Set<LocalBroker> localBrokers) {
+    private Set<LocalEndpointApi> transformLocalBrokersToLocalEndpointApis(Set<LocalBroker> localBrokers) {
         Set<LocalEndpointApi> result = new HashSet<>();
         for (LocalBroker broker : localBrokers) {
             List<String> hostAndPort = makeHostAndPortUfUrl(broker.getMessageBrokerUrl());
