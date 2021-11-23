@@ -112,11 +112,11 @@ public class TypeTransformer {
         );
     }
 
-    private Set<LocalEndpoint> transformLocalBrokersToEndpoints(Set<LocalBroker> localBrokers) {
-        Set<LocalEndpoint> result = new HashSet<>();
+    private Set<LocalEndpointApi> transformLocalBrokersToEndpoints(Set<LocalBroker> localBrokers) {
+        Set<LocalEndpointApi> result = new HashSet<>();
         for (LocalBroker broker : localBrokers) {
             List<String> hostAndPort = makeHostAndPortUfUrl(broker.getMessageBrokerUrl());
-            result.add(new LocalEndpoint(hostAndPort.get(0),
+            result.add(new LocalEndpointApi(hostAndPort.get(0),
                     Integer.parseInt(hostAndPort.get(1)),
                     broker.getQueueName(),
                     broker.getMaxBandwidth(),

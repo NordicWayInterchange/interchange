@@ -9,7 +9,7 @@ public class GetSubscriptionResponse {
     private String selector;
     private long lastUpdatedTimestamp;
     private LocalActorSubscriptionStatusApi status;
-    private Set<LocalEndpoint> localEndpoints;
+    private Set<LocalEndpointApi> localEndpointApis;
 
     public GetSubscriptionResponse() {
     }
@@ -19,13 +19,13 @@ public class GetSubscriptionResponse {
                                    String selector,
                                    long lastUpdatedTimestamp,
                                    LocalActorSubscriptionStatusApi status,
-                                   Set<LocalEndpoint> localEndpoints) {
+                                   Set<LocalEndpointApi> localEndpointApis) {
         this.id = id;
         this.path = path;
         this.selector = selector;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
-        this.localEndpoints = localEndpoints;
+        this.localEndpointApis = localEndpointApis;
     }
 
     public String getId() {
@@ -68,12 +68,12 @@ public class GetSubscriptionResponse {
         this.status = status;
     }
 
-    public Set<LocalEndpoint> getEndpoints() {
-        return localEndpoints;
+    public Set<LocalEndpointApi> getEndpoints() {
+        return localEndpointApis;
     }
 
-    public void setEndpoints(Set<LocalEndpoint> localEndpoints) {
-        this.localEndpoints = localEndpoints;
+    public void setEndpoints(Set<LocalEndpointApi> localEndpointApis) {
+        this.localEndpointApis = localEndpointApis;
     }
 
     @Override
@@ -81,12 +81,12 @@ public class GetSubscriptionResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GetSubscriptionResponse that = (GetSubscriptionResponse) o;
-        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(id, that.id) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(localEndpoints, that.localEndpoints);
+        return lastUpdatedTimestamp == that.lastUpdatedTimestamp && Objects.equals(id, that.id) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(localEndpointApis, that.localEndpointApis);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, path, selector, lastUpdatedTimestamp, status, localEndpoints);
+        return Objects.hash(id, path, selector, lastUpdatedTimestamp, status, localEndpointApis);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class GetSubscriptionResponse {
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
-                ", endpoints=" + localEndpoints +
+                ", endpoints=" + localEndpointApis +
                 '}';
     }
 }
