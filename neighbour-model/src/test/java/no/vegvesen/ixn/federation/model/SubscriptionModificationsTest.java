@@ -48,7 +48,7 @@ class SubscriptionModificationsTest {
 	}
 
 	@Test
-	void addBrokersToSubscription() {
+	void addEndpointsToSubscription() {
 		Subscription sub = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, "");
 		Endpoint endpoint1 = new Endpoint("queue-1", "endpoint-1");
 		Endpoint endpoint2 = new Endpoint("queue-2", "endpoint-2");

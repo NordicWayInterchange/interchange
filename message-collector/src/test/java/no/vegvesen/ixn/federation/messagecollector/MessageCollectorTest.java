@@ -49,8 +49,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "broker-one", "queue-one", messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("two", "broker-two", "queue-two", messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "endpoint-one", "queue-one", messageConnectionOne);
+        ListenerEndpoint two = new ListenerEndpoint("two", "endpoint-two", "queue-two", messageConnectionTwo);
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -69,15 +69,15 @@ public class MessageCollectorTest {
     }
 
     @Test
-    public void testTwoListenersAreCreatedForOneNeighbourWithTwoBrokers() {
+    public void testTwoListenersAreCreatedForOneNeighbourWithTwoEndpoints() {
         Connection messageConnectionOne = mock(Connection.class);
         when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
 
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "broker-one", "queue-one", messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("one", "broker-two", "queue-two", messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "endpoint-one", "queue-one", messageConnectionOne);
+        ListenerEndpoint two = new ListenerEndpoint("one", "endpoint-two", "queue-two", messageConnectionTwo);
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -96,15 +96,15 @@ public class MessageCollectorTest {
     }
 
     @Test
-    public void testOneListenerIsCreatedForOneNeighbourWithTwoBrokersOneFailing() {
+    public void testOneListenerIsCreatedForOneNeighbourWithTwoEndpointsOneFailing() {
         Connection messageConnectionOne = mock(Connection.class);
         when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
 
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "broker-one", "queue-one", messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("one", "broker-two", "queue-two", messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "endpoint-one", "queue-one", messageConnectionOne);
+        ListenerEndpoint two = new ListenerEndpoint("one", "endpoint-two", "queue-two", messageConnectionTwo);
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 

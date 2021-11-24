@@ -280,7 +280,7 @@ public class NeighbourRepositoryIT {
 	}
 
 	@Test
-	public void addSubscriptionWithBrokersList() {
+	public void addSubscriptionWithEndpointsList() {
 		Subscription sub = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "");
 		Endpoint endpoint = new Endpoint("my-queue","my-broker");
 		sub.setEndpoints(Sets.newLinkedHashSet(endpoint));
