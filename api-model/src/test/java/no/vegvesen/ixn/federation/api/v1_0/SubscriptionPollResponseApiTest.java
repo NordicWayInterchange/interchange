@@ -39,15 +39,15 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void createValidJsonWithBrokers() throws JsonProcessingException {
-        EndpointApi broker1 = new EndpointApi("client1queue", "amqps://a.c-its-interchange.eu:5671");
-        EndpointApi broker2 = new EndpointApi("client2queue", "amqps://b.c-its-interchange.eu:5671");
+        EndpointApi endpoint1 = new EndpointApi("client1queue", "amqps://a.c-its-interchange.eu:5671");
+        EndpointApi endpoint2 = new EndpointApi("client2queue", "amqps://b.c-its-interchange.eu:5671");
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
                 "1",
                 "messageType='DENM' AND originatingCountry='NO'",
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,
                 "neighbour1",
-                Sets.newLinkedHashSet(broker1,broker2)
+                Sets.newLinkedHashSet(endpoint1,endpoint2)
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(responseApi));
