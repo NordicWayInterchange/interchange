@@ -38,7 +38,7 @@ public class SubscriptionPollResponseApiTest {
     }
 
     @Test
-    public void createValidJsonWithBrokers() throws JsonProcessingException {
+    public void createValidJsonWithEndpoints() throws JsonProcessingException {
         EndpointApi endpoint1 = new EndpointApi("client1queue", "amqps://a.c-its-interchange.eu:5671");
         EndpointApi endpoint2 = new EndpointApi("client2queue", "amqps://b.c-its-interchange.eu:5671");
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
@@ -54,8 +54,8 @@ public class SubscriptionPollResponseApiTest {
     }
 
     @Test
-    public void parseBrokersToObject() throws JsonProcessingException {
-        String input = "{\"id\":\"1\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"queueConsumerUser\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":null,\"queueName\":null,\"brokers\":[{\"queueName\":\"client1queue\",\"messageBrokerUrl\":\"amqps://a.c-its-interchange.eu:5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"queueName\":\"client2queue\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
+    public void parseEndpointsToObject() throws JsonProcessingException {
+        String input = "{\"id\":\"1\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"queueConsumerUser\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":null,\"queueName\":null,\"endpoints\":[{\"queueName\":\"client1queue\",\"messageBrokerUrl\":\"amqps://a.c-its-interchange.eu:5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"queueName\":\"client2queue\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
         ObjectMapper mapper = new ObjectMapper();
 
         SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);

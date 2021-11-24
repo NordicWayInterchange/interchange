@@ -42,7 +42,7 @@ public class ServiceProviderService {
                 for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
                     if (localSubscription.getSelector().equals(subscription.getSelector())) {
                         if (localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
-                            //TODO What about changes to brokers? We also write ALL service provider Brokers every time!
+                            //TODO What about changes to endpoints? We also write ALL service provider Endpoints every time!
                             Set<Endpoint> endpoints = subscription.getEndpoints();
                             Set<LocalEndpoint> localEndpoints = new HashSet<>();
                             for (Endpoint endpoint : endpoints) {

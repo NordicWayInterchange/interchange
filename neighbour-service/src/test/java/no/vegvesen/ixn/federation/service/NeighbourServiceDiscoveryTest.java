@@ -396,7 +396,7 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	@Test
-	public void successfulPollOfSubscriptionWithBrokersCallsSaveOnRepository(){
+	public void successfulPollOfSubscriptionWithEndpointsCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, self.getName());
 		Endpoint endpoint1 = new Endpoint("queue-1", "broker-1");
@@ -621,7 +621,7 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	@Test
-	public void listenerEndpointsAreSavedWhenSubscriptionWithCreatedStatusAndBrokersIsPolled(){
+	public void listenerEndpointsAreSavedWhenSubscriptionWithCreatedStatusAndEndpointsIsPolled(){
 		Neighbour spyNeighbour1 = spy(Neighbour.class);
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, self.getName());
@@ -646,7 +646,7 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	@Test
-	public void listenerEndpointsAreSavedWhenSubscriptionWithCreatedStatusAndMultipleBrokersIsPolled(){
+	public void listenerEndpointsAreSavedWhenSubscriptionWithCreatedStatusAndMultipleEndpointsIsPolled(){
 		Neighbour spyNeighbour1 = spy(Neighbour.class);
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, self.getName());
@@ -675,7 +675,7 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	@Test
-	public void listenerEndpointsAreRemovedWhenBrokersListIsUpdated() {
+	public void listenerEndpointsAreRemovedWhenEndpointsListIsUpdated() {
 		Neighbour spyNeighbour1 = spy(Neighbour.class);
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, self.getName());
