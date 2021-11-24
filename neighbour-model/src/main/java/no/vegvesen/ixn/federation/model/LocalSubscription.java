@@ -31,8 +31,8 @@ public class LocalSubscription {
 
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "locbrok_id", foreignKey = @ForeignKey(name = "fk_locbrok_sub"))
-    private Set<LocalBroker> localBrokers = new HashSet<>();
+    @JoinColumn(name = "locend_id", foreignKey = @ForeignKey(name = "fk_locend_sub"))
+    private Set<LocalEndpoint> localEndpoints = new HashSet<>();
 
     public LocalSubscription() {
 
@@ -69,13 +69,13 @@ public class LocalSubscription {
         this.lastUpdated = lastUpdated;
     }
 
-    public LocalSubscription(Integer sub_id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalBroker> localBrokers) {
+    public LocalSubscription(Integer sub_id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalEndpoint> localEndpoints) {
         this.sub_id = sub_id;
         this.status = status;
         this.selector = selector;
         this.lastUpdated = lastUpdated;
         this.consumerCommonName = consumerCommonName;
-        this.localBrokers = localBrokers;
+        this.localEndpoints = localEndpoints;
     }
 
     public void setStatus(LocalSubscriptionStatus status) {
@@ -108,14 +108,14 @@ public class LocalSubscription {
     }
 
 
-    public Set<LocalBroker> getLocalBrokers() {
-        return localBrokers;
+    public Set<LocalEndpoint> getLocalEndpoints() {
+        return localEndpoints;
     }
 
-    public void setBrokers(Set<LocalBroker> newLocalBrokers) {
-        this.localBrokers.clear();
-        if (newLocalBrokers != null) {
-            this.localBrokers.addAll(newLocalBrokers);
+    public void setLocalEndpoints(Set<LocalEndpoint> newLocalEndpoints) {
+        this.localEndpoints.clear();
+        if (newLocalEndpoints != null) {
+            this.localEndpoints.addAll(newLocalEndpoints);
         }
     }
 
