@@ -55,7 +55,7 @@ public class ServiceProviderService {
                                 //throw new IllegalStateException("consumerCommonName is the same as Ixn name, local subscription user = subscription user");
                             //}
                             LocalEndpoint localEndpoint = new LocalEndpoint(serviceProvider.getName(), localMessageBrokerUrl);
-                            logger.info("Adding local endpoint {} with consumerCommonName the same as Ixn name, queue {}", localEndpoint.getMessageBrokerUrl(), localEndpoint.getQueueName());
+                            logger.info("Adding local endpoint {} with consumerCommonName the same as Ixn name, queue {}", localEndpoint.getMessageBrokerUrl(), localEndpoint.getSource());
                             Set<LocalEndpoint> localEndpoints = new HashSet<>(Arrays.asList(localEndpoint));
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localEndpoints);
                         }
