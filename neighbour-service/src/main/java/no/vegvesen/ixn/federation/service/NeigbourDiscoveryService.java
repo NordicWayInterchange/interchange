@@ -245,14 +245,14 @@ public class NeigbourDiscoveryService {
                         subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
                         subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
                         subscription.setConsumerCommonName(polledSubscription.getConsumerCommonName());
-                        subscription.setBrokers(polledSubscription.getBrokers());
+                        subscription.setEndpoints(polledSubscription.getEndpoints());
                         subscription.setLastUpdatedTimestamp(polledSubscription.getLastUpdatedTimestamp());
                         neighbour.getControlConnection().okConnection();
                         if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
                             logger.info("Subscription for neighbour {} with path {} is CREATED",neighbour.getName(),subscription.getPath());
                             if (polledSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getBrokers());
-                                createListenerEndpointFromBrokersList(neighbour, polledSubscription.getBrokers());
+                                logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getEndpoints());
+                                createListenerEndpointFromEndpointsList(neighbour, polledSubscription.getEndpoints());
                             }
                         }
                         //utvide med ListenerEndpoint lookup + lage ny om det trengs
@@ -274,9 +274,9 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void createListenerEndpointFromBrokersList(Neighbour neighbour, Set<Broker> brokers) {
-        for(Broker broker : brokers) {
-            createListenerEndpoint(broker.getMessageBrokerUrl(), broker.getQueueName(), neighbour);
+    public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+        for(Endpoint endpoint : endpoints) {
+            createListenerEndpoint(endpoint.getMessageBrokerUrl(), endpoint.getQueueName(), neighbour);
         }
     }
 
@@ -314,20 +314,20 @@ public class NeigbourDiscoveryService {
                 try {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
-                        if (!lastUpdatedSubscription.getBrokers().isEmpty() || !subscription.getBrokers().equals(lastUpdatedSubscription.getBrokers())) {
+                        if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                             //if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
                             logger.info("Polled updated subscription with id {}", subscription.getId());
-                            Set<Broker> wantedBrokers = lastUpdatedSubscription.getBrokers();
-                            Set<Broker> existingBrokers = subscription.getBrokers();
+                            Set<Endpoint> wantedEndpoints = lastUpdatedSubscription.getEndpoints();
+                            Set<Endpoint> existingEndpoints = subscription.getEndpoints();
 
-                            Set<Broker> brokersToRemove = new HashSet<>(existingBrokers);
-                            brokersToRemove.removeAll(wantedBrokers);
-                            tearDownListenerEndpointsFromBrokersList(neighbour, brokersToRemove);
+                            Set<Endpoint> endpointsToRemove = new HashSet<>(existingEndpoints);
+                            endpointsToRemove.removeAll(wantedEndpoints);
+                            tearDownListenerEndpointsFromEndpointsList(neighbour, endpointsToRemove);
 
-                            Set<Broker> additionalBrokers = new HashSet<>(wantedBrokers);
-                            additionalBrokers.removeAll(existingBrokers);
-                            createListenerEndpointFromBrokersList(neighbour, additionalBrokers);
-                            subscription.setBrokers(wantedBrokers);
+                            Set<Endpoint> additionalEndpoints = new HashSet<>(wantedEndpoints);
+                            additionalEndpoints.removeAll(existingEndpoints);
+                            createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints);
+                            subscription.setEndpoints(wantedEndpoints);
                             //} else {
                             //	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
                             //}
@@ -346,11 +346,11 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void tearDownListenerEndpointsFromBrokersList(Neighbour neighbour, Set<Broker> brokers) {
-        for(Broker broker : brokers) {
-            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), broker.getMessageBrokerUrl(), broker.getQueueName());
+    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+        for(Endpoint endpoint : endpoints) {
+            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), endpoint.getMessageBrokerUrl(), endpoint.getQueueName());
             listenerEndpointRepository.delete(listenerEndpoint);
-            logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), broker.getMessageBrokerUrl(), broker.getQueueName());
+            logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), endpoint.getMessageBrokerUrl(), endpoint.getQueueName());
         }
     }
 
@@ -385,7 +385,7 @@ public class NeigbourDiscoveryService {
         List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
         Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
 
-        Set<String> brokerUrlList = subscriptions.stream().flatMap(subscription -> subscription.getBrokers().stream()).map(Broker::getMessageBrokerUrl).collect(Collectors.toSet());
+        Set<String> brokerUrlList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getMessageBrokerUrl).collect(Collectors.toSet());
 
         for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
             if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {

@@ -43,11 +43,11 @@ public class ServiceProviderService {
                     if (localSubscription.getSelector().equals(subscription.getSelector())) {
                         if (localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
                             //TODO What about changes to brokers? We also write ALL service provider Brokers every time!
-                            Set<Broker> brokers = subscription.getBrokers();
+                            Set<Endpoint> endpoints = subscription.getEndpoints();
                             Set<LocalEndpoint> localEndpoints = new HashSet<>();
-                            for (Broker broker : brokers) {
-                                logger.info("Adding local endpoint {} with consumerCommonName same as serviceProvider name, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
-                                localEndpoints.add(brokerToLocalEndpoint(broker));
+                            for (Endpoint endpoint : endpoints) {
+                                logger.info("Adding local endpoint {} with consumerCommonName same as serviceProvider name, queue {}", endpoint.getMessageBrokerUrl(), endpoint.getQueueName());
+                                localEndpoints.add(endpointToLocalEndpoint(endpoint));
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localEndpoints);
                         } else {
@@ -55,7 +55,7 @@ public class ServiceProviderService {
                                 //throw new IllegalStateException("consumerCommonName is the same as Ixn name, local subscription user = subscription user");
                             //}
                             LocalEndpoint localEndpoint = new LocalEndpoint(serviceProvider.getName(), localMessageBrokerUrl);
-                            logger.info("Adding local broker {} with consumerCommonName the same as Ixn name, queue {}", localEndpoint.getMessageBrokerUrl(), localEndpoint.getQueueName());
+                            logger.info("Adding local endpoint {} with consumerCommonName the same as Ixn name, queue {}", localEndpoint.getMessageBrokerUrl(), localEndpoint.getQueueName());
                             Set<LocalEndpoint> localEndpoints = new HashSet<>(Arrays.asList(localEndpoint));
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localEndpoints);
                         }
@@ -65,7 +65,7 @@ public class ServiceProviderService {
         }
     }
 
-    public LocalEndpoint brokerToLocalEndpoint(Broker broker) {
-        return new LocalEndpoint(broker.getQueueName(), broker.getMessageBrokerUrl());
+    public LocalEndpoint endpointToLocalEndpoint(Endpoint endpoint) {
+        return new LocalEndpoint(endpoint.getQueueName(), endpoint.getMessageBrokerUrl());
     }
 }

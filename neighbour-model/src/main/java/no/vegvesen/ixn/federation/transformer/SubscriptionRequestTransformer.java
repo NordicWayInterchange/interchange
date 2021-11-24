@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
-import no.vegvesen.ixn.federation.model.Broker;
+import no.vegvesen.ixn.federation.model.Endpoint;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
@@ -55,16 +55,16 @@ public class SubscriptionRequestTransformer {
 		subscription.setLastUpdatedTimestamp(subscriptionApi.getLastUpdatedTimestamp());
 		subscription.setConsumerCommonName(subscriptionApi.getConsumerCommonName());
 
-		Set<Broker> brokers = new HashSet<>();
+		Set<Endpoint> endpoints = new HashSet<>();
 		for(EndpointApi endpointApi : subscriptionApi.getEndpoints()){
-			Broker broker = new Broker(endpointApi.getQueueName(), endpointApi.getMessageBrokerUrl());
+			Endpoint endpoint = new Endpoint(endpointApi.getQueueName(), endpointApi.getMessageBrokerUrl());
 			if(endpointApi.getMaxBandwidth() != null && endpointApi.getMaxMessageRate() != null) {
-				broker.setMaxBandwidth(endpointApi.getMaxBandwidth());
-				broker.setMaxMessageRate(endpointApi.getMaxMessageRate());
+				endpoint.setMaxBandwidth(endpointApi.getMaxBandwidth());
+				endpoint.setMaxMessageRate(endpointApi.getMaxMessageRate());
 			}
-			brokers.add(broker);
+			endpoints.add(endpoint);
 		}
-		subscription.setBrokers(brokers);
+		subscription.setEndpoints(endpoints);
 		return subscription;
 
 	}

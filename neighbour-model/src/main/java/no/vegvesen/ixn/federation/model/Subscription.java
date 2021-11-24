@@ -27,8 +27,8 @@ public class Subscription {
 	private String consumerCommonName;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "brok_id", foreignKey = @ForeignKey(name = "fk_brok_sub"))
-	private Set<Broker> brokers = new HashSet<>();
+	@JoinColumn(name = "end_id", foreignKey = @ForeignKey(name = "fk_end_sub"))
+	private Set<Endpoint> endpoints = new HashSet<>();
 
 	private long lastUpdatedTimestamp;
 
@@ -48,13 +48,13 @@ public class Subscription {
 		this.consumerCommonName = consumerCommonName;
 	}
 
-	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Broker> brokers) {
+	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Endpoint> endpoints) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
 		this.consumerCommonName = consumerCommonName;
-		this.brokers = brokers;
+		this.endpoints = endpoints;
 	}
 
 	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
@@ -126,14 +126,14 @@ public class Subscription {
 		this.lastUpdatedTimestamp = lastUpdatedTimestamp;
 	}
 
-	public Set<Broker> getBrokers() {
-		return brokers;
+	public Set<Endpoint> getEndpoints() {
+		return endpoints;
 	}
 
-	public void setBrokers(Set<Broker> newBrokers) {
-		this.brokers.clear();
-		if (newBrokers != null) {
-			this.brokers.addAll(newBrokers);
+	public void setEndpoints(Set<Endpoint> newEndpoints) {
+		this.endpoints.clear();
+		if (newEndpoints != null) {
+			this.endpoints.addAll(newEndpoints);
 		}
 	}
 
@@ -161,7 +161,7 @@ public class Subscription {
 				", numberOfPolls=" + numberOfPolls +
 				", consumerCommonName='" + consumerCommonName + '\'' +
 				", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
-				", brokers=" + brokers +
+				", endpoints=" + endpoints +
 				'}';
 	}
 

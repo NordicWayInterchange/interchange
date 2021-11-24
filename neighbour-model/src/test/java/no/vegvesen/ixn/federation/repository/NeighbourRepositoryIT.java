@@ -282,8 +282,8 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void addSubscriptionWithBrokersList() {
 		Subscription sub = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "");
-		Broker broker = new Broker("my-queue","my-broker");
-		sub.setBrokers(Sets.newLinkedHashSet(broker));
+		Endpoint endpoint = new Endpoint("my-queue","my-broker");
+		sub.setEndpoints(Sets.newLinkedHashSet(endpoint));
 
 		Set<Subscription> subs = Sets.newLinkedHashSet(sub);
 		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subs);
@@ -295,7 +295,7 @@ public class NeighbourRepositoryIT {
 
 		Subscription savedSub = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-		assertThat(savedSub.getBrokers()).hasSize(1);
+		assertThat(savedSub.getEndpoints()).hasSize(1);
 	}
 
 }
