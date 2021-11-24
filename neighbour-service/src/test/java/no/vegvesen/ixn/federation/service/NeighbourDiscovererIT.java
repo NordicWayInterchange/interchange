@@ -132,7 +132,7 @@ public class NeighbourDiscovererIT {
 		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 
 		neigbourDiscoveryService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
-		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any() );
+		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any(), any());
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
@@ -155,12 +155,12 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
-		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any())).thenReturn(c1);
-		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any() )).thenReturn(c2);
+		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any(), any())).thenReturn(c1);
+		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any(), any())).thenReturn(c2);
 
 		neigbourDiscoveryService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
 
-		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
+		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
 		assertThat(known).hasSize(2);
 	}

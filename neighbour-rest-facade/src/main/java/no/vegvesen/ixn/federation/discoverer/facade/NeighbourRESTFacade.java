@@ -40,11 +40,11 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 
 
 	@Override
-	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, Self self) {
+	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.info("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
-		CapabilitiesApi selfCapability = capabilitiesTransformer.selfToCapabilityApi(self);
+		CapabilitiesApi selfCapability = capabilitiesTransformer.selfToCapabilityApi(selfName, localCapabilities);
 		CapabilitiesApi result = neighbourRESTClient.doPostCapabilities(controlChannelUrl, name, selfCapability);
 		return capabilitiesTransformer.capabilitiesApiToCapabilities(result);
 	}

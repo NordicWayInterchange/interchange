@@ -119,7 +119,7 @@ public class NeigbourDiscoveryService {
 
     private void postCapabilities(Self self, Neighbour neighbour, NeighbourFacade neighbourFacade) {
         try {
-            Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, self);
+            Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, self.getName(), self.getLocalCapabilities());
             capabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.setCapabilities(capabilities);
             neighbour.getControlConnection().okConnection();

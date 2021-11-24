@@ -27,11 +27,12 @@ public class ServiceProviderService {
         this.serviceProviderRepository = serviceProviderRepository;
     }
 
-    public void updateLocalSubscriptions(Self self) {
+    //TODO don't need Self here. Getting the messageChannelUrl should be somwhere else?
+    public void updateLocalSubscriptions(String messageChannelUrl) {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for(ServiceProvider serviceProvider : serviceProviders) {
-            updateServiceProviderSubscriptionsWithBrokerUrl(neighbours, serviceProvider, self.getMessageChannelUrl());
+            updateServiceProviderSubscriptionsWithBrokerUrl(neighbours, serviceProvider, messageChannelUrl);
             serviceProviderRepository.save(serviceProvider);
         }
     }
