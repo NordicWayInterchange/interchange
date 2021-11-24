@@ -14,14 +14,14 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void createValidJson() throws JsonProcessingException {
-        BrokerApi broker = new BrokerApi("client1queue","amqps://b.c-its-interchange.eu:5671");
+        EndpointApi endpoint = new EndpointApi("client1queue","amqps://b.c-its-interchange.eu:5671");
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
                 "1",
                 "messageType='DENM' AND originatingCountry='NO'",
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,
                 "client1",
-                Collections.singleton(broker)
+                Collections.singleton(endpoint)
         );
 
         ObjectMapper mapper = new ObjectMapper();
@@ -39,8 +39,8 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void createValidJsonWithBrokers() throws JsonProcessingException {
-        BrokerApi broker1 = new BrokerApi("client1queue", "amqps://a.c-its-interchange.eu:5671");
-        BrokerApi broker2 = new BrokerApi("client2queue", "amqps://b.c-its-interchange.eu:5671");
+        EndpointApi broker1 = new EndpointApi("client1queue", "amqps://a.c-its-interchange.eu:5671");
+        EndpointApi broker2 = new EndpointApi("client2queue", "amqps://b.c-its-interchange.eu:5671");
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
                 "1",
                 "messageType='DENM' AND originatingCountry='NO'",
