@@ -58,7 +58,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilitiesTransformer.selfToCapabilityApi(self);
+		return capabilitiesTransformer.selfToCapabilityApi(self.getName(), self.getLocalCapabilities());
 	}
 
 	Neighbour findNeighbour(String neighbourName) {

@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.model.*;
 import java.util.Set;
 
 public interface NeighbourFacade {
-	Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, Self self);
+	Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities);
 
 	SubscriptionRequest postSubscriptionRequest(Neighbour neighbour, Set<Subscription> subscriptions, String selfName);
 

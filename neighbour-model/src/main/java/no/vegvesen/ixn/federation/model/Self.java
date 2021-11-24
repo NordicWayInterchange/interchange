@@ -78,21 +78,19 @@ public class Self {
 		this.lastUpdatedLocalSubscriptions = lastUpdatedLocalSubscriptions;
 	}
 
-	public String getMessageChannelPort() { return this.messageChannelPort; }
-
 	public void setMessageChannelPort(String messageChannelPort) {
 		this.messageChannelPort = messageChannelPort;
 	}
 
-	public String getMessageChannelUrl() {
+	public static String getMessageChannelUrl(String brokerName, String port) {
 		try {
-			if (this.getMessageChannelPort() == null || this.getMessageChannelPort().equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
-				return String.format("amqps://%s/", name);
+			if (port == null || port.equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
+				return String.format("amqps://%s/", brokerName);
 			} else {
-				return String.format("amqps://%s:%s/", name, this.getMessageChannelPort());
+				return String.format("amqps://%s:%s/",brokerName, port);
 			}
 		} catch (NumberFormatException e) {
-			logger.error("Could not create message channel url for interchange {}", this, e);
+			logger.error("Could not create message channel url for interchange {}", brokerName, e);
 			throw new DiscoveryException(e);
 		}
 	}

@@ -95,4 +95,8 @@ public class SelfService {
 	public String getNodeProviderName() {
 		return interchangeNodeProperties.getName();
 	}
+
+	public String getMessageChannelUrl() {
+		return Self.getMessageChannelUrl(interchangeNodeProperties.getName(),interchangeNodeProperties.getMessageChannelPort());
+	}
 }

@@ -42,9 +42,9 @@ public class ServiceProviderServiceTest {
                 new SubscriptionRequest(),
                 new SubscriptionRequest()
         ))).when(neighbourRepository).findAll();
-        Self self = new Self("local-node");
+        String name = "local-node";
 
-        serviceProviderService.updateLocalSubscriptions(self);
+        serviceProviderService.updateLocalSubscriptions(Self.getMessageChannelUrl(name,null));
 
         verify(serviceProviderRepository).findAll();
         verify(neighbourRepository).findAll();

@@ -8,28 +8,25 @@ public class SelfTest {
 
     @Test
     public void getMessageChannelUrlWithDomainNameAndSpecifiedNonDefaultPorts() {
-        Self self = new Self("my-host.my-domain.top");
-        self.setMessageChannelPort("5678");
-        assertThat(self.getMessageChannelUrl()).isEqualTo("amqps://my-host.my-domain.top:5678/");
+        assertThat(Self.getMessageChannelUrl("my-host.my-domain.top", "5678"))
+                .isEqualTo("amqps://my-host.my-domain.top:5678/");
     }
 
     @Test
     public void getMessageChannelUrlWithDomainNameAndSpecifiedDefaultPorts() {
-        Self self = new Self("my-host.my-domain.top");
-        self.setMessageChannelPort("5671");
-        assertThat(self.getMessageChannelUrl()).isEqualTo("amqps://my-host.my-domain.top/");
+        assertThat(Self.getMessageChannelUrl("my-host.my-domain.top", "5671"))
+                .isEqualTo("amqps://my-host.my-domain.top/");
     }
 
     @Test
     public void getMessageChannelUrlWithDomainNameDefaultPorts() {
-        Self self = new Self("my-host.my-domain.top");
-        assertThat(self.getMessageChannelUrl()).isEqualTo("amqps://my-host.my-domain.top/");
+        assertThat(Self.getMessageChannelUrl("my-host.my-domain.top",null))
+                .isEqualTo("amqps://my-host.my-domain.top/");
     }
 
     @Test
     public void getMessageChannelUrlWithoutDomainNameAndSpecificPort() {
-        Self self = new Self("my-host");
-        self.setMessageChannelPort("5678");
-        assertThat(self.getMessageChannelUrl()).isEqualTo("amqps://my-host:5678/");
+        assertThat(Self.getMessageChannelUrl("my-host", "5678"))
+                .isEqualTo("amqps://my-host:5678/");
     }
 }
