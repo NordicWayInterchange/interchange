@@ -117,7 +117,7 @@ public class ApiModelRestDocumentationTest {
                 "node-1",
                 Collections.singleton(
                         new EndpointApi(
-                                "queue-1",
+                                "source-1",
                                 "endpoint-1"
                         )
                 )
