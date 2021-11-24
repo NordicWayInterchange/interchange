@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.messagecollector;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
-import no.vegvesen.ixn.federation.model.Neighbour;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +51,7 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "incomingExchange");
 		ListenerEndpoint remote = mock(ListenerEndpoint.class);
 		when(remote.getBrokerUrl()).thenReturn(remoteAmqpsUrl);
-		when(remote.getQueue()).thenReturn("localhost");
+		when(remote.getSource()).thenReturn("localhost");
 		MessageCollectorListener remoteForwardListener = collectorCreator.setupCollection(remote);
 
 		//Stop the container to trigger the connection exception listener to run

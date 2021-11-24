@@ -14,7 +14,7 @@ public class ListenerEndpoint {
 
     private String neighbourName;
     private String brokerUrl;
-    private String queue;
+    private String source;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_listener_endpoints_message_connection"))
@@ -26,17 +26,17 @@ public class ListenerEndpoint {
 
     public ListenerEndpoint() { }
 
-    public ListenerEndpoint(String neighbourName, String brokerUrl, String queue, Connection messageConnection) {
+    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, Connection messageConnection) {
         this.neighbourName = neighbourName;
         this.brokerUrl = brokerUrl;
-        this.queue = queue;
+        this.source = source;
         this.messageConnection = messageConnection;
     }
 
-    public ListenerEndpoint(String neighbourName, String brokerUrl, String queue, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
+    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
         this.neighbourName = neighbourName;
         this.brokerUrl = brokerUrl;
-        this.queue = queue;
+        this.source = source;
         this.messageConnection = messageConnection;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
@@ -50,9 +50,9 @@ public class ListenerEndpoint {
 
     public void setBrokerUrl(String brokerUrl){ this.brokerUrl = brokerUrl; }
 
-    public String getQueue() { return queue; }
+    public String getSource() { return source; }
 
-    public void setQueue(String queue) { this.queue = queue; }
+    public void setSource(String source) { this.source = source; }
 
     public Connection getMessageConnection () { return messageConnection; }
 
@@ -80,7 +80,7 @@ public class ListenerEndpoint {
                 "id=" + id +
                 ", neighbourName='" + neighbourName + '\'' +
                 ", brokerUrl='" + brokerUrl + '\'' +
-                ", queue='" + queue + '\'' +
+                ", source='" + source + '\'' +
                 ", messageConnection=" + messageConnection +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
@@ -94,12 +94,12 @@ public class ListenerEndpoint {
         ListenerEndpoint that = (ListenerEndpoint) o;
         return neighbourName.equals(that.neighbourName) &&
                 brokerUrl.equals(that.brokerUrl) &&
-                queue.equals(that.queue);
+                source.equals(that.source);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(neighbourName, brokerUrl, queue);
+        return Objects.hash(neighbourName, brokerUrl, source);
     }
 
 }

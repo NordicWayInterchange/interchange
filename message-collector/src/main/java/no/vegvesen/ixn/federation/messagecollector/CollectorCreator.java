@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.messagecollector;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
-import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +49,7 @@ public class CollectorCreator {
         Source writeSource = new Source(writeUrl, writeQueue, sslContext);
 
         String readUrl = listenerEndpoint.getBrokerUrl();
-        String readQueue = listenerEndpoint.getQueue();
+        String readQueue = listenerEndpoint.getSource();
         Sink readSink = new Sink(readUrl, readQueue, sslContext);
         logger.info("Fetching messages from {}, write to {}",readUrl,writeUrl);
 

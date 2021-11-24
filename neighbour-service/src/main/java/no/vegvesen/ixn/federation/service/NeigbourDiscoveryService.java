@@ -276,13 +276,13 @@ public class NeigbourDiscoveryService {
 
     public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
         for(Endpoint endpoint : endpoints) {
-            createListenerEndpoint(endpoint.getMessageBrokerUrl(), endpoint.getQueueName(), neighbour);
+            createListenerEndpoint(endpoint.getMessageBrokerUrl(), endpoint.getSource(), neighbour);
         }
     }
 
-    public void createListenerEndpoint(String brokerUrl, String queueName, Neighbour neighbour) {
-        if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), brokerUrl, queueName) == null){
-            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), brokerUrl, queueName, new Connection()));
+    public void createListenerEndpoint(String brokerUrl, String source, Neighbour neighbour) {
+        if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndSource(neighbour.getName(), brokerUrl, source) == null){
+            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), brokerUrl, source, new Connection()));
             logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
         }
     }
@@ -348,9 +348,9 @@ public class NeigbourDiscoveryService {
 
     public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
         for(Endpoint endpoint : endpoints) {
-            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), endpoint.getMessageBrokerUrl(), endpoint.getQueueName());
+            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndSource(neighbour.getName(), endpoint.getMessageBrokerUrl(), endpoint.getSource());
             listenerEndpointRepository.delete(listenerEndpoint);
-            logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), endpoint.getMessageBrokerUrl(), endpoint.getQueueName());
+            logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and source {}", neighbour.getName(), endpoint.getMessageBrokerUrl(), endpoint.getSource());
         }
     }
 
@@ -390,7 +390,7 @@ public class NeigbourDiscoveryService {
         for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
             if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
                 listenerEndpointRepository.delete(listenerEndpoint);
-                logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), listenerEndpoint.getBrokerUrl(), listenerEndpoint.getQueue());
+                logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and source {}", neighbour.getName(), listenerEndpoint.getBrokerUrl(), listenerEndpoint.getSource());
             }
         }
     }

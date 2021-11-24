@@ -59,7 +59,7 @@ public class LocalEndpoint {
     }
 
     public boolean isTheSameAsListenerEndpoint(ListenerEndpoint listenerEndpoint) {
-        if(queueName.equals(listenerEndpoint.getQueue()) && messageBrokerUrl.equals(listenerEndpoint.getBrokerUrl())){
+        if(queueName.equals(listenerEndpoint.getSource()) && messageBrokerUrl.equals(listenerEndpoint.getBrokerUrl())){
             return true;
         } else {
             return false;
