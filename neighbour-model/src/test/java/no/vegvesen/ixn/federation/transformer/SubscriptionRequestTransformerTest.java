@@ -86,8 +86,8 @@ public class SubscriptionRequestTransformerTest {
 		String path = "myName/subscriptions/1";
 		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path, "myNeighbour");
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, brokerUrl);
-		assertThat(responseApi.getBrokers().size()).isEqualTo(1);
-		assertThat(new ArrayList<>(responseApi.getBrokers()).get(0).getMessageBrokerUrl()).isEqualTo(brokerUrl);
+		assertThat(responseApi.getEndpoints().size()).isEqualTo(1);
+		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getMessageBrokerUrl()).isEqualTo(brokerUrl);
 	}
 
 	@Test

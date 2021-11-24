@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BrokerApi {
+public class EndpointApi {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String queueName;
@@ -17,16 +17,16 @@ public class BrokerApi {
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
-    public BrokerApi() {
+    public EndpointApi() {
 
     }
 
-    public BrokerApi(String queueName, String messageBrokerUrl) {
+    public EndpointApi(String queueName, String messageBrokerUrl) {
         this.queueName = queueName;
         this.messageBrokerUrl = messageBrokerUrl;
     }
 
-    public BrokerApi(String queueName, String messageBrokerUrl, Integer maxBandwidth, Integer maxMessageRate) {
+    public EndpointApi(String queueName, String messageBrokerUrl, Integer maxBandwidth, Integer maxMessageRate) {
         this.queueName = queueName;
         this.messageBrokerUrl = messageBrokerUrl;
         this.maxBandwidth = maxBandwidth;
@@ -68,12 +68,12 @@ public class BrokerApi {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BrokerApi)) return false;
-        BrokerApi brokerApi = (BrokerApi) o;
-        return queueName.equals(brokerApi.queueName) &&
-                messageBrokerUrl.equals(brokerApi.messageBrokerUrl) &&
-                Objects.equals(maxBandwidth, brokerApi.maxBandwidth) &&
-                Objects.equals(maxMessageRate, brokerApi.maxMessageRate);
+        if (!(o instanceof EndpointApi)) return false;
+        EndpointApi endpointApi = (EndpointApi) o;
+        return queueName.equals(endpointApi.queueName) &&
+                messageBrokerUrl.equals(endpointApi.messageBrokerUrl) &&
+                Objects.equals(maxBandwidth, endpointApi.maxBandwidth) &&
+                Objects.equals(maxMessageRate, endpointApi.maxMessageRate);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class BrokerApi {
 
     @Override
     public String toString() {
-        return "BrokerApi{" +
+        return "EndpointApi{" +
                 "queueName='" + queueName + '\'' +
                 ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
                 ", maxBandwidth=" + maxBandwidth +

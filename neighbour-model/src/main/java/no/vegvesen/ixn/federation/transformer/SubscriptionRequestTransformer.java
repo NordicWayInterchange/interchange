@@ -56,11 +56,11 @@ public class SubscriptionRequestTransformer {
 		subscription.setConsumerCommonName(subscriptionApi.getConsumerCommonName());
 
 		Set<Broker> brokers = new HashSet<>();
-		for(BrokerApi brokerApi : subscriptionApi.getBrokers()){
-			Broker broker = new Broker(brokerApi.getQueueName(), brokerApi.getMessageBrokerUrl());
-			if(brokerApi.getMaxBandwidth() != null && brokerApi.getMaxMessageRate() != null) {
-				broker.setMaxBandwidth(brokerApi.getMaxBandwidth());
-				broker.setMaxMessageRate(brokerApi.getMaxMessageRate());
+		for(EndpointApi endpointApi : subscriptionApi.getEndpoints()){
+			Broker broker = new Broker(endpointApi.getQueueName(), endpointApi.getMessageBrokerUrl());
+			if(endpointApi.getMaxBandwidth() != null && endpointApi.getMaxMessageRate() != null) {
+				broker.setMaxBandwidth(endpointApi.getMaxBandwidth());
+				broker.setMaxMessageRate(endpointApi.getMaxMessageRate());
 			}
 			brokers.add(broker);
 		}
@@ -77,11 +77,11 @@ public class SubscriptionRequestTransformer {
 		response.setStatus(status);
 		response.setConsumerCommonName(subscription.getConsumerCommonName());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			BrokerApi broker = new BrokerApi(
+			EndpointApi endpointApi = new EndpointApi(
 					neighbourName,
 					messageChannelUrl
 			);
-			response.setBrokers(Collections.singleton(broker));
+			response.setEndpoints(Collections.singleton(endpointApi));
 		}
 		return response;
 	}
