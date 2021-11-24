@@ -390,17 +390,17 @@ class NeighbourServiceTest {
 		neighbour.setName("neighbour");
 
 		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
-		Set<Broker> brokers = new HashSet<>();
-		Broker broker = new Broker("queue-1","broker-1");
-		brokers.add(broker);
-		sub1.setBrokers(brokers);
+		Set<Endpoint> endpoints = new HashSet<>();
+		Endpoint endpoint = new Endpoint("queue-1","endpoint-1");
+		endpoints.add(endpoint);
+		sub1.setEndpoints(endpoints);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(sub1));
 		neighbour.setOurRequestedSubscriptions(subscriptionRequest);
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "broker-1", "queue-1", new Connection());
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "broker-2", "queue-2", new Connection());
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "endpoint-1", "queue-1", new Connection());
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "endpoint-2", "queue-2", new Connection());
 
 		when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
 		neigbourDiscoveryService.tearDownListenerEndpoints(neighbour);
@@ -414,23 +414,23 @@ class NeighbourServiceTest {
 		neighbour.setName("neighbour");
 
 		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
-		Set<Broker> brokers = new HashSet<>();
-		Broker broker = new Broker("queue-1","broker-1");
-		brokers.add(broker);
-		sub1.setBrokers(brokers);
+		Set<Endpoint> endpoints = new HashSet<>();
+		Endpoint endpoint = new Endpoint("queue-1","endpoint-1");
+		endpoints.add(endpoint);
+		sub1.setEndpoints(endpoints);
 
 		Subscription sub2 = new Subscription(2, SubscriptionStatus.CREATED, "originatingCountry = 'SE'", "/neighbour/subscriptions/2", "");
-		Set<Broker> brokers2 = new HashSet<>();
-		Broker broker2 = new Broker("queue-2","broker-2");
-		brokers2.add(broker2);
-		sub2.setBrokers(brokers2);
+		Set<Endpoint> endpoints2 = new HashSet<>();
+		Endpoint endpoint2 = new Endpoint("queue-2","endpoint-2");
+		endpoints2.add(endpoint2);
+		sub2.setEndpoints(endpoints2);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Sets.newSet(sub1, sub2));
 		neighbour.setOurRequestedSubscriptions(subscriptionRequest);
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "broker-1", "queue-1", new Connection());
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "broker-2", "queue-2", new Connection());
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "endpoint-1", "queue-1", new Connection());
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "endpoint-2", "queue-2", new Connection());
 
 		when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
 		neigbourDiscoveryService.tearDownListenerEndpoints(neighbour);
@@ -439,46 +439,46 @@ class NeighbourServiceTest {
 	}
 
 	@Test
-	public void listenerEndpointsAreSavedFromBrokersList() {
+	public void listenerEndpointsAreSavedFromEndpointsList() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("my-neighbour");
 
-		Broker broker1 = new Broker("my-queue-1", "my-broker-1");
-		Broker broker2 = new Broker("my-queue-2", "my-broker-2");
+		Endpoint endpoint1 = new Endpoint("my-queue-1", "my-endpoint-1");
+		Endpoint endpoint2 = new Endpoint("my-queue-2", "my-endpoint-2");
 
-		Set<Broker> brokers = new HashSet<>(Sets.newSet(broker1, broker2));
+		Set<Endpoint> endpoints = new HashSet<>(Sets.newSet(endpoint1, endpoint2));
 
-		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-1", "my-queue-1")).thenReturn(null);
-		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-2", "my-queue-2")).thenReturn(null);
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-endpoint-1", "my-queue-1")).thenReturn(null);
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-endpoint-2", "my-queue-2")).thenReturn(null);
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-broker-1", "my-queue-1", new Connection());
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-broker-2", "my-queue-2", new Connection());
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-endpoint-1", "my-queue-1", new Connection());
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-endpoint-2", "my-queue-2", new Connection());
 
 		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
 
-		neigbourDiscoveryService.createListenerEndpointFromBrokersList(neighbour, brokers);
+		neigbourDiscoveryService.createListenerEndpointFromEndpointsList(neighbour, endpoints);
 
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
 	}
 
 	@Test
-	public void listenerEndpointsAreRemoverFromBrokersList() {
+	public void listenerEndpointsAreRemoverFromEndpointsList() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("my-neighbour");
 
-		Broker broker1 = new Broker("my-queue-1", "my-broker-1");
-		Broker broker2 = new Broker("my-queue-2", "my-broker-2");
+		Endpoint endpoint1 = new Endpoint("my-queue-1", "my-endpoint-1");
+		Endpoint endpoint2 = new Endpoint("my-queue-2", "my-endpoint-2");
 
-		Set<Broker> brokers = new HashSet<>(Sets.newSet(broker1, broker2));
+		Set<Endpoint> endpoints = new HashSet<>(Sets.newSet(endpoint1, endpoint2));
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-broker-1", "my-queue-1", new Connection());
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-broker-2", "my-queue-2", new Connection());
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-endpoint-1", "my-queue-1", new Connection());
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-endpoint-2", "my-queue-2", new Connection());
 
-		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-1", "my-queue-1")).thenReturn(listenerEndpoint1);
-		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-broker-2", "my-queue-2")).thenReturn(listenerEndpoint2);
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-endpoint-1", "my-queue-1")).thenReturn(listenerEndpoint1);
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue("my-neighbour", "my-endpoint-2", "my-queue-2")).thenReturn(listenerEndpoint2);
 
-		neigbourDiscoveryService.tearDownListenerEndpointsFromBrokersList(neighbour, brokers);
+		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbour, endpoints);
 
 		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
 	}

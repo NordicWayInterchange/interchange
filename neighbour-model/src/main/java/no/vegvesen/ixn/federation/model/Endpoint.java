@@ -4,11 +4,11 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "brokers")
-public class Broker {
+@Table(name = "endpoints")
+public class Endpoint {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "broker_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "endpoint_seq")
     @Column(name = "id")
     private Integer id;
 
@@ -17,11 +17,11 @@ public class Broker {
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
-    public Broker() {
+    public Endpoint() {
 
     }
 
-    public Broker(String queueName, String messageBrokerUrl) {
+    public Endpoint(String queueName, String messageBrokerUrl) {
         this.queueName = queueName;
         this.messageBrokerUrl = messageBrokerUrl;
     }
@@ -69,11 +69,11 @@ public class Broker {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Broker)) return false;
-        Broker broker = (Broker) o;
-        return id.equals(broker.id) &&
-                queueName.equals(broker.queueName) &&
-                messageBrokerUrl.equals(broker.messageBrokerUrl);
+        if (!(o instanceof Endpoint)) return false;
+        Endpoint endpoint = (Endpoint) o;
+        return id.equals(endpoint.id) &&
+                queueName.equals(endpoint.queueName) &&
+                messageBrokerUrl.equals(endpoint.messageBrokerUrl);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class Broker {
 
     @Override
     public String toString() {
-        return "Broker{" +
+        return "Endpoint{" +
                 "id=" + id +
                 ", queueName='" + queueName + '\'' +
                 ", messageBrokerUrl='" + messageBrokerUrl + '\'' +

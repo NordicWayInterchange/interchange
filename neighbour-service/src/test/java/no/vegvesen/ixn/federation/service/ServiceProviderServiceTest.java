@@ -74,7 +74,7 @@ public class ServiceProviderServiceTest {
                                selector,
                                "local-node/subscriptions/1",
                                serviceProviderName,
-                               Collections.singleton(new Broker(
+                               Collections.singleton(new Endpoint(
                                        serviceProviderName,
                                        "amqps://messages.node-A.eu"
                                ))
@@ -125,7 +125,7 @@ public class ServiceProviderServiceTest {
                                 selector,
                                 "local-node/subscriptions/1",
                                 null, //QueueconsumerUser is most often null from other node.
-                                Collections.singleton(new Broker(
+                                Collections.singleton(new Endpoint(
                                         localNodeName,
                                         "amqps://messages.node-A.eu"
                                 ))
