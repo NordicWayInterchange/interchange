@@ -4,11 +4,11 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "local_brokers")
-public class LocalBroker {
+@Table(name = "local_endpoints")
+public class LocalEndpoint {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "local_broker_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "local_endpoint_seq")
     @Column(name = "id")
     private Integer id;
 
@@ -17,11 +17,11 @@ public class LocalBroker {
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
-    public LocalBroker() {
+    public LocalEndpoint() {
 
     }
 
-    public LocalBroker(String queueName, String messageBrokerUrl) {
+    public LocalEndpoint(String queueName, String messageBrokerUrl) {
         this.queueName = queueName;
         this.messageBrokerUrl = messageBrokerUrl;
     }
@@ -69,11 +69,11 @@ public class LocalBroker {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof LocalBroker)) return false;
-        LocalBroker localBroker = (LocalBroker) o;
-        return id.equals(localBroker.id) &&
-                queueName.equals(localBroker.queueName) &&
-                messageBrokerUrl.equals(localBroker.messageBrokerUrl);
+        if (!(o instanceof LocalEndpoint)) return false;
+        LocalEndpoint localEndpoint = (LocalEndpoint) o;
+        return id.equals(localEndpoint.id) &&
+                queueName.equals(localEndpoint.queueName) &&
+                messageBrokerUrl.equals(localEndpoint.messageBrokerUrl);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class LocalBroker {
 
     @Override
     public String toString() {
-        return "LocalBroker{" +
+        return "LocalEndpoint{" +
                 "id=" + id +
                 ", queueName='" + queueName + '\'' +
                 ", messageBrokerUrl='" + messageBrokerUrl + '\'' +

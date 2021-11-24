@@ -108,19 +108,19 @@ public class TypeTransformer {
                 localSubscription.getSelector(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
                 transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
-                transformLocalBrokersToLocalEndpointApis(localSubscription.getLocalBrokers())
+                transformLocalEndpointsToLocalEndpointApis(localSubscription.getLocalEndpoints())
         );
     }
 
-    private Set<LocalEndpointApi> transformLocalBrokersToLocalEndpointApis(Set<LocalBroker> localBrokers) {
+    private Set<LocalEndpointApi> transformLocalEndpointsToLocalEndpointApis(Set<LocalEndpoint> localEndpoints) {
         Set<LocalEndpointApi> result = new HashSet<>();
-        for (LocalBroker broker : localBrokers) {
-            List<String> hostAndPort = makeHostAndPortUfUrl(broker.getMessageBrokerUrl());
+        for (LocalEndpoint localEndpoint : localEndpoints) {
+            List<String> hostAndPort = makeHostAndPortUfUrl(localEndpoint.getMessageBrokerUrl());
             result.add(new LocalEndpointApi(hostAndPort.get(0),
                     Integer.parseInt(hostAndPort.get(1)),
-                    broker.getQueueName(),
-                    broker.getMaxBandwidth(),
-                    broker.getMaxMessageRate()));
+                    localEndpoint.getQueueName(),
+                    localEndpoint.getMaxBandwidth(),
+                    localEndpoint.getMaxMessageRate()));
         }
         return result;
     }

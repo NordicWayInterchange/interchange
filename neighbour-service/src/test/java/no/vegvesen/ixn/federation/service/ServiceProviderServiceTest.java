@@ -99,7 +99,7 @@ public class ServiceProviderServiceTest {
         serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider,"amqps://messages.local-node");
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.getLocalBrokers())
+        assertThat(subscription.getLocalEndpoints())
                 .hasSize(1)
                 .allMatch(b -> "amqps://messages.node-A.eu".equals(b.getMessageBrokerUrl()))
                 .allMatch(b -> serviceProviderName.equals(b.getQueueName()));
@@ -151,7 +151,7 @@ public class ServiceProviderServiceTest {
         serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider, localMessageBrokerUrl);
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.getLocalBrokers())
+        assertThat(subscription.getLocalEndpoints())
                 .hasSize(1)
                 .allMatch(b -> localMessageBrokerUrl.equals(b.getMessageBrokerUrl()))
                 .allMatch(b -> serviceProviderName.equals(b.getQueueName()));

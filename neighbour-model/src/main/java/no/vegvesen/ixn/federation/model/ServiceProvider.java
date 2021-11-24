@@ -124,10 +124,10 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void updateSubscriptionWithBrokerUrl(LocalSubscription subscription, Set<LocalBroker> localBrokers) {
+	public void updateSubscriptionWithBrokerUrl(LocalSubscription subscription, Set<LocalEndpoint> localEndpoints) {
 		for(LocalSubscription localSubscription : subscriptions) {
 			if (localSubscription.getSelector().equals(subscription.getSelector())){
-				localSubscription.setBrokers(localBrokers);
+				localSubscription.setLocalEndpoints(localEndpoints);
 			}
 		}
 	}
