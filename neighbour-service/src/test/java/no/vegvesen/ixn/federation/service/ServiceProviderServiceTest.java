@@ -102,7 +102,7 @@ public class ServiceProviderServiceTest {
         assertThat(subscription.getLocalEndpoints())
                 .hasSize(1)
                 .allMatch(b -> "amqps://messages.node-A.eu".equals(b.getMessageBrokerUrl()))
-                .allMatch(b -> serviceProviderName.equals(b.getQueueName()));
+                .allMatch(b -> serviceProviderName.equals(b.getSource()));
     }
 
     @Test
@@ -154,6 +154,6 @@ public class ServiceProviderServiceTest {
         assertThat(subscription.getLocalEndpoints())
                 .hasSize(1)
                 .allMatch(b -> localMessageBrokerUrl.equals(b.getMessageBrokerUrl()))
-                .allMatch(b -> serviceProviderName.equals(b.getQueueName()));
+                .allMatch(b -> serviceProviderName.equals(b.getSource()));
     }
 }

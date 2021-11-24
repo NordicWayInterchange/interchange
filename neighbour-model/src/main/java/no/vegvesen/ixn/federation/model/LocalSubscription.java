@@ -103,8 +103,8 @@ public class LocalSubscription {
         return consumerCommonName;
     }
 
-    public void setConsumerCommonName(String queueConsumerUser) {
-        this.consumerCommonName = queueConsumerUser;
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
 

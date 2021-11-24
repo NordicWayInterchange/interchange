@@ -118,7 +118,7 @@ public class TypeTransformer {
             List<String> hostAndPort = makeHostAndPortUfUrl(localEndpoint.getMessageBrokerUrl());
             result.add(new LocalEndpointApi(hostAndPort.get(0),
                     Integer.parseInt(hostAndPort.get(1)),
-                    localEndpoint.getQueueName(),
+                    localEndpoint.getSource(),
                     localEndpoint.getMaxBandwidth(),
                     localEndpoint.getMaxMessageRate()));
         }
