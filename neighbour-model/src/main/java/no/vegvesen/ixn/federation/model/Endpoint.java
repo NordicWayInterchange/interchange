@@ -12,7 +12,7 @@ public class Endpoint {
     @Column(name = "id")
     private Integer id;
 
-    private String queueName;
+    private String source;
     private String messageBrokerUrl;
     private Integer maxBandwidth;
     private Integer maxMessageRate;
@@ -21,17 +21,17 @@ public class Endpoint {
 
     }
 
-    public Endpoint(String queueName, String messageBrokerUrl) {
-        this.queueName = queueName;
+    public Endpoint(String source, String messageBrokerUrl) {
+        this.source = source;
         this.messageBrokerUrl = messageBrokerUrl;
     }
 
-    public String getQueueName() {
-        return queueName;
+    public String getSource() {
+        return source;
     }
 
-    public void setQueueName(String queueName) {
-        this.queueName = queueName;
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public String getMessageBrokerUrl() {
@@ -59,7 +59,7 @@ public class Endpoint {
     }
 
     public boolean isTheSameAsListenerEndpoint(ListenerEndpoint listenerEndpoint) {
-        if(queueName.equals(listenerEndpoint.getQueue()) && messageBrokerUrl.equals(listenerEndpoint.getBrokerUrl())){
+        if(source.equals(listenerEndpoint.getSource()) && messageBrokerUrl.equals(listenerEndpoint.getBrokerUrl())){
             return true;
         } else {
             return false;
@@ -72,20 +72,20 @@ public class Endpoint {
         if (!(o instanceof Endpoint)) return false;
         Endpoint endpoint = (Endpoint) o;
         return id.equals(endpoint.id) &&
-                queueName.equals(endpoint.queueName) &&
+                source.equals(endpoint.source) &&
                 messageBrokerUrl.equals(endpoint.messageBrokerUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, queueName, messageBrokerUrl);
+        return Objects.hash(id, source, messageBrokerUrl);
     }
 
     @Override
     public String toString() {
         return "Endpoint{" +
                 "id=" + id +
-                ", queueName='" + queueName + '\'' +
+                ", source='" + source + '\'' +
                 ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +

@@ -293,7 +293,7 @@ public class NeighbourServiceDiscoveryTest {
 		// Mock result of polling in backoff.
 		Subscription ericssonSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "");
 		ericssonSubscription.setLastUpdatedTimestamp(1);
-		Endpoint endpoint = new Endpoint("queue-1", "broker-1");
+		Endpoint endpoint = new Endpoint("source-1", "broker-1");
 		ericssonSubscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(ericssonSubscription));
 		ericsson.setOurRequestedSubscriptions(subReq);
@@ -377,7 +377,7 @@ public class NeighbourServiceDiscoveryTest {
 	public void successfulPollOfSubscriptionWithStatusCreatedCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "");
-		Endpoint endpoint = new Endpoint("queue-1", "broker-1");
+		Endpoint endpoint = new Endpoint("source-1", "broker-1");
 		subscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
 		subscription.setLastUpdatedTimestamp(1);
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(subscription));
@@ -399,8 +399,8 @@ public class NeighbourServiceDiscoveryTest {
 	public void successfulPollOfSubscriptionWithEndpointsCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, self.getName());
-		Endpoint endpoint1 = new Endpoint("queue-1", "broker-1");
-		Endpoint endpoint2 = new Endpoint("queue-2", "broker-2");
+		Endpoint endpoint1 = new Endpoint("source-1", "broker-1");
+		Endpoint endpoint2 = new Endpoint("source-2", "broker-2");
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		ericsson.setOurRequestedSubscriptions(ericssonSubscription);
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(ericsson));
@@ -695,7 +695,7 @@ public class NeighbourServiceDiscoveryTest {
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(spyNeighbour1.getName(), "amqps://spy-neighbour", "spy-neighbour", new Connection());
 
 		when(neighbourFacade.pollSubscriptionLastUpdatedTime(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
-		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(spyNeighbour1.getName(), endpoint.getMessageBrokerUrl(), endpoint.getQueueName())).thenReturn(listenerEndpoint);
+		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndSource(spyNeighbour1.getName(), endpoint.getMessageBrokerUrl(), endpoint.getSource())).thenReturn(listenerEndpoint);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
