@@ -49,8 +49,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "endpoint-one", "queue-one", messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("two", "endpoint-two", "queue-two", messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "endpoint-one", "source-one", messageConnectionOne);
+        ListenerEndpoint two = new ListenerEndpoint("two", "endpoint-two", "source-two", messageConnectionTwo);
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -76,8 +76,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "endpoint-one", "queue-one", messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("one", "endpoint-two", "queue-two", messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "endpoint-one", "source-one", messageConnectionOne);
+        ListenerEndpoint two = new ListenerEndpoint("one", "endpoint-two", "source-two", messageConnectionTwo);
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -103,8 +103,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "endpoint-one", "queue-one", messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("one", "endpoint-two", "queue-two", messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "endpoint-one", "source-one", messageConnectionOne);
+        ListenerEndpoint two = new ListenerEndpoint("one", "endpoint-two", "source-two", messageConnectionTwo);
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
