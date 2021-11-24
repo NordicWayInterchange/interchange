@@ -9,7 +9,7 @@ import java.util.Objects;
 public class EndpointApi {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String queueName;
+    private String source;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String messageBrokerUrl;
@@ -21,24 +21,24 @@ public class EndpointApi {
 
     }
 
-    public EndpointApi(String queueName, String messageBrokerUrl) {
-        this.queueName = queueName;
+    public EndpointApi(String source, String messageBrokerUrl) {
+        this.source = source;
         this.messageBrokerUrl = messageBrokerUrl;
     }
 
-    public EndpointApi(String queueName, String messageBrokerUrl, Integer maxBandwidth, Integer maxMessageRate) {
-        this.queueName = queueName;
+    public EndpointApi(String source, String messageBrokerUrl, Integer maxBandwidth, Integer maxMessageRate) {
+        this.source = source;
         this.messageBrokerUrl = messageBrokerUrl;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
     }
 
-    public String getQueueName() {
-        return queueName;
+    public String getSource() {
+        return source;
     }
 
-    public void setQueueName(String queueName) {
-        this.queueName = queueName;
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public String getMessageBrokerUrl() {
@@ -70,7 +70,7 @@ public class EndpointApi {
         if (this == o) return true;
         if (!(o instanceof EndpointApi)) return false;
         EndpointApi endpointApi = (EndpointApi) o;
-        return queueName.equals(endpointApi.queueName) &&
+        return source.equals(endpointApi.source) &&
                 messageBrokerUrl.equals(endpointApi.messageBrokerUrl) &&
                 Objects.equals(maxBandwidth, endpointApi.maxBandwidth) &&
                 Objects.equals(maxMessageRate, endpointApi.maxMessageRate);
@@ -78,13 +78,13 @@ public class EndpointApi {
 
     @Override
     public int hashCode() {
-        return Objects.hash(queueName, messageBrokerUrl, maxBandwidth, maxMessageRate);
+        return Objects.hash(source, messageBrokerUrl, maxBandwidth, maxMessageRate);
     }
 
     @Override
     public String toString() {
         return "EndpointApi{" +
-                "queueName='" + queueName + '\'' +
+                "source='" + source + '\'' +
                 ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
