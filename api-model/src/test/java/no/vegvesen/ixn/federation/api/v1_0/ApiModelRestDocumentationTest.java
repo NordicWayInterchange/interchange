@@ -116,9 +116,9 @@ public class ApiModelRestDocumentationTest {
                 SubscriptionStatusApi.CREATED,
                 "node-1",
                 Collections.singleton(
-                        new BrokerApi(
+                        new EndpointApi(
                                 "queue-1",
-                                "broker-1"
+                                "endpoint-1"
                         )
                 )
         );
