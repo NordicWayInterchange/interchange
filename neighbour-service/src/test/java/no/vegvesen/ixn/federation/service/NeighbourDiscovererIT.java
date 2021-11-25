@@ -131,7 +131,7 @@ public class NeighbourDiscovererIT {
 		Self self = selfService.fetchSelf();
 		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 
-		neigbourDiscoveryService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
+		neigbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
 		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any(), any());
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
@@ -158,7 +158,8 @@ public class NeighbourDiscovererIT {
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any(), any())).thenReturn(c1);
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any(), any())).thenReturn(c2);
 
-		neigbourDiscoveryService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
+		Self self = selfService.fetchSelf();
+		neigbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);

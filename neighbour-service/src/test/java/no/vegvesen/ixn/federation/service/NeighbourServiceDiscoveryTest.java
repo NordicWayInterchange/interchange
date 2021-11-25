@@ -135,7 +135,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		doReturn(self).when(selfService).fetchSelf();
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade,  self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -169,7 +169,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.getControlConnection().setConnectionStatus(ConnectionStatus.FAILED);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		verify(neighbourFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 	}
@@ -239,7 +239,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		verify(neighbourFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 	}
@@ -325,7 +325,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		assertThat(ericsson.getControlConnection().getBackoffAttempts()).isEqualTo(1);
 	}
@@ -345,7 +345,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(self).when(selfService).fetchSelf();
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), self, neighbourFacade);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		assertThat(ericsson.getControlConnection().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 		verify(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
