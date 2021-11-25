@@ -42,7 +42,6 @@ public class SelfService {
 		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
 		self.setLastUpdatedLocalSubscriptions(calculateLastUpdatedSubscriptions(serviceProviders));
 		self.setLastUpdatedLocalCapabilities(calculateLastUpdatedCapabilities(serviceProviders));
-		self.setMessageChannelPort(interchangeNodeProperties.getMessageChannelPort());
         return self;
 
 	}
