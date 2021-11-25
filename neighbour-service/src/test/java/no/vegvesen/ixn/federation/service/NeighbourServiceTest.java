@@ -443,16 +443,16 @@ class NeighbourServiceTest {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("my-neighbour");
 
-		Endpoint endpoint1 = new Endpoint("my-source-1", "my-endpoint-1");
-		Endpoint endpoint2 = new Endpoint("my-source-2", "my-endpoint-2");
+		Endpoint endpoint1 = new Endpoint("my-source-1", "host-1", 0);
+		Endpoint endpoint2 = new Endpoint("my-source-2", "host-2", 0);
 
 		Set<Endpoint> endpoints = new HashSet<>(Sets.newSet(endpoint1, endpoint2));
 
-		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndSource("my-neighbour", "my-endpoint-1", "my-source-1")).thenReturn(null);
-		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndSource("my-neighbour", "my-endpoint-2", "my-source-2")).thenReturn(null);
+		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "host-1", 0, "my-source-1")).thenReturn(null);
+		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "host-2", 0, "my-source-2")).thenReturn(null);
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-endpoint-1", "my-source-1", new Connection());
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-endpoint-2", "my-source-2", new Connection());
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "host-1", 0, new Connection());
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "host-2", 0, new Connection());
 
 		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);

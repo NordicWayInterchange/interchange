@@ -276,13 +276,13 @@ public class NeigbourDiscoveryService {
 
     public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
         for(Endpoint endpoint : endpoints) {
-            createListenerEndpoint(endpoint.getMessageBrokerUrl(), endpoint.getSource(), neighbour);
+            createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), neighbour);
         }
     }
 
-    public void createListenerEndpoint(String brokerUrl, String source, Neighbour neighbour) {
-        if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndSource(neighbour.getName(), brokerUrl, source) == null){
-            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), brokerUrl, source, new Connection()));
+    public void createListenerEndpoint(String host, Integer port, String source, Neighbour neighbour) {
+        if(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), host, port, source) == null){
+            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection()));
             logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
         }
     }
