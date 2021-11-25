@@ -14,6 +14,8 @@ public class LocalEndpoint {
 
     private String source;
     private String messageBrokerUrl;
+    private String host;
+    private Integer port;
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
@@ -24,6 +26,20 @@ public class LocalEndpoint {
     public LocalEndpoint(String source, String messageBrokerUrl) {
         this.source = source;
         this.messageBrokerUrl = messageBrokerUrl;
+    }
+
+    public LocalEndpoint(String source, String host, Integer port) {
+        this.source = source;
+        this.host = host;
+        this.port = port;
+    }
+
+    public LocalEndpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+        this.source = source;
+        this.host = host;
+        this.port = port;
+        this.maxBandwidth = maxBandwidth;
+        this.maxMessageRate = maxMessageRate;
     }
 
     public String getSource() {
@@ -40,6 +56,22 @@ public class LocalEndpoint {
 
     public void setMessageBrokerUrl(String messageBrokerUrl) {
         this.messageBrokerUrl = messageBrokerUrl;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
     }
 
     public Integer getMaxBandwidth() {
@@ -70,15 +102,16 @@ public class LocalEndpoint {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof LocalEndpoint)) return false;
-        LocalEndpoint localEndpoint = (LocalEndpoint) o;
-        return id.equals(localEndpoint.id) &&
-                source.equals(localEndpoint.source) &&
-                messageBrokerUrl.equals(localEndpoint.messageBrokerUrl);
+        LocalEndpoint that = (LocalEndpoint) o;
+        return id.equals(that.id) &&
+                source.equals(that.source) &&
+                host.equals(that.host) &&
+                port.equals(that.port);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, source, messageBrokerUrl);
+        return Objects.hash(id, source, host, port);
     }
 
     @Override
@@ -86,7 +119,8 @@ public class LocalEndpoint {
         return "LocalEndpoint{" +
                 "id=" + id +
                 ", source='" + source + '\'' +
-                ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
                 '}';
