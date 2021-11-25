@@ -14,6 +14,8 @@ public class Endpoint {
 
     private String source;
     private String messageBrokerUrl;
+    private String host;
+    private Integer port;
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
@@ -24,6 +26,20 @@ public class Endpoint {
     public Endpoint(String source, String messageBrokerUrl) {
         this.source = source;
         this.messageBrokerUrl = messageBrokerUrl;
+    }
+
+    public Endpoint(String source, String host, Integer port) {
+        this.source = source;
+        this.host = host;
+        this.port = port;
+    }
+
+    public Endpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+        this.source = source;
+        this.host = host;
+        this.port = port;
+        this.maxBandwidth = maxBandwidth;
+        this.maxMessageRate = maxMessageRate;
     }
 
     public String getSource() {
@@ -40,6 +56,22 @@ public class Endpoint {
 
     public void setMessageBrokerUrl(String messageBrokerUrl) {
         this.messageBrokerUrl = messageBrokerUrl;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
     }
 
     public Integer getMaxBandwidth() {
@@ -73,12 +105,13 @@ public class Endpoint {
         Endpoint endpoint = (Endpoint) o;
         return id.equals(endpoint.id) &&
                 source.equals(endpoint.source) &&
-                messageBrokerUrl.equals(endpoint.messageBrokerUrl);
+                host.equals(endpoint.host) &&
+                port.equals(endpoint.port);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, source, messageBrokerUrl);
+        return Objects.hash(id, source, host, port);
     }
 
     @Override
@@ -86,7 +119,8 @@ public class Endpoint {
         return "Endpoint{" +
                 "id=" + id +
                 ", source='" + source + '\'' +
-                ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
                 '}';
