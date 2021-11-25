@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "listener_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"neighbourName", "brokerUrl", "source"}, name = "uk_listener_endpoint"))
+@Table(name = "listener_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"neighbourName", "source", "host", "port"}, name = "uk_listener_endpoint"))
 public class ListenerEndpoint {
 
     @Id
@@ -16,7 +16,7 @@ public class ListenerEndpoint {
     private String brokerUrl;
     private String source;
     private String host;
-    private int port;
+    private Integer port;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_listener_endpoints_message_connection"))
@@ -35,9 +35,8 @@ public class ListenerEndpoint {
         this.messageConnection = messageConnection;
     }
 
-    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, String host, int port, Connection messageConnection) {
+    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection) {
         this.neighbourName = neighbourName;
-        this.brokerUrl = brokerUrl;
         this.source = source;
         this.host = host;
         this.port = port;
@@ -53,7 +52,7 @@ public class ListenerEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
-    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, String host, int port, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
+    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, String host, Integer port, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
         this.neighbourName = neighbourName;
         this.brokerUrl = brokerUrl;
         this.source = source;
@@ -84,11 +83,11 @@ public class ListenerEndpoint {
         this.host = host;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 
@@ -131,10 +130,10 @@ public class ListenerEndpoint {
         if (this == o) return true;
         if (!(o instanceof ListenerEndpoint)) return false;
         ListenerEndpoint that = (ListenerEndpoint) o;
-        return port == that.port &&
-                neighbourName.equals(that.neighbourName) &&
+        return neighbourName.equals(that.neighbourName) &&
                 source.equals(that.source) &&
-                host.equals(that.host);
+                host.equals(that.host) &&
+                port.equals(that.port);
     }
 
     @Override
