@@ -13,6 +13,10 @@ public class AddSubscription {
 
     public AddSubscription(){}
 
+    public AddSubscription(SelectorApi selector){
+        this.selector = selector;
+    }
+
     public AddSubscription(String consumerCommonName, SelectorApi selector){
         this.consumerCommonName = consumerCommonName;
         this.selector = selector;
