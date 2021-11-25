@@ -14,6 +14,9 @@ public class EndpointApi {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String messageBrokerUrl;
 
+    private String host;
+    private Integer port;
+
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
@@ -49,6 +52,22 @@ public class EndpointApi {
         this.messageBrokerUrl = messageBrokerUrl;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
     public Integer getMaxBandwidth() {
         return maxBandwidth;
     }
@@ -69,23 +88,25 @@ public class EndpointApi {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof EndpointApi)) return false;
-        EndpointApi endpointApi = (EndpointApi) o;
-        return source.equals(endpointApi.source) &&
-                messageBrokerUrl.equals(endpointApi.messageBrokerUrl) &&
-                Objects.equals(maxBandwidth, endpointApi.maxBandwidth) &&
-                Objects.equals(maxMessageRate, endpointApi.maxMessageRate);
+        EndpointApi that = (EndpointApi) o;
+        return source.equals(that.source) &&
+                host.equals(that.host) &&
+                port.equals(that.port) &&
+                Objects.equals(maxBandwidth, that.maxBandwidth) &&
+                Objects.equals(maxMessageRate, that.maxMessageRate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(source, messageBrokerUrl, maxBandwidth, maxMessageRate);
+        return Objects.hash(source, host, port, maxBandwidth, maxMessageRate);
     }
 
     @Override
     public String toString() {
         return "EndpointApi{" +
                 "source='" + source + '\'' +
-                ", messageBrokerUrl='" + messageBrokerUrl + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
                 '}';
