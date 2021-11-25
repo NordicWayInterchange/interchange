@@ -15,6 +15,8 @@ public class ListenerEndpoint {
     private String neighbourName;
     private String brokerUrl;
     private String source;
+    private String host;
+    private int port;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_listener_endpoints_message_connection"))
@@ -33,10 +35,30 @@ public class ListenerEndpoint {
         this.messageConnection = messageConnection;
     }
 
+    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, String host, int port, Connection messageConnection) {
+        this.neighbourName = neighbourName;
+        this.brokerUrl = brokerUrl;
+        this.source = source;
+        this.host = host;
+        this.port = port;
+        this.messageConnection = messageConnection;
+    }
+
     public ListenerEndpoint(String neighbourName, String brokerUrl, String source, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
         this.neighbourName = neighbourName;
         this.brokerUrl = brokerUrl;
         this.source = source;
+        this.messageConnection = messageConnection;
+        this.maxBandwidth = maxBandwidth;
+        this.maxMessageRate = maxMessageRate;
+    }
+
+    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, String host, int port, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
+        this.neighbourName = neighbourName;
+        this.brokerUrl = brokerUrl;
+        this.source = source;
+        this.host = host;
+        this.port = port;
         this.messageConnection = messageConnection;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
@@ -53,6 +75,22 @@ public class ListenerEndpoint {
     public String getSource() { return source; }
 
     public void setSource(String source) { this.source = source; }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 
     public Connection getMessageConnection () { return messageConnection; }
 
@@ -79,8 +117,9 @@ public class ListenerEndpoint {
         return "ListenerEndpoint{" +
                 "id=" + id +
                 ", neighbourName='" + neighbourName + '\'' +
-                ", brokerUrl='" + brokerUrl + '\'' +
                 ", source='" + source + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
                 ", messageConnection=" + messageConnection +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
@@ -90,16 +129,16 @@ public class ListenerEndpoint {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ListenerEndpoint)) return false;
         ListenerEndpoint that = (ListenerEndpoint) o;
-        return neighbourName.equals(that.neighbourName) &&
-                brokerUrl.equals(that.brokerUrl) &&
-                source.equals(that.source);
+        return port == that.port &&
+                neighbourName.equals(that.neighbourName) &&
+                source.equals(that.source) &&
+                host.equals(that.host);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(neighbourName, brokerUrl, source);
+        return Objects.hash(neighbourName, source, host, port);
     }
-
 }
