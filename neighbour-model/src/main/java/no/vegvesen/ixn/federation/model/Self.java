@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 
-import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +23,6 @@ public class Self {
 
 	private LocalDateTime lastUpdatedLocalCapabilities;
 	private LocalDateTime lastUpdatedLocalSubscriptions;
-
-	private String messageChannelPort;
 
 	public Self(){}
 
@@ -78,10 +75,6 @@ public class Self {
 		this.lastUpdatedLocalSubscriptions = lastUpdatedLocalSubscriptions;
 	}
 
-	public void setMessageChannelPort(String messageChannelPort) {
-		this.messageChannelPort = messageChannelPort;
-	}
-
 	@Override
 	public String toString() {
 		return "Self{" +
@@ -90,7 +83,6 @@ public class Self {
 				", localSubscriptions=" + localSubscriptions +
 				", lastUpdatedLocalCapabilities=" + lastUpdatedLocalCapabilities +
 				", lastUpdatedLocalSubscriptions=" + lastUpdatedLocalSubscriptions +
-				", messageChannelPort=" + messageChannelPort +
 				'}';
 	}
 }
