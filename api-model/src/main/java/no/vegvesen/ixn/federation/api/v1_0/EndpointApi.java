@@ -29,9 +29,23 @@ public class EndpointApi {
         this.messageBrokerUrl = messageBrokerUrl;
     }
 
+    public EndpointApi(String source, String host, Integer port) {
+        this.source = source;
+        this.host = host;
+        this.port = port;
+    }
+
     public EndpointApi(String source, String messageBrokerUrl, Integer maxBandwidth, Integer maxMessageRate) {
         this.source = source;
         this.messageBrokerUrl = messageBrokerUrl;
+        this.maxBandwidth = maxBandwidth;
+        this.maxMessageRate = maxMessageRate;
+    }
+
+    public EndpointApi(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+        this.source = source;
+        this.host = host;
+        this.port = port;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
     }
