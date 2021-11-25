@@ -16,7 +16,7 @@ public class Self {
 
 	private String name;
 
-	private static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
+	public static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 
 	private Set<Capability> localCapabilities = new HashSet<>();
 
@@ -80,19 +80,6 @@ public class Self {
 
 	public void setMessageChannelPort(String messageChannelPort) {
 		this.messageChannelPort = messageChannelPort;
-	}
-
-	public static String getMessageChannelUrl(String brokerName, String port) {
-		try {
-			if (port == null || port.equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
-				return String.format("amqps://%s/", brokerName);
-			} else {
-				return String.format("amqps://%s:%s/",brokerName, port);
-			}
-		} catch (NumberFormatException e) {
-			logger.error("Could not create message channel url for interchange {}", brokerName, e);
-			throw new DiscoveryException(e);
-		}
 	}
 
 	@Override

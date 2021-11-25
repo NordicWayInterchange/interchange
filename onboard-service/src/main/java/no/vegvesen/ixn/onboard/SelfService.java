@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.onboard;
 
 
+import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -97,6 +98,19 @@ public class SelfService {
 	}
 
 	public String getMessageChannelUrl() {
-		return Self.getMessageChannelUrl(interchangeNodeProperties.getName(),interchangeNodeProperties.getMessageChannelPort());
+		return getMessageChannelUrl(interchangeNodeProperties.getName(),interchangeNodeProperties.getMessageChannelPort());
+	}
+
+	public static String getMessageChannelUrl(String brokerName, String port) {
+		try {
+			if (port == null || port.equals(Self.DEFAULT_MESSAGE_CHANNEL_PORT)) {
+				return String.format("amqps://%s/", brokerName);
+			} else {
+				return String.format("amqps://%s:%s/",brokerName, port);
+			}
+		} catch (NumberFormatException e) {
+			logger.error("Could not create message channel url for interchange {}", brokerName, e);
+			throw new DiscoveryException(e);
+		}
 	}
 }
