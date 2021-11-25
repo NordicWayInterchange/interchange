@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "listener_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"neighbourName", "brokerUrl", "queue"}, name = "uk_listener_endpoint"))
+@Table(name = "listener_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"neighbourName", "brokerUrl", "source"}, name = "uk_listener_endpoint"))
 public class ListenerEndpoint {
 
     @Id
