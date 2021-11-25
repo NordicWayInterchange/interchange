@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.Self;
 import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
@@ -60,7 +61,8 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void scheduleCapabilityExchangeWithNeighbours() {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
-		neigbourDiscoveryService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), neighbourFacade);
+		Self self = selfService.fetchSelf();
+		neigbourDiscoveryService.capabilityExchangeWithNeighbours(neighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
