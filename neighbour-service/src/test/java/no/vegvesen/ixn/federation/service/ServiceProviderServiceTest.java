@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.onboard.SelfService;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,9 +43,9 @@ public class ServiceProviderServiceTest {
                 new SubscriptionRequest(),
                 new SubscriptionRequest()
         ))).when(neighbourRepository).findAll();
-        Self self = new Self("local-node");
+        String name = "local-node";
 
-        serviceProviderService.updateLocalSubscriptions(self);
+        serviceProviderService.updateLocalSubscriptions(SelfService.getMessageChannelUrl(name,null));
 
         verify(serviceProviderRepository).findAll();
         verify(neighbourRepository).findAll();

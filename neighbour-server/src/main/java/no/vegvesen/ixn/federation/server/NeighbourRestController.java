@@ -96,7 +96,9 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.info("Common name matches Neighbour name in path.");
 
-		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId,selfService.fetchSelf().getMessageChannelUrl());
+		String messageChannelUrl = selfService.getMessageChannelUrl();
+		NeighbourMDCUtil.removeLogVariables();
+		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId, messageChannelUrl);
 	}
 
 
@@ -137,5 +139,6 @@ public class NeighbourRestController {
 		logger.info("Common name matches Neighbour name in path.");
 
 		neighbourService.incomingSubscriptionDelete(ixnName, subscriptionId);
+		NeighbourMDCUtil.removeLogVariables();
 	}
 }

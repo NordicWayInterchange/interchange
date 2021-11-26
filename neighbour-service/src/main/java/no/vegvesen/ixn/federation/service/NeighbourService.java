@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
@@ -32,13 +33,15 @@ public class NeighbourService {
 	private CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
-
+	private InterchangeNodeProperties interchangeNodeProperties;
 
 	@Autowired
 	public NeighbourService(NeighbourRepository neighbourRepository,
-							DNSFacade dnsFacade) {
+							DNSFacade dnsFacade,
+							InterchangeNodeProperties interchangeNodeProperties) {
 		this.neighbourRepository = neighbourRepository;
 		this.dnsFacade = dnsFacade;
+		this.interchangeNodeProperties = interchangeNodeProperties;
 	}
 
 	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Self self) {
@@ -58,7 +61,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilitiesTransformer.selfToCapabilityApi(self);
+		return capabilitiesTransformer.selfToCapabilityApi(interchangeNodeProperties.getName(), self.getLocalCapabilities());
 	}
 
 	Neighbour findNeighbour(String neighbourName) {

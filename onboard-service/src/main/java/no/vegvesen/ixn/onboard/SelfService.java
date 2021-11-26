@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.onboard;
 
 
+import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -36,12 +37,11 @@ public class SelfService {
     //this could, of course, be a lot more efficient :-)
 	public Self fetchSelf() {
 		List<ServiceProvider> serviceProviders = repository.findAll();
-		Self self = new Self(interchangeNodeProperties.getName());
+		Self self = new Self();
 		self.setLocalCapabilities(CapabilityCalculator.calculateSelfCapabilities(serviceProviders));
 		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
 		self.setLastUpdatedLocalSubscriptions(calculateLastUpdatedSubscriptions(serviceProviders));
 		self.setLastUpdatedLocalCapabilities(calculateLastUpdatedCapabilities(serviceProviders));
-		self.setMessageChannelPort(interchangeNodeProperties.getMessageChannelPort());
         return self;
 
 	}
@@ -94,5 +94,22 @@ public class SelfService {
 	//TODO: decide if centralize to the Properties class, or the service
 	public String getNodeProviderName() {
 		return interchangeNodeProperties.getName();
+	}
+
+	public String getMessageChannelUrl() {
+		return getMessageChannelUrl(interchangeNodeProperties.getName(),interchangeNodeProperties.getMessageChannelPort());
+	}
+
+	public static String getMessageChannelUrl(String brokerName, String port) {
+		try {
+			if (port == null || port.equals(Self.DEFAULT_MESSAGE_CHANNEL_PORT)) {
+				return String.format("amqps://%s/", brokerName);
+			} else {
+				return String.format("amqps://%s:%s/",brokerName, port);
+			}
+		} catch (NumberFormatException e) {
+			logger.error("Could not create message channel url for interchange {}", brokerName, e);
+			throw new DiscoveryException(e);
+		}
 	}
 }

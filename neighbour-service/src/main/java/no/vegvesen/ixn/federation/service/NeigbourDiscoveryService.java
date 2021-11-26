@@ -69,23 +69,23 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void capabilityExchangeWithNeighbours(Self self, NeighbourFacade neighbourFacade) {
+    public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
                 Capabilities.CapabilitiesStatus.UNKNOWN,
                 Capabilities.CapabilitiesStatus.KNOWN,
                 Capabilities.CapabilitiesStatus.FAILED);
-        capabilityExchange(neighboursForCapabilityExchange, self, neighbourFacade);
+        capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
-    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self, NeighbourFacade neighbourFacade) {
+    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         for (Neighbour neighbour : neighboursForCapabilityExchange) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-                    if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
+                    if (neighbour.needsOurUpdatedCapabilities(lastUpdatedLocalCapabilities)) {
                         logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
-                        postCapabilities(self, neighbour, neighbourFacade);
+                        postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), localCapabilities);
                     } else {
                         logger.debug("Neighbour has our last capabilities");
                     }
@@ -107,7 +107,7 @@ public class NeigbourDiscoveryService {
             for (Neighbour neighbour : unreachableNeighbours) {
                 try {
                     NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-                    postCapabilities(self, neighbour, neighbourFacade);
+                    postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), self.getLocalCapabilities());
                 } catch (Exception e) {
                     logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
                 } finally {
@@ -117,9 +117,9 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    private void postCapabilities(Self self, Neighbour neighbour, NeighbourFacade neighbourFacade) {
+    private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<Capability> localCapabilities) {
         try {
-            Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, self);
+            Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             capabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.setCapabilities(capabilities);
             neighbour.getControlConnection().okConnection();
@@ -174,9 +174,11 @@ public class NeigbourDiscoveryService {
                     Set<Subscription> additionalSubscriptions = new HashSet<>(wantedSubscriptions);
                     additionalSubscriptions.removeAll(existingSubscriptions);
                     if (!additionalSubscriptions.isEmpty()) {
-                        SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, self.getName());
+                        SubscriptionRequest subscriptionRequestResponse = neighbourFacade
+                                .postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
                         subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
-                        neighbour.getOurRequestedSubscriptions().addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
+                        neighbour.getOurRequestedSubscriptions()
+                                .addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
                     }
                     neighbour.getControlConnection().okConnection();
                     logger.info("Successfully posted subscription request to neighbour.");

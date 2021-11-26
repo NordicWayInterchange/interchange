@@ -20,8 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -43,12 +42,12 @@ class NeighbourServiceTest {
 
 	NeighbourService neighbourService;
 	NeigbourDiscoveryService neigbourDiscoveryService;
-
+	InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName,null);
 
 	@BeforeEach
 	void setUp() {
 		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
-		neighbourService = new NeighbourService(neighbourRepository, dnsFacade);
+		neighbourService = new NeighbourService(neighbourRepository, dnsFacade,interchangeNodeProperties);
 		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository,interchangeNodeProperties,backoffProperties,discovererProperties);
 	}
 
@@ -69,11 +68,11 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, new Self("bouvet"));
+		CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, new Self());
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
-		assertThat(response.getName()).isEqualTo("bouvet");
+		assertThat(response.getName()).isEqualTo(myName);
 	}
 
 	@Test
@@ -114,7 +113,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		neighbourService.incomingCapabilities(ericsson, new Self(myName));
+		neighbourService.incomingCapabilities(ericsson, new Self());
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 	}
@@ -130,7 +129,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		Throwable thrown = catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, new Self("some-node-name")));
+		Throwable thrown = catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, new Self()));
 
 		assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 		verify(dnsFacade, times(1)).lookupNeighbours();
@@ -222,7 +221,7 @@ class NeighbourServiceTest {
 
 	@Test
 	public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
-		Self selfWithNoSubscriptions = new Self("self");
+		Self selfWithNoSubscriptions = new Self();
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
 		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(neighbour, selfWithNoSubscriptions.getLocalSubscriptions());
@@ -252,7 +251,7 @@ class NeighbourServiceTest {
 
 	@Test
 	public void noSubscriptionsAreAddedWhenLocalSubscriptionsAndCapabilitiesAreTheSame() {
-		Self self = new Self("self");
+		Self self = new Self();
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", "self"));
 		self.setLocalSubscriptions(localSubscriptions);
@@ -271,7 +270,7 @@ class NeighbourServiceTest {
 
 	@Test
 	public void subscriptionsAreAddedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
-		Self self = new Self("self");
+		Self self = new Self();
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'"));
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'SE'"));
@@ -296,7 +295,7 @@ class NeighbourServiceTest {
 
 	@Test
 	public void subscriptionsAreRemovedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
-		Self self = new Self("self");
+		Self self = new Self();
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", "self"));
 		self.setLocalSubscriptions(localSubscriptions);
@@ -318,7 +317,7 @@ class NeighbourServiceTest {
 
 	@Test
 	public void subscriptionsAreAddedAndRemovedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
-		Self self = new Self("self");
+		Self self = new Self();
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'"));
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'"));
