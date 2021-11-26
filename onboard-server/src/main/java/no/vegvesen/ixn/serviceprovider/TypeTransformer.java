@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -115,9 +114,8 @@ public class TypeTransformer {
     private Set<LocalEndpointApi> transformLocalEndpointsToLocalEndpointApis(Set<LocalEndpoint> localEndpoints) {
         Set<LocalEndpointApi> result = new HashSet<>();
         for (LocalEndpoint localEndpoint : localEndpoints) {
-            List<String> hostAndPort = makeHostAndPortUfUrl(localEndpoint.getMessageBrokerUrl());
-            result.add(new LocalEndpointApi(hostAndPort.get(0),
-                    Integer.parseInt(hostAndPort.get(1)),
+            result.add(new LocalEndpointApi(localEndpoint.getHost(),
+                    localEndpoint.getPort(),
                     localEndpoint.getSource(),
                     localEndpoint.getMaxBandwidth(),
                     localEndpoint.getMaxMessageRate()));
@@ -162,15 +160,5 @@ public class TypeTransformer {
                 createCapabilitiesPath(serviceProviderName,capabilityId),
                 capability.toApi()
         );
-    }
-
-    public static List<String> makeHostAndPortUfUrl(String url) {
-        URI uri = URI.create(url);
-        String host = uri.getHost();
-        int port = uri.getPort();
-        if (port == -1){
-            port = 5671;
-        }
-        return new ArrayList<>(Arrays.asList(host, String.valueOf(port)));
     }
 }
