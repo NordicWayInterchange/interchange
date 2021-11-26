@@ -107,7 +107,7 @@ public class NeigbourDiscoveryService {
             for (Neighbour neighbour : unreachableNeighbours) {
                 try {
                     NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-                    postCapabilities(neighbour, neighbourFacade, self.getName(), self.getLocalCapabilities());
+                    postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), self.getLocalCapabilities());
                 } catch (Exception e) {
                     logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
                 } finally {
@@ -174,9 +174,11 @@ public class NeigbourDiscoveryService {
                     Set<Subscription> additionalSubscriptions = new HashSet<>(wantedSubscriptions);
                     additionalSubscriptions.removeAll(existingSubscriptions);
                     if (!additionalSubscriptions.isEmpty()) {
-                        SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, self.getName());
+                        SubscriptionRequest subscriptionRequestResponse = neighbourFacade
+                                .postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
                         subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
-                        neighbour.getOurRequestedSubscriptions().addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
+                        neighbour.getOurRequestedSubscriptions()
+                                .addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
                     }
                     neighbour.getControlConnection().okConnection();
                     logger.info("Successfully posted subscription request to neighbour.");

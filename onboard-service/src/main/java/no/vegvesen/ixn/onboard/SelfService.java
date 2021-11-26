@@ -37,7 +37,7 @@ public class SelfService {
     //this could, of course, be a lot more efficient :-)
 	public Self fetchSelf() {
 		List<ServiceProvider> serviceProviders = repository.findAll();
-		Self self = new Self(interchangeNodeProperties.getName());
+		Self self = new Self();
 		self.setLocalCapabilities(CapabilityCalculator.calculateSelfCapabilities(serviceProviders));
 		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
 		self.setLastUpdatedLocalSubscriptions(calculateLastUpdatedSubscriptions(serviceProviders));
