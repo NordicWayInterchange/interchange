@@ -1,9 +1,23 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Capability;
+import no.vegvesen.ixn.federation.model.LocalBroker;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.serviceprovider.model.*;
+import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesRequest;
+import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesResponse;
+import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsResponse;
+import no.vegvesen.ixn.serviceprovider.model.Endpoint;
+import no.vegvesen.ixn.serviceprovider.model.GetCapabilityResponse;
+import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
+import no.vegvesen.ixn.serviceprovider.model.ListCapabilitiesResponse;
+import no.vegvesen.ixn.serviceprovider.model.ListSubscriptionsResponse;
+import no.vegvesen.ixn.serviceprovider.model.LocalActorCapability;
+import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
+import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscriptionStatusApi;
+import no.vegvesen.ixn.serviceprovider.model.SelectorApi;
 
 import java.net.URI;
 import java.time.LocalDateTime;

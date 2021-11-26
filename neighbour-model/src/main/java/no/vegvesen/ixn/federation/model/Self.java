@@ -13,8 +13,6 @@ public class Self {
 
 	private static Logger logger = LoggerFactory.getLogger(Self.class);
 
-	private String name;
-
 	public static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 
 	private Set<Capability> localCapabilities = new HashSet<>();
@@ -25,18 +23,6 @@ public class Self {
 	private LocalDateTime lastUpdatedLocalSubscriptions;
 
 	public Self(){}
-
-	public Self(String name){
-		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	public Set<Capability> getLocalCapabilities() {
 		return localCapabilities;
@@ -78,7 +64,6 @@ public class Self {
 	@Override
 	public String toString() {
 		return "Self{" +
-				", name='" + name + '\'' +
 				", localCapabilities=" + localCapabilities +
 				", localSubscriptions=" + localSubscriptions +
 				", lastUpdatedLocalCapabilities=" + lastUpdatedLocalCapabilities +
