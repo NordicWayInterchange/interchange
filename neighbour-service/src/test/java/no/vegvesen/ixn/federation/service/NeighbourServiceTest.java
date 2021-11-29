@@ -68,7 +68,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, new Self());
+        CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, Collections.emptySet());
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
@@ -113,7 +113,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		neighbourService.incomingCapabilities(ericsson, new Self());
+        neighbourService.incomingCapabilities(ericsson, Collections.emptySet());
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 	}
@@ -129,7 +129,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-		Throwable thrown = catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, new Self()));
+		Throwable thrown = catchThrowable(() -> neighbourService.incomingCapabilities(unknownNeighbour, Collections.emptySet()));
 
 		assertThat(thrown).isInstanceOf(InterchangeNotInDNSException.class);
 		verify(dnsFacade, times(1)).lookupNeighbours();
@@ -197,7 +197,7 @@ class NeighbourServiceTest {
 
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
+		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbour.getCapabilities().getCapabilities(), neighbour.getName());
 
 		assertThat(calculatedSubscription).hasSize(1);
 		assertThat(calculatedSubscription.iterator().next().getSelector()).isEqualTo("originatingCountry = 'NO'");
@@ -210,7 +210,7 @@ class NeighbourServiceTest {
 
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(neighbour, localSubscriptions);
+		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbour.getCapabilities().getCapabilities(), neighbour.getName());
 
 		assertThat(calculatedSubscription).hasSize(1);
 		assertThat(calculatedSubscription.iterator().next().getSelector())
@@ -224,7 +224,7 @@ class NeighbourServiceTest {
 		Self selfWithNoSubscriptions = new Self();
 		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(neighbour, selfWithNoSubscriptions.getLocalSubscriptions());
+		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(selfWithNoSubscriptions.getLocalSubscriptions(), neighbour.getCapabilities().getCapabilities(), neighbour.getName());
 		assertThat(calculatedSubscription).hasSize(0);
 	}
 
@@ -264,7 +264,7 @@ class NeighbourServiceTest {
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(getDatexCapability("NO")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), subscriptionRequest);
 
-		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self, neighbourFacade);
+		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self.getLocalSubscriptions(), neighbourFacade);
 		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
 	}
 
@@ -286,9 +286,9 @@ class NeighbourServiceTest {
 
 		Subscription subscription2 = new Subscription(2, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "self");
 
-		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, new HashSet<>(Collections.singleton(subscription2))));
+		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new HashSet<>(Collections.singleton(subscription2)));
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self, neighbourFacade);
+		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self.getLocalSubscriptions(), neighbourFacade);
 		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
 	}
@@ -310,7 +310,7 @@ class NeighbourServiceTest {
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), existingSubscriptions);
 
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self, neighbourFacade);
+		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self.getLocalSubscriptions(), neighbourFacade);
 		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionById(2).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
 	}
@@ -333,9 +333,9 @@ class NeighbourServiceTest {
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newSet(getDatexCapability("NO"), getDatexCapability("SE"), getDatexCapability("FI")));
 		Neighbour neighbour = new Neighbour("neighbour", capabilities, new SubscriptionRequest(), existingSubscriptions);
 
-		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, new HashSet<>(Collections.singleton(subscription3))));
+		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new HashSet<>(Collections.singleton(subscription3)));
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self, neighbourFacade);
+		neigbourDiscoveryService.postSubscriptionRequest(neighbour, self.getLocalSubscriptions(), neighbourFacade);
 		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionById(2).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionById(3).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ACCEPTED);

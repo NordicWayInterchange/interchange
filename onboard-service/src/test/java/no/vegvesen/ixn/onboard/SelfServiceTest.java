@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.onboard;
 
 
-import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ class SelfServiceTest {
 
 		List<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toList());
 
-		Set<LocalSubscription> selfSubscriptions = selfService.calculateSelfSubscriptions(serviceProviders);
+		Set<LocalSubscription> selfSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
 
 		assertThat(selfSubscriptions).hasSize(3);
 		assertThat(selfSubscriptions).containsAll(Stream.of(localSubA, localSubB, localSubC).collect(Collectors.toSet()));
@@ -56,7 +56,7 @@ class SelfServiceTest {
 	@Test
 	void calculateLastUpdatedSubscriptionsEmpty() {
 		ServiceProvider serviceProvider = new ServiceProvider();
-		LocalDateTime lastUpdatedSubscriptions = selfService.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider));
+		LocalDateTime lastUpdatedSubscriptions = SubscriptionCalculator.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider));
 		assertThat(lastUpdatedSubscriptions).isNull();
 	}
 
@@ -67,67 +67,34 @@ class SelfServiceTest {
 		serviceProvider.addLocalSubscription(subscription);
 		Optional<LocalDateTime> lastUpdated = serviceProvider.getSubscriptionUpdated();
 		assertThat(lastUpdated).isPresent();
-		assertThat(selfService.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider))).isEqualTo(lastUpdated.get());
+		assertThat(SubscriptionCalculator.calculateLastUpdatedSubscriptions(Arrays.asList(serviceProvider))).isEqualTo(lastUpdated.get());
 	}
 
-	@Test
-	void calculateLastUpdateCapabilitiesEmpty() {
-		ServiceProvider serviceProvider = new ServiceProvider();
 
-		LocalDateTime localDateTime = selfService.calculateLastUpdatedCapabilities(Arrays.asList(serviceProvider));
-		assertThat(localDateTime).isNull();
-	}
 
-	@Test
-	void calculateLastUpdatedCapabiltiesOneCap() {
-		ServiceProvider serviceProvider = new ServiceProvider();
-		LocalDateTime lastUpdated = LocalDateTime.now();
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,Sets.newLinkedHashSet(getDatexCapability("NO")),lastUpdated);
-		serviceProvider.setCapabilities(capabilities);
-		LocalDateTime result = selfService.calculateLastUpdatedCapabilities(Arrays.asList(serviceProvider));
-		assertThat(result).isEqualTo(lastUpdated);
-	}
-
-	@Test
-	void calculateSelfCapabilitiesTest() {
-
-		Capability a = getDatexCapability("SE");
-		Capability b = getDatexCapability("FI");
-		Capability c = getDatexCapability("NO");
-
-		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setName("First Service Provider");
-		Capabilities firstServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(a, b).collect(Collectors.toSet()));
-		firstServiceProvider.setCapabilities(firstServiceProviderCapabilities);
-
-		ServiceProvider secondServiceProvider = new ServiceProvider();
-		secondServiceProvider.setName("Second Service Provider");
-		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Stream.of(b, c).collect(Collectors.toSet()));
-		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
-
-		Set<ServiceProvider> serviceProviders = Stream.of(firstServiceProvider, secondServiceProvider).collect(Collectors.toSet());
-
-		Set<Capability> selfCapabilities = CapabilityCalculator.calculateSelfCapabilities(serviceProviders);
-
-		assertThat(selfCapabilities).hasSize(3);
-		assertThat(selfCapabilities).containsAll(Stream.of(a, b, c).collect(Collectors.toSet()));
-	}
 
 	@Test
 	void fetchSelfCalculatesGetLastUpdatedLocalSubscriptions() {
 		LocalDateTime aprilNano1 = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 1);
-		ServiceProvider aServiceProvider = mock(ServiceProvider.class);
-		when(aServiceProvider.getSubscriptionUpdated()).thenReturn(Optional.of(aprilNano1));
+		ServiceProvider aServiceProvider = new ServiceProvider(null,
+				null,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				aprilNano1);
 
-		ServiceProvider bServiceProvider = mock(ServiceProvider.class);
+
 		LocalDateTime aprilNano2 = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
-		when(bServiceProvider.getSubscriptionUpdated()).thenReturn(Optional.of(aprilNano2));
+		ServiceProvider bServiceProvider = new ServiceProvider(null,
+				null,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				aprilNano2);
 
 		List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider).collect(Collectors.toList());
 		when(serviceProviderRepository.findAll()).thenReturn(serviceProviders);
 
-		when(aServiceProvider.getCapabilities()).thenReturn(new Capabilities());
-		when(bServiceProvider.getCapabilities()).thenReturn(new Capabilities());
 		Self self = selfService.fetchSelf();
 
 		assertThat(self.getLastUpdatedLocalSubscriptions()).isEqualTo(Optional.of(aprilNano2));
@@ -169,7 +136,7 @@ class SelfServiceTest {
 		LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'");
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
 		serviceProvider.setSubscriptions(Sets.newLinkedHashSet(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
-		Set<LocalSubscription> localSubscriptions = selfService.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
+		Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
 		assertThat(localSubscriptions).hasSize(1);
 	}
 
@@ -189,7 +156,7 @@ class SelfServiceTest {
 
 		List<ServiceProvider> SPs = new ArrayList<>(Arrays.asList(serviceProvider));
 
-		Set<LocalSubscription> serviceProviderSubscriptions = selfService.calculateSelfSubscriptions(SPs)
+		Set<LocalSubscription> serviceProviderSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(SPs)
 				.stream()
 				.filter(s -> s.getConsumerCommonName().equals(serviceProvider.getName()))
 				.collect(Collectors.toSet());

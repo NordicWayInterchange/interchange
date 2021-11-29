@@ -5,17 +5,14 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(MockitoExtension.class)
 public class SubscriptionRequestTransformerTest {
 
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
@@ -51,13 +48,13 @@ public class SubscriptionRequestTransformerTest {
 	}
 
 	@Test
-	public void emptySubscriptionsToSubscriptionRequestApi() {
+	public void emptySubscriptionResponseApiToSubscriptions() {
 		String name = "myNode";
 		SubscriptionResponseApi responseApi = subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(name,Collections.emptySet());
 		assertThat(responseApi.getName()).isEqualTo(name);
 		assertThat(responseApi.getSubscriptions()).isEmpty();
-		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionResponseApiToSubscriptionRequest(responseApi,SubscriptionRequestStatus.REQUESTED);
-		assertThat(result.getSubscriptions()).isEmpty();
+		Set<Subscription> subscriptions = subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions());
+		assertThat(subscriptions).isEmpty();
 	}
 
 	@Test

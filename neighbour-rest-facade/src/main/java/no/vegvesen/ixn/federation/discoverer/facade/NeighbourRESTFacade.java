@@ -50,13 +50,14 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 	}
 
 	@Override
-	public SubscriptionRequest postSubscriptionRequest(Neighbour neighbour, Set<Subscription> subscriptions, String selfName) {
+	public Set<Subscription> postSubscriptionRequest(Neighbour neighbour, Set<Subscription> subscriptions, String selfName) {
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(selfName,subscriptions);
 		String controlChannelUrl = neighbour.getControlChannelUrl("/subscriptions");
 		String name = neighbour.getName();
-		logger.info("Posting subscription request to {} on URL: {}", name, controlChannelUrl);
+		logger.info("Posting subscription request to URL: {}", controlChannelUrl);
 		SubscriptionResponseApi responseApi = neighbourRESTClient.doPostSubscriptionRequest(subscriptionRequestApi, controlChannelUrl, name);
-		return subscriptionRequestTransformer.subscriptionResponseApiToSubscriptionRequest(responseApi,SubscriptionRequestStatus.REQUESTED);
+		//return subscriptionRequestTransformer.subscriptionResponseApiToSubscriptionRequest(responseApi,SubscriptionRequestStatus.REQUESTED);
+		return subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions());
 	}
 
 	@Override

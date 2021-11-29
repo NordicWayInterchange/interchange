@@ -6,18 +6,14 @@ import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @ConfigurationPropertiesScan
@@ -38,57 +34,17 @@ public class SelfService {
 	public Self fetchSelf() {
 		List<ServiceProvider> serviceProviders = repository.findAll();
 		Self self = new Self();
-		self.setLocalCapabilities(CapabilityCalculator.calculateSelfCapabilities(serviceProviders));
-		self.setLocalSubscriptions(calculateSelfSubscriptions(serviceProviders));
-		self.setLastUpdatedLocalSubscriptions(calculateLastUpdatedSubscriptions(serviceProviders));
-		self.setLastUpdatedLocalCapabilities(calculateLastUpdatedCapabilities(serviceProviders));
+		self.setLocalCapabilities(CapabilityCalculator.allServiceProviderCapabilities(serviceProviders));
+		self.setLastUpdatedLocalCapabilities(CapabilityCalculator.calculateLastUpdatedCapabilities(serviceProviders));
+		self.setLocalSubscriptions(SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders));
+		self.setLastUpdatedLocalSubscriptions(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
         return self;
 
 	}
 
-	Set<LocalSubscription> calculateSelfSubscriptions(List<ServiceProvider> serviceProviders) {
-		logger.info("Calculating Self subscriptions...");
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+	public List<ServiceProvider> getServiceProviders() {
+		return repository.findAll();
 
-		for (ServiceProvider serviceProvider : serviceProviders) {
-			logger.info("Service provider name: {}", serviceProvider.getName());
-			Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider
-					.getSubscriptions()
-					.stream()
-					.filter(subscription -> LocalSubscriptionStatus.CREATED.equals(subscription.getStatus()))
-					.collect(Collectors.toSet());
-			logger.info("Service Provider Subscriptions: {}", serviceProviderSubscriptions.toString());
-			localSubscriptions.addAll(serviceProviderSubscriptions);
-		}
-		logger.info("Calculated Self subscriptions: {}", localSubscriptions.toString());
-		return localSubscriptions;
-	}
-
-	LocalDateTime calculateLastUpdatedSubscriptions(List<ServiceProvider> serviceProviders) {
-	    LocalDateTime result = null;
-		for (ServiceProvider serviceProvider : serviceProviders) {
-			Optional<LocalDateTime> lastUpdated = serviceProvider.getSubscriptionUpdated();
-			if (lastUpdated.isPresent()) {
-				if (result == null || lastUpdated.get().isAfter(result)) {
-					result = lastUpdated.get();
-				}
-			}
-		}
-	    return result;
-	}
-
-	LocalDateTime calculateLastUpdatedCapabilities(List<ServiceProvider> serviceProviders) {
-	    LocalDateTime result = null;
-		for (ServiceProvider serviceProvider : serviceProviders) {
-		    Capabilities capabilities = serviceProvider.getCapabilities();
-			Optional<LocalDateTime> lastUpdated = capabilities.getLastUpdated();
-			if (lastUpdated.isPresent()) {
-				if (result == null || lastUpdated.get().isAfter(result)) {
-					result = lastUpdated.get();
-				}
-			}
-		}
-	    return result;
 	}
 
 	//TODO: decide if centralize to the Properties class, or the service
