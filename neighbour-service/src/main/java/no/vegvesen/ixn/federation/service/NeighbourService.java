@@ -44,7 +44,7 @@ public class NeighbourService {
 		this.interchangeNodeProperties = interchangeNodeProperties;
 	}
 
-	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Self self) {
+	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Set<Capability> localCapabilities) {
 		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
@@ -61,7 +61,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilitiesTransformer.selfToCapabilityApi(interchangeNodeProperties.getName(), self.getLocalCapabilities());
+		return capabilitiesTransformer.selfToCapabilityApi(interchangeNodeProperties.getName(), localCapabilities);
 	}
 
 	Neighbour findNeighbour(String neighbourName) {

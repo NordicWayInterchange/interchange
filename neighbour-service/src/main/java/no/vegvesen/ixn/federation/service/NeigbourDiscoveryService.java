@@ -100,14 +100,14 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void retryUnreachable(Self self, NeighbourFacade neighbourFacade) {
+    public void retryUnreachable(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities) {
         List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
         if (!unreachableNeighbours.isEmpty()) {
             logger.info("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
             for (Neighbour neighbour : unreachableNeighbours) {
                 try {
                     NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-                    postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), self.getLocalCapabilities());
+                    postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), localCapabilities);
                 } catch (Exception e) {
                     logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
                 } finally {
@@ -135,15 +135,14 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self, NeighbourFacade neighbourFacade) {
-        Optional<LocalDateTime> lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
+    public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
                     if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
-                        postSubscriptionRequest(neighbour, self, neighbourFacade);
+                        postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
                     } else {
                         logger.debug("No need to calculateCustomSubscriptionForNeighbour based on timestamps on local subscriptions, neighbour capabilities, last subscription request");
                     }
@@ -159,35 +158,39 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void postSubscriptionRequest(Neighbour neighbour, Self self, NeighbourFacade neighbourFacade) {
-        logger.info("Found neighbour for subscription request: {}", neighbour.getName());
-        Set<Subscription> wantedSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
-        Set<Subscription> existingSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+    public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
+        String neighbourName = neighbour.getName();
+        Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
+        SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
+        logger.info("Found neighbour for subscription request: {}", neighbourName);
+        Set<Subscription> wantedSubscriptions = calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, neighbourName);
+        Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
             Set<Subscription> subscriptionsToRemove = new HashSet<>(existingSubscriptions);
             subscriptionsToRemove.removeAll(wantedSubscriptions);
             for (Subscription subscription : subscriptionsToRemove) {
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
             }
+            Connection controlConnection = neighbour.getControlConnection();
             try {
-                if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
+                if (controlConnection.canBeContacted(backoffProperties)) {
                     Set<Subscription> additionalSubscriptions = new HashSet<>(wantedSubscriptions);
                     additionalSubscriptions.removeAll(existingSubscriptions);
                     if (!additionalSubscriptions.isEmpty()) {
-                        SubscriptionRequest subscriptionRequestResponse = neighbourFacade
-                                .postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
-                        subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
-                        neighbour.getOurRequestedSubscriptions()
-                                .addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
+                        Set<Subscription> responseSubscriptions = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
+                        ourRequestedSubscriptionsFromNeighbour.addNewSubscriptions(responseSubscriptions);
+                        ourRequestedSubscriptionsFromNeighbour.setSuccessfulRequest(LocalDateTime.now());
+                        //TODO we never changed the subscription status. We don't now either. Is that OK?
+
                     }
-                    neighbour.getControlConnection().okConnection();
+                    controlConnection.okConnection();
                     logger.info("Successfully posted subscription request to neighbour.");
                 } else {
                     logger.info("Too soon to post subscription request to neighbour when backing off");
                 }
             } catch (SubscriptionRequestException e) {
-                neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.FAILED);
-                neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
+                ourRequestedSubscriptionsFromNeighbour.setStatus(SubscriptionRequestStatus.FAILED);
+                controlConnection.failedConnection(backoffProperties.getNumberOfAttempts());
                 logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
             }
             // Successful subscription request, update discovery state subscription request timestamp.
@@ -198,9 +201,8 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<LocalSubscription> localSubscriptions) {
-        logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
-        Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
+    Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<Capability> neighbourCapabilities, String neighbourName) {
+        logger.info("Calculating custom subscription for neighbour: {}", neighbourName);
         logger.debug("Neighbour capabilities {}", neighbourCapabilities);
         logger.debug("Local subscriptions {}", localSubscriptions);
         Set<LocalSubscription> existingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
@@ -211,7 +213,7 @@ public class NeigbourDiscoveryService {
                     subscription.getConsumerCommonName());
             calculatedSubscriptions.add(newSubscription);
         }
-        logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
+        logger.info("Calculated custom subscription for neighbour {}: {}", neighbourName, calculatedSubscriptions);
         return calculatedSubscriptions;
     }
 

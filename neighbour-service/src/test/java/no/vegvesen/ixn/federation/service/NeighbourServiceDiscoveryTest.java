@@ -151,14 +151,14 @@ public class NeighbourServiceDiscoveryTest {
 
 		doReturn(self).when(selfService).fetchSelf();
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self.getLastUpdatedLocalSubscriptions(), self.getLocalSubscriptions(), neighbourFacade);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
 
-	private SubscriptionRequest createFirstSubscriptionRequestResponse() {
+	private Set<Subscription> createFirstSubscriptionRequestResponse() {
 		Subscription firstSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
-		return new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
+		return Collections.singleton(firstSubscription);
 	}
 
 	@Test
@@ -188,7 +188,7 @@ public class NeighbourServiceDiscoveryTest {
 			return answer;
 		});
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self.getLastUpdatedLocalSubscriptions(), self.getLocalSubscriptions(), neighbourFacade);
 
 		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(), anySet(), anyString());
 	}
@@ -257,7 +257,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.setCapabilities(noCapabilities);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), self.getLastUpdatedLocalSubscriptions(), self.getLocalSubscriptions(), neighbourFacade);
 
 		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
@@ -515,7 +515,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		discoveringNode.setLocalSubscriptions(selfSubscriptions);
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighbours, discoveringNode, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighbours, discoveringNode.getLastUpdatedLocalSubscriptions(), discoveringNode.getLocalSubscriptions(), neighbourFacade);
 
 		verify(neighbourFacade, times(3)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
@@ -525,11 +525,11 @@ public class NeighbourServiceDiscoveryTest {
 		return new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, subscription);
 	}
 
-	private SubscriptionRequest getReturnedSubscriptionRequest() {
+	private Set<Subscription> getReturnedSubscriptionRequest() {
 		HashSet<Subscription> returnedSubscriptionsFromNeighbour = new HashSet<>();
 		returnedSubscriptionsFromNeighbour.add(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, ""));
 
-		return new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, returnedSubscriptionsFromNeighbour);
+		return returnedSubscriptionsFromNeighbour;
 	}
 
 	@Test
@@ -552,7 +552,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(null,neighbourFedInSubscription));
 
 		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
-		Set<Subscription> subscriptions = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(neighbour, selfLocalSubscriptions);
+		Set<Subscription> subscriptions = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet, neighbour.getName());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
@@ -565,9 +565,9 @@ public class NeighbourServiceDiscoveryTest {
 				new SubscriptionRequest());
 
 		doReturn(self).when(selfService).fetchSelf();
-		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(mock(SubscriptionRequest.class));
+		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(Collections.emptySet());
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), self, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), self.getLastUpdatedLocalSubscriptions(), self.getLocalSubscriptions(), neighbourFacade);
 
 		verify(neighbourRepository).save(otherNeighbour);
     }
@@ -588,7 +588,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
 		when(neighbourFacade.postCapabilitiesToCapabilities(any(), any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
 
-		neigbourDiscoveryService.retryUnreachable(self, neighbourFacade);
+		neigbourDiscoveryService.retryUnreachable(neighbourFacade, self.getLocalCapabilities());
 
 		verify(neighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
 	}

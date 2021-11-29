@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -134,4 +135,27 @@ public class NeighbourTest {
 		seenYesterday.getCapabilities().setLastCapabilityExchange(LocalDateTime.now().minusDays(1));
 		return seenYesterday;
 	}
+
+	@Test
+	public void hasEstablishedSubscriptionsNull() {
+		Neighbour neighbour = new Neighbour();
+		assertThat(neighbour.hasEstablishedSubscriptions()).isFalse();
+	}
+
+	@Test
+	public void hasEstablishedSubscriptionsEmpty() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setNeighbourRequestedSubscriptions(new SubscriptionRequest());
+		assertThat(neighbour.hasEstablishedSubscriptions()).isFalse();
+	}
+
+	@Test
+	public void hasEstablishedSubscriptionsStatusEnabled() {
+		Neighbour neighbour = new Neighbour();
+		neighbour.setNeighbourRequestedSubscriptions(
+				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,
+						Collections.emptySet()));
+		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
+	}
+
 }
