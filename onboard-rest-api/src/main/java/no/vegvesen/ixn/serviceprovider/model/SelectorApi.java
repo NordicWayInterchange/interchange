@@ -1,11 +1,5 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-import java.util.Objects;
-
 public class SelectorApi {
     private String selector;
 

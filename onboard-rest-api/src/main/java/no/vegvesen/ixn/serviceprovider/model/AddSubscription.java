@@ -9,11 +9,11 @@ public class AddSubscription {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     boolean createNewQueue = false;
 
-    SelectorApi selector;
+    String selector;
 
     public AddSubscription(){}
 
-    public AddSubscription(boolean createNewQueue, SelectorApi selector){
+    public AddSubscription(boolean createNewQueue, String selector){
         this.createNewQueue = createNewQueue;
         this.selector = selector;
     }
@@ -26,11 +26,11 @@ public class AddSubscription {
         this.createNewQueue = createNewQueue;
     }
 
-    public SelectorApi getSelector() {
+    public String getSelector() {
         return selector;
     }
 
-    public void setSelector(SelectorApi selector) {
+    public void setSelector(String selector) {
         this.selector = selector;
     }
 

@@ -61,7 +61,7 @@ public class TypeTransformer {
 
     public LocalSubscription transformAddSubscriptionToLocalSubscription(String serviceProviderName, AddSubscription addSubscription) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                addSubscription.getSelector().getSelector(),
+                addSubscription.getSelector(),
                 addSubscription.isCreateNewQueue(),
                 serviceProviderName);
     }

@@ -15,7 +15,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription(false, new SelectorApi("countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'")));
+        addSubscriptions.add(new AddSubscription(false, "countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "kyrre",
                 addSubscriptions
@@ -27,8 +27,8 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSubscriptionRequest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription(false, new SelectorApi("countryCode = 'NO' and messageType = 'DENM'")));
-        addSubscriptions.add(new AddSubscription(false, new SelectorApi("countryCode = 'SE' and messageType = 'DENM'")));
+        addSubscriptions.add(new AddSubscription(false, "countryCode = 'NO' and messageType = 'DENM'"));
+        addSubscriptions.add(new AddSubscription(false, "countryCode = 'SE' and messageType = 'DENM'"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "serviceprovider1",
                 addSubscriptions
@@ -210,7 +210,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addDelieriesRequest() throws JsonProcessingException {
+    public void addDeliveriesRequest() throws JsonProcessingException {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 "sp-1",
                 Collections.singleton(new SelectorApi(
