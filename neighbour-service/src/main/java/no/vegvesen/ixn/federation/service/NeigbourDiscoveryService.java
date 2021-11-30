@@ -350,7 +350,7 @@ public class NeigbourDiscoveryService {
 
     public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
         for(Endpoint endpoint : endpoints) {
-            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndSource(neighbour.getName(), endpoint.getMessageBrokerUrl(), endpoint.getSource());
+            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource());
             listenerEndpointRepository.delete(listenerEndpoint);
             logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and source {}", neighbour.getName(), endpoint.getMessageBrokerUrl(), endpoint.getSource());
         }
@@ -387,12 +387,13 @@ public class NeigbourDiscoveryService {
         List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
         Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
 
-        Set<String> brokerUrlList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getMessageBrokerUrl).collect(Collectors.toSet());
+        Set<String> sourceList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getSource).collect(Collectors.toSet());
+        Set<String> hostList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getHost).collect(Collectors.toSet());
 
         for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
-            if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
+            if (!sourceList.contains(listenerEndpoint.getSource()) && !hostList.contains(listenerEndpoint.getHost())) {
                 listenerEndpointRepository.delete(listenerEndpoint);
-                logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and source {}", neighbour.getName(), listenerEndpoint.getBrokerUrl(), listenerEndpoint.getSource());
+                logger.info("Tearing down listenerEndpoint for neighbour {} with host {}, port {} and source {}", neighbour.getName(), listenerEndpoint.getHost(), listenerEndpoint.getPort(), listenerEndpoint.getSource());
             }
         }
     }

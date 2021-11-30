@@ -45,7 +45,7 @@ public class MessageCollector {
             MessageCollectorListener listener = listeners.get(listenerEndpoint);
             if (! listener.isRunning()) {
                 listeners.remove(listenerEndpoint);
-                logger.info("Removed stopped listener {} with brokerUrl {}", listenerEndpoint.getNeighbourName(), listenerEndpoint.getBrokerUrl());
+                logger.info("Removed stopped listener {} with host {} and port {}", listenerEndpoint.getNeighbourName(), listenerEndpoint.getHost(), listenerEndpoint.getPort());
             }
         }
 
@@ -57,16 +57,15 @@ public class MessageCollector {
 
         for (ListenerEndpoint listenerEndpoint : listenerEndpoints) {
             String neighbourName = listenerEndpoint.getNeighbourName();
-            String brokerUrl = listenerEndpoint.getBrokerUrl();
             interchangeListenerEndpoints.add(listenerEndpoint);
             if (!listeners.containsKey(listenerEndpoint)) {
                 setUpConnectionToNeighbour(listenerEndpoint);
             }
             else {
                 if (listeners.get(listenerEndpoint).isRunning()) {
-                    logger.debug("Listener for {} with brokerUrl {} is still running with no changes", neighbourName, brokerUrl);
+                    logger.debug("Listener for {} with host {} and port {} is still running with no changes", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 } else {
-                    logger.debug("Non-running listener detected, name {} with brokerUrl {}", neighbourName, brokerUrl);
+                    logger.debug("Non-running listener detected, name {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 }
             }
 
@@ -77,10 +76,9 @@ public class MessageCollector {
         for (ListenerEndpoint listenerEndpoint : listeners.keySet()) {
             if (!interchangeListenerEndpoints.contains(listenerEndpoint)) {
                 String neighbourName = listenerEndpoint.getNeighbourName();
-                String brokerUrl = listenerEndpoint.getBrokerUrl();
-                logger.info("Listener for {} with brokerUrl {} is now being removed", neighbourName, brokerUrl);
+                logger.info("Listener for {} with host {} and port {} is now being removed", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 MessageCollectorListener toRemove = listeners.get(listenerEndpoint);
-                logger.debug("Tearing down listener for {} with brokerUrl {}", neighbourName, brokerUrl);
+                logger.debug("Tearing down listener for {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 toRemove.teardown();
                 listenerKeysToRemove.add(listenerEndpoint);
             }
@@ -93,17 +91,17 @@ public class MessageCollector {
         String name = listenerEndpoint.getNeighbourName();
         if(listenerEndpoint.getMessageConnection().canBeContacted(backoffProperties)) {
             try {
-                logger.info("Setting up connection to ixn with name {}, brokerUrl {}", name, listenerEndpoint.getBrokerUrl());
+                logger.info("Setting up connection to ixn with name {}, host {} and port {}", name, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 MessageCollectorListener messageListener = collectorCreator.setupCollection(listenerEndpoint);
                 listeners.put(listenerEndpoint, messageListener);
                 listenerEndpoint.getMessageConnection().okConnection();
             } catch (MessageCollectorException e) {
-                logger.warn("Tried to create connection to {} with brokerUrl {}, but failed with exception.", name, listenerEndpoint.getBrokerUrl(), e);
+                logger.warn("Tried to create connection to {} with host {} and port {}, but failed with exception.", name, listenerEndpoint.getHost(), listenerEndpoint.getPort(), e);
                 listenerEndpoint.getMessageConnection().failedConnection(backoffProperties.getNumberOfAttempts());
             }
         }
         else {
-            logger.info("Too soon to connect to {} with brokerUrl {}", name, listenerEndpoint.getBrokerUrl());
+            logger.info("Too soon to connect to {} with host {} and port {}", name, listenerEndpoint.getHost(), listenerEndpoint.getPort());
         }
     }
 

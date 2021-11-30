@@ -48,7 +48,8 @@ public class CollectorCreator {
         logger.debug("Write URL: {}, queue {}", writeUrl, writeQueue);
         Source writeSource = new Source(writeUrl, writeQueue, sslContext);
 
-        String readUrl = listenerEndpoint.getBrokerUrl();
+        //String readUrl = listenerEndpoint.getBrokerUrl();
+        String readUrl = String.format("amqps://%s:%s", listenerEndpoint.getHost(), listenerEndpoint.getPort());
         String readQueue = listenerEndpoint.getSource();
         Sink readSink = new Sink(readUrl, readQueue, sslContext);
         logger.info("Fetching messages from {}, write to {}",readUrl,writeUrl);

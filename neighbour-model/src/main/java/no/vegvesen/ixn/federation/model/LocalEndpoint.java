@@ -91,11 +91,7 @@ public class LocalEndpoint {
     }
 
     public boolean isTheSameAsListenerEndpoint(ListenerEndpoint listenerEndpoint) {
-        if(source.equals(listenerEndpoint.getSource()) && messageBrokerUrl.equals(listenerEndpoint.getBrokerUrl())){
-            return true;
-        } else {
-            return false;
-        }
+        return source.equals(listenerEndpoint.getSource()) && host.equals(listenerEndpoint.getHost()) && port.equals(listenerEndpoint.getPort());
     }
 
     @Override

@@ -607,7 +607,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
 		Set<Endpoint> endpoints = new HashSet<>();
-		Endpoint endpoint = new Endpoint("spy-neighbour1","host", 0);
+		Endpoint endpoint = new Endpoint("spy-neighbour1","host", 5671);
 		endpoints.add(endpoint);
 		createdSubscription.setEndpoints(endpoints);
 
@@ -633,7 +633,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour1));
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
-		Endpoint endpoint = new Endpoint("spy-neighbour1", "host", 0);
+		Endpoint endpoint = new Endpoint("spy-neighbour1", "host", 5671);
 		createdSubscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
 
 
@@ -659,8 +659,8 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(spyNeighbour1));
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
-		Endpoint endpoint1 = new Endpoint("spy-neighbour1", "host", 0);
-		Endpoint endpoint2 = new Endpoint("spy-neighbour2", "host", 0);
+		Endpoint endpoint1 = new Endpoint("spy-neighbour1", "host", 5671);
+		Endpoint endpoint2 = new Endpoint("spy-neighbour2", "host", 5671);
 		createdSubscription.setEndpoints(Sets.newLinkedHashSet(endpoint1, endpoint2));
 		createdSubscription.setLastUpdatedTimestamp(2);
 
@@ -681,7 +681,7 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
 		subscription.setLastUpdatedTimestamp(0);
-		Endpoint endpoint = new Endpoint("spy-neighbour", "amqps://spy-neighbour");
+		Endpoint endpoint = new Endpoint("spy-neighbour", "spy-neighbour", 5671);
 		subscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(subscription));
 		spyNeighbour1.setOurRequestedSubscriptions(subscriptionRequest);
@@ -692,10 +692,10 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
 		createdSubscription.setLastUpdatedTimestamp(2);
 
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(spyNeighbour1.getName(), "amqps://spy-neighbour", "spy-neighbour", new Connection());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(spyNeighbour1.getName(), "spy-neighbour", "spy-neighbour", 5671, new Connection());
 
 		when(neighbourFacade.pollSubscriptionLastUpdatedTime(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
-		when(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndSource(spyNeighbour1.getName(), endpoint.getMessageBrokerUrl(), endpoint.getSource())).thenReturn(listenerEndpoint);
+		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(spyNeighbour1.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource())).thenReturn(listenerEndpoint);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
@@ -718,7 +718,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
 		Set<Endpoint> endpoints = new HashSet<>();
-		Endpoint endpoint = new Endpoint("spy-neighbour1","amqps://spy-neighbour1");
+		Endpoint endpoint = new Endpoint("spy-neighbour1","spy-neighbour1", 5671);
 		endpoints.add(endpoint);
 		createdSubscription.setEndpoints(endpoints);
 
