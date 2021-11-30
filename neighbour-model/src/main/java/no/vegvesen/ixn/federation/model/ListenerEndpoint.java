@@ -13,7 +13,6 @@ public class ListenerEndpoint {
     private Integer id;
 
     private String neighbourName;
-    private String brokerUrl;
     private String source;
     private String host;
     private Integer port;
@@ -28,13 +27,6 @@ public class ListenerEndpoint {
 
     public ListenerEndpoint() { }
 
-    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, Connection messageConnection) {
-        this.neighbourName = neighbourName;
-        this.brokerUrl = brokerUrl;
-        this.source = source;
-        this.messageConnection = messageConnection;
-    }
-
     public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection) {
         this.neighbourName = neighbourName;
         this.source = source;
@@ -43,18 +35,8 @@ public class ListenerEndpoint {
         this.messageConnection = messageConnection;
     }
 
-    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
+    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
         this.neighbourName = neighbourName;
-        this.brokerUrl = brokerUrl;
-        this.source = source;
-        this.messageConnection = messageConnection;
-        this.maxBandwidth = maxBandwidth;
-        this.maxMessageRate = maxMessageRate;
-    }
-
-    public ListenerEndpoint(String neighbourName, String brokerUrl, String source, String host, Integer port, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
-        this.neighbourName = neighbourName;
-        this.brokerUrl = brokerUrl;
         this.source = source;
         this.host = host;
         this.port = port;
@@ -66,10 +48,6 @@ public class ListenerEndpoint {
     public String getNeighbourName() { return neighbourName; }
 
     public void setNeighbourName(String neighbourName) { this.neighbourName = neighbourName; }
-
-    public String getBrokerUrl() { return brokerUrl; }
-
-    public void setBrokerUrl(String brokerUrl){ this.brokerUrl = brokerUrl; }
 
     public String getSource() { return source; }
 
