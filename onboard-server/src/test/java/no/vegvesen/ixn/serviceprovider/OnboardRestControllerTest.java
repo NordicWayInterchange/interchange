@@ -93,7 +93,6 @@ public class OnboardRestControllerTest {
 			}
 			return s;
 		});
-		when(selfService.fetchSelf()).thenReturn(new Self());
 
 		mockMvc.perform(
 				post(String.format("/%s/capabilities", firstServiceProvider))
@@ -119,7 +118,6 @@ public class OnboardRestControllerTest {
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
-		when(selfService.fetchSelf()).thenReturn(new Self());
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -130,6 +128,7 @@ public class OnboardRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isNoContent());
+
 	}
 
 	@Test
@@ -181,7 +180,6 @@ public class OnboardRestControllerTest {
 			}
 			return s;
 		});
-		when(selfService.fetchSelf()).thenReturn(new Self());
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -253,7 +251,6 @@ public class OnboardRestControllerTest {
 		//Self
 		Self self = new Self();
 		self.setLocalSubscriptions(serviceProviderSubscriptionRequest);//same subscriptions as the service provider
-		doReturn(self).when(selfService).fetchSelf();
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
 		// Subscription request api posted to the server
@@ -275,7 +272,6 @@ public class OnboardRestControllerTest {
 		// The existing subscriptions of the Service Provider
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
-		when(selfService.fetchSelf()).thenReturn(new Self());
 
 		// Subscription request api posted to the server
 
@@ -295,7 +291,6 @@ public class OnboardRestControllerTest {
 
 		// The existing subscriptions of the Service Provider
 		doReturn(null).when(serviceProviderRepository).findByName(any(String.class));
-		when(selfService.fetchSelf()).thenReturn(new Self());
 
 		// Subscription request api posted to the server
 

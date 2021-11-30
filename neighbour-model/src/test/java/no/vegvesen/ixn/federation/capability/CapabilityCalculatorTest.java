@@ -92,4 +92,36 @@ public class CapabilityCalculatorTest {
         assertThat(CapabilityCalculator.calculateLastUpdatedCapabilities(Arrays.asList(latestSP,earliestSP))).isEqualTo(latest);
     }
 
+    @Test
+    void calculateGetLastUpdatedLocalCapabilities() {
+        LocalDateTime aCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
+        Capability aCap1 = getDatexCapability("SE");
+        Capability aCap2 = getDatexCapability("SE");
+        ServiceProvider aServiceProvider = new ServiceProvider();
+        aServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(aCap1, aCap2), aCapDate));
+
+        LocalDateTime bCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 2);
+        Capability bCap1 = getDatexCapability("SE");
+        Capability bCap2 = getDatexCapability("SE");
+        ServiceProvider bServiceProvider = new ServiceProvider();
+        bServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(bCap1, bCap2), bCapDate));
+
+        LocalDateTime cCapDate = LocalDateTime.of(1999, Month.APRIL, 1, 1, 1, 1, 0);
+        Capability cCap1 = getDatexCapability("FI");
+        Capability cCap2 = getDatexCapability("FI");
+        ServiceProvider cServiceProvider = new ServiceProvider();
+        cServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cCap1, cCap2), cCapDate));
+
+        List<ServiceProvider> serviceProviders = Stream.of(aServiceProvider, bServiceProvider, cServiceProvider).collect(Collectors.toList());
+
+
+        LocalDateTime lastUpdatedCapabilities = CapabilityCalculator.calculateLastUpdatedCapabilities(serviceProviders);
+
+        assertThat(lastUpdatedCapabilities).isEqualTo(bCapDate);
+    }
+
+    private Capability getDatexCapability(String originatingCountry) {
+        return new DatexCapability(null, originatingCountry, null, Collections.emptySet(), Collections.emptySet());
+    }
+
 }
