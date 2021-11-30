@@ -29,19 +29,6 @@ public class SelfService {
 		this.repository = repository;
 	}
 
-	// Get the self representation from the database.
-    //this could, of course, be a lot more efficient :-)
-	public Self fetchSelf() {
-		List<ServiceProvider> serviceProviders = repository.findAll();
-		Self self = new Self();
-		self.setLocalCapabilities(CapabilityCalculator.allServiceProviderCapabilities(serviceProviders));
-		self.setLastUpdatedLocalCapabilities(CapabilityCalculator.calculateLastUpdatedCapabilities(serviceProviders));
-		self.setLocalSubscriptions(SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders));
-		self.setLastUpdatedLocalSubscriptions(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
-        return self;
-
-	}
-
 	public List<ServiceProvider> getServiceProviders() {
 		return repository.findAll();
 
