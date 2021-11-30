@@ -115,7 +115,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "amqps://localhost:" + producerPort.toString(), "localhost", new Connection());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection());
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
