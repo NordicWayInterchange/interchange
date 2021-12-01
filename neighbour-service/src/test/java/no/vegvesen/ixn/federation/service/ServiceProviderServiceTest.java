@@ -141,7 +141,7 @@ public class ServiceProviderServiceTest {
                 selector,
                 LocalDateTime.now(),
                 false,
-                serviceProviderName,
+                localNodeName,
                 new HashSet<>());
         ServiceProvider serviceProvider = new ServiceProvider(
                 1,
