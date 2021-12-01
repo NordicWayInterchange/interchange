@@ -65,7 +65,7 @@ public class SubscriptionRequestTransformer {
 
 	}
 
-	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelUrl) {
+	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelHost, String messageChannelPort) {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());
@@ -75,7 +75,8 @@ public class SubscriptionRequestTransformer {
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			EndpointApi endpointApi = new EndpointApi(
 					neighbourName,
-					messageChannelUrl
+					messageChannelHost,
+					Integer.parseInt(messageChannelPort)
 			);
 			response.setEndpoints(Collections.singleton(endpointApi));
 		}

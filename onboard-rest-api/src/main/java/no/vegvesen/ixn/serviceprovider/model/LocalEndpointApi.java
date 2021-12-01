@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class LocalEndpointApi {
     private String host;
-    private int port;
+    private Integer port;
     private String source;
     private Integer maxBandwidth;
     private Integer maxMessageRate;
@@ -12,13 +12,13 @@ public class LocalEndpointApi {
     public LocalEndpointApi() {
     }
 
-    public LocalEndpointApi(String host, int port, String source) {
+    public LocalEndpointApi(String host, Integer port, String source) {
         this.host = host;
         this.port = port;
         this.source = source;
     }
 
-    public LocalEndpointApi(String host, int port, String source, Integer maxBandwidth, Integer maxMessageRate) {
+    public LocalEndpointApi(String host, Integer port, String source, Integer maxBandwidth, Integer maxMessageRate) {
         this.host = host;
         this.port = port;
         this.source = source;
@@ -34,11 +34,11 @@ public class LocalEndpointApi {
         this.host = host;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 
@@ -71,7 +71,7 @@ public class LocalEndpointApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalEndpointApi localEndpointApi = (LocalEndpointApi) o;
-        return Objects.equals(host, localEndpointApi.host) && Objects.equals(port, localEndpointApi.port) &&Objects.equals(source, localEndpointApi.source) && Objects.equals(maxBandwidth, localEndpointApi.maxBandwidth) && Objects.equals(maxMessageRate, localEndpointApi.maxMessageRate);
+        return Objects.equals(host, localEndpointApi.host) && Objects.equals(port, localEndpointApi.port) && Objects.equals(source, localEndpointApi.source) && Objects.equals(maxBandwidth, localEndpointApi.maxBandwidth) && Objects.equals(maxMessageRate, localEndpointApi.maxMessageRate);
     }
 
     @Override

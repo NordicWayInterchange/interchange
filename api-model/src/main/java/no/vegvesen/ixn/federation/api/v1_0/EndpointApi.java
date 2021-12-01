@@ -11,9 +11,6 @@ public class EndpointApi {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String source;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String messageBrokerUrl;
-
     private String host;
     private Integer port;
 
@@ -24,22 +21,10 @@ public class EndpointApi {
 
     }
 
-    public EndpointApi(String source, String messageBrokerUrl) {
-        this.source = source;
-        this.messageBrokerUrl = messageBrokerUrl;
-    }
-
     public EndpointApi(String source, String host, Integer port) {
         this.source = source;
         this.host = host;
         this.port = port;
-    }
-
-    public EndpointApi(String source, String messageBrokerUrl, Integer maxBandwidth, Integer maxMessageRate) {
-        this.source = source;
-        this.messageBrokerUrl = messageBrokerUrl;
-        this.maxBandwidth = maxBandwidth;
-        this.maxMessageRate = maxMessageRate;
     }
 
     public EndpointApi(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
@@ -56,14 +41,6 @@ public class EndpointApi {
 
     public void setSource(String source) {
         this.source = source;
-    }
-
-    public String getMessageBrokerUrl() {
-        return messageBrokerUrl;
-    }
-
-    public void setMessageBrokerUrl(String messageBrokerUrl) {
-        this.messageBrokerUrl = messageBrokerUrl;
     }
 
     public String getHost() {

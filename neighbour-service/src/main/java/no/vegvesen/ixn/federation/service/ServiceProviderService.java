@@ -28,16 +28,16 @@ public class ServiceProviderService {
     }
 
     //TODO don't need Self here. Getting the messageChannelUrl should be somwhere else?
-    public void updateLocalSubscriptions(String messageChannelUrl) {
+    public void updateLocalSubscriptions(String messageChannelHost, String messageChannelPort) {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for(ServiceProvider serviceProvider : serviceProviders) {
-            updateServiceProviderSubscriptionsWithBrokerUrl(neighbours, serviceProvider, messageChannelUrl);
+            updateServiceProviderSubscriptionsWithHostAndPort(neighbours, serviceProvider, messageChannelHost, messageChannelPort);
             serviceProviderRepository.save(serviceProvider);
         }
     }
     //TODO: make test for this method
-    public void updateServiceProviderSubscriptionsWithBrokerUrl(List<Neighbour> neighbours, ServiceProvider serviceProvider, String localMessageBrokerUrl) {
+    public void updateServiceProviderSubscriptionsWithHostAndPort(List<Neighbour> neighbours, ServiceProvider serviceProvider, String messageChannelHost, String messageChannelPort) {
         for(Neighbour neighbour : neighbours) {
             for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
                 for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
@@ -50,15 +50,12 @@ public class ServiceProviderService {
                                 logger.info("Adding local endpoint with host {} and consumerCommonName same as serviceProvider name, source {}", endpoint.getHost(), endpoint.getSource());
                                 localEndpoints.add(endpointToLocalEndpoint(endpoint));
                             }
-                            serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localEndpoints);
+                            serviceProvider.updateSubscriptionWithHostAndPort(localSubscription, localEndpoints);
                         } else {
-                            //if (localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
-                                //throw new IllegalStateException("consumerCommonName is the same as Ixn name, local subscription user = subscription user");
-                            //}
-                            LocalEndpoint localEndpoint = new LocalEndpoint(serviceProvider.getName(), localMessageBrokerUrl);
-                            logger.info("Adding local endpoint {} with consumerCommonName the same as Ixn name, queue {}", localEndpoint.getMessageBrokerUrl(), localEndpoint.getSource());
+                            LocalEndpoint localEndpoint = new LocalEndpoint(serviceProvider.getName(), messageChannelHost, Integer.parseInt(messageChannelPort));
+                            logger.info("Adding local endpoint with host {} and port {}, consumerCommonName the same as Ixn name, queue {}", localEndpoint.getHost(), localEndpoint.getPort(), localEndpoint.getSource());
                             Set<LocalEndpoint> localEndpoints = new HashSet<>(Arrays.asList(localEndpoint));
-                            serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localEndpoints);
+                            serviceProvider.updateSubscriptionWithHostAndPort(localSubscription, localEndpoints);
                         }
                     }
                 }

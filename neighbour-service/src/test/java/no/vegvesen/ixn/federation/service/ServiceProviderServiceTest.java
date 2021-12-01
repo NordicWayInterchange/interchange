@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.onboard.SelfService;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +44,7 @@ public class ServiceProviderServiceTest {
         ))).when(neighbourRepository).findAll();
         String name = "local-node";
 
-        serviceProviderService.updateLocalSubscriptions(SelfService.getMessageChannelUrl(name,null));
+        serviceProviderService.updateLocalSubscriptions(name, "5671");
 
         verify(serviceProviderRepository).findAll();
         verify(neighbourRepository).findAll();
@@ -98,7 +97,7 @@ public class ServiceProviderServiceTest {
                 new HashSet<>(),
                 LocalDateTime.now()
         );
-        serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider,"amqps://messages.local-node");
+        serviceProviderService.updateServiceProviderSubscriptionsWithHostAndPort(neighbours,serviceProvider,"messages.local-node", "5671");
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getLocalEndpoints())
@@ -151,13 +150,15 @@ public class ServiceProviderServiceTest {
                 new HashSet<>(),
                 LocalDateTime.now()
         );
-        final String localMessageBrokerUrl = "amqps://messages.local-node";
-        serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider, localMessageBrokerUrl);
+        final String localMessageHost = "messages.local-node";
+        final String localMessagePort = "5671";
+        serviceProviderService.updateServiceProviderSubscriptionsWithHostAndPort(neighbours,serviceProvider, localMessageHost, localMessagePort);
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getLocalEndpoints())
                 .hasSize(1)
-                .allMatch(b -> localMessageBrokerUrl.equals(b.getMessageBrokerUrl()))
+                .allMatch(b -> "messages.local-node".equals(b.getHost()))
+                .allMatch(b -> 5671 == b.getPort())
                 .allMatch(b -> serviceProviderName.equals(b.getSource()));
     }
 }

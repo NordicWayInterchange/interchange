@@ -65,7 +65,7 @@ public class SubscriptionRequestTransformerTest {
 		String path = "myName/subscriptions/1";
 		String consumerCommonName = "myName";
 		Subscription subscription = new Subscription(1,SubscriptionStatus.REQUESTED,selector,path,consumerCommonName);
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, thisNodeName);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, thisNodeName, "5671");
 		assertThat(responseApi.getPath()).isEqualTo(path);
 		assertThat(responseApi.getSelector()).isEqualTo(selector);
 		assertThat(responseApi.getStatus()).isEqualTo(SubscriptionStatusApi.REQUESTED);
@@ -78,13 +78,15 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void subscriptionPollResponseApiWithStatusCreated() {
 		String neighbourName = "myNeighbour";
-		String brokerUrl = "amqps://myName";
+		String hostName = "myName";
+		String port = "5671";
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
 		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path, "myNeighbour");
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, brokerUrl);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, hostName, port);
 		assertThat(responseApi.getEndpoints().size()).isEqualTo(1);
-		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getMessageBrokerUrl()).isEqualTo(brokerUrl);
+		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getHost()).isEqualTo(hostName);
+		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getPort().toString()).isEqualTo(port);
 	}
 
 	@Test

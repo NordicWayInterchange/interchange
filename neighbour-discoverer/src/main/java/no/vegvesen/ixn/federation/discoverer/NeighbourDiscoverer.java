@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.discoverer;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
@@ -41,6 +42,7 @@ public class NeighbourDiscoverer {
 	private final NeighbourRESTFacade neighbourFacade;
 	private final ServiceProviderService serviceProviderService;
 	private final NeigbourDiscoveryService neigbourDiscoveryService;
+	private final InterchangeNodeProperties interchangeNodeProperties;
 
 
 	@Autowired
@@ -48,12 +50,13 @@ public class NeighbourDiscoverer {
 						SelfService selfService,
 						NeighbourRESTFacade neighbourFacade,
 						ServiceProviderService serviceProviderService,
-						NeigbourDiscoveryService neigbourDiscoveryService) {
+						NeigbourDiscoveryService neigbourDiscoveryService, InterchangeNodeProperties interchangeNodeProperties) {
 		this.neighbourService = neighbourService;
 		this.selfService = selfService;
 		this.neighbourFacade = neighbourFacade;
 		this.serviceProviderService = serviceProviderService;
 		this.neigbourDiscoveryService = neigbourDiscoveryService;
+		this.interchangeNodeProperties = interchangeNodeProperties;
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), null);
 	}
 
@@ -110,7 +113,7 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void updateLocalSubscriptions() {
-		serviceProviderService.updateLocalSubscriptions(selfService.getMessageChannelUrl());
+		serviceProviderService.updateLocalSubscriptions(interchangeNodeProperties.getName(), interchangeNodeProperties.getMessageChannelPort());
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")

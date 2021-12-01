@@ -14,7 +14,7 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void createValidJson() throws JsonProcessingException {
-        EndpointApi endpoint = new EndpointApi("client1queue","amqps://b.c-its-interchange.eu:5671");
+        EndpointApi endpoint = new EndpointApi("client1queue","b.c-its-interchange.eu", 5671);
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
                 "1",
                 "messageType='DENM' AND originatingCountry='NO'",
@@ -30,17 +30,19 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void parseUnknownJsonField() throws JsonProcessingException {
-        String input = "{\"id\":\"1\",\"foo\":\"bar\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"source\":\"client1source\"}";
+        String input = "{\"id\":\"1\",\"foo\":\"bar\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"endpoints\":[{\"source\":\"client1source\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
         ObjectMapper mapper = new ObjectMapper();
         SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);
+        System.out.println(mapper.writeValueAsString(result));
         assertThat(result.getId()).isEqualTo("1");
         assertThat(result.getConsumerCommonName()).isEqualTo("client1");
+        assertThat(result.getEndpoints().stream().findFirst().get().getHost()).isEqualTo("b.c-its-interchange.eu");
     }
 
     @Test
     public void createValidJsonWithEndpoints() throws JsonProcessingException {
-        EndpointApi endpoint1 = new EndpointApi("client1source", "amqps://a.c-its-interchange.eu:5671");
-        EndpointApi endpoint2 = new EndpointApi("client2source", "amqps://b.c-its-interchange.eu:5671");
+        EndpointApi endpoint1 = new EndpointApi("client1source", "a.c-its-interchange.eu", 5671);
+        EndpointApi endpoint2 = new EndpointApi("client2source", "b.c-its-interchange.eu", 5671);
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApi(
                 "1",
                 "messageType='DENM' AND originatingCountry='NO'",
@@ -55,7 +57,7 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void parseEndpointsToObject() throws JsonProcessingException {
-        String input = "{\"id\":\"1\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"messageBrokerUrl\":null,\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"messageBrokerUrl\":\"amqps://a.c-its-interchange.eu:5671\",\"host\":null,\"port\":null,\"maxBandwidth\":null,\"maxMessageRate\":null},{\"source\":\"client2queue\",\"messageBrokerUrl\":\"amqps://b.c-its-interchange.eu:5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
+        String input = "{\"id\":\"1\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
         ObjectMapper mapper = new ObjectMapper();
 
         SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);

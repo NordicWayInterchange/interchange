@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.Capability;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import no.vegvesen.ixn.onboard.SelfService;
@@ -99,9 +100,8 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.info("Common name matches Neighbour name in path.");
 
-		String messageChannelUrl = selfService.getMessageChannelUrl();
 		NeighbourMDCUtil.removeLogVariables();
-		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId, messageChannelUrl);
+		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId);
 	}
 
 

@@ -118,7 +118,8 @@ public class ApiModelRestDocumentationTest {
                 Collections.singleton(
                         new EndpointApi(
                                 "source-1",
-                                "endpoint-1"
+                                "endpoint-1",
+                                5671
                         )
                 )
         );
