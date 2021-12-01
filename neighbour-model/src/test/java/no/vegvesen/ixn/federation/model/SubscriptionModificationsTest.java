@@ -50,8 +50,8 @@ class SubscriptionModificationsTest {
 	@Test
 	void addEndpointsToSubscription() {
 		Subscription sub = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, "");
-		Endpoint endpoint1 = new Endpoint("queue-1", "endpoint-1");
-		Endpoint endpoint2 = new Endpoint("queue-2", "endpoint-2");
+		Endpoint endpoint1 = new Endpoint("queue-1", "endpoint-1", 5671);
+		Endpoint endpoint2 = new Endpoint("queue-2", "endpoint-2", 5671);
 		sub.setEndpoints(Sets.newSet(endpoint1, endpoint2));
 
 		assertThat(sub.getEndpoints()).hasSize(2);

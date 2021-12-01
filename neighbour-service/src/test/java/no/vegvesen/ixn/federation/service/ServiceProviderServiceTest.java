@@ -77,7 +77,8 @@ public class ServiceProviderServiceTest {
                                serviceProviderName,
                                Collections.singleton(new Endpoint(
                                        serviceProviderName,
-                                       "amqps://messages.node-A.eu"
+                                       "messages.node-A.eu",
+                                       5671
                                ))
                        ))
                 )
@@ -102,7 +103,8 @@ public class ServiceProviderServiceTest {
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getLocalEndpoints())
                 .hasSize(1)
-                .allMatch(b -> "amqps://messages.node-A.eu".equals(b.getMessageBrokerUrl()))
+                .allMatch(b -> "messages.node-A.eu".equals(b.getHost()))
+                .allMatch(b -> 5671 == b.getPort())
                 .allMatch(b -> serviceProviderName.equals(b.getSource()));
     }
 
@@ -128,7 +130,8 @@ public class ServiceProviderServiceTest {
                                 null, //QueueconsumerUser is most often null from other node.
                                 Collections.singleton(new Endpoint(
                                         localNodeName,
-                                        "amqps://messages.node-A.eu"
+                                        "messages.node-A.eu",
+                                        5671
                                 ))
                         ))
                 )

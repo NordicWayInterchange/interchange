@@ -354,7 +354,7 @@ public class NeigbourDiscoveryService {
         for(Endpoint endpoint : endpoints) {
             ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource());
             listenerEndpointRepository.delete(listenerEndpoint);
-            logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and source {}", neighbour.getName(), endpoint.getMessageBrokerUrl(), endpoint.getSource());
+            logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", neighbour.getName(), endpoint.getHost(), endpoint.getSource());
         }
     }
 

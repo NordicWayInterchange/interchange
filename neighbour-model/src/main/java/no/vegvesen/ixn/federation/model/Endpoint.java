@@ -13,7 +13,6 @@ public class Endpoint {
     private Integer id;
 
     private String source;
-    private String messageBrokerUrl;
     private String host;
     private Integer port;
     private Integer maxBandwidth;
@@ -21,11 +20,6 @@ public class Endpoint {
 
     public Endpoint() {
 
-    }
-
-    public Endpoint(String source, String messageBrokerUrl) {
-        this.source = source;
-        this.messageBrokerUrl = messageBrokerUrl;
     }
 
     public Endpoint(String source, String host, Integer port) {
@@ -48,14 +42,6 @@ public class Endpoint {
 
     public void setSource(String source) {
         this.source = source;
-    }
-
-    public String getMessageBrokerUrl() {
-        return messageBrokerUrl;
-    }
-
-    public void setMessageBrokerUrl(String messageBrokerUrl) {
-        this.messageBrokerUrl = messageBrokerUrl;
     }
 
     public String getHost() {

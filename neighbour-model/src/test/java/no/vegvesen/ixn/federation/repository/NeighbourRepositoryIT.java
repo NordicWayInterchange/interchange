@@ -282,7 +282,7 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void addSubscriptionWithEndpointsList() {
 		Subscription sub = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "");
-		Endpoint endpoint = new Endpoint("my-queue","my-broker");
+		Endpoint endpoint = new Endpoint("my-queue","my-host", 5671);
 		sub.setEndpoints(Sets.newLinkedHashSet(endpoint));
 
 		Set<Subscription> subs = Sets.newLinkedHashSet(sub);

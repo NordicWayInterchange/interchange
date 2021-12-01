@@ -47,7 +47,7 @@ public class ServiceProviderService {
                             Set<Endpoint> endpoints = subscription.getEndpoints();
                             Set<LocalEndpoint> localEndpoints = new HashSet<>();
                             for (Endpoint endpoint : endpoints) {
-                                logger.info("Adding local endpoint {} with consumerCommonName same as serviceProvider name, source {}", endpoint.getMessageBrokerUrl(), endpoint.getSource());
+                                logger.info("Adding local endpoint with host {} and consumerCommonName same as serviceProvider name, source {}", endpoint.getHost(), endpoint.getSource());
                                 localEndpoints.add(endpointToLocalEndpoint(endpoint));
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localEndpoints);
@@ -67,6 +67,6 @@ public class ServiceProviderService {
     }
 
     public LocalEndpoint endpointToLocalEndpoint(Endpoint endpoint) {
-        return new LocalEndpoint(endpoint.getSource(), endpoint.getMessageBrokerUrl());
+        return new LocalEndpoint(endpoint.getSource(), endpoint.getHost(), endpoint.getPort());
     }
 }

@@ -288,7 +288,7 @@ public class NeighbourServiceDiscoveryTest {
 		// Mock result of polling in backoff.
 		Subscription ericssonSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "");
 		ericssonSubscription.setLastUpdatedTimestamp(1);
-		Endpoint endpoint = new Endpoint("source-1", "broker-1");
+		Endpoint endpoint = new Endpoint("source-1", "host-1", 5671);
 		ericssonSubscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
 		SubscriptionRequest subReq = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(ericssonSubscription));
 		ericsson.setOurRequestedSubscriptions(subReq);
@@ -370,7 +370,7 @@ public class NeighbourServiceDiscoveryTest {
 	public void successfulPollOfSubscriptionWithStatusCreatedCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "");
-		Endpoint endpoint = new Endpoint("source-1", "broker-1");
+		Endpoint endpoint = new Endpoint("source-1", "host-1", 5671);
 		subscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
 		subscription.setLastUpdatedTimestamp(1);
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(subscription));
@@ -392,8 +392,8 @@ public class NeighbourServiceDiscoveryTest {
 	public void successfulPollOfSubscriptionWithEndpointsCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
-		Endpoint endpoint1 = new Endpoint("source-1", "host-1", 0);
-		Endpoint endpoint2 = new Endpoint("source-2", "host-2", 0);
+		Endpoint endpoint1 = new Endpoint("source-1", "host-1", 5671);
+		Endpoint endpoint2 = new Endpoint("source-2", "host-2", 5671);
 		SubscriptionRequest ericssonSubscription = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(subscription));
 		ericsson.setOurRequestedSubscriptions(ericssonSubscription);
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any())).thenReturn(Collections.singletonList(ericsson));
