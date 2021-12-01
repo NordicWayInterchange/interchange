@@ -85,8 +85,8 @@ public class OnboardRestControllerIT {
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
-        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        AddSubscription addSubscription = new AddSubscription("ixn", selectorApi);
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscription addSubscription = new AddSubscription("ixn", selector);
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         restController.addSubscriptions(serviceProviderName, requestApi);
@@ -109,7 +109,7 @@ public class OnboardRestControllerIT {
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 		        serviceProviderName,
-                Collections.singleton(new AddSubscription("ixn", new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'")))
+                Collections.singleton(new AddSubscription("ixn", "messageType = 'DATEX2' AND originatingCountry = 'NO'"))
         );
         restController.addSubscriptions(serviceProviderName, requestApi);
 
@@ -131,8 +131,8 @@ public class OnboardRestControllerIT {
 	@Test
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
-        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription("service-provider-create-new-queue", selectorApi))));
+        String selector= "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription("service-provider-create-new-queue", selector))));
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -151,7 +151,7 @@ public class OnboardRestControllerIT {
     @Test
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
-        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription("ixn", selectorApi))));
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription("ixn", selector))));
     }
 }

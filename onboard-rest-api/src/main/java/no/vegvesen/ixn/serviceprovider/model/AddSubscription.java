@@ -9,15 +9,15 @@ public class AddSubscription {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String consumerCommonName;
 
-    SelectorApi selector;
+    String selector;
 
     public AddSubscription(){}
 
-    public AddSubscription(SelectorApi selector){
+    public AddSubscription(String selector){
         this.selector = selector;
     }
 
-    public AddSubscription(String consumerCommonName, SelectorApi selector){
+    public AddSubscription(String consumerCommonName, String selector){
         this.consumerCommonName = consumerCommonName;
         this.selector = selector;
     }
@@ -30,11 +30,11 @@ public class AddSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public SelectorApi getSelector() {
+    public String getSelector() {
         return selector;
     }
 
-    public void setSelector(SelectorApi selector) {
+    public void setSelector(String selector) {
         this.selector = selector;
     }
 

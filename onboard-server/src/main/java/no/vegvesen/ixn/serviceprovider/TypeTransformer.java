@@ -59,7 +59,7 @@ public class TypeTransformer {
 
     public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                addSubscription.getSelector().getSelector(),
+                addSubscription.getSelector(),
                 addSubscription.getConsumerCommonName());
     }
 
