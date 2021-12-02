@@ -174,13 +174,13 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         OnboardRestClientApplication parentCommand;
 
         @Parameters(index = "0", description = "The ID of the subscription with the brokerUrl")
-        Integer subscriptionId;
+        String subscriptionId;
 
         @Override
         public Integer call() throws JsonProcessingException {
             OnboardRESTClient client = parentCommand.createClient();
             GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
-            System.out.printf("Subscription %d successfully polled with %n", subscriptionId);
+            System.out.printf("Subscription %s successfully polled with %n", subscriptionId);
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
             return 0;
@@ -288,13 +288,13 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         OnboardRestClientApplication parentCommand;
 
         @Parameters(index = "0", description = "The ID of the subscription to delete")
-        Integer privateChannelId;
+        String privateChannelId;
 
         @Override
         public Integer call(){
             OnboardRESTClient client = parentCommand.createClient();
             client.deletePrivateChannel(privateChannelId);
-            System.out.printf("Private channel with id %d deleted successfully%n",privateChannelId);
+            System.out.printf("Private channel with id %s deleted successfully%n",privateChannelId);
             return 0;
         }
     }

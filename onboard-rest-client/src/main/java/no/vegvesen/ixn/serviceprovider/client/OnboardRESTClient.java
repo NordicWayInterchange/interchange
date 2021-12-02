@@ -64,8 +64,8 @@ public class OnboardRESTClient {
 		restTemplate.delete(String.format("%s/%s/capabilities/%s", server, user, capabilityId));
     }
 
-    public GetSubscriptionResponse getSubscription(Integer localSubscriptionId) {
-        String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId.toString());
+    public GetSubscriptionResponse getSubscription(String localSubscriptionId) {
+        String url = String.format("%s/%s/subscriptions/%s", server, user, localSubscriptionId);
         return restTemplate.getForEntity(url, GetSubscriptionResponse.class).getBody();
     }
 
@@ -101,7 +101,7 @@ public class OnboardRESTClient {
         return restTemplate.exchange(url, HttpMethod.POST, entity, PrivateChannelApi.class).getBody();
     }
 
-    public void deletePrivateChannel(Integer privateChannelId) {
+    public void deletePrivateChannel(String privateChannelId) {
         restTemplate.delete(String.format("%s/%s/privatechannels/%s", server, user, privateChannelId));
     }
 
