@@ -61,7 +61,7 @@ public class OnboardRestControllerIT {
 
         LocalActorCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
         //LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
-        restController.deleteCapability(serviceProviderName, Integer.parseInt(saved.getId()));
+        restController.deleteCapability(serviceProviderName, saved.getId());
     }
 
     @Test
@@ -77,7 +77,7 @@ public class OnboardRestControllerIT {
         assertThat(addedCapability).isNotNull();
         LocalActorCapability capability = addedCapability.getCapabilities().stream().findFirst()
                 .orElseThrow(() -> new AssertionError("No capabilities in response"));
-        GetCapabilityResponse response = restController.getServiceProviderCapability(serviceProviderName,Integer.parseInt(capability.getId()));
+        GetCapabilityResponse response = restController.getServiceProviderCapability(serviceProviderName,capability.getId());
         assertThat(response.getId()).isEqualTo(capability.getId());
 
     }
@@ -99,7 +99,7 @@ public class OnboardRestControllerIT {
 		assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
 		LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().get();
-        restController.deleteSubscription(serviceProviderName,Integer.parseInt(subscriptionApi.getId()));
+        restController.deleteSubscription(serviceProviderName,subscriptionApi.getId());
 
 		ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
 		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
@@ -121,7 +121,7 @@ public class OnboardRestControllerIT {
 		assertThat(subscriptionUpdated).isPresent();
 
 		try {
-			restController.deleteSubscription(serviceProviderName, -1);
+			restController.deleteSubscription(serviceProviderName, "-1");
 		} catch (NotFoundException ignore) {
 		}
 		ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);

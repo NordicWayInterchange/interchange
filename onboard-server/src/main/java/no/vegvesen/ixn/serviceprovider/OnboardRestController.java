@@ -88,7 +88,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/capabilities/{capabilityId}")
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deleteCapability(@PathVariable String serviceProviderName, @PathVariable Integer capabilityId ) {
+	public void deleteCapability(@PathVariable String serviceProviderName, @PathVariable String capabilityId ) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -102,7 +102,7 @@ public class OnboardRestController {
 			throw new NotFoundException("The Service Provider trying to delete a capability does not exist in the database. Rejecting...");
 		}
 		// Service provider exists. Remove the incoming capabilities from the Service Provider capabilities.
-		serviceProviderToUpdate.getCapabilities().removeDataType(capabilityId);
+		serviceProviderToUpdate.getCapabilities().removeDataType(Integer.parseInt(capabilityId));
 
 		// Save the updated Service Provider representation in the database.
 		serviceProviderRepository.save(serviceProviderToUpdate);
@@ -112,12 +112,12 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities/{capabilityId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetCapabilityResponse getServiceProviderCapability(@PathVariable String serviceProviderName, @PathVariable Integer capabilityId) {
+	public GetCapabilityResponse getServiceProviderCapability(@PathVariable String serviceProviderName, @PathVariable String capabilityId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 		Capability capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
-				c.getId().equals(capabilityId))
+				c.getId().equals(Integer.parseInt(capabilityId)))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, serviceProviderName)));
 		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(serviceProviderName,capability);
@@ -182,7 +182,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/subscriptions/{dataTypeId}")
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void deleteSubscription(@PathVariable String serviceProviderName, @PathVariable Integer dataTypeId) throws NotFoundException {
+	public void deleteSubscription(@PathVariable String serviceProviderName, @PathVariable String dataTypeId) throws NotFoundException {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -194,7 +194,7 @@ public class OnboardRestController {
 		if (serviceProviderToUpdate == null) {
 			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
 		}
-		serviceProviderToUpdate.removeLocalSubscription(dataTypeId);
+		serviceProviderToUpdate.removeLocalSubscription(Integer.parseInt(dataTypeId));
 
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
@@ -222,11 +222,11 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable String serviceProviderName, @PathVariable Integer subscriptionId) {
+	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable String serviceProviderName, @PathVariable String subscriptionId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
-				s.getSub_id().equals(subscriptionId))
+				s.getSub_id().equals(Integer.parseInt(subscriptionId)))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,serviceProviderName)));
 		logger.info("Received poll from Service Provider {} with queueConsumerUser = {}", serviceProviderName, localSubscription.getQueueConsumerUser());
@@ -258,7 +258,7 @@ public class OnboardRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/{privateChannelId}")
-	public RedirectView deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable Integer privateChannelId) {
+	public RedirectView deletePrivateChannel(@PathVariable String serviceProviderName, @PathVariable String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
@@ -269,7 +269,7 @@ public class OnboardRestController {
 			throw new NotFoundException("The Service Provider trying to delete a private channel does not exist in the database. No private channels to delete.");
 		}
 
-		serviceProviderToUpdate.setPrivateChannelToTearDown(privateChannelId);
+		serviceProviderToUpdate.setPrivateChannelToTearDown(Integer.parseInt(privateChannelId));
 
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
