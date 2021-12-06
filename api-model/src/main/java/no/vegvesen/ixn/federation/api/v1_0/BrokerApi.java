@@ -14,7 +14,10 @@ public class BrokerApi {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String messageBrokerUrl;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer maxBandwidth;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer maxMessageRate;
 
     public BrokerApi() {

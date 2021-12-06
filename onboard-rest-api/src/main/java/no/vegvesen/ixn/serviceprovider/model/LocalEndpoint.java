@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 public class LocalEndpoint {
@@ -7,7 +9,11 @@ public class LocalEndpoint {
     private String host;
     private Integer port;
     private String source;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer maxBandwidth;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer maxMessageRate;
 
     public LocalEndpoint() {
@@ -42,16 +48,6 @@ public class LocalEndpoint {
     public void setPort(Integer port) {
         this.port = port;
     }
-
-    //TODO: Remove temporary method for Url, probably don't need it for testing purposes
-    /*public String getUrl() {
-        if(port == null){
-            return String.format("amqps://%s:%s", host, "5671");
-        }
-        else {
-            return String.format("amqps://%s:%s", host, port);
-        }
-    }*/
 
     public String getSource() {
         return source;

@@ -284,10 +284,12 @@ public class NeighbourService {
 
 		Set<String> brokerUrlList = subscriptions.stream().flatMap(subscription -> subscription.getBrokers().stream()).map(Broker::getMessageBrokerUrl).collect(Collectors.toSet());
 
-		for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
-			if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
-				listenerEndpointRepository.delete(listenerEndpoint);
-				logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), listenerEndpoint.getBrokerUrl(), listenerEndpoint.getQueue());
+		if(!listenerEndpoints.isEmpty()) {
+			for (ListenerEndpoint listenerEndpoint : listenerEndpoints) {
+				if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
+					listenerEndpointRepository.delete(listenerEndpoint);
+					logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), listenerEndpoint.getBrokerUrl(), listenerEndpoint.getQueue());
+				}
 			}
 		}
 	}
@@ -353,7 +355,9 @@ public class NeighbourService {
 
 								Set<Broker> brokersToRemove = new HashSet<>(existingBrokers);
 								brokersToRemove.removeAll(wantedBrokers);
-								tearDownListenerEndpointsFromBrokersList(neighbour, brokersToRemove);
+								if(!brokersToRemove.isEmpty()) {
+									tearDownListenerEndpointsFromBrokersList(neighbour, brokersToRemove);
+								}
 
 								Set<Broker> additionalBrokers = new HashSet<>(wantedBrokers);
 								additionalBrokers.removeAll(existingBrokers);

@@ -86,7 +86,7 @@ public class SubscriptionRequestTransformer {
 		response.setQueueConsumerUser(subscription.getQueueConsumerUser());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			BrokerApi broker = new BrokerApi(
-					neighbourName,
+					subscription.getQueueConsumerUser(),
 					messageChannelUrl
 			);
 			response.setBrokers(Collections.singleton(broker));

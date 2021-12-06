@@ -145,14 +145,13 @@ public class OnboardRestController {
 
 		logger.info("Service provider {} Incoming subscription selector {}", serviceProviderName, requestApi.getSubscriptions());
 
-		//LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,selector);
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
 			LocalSubscription localSubscription;
 			if(subscription.isCreateNewQueue()) {
 				localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(serviceProviderName, subscription);
 			} else {
-				localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(selfService.fetchInterchangeNodeName(), subscription);
+				localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(selfService.getNodeProviderName(), subscription);
 			}
 			localSubscriptions.add(localSubscription);
 		}
