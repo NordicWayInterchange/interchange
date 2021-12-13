@@ -79,6 +79,10 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         return String.format("amqps://%s:%d",getHost(),getMappedPort(AMQPS_PORT));
     }
 
+    public String getAmqpUrl() {
+        return String.format("amqp://%s:%d",getHost(),getMappedPort(AMQP_PORT));
+    }
+
 
     public String getHttpsUrl() {
         return String.format("https://%s:%d",getHost(),getMappedPort(HTTPS_PORT));

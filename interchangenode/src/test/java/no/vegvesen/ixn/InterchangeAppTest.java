@@ -48,6 +48,7 @@ public class InterchangeAppTest {
         assertThat(validator.isValid(message)).isTrue();
         consumer.onMessage(message);
         verify(outgoingExchangeProducer, times(1)).send(any(Message.class), anyInt(), anyInt(), anyLong());
+        verify(dlQueueProducer,never()).send(any(Message.class),anyInt(),anyInt(),anyLong());
     }
 
     @Test
@@ -64,6 +65,7 @@ public class InterchangeAppTest {
         );
 		consumer.onMessage(message);
         verify(dlQueueProducer, times(1)).send(any(Message.class), anyInt(), anyInt(), anyLong());
+        verify(outgoingExchangeProducer,never()).send(any(Message.class),anyInt(),anyInt(),anyLong());
     }
 
 }
