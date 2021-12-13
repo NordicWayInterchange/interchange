@@ -35,12 +35,13 @@ public class ServiceProviderService {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         List<Neighbour> neighbours = neighbourRepository.findAll();
         for(ServiceProvider serviceProvider : serviceProviders) {
-            updateServiceProviderSubscriptionsWithBrokerUrl(neighbours, serviceProvider, self.getMessageChannelUrl());
+            updateServiceProvidersWithNonCreateNewQueue(serviceProvider,self.getMessageChannelUrl());
+            updateServiceProvidersWithCreateNewQueue(neighbours, serviceProvider);
             serviceProviderRepository.save(serviceProvider);
         }
     }
 
-    public void updateServiceProviderSubscriptionsWithBrokerUrl(List<Neighbour> neighbours, ServiceProvider serviceProvider, String localMessageBrokerUrl) {
+    public void updateServiceProvidersWithCreateNewQueue(List<Neighbour> neighbours, ServiceProvider serviceProvider) {
         for(Neighbour neighbour : neighbours) {
             for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
                 for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
@@ -57,16 +58,25 @@ public class ServiceProviderService {
                                 localBrokers.add(brokerToLocalBroker(broker));
                             }
                             serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
-                        } else {
-                            if (localSubscription.getQueueConsumerUser().equals(serviceProvider.getName())) {
-                                throw new IllegalStateException("createNewQueue = false, local subscription user = subscription user");
-                            }
-                            LocalBroker broker = new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl);
-                            logger.info("Adding local broker {} with createNewQueue false, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
-                            Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(broker));
-                            serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    public void updateServiceProvidersWithNonCreateNewQueue(ServiceProvider serviceProvider, String localMessageBrokerUrl) {
+        for (LocalSubscription localSubscription : serviceProvider.getSubscriptions()) {
+            if (!localSubscription.isCreateNewQueue()) {
+                if (localSubscription.getQueueConsumerUser().equals(serviceProvider.getName())) {
+                    throw new IllegalStateException("createNewQueue = false, local subscription user = subscription user");
+                }
+                //To avoid overwriting CREATED subscriptions
+                if (!localSubscription.isCreateNewQueue()) {
+                    LocalBroker broker = new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl);
+                    logger.info("Adding local broker {} with createNewQueue false, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
+                    Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(broker));
+                    serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
                 }
             }
         }

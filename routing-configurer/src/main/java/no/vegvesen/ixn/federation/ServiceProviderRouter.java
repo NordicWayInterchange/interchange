@@ -65,6 +65,7 @@ public class ServiceProviderRouter {
             }
 
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
+                //service provider has capabilities, or a local subscription with createNewQueue = false
                 if (serviceProvider.hasCapabilities() || (newSubscriptions.size() > hasCreateNewQueue.size())) {
                     optionallyAddServiceProviderToGroup(groupMemberNames,name);
                 }
@@ -91,7 +92,8 @@ public class ServiceProviderRouter {
             case REQUESTED:
 			case CREATED:
 			    if (subscription.isCreateNewQueue()) {
-                    newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
+                    subscription.setStatus(LocalSubscriptionStatus.CREATED);
+                    newSubscription = Optional.of(subscription);
                 } else {
 				    newSubscription = onRequested(name, subscription);
 			    }
@@ -114,7 +116,8 @@ public class ServiceProviderRouter {
     private Optional<LocalSubscription> onRequested(String name, LocalSubscription subscription) {
         optionallyCreateQueue(name);
         optionallyAddQueueBindings(name, subscription);
-        return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
+        subscription.setStatus(LocalSubscriptionStatus.CREATED);
+        return Optional.of(subscription);
     }
 
     private void removeBindingIfExists(String name, LocalSubscription subscription) {

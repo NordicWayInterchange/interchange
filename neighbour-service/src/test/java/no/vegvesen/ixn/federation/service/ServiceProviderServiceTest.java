@@ -98,17 +98,23 @@ public class ServiceProviderServiceTest {
                 new HashSet<>(),
                 LocalDateTime.now()
         );
-        serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider,"amqps://messages.local-node");
+        doReturn(Arrays.asList(serviceProvider)).when(serviceProviderRepository).findAll();
+        doReturn(neighbours).when(neighbourRepository).findAll();
+        Self self = new Self(localNodeName);
+        serviceProviderService.updateLocalSubscriptions(self);
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getLocalBrokers())
                 .hasSize(1)
                 .allMatch(b -> "amqps://messages.node-A.eu".equals(b.getMessageBrokerUrl()))
                 .allMatch(b -> serviceProviderName.equals(b.getQueueName()));
+        verify(serviceProviderRepository,times(1)).findAll();
+        verify(neighbourRepository,times(1)).findAll();
+        verify(serviceProviderRepository,times(1)).save(any());
     }
 
     @Test
-    public void testUpdateServiceProviderSubscriptionWithLocalBrokerUrlNonCreateNewQueue() {
+    public void updateServiceProviderSubscriptionWithLocalBrokerUrlNonCreateNewQueue() {
         ServiceProviderService serviceProviderService = new ServiceProviderService(neighbourRepository,serviceProviderRepository);
         String neighbourName = "node-A";
         String selector = "a = b";
@@ -151,13 +157,17 @@ public class ServiceProviderServiceTest {
                 new HashSet<>(),
                 LocalDateTime.now()
         );
-        final String localMessageBrokerUrl = "amqps://messages.local-node";
-        serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider, localMessageBrokerUrl);
+        doReturn(Arrays.asList(serviceProvider)).when(serviceProviderRepository).findAll();
+        doReturn(neighbours).when(neighbourRepository).findAll();
+        serviceProviderService.updateLocalSubscriptions(new Self(localNodeName));
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getLocalBrokers())
                 .hasSize(1)
-                .allMatch(b -> localMessageBrokerUrl.equals(b.getMessageBrokerUrl()))
-                .allMatch(b -> serviceProviderName.equals(b.getQueueName()));
+                .allMatch(b -> b.getMessageBrokerUrl().equals(String.format("amqps://%s/",localNodeName)))
+                .allMatch(b -> b.getQueueName().equals(serviceProviderName));
+        verify(serviceProviderRepository,times(1)).findAll();
+        verify(neighbourRepository).findAll();
+        verify(serviceProviderRepository).save(any());
     }
 }
