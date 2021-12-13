@@ -16,7 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
 @Command(name = "jmsclientsource", description = "JMS Client Source Application", subcommands = {
-        JmsClientSourceApplication.SendBytesMessage.class
+        JmsClientSourceApplication.SendBytesMessage.class,
+        JmsClientSourceApplication.SendTextMessage.class
 })
 public class JmsClientSourceApplication implements Callable<Integer> {
 
@@ -51,21 +52,49 @@ public class JmsClientSourceApplication implements Callable<Integer> {
         public Integer call() throws Exception {
             try(Source source = parentCommand.createClient()){
                 source.start();
-                String messageText = "{}";
+                String messageText = "{Tester med meg selv hehehehe}";
                 byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
 
                 source.sendNonPersistentMessage(source.createMessageBuilder()
                         .bytesMessage(bytemessage)
                         .userId("anna")
                         .messageType(Constants.DENM)
-                        .publisherId("NO-123")
+                        .publisherId("NO00001")
                         .originatingCountry("NO")
-                        .protocolVersion("1.0")
-                        .quadTreeTiles(",12003")
-                        .causeCode("6")
-                        .subCauseCode("76")
+                        .protocolVersion("DENM:1.2.2")
+                        .quadTreeTiles(",12004")
+                        .causeCode("5")
+                        .subCauseCode("56")
                         .build());
             } catch (Exception e){
+                e.printStackTrace();
+            }
+            return 0;
+        }
+    }
+
+    @Command(name = "sendtextmessage", description = "Send a text message")
+    static class SendTextMessage implements Callable<Integer> {
+        @ParentCommand
+        JmsClientSourceApplication parentCommand;
+
+        @Override
+        public Integer call() throws Exception {
+            try(Source source = parentCommand.createClient()){
+                source.start();
+                String messageText = "{Dette er en datex2 melding hehehe}";
+
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                    .textMessage(messageText)
+                    .userId("anna")
+                    .datex2MessageType()
+                    .publisherId("NO00001")
+                    .originatingCountry("NO")
+                    .protocolVersion("DATEX2;2.3")
+                    .publicationType("SituationPublication")
+                    .quadTreeTiles(",12004")
+                    .build());
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return 0;

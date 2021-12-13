@@ -3,6 +3,6 @@
     "subscriptions" : [
     {
       "createNewQueue" : false,
-      "selector": "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'"
+      "selector": "originatingCountry = 'NO' and messageType = 'DATEX2' and protocolVersion = 'DATEX2;2.3' and quadTree like '%,12004%' and publicationType = 'SituationPublication'"
     }]
 }

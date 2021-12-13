@@ -38,13 +38,12 @@ public class JmsSource implements CommandLineRunner {
             s.send(s.createMessageBuilder()
                     .textMessage("Dette er en test, FISK!")
                     .userId("king_olav")
-                    .publisherId("NO-123")
-                    .messageType(Constants.DENM)
-                    .causeCode("6")
-                    .subCauseCode("61")
+                    .publisherId("NO-12345")
+                    .messageType(Constants.DATEX_2)
                     .originatingCountry("NO")
-                    .protocolVersion("1.0")
-                    .quadTreeTiles(",12003")
+                    .protocolVersion("DATEX2;2.3")
+                    .quadTreeTiles(",12004")
+                    .publicationType("SituationPublication")
                     .timestamp(System.currentTimeMillis())
                     .build());
         }

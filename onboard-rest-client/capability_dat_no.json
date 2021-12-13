@@ -1,16 +1,15 @@
 {	"name" : "king_olav",
-  "version" : "1.0",
-  "capabilities" : [
-    {
-      "messageType": "DENM",
-      "publisherId": "NO-123",
-      "originatingCountry": "NO",
-      "protocolVersion": "1.0",
-      "quadTree": [
-        "12003"
-      ],
-      "causeCode": [
-        "6"
-      ]
-    }]
+    "version" : "1.0",
+    "capabilities" : [
+        {
+            "messageType": "DATEX2",
+            "publisherId": "NO-12345",
+            "originatingCountry": "NO",
+            "protocolVersion": "DATEX2;2.3",
+            "quadTree": [
+                "12004"
+            ],
+            "publicationType": "SituationPublication"
+        }
+    ]
 }
