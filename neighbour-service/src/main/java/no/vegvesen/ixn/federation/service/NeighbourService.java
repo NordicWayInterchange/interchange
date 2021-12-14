@@ -310,10 +310,11 @@ public class NeighbourService {
 		Set<LocalSubscription> existingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
 		Set<Subscription> calculatedSubscriptions = new HashSet<>();
 		for (LocalSubscription subscription : existingSubscriptions) {
+			String queueConsumerUser = subscription.isCreateNewQueue() ? subscription.getQueueConsumerUser() : interchangeNodeProperties.getName();
 			Subscription newSubscription = new Subscription(subscription.getSelector(),
 					SubscriptionStatus.REQUESTED,
 					subscription.isCreateNewQueue(),
-					subscription.getQueueConsumerUser());
+					queueConsumerUser);
 			calculatedSubscriptions.add(newSubscription);
 		}
 		logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);

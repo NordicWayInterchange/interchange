@@ -92,8 +92,9 @@ public class ServiceProviderRouter {
             case REQUESTED:
 			case CREATED:
 			    if (subscription.isCreateNewQueue()) {
-                    subscription.setStatus(LocalSubscriptionStatus.CREATED);
-                    newSubscription = Optional.of(subscription);
+                    //NOTE: We return a new instance due to the fact that we compare 2 collections of objects.
+                    //If we changed in-place, the same instance would occur in both collections
+                    newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
                 } else {
 				    newSubscription = onRequested(name, subscription);
 			    }
@@ -116,8 +117,9 @@ public class ServiceProviderRouter {
     private Optional<LocalSubscription> onRequested(String name, LocalSubscription subscription) {
         optionallyCreateQueue(name);
         optionallyAddQueueBindings(name, subscription);
-        subscription.setStatus(LocalSubscriptionStatus.CREATED);
-        return Optional.of(subscription);
+        //NOTE: We return a new instance due to the fact that we compare 2 collections of objects.
+        //If we changed in-place, the same instance would occur in both collections
+        return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
     }
 
     private void removeBindingIfExists(String name, LocalSubscription subscription) {

@@ -68,16 +68,15 @@ public class ServiceProviderService {
     public void updateServiceProvidersWithNonCreateNewQueue(ServiceProvider serviceProvider, String localMessageBrokerUrl) {
         for (LocalSubscription localSubscription : serviceProvider.getSubscriptions()) {
             if (!localSubscription.isCreateNewQueue()) {
-                if (localSubscription.getQueueConsumerUser().equals(serviceProvider.getName())) {
-                    throw new IllegalStateException("createNewQueue = false, local subscription user = subscription user");
-                }
+                //TODO this is a bit strange. The local user sohuld be the sp!
+                //if (localSubscription.getQueueConsumerUser().equals(serviceProvider.getName())) {
+                //    throw new IllegalStateException("createNewQueue = false, local subscription user = subscription user");
+                //}
                 //To avoid overwriting CREATED subscriptions
-                if (!localSubscription.isCreateNewQueue()) {
-                    LocalBroker broker = new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl);
-                    logger.info("Adding local broker {} with createNewQueue false, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
-                    Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(broker));
-                    serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
-                }
+                LocalBroker broker = new LocalBroker(serviceProvider.getName(), localMessageBrokerUrl);
+                logger.info("Adding local broker {} with createNewQueue false, queue {}", broker.getMessageBrokerUrl(), broker.getQueueName());
+                Set<LocalBroker> localBrokers = new HashSet<>(Arrays.asList(broker));
+                serviceProvider.updateSubscriptionWithBrokerUrl(localSubscription, localBrokers);
             }
         }
     }
