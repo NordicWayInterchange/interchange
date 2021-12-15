@@ -110,8 +110,8 @@ public class MessageValidatorTest {
         Message message = MessageTestDouble.createMessage(
                 "SVV",
                 "NO",
-                "IVI:1.0",
-                "IVI",
+                "IVIM:1.0",
+                "IVIM",
                 "abc"
         );
         assertThat(validator.isValid(message)).isTrue();
@@ -122,8 +122,8 @@ public class MessageValidatorTest {
         Message message = MessageTestDouble.createMessage(
                 "SVV",
                 "NO",
-                "IVI:1.0",
-                "IVI",
+                "IVIM:1.0",
+                "IVIM",
                 "abc",
                 new KeyValue("foo","bar")
         );

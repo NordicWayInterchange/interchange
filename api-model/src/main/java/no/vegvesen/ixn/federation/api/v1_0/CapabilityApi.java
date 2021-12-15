@@ -19,14 +19,14 @@ import static no.vegvesen.ixn.federation.api.v1_0.CapabilityApi.*;
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = DatexCapabilityApi.class, name = DATEX_2),
 		@JsonSubTypes.Type(value = DenmCapabilityApi.class, name = DENM),
-		@JsonSubTypes.Type(value = IviCapabilityApi.class, name = IVI),
+		@JsonSubTypes.Type(value = IvimCapabilityApi.class, name = IVIM),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CapabilityApi {
 	public static final String DATEX_2 = "DATEX2";
 	public static final String DENM = "DENM";
-	public static final String IVI = "IVI";
+	public static final String IVIM = "IVIM";
 
 	private String messageType;
 	private String publisherId;

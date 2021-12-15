@@ -3,11 +3,11 @@ package no.vegvesen.ixn.federation.transformer;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.IviCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.IvimCapabilityApi;
 import no.vegvesen.ixn.federation.model.Capability;
 import no.vegvesen.ixn.federation.model.DatexCapability;
 import no.vegvesen.ixn.federation.model.DenmCapability;
-import no.vegvesen.ixn.federation.model.IviCapability;
+import no.vegvesen.ixn.federation.model.IvimCapability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +47,8 @@ public class CapabilityToCapabilityApiTransformer {
 		else if (capabilityApi instanceof DenmCapabilityApi) {
 			return new DenmCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((DenmCapabilityApi) capabilityApi).getCauseCode());
 		}
-		else if (capabilityApi instanceof IviCapabilityApi) {
-			return new IviCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((IviCapabilityApi) capabilityApi).getIviType());
+		else if (capabilityApi instanceof IvimCapabilityApi) {
+			return new IvimCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((IvimCapabilityApi) capabilityApi).getIviType());
 		}
 		throw new RuntimeException("Subclass of CapabilityApi not possible to convert: " + capabilityApi.getClass().getSimpleName());
 	}

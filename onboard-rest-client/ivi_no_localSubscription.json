@@ -1,0 +1,9 @@
+{	"name" : "king.gustaf",
+    "version" : "1.0",
+    "subscriptions" : [
+        {
+            "createNewQueue" : false,
+            "selector": "originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType = ',1,2,3,'"
+        }
+    ]
+}

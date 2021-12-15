@@ -56,7 +56,7 @@ public class MessageProperty {
 
 	/* TODO This is specified as String, but obviously has some string-array properties. Double check that this is not a mistake in spec */
 	public static final MessageProperty IVI_CONTAINER = new MessageProperty("iviContainer", false, false, MessagePropertyType.STRING);
-	public static final List<MessageProperty> iviApplicationProperties = Arrays.asList(
+	public static final List<MessageProperty> ivimApplicationProperties = Arrays.asList(
 			IVI_TYPE,
 			PICTOGRAM_CATEGORY_CODE,
 			IVI_CONTAINER
@@ -77,10 +77,10 @@ public class MessageProperty {
 			.map(MessageProperty::getName)
 			.collect(Collectors.toSet());
 
-	public static Set<String> mandatoryIviPropertyNames = Stream.of(
+	public static Set<String> mandatoryIvimPropertyNames = Stream.of(
 			commonApplicationProperties,
 			itsG5ApplicationProperties,
-			iviApplicationProperties).flatMap(Collection::stream)
+			ivimApplicationProperties).flatMap(Collection::stream)
 			.filter(MessageProperty::isMandatory)
 			.map(MessageProperty::getName)
 			.collect(Collectors.toSet());
@@ -90,7 +90,7 @@ public class MessageProperty {
 			datex2ApplicationProperties,
 			itsG5ApplicationProperties,
 			denmApplicationProperties,
-			iviApplicationProperties).flatMap(Collection::stream)
+			ivimApplicationProperties).flatMap(Collection::stream)
 			.collect(Collectors.toSet());
 
 	public static Set<MessageProperty> filterableProperties = Stream.of(

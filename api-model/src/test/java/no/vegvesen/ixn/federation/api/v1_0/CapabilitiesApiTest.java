@@ -25,7 +25,7 @@ public class CapabilitiesApiTest {
 				"NO-12345",
 				"NO", "DATEX2:2.3", quadTree,
 				Sets.newLinkedHashSet("SituationPublication"));
-		IviCapabilityApi iviType128Pictograms557_559_612 = new IviCapabilityApi(
+		IvimCapabilityApi iviType128Pictograms557_559_612 = new IvimCapabilityApi(
 				"NO-12345",
 				"NO", "IVI:1.2", quadTree,
 				Sets.newLinkedHashSet("128"));

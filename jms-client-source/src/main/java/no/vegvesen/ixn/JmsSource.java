@@ -36,14 +36,14 @@ public class JmsSource implements CommandLineRunner {
         try(Source s = new Source(properties.getUrl(),properties.getSendQueue(),sslContext)) {
             s.start();
             s.send(s.createMessageBuilder()
-                    .textMessage("Dette er en test, FISK!")
+                    .bytesMessage("Dette er en test, FISK!".getBytes())
                     .userId("king_olav")
                     .publisherId("NO-12345")
-                    .messageType(Constants.DATEX_2)
+                    .messageType(Constants.IVIM)
                     .originatingCountry("NO")
-                    .protocolVersion("DATEX2;2.3")
-                    .quadTreeTiles(",12004")
-                    .publicationType("SituationPublication")
+                    .protocolVersion("IVI:1.0")
+                    .quadTreeTiles(",12004,")
+                    .iviType(",1,2,3,")
                     .timestamp(System.currentTimeMillis())
                     .build());
         }

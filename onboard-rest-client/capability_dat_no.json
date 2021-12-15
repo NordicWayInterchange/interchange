@@ -9,7 +9,9 @@
             "quadTree": [
                 "12004"
             ],
-            "publicationType": "SituationPublication"
+            "publicationType": [
+                "SituationPublication"
+            ]
         }
     ]
 }

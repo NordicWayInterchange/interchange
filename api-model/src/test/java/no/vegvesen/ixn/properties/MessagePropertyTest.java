@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.properties;
 
 
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -69,7 +68,7 @@ public class MessagePropertyTest {
         assertThat(filterProperties(optionalIVIProperties,MessageProperty::isOptional))
                 .isEqualTo(optionalIVIProperties);
 
-        assertThat(filterProperties(MessageProperty.iviApplicationProperties,MessageProperty::isMandatory))
+        assertThat(filterProperties(MessageProperty.ivimApplicationProperties,MessageProperty::isMandatory))
                 .isEqualTo(mandatoryIVIProperties);
     }
 

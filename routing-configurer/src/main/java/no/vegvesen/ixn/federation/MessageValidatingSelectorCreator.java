@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.Capability;
 import no.vegvesen.ixn.federation.model.DatexCapability;
 import no.vegvesen.ixn.federation.model.DenmCapability;
-import no.vegvesen.ixn.federation.model.IviCapability;
+import no.vegvesen.ixn.federation.model.IvimCapability;
 
 public class MessageValidatingSelectorCreator {
 
@@ -17,9 +17,9 @@ public class MessageValidatingSelectorCreator {
                 .protocolVersion(capability.getProtocolVersion())
                 .quadTree(capability.getQuadTree())
                 .messageType(messageType);
-        if (messageType.equals(Constants.IVI)) {
-            IviCapability iviCapability = (IviCapability) capability;
-            builder.iviTypes(iviCapability.getIviTypes());
+        if (messageType.equals(Constants.IVIM)) {
+            IvimCapability ivimCapability = (IvimCapability) capability;
+            builder.iviTypes(ivimCapability.getIviTypes());
         } else if (messageType.equals(Constants.DENM)) {
             DenmCapability denmCapability = (DenmCapability) capability;
             builder.causeCodes(denmCapability.getCauseCodes());
