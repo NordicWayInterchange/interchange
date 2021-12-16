@@ -4,10 +4,7 @@ import no.vegvesen.ixn.federation.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -125,9 +122,10 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void matchIviSelectorWithQuadTree() {
-		IvimCapability capability = new IvimCapability("NO-12345", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")), Sets.newHashSet(Collections.emptySet()));
+		IvimCapability capability = new IvimCapability("NO-12345", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")), Sets.newHashSet(Arrays.asList("1", "2")));
 		LocalSubscription localSubscription = new LocalSubscription();
-		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%'");
+		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType like '%,2%'");
+		System.out.println(localSubscription.getSelector());
 		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)));
 	}
 

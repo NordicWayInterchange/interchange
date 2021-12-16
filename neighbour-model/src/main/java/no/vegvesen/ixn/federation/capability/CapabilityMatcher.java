@@ -33,6 +33,7 @@ public class CapabilityMatcher {
 					match = matchDenm((DenmCapability) capability, selectorFilter);
 				} else if (capability instanceof IvimCapability) {
 					match = matchIvi((IvimCapability) capability, selectorFilter);
+					System.out.println(match);
 				} else {
 					logger.warn("Unknown Capability type {} ", capability.getClass().getName());
 				}
