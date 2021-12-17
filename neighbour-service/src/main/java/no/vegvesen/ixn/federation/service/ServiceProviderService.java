@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -37,6 +38,30 @@ public class ServiceProviderService {
         for(ServiceProvider serviceProvider : serviceProviders) {
             updateServiceProvidersWithNonCreateNewQueue(serviceProvider,self.getMessageChannelUrl());
             updateServiceProvidersWithCreateNewQueue(neighbours, serviceProvider);
+            serviceProviderRepository.save(serviceProvider);
+        }
+    }
+
+    public void updateLocalDeliveries(Self self) {
+        List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+        for(ServiceProvider serviceProvider : serviceProviders) {
+            if (serviceProvider.hasCapabilities() && !serviceProvider.getDeliveries().isEmpty()) {
+                for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                    if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
+                        boolean match = CapabilityMatcher.matchLocalDeliveryToServiceProviderCapabilities(serviceProvider.getCapabilities().getCapabilities(), delivery);
+                        if (match) {
+                            LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(
+                                    self.getName(),
+                                    Integer.parseInt(self.getMessageChannelPort()),
+                                    "onramp",
+                                    delivery.getSelector()
+                            );
+                            delivery.setEndpoints(Collections.singleton(endpoint));
+                            delivery.setStatus(LocalDeliveryStatus.CREATED);
+                        }
+                    }
+                }
+            }
             serviceProviderRepository.save(serviceProvider);
         }
     }

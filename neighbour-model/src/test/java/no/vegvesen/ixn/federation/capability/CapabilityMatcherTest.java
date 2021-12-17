@@ -126,12 +126,21 @@ class CapabilityMatcherTest {
 		IvimCapability capability = new IvimCapability(
 				"NO-12345",
 				"NO",
-				"IVI:1.0",
+				"IVIM:1.0",
 				Sets.newHashSet(Collections.singleton("12004")),
 				Sets.newHashSet(Arrays.asList("1", "2"))
 		);
 		LocalSubscription localSubscription = new LocalSubscription();
-		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType like '%,2,%' ");
+		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVIM:1.0' and quadTree like '%,12004%' and iviType like '1,2'");
+		System.out.println(localSubscription.getSelector());
+		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)));
+	}
+
+	@Test
+	public void matchDenmSelectorWithQuadTree() {
+		DenmCapability capability = new DenmCapability("NO-12345", "NO", "DENM:1.0.0", Sets.newHashSet(Collections.singleton("12004")), Sets.newHashSet(Arrays.asList("1", "2")));
+		LocalSubscription localSubscription = new LocalSubscription();
+		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'DENM' and protocolVersion = 'DENM:1.0.0' and quadTree like '%,12004%' and causeCode = '1'");
 		System.out.println(localSubscription.getSelector());
 		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription));
 		assertThat(localSubscriptions).isNotEmpty();

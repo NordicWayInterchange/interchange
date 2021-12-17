@@ -36,6 +36,10 @@ public class ServiceProvider {
 	@JoinColumn(name = "priv_channel_id", foreignKey = @ForeignKey(name = "fk_priv_channel"))
 	private Set<PrivateChannel> privateChannels = new HashSet<>();
 
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "del_id", foreignKey = @ForeignKey(name = "fk_deliveries"))
+	private Set<LocalDelivery> deliveries = new HashSet<>();
+
 	private LocalDateTime subscriptionUpdated;
 
 	public ServiceProvider() {
@@ -171,6 +175,15 @@ public class ServiceProvider {
 	public Set<PrivateChannel> getPrivateChannels() {
 		return privateChannels;
 	}
+
+	public void setDeliveries(Set<LocalDelivery> deliveries) {
+		this.deliveries = deliveries;
+	}
+
+	public Set<LocalDelivery> getDeliveries() {
+		return deliveries;
+	}
+
 
 	@Override
 	public boolean equals(Object o) {

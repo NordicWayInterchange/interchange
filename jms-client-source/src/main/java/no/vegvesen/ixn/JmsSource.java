@@ -43,7 +43,6 @@ public class JmsSource implements CommandLineRunner {
                     .originatingCountry("NO")
                     .protocolVersion("IVI:1.0")
                     .quadTreeTiles(",12004,")
-                    .iviType(",1,2,3,")
                     .timestamp(System.currentTimeMillis())
                     .build());
         }

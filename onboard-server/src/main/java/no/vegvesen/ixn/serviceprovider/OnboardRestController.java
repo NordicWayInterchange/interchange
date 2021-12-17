@@ -2,6 +2,7 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.DeliveryException;
 import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
@@ -299,6 +300,19 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
+		if(request == null) {
+			throw new DeliveryException("Delivery cannot be null");
+		}
+
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
+
+		if (serviceProviderToUpdate == null) {
+			logger.info("The posting Service Provider is new. Converting incoming API object to Service Provider");
+			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
+		}
+
+
+
 		OnboardMDCUtil.removeLogVariables();
 		return new AddDeliveriesResponse();
 	}
@@ -309,6 +323,11 @@ public class OnboardRestController {
 	public ListDeliveriesResponse listDeliveries(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+/*
+		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProvider == null) {
+			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
+		}*/
 
 		OnboardMDCUtil.removeLogVariables();
 		 return new ListDeliveriesResponse();
@@ -319,6 +338,11 @@ public class OnboardRestController {
 	public GetDeliveryResponse getDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+/*
+		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProvider == null) {
+			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
+		}*/
 
 		OnboardMDCUtil.removeLogVariables();
 		return new GetDeliveryResponse();
@@ -330,6 +354,11 @@ public class OnboardRestController {
 	public void deleteDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+/*
+		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProvider == null) {
+			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
+		}*/
 
 		OnboardMDCUtil.removeLogVariables();
 
