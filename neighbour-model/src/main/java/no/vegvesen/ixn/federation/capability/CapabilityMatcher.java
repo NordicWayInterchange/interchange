@@ -3,11 +3,13 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.server.filter.JMSSelectorFilter;
+import org.apache.qpid.server.filter.SelectorParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("WeakerAccess")
@@ -47,30 +49,61 @@ public class CapabilityMatcher {
 	}
 
 	private static boolean matchDatex(DatexCapability capability, JMSSelectorFilter selectorFilter) {
-		return matchArrayValues(selectorFilter, capability, MessageProperty.PUBLICATION_TYPE, capability.getPublicationTypes());
+		Map<String, String> mandatoryValues = capability.getSingleValues();
+		return matchEnumValues(selectorFilter, mandatoryValues, MessageProperty.PUBLICATION_TYPE.getName(), capability.getPublicationTypes());
 	}
 
+	//TODO the DENM cause code is NOT an array value! It's a string value with multiple possible values
+	//AND it's mandatory
 	private static boolean matchDenm(DenmCapability capability, JMSSelectorFilter selectorFilter) {
-		return matchArrayValues(selectorFilter, capability, MessageProperty.CAUSE_CODE, capability.getCauseCodes());
+		return matchEnumValues(selectorFilter, capability.getSingleValues(), MessageProperty.CAUSE_CODE.getName(), capability.getCauseCodes());
 	}
 
 	private static boolean matchIvi(IvimCapability capability, JMSSelectorFilter selectorFilter) {
-		return matchArrayValues(selectorFilter, capability, MessageProperty.IVI_TYPE, capability.getIviTypes());
+		boolean c = matchStringArrayValues(selectorFilter,capability,MessageProperty.IVI_TYPE,capability.getIviTypes());
+		return c;
 	}
 
-	private static boolean matchArrayValues(JMSSelectorFilter selectorFilter, Capability capability, MessageProperty messageProperty, Set<String> propertyValues) {
+	//String array values are properties where a property may contain several values, thus needing to be
+	//prefixed and postfixed by a ','
+	private static boolean matchStringArrayValues(JMSSelectorFilter selectorFilter, Capability capability, MessageProperty messageProperty, Set<String> propertyValues) {
 		CapabilityFilter capabilityFilter = new CapabilityFilter(capability.getSingleValues());
+		Set<String> messagepropertyValues = new HashSet<>();
+		for (String value : propertyValues) {
+			messagepropertyValues.add("," + value + ",");
+		}
 		if (propertyValues.isEmpty()){
 			boolean matches = selectorFilter.matches(capabilityFilter);
 			logger.debug("Evaluated match {} against selector [{}] without array values because array values are empty for property {}",
 					matches, selectorFilter.getSelector(), messageProperty.getName());
 			return matches;
 		}
-		for (String propertyValue : propertyValues) {
+		for (String propertyValue : messagepropertyValues) {
 			capabilityFilter.putValue(messageProperty.getName(), propertyValue);
 			if (selectorFilter.matches(capabilityFilter)) {
 				logger.debug("array value matches selector [{}] on property [{}] with value [{}].",
 						selectorFilter.getSelector(), messageProperty.getName(), propertyValue);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// Enum values are properties where a property may have only one value in the message headers, but multiple possible
+	// values may be specified in the Capability, thus making an enum-type.
+	private static boolean matchEnumValues(JMSSelectorFilter selectorFilter, Map<String, String> mandatoryValues, String propertyName, Set<String> propertyValues) {
+		CapabilityFilter capabilityFilter = new CapabilityFilter(mandatoryValues);
+		if (propertyValues.isEmpty()){
+			boolean matches = selectorFilter.matches(capabilityFilter);
+			logger.debug("Evaluated match {} against selector [{}] without array values because array values are empty for property {}",
+					matches, selectorFilter.getSelector(), propertyName);
+			return matches;
+		}
+		for (String propertyValue : propertyValues) {
+			capabilityFilter.putValue(propertyName, propertyValue);
+			if (selectorFilter.matches(capabilityFilter)) {
+				logger.debug("array value matches selector [{}] on property [{}] with value [{}].",
+						selectorFilter.getSelector(), propertyName, propertyValue);
 				return true;
 			}
 		}
@@ -94,6 +127,9 @@ public class CapabilityMatcher {
 				break;
 			}
 			matchEnd = evaluatedSelector.indexOf(QUAD_TREE_MATCH_PATTERN_END, matchStart);
+			if (matchEnd < 0) {
+				throw new SelectorParsingException("Could not find end of quad tree match started at index " + matchStart);
+			}
 			String selectorQuadTreeTile = evaluatedSelector.substring(matchStart + QUAD_TREE_MATCH_PATTERN_START.length(), matchEnd).trim();
 
 			logger.info("Checking capability quadTreeTile against selector quadTree tile [{}]", selectorQuadTreeTile);

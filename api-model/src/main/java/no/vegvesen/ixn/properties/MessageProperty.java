@@ -33,7 +33,7 @@ public class MessageProperty {
 	);
 
 
-	public static final MessageProperty PUBLICATION_TYPE = new MessageProperty("publicationType", true, true, MessagePropertyType.STRING);
+	public static final MessageProperty PUBLICATION_TYPE = new MessageProperty("publicationType", true, true, MessagePropertyType.STRING_ARRAY);
 	public static final MessageProperty PUBLICATION_SUB_TYPE = new MessageProperty("publicationSubType", false, true, MessagePropertyType.STRING_ARRAY);
 	public static final List<MessageProperty> datex2ApplicationProperties = Arrays.asList(
 			PUBLICATION_TYPE,
@@ -44,14 +44,14 @@ public class MessageProperty {
 			SERVICE_TYPE
 	);
 
-	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.STRING_ARRAY);
+	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.STRING);
 	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", true, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> denmApplicationProperties = Arrays.asList(
 			CAUSE_CODE,
 			SUB_CAUSE_CODE
 	);
 
-	public static final MessageProperty IVI_TYPE = new MessageProperty("iviType", false, true, MessagePropertyType.INTEGER_ARRAY);
+	public static final MessageProperty IVI_TYPE = new MessageProperty("iviType", false, true, MessagePropertyType.STRING_ARRAY);
 	public static final MessageProperty PICTOGRAM_CATEGORY_CODE = new MessageProperty("pictogramCategoryCode", false, true, MessagePropertyType.INTEGER_ARRAY);
 
 	/* TODO This is specified as String, but obviously has some string-array properties. Double check that this is not a mistake in spec */

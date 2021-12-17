@@ -128,6 +128,18 @@ public class MessageValidatorTest {
                 new KeyValue("foo","bar")
         );
         assertThat(validator.isValid(message)).isTrue();
+    }
 
+    @Test
+    public void testIviWithSeveralIviTypes() {
+        Message message = MessageTestDouble.createMessage(
+                "SVV",
+                "NO",
+                "IVIM:1.0",
+                "IVIM",
+                "120003",
+                new KeyValue("iviType",",1,2,")
+        );
+        assertThat(validator.isValid(message)).isTrue();
     }
 }
