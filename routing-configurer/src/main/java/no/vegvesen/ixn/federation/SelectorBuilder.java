@@ -57,7 +57,8 @@ public class SelectorBuilder {
 			switch (property.getMessagePropertyType()) {
 				case INTEGER:
 				case STRING:
-					addSelector(selectorElements, singleValueSelector(property));
+					//note that we might have multiple values in the cap, but only a single value in the headers
+					addSelector(selectorElements, arraySelector(property));
 					break;
 				case STRING_ARRAY:
 				case INTEGER_ARRAY:
@@ -87,6 +88,8 @@ public class SelectorBuilder {
 			return String.format("%s = %s", property.getName(), propertyValue);
 		} else if (MessageProperty.QUAD_TREE == property) {
 			return String.format("%s like '%%,%s%%'", property.getName(), propertyValue);
+		} else if (MessagePropertyType.STRING_ARRAY == property.getMessagePropertyType()) {
+			return String.format("%s like '%%,%s,%%'",property.getName(),propertyValue);
 		}
 		return String.format("%s = '%s'", property.getName(), propertyValue);
 	}
