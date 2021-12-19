@@ -34,6 +34,11 @@ public class MessageValidator {
 			case Constants.IVIM:
 				mandatoryPropertyNames = MessageProperty.mandatoryIvimPropertyNames;
 				break;
+			//case Constants.SPATEM:
+			//case Constants.MAPEM:
+			//case Constants.SREM:
+			//case Constants.SSEM:
+			//case Constants.CAM:
 			default:
 				return false;
 		}

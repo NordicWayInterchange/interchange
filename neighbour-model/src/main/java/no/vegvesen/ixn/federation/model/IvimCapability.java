@@ -18,7 +18,9 @@ public class IvimCapability extends Capability {
 
 	public IvimCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> iviTypes) {
 		super(publisherId, originatingCountry, protocolVersion, quadTree);
-		this.iviTypes.addAll(iviTypes);
+		if(iviTypes != null) {
+			this.iviTypes.addAll(iviTypes);
+		}
 	}
 
 	public IvimCapability() {

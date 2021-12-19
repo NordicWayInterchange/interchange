@@ -20,6 +20,11 @@ import static no.vegvesen.ixn.federation.api.v1_0.CapabilityApi.*;
 		@JsonSubTypes.Type(value = DatexCapabilityApi.class, name = DATEX_2),
 		@JsonSubTypes.Type(value = DenmCapabilityApi.class, name = DENM),
 		@JsonSubTypes.Type(value = IvimCapabilityApi.class, name = IVIM),
+		@JsonSubTypes.Type(value = SpatemCapabilityApi.class, name = SPATEM),
+		@JsonSubTypes.Type(value = MapemCapabilityApi.class, name = MAPEM),
+		@JsonSubTypes.Type(value = SremCapabilityApi.class, name = SREM),
+		@JsonSubTypes.Type(value = SremCapabilityApi.class, name = SSEM),
+		@JsonSubTypes.Type(value = CamCapabilityApi.class, name = CAM),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,6 +32,11 @@ public class CapabilityApi {
 	public static final String DATEX_2 = "DATEX2";
 	public static final String DENM = "DENM";
 	public static final String IVIM = "IVIM";
+	public static final String SPATEM = "SPATEM";
+	public static final String MAPEM = "MAPEM";
+	public static final String SREM = "SREM";
+	public static final String SSEM = "SSEM";
+	public static final String CAM = "CAM";
 
 	private String messageType;
 	private String publisherId;

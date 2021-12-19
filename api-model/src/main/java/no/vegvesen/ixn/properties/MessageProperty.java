@@ -32,7 +32,7 @@ public class MessageProperty {
 			LONGITUDE
 	);
 
-
+	//public static final MessageProperty PUBLISHER_NAME = new MessageProperty("publisherName", true, true, MessagePropertyType.STRING);
 	public static final MessageProperty PUBLICATION_TYPE = new MessageProperty("publicationType", true, true, MessagePropertyType.STRING_ARRAY);
 	public static final MessageProperty PUBLICATION_SUB_TYPE = new MessageProperty("publicationSubType", false, true, MessagePropertyType.STRING_ARRAY);
 	public static final List<MessageProperty> datex2ApplicationProperties = Arrays.asList(

@@ -18,7 +18,9 @@ public class DenmCapability extends Capability {
 
 	public DenmCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> causeCodes) {
 		super(publisherId, originatingCountry, protocolVersion, quadTree);
-		this.causeCodes.addAll(causeCodes);
+		if(causeCodes != null) {
+			this.causeCodes.addAll(causeCodes);
+		}
 	}
 
 	public DenmCapability() {

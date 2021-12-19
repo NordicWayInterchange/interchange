@@ -1,13 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.IvimCapabilityApi;
-import no.vegvesen.ixn.federation.model.Capability;
-import no.vegvesen.ixn.federation.model.DatexCapability;
-import no.vegvesen.ixn.federation.model.DenmCapability;
-import no.vegvesen.ixn.federation.model.IvimCapability;
+import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +43,21 @@ public class CapabilityToCapabilityApiTransformer {
 		}
 		else if (capabilityApi instanceof IvimCapabilityApi) {
 			return new IvimCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((IvimCapabilityApi) capabilityApi).getIviType());
+		}
+		else if (capabilityApi instanceof SpatemCapabilityApi) {
+			return new SpatemCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((SpatemCapabilityApi) capabilityApi).getIds());
+		}
+		else if (capabilityApi instanceof MapemCapabilityApi) {
+			return new MapemCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((MapemCapabilityApi) capabilityApi).getIds());
+		}
+		else if (capabilityApi instanceof SremCapabilityApi) {
+			return new SremCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((SremCapabilityApi) capabilityApi).getIds());
+		}
+		else if (capabilityApi instanceof SsemCapabilityApi) {
+			return new SsemCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((SsemCapabilityApi) capabilityApi).getIds());
+		}
+		else if (capabilityApi instanceof CamCapabilityApi) {
+			return new CamCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((CamCapabilityApi) capabilityApi).getStationType());
 		}
 		throw new RuntimeException("Subclass of CapabilityApi not possible to convert: " + capabilityApi.getClass().getSimpleName());
 	}
