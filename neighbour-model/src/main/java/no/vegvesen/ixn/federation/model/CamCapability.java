@@ -4,17 +4,23 @@ import no.vegvesen.ixn.federation.api.v1_0.CamCapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 @Entity
 @DiscriminatorValue(CapabilityApi.CAM)
 public class CamCapability extends Capability{
-    private String stationType = "";
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "capability_stations", joinColumns = @JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_capstat_cap")))
+    @Column(name = "station_type")
+    private final Set<String> stationTypes = new HashSet<>();
 
-    public CamCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, String stationType) {
+    public CamCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> stationTypes) {
         super(publisherId, originatingCountry, protocolVersion, quadTree);
-        this.stationType = stationType;
+        if(stationTypes != null) {
+            this.stationTypes.addAll(stationTypes);
+        }
     }
 
     public CamCapability() {
@@ -28,7 +34,7 @@ public class CamCapability extends Capability{
 
     @Override
     public CapabilityApi toApi() {
-        return new CamCapabilityApi(this.getPublisherId(), this.getOriginatingCountry(), this.getProtocolVersion(), this.getQuadTree(), this.getStationType());
+        return new CamCapabilityApi(this.getPublisherId(), this.getOriginatingCountry(), this.getProtocolVersion(), this.getQuadTree(), this.getStationTypes());
     }
 
     @Override
@@ -36,14 +42,14 @@ public class CamCapability extends Capability{
         return CapabilityApi.CAM;
     }
 
-    public String getStationType() {
-        return stationType;
+    public Set<String> getStationTypes() {
+        return stationTypes;
     }
 
     @Override
     public String toString() {
         return "CamCapability{" +
-                "stationType=" + stationType +
+                "stationTypes=" + stationTypes +
                 "} " + super.toString();
     }
 }

@@ -62,6 +62,27 @@ public class MessageProperty {
 			IVI_CONTAINER
 	);
 
+	public static final MessageProperty IDS = new MessageProperty("id", false, true, MessagePropertyType.STRING_ARRAY);
+	public static final MessageProperty NAME = new MessageProperty("name", false, true, MessagePropertyType.STRING);
+
+	public static final List<MessageProperty> spatemMapemApplicationProperties = Arrays.asList(
+			IDS,
+			NAME
+	);
+
+	public static final List<MessageProperty> sremSsemApplicationProperties = Arrays.asList(
+			IDS
+	);
+
+	public static final MessageProperty STATION_TYPE = new MessageProperty("stationType", true, true, MessagePropertyType.STRING_ARRAY);
+	public static final MessageProperty VEHICLE_ROLE = new MessageProperty("vehicleRole", false, true, MessagePropertyType.STRING);
+
+	public static final List<MessageProperty> camApplicationProperties = Arrays.asList(
+			STATION_TYPE,
+			VEHICLE_ROLE
+	);
+
+
 	public static Set<String> mandatoryDatex2PropertyNames = Stream.of(
 			commonApplicationProperties,
 			datex2ApplicationProperties).flatMap(Collection::stream)
@@ -81,6 +102,30 @@ public class MessageProperty {
 			commonApplicationProperties,
 			itsG5ApplicationProperties,
 			ivimApplicationProperties).flatMap(Collection::stream)
+			.filter(MessageProperty::isMandatory)
+			.map(MessageProperty::getName)
+			.collect(Collectors.toSet());
+
+	public static Set<String> mandatorySpatemMapemPropertyNames = Stream.of(
+			commonApplicationProperties,
+			itsG5ApplicationProperties,
+			spatemMapemApplicationProperties).flatMap(Collection::stream)
+			.filter(MessageProperty::isMandatory)
+			.map(MessageProperty::getName)
+			.collect(Collectors.toSet());
+
+	public static Set<String> mandatorySremSsemPropertyNames = Stream.of(
+			commonApplicationProperties,
+			itsG5ApplicationProperties,
+			sremSsemApplicationProperties).flatMap(Collection::stream)
+			.filter(MessageProperty::isMandatory)
+			.map(MessageProperty::getName)
+			.collect(Collectors.toSet());
+
+	public static Set<String> mandatoryCamPropertyNames = Stream.of(
+			commonApplicationProperties,
+			itsG5ApplicationProperties,
+			camApplicationProperties).flatMap(Collection::stream)
 			.filter(MessageProperty::isMandatory)
 			.map(MessageProperty::getName)
 			.collect(Collectors.toSet());

@@ -2,6 +2,7 @@ package no.vegvesen.ixn.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
+import org.ietf.jgss.MessageProp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -34,11 +35,21 @@ public class MessageValidator {
 			case Constants.IVIM:
 				mandatoryPropertyNames = MessageProperty.mandatoryIvimPropertyNames;
 				break;
-			//case Constants.SPATEM:
-			//case Constants.MAPEM:
-			//case Constants.SREM:
-			//case Constants.SSEM:
-			//case Constants.CAM:
+			case Constants.SPATEM:
+				mandatoryPropertyNames = MessageProperty.mandatorySpatemMapemPropertyNames;
+				break;
+			case Constants.MAPEM:
+				mandatoryPropertyNames = MessageProperty.mandatorySpatemMapemPropertyNames;
+				break;
+			case Constants.SREM:
+				mandatoryPropertyNames = MessageProperty.mandatorySremSsemPropertyNames;
+				break;
+			case Constants.SSEM:
+				mandatoryPropertyNames = MessageProperty.mandatorySremSsemPropertyNames;
+				break;
+			case Constants.CAM:
+				mandatoryPropertyNames = MessageProperty.mandatoryCamPropertyNames;
+				break;
 			default:
 				return false;
 		}

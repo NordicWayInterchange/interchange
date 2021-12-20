@@ -57,7 +57,7 @@ public class CapabilityToCapabilityApiTransformer {
 			return new SsemCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((SsemCapabilityApi) capabilityApi).getIds());
 		}
 		else if (capabilityApi instanceof CamCapabilityApi) {
-			return new CamCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((CamCapabilityApi) capabilityApi).getStationType());
+			return new CamCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((CamCapabilityApi) capabilityApi).getStationTypes());
 		}
 		throw new RuntimeException("Subclass of CapabilityApi not possible to convert: " + capabilityApi.getClass().getSimpleName());
 	}

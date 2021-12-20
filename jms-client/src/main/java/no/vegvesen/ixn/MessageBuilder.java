@@ -97,6 +97,11 @@ public class MessageBuilder {
         return this;
     }
 
+    public MessageBuilder publicationSubType(String subType) throws JMSException {
+        message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), subType);
+        return this;
+    }
+
     public MessageBuilder latitude(double latitude) throws JMSException {
         message.setDoubleProperty(MessageProperty.LATITUDE.getName(), latitude);
         return this;
@@ -107,13 +112,28 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageBuilder publicationSubType(String subType) throws JMSException {
-        message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), subType);
+    public MessageBuilder iviType(String iviType) throws JMSException {
+        message.setStringProperty(MessageProperty.IVI_TYPE.getName(), iviType);
         return this;
     }
 
-    public MessageBuilder iviType(String iviType) throws JMSException {
-        message.setStringProperty(MessageProperty.IVI_TYPE.getName(), iviType);
+    public MessageBuilder id(String id) throws JMSException {
+        message.setStringProperty(MessageProperty.IDS.getName(), id);
+        return this;
+    }
+
+    public MessageBuilder name(String name) throws JMSException {
+        message.setStringProperty(MessageProperty.NAME.getName(), name);
+        return this;
+    }
+
+    public MessageBuilder stationType(String stationType) throws JMSException {
+        message.setStringProperty(MessageProperty.STATION_TYPE.getName(), stationType);
+        return this;
+    }
+
+    public MessageBuilder vehicleRole(String vehicleRole) throws JMSException {
+        message.setStringProperty(MessageProperty.VEHICLE_ROLE.getName(), vehicleRole);
         return this;
     }
 }

@@ -35,7 +35,16 @@ public class CapabilityMatcher {
 					match = matchDenm((DenmCapability) capability, selectorFilter);
 				} else if (capability instanceof IvimCapability) {
 					match = matchIvi((IvimCapability) capability, selectorFilter);
-					System.out.println(match);
+				} else if (capability instanceof SpatemCapability) {
+					match = matchSpatem((SpatemCapability) capability, selectorFilter);
+				} else if (capability instanceof MapemCapability) {
+					match = matchMapem((MapemCapability) capability, selectorFilter);
+			    } else if (capability instanceof SremCapability) {
+					match = matchSrem((SremCapability) capability, selectorFilter);
+				} else if (capability instanceof SsemCapability) {
+					match = matchSsem((SsemCapability) capability, selectorFilter);
+				} else if (capability instanceof CamCapability) {
+					match = matchCam((CamCapability) capability, selectorFilter);
 				} else {
 					logger.warn("Unknown Capability type {} ", capability.getClass().getName());
 				}
@@ -60,8 +69,33 @@ public class CapabilityMatcher {
 	}
 
 	private static boolean matchIvi(IvimCapability capability, JMSSelectorFilter selectorFilter) {
-		boolean c = matchStringArrayValues(selectorFilter,capability,MessageProperty.IVI_TYPE,capability.getIviTypes());
+		boolean c = matchStringArrayValues(selectorFilter, capability, MessageProperty.IVI_TYPE, capability.getIviTypes());
 		return c;
+	}
+
+	private static boolean matchSpatem(SpatemCapability capability, JMSSelectorFilter selectorFilter) {
+		boolean m = matchStringArrayValues(selectorFilter, capability, MessageProperty.IDS, capability.getIds());
+		return m;
+	}
+
+	private static boolean matchMapem(MapemCapability capability, JMSSelectorFilter selectorFilter) {
+		boolean m = matchStringArrayValues(selectorFilter, capability, MessageProperty.IDS, capability.getIds());
+		return m;
+	}
+
+	private static boolean matchSrem(SremCapability capability, JMSSelectorFilter selectorFilter) {
+		boolean m = matchStringArrayValues(selectorFilter, capability, MessageProperty.IDS, capability.getIds());
+		return m;
+	}
+
+	private static boolean matchSsem(SsemCapability capability, JMSSelectorFilter selectorFilter) {
+		boolean m = matchStringArrayValues(selectorFilter, capability, MessageProperty.IDS, capability.getIds());
+		return m;
+	}
+
+	private static boolean matchCam(CamCapability capability, JMSSelectorFilter selectorFilter) {
+		Map<String, String> mandatoryValues = capability.getSingleValues();
+		return matchEnumValues(selectorFilter, mandatoryValues, MessageProperty.STATION_TYPE.getName(), capability.getStationTypes());
 	}
 
 	//String array values are properties where a property may contain several values, thus needing to be

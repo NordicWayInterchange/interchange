@@ -138,4 +138,32 @@ class CapabilityMatcherTest {
 		assertThat(localSubscriptions).isNotEmpty();
 	}
 
+	@Test
+	@Disabled
+	public void matchSpatemSelectorWithQuadTree() {
+		SpatemCapability capability = new SpatemCapability(
+				"NO-12345",
+				"NO",
+				"SPATEM:1.0",
+				Sets.newHashSet(Collections.singleton("12003")),
+				Sets.newHashSet(Arrays.asList("1", "2"))
+		);
+		LocalSubscription localSubscription = new LocalSubscription();
+		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id like '%,2,%' or id like '%,3,%'");
+		System.out.println(localSubscription.getSelector());
+		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription));
+		assertThat(localSubscriptions).isNotEmpty();
+	}
+
+	@Test
+	@Disabled
+	void camCapabilitiesMatchCamSelectorInsideQuadTreeAndStationType() {
+		Set<String> statTypes = Sets.newLinkedHashSet("pedestrian", "cyclist", "moped");
+		CamCapability camCapability = new CamCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, statTypes);
+		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+				Sets.newLinkedHashSet(camCapability),
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'CAM' and quadTree like '%,012100%' and stationType = 'cyclist'")));
+		assertThat(commonInterest).isNotEmpty();
+	}
+
 }
