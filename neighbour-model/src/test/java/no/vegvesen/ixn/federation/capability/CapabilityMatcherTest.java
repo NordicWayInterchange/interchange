@@ -122,7 +122,6 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled
 	public void matchIviSelectorWithQuadTree() {
 		IvimCapability capability = new IvimCapability(
 				"NO-12345",
@@ -139,7 +138,6 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled
 	public void matchSpatemSelectorWithQuadTree() {
 		SpatemCapability capability = new SpatemCapability(
 				"NO-12345",
@@ -156,7 +154,6 @@ class CapabilityMatcherTest {
 	}
 
 	@Test
-	@Disabled
 	void camCapabilitiesMatchCamSelectorInsideQuadTreeAndStationType() {
 		Set<String> statTypes = Sets.newLinkedHashSet("pedestrian", "cyclist", "moped");
 		CamCapability camCapability = new CamCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, statTypes);
@@ -165,5 +162,23 @@ class CapabilityMatcherTest {
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'CAM' and quadTree like '%,012100%' and stationType = 'cyclist'")));
 		assertThat(commonInterest).isNotEmpty();
 	}
+
+	@Test
+	@Disabled("At the moment, it's not possible to filter on optional fields that are not a part of the set of properties")
+	void mathcCapabilityWithSelectorOfOnlyOptionalField() {
+		SpatemCapability capability = new SpatemCapability(
+				"NO-12345",
+				"NO",
+				"SPATEM:1.0",
+				Sets.newHashSet(Collections.singleton("12003")),
+				Sets.newHashSet(Arrays.asList("1", "2"))
+		);
+		LocalSubscription localSubscription = new LocalSubscription();
+		localSubscription.setSelector("name = 'fish'");
+		System.out.println(localSubscription.getSelector());
+		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription));
+		assertThat(localSubscriptions).isNotEmpty();
+	}
+
 
 }
