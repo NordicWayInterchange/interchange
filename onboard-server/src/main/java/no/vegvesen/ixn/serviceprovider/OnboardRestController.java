@@ -304,6 +304,18 @@ public class OnboardRestController {
 			throw new DeliveryException("Delivery cannot be null");
 		}
 
+		for(SelectorApi delivery : request.getDeliveries()) {
+			if(delivery.getSelector() == null) {
+				throw new DeliveryException("Bad api object for adding delivery. The selector object was null.");
+			}
+		}
+
+		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
+
+		Set<LocalDelivery> localDeliveries = new HashSet<>();
+		//for(SelectorApi delivery : request.getDeliveries()) {
+		//}
+
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 
 		if (serviceProviderToUpdate == null) {

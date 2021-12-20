@@ -208,6 +208,7 @@ public class ServiceProvider {
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
 				", privateChannels=" + Arrays.toString(privateChannels.toArray()) +
+				", deliveries=" + Arrays.toString(deliveries.toArray()) +
 				'}';
 	}
 

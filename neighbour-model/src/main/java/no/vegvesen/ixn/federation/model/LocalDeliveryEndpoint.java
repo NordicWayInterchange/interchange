@@ -1,8 +1,17 @@
 package no.vegvesen.ixn.federation.model;
 
+import javax.persistence.*;
 import java.util.Objects;
 
+@Entity
+@Table(name = "local_delivery_endpoints")
 public class LocalDeliveryEndpoint {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "local_del_endpoint_seq")
+    @Column(name = "id")
+    private Integer id;
+
     private String host;
     private int port;
     private String target;

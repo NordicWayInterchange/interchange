@@ -1,20 +1,42 @@
 package no.vegvesen.ixn.federation.model;
 
+import org.hibernate.annotations.UpdateTimestamp;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
+@Entity
+@Table(name = "local_deliveries")
 public class LocalDelivery {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locdel_seq")
+    @Column(name="id")
     private String id;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
     private Set<LocalDeliveryEndpoint> endpoints;
+
+    @Column
     private String path;
+
+    @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locdel_sel"))
+    @Column(columnDefinition="TEXT")
     private String selector;
-    private long lastUpdatedTimestamp;
-    private LocalDeliveryStatus status;
+
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime lastUpdatedTimestamp;
+
+    @Enumerated(EnumType.STRING)
+    private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
 
     public LocalDelivery() {
     }
 
-    public LocalDelivery(String id, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, long lastUpdatedTimestamp, LocalDeliveryStatus status) {
+    public LocalDelivery(String id, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDateTime lastUpdatedTimestamp, LocalDeliveryStatus status) {
         this.id = id;
         this.endpoints = endpoints;
         this.path = path;
@@ -55,11 +77,11 @@ public class LocalDelivery {
         this.selector = selector;
     }
 
-    public long getLastUpdatedTimestamp() {
+    public LocalDateTime getLastUpdatedTimestamp() {
         return lastUpdatedTimestamp;
     }
 
-    public void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
+    public void setLastUpdatedTimestamp(LocalDateTime lastUpdatedTimestamp) {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
