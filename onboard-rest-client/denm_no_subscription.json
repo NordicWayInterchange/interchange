@@ -1,0 +1,9 @@
+{	"name" : "king.gustaf",
+    "version" : "1.0",
+    "subscriptions" : [
+        {
+            "createNewQueue" : false,
+            "selector": "originatingCountry = 'NO' and publisherId = 'NO-12345' and messageType = 'DENM' and protocolVersion = 'DENM:1.1.0' and quadTree like '%,12002%,' and causeCode like '%,1,%'"
+        }
+    ]
+}

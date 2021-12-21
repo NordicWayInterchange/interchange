@@ -4,6 +4,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,14 +18,14 @@ public class LocalDelivery {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
-    private Set<LocalDeliveryEndpoint> endpoints;
+    private Set<LocalDeliveryEndpoint> endpoints = new HashSet<>();
 
     @Column
     private String path;
 
     @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locdel_sel"))
     @Column(columnDefinition="TEXT")
-    private String selector;
+    private String selector = "";
 
     @Column
     @UpdateTimestamp
@@ -42,6 +43,19 @@ public class LocalDelivery {
         this.path = path;
         this.selector = selector;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+        this.status = status;
+    }
+
+    public LocalDelivery(String id, String path, String selector, LocalDateTime lastUpdatedTimestamp, LocalDeliveryStatus status) {
+        this.id = id;
+        this.path = path;
+        this.selector = selector;
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+        this.status = status;
+    }
+
+    public LocalDelivery(String selector, LocalDeliveryStatus status) {
+        this.selector = selector;
         this.status = status;
     }
 
@@ -98,12 +112,12 @@ public class LocalDelivery {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalDelivery delivery = (LocalDelivery) o;
-        return lastUpdatedTimestamp == delivery.lastUpdatedTimestamp && Objects.equals(id, delivery.id) && Objects.equals(endpoints, delivery.endpoints) && Objects.equals(path, delivery.path) && Objects.equals(selector, delivery.selector) && status == delivery.status;
+        return Objects.equals(id, delivery.id) && Objects.equals(selector, delivery.selector) && status == delivery.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, endpoints, path, selector, lastUpdatedTimestamp, status);
+        return Objects.hash(id, selector, status);
     }
 
     @Override

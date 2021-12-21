@@ -1,14 +1,17 @@
-{
-  "messageType": "DENM",
-  "publisherId": "NO-12345",
-  "publisherName": "Some Norwegian publisher",
-  "originatingCountry": "NO",
-  "protocolVersion": "DENM:1.2.2",
-  "contentType": "application/octet-stream",
-  "quadTree": [
-    "01230122"
-  ],
-  "serviceType": "some-denm-service-type",
-  "causeCode": "3",
-  "subCauseCode": "6"
+{	"name" : "king_olav",
+    "version" : "1.0",
+    "capabilities" : [
+        {
+            "messageType": "DENM",
+            "publisherId": "NO-12345",
+            "originatingCountry": "NO",
+            "protocolVersion": "DENM:1.1.0",
+            "quadTree": [
+                "12002"
+            ],
+            "causeCode": [
+                "1", "2"
+            ]
+        }
+    ]
 }

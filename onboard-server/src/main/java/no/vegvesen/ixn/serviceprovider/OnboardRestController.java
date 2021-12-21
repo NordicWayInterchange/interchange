@@ -295,12 +295,12 @@ public class OnboardRestController {
 	}
 
 	//TODO implement!
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries")
 	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, AddDeliveriesRequest request) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if(request == null) {
+		if(Objects.isNull(request.getDeliveries())) {
 			throw new DeliveryException("Delivery cannot be null");
 		}
 
@@ -313,8 +313,9 @@ public class OnboardRestController {
 		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
 
 		Set<LocalDelivery> localDeliveries = new HashSet<>();
-		//for(SelectorApi delivery : request.getDeliveries()) {
-		//}
+		for(SelectorApi delivery : request.getDeliveries()) {
+			localDeliveries.add(typeTransformer.transformDeliveryToLocalDelivery(delivery));
+		}
 
 		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
 
@@ -323,57 +324,61 @@ public class OnboardRestController {
 			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
 		}
 
+		serviceProviderToUpdate.addDeliveries(localDeliveries);
 
+		// Save updated Service Provider in the database.
+		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+		logger.debug("Updated Service Provider: {}", saved.toString());
+
+		Set<LocalDelivery> savedDeliveries = saved
+				.getDeliveries()
+				.stream()
+				.filter(delivery -> localDeliveries.contains(delivery))
+				.collect(Collectors.toSet());
 
 		OnboardMDCUtil.removeLogVariables();
-		return new AddDeliveriesResponse();
+		return typeTransformer.transformToDeliveriesResponse(serviceProviderName, savedDeliveries);
 	}
 
-
-	//TODO implement!
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ListDeliveriesResponse listDeliveries(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
-		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-/*
-		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProvider == null) {
-			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
-		}*/
-
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		ListDeliveriesResponse response = typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
 		OnboardMDCUtil.removeLogVariables();
-		 return new ListDeliveriesResponse();
+		 return response;
 	}
 
-	//TODO implement!
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries/{deliveryId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public GetDeliveryResponse getDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-/*
-		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProvider == null) {
-			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
-		}*/
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d ->
+				d.getId().equals(deliveryId))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,serviceProviderName)));
+		logger.info("Received delivery poll from Service Provider {}", serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();
-		return new GetDeliveryResponse();
+		return typeTransformer.transformLocalDeliveryToGetDeliveryResponse(serviceProviderName, localDelivery);
 	}
 
-	//TODO implement!
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/deliveries/{deliveryId}")
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	public void deleteDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-/*
-		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProvider == null) {
-			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
-		}*/
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+
+		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
+
+		serviceProvider.removeLocalDelivery(deliveryId);
+
+		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
+		logger.debug("Updated Service Provider: {}", saved.toString());
 
 		OnboardMDCUtil.removeLogVariables();
-
 	}
 
 	// TODO: Remove

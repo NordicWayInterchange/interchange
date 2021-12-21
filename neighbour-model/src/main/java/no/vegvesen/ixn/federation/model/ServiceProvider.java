@@ -184,6 +184,20 @@ public class ServiceProvider {
 		return deliveries;
 	}
 
+	public void addDeliveries(Set<LocalDelivery> newDeliveries) {
+		deliveries.addAll(newDeliveries);
+	}
+
+	public void removeLocalDelivery(String deliveryId) {
+		LocalDelivery localDeliveryToDelete = deliveries
+				.stream()
+				.filter(localDelivery -> localDelivery.getId().equals(deliveryId))
+				.findFirst()
+				.orElseThrow(
+						() -> new NotFoundException("The delivery to delete is not in the Service Provider deliveries. Cannot delete delivery that don't exist.")
+				);
+		deliveries.remove(localDeliveryToDelete);
+	}
 
 	@Override
 	public boolean equals(Object o) {

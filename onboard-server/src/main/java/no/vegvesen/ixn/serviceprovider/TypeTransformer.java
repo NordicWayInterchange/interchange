@@ -66,6 +66,41 @@ public class TypeTransformer {
                 serviceProviderName);
     }
 
+    public LocalDelivery transformDeliveryToLocalDelivery(SelectorApi delivery) {
+        return new LocalDelivery(delivery.getSelector(), LocalDeliveryStatus.REQUESTED);
+    }
+
+    public AddDeliveriesResponse transformToDeliveriesResponse(String serviceProviderName, Set<LocalDelivery> localDeliveries) {
+        return new AddDeliveriesResponse(serviceProviderName,
+                transformLocalDeliveryToDelivery(
+                        serviceProviderName,
+                        localDeliveries));
+    }
+
+    public Set<Delivery> transformLocalDeliveryToDelivery(String serviceProviderName, Set<LocalDelivery> localDeliveries) {
+        Set<Delivery> result = new HashSet<>();
+        for (LocalDelivery delivery : localDeliveries){
+            result.add(new Delivery(
+                    delivery.getId(),
+                    createDeliveryPath(serviceProviderName, delivery.getId()),
+                    delivery.getSelector(),
+                    transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
+                    transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus())
+                    )
+            );
+        }
+        return result;
+    }
+
+    public ListDeliveriesResponse transformToListDeliveriesResponse(String serviceProviderName, Set<LocalDelivery> localDeliveries) {
+        return new ListDeliveriesResponse(serviceProviderName,
+                transformLocalDeliveryToDelivery(
+                        serviceProviderName,
+                        localDeliveries
+                )
+        );
+    }
+
     public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         return new AddSubscriptionsResponse(serviceProviderName,
                 transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(
@@ -100,6 +135,10 @@ public class TypeTransformer {
         return String.format("/%s/capabilities/%s", serviceProviderName, capabilityId);
     }
 
+    private static String createDeliveryPath(String serviceProviderName, String deliveryId) {
+        return String.format("/%s/deliveries/%s", serviceProviderName, deliveryId);
+    }
+
     private long transformLocalDateTimeToEpochMili(LocalDateTime lastUpdated) {
         return lastUpdated == null ? 0 : ZonedDateTime.of(lastUpdated, ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
@@ -117,6 +156,18 @@ public class TypeTransformer {
         );
     }
 
+    public GetDeliveryResponse transformLocalDeliveryToGetDeliveryResponse(String serviceProviderName, LocalDelivery localDelivery) {
+        return new GetDeliveryResponse(
+                localDelivery.getId(),
+                transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints()),
+                createDeliveryPath(serviceProviderName, localDelivery.getId()),
+                localDelivery.getSelector(),
+                transformLocalDateTimeToEpochMili(localDelivery.getLastUpdatedTimestamp()),
+                transformLocalDeliveryStatusToDeliveryStatus(localDelivery.getStatus())
+
+        );
+    }
+
     private Set<LocalEndpoint> transformLocalBrokersToEndpoints(Set<LocalBroker> localBrokers) {
         Set<LocalEndpoint> result = new HashSet<>();
         for (LocalBroker broker : localBrokers) {
@@ -126,6 +177,21 @@ public class TypeTransformer {
                     broker.getQueueName(),
                     broker.getMaxBandwidth(),
                     broker.getMaxMessageRate()));
+        }
+        return result;
+    }
+
+    private Set<DeliveryEndpoint> transformLocalDeliveryEndpointToDeliveryEndpoint(Set<LocalDeliveryEndpoint> endpoints) {
+        Set<DeliveryEndpoint> result = new HashSet<>();
+        for (LocalDeliveryEndpoint endpoint : endpoints) {
+            result.add(new DeliveryEndpoint(
+                    endpoint.getHost(),
+                    endpoint.getPort(),
+                    endpoint.getTarget(),
+                    endpoint.getSelector(),
+                    null,
+                    null
+            ));
         }
         return result;
     }
@@ -140,6 +206,19 @@ public class TypeTransformer {
                 return LocalActorSubscriptionStatusApi.NOT_VALID;
             default:
                 return LocalActorSubscriptionStatusApi.ILLEGAL;
+        }
+    }
+
+    private DeliveryStatus transformLocalDeliveryStatusToDeliveryStatus(LocalDeliveryStatus status) {
+        switch (status) {
+            case REQUESTED:
+                return DeliveryStatus.REQUESTED;
+            case CREATED:
+                return DeliveryStatus.CREATED;
+            case NOT_VALID:
+                return DeliveryStatus.NOT_VALID;
+            default:
+                return DeliveryStatus.ILLEGAL;
         }
     }
 
