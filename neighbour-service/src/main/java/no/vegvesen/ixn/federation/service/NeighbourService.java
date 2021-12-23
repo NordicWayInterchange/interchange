@@ -259,10 +259,11 @@ public class NeighbourService {
 				for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
 					if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
 						try{
-						neighbourFacade.deleteSubscription(neighbour, subscription);
-						subscriptionsToDelete.add(subscription);
+							neighbourFacade.deleteSubscription(neighbour, subscription);
 						} catch(SubscriptionDeleteException e) {
 							logger.error("Exception when deleting subscription {} to neighbour {}", subscription.getId(), neighbour.getName(), e);
+						} finally {
+							subscriptionsToDelete.add(subscription);
 						}
 					}
 				}
