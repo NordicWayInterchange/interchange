@@ -163,14 +163,13 @@ public class OnboardRestClientIT extends DockerBaseIT {
     }
 
     @Test
-    @Disabled
     public void callListDeliveriesSucceeds() {
         ListDeliveriesResponse response = client.listServiceProviderDeliveries();
         assertThat(response).isNotNull();
+        assertThat(response.getDeliveries()).isNotNull();
     }
 
     @Test
-    @Disabled
     public void callGetDeliverySucceeds() {
         //TODO have to actually add a delivery, and get it's ID before doing the GET on the new ID
         GetDeliveryResponse response = client.getDelivery("1");
