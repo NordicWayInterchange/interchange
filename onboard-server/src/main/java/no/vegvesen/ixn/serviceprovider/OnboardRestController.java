@@ -295,7 +295,7 @@ public class OnboardRestController {
 	}
 
 	//TODO implement!
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries")
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
 	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, AddDeliveriesRequest request) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
