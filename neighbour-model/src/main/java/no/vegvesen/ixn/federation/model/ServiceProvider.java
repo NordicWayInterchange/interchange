@@ -188,7 +188,7 @@ public class ServiceProvider {
 		deliveries.addAll(newDeliveries);
 	}
 
-	public void removeLocalDelivery(String deliveryId) {
+	public void removeLocalDelivery(Integer deliveryId) {
 		LocalDelivery localDeliveryToDelete = deliveries
 				.stream()
 				.filter(localDelivery -> localDelivery.getId().equals(deliveryId))

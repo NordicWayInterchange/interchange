@@ -158,8 +158,16 @@ public class OnboardRestClientIT extends DockerBaseIT {
                 Collections.singleton(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"))
         );
         AddDeliveriesResponse response = client.addServiceProviderDeliveries(request);
-        //TODO check the actual response details
         assertThat(response).isNotNull();
+        assertThat(response.getDeliveries()).hasSize(1);
+
+        Delivery delivery = response.getDeliveries().stream().findFirst().get();
+
+        ListDeliveriesResponse listDeliveriesResponse = client.listServiceProviderDeliveries();
+        assertThat(listDeliveriesResponse.getDeliveries()).hasSize(1);
+
+        GetDeliveryResponse getDeliveryResponse = client.getDelivery(delivery.getId());
+        assertThat(getDeliveryResponse).isNotNull();
     }
 
     @Test
@@ -172,8 +180,6 @@ public class OnboardRestClientIT extends DockerBaseIT {
     @Test
     public void callGetDeliverySucceeds() {
         //TODO have to actually add a delivery, and get it's ID before doing the GET on the new ID
-        GetDeliveryResponse response = client.getDelivery("1");
-        assertThat(response).isNotNull();
     }
 
     private List<LocalActorSubscription> filterOutTearDownSubscriptions(Set<LocalActorSubscription> subscriptions) {

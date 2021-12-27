@@ -346,7 +346,6 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	@Disabled
 	public void postingDeliveryReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "First Service Provider";
 		mockCertificate(firstServiceProvider);
@@ -363,7 +362,7 @@ public class OnboardRestControllerTest {
 			s.setId(1);
 			int j = 0;
 			for (LocalDelivery delivery : s.getDeliveries()) {
-				delivery.setId(Integer.toString(j++));
+				delivery.setId(j++);
 				delivery.setLastUpdatedTimestamp(LocalDateTime.now());
 			}
 			return s;
@@ -381,10 +380,20 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	@Disabled
 	public void listingDeliveriesReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "First Service Provider";
 		mockCertificate(firstServiceProvider);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				1,
+				firstServiceProvider,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		when(serviceProviderRepository.findByName(firstServiceProvider))
+				.thenReturn(serviceProvider);
+
 		mockMvc.perform(
 				get(String.format("/%s/deliveries",firstServiceProvider))
 				.accept(MediaType.APPLICATION_JSON))
@@ -394,11 +403,31 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	@Disabled
 	public void getDeliveryThatExistsReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "First Service Provider";
 		String deliveryId = "1";
 		mockCertificate(firstServiceProvider);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				1,
+				firstServiceProvider,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		serviceProvider.addDeliveries(Collections.singleton(
+				new LocalDelivery(
+						1,
+						Collections.emptySet(),
+						"/mydelivery",
+						"originatingCountry = 'NO'",
+						LocalDateTime.now(),
+						LocalDeliveryStatus.REQUESTED
+				)
+		));
+		when(serviceProviderRepository.findByName(firstServiceProvider))
+				.thenReturn(serviceProvider);
+
 		mockMvc.perform(
 				get(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
 				.accept(MediaType.APPLICATION_JSON))
@@ -407,12 +436,32 @@ public class OnboardRestControllerTest {
 	}
 
 	@Test
-	@Disabled
 	public void deleteDeliveryReturnsNoContent() throws Exception {
 
 		String firstServiceProvider = "First Service Provider";
 		String deliveryId = "1";
 		mockCertificate(firstServiceProvider);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				1,
+				firstServiceProvider,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		serviceProvider.addDeliveries(Collections.singleton(
+				new LocalDelivery(
+						1,
+						Collections.emptySet(),
+						"/mydelivery",
+						"originatingCountry = 'NO'",
+						LocalDateTime.now(),
+						LocalDeliveryStatus.REQUESTED
+				)
+		));
+		when(serviceProviderRepository.findByName(firstServiceProvider))
+				.thenReturn(serviceProvider);
+		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
 		mockMvc.perform(
 				delete(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
 				.accept(MediaType.APPLICATION_JSON))

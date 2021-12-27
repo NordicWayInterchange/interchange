@@ -81,8 +81,8 @@ public class TypeTransformer {
         Set<Delivery> result = new HashSet<>();
         for (LocalDelivery delivery : localDeliveries){
             result.add(new Delivery(
-                    delivery.getId(),
-                    createDeliveryPath(serviceProviderName, delivery.getId()),
+                    delivery.getId().toString(),
+                    createDeliveryPath(serviceProviderName, delivery.getId().toString()),
                     delivery.getSelector(),
                     transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
                     transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus())
@@ -157,10 +157,11 @@ public class TypeTransformer {
     }
 
     public GetDeliveryResponse transformLocalDeliveryToGetDeliveryResponse(String serviceProviderName, LocalDelivery localDelivery) {
+        String id = localDelivery.getId().toString();
         return new GetDeliveryResponse(
-                localDelivery.getId(),
+                id,
                 transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints()),
-                createDeliveryPath(serviceProviderName, localDelivery.getId()),
+                createDeliveryPath(serviceProviderName, id),
                 localDelivery.getSelector(),
                 transformLocalDateTimeToEpochMili(localDelivery.getLastUpdatedTimestamp()),
                 transformLocalDeliveryStatusToDeliveryStatus(localDelivery.getStatus())

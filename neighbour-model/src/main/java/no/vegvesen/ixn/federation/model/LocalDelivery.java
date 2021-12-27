@@ -14,7 +14,7 @@ public class LocalDelivery {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locdel_seq")
     @Column(name="id")
-    private String id;
+    private Integer id;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
@@ -37,7 +37,7 @@ public class LocalDelivery {
     public LocalDelivery() {
     }
 
-    public LocalDelivery(String id, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDateTime lastUpdatedTimestamp, LocalDeliveryStatus status) {
+    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints, String path, String selector, LocalDateTime lastUpdatedTimestamp, LocalDeliveryStatus status) {
         this.id = id;
         this.endpoints = endpoints;
         this.path = path;
@@ -46,7 +46,7 @@ public class LocalDelivery {
         this.status = status;
     }
 
-    public LocalDelivery(String id, String path, String selector, LocalDateTime lastUpdatedTimestamp, LocalDeliveryStatus status) {
+    public LocalDelivery(Integer id, String path, String selector, LocalDateTime lastUpdatedTimestamp, LocalDeliveryStatus status) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -59,11 +59,11 @@ public class LocalDelivery {
         this.status = status;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -112,12 +112,12 @@ public class LocalDelivery {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalDelivery delivery = (LocalDelivery) o;
-        return Objects.equals(id, delivery.id) && Objects.equals(selector, delivery.selector) && status == delivery.status;
+        return  Objects.equals(selector, delivery.selector) && status == delivery.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, selector, status);
+        return Objects.hash(selector, status);
     }
 
     @Override

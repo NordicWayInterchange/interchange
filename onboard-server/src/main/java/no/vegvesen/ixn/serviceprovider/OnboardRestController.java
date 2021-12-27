@@ -294,7 +294,6 @@ public class OnboardRestController {
 		return new PrivateChannelListApi(privateChannelsApis);
 	}
 
-	//TODO implement!
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
 	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
@@ -355,7 +354,7 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d ->
-				d.getId().equals(deliveryId))
+				d.getId().equals(Integer.parseInt(deliveryId)))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,serviceProviderName)));
 		logger.info("Received delivery poll from Service Provider {}", serviceProviderName);
@@ -373,7 +372,7 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
-		serviceProvider.removeLocalDelivery(deliveryId);
+		serviceProvider.removeLocalDelivery(Integer.parseInt(deliveryId));
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
 		logger.debug("Updated Service Provider: {}", saved.toString());
