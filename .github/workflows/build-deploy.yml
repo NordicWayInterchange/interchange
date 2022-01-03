@@ -44,11 +44,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: interchange
-      - name: Authenticate
-        uses: google-github-actions/setup-gcloud@master
+      - id: auth
+        uses: google-github-actions/auth@v0
         with:
-          project_id: nw-shared-w3ml
-          service_account_key: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
+          credentials_json: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
       - name: Setup docker
         run: gcloud auth configure-docker
       - name: Build and upload Docker images
@@ -72,11 +71,10 @@ jobs:
           helm package helm/interchange -d target/helm
           helm package helm/basic-interchange -d target/helm
           helm repo index target/helm
-      - name: Authenticate
-        uses: google-github-actions/setup-gcloud@master
+      - id: auth
+        uses: google-github-actions/auth@v0
         with:
-          project_id: nw-shared-w3ml
-          service_account_key: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
+          credentials_json: ${{ secrets.SVV_GITHUB_ACTIONS_PUBLISHER_KEY  }}
       - name: Publish charts
         run: |
           gsutil cp target/helm/* gs://nordic_way_helm_repository
