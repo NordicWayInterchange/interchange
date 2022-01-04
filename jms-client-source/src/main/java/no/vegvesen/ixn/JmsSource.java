@@ -39,10 +39,12 @@ public class JmsSource implements CommandLineRunner {
                     .bytesMessage("Dette er en test, FISK!".getBytes())
                     .userId("king_olav")
                     .publisherId("NO-12345")
-                    .messageType(Constants.IVIM)
+                    .messageType(Constants.DENM)
                     .originatingCountry("NO")
-                    .protocolVersion("IVI:1.0")
-                    .quadTreeTiles(",12004,")
+                    .protocolVersion("DENM:1.1.0")
+                    .quadTreeTiles(",12002,")
+                    .causeCode(",1,")
+                    .subCauseCode("5")
                     .timestamp(System.currentTimeMillis())
                     .build());
         }

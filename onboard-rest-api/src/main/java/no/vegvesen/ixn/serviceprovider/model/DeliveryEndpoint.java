@@ -7,8 +7,8 @@ public class DeliveryEndpoint {
     private int port;
     private String target;
     private String selector;
-    private int maxBandwidth;
-    private int maxMessageRate;
+    private Integer maxBandwidth;
+    private Integer maxMessageRate;
 
     public DeliveryEndpoint() {
     }
