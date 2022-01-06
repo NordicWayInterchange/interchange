@@ -77,11 +77,16 @@ public class NeighbourServiceDiscoveryTest {
 		self = new Self();
 		Set<Capability> selfCapabilities = getSelfCapabilities();
 		self.setLocalCapabilities(selfCapabilities);
-		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
-		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'"));
+		Set<LocalSubscription> selfSubscriptions = getLocalSubscriptions();
 		self.setLocalSubscriptions(selfSubscriptions);
 		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 		return self;
+	}
+
+	private Set<LocalSubscription> getLocalSubscriptions() {
+		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
+		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'"));
+		return selfSubscriptions;
 	}
 
 	private Set<Capability> getSelfCapabilities() {
@@ -141,7 +146,7 @@ public class NeighbourServiceDiscoveryTest {
 
 
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade,  self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade,  getSelfCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -174,7 +179,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.getControlConnection().setConnectionStatus(ConnectionStatus.FAILED);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, getSelfCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		verify(neighbourFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 	}
@@ -242,7 +247,7 @@ public class NeighbourServiceDiscoveryTest {
 		ericsson.getControlConnection().setBackoffStart(pastTime);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, getSelfCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		verify(neighbourFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 	}
@@ -326,7 +331,7 @@ public class NeighbourServiceDiscoveryTest {
 		Mockito.doThrow(new CapabilityPostException("Exception from mock")).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, getSelfCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		assertThat(ericsson.getControlConnection().getBackoffAttempts()).isEqualTo(1);
 	}
@@ -345,7 +350,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, self.getLocalCapabilities(), self.getLastUpdatedLocalCapabilities());
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, getSelfCapabilities(), self.getLastUpdatedLocalCapabilities());
 
 		assertThat(ericsson.getControlConnection().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 		verify(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
@@ -587,7 +592,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
 		when(neighbourFacade.postCapabilitiesToCapabilities(any(), any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
 
-		neigbourDiscoveryService.retryUnreachable(neighbourFacade, self.getLocalCapabilities());
+		neigbourDiscoveryService.retryUnreachable(neighbourFacade, getSelfCapabilities());
 
 		verify(neighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
 	}
