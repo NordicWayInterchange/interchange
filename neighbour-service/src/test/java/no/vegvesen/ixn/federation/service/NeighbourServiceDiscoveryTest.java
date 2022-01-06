@@ -75,13 +75,17 @@ public class NeighbourServiceDiscoveryTest {
 	private Self createSelf() {
 		// Self setup
 		self = new Self();
-		Set<Capability> selfCapabilities = Collections.singleton(getDatexCapability("NO"));
+		Set<Capability> selfCapabilities = getSelfCapabilities();
 		self.setLocalCapabilities(selfCapabilities);
 		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
 		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'"));
 		self.setLocalSubscriptions(selfSubscriptions);
 		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
 		return self;
+	}
+
+	private Set<Capability> getSelfCapabilities() {
+		return Collections.singleton(getDatexCapability("NO"));
 	}
 
 	@Test

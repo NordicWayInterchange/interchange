@@ -2,11 +2,9 @@ package no.vegvesen.ixn.onboard;
 
 
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
-import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +16,7 @@ import java.util.List;
 @Service
 @ConfigurationPropertiesScan
 public class SelfService {
+	public static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
 	private static Logger logger = LoggerFactory.getLogger(SelfService.class);
 	ServiceProviderRepository repository;
 	InterchangeNodeProperties interchangeNodeProperties;
@@ -45,7 +44,7 @@ public class SelfService {
 
 	public static String getMessageChannelUrl(String brokerName, String port) {
 		try {
-			if (port == null || port.equals(Self.DEFAULT_MESSAGE_CHANNEL_PORT)) {
+			if (port == null || port.equals(DEFAULT_MESSAGE_CHANNEL_PORT)) {
 				return String.format("amqps://%s/", brokerName);
 			} else {
 				return String.format("amqps://%s:%s/",brokerName, port);

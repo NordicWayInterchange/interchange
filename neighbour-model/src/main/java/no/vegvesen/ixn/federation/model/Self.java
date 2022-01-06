@@ -13,8 +13,6 @@ public class Self {
 
 	private static Logger logger = LoggerFactory.getLogger(Self.class);
 
-	public static final String DEFAULT_MESSAGE_CHANNEL_PORT = "5671";
-
 	private Set<Capability> localCapabilities = new HashSet<>();
 
 	private Set<LocalSubscription> localSubscriptions = new HashSet<>();
