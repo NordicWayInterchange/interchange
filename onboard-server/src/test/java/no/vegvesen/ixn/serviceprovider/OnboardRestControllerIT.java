@@ -7,7 +7,16 @@ import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.serviceprovider.model.*;
+import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesRequest;
+import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesResponse;
+import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
+import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsRequest;
+import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsResponse;
+import no.vegvesen.ixn.serviceprovider.model.GetCapabilityResponse;
+import no.vegvesen.ixn.serviceprovider.model.ListCapabilitiesResponse;
+import no.vegvesen.ixn.serviceprovider.model.ListSubscriptionsResponse;
+import no.vegvesen.ixn.serviceprovider.model.LocalActorCapability;
+import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,11 +26,13 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -62,6 +73,9 @@ public class OnboardRestControllerIT {
         LocalActorCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
         //LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
         restController.deleteCapability(serviceProviderName, saved.getId());
+
+        //We did four calls to the controller, thus we should have checked the cert 4 times
+        verify(certService,times(4)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -80,6 +94,7 @@ public class OnboardRestControllerIT {
         GetCapabilityResponse response = restController.getServiceProviderCapability(serviceProviderName,capability.getId());
         assertThat(response.getId()).isEqualTo(capability.getId());
 
+        verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -103,6 +118,7 @@ public class OnboardRestControllerIT {
 
 		ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
 		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
+        verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
 
 	@Test
@@ -127,6 +143,7 @@ public class OnboardRestControllerIT {
 		ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);
 
 		assertThat(savedSPAfterDelete.getSubscriptionUpdated()).isEqualTo(subscriptionUpdated);
+        verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
 
 	@Test
@@ -151,6 +168,7 @@ public class OnboardRestControllerIT {
         assertThat(localSubscriptionApis.size()).isEqualTo(1);
         //TODO same as above, cannot set createNewQueue to true through the API
         //assertThat(localSubscriptionApis.get(0).isCreateNewQueue()).isTrue();
+        verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -158,6 +176,7 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(false, selector))));
+        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
 
     }
 }

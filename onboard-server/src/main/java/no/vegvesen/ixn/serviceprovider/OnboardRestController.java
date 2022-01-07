@@ -53,12 +53,7 @@ public class OnboardRestController {
 
 
 		Set<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-
-		if (serviceProviderToUpdate == null) {
-			logger.info("The posting Service Provider is new. Converting incoming API object to Service Provider");
-			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
-		}
+		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
 		for (Capability newLocalCapability : newLocalCapabilities) {
@@ -81,6 +76,7 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ListCapabilitiesResponse listCapabilities(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(serviceProviderName,serviceProvider.getCapabilities().getCapabilities());
 		OnboardMDCUtil.removeLogVariables();
@@ -117,6 +113,10 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProvider == null) {
+			logger.warn("The Service Provider trying to delete a capability is new. No capabilities to delete. Rejecting...");
+			throw new NotFoundException("The Service Provider trying to delete a capability does not exist in the database. Rejecting...");
+		}
 		Capability capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
 				c.getId().equals(Integer.parseInt(capabilityId)))
 				.findFirst()
@@ -151,11 +151,7 @@ public class OnboardRestController {
 			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(serviceProviderName, subscription));
 		}
 
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProviderToUpdate == null) {
-			logger.info("The posting Service Provider does not exist in the database. Creating Service Provider object.");
-			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
-		}
+		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.addLocalSubscriptions(localSubscriptions);
 
 		// Save updated Service Provider in the database.
@@ -198,7 +194,6 @@ public class OnboardRestController {
 	}
 
 	private ServiceProvider checkAndGetServiceProvider(String serviceProviderName) {
-		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
 		if (serviceProvider == null) {
 			throw new NotFoundException("The requesting Service Provider does not exist in the database.");
@@ -206,9 +201,18 @@ public class OnboardRestController {
 		return serviceProvider;
 	}
 
+	private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
+		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		if (serviceProvider == null) {
+			serviceProvider = new ServiceProvider(serviceProviderName);
+		}
+		return serviceProvider;
+	}
+
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ListSubscriptionsResponse listSubscriptions(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(serviceProviderName,serviceProvider.getSubscriptions());
 		OnboardMDCUtil.removeLogVariables();
@@ -218,6 +222,7 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable String serviceProviderName, @PathVariable String subscriptionId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
 				s.getSub_id().equals(Integer.parseInt(subscriptionId)))
@@ -237,12 +242,7 @@ public class OnboardRestController {
 			throw new PrivateChannelException("Client channel cannot be null");
 		}
 
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-
-		if (serviceProviderToUpdate == null) {
-			logger.info("The posting Service Provider is new. Converting incoming API object to Service Provider");
-			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
-		}
+		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		PrivateChannel newPrivateChannel = serviceProviderToUpdate.addPrivateChannel(clientChannel.getPeerName());
 
@@ -280,10 +280,7 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProvider == null) {
-			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
-		}
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
 		List<PrivateChannel> privateChannels = serviceProvider.getPrivateChannels().stream().collect(Collectors.toList());
 		List<PrivateChannelApi> privateChannelsApis = new ArrayList<>();
@@ -316,13 +313,7 @@ public class OnboardRestController {
 			localDeliveries.add(typeTransformer.transformDeliveryToLocalDelivery(delivery));
 		}
 
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-
-		if (serviceProviderToUpdate == null) {
-			logger.info("The posting Service Provider is new. Converting incoming API object to Service Provider");
-			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
-		}
-
+		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.addDeliveries(localDeliveries);
 
 		// Save updated Service Provider in the database.
@@ -342,7 +333,8 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ListDeliveriesResponse listDeliveries(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
-		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		ListDeliveriesResponse response = typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
 		OnboardMDCUtil.removeLogVariables();
 		 return response;
@@ -368,6 +360,7 @@ public class OnboardRestController {
 	public void deleteDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
