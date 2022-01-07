@@ -1,8 +1,17 @@
-package no.vegvesen.ixn.serviceprovider.model;
+package no.vegvesen.ixn.federation.model;
 
+import javax.persistence.*;
 import java.util.Objects;
 
-public class DeliveryEndpoint {
+@Entity
+@Table(name = "local_delivery_endpoints")
+public class LocalDeliveryEndpoint {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "local_del_endpoint_seq")
+    @Column(name = "id")
+    private Integer id;
+
     private String host;
     private int port;
     private String target;
@@ -10,10 +19,10 @@ public class DeliveryEndpoint {
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
-    public DeliveryEndpoint() {
+    public LocalDeliveryEndpoint() {
     }
 
-    public DeliveryEndpoint(String host, int port, String target, String selector, Integer maxBandwidth, Integer maxMessageRate) {
+    public LocalDeliveryEndpoint(String host, int port, String target, String selector, Integer maxBandwidth, Integer maxMessageRate) {
         this.host = host;
         this.port = port;
         this.target = target;
@@ -22,7 +31,7 @@ public class DeliveryEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
-    public DeliveryEndpoint(String host, int port, String target, String selector) {
+    public LocalDeliveryEndpoint(String host, int port, String target, String selector) {
         this.host = host;
         this.port = port;
         this.target = target;
@@ -80,8 +89,8 @@ public class DeliveryEndpoint {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DeliveryEndpoint)) return false;
-        DeliveryEndpoint that = (DeliveryEndpoint) o;
+        if (!(o instanceof LocalDeliveryEndpoint)) return false;
+        LocalDeliveryEndpoint that = (LocalDeliveryEndpoint) o;
         return port == that.port &&
                 maxBandwidth == that.maxBandwidth &&
                 maxMessageRate == that.maxMessageRate &&
@@ -97,7 +106,7 @@ public class DeliveryEndpoint {
 
     @Override
     public String toString() {
-        return "DeliveryEndpoint{" +
+        return "LocalDeliveryEndpoint{" +
                 "host='" + host + '\'' +
                 ", port=" + port +
                 ", target='" + target + '\'' +
@@ -106,5 +115,4 @@ public class DeliveryEndpoint {
                 ", maxMessageRate=" + maxMessageRate +
                 '}';
     }
-
 }

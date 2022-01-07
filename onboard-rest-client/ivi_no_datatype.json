@@ -8,6 +8,9 @@
         "protocolVersion": "IVI:1.0",
         "quadTree": [
             "12004"
+        ],
+        "iviType": [
+          "1", "2", "3"
         ]
       }
     ]

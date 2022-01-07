@@ -36,6 +36,10 @@ public class ServiceProvider {
 	@JoinColumn(name = "priv_channel_id", foreignKey = @ForeignKey(name = "fk_priv_channel"))
 	private Set<PrivateChannel> privateChannels = new HashSet<>();
 
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@JoinColumn(name = "del_id", foreignKey = @ForeignKey(name = "fk_deliveries"))
+	private Set<LocalDelivery> deliveries = new HashSet<>();
+
 	private LocalDateTime subscriptionUpdated;
 
 	public ServiceProvider() {
@@ -172,6 +176,29 @@ public class ServiceProvider {
 		return privateChannels;
 	}
 
+	public void setDeliveries(Set<LocalDelivery> deliveries) {
+		this.deliveries = deliveries;
+	}
+
+	public Set<LocalDelivery> getDeliveries() {
+		return deliveries;
+	}
+
+	public void addDeliveries(Set<LocalDelivery> newDeliveries) {
+		deliveries.addAll(newDeliveries);
+	}
+
+	public void removeLocalDelivery(Integer deliveryId) {
+		LocalDelivery localDeliveryToDelete = deliveries
+				.stream()
+				.filter(localDelivery -> localDelivery.getId().equals(deliveryId))
+				.findFirst()
+				.orElseThrow(
+						() -> new NotFoundException("The delivery to delete is not in the Service Provider deliveries. Cannot delete delivery that don't exist.")
+				);
+		deliveries.remove(localDeliveryToDelete);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -195,6 +222,7 @@ public class ServiceProvider {
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
 				", privateChannels=" + Arrays.toString(privateChannels.toArray()) +
+				", deliveries=" + Arrays.toString(deliveries.toArray()) +
 				'}';
 	}
 

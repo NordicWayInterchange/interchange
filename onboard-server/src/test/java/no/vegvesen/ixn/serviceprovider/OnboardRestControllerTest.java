@@ -9,6 +9,7 @@ import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -355,11 +356,25 @@ public class OnboardRestControllerTest {
 
 		String requestBody = objectMapper.writeValueAsString(request);
 
+		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
+			Object argument = i.getArguments()[0];
+			ServiceProvider s = (ServiceProvider) argument;
+			s.setId(1);
+			int j = 0;
+			for (LocalDelivery delivery : s.getDeliveries()) {
+				delivery.setId(j++);
+				delivery.setLastUpdatedTimestamp(LocalDateTime.now());
+			}
+			return s;
+		});
+
+		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
+
 		mockMvc.perform(
 				post(String.format("/%s/deliveries",firstServiceProvider))
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(requestBody))
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestBody))
 				.andDo(print())
 				.andExpect(status().isOk());
 	}
@@ -368,6 +383,17 @@ public class OnboardRestControllerTest {
 	public void listingDeliveriesReturnsStatusOk() throws Exception {
 		String firstServiceProvider = "First Service Provider";
 		mockCertificate(firstServiceProvider);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				1,
+				firstServiceProvider,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		when(serviceProviderRepository.findByName(firstServiceProvider))
+				.thenReturn(serviceProvider);
+
 		mockMvc.perform(
 				get(String.format("/%s/deliveries",firstServiceProvider))
 				.accept(MediaType.APPLICATION_JSON))
@@ -381,6 +407,27 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "First Service Provider";
 		String deliveryId = "1";
 		mockCertificate(firstServiceProvider);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				1,
+				firstServiceProvider,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		serviceProvider.addDeliveries(Collections.singleton(
+				new LocalDelivery(
+						1,
+						Collections.emptySet(),
+						"/mydelivery",
+						"originatingCountry = 'NO'",
+						LocalDateTime.now(),
+						LocalDeliveryStatus.REQUESTED
+				)
+		));
+		when(serviceProviderRepository.findByName(firstServiceProvider))
+				.thenReturn(serviceProvider);
+
 		mockMvc.perform(
 				get(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
 				.accept(MediaType.APPLICATION_JSON))
@@ -394,6 +441,27 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "First Service Provider";
 		String deliveryId = "1";
 		mockCertificate(firstServiceProvider);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				1,
+				firstServiceProvider,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		serviceProvider.addDeliveries(Collections.singleton(
+				new LocalDelivery(
+						1,
+						Collections.emptySet(),
+						"/mydelivery",
+						"originatingCountry = 'NO'",
+						LocalDateTime.now(),
+						LocalDeliveryStatus.REQUESTED
+				)
+		));
+		when(serviceProviderRepository.findByName(firstServiceProvider))
+				.thenReturn(serviceProvider);
+		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
 		mockMvc.perform(
 				delete(String.format("/%s/deliveries/%s",firstServiceProvider,deliveryId))
 				.accept(MediaType.APPLICATION_JSON))

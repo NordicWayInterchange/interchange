@@ -2,6 +2,7 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.DeliveryException;
 import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
@@ -293,46 +294,90 @@ public class OnboardRestController {
 		return new PrivateChannelListApi(privateChannelsApis);
 	}
 
-	//TODO implement!
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, AddDeliveriesRequest request) {
+	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
+		if(Objects.isNull(request.getDeliveries())) {
+			throw new DeliveryException("Delivery cannot be null");
+		}
+
+		for(SelectorApi delivery : request.getDeliveries()) {
+			if(delivery.getSelector() == null) {
+				throw new DeliveryException("Bad api object for adding delivery. The selector object was null.");
+			}
+		}
+
+		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
+
+		Set<LocalDelivery> localDeliveries = new HashSet<>();
+		for(SelectorApi delivery : request.getDeliveries()) {
+			localDeliveries.add(typeTransformer.transformDeliveryToLocalDelivery(delivery));
+		}
+
+		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
+
+		if (serviceProviderToUpdate == null) {
+			logger.info("The posting Service Provider is new. Converting incoming API object to Service Provider");
+			serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
+		}
+
+		serviceProviderToUpdate.addDeliveries(localDeliveries);
+
+		// Save updated Service Provider in the database.
+		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+		logger.debug("Updated Service Provider: {}", saved.toString());
+
+		Set<LocalDelivery> savedDeliveries = saved
+				.getDeliveries()
+				.stream()
+				.filter(delivery -> localDeliveries.contains(delivery))
+				.collect(Collectors.toSet());
+
 		OnboardMDCUtil.removeLogVariables();
-		return new AddDeliveriesResponse();
+		return typeTransformer.transformToDeliveriesResponse(serviceProviderName, savedDeliveries);
 	}
 
-
-	//TODO implement!
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ListDeliveriesResponse listDeliveries(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
-		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		ListDeliveriesResponse response = typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
 		OnboardMDCUtil.removeLogVariables();
-		 return new ListDeliveriesResponse();
+		 return response;
 	}
 
-	//TODO implement!
 	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/deliveries/{deliveryId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public GetDeliveryResponse getDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d ->
+				d.getId().equals(Integer.parseInt(deliveryId)))
+				.findFirst()
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,serviceProviderName)));
+		logger.info("Received delivery poll from Service Provider {}", serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();
-		return new GetDeliveryResponse();
+		return typeTransformer.transformLocalDeliveryToGetDeliveryResponse(serviceProviderName, localDelivery);
 	}
 
-	//TODO implement!
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/deliveries/{deliveryId}")
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	public void deleteDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+
+		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
+
+		serviceProvider.removeLocalDelivery(Integer.parseInt(deliveryId));
+
+		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
+		logger.debug("Updated Service Provider: {}", saved.toString());
 
 		OnboardMDCUtil.removeLogVariables();
-
 	}
 
 	// TODO: Remove
