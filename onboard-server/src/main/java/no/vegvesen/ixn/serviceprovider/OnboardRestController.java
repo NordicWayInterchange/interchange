@@ -77,7 +77,7 @@ public class OnboardRestController {
 	public ListCapabilitiesResponse listCapabilities(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(serviceProviderName,serviceProvider.getCapabilities().getCapabilities());
 		OnboardMDCUtil.removeLogVariables();
 		return response;
@@ -93,11 +93,7 @@ public class OnboardRestController {
 
 
 		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProviderToUpdate == null) {
-			logger.warn("The Service Provider trying to delete a capability is new. No capabilities to delete. Rejecting...");
-			throw new NotFoundException("The Service Provider trying to delete a capability does not exist in the database. Rejecting...");
-		}
+		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		// Service provider exists. Remove the incoming capabilities from the Service Provider capabilities.
 		serviceProviderToUpdate.getCapabilities().removeDataType(Integer.parseInt(capabilityId));
 
@@ -112,11 +108,7 @@ public class OnboardRestController {
 	public GetCapabilityResponse getServiceProviderCapability(@PathVariable String serviceProviderName, @PathVariable String capabilityId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProvider == null) {
-			logger.warn("The Service Provider trying to delete a capability is new. No capabilities to delete. Rejecting...");
-			throw new NotFoundException("The Service Provider trying to delete a capability does not exist in the database. Rejecting...");
-		}
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		Capability capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
 				c.getId().equals(Integer.parseInt(capabilityId)))
 				.findFirst()
@@ -180,10 +172,7 @@ public class OnboardRestController {
 
 
 
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProviderToUpdate == null) {
-			throw new NotFoundException("The Service Provider trying to delete a subscription does not exist in the database. No subscriptions to delete.");
-		}
+		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.removeLocalSubscription(Integer.parseInt(dataTypeId));
 
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
@@ -191,14 +180,6 @@ public class OnboardRestController {
 		logger.debug("Updated Service Provider: {}", saved.toString());
 
 		OnboardMDCUtil.removeLogVariables();
-	}
-
-	private ServiceProvider checkAndGetServiceProvider(String serviceProviderName) {
-		ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProvider == null) {
-			throw new NotFoundException("The requesting Service Provider does not exist in the database.");
-		}
-		return serviceProvider;
 	}
 
 	private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {
@@ -213,7 +194,7 @@ public class OnboardRestController {
 	public ListSubscriptionsResponse listSubscriptions(@PathVariable String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(serviceProviderName,serviceProvider.getSubscriptions());
 		OnboardMDCUtil.removeLogVariables();
 		return response;
@@ -223,7 +204,7 @@ public class OnboardRestController {
 	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable String serviceProviderName, @PathVariable String subscriptionId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
 				s.getSub_id().equals(Integer.parseInt(subscriptionId)))
 				.findFirst()
@@ -258,11 +239,7 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE private channel {}", serviceProviderName, privateChannelId);
 
-		ServiceProvider serviceProviderToUpdate = serviceProviderRepository.findByName(serviceProviderName);
-		if (serviceProviderToUpdate == null) {
-			throw new NotFoundException("The Service Provider trying to delete a private channel does not exist in the database. No private channels to delete.");
-		}
-
+		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.setPrivateChannelToTearDown(Integer.parseInt(privateChannelId));
 
 		// Save updated Service Provider - set it to TEAR_DOWN. It's the routing-configurers job to delete from the database, if needed.
@@ -344,7 +321,7 @@ public class OnboardRestController {
 	public GetDeliveryResponse getDelivery(@PathVariable String serviceProviderName, @PathVariable String deliveryId) {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		LocalDelivery localDelivery = serviceProvider.getDeliveries().stream().filter(d ->
 				d.getId().equals(Integer.parseInt(deliveryId)))
 				.findFirst()
@@ -361,7 +338,7 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
