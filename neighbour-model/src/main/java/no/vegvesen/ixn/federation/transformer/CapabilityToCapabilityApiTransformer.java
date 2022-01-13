@@ -14,7 +14,7 @@ public class CapabilityToCapabilityApiTransformer {
 	public CapabilityToCapabilityApiTransformer() {
 	}
 
-	Set<CapabilityApi> capabilitiesToCapabilityApis(Set<Capability> capabilities) {
+	public Set<CapabilityApi> capabilitiesToCapabilityApis(Set<Capability> capabilities) {
 		Set<CapabilityApi> apis = new HashSet<>();
 		for (Capability capability : capabilities) {
 			CapabilityApi capabilityApi = capability.toApi();
