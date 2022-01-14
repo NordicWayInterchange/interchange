@@ -22,8 +22,7 @@ public class PostgresTestcontainerInitializer {
 					String.format("spring.datasource.url: jdbc:postgresql://localhost:%s/%s", postgresContainer.getMappedPort(5432), FEDERATION),
 					"spring.datasource.username: " + FEDERATION,
 					"spring.datasource.password: " + FEDERATION,
-					"spring.datasource.driver-class-name: org.postgresql.Driver",
-					"spring.jpa.hibernate.ddl-auto = create-drop"
+					"spring.datasource.driver-class-name: org.postgresql.Driver"
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
