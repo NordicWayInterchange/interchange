@@ -249,8 +249,6 @@ public class OnboardRestControllerTest {
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self
-		Self self = new Self();
-		self.setLocalSubscriptions(serviceProviderSubscriptionRequest);//same subscriptions as the service provider
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
 		// Subscription request api posted to the server

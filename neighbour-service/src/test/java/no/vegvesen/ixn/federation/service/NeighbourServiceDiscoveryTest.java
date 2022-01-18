@@ -54,8 +54,8 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Autowired
 	private NeigbourDiscoveryService neigbourDiscoveryService;
-	//private Self self;
-	private LocalDateTime now;
+
+	private LocalDateTime now = LocalDateTime.now();
 
 	private Capability getDatexCapability(String originatingCountry) {
 		return new DatexCapability(null, originatingCountry, null, null, null);
@@ -63,7 +63,6 @@ public class NeighbourServiceDiscoveryTest {
 
 	@BeforeEach
 	public void before(){
-//		self = createSelf();
 	}
 
 	private Neighbour createNeighbour() {
@@ -71,18 +70,6 @@ public class NeighbourServiceDiscoveryTest {
 		neighbour.setName("ericsson.itsinterchange.eu");
 		neighbour.setControlChannelPort("8080");
 		return neighbour;
-	}
-
-	private Self createSelf() {
-		// Self setup
-		//self = new Self();
-		Set<Capability> selfCapabilities = getSelfCapabilities();
-		//self.setLocalCapabilities(selfCapabilities);
-		Set<LocalSubscription> selfSubscriptions = getLocalSubscriptions();
-		//self.setLocalSubscriptions(selfSubscriptions);
-		now = LocalDateTime.now();
-		//self.setLastUpdatedLocalSubscriptions(now);
-		return null;
 	}
 
 	private Set<LocalSubscription> getLocalSubscriptions() {
@@ -495,8 +482,8 @@ public class NeighbourServiceDiscoveryTest {
 		assertThat(spyNeighbour.getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.REQUESTED);
 	}
 
-	//TODO: test why local subscriptions for self must be different from subscription request for neighbours
-	// Only capabilities of neighbour and subscription of self is relevant for matching
+	//TODO: test why local subscriptions be different from subscription request for neighbours
+	// Only capabilities of neighbour and local subscriptions  are relevant for matching
 	// To introduce error make sure part 1 and part 2 below has same selector filter
 	@Test
 	public void subscriptionRequestProcessesAllNeighboursDespiteNetworkError() {
@@ -545,11 +532,9 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void calculatedSubscriptionRequestSameAsNeighbourSubscriptionsAllowsNextNeighbourToBeSaved() {
-		Self self = new Self();
 		Set<LocalSubscription> selfLocalSubscriptions = new HashSet<>();
 		selfLocalSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", "self"));
-		self.setLocalSubscriptions(selfLocalSubscriptions);
-		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
+		LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
 		Capability neighbourCapability = getDatexCapability("NO");
@@ -577,9 +562,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(Collections.emptySet());
 
-		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
-		Set<LocalSubscription> localSubscriptions = self.getLocalSubscriptions();
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), Optional.of(lastUpdatedLocalSubscriptions), selfLocalSubscriptions, neighbourFacade);
 
 		verify(neighbourRepository).save(otherNeighbour);
     }
