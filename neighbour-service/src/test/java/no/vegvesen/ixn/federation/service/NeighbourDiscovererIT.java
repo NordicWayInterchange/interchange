@@ -16,7 +16,6 @@ import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -49,9 +48,6 @@ public class NeighbourDiscovererIT {
 
 	@MockBean
 	NeighbourFacade mockNeighbourFacade;
-
-	@MockBean
-	SelfService selfService;
 
 	@Autowired
 	NeighbourService neighbourService;
