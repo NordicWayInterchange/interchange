@@ -67,6 +67,10 @@ public class ServiceProviderService {
         }
     }
 
+    public List<ServiceProvider> getServiceProviders() {
+        return serviceProviderRepository.findAll();
+    }
+
     public LocalEndpoint endpointToLocalEndpoint(Endpoint endpoint) {
         return new LocalEndpoint(endpoint.getSource(), endpoint.getHost(), endpoint.getPort());
     }
