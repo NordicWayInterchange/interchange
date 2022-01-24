@@ -85,20 +85,20 @@ public class ServiceProviderRouter {
         }
     }
 
-    private Optional<LocalSubscription> processSubscription(String name, LocalSubscription subscription) {
+    private Optional<LocalSubscription> processSubscription(String queueName, LocalSubscription subscription) {
         Optional<LocalSubscription> newSubscription;
         switch (subscription.getStatus()) {
             case REQUESTED:
 			case CREATED:
-			    if (subscription.getConsumerCommonName().equals(name)) {
+			    if (subscription.getConsumerCommonName().equals(queueName)) {
                     newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
                 } else {
-				    newSubscription = onRequested(name, subscription);
+				    newSubscription = onRequested(queueName, subscription);
 			    }
                 break;
 			case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
-                newSubscription = onTearDown(name, subscription);
+                newSubscription = onTearDown(queueName, subscription);
                 break;
             default:
                 throw new IllegalStateException("Unknown subscription status encountered");
@@ -106,39 +106,39 @@ public class ServiceProviderRouter {
         return newSubscription;
     }
 
-    private Optional<LocalSubscription> onTearDown(String name, LocalSubscription subscription) {
-        removeBindingIfExists(name, subscription);
+    private Optional<LocalSubscription> onTearDown(String queueName, LocalSubscription subscription) {
+        removeBindingIfExists(queueName, subscription);
         return Optional.empty();
     }
 
-    private Optional<LocalSubscription> onRequested(String name, LocalSubscription subscription) {
-        optionallyCreateQueue(name);
-        optionallyAddQueueBindings(name, subscription);
+    private Optional<LocalSubscription> onRequested(String queueName, LocalSubscription subscription) {
+        optionallyCreateQueue(queueName);
+        optionallyAddQueueBindings(queueName, subscription);
         return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
     }
 
-    private void removeBindingIfExists(String name, LocalSubscription subscription) {
-        if (qpidClient.queueExists(name)) {
-            if (qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
-                qpidClient.unbindBindKey(name, subscription.bindKey(), "outgoingExchange");
-                qpidClient.unbindBindKey(name, subscription.bindKey(), "incomingExchange");
+    private void removeBindingIfExists(String queueName, LocalSubscription subscription) {
+        if (qpidClient.queueExists(queueName)) {
+            if (qpidClient.getQueueBindKeys(queueName).contains(subscription.bindKey())) {
+                qpidClient.unbindBindKey(queueName, subscription.bindKey(), "outgoingExchange");
+                qpidClient.unbindBindKey(queueName, subscription.bindKey(), "incomingExchange");
             }
         }
     }
 
-    private void optionallyAddQueueBindings(String name, LocalSubscription subscription) {
-        if (!qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
-            logger.debug("Adding bindings to the queue {}", name);
-            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "outgoingExchange");
-            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "incomingExchange");
+    private void optionallyAddQueueBindings(String queueName, LocalSubscription subscription) {
+        if (!qpidClient.getQueueBindKeys(queueName).contains(subscription.bindKey())) {
+            logger.debug("Adding bindings to the queue {}", queueName);
+            qpidClient.addBinding(subscription.getSelector(), queueName, subscription.bindKey(), "outgoingExchange");
+            qpidClient.addBinding(subscription.getSelector(), queueName, subscription.bindKey(), "incomingExchange");
         }
     }
 
-    private void optionallyCreateQueue(String name) {
-        if (!qpidClient.queueExists(name)) {
-            logger.info("Creating queue {}", name);
-            qpidClient.createQueue(name);
-            qpidClient.addReadAccess(name, name);
+    private void optionallyCreateQueue(String queueName) {
+        if (!qpidClient.queueExists(queueName)) {
+            logger.info("Creating queue {}", queueName);
+            qpidClient.createQueue(queueName);
+            qpidClient.addReadAccess(queueName, queueName);
         }
     }
 

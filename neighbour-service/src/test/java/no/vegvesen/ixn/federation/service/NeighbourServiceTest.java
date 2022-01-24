@@ -456,7 +456,7 @@ class NeighbourServiceTest {
 		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
 
-		neigbourDiscoveryService.createListenerEndpointFromEndpointsList(neighbour, endpoints);
+		neigbourDiscoveryService.createListenerEndpointFromEndpointsList(neighbour, endpoints, "");
 
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
 	}

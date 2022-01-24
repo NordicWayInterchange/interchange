@@ -45,8 +45,9 @@ public class CollectorCreator {
 
     MessageCollectorListener setupCollection(ListenerEndpoint listenerEndpoint) {
         String writeUrl = String.format("amqps://%s:%s", localIxnDomainName, localIxnFederationPort);
-        logger.debug("Write URL: {}, queue {}", writeUrl, writeQueue);
-        Source writeSource = new Source(writeUrl, writeQueue, sslContext);
+        String localExchange = listenerEndpoint.getExchangeName();
+        logger.debug("Write URL: {}, exchange {}", writeUrl, localExchange);
+        Source writeSource = new Source(writeUrl, localExchange, sslContext);
 
         String readUrl = String.format("amqps://%s:%s", listenerEndpoint.getHost(), listenerEndpoint.getPort());
         String readQueue = listenerEndpoint.getSource();

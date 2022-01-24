@@ -24,6 +24,8 @@ public class ListenerEndpoint {
     private int maxBandwidth;
     private int maxMessageRate;
 
+    private String exchangeName;
+
 
     public ListenerEndpoint() { }
 
@@ -33,6 +35,15 @@ public class ListenerEndpoint {
         this.host = host;
         this.port = port;
         this.messageConnection = messageConnection;
+    }
+
+    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, String exchangeName) {
+        this.neighbourName = neighbourName;
+        this.source = source;
+        this.host = host;
+        this.port = port;
+        this.messageConnection = messageConnection;
+        this.exchangeName = exchangeName;
     }
 
     public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
@@ -87,6 +98,14 @@ public class ListenerEndpoint {
 
     public void setMaxMessageRate(int maxMessageRate) {
         this.maxMessageRate = maxMessageRate;
+    }
+
+    public String getExchangeName() {
+        return exchangeName;
+    }
+
+    public void setExchangeName(String exchangeName) {
+        this.exchangeName = exchangeName;
     }
 
     @Override

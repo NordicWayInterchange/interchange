@@ -19,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -178,6 +175,10 @@ public class NeigbourDiscoveryService {
                     additionalSubscriptions.removeAll(existingSubscriptions);
                     if (!additionalSubscriptions.isEmpty()) {
                         Set<Subscription> responseSubscriptions = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
+                        for(Subscription subscription : responseSubscriptions) {
+                            String exchangeName = UUID.randomUUID().toString();
+                            subscription.setExchangeName(exchangeName);
+                        }
                         ourRequestedSubscriptionsFromNeighbour.addNewSubscriptions(responseSubscriptions);
                         ourRequestedSubscriptionsFromNeighbour.setSuccessfulRequest(LocalDateTime.now());
                         //TODO we never changed the subscription status. We don't now either. Is that OK?
@@ -256,7 +257,7 @@ public class NeigbourDiscoveryService {
                             logger.info("Subscription for neighbour {} with path {} is CREATED",neighbour.getName(),subscription.getPath());
                             if (polledSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
                                 logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getEndpoints());
-                                createListenerEndpointFromEndpointsList(neighbour, polledSubscription.getEndpoints());
+                                createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                             }
                         }
                         //utvide med ListenerEndpoint lookup + lage ny om det trengs
@@ -278,15 +279,15 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+    public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
         for(Endpoint endpoint : endpoints) {
-            createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), neighbour);
+            createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour);
         }
     }
 
-    public void createListenerEndpoint(String host, Integer port, String source, Neighbour neighbour) {
+    public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
         if(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), host, port, source) == null){
-            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection()));
+            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
             logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
         }
     }
@@ -330,7 +331,7 @@ public class NeigbourDiscoveryService {
 
                             Set<Endpoint> additionalEndpoints = new HashSet<>(wantedEndpoints);
                             additionalEndpoints.removeAll(existingEndpoints);
-                            createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints);
+                            createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints, subscription.getExchangeName());
                             subscription.setEndpoints(wantedEndpoints);
                             //} else {
                             //	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
