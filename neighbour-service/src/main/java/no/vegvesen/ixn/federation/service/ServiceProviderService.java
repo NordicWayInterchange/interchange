@@ -27,6 +27,10 @@ public class ServiceProviderService {
         this.serviceProviderRepository = serviceProviderRepository;
     }
 
+    public List<ServiceProvider> findAllServiceProviders() {
+        return serviceProviderRepository.findAll();
+    }
+
     //TODO don't need Self here. Getting the messageChannelUrl should be somwhere else?
     public void updateLocalSubscriptions(String messageChannelHost, String messageChannelPort) {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();

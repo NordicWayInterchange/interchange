@@ -44,7 +44,7 @@ public class TypeTransformer {
     private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : subscriptions) {
-            String sub_id = subscription.getSub_id() == null ? null : subscription.getSub_id().toString();
+            String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
             result.add(new LocalActorSubscription(
                     sub_id,
                     createSubscriptionPath(name,sub_id),
@@ -74,7 +74,7 @@ public class TypeTransformer {
     private Set<LocalActorSubscription> transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
-            String subscriptionId = subscription.getSub_id().toString();
+            String subscriptionId = subscription.getId().toString();
             result.add(new LocalActorSubscription(
                     subscriptionId,
                     createSubscriptionPath(serviceProviderName, subscriptionId),
@@ -102,8 +102,8 @@ public class TypeTransformer {
 
     public GetSubscriptionResponse transformLocalSubscriptionToGetSubscriptionResponse(String serviceProviderName, LocalSubscription localSubscription) {
         return new GetSubscriptionResponse(
-                localSubscription.getSub_id().toString(),
-                createSubscriptionPath(serviceProviderName,localSubscription.getSub_id().toString()),
+                localSubscription.getId().toString(),
+                createSubscriptionPath(serviceProviderName,localSubscription.getId().toString()),
                 localSubscription.getSelector(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
                 transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),

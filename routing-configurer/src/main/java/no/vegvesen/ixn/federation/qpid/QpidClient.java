@@ -109,6 +109,12 @@ public class QpidClient {
 		}
 	}
 
+	public void createTopicExchange(String exchangeName) {
+		if (!exchangeExists(exchangeName)){
+			_createTopicExchange(exchangeName);
+		}
+	}
+
 	void _createQueue(String queueName) {
 		JSONObject json = new JSONObject();
 		json.put("name", queueName);
@@ -124,6 +130,17 @@ public class QpidClient {
 		json.put("type","direct");
 		String jsonString = json.toString();
 		postQpid(exchangesURL, jsonString, "/");
+		logger.debug("Created exchange {}", exchangeName);
+	}
+
+	public void _createTopicExchange(String exchangeName) {
+		JSONObject json = new JSONObject();
+		json.put("name", exchangeName);
+		json.put("durable", true);
+		json.put("type","headers");
+		String jsonString = json.toString();
+		postQpid(exchangesURL, jsonString, "/");
+		logger.debug("Created exchange {}", exchangeName);
 	}
 
 	public boolean queueExists(String queueName) {
@@ -153,6 +170,32 @@ public class QpidClient {
 		return null;
 	}
 
+	public boolean exchangeExists(String exchangeName) {
+		return lookupExchangeId(exchangeName) != null;
+	}
+
+	private String lookupExchangeId(String exchangeName) {
+		String exchangeQueryUrl = exchangesURL + "/" + exchangeName;
+		logger.debug("quering for queue {} with url {}", exchangeName, exchangeQueryUrl);
+		@SuppressWarnings("rawtypes")
+		ResponseEntity<HashMap> response;
+		try {
+			response = restTemplate.getForEntity(new URI(exchangeQueryUrl), HashMap.class);
+		} catch (HttpClientErrorException.NotFound notFound) {
+			return null;
+		} catch (Throwable e) {
+			throw new RoutingConfigurerException(String.format("Could not query for QPID exchange %s", exchangeName), e);
+		}
+		HttpStatus statusCode = response.getStatusCode();
+		if (statusCode.is2xxSuccessful()) {
+			if (response.getBody() != null) {
+				return (String) response.getBody().get("id");
+			}
+		} else {
+			logger.error("Status code {} querying for QPID exchange {}", statusCode.value(), exchangeName);
+		}
+		return null;
+	}
 
 	public void unbindBindKey(String interchange, String unwantedBindKey, String exchangeName) {
 		JSONObject json = new JSONObject();
@@ -189,6 +232,11 @@ public class QpidClient {
 	public void removeQueue(String queueName) {
 		String queueId = lookupQueueId(queueName);
 		restTemplate.delete(queuesURL + "?id=" + queueId);
+	}
+
+	public void removeDirectExchange(String exchangeName) {
+		String exchangeId = lookupExchangeId(exchangeName);
+		restTemplate.delete(exchangesURL + "?id=" + exchangeId);
 	}
 
 	public List<String> getGroupMemberNames(String groupName) {

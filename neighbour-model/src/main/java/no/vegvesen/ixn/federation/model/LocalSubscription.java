@@ -14,7 +14,7 @@ public class LocalSubscription {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsub_seq")
     @Column(name="id")
-    private Integer sub_id;
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
@@ -50,27 +50,27 @@ public class LocalSubscription {
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
-        this.sub_id = id;
+        this.id = id;
         this.status = status;
         this.selector = selector;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
-        this.sub_id = id;
+        this.id = id;
         this.status = status;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
-        this.sub_id = id;
+        this.id = id;
         this.status = status;
         this.selector = selector;
         this.lastUpdated = lastUpdated;
     }
 
-    public LocalSubscription(Integer sub_id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalEndpoint> localEndpoints) {
-        this.sub_id = sub_id;
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalEndpoint> localEndpoints) {
+        this.id = id;
         this.status = status;
         this.selector = selector;
         this.lastUpdated = lastUpdated;
@@ -139,14 +139,14 @@ public class LocalSubscription {
         return Objects.hash(status, selector, consumerCommonName);
     }
 
-    public Integer getSub_id() {
-        return sub_id;
+    public Integer getId() {
+        return id;
     }
 
     @Override
     public String toString() {
         return "LocalSubscription{" +
-                "sub_id=" + sub_id +
+                "id=" + id +
                 ", status=" + status +
                 ", selector=" + selector +
                 ", queueConsumerUser=" + consumerCommonName +
@@ -157,7 +157,7 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(sub_id, newStatus, selector, consumerCommonName);
+            return new LocalSubscription(id, newStatus, selector, consumerCommonName);
         }
     }
 
@@ -165,8 +165,8 @@ public class LocalSubscription {
         return lastUpdated;
     }
 
-    public void setSub_id(Integer sub_id) {
-        this.sub_id = sub_id;
+    public void setId(Integer sub_id) {
+        this.id = sub_id;
     }
 
     public void setLastUpdated(LocalDateTime lastUpdated) {

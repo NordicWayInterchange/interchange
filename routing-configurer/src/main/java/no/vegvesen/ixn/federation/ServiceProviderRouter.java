@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidAcl;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,13 @@ public class ServiceProviderRouter {
 
     private final ServiceProviderRepository repository;
     private final QpidClient qpidClient;
+    private final MatchRepository matchRepository;
 
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, QpidClient qpidClient) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, QpidClient qpidClient, MatchRepository matchRepository) {
         this.repository = repository;
         this.qpidClient = qpidClient;
+        this.matchRepository = matchRepository;
     }
 
 
@@ -73,6 +76,9 @@ public class ServiceProviderRouter {
                     removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
                 }
             }
+
+            setUpSubscriptionExchanges(name);
+            tearDownSubscriptionExchanges(name);
 
             //save if it has changed from the initial
             if (! newSubscriptions.equals(serviceProvider.getSubscriptions())) {
@@ -130,7 +136,6 @@ public class ServiceProviderRouter {
         if (!qpidClient.getQueueBindKeys(queueName).contains(subscription.bindKey())) {
             logger.debug("Adding bindings to the queue {}", queueName);
             qpidClient.addBinding(subscription.getSelector(), queueName, subscription.bindKey(), "outgoingExchange");
-            qpidClient.addBinding(subscription.getSelector(), queueName, subscription.bindKey(), "incomingExchange");
         }
     }
 
@@ -216,5 +221,47 @@ public class ServiceProviderRouter {
                 qpidClient.removeQueue(queueName);
             }
         }
+    }
+
+    public void setUpSubscriptionExchanges(String serviceProviderName) {
+        List<Match> matches = matchRepository.findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.CREATED);
+        for (Match match : matches) {
+            if (match.getServiceProviderName().equals(serviceProviderName)) {
+                if (match.getStatus().equals(MatchStatus.REQUESTED)) {
+                    String exchangeName = match.getSubscription().getExchangeName();
+                    String queueName = serviceProviderName;
+                    createSubscriptionExchange(exchangeName);
+                    bindQueueToSubscriptionExchange(queueName, exchangeName, match.getLocalSubscription());
+                    match.setStatus(MatchStatus.CREATED);
+                    matchRepository.save(match);
+                    logger.info("Saved match {} with status CREATED", match.toString());
+                    logger.info("Created exchange with name {}", exchangeName);
+                }
+            }
+        }
+    }
+
+    public void tearDownSubscriptionExchanges(String serviceProviderName) {
+        List<Match> matches = matchRepository.findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN);
+        for (Match match : matches) {
+            String exchangeName = match.getSubscription().getExchangeName();
+            String queueName = serviceProviderName;
+            String bindKey = match.getLocalSubscription().bindKey();
+            if(qpidClient.exchangeExists(exchangeName)) {
+                if(qpidClient.getQueueBindKeys(queueName).contains(bindKey)){
+                    qpidClient.unbindBindKey(queueName, bindKey, exchangeName);
+                    qpidClient.removeDirectExchange(exchangeName);
+                }
+            }
+        }
+    }
+
+    private void createSubscriptionExchange(String exchangeName) {
+        qpidClient.createTopicExchange(exchangeName);
+    }
+
+    private void bindQueueToSubscriptionExchange(String queueName, String exchangeName, LocalSubscription localSubscription) {
+        logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
+        qpidClient.addBinding(localSubscription.getSelector(), queueName, localSubscription.bindKey(), exchangeName);
     }
 }
