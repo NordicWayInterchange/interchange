@@ -17,8 +17,8 @@ public class MessageCollectorTest {
 
     @Test
     public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() {
-        ListenerEndpoint one = new ListenerEndpoint("one", "", "", 5671,  new Connection());
-        ListenerEndpoint two = new ListenerEndpoint("two", "", "", 5671,  new Connection());
+        ListenerEndpoint one = new ListenerEndpoint("one", "", "", 5671,  new Connection(), "subscriptionExchange");
+        ListenerEndpoint two = new ListenerEndpoint("two", "", "", 5671,  new Connection(), "subscriptionExchange");
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
         ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
@@ -49,8 +49,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671,  messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("two", "source-two", "endpoint-two", 5671,  messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671,  messageConnectionOne, "subscriptionExchange");
+        ListenerEndpoint two = new ListenerEndpoint("two", "source-two", "endpoint-two", 5671,  messageConnectionTwo, "subscriptionExchange");
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -76,8 +76,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("one", "source-two", "endpoint-two", 5671, messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange");
+        ListenerEndpoint two = new ListenerEndpoint("one", "source-two", "endpoint-two", 5671, messageConnectionTwo, "subscriptionExchange");
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -103,8 +103,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne);
-        ListenerEndpoint two = new ListenerEndpoint("one", "source-two", "endpoint-two", 5671, messageConnectionTwo);
+        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange");
+        ListenerEndpoint two = new ListenerEndpoint("one", "source-two", "endpoint-two", 5671, messageConnectionTwo, "subscriptionExchange");
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 

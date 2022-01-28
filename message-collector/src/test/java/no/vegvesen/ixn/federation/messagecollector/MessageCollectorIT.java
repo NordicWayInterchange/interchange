@@ -71,7 +71,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", producerPort, new Connection());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", producerPort, new Connection(), "subscriptionExchange");
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
@@ -81,7 +81,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
-				"incomingExchange");
+				"subscriptionExchange");
 
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
@@ -115,7 +115,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection(), "subscriptionExchange");
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
@@ -125,7 +125,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
-				"incomingExchange");
+				"subscriptionExchange");
 		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
 		forwarder.runSchedule();
 

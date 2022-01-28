@@ -60,7 +60,7 @@ public class ServiceProviderRepositoryIT {
 		assertThat(volvoFromRepository.getSubscriptions()).size().isEqualTo(1);
 		Optional<LocalSubscription> first = volvoFromRepository.getSubscriptions().stream().findFirst();
 		LocalSubscription savedSubscription = first.orElseThrow(() -> new AssertionError("Could not locate subscription"));
-		assertThat(savedSubscription.getSub_id()).isNotNull();
+		assertThat(savedSubscription.getId()).isNotNull();
 	}
 
 	@Test

@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
@@ -19,10 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +34,7 @@ public class NeigbourDiscoveryService {
     private final InterchangeNodeProperties interchangeNodeProperties;
     private final GracefulBackoffProperties backoffProperties;
     private final NeighbourDiscovererProperties discovererProperties;
+    private final MatchRepository matchRepository;
 
     @Autowired
     public NeigbourDiscoveryService(DNSFacade dnsFacade,
@@ -43,13 +42,14 @@ public class NeigbourDiscoveryService {
                                     ListenerEndpointRepository listenerEndpointRepository,
                                     InterchangeNodeProperties interchangeNodeProperties,
                                     GracefulBackoffProperties backoffProperties,
-                                    NeighbourDiscovererProperties discovererProperties) {
+                                    NeighbourDiscovererProperties discovererProperties, MatchRepository matchRepository) {
         this.dnsFacade = dnsFacade;
         this.neighbourRepository = neighbourRepository;
         this.listenerEndpointRepository = listenerEndpointRepository;
         this.interchangeNodeProperties = interchangeNodeProperties;
         this.backoffProperties = backoffProperties;
         this.discovererProperties = discovererProperties;
+        this.matchRepository = matchRepository;
     }
     public void checkForNewNeighbours() {
         logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
@@ -178,6 +178,10 @@ public class NeigbourDiscoveryService {
                     additionalSubscriptions.removeAll(existingSubscriptions);
                     if (!additionalSubscriptions.isEmpty()) {
                         Set<Subscription> responseSubscriptions = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
+                        for(Subscription subscription : responseSubscriptions) {
+                            String exchangeName = UUID.randomUUID().toString();
+                            subscription.setExchangeName(exchangeName);
+                        }
                         ourRequestedSubscriptionsFromNeighbour.addNewSubscriptions(responseSubscriptions);
                         ourRequestedSubscriptionsFromNeighbour.setSuccessfulRequest(LocalDateTime.now());
                         //TODO we never changed the subscription status. We don't now either. Is that OK?
@@ -256,7 +260,7 @@ public class NeigbourDiscoveryService {
                             logger.info("Subscription for neighbour {} with path {} is CREATED",neighbour.getName(),subscription.getPath());
                             if (polledSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
                                 logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getEndpoints());
-                                createListenerEndpointFromEndpointsList(neighbour, polledSubscription.getEndpoints());
+                                createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                             }
                         }
                         //utvide med ListenerEndpoint lookup + lage ny om det trengs
@@ -278,15 +282,15 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+    public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
         for(Endpoint endpoint : endpoints) {
-            createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), neighbour);
+            createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour);
         }
     }
 
-    public void createListenerEndpoint(String host, Integer port, String source, Neighbour neighbour) {
+    public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
         if(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), host, port, source) == null){
-            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection()));
+            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
             logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
         }
     }
@@ -330,11 +334,14 @@ public class NeigbourDiscoveryService {
 
                             Set<Endpoint> additionalEndpoints = new HashSet<>(wantedEndpoints);
                             additionalEndpoints.removeAll(existingEndpoints);
-                            createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints);
+                            createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints, subscription.getExchangeName());
                             subscription.setEndpoints(wantedEndpoints);
                             //} else {
                             //	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
                             //}
+                        } else {
+                            subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                            logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                         }
                     }
                 } catch (SubscriptionPollException e) {
@@ -366,8 +373,11 @@ public class NeigbourDiscoveryService {
                 for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                     if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
                         try{
-                            neighbourFacade.deleteSubscription(neighbour, subscription);
-                            subscriptionsToDelete.add(subscription);
+                            Match match = matchRepository.findBySubscriptionId(subscription.getId());
+                            if (match == null) {
+                                neighbourFacade.deleteSubscription(neighbour, subscription);
+                                subscriptionsToDelete.add(subscription);
+                            }
                         } catch(SubscriptionDeleteException e) {
                             logger.error("Exception when deleting subscription {} to neighbour {}", subscription.getId(), neighbour.getName(), e);
                         }

@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
@@ -43,6 +44,7 @@ public class NeighbourDiscoverer {
 	private final ServiceProviderService serviceProviderService;
 	private final NeigbourDiscoveryService neigbourDiscoveryService;
 	private final InterchangeNodeProperties interchangeNodeProperties;
+	private final MatchDiscoveryService matchDiscoveryService;
 
 
 	@Autowired
@@ -50,13 +52,14 @@ public class NeighbourDiscoverer {
 						SelfService selfService,
 						NeighbourRESTFacade neighbourFacade,
 						ServiceProviderService serviceProviderService,
-						NeigbourDiscoveryService neigbourDiscoveryService, InterchangeNodeProperties interchangeNodeProperties) {
+						NeigbourDiscoveryService neigbourDiscoveryService, InterchangeNodeProperties interchangeNodeProperties, MatchDiscoveryService matchDiscoveryService) {
 		this.neighbourService = neighbourService;
 		this.selfService = selfService;
 		this.neighbourFacade = neighbourFacade;
 		this.serviceProviderService = serviceProviderService;
 		this.neigbourDiscoveryService = neigbourDiscoveryService;
 		this.interchangeNodeProperties = interchangeNodeProperties;
+		this.matchDiscoveryService = matchDiscoveryService;
 		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), null);
 	}
 
@@ -119,5 +122,10 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void deleteSubscriptionAtKnownNeighbours() {
 		neigbourDiscoveryService.deleteSubscriptions(neighbourFacade);
+	}
+
+	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void updateMatches() {
+		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToMatch(serviceProviderService.findAllServiceProviders(), neighbourService.findAllNeighbours());
 	}
 }

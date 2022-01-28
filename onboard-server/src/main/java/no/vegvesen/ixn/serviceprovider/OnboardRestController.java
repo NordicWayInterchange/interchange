@@ -221,7 +221,7 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(selfService.getNodeProviderName(), serviceProviderName);
 		ServiceProvider serviceProvider = checkAndGetServiceProvider(serviceProviderName);
 		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
-				s.getSub_id().equals(subscriptionId))
+				s.getId().equals(subscriptionId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,serviceProviderName)));
 		logger.info("Received poll from Service Provider {} with queueConsumerUser = {}", serviceProviderName, localSubscription.getConsumerCommonName());

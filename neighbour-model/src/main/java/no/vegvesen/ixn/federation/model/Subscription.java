@@ -32,6 +32,8 @@ public class Subscription {
 
 	private long lastUpdatedTimestamp;
 
+	private String exchangeName;
+
 	public Subscription() {
 	}
 
@@ -135,6 +137,14 @@ public class Subscription {
 		if (newEndpoints != null) {
 			this.endpoints.addAll(newEndpoints);
 		}
+	}
+
+	public String getExchangeName() {
+		return exchangeName;
+	}
+
+	public void setExchangeName(String exchangeName) {
+		this.exchangeName = exchangeName;
 	}
 
 	@Override

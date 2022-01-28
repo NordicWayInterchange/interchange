@@ -33,8 +33,9 @@ public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
 	@Test
     public void stoppingRemoteContainerStopsListener() {
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "localhost.p12", "truststore.jks");
-		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "incomingExchange");
+		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "subscriptionExchange");
         ListenerEndpoint remote = mock(ListenerEndpoint.class);
+        when(remote.getExchangeName()).thenReturn("subscriptionExchange");
         when(remote.getHost()).thenReturn("localhost");
         when(remote.getPort()).thenReturn(remoteContainer.getMappedPort(AMQPS_PORT));
         when(remote.getSource()).thenReturn("localhost");

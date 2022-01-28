@@ -193,7 +193,7 @@ public class RoutingConfigurer {
 		logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 	}
 
-	@Scheduled(fixedRateString = "${routing-configurer.interval}")
+	@Scheduled(fixedRateString = "${service-provider-router.interval}")
 	public void checkForServiceProvidersToSetupRoutingFor() {
 		logger.debug("Checking for new service providers to setup routing");
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();

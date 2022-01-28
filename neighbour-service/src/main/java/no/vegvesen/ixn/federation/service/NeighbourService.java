@@ -44,6 +44,10 @@ public class NeighbourService {
 		this.interchangeNodeProperties = interchangeNodeProperties;
 	}
 
+	public List<Neighbour> findAllNeighbours() {
+		return neighbourRepository.findAll();
+	}
+
 	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Set<Capability> localCapabilities) {
 		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());

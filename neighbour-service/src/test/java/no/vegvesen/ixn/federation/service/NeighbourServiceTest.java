@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,8 @@ class NeighbourServiceTest {
 	DNSFacade dnsFacade;
 	@Mock
 	NeighbourFacade neighbourFacade;
+	@Mock
+	MatchRepository matchRepository;
 
 	private NeighbourDiscovererProperties discovererProperties = new NeighbourDiscovererProperties();
 	private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
@@ -48,7 +51,7 @@ class NeighbourServiceTest {
 	void setUp() {
 		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
 		neighbourService = new NeighbourService(neighbourRepository, dnsFacade,interchangeNodeProperties);
-		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository,interchangeNodeProperties,backoffProperties,discovererProperties);
+		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository,interchangeNodeProperties,backoffProperties,discovererProperties, matchRepository);
 	}
 
 	@Test
@@ -456,7 +459,7 @@ class NeighbourServiceTest {
 		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
 
-		neigbourDiscoveryService.createListenerEndpointFromEndpointsList(neighbour, endpoints);
+		neigbourDiscoveryService.createListenerEndpointFromEndpointsList(neighbour, endpoints, "");
 
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
 	}

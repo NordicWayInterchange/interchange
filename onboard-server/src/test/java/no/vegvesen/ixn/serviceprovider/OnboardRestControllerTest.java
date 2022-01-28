@@ -175,7 +175,7 @@ public class OnboardRestControllerTest {
 			s.setId(1);
 			int j = 0;
 			for (LocalSubscription subscription : s.getSubscriptions()) {
-				subscription.setSub_id(j++);
+				subscription.setId(j++);
 				subscription.setLastUpdated(LocalDateTime.now());
 			}
 			return s;

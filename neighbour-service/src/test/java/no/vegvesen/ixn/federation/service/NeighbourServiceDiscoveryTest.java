@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.onboard.SelfService;
 import org.assertj.core.util.Lists;
@@ -34,6 +35,8 @@ public class NeighbourServiceDiscoveryTest {
 	private NeighbourRepository neighbourRepository;
 	@MockBean
 	private ListenerEndpointRepository listenerEndpointRepository;
+	@MockBean
+	private MatchRepository matchRepository;
 	@MockBean
 	private DNSFacade dnsFacade;
 	@MockBean
