@@ -46,6 +46,7 @@ public class ServiceProviderRouter {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
             syncPrivateChannels(serviceProvider);
+            tearDownSubscriptionExchanges(name);
             Set<LocalSubscription> newSubscriptions = new HashSet<>();
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
 
@@ -78,7 +79,7 @@ public class ServiceProviderRouter {
             }
 
             setUpSubscriptionExchanges(name);
-            tearDownSubscriptionExchanges(name);
+
 
             //save if it has changed from the initial
             if (! newSubscriptions.equals(serviceProvider.getSubscriptions())) {
@@ -114,7 +115,12 @@ public class ServiceProviderRouter {
 
     private Optional<LocalSubscription> onTearDown(String queueName, LocalSubscription subscription) {
         removeBindingIfExists(queueName, subscription);
-        return Optional.empty();
+        Match match = matchRepository.findByLocalSubscriptionId(subscription.getId());
+        if (match == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(subscription);
+        }
     }
 
     private Optional<LocalSubscription> onRequested(String queueName, LocalSubscription subscription) {
@@ -127,7 +133,6 @@ public class ServiceProviderRouter {
         if (qpidClient.queueExists(queueName)) {
             if (qpidClient.getQueueBindKeys(queueName).contains(subscription.bindKey())) {
                 qpidClient.unbindBindKey(queueName, subscription.bindKey(), "outgoingExchange");
-                qpidClient.unbindBindKey(queueName, subscription.bindKey(), "incomingExchange");
             }
         }
     }
@@ -242,15 +247,22 @@ public class ServiceProviderRouter {
     }
 
     public void tearDownSubscriptionExchanges(String serviceProviderName) {
-        List<Match> matches = matchRepository.findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN);
+        List<Match> matches = matchRepository.findAllByStatus(MatchStatus.CREATED);
         for (Match match : matches) {
-            String exchangeName = match.getSubscription().getExchangeName();
-            String queueName = serviceProviderName;
-            String bindKey = match.getLocalSubscription().bindKey();
-            if(qpidClient.exchangeExists(exchangeName)) {
-                if(qpidClient.getQueueBindKeys(queueName).contains(bindKey)){
-                    qpidClient.unbindBindKey(queueName, bindKey, exchangeName);
-                    qpidClient.removeDirectExchange(exchangeName);
+            if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
+                match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                if (match.getServiceProviderName().equals(serviceProviderName)) {
+                    String exchangeName = match.getSubscription().getExchangeName();
+                    String queueName = serviceProviderName;
+                    String bindKey = match.getLocalSubscription().bindKey();
+                    if (qpidClient.exchangeExists(exchangeName)) {
+                        if (qpidClient.getQueueBindKeys(queueName).contains(bindKey)) {
+                            qpidClient.unbindBindKey(queueName, bindKey, exchangeName);
+                            qpidClient.removeDirectExchange(exchangeName);
+                        }
+                    }
+                    match.setStatus(MatchStatus.TEAR_DOWN);
+                    matchRepository.save(match);
                 }
             }
         }

@@ -24,6 +24,7 @@ public class MatchDiscoveryService {
     }
 
     public void syncLocalSubscriptionAndSubscriptionsToMatch(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours) {
+        removeMatchesToTearDown();
         for (ServiceProvider serviceProvider : serviceProviders) {
             Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
             String serviceProviderName = serviceProvider.getName();
@@ -37,12 +38,19 @@ public class MatchDiscoveryService {
                             if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
                             Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REQUESTED);
                             matchRepository.save(newMatch);
-                            logger.info("saved new Match {}", newMatch);
+                            logger.info("Saved new Match {}", newMatch);
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    public void removeMatchesToTearDown() {
+        List<Match> matchesToTearDown = matchRepository.findAllByStatus(MatchStatus.TEAR_DOWN);
+        if (!matchesToTearDown.isEmpty()) {
+            matchRepository.deleteAll(matchesToTearDown);
         }
     }
 }

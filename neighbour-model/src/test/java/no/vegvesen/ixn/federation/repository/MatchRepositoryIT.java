@@ -62,6 +62,10 @@ public class MatchRepositoryIT {
 
         List<Match> allMatches = matchRepository.findAll();
         assertThat(allMatches).hasSize(1);
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -92,7 +96,10 @@ public class MatchRepositoryIT {
 
         List<Match> allMatches = matchRepository.findAll();
         assertThat(allMatches).hasSize(1);
-
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -120,7 +127,10 @@ public class MatchRepositoryIT {
 
         Neighbour neighbourFromDb = neighbourRepository.findByName("neighbour");
         assertThat(neighbourFromDb.getOurRequestedSubscriptions().getSubscriptions()).isNotEmpty();
-
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -139,6 +149,10 @@ public class MatchRepositoryIT {
 
         List<Match> allMatches = matchRepository.findAll();
         assertThat(allMatches).hasSize(1);
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -160,6 +174,10 @@ public class MatchRepositoryIT {
 
         List<Match> allMatches = matchRepository.findAll();
         assertThat(allMatches).hasSize(1);
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -198,6 +216,10 @@ public class MatchRepositoryIT {
         assertThat(allMatches).hasSize(0);
         assertThat(requestedSubscriptions).hasSize(1);
         assertThat(localSubscriptions).hasSize(1);
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -333,4 +355,153 @@ public class MatchRepositoryIT {
         serviceProviderRepository.deleteAll();
     }
 
+    @Test
+    public void localSubscriptionIsNotRemovedWhenMatchIsRemoved() {
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour");
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
+
+        serviceProviderRepository.save(sp);
+
+        Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+
+        neighbourRepository.save(neighbour);
+
+        ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
+        LocalSubscription savedLocalSubscription = savedServiceProvider.getSubscriptions().stream().findFirst().get();
+
+        Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
+        Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
+
+        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.REQUESTED);
+        matchRepository.save(match);
+
+        assertThat(matchRepository.findAll()).hasSize(1);
+
+        Match savedMatch = matchRepository.findAll().get(0);
+
+        matchRepository.delete(savedMatch);
+
+        ServiceProvider getServiceProvider = serviceProviderRepository.findByName("my-sp");
+
+        assertThat(getServiceProvider.getSubscriptions()).hasSize(1);
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
+    @Test
+    public void subscriptionIsNotRemovedWhenMatchIsRemoved() {
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour");
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
+
+        serviceProviderRepository.save(sp);
+
+        Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+
+        neighbourRepository.save(neighbour);
+
+        ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
+        LocalSubscription savedLocalSubscription = savedServiceProvider.getSubscriptions().stream().findFirst().get();
+
+        Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
+        Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
+
+        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.REQUESTED);
+        matchRepository.save(match);
+
+        assertThat(matchRepository.findAll()).hasSize(1);
+
+        Match savedMatch = matchRepository.findAll().get(0);
+
+        matchRepository.delete(savedMatch);
+
+        Neighbour getNeighbour = neighbourRepository.findByName("neighbour");
+
+        assertThat(getNeighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
+    @Test
+    public void matchIsNotRemovedWhenLocalSubscriptionIsRemoved() {
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour");
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
+
+        serviceProviderRepository.save(sp);
+
+        Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED);
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+
+        neighbourRepository.save(neighbour);
+
+        ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
+        LocalSubscription savedLocalSubscription = savedServiceProvider.getSubscriptions().stream().findFirst().get();
+
+        Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
+        Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
+
+        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.REQUESTED);
+        matchRepository.save(match);
+
+        assertThat(matchRepository.findAll()).hasSize(1);
+
+        ServiceProvider getServiceProvider = serviceProviderRepository.findByName("my-sp");
+        LocalSubscription getLocalSubscription = getServiceProvider.getSubscriptions().stream().findFirst().get();
+
+        getServiceProvider.removeLocalSubscription(getLocalSubscription.getId());
+
+        serviceProviderRepository.save(getServiceProvider);
+
+        Match savedMatch = matchRepository.findAll().get(0);
+
+        assertThat(savedMatch).isNotNull();
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
+    @Test
+    public void matchIsNotRemovedWhenSubscriptionIsRemoved() {
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour");
+        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
+
+        serviceProviderRepository.save(sp);
+
+        Subscription sub = new Subscription("a=b", SubscriptionStatus.REQUESTED, "");
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+
+        neighbourRepository.save(neighbour);
+
+        ServiceProvider savedServiceProvider = serviceProviderRepository.findByName("my-sp");
+        LocalSubscription savedLocalSubscription = savedServiceProvider.getSubscriptions().stream().findFirst().get();
+
+        Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
+        Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
+
+        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.REQUESTED);
+        matchRepository.save(match);
+
+        assertThat(matchRepository.findAll()).hasSize(1);
+
+        Neighbour getNeighbour = neighbourRepository.findByName("neighbour");
+        Subscription getSubscription = getNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
+
+        getNeighbour.getOurRequestedSubscriptions().getSubscriptions().remove(getSubscription);
+
+        //neighbourRepository.save(getNeighbour);
+
+        Match savedMatch = matchRepository.findAll().get(0);
+
+        assertThat(savedMatch).isNotNull();
+        //clean-up
+        matchRepository.deleteAll();
+        neighbourRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
 }

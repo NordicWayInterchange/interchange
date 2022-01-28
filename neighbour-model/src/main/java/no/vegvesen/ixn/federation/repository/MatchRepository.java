@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
+import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Match;
 import no.vegvesen.ixn.federation.model.MatchStatus;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;

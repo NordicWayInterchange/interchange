@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class NeigbourDiscoveryService {
     private final InterchangeNodeProperties interchangeNodeProperties;
     private final GracefulBackoffProperties backoffProperties;
     private final NeighbourDiscovererProperties discovererProperties;
+    private final MatchRepository matchRepository;
 
     @Autowired
     public NeigbourDiscoveryService(DNSFacade dnsFacade,
@@ -40,13 +42,14 @@ public class NeigbourDiscoveryService {
                                     ListenerEndpointRepository listenerEndpointRepository,
                                     InterchangeNodeProperties interchangeNodeProperties,
                                     GracefulBackoffProperties backoffProperties,
-                                    NeighbourDiscovererProperties discovererProperties) {
+                                    NeighbourDiscovererProperties discovererProperties, MatchRepository matchRepository) {
         this.dnsFacade = dnsFacade;
         this.neighbourRepository = neighbourRepository;
         this.listenerEndpointRepository = listenerEndpointRepository;
         this.interchangeNodeProperties = interchangeNodeProperties;
         this.backoffProperties = backoffProperties;
         this.discovererProperties = discovererProperties;
+        this.matchRepository = matchRepository;
     }
     public void checkForNewNeighbours() {
         logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
@@ -336,6 +339,9 @@ public class NeigbourDiscoveryService {
                             //} else {
                             //	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
                             //}
+                        } else {
+                            subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                            logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                         }
                     }
                 } catch (SubscriptionPollException e) {
@@ -367,8 +373,11 @@ public class NeigbourDiscoveryService {
                 for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                     if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
                         try{
-                            neighbourFacade.deleteSubscription(neighbour, subscription);
-                            subscriptionsToDelete.add(subscription);
+                            Match match = matchRepository.findBySubscriptionId(subscription.getId());
+                            if (match == null) {
+                                neighbourFacade.deleteSubscription(neighbour, subscription);
+                                subscriptionsToDelete.add(subscription);
+                            }
                         } catch(SubscriptionDeleteException e) {
                             logger.error("Exception when deleting subscription {} to neighbour {}", subscription.getId(), neighbour.getName(), e);
                         }
