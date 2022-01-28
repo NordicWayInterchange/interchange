@@ -32,19 +32,6 @@ public class MatchRepositoryIT {
     ServiceProviderRepository serviceProviderRepository;
 
     @Test
-    @Transactional
-    @Disabled
-    public void saveMatch() {
-        Match match = new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED);
-        matchRepository.save(match);
-
-        List<Match> allMatches = matchRepository.findAll();
-        assertThat(allMatches).hasSize(1);
-    }
-
-    @Test
-    @Transactional
-    @Disabled
     public void saveNeighbourAndServiceProviderBeforeSavingMatch() {
         LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp");
@@ -69,42 +56,6 @@ public class MatchRepositoryIT {
     }
 
     @Test
-    @Transactional
-    @Disabled
-    public void saveServiceProviderBeforeSavingMatch() {
-        LocalSubscription locSub = new LocalSubscription();
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
-
-        serviceProviderRepository.save(sp);
-
-        Subscription sub = new Subscription();
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
-
-
-        Match match = new Match(locSub, sub, MatchStatus.REQUESTED);
-        matchRepository.save(match);
-
-        //Have we saved the neighbour?
-        Neighbour fromDb = neighbourRepository.findByName("neighbour");
-        //No.
-        assertThat(fromDb).isNull();
-
-        //Have we saved the subscription?
-        assertThat(sub.getId()).isNotNull(); //Yep! And the original object is updated :-)
-
-        neighbourRepository.save(neighbour);
-
-        List<Match> allMatches = matchRepository.findAll();
-        assertThat(allMatches).hasSize(1);
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
-    }
-
-    @Test
-    @Transactional
-    @Disabled
     public void deletingMatchFromDatabase() {
         LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp");
@@ -134,61 +85,12 @@ public class MatchRepositoryIT {
     }
 
     @Test
-    @Transactional
-    @Disabled
-    public void saveNeighbourBeforeSavingMatch() {
-        LocalSubscription locSub = new LocalSubscription();
-
-        Subscription sub = new Subscription(SubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", "path/1", "my-interchange");
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
-
-        neighbourRepository.save(neighbour);
-
-        Match match = new Match(locSub, sub, MatchStatus.REQUESTED);
-        matchRepository.save(match);
-
-        List<Match> allMatches = matchRepository.findAll();
-        assertThat(allMatches).hasSize(1);
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
-    }
-
-    @Test
-    @Transactional
-    @Disabled
-    public void saveNeighbourAfterSavingMatch() {
-        LocalSubscription locSub = new LocalSubscription();
-        ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
-
-        serviceProviderRepository.save(sp);
-
-        Subscription sub = new Subscription(SubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", "path/1", "my-interchange");
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
-
-        Match match = new Match(locSub, sub, MatchStatus.REQUESTED);
-        matchRepository.save(match);
-
-        neighbourRepository.save(neighbour);
-
-        List<Match> allMatches = matchRepository.findAll();
-        assertThat(allMatches).hasSize(1);
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
-    }
-
-    @Test
     public void findOnUnsavedMatch() {
         Match noMatch = matchRepository.findBySubscriptionId(1);
         assertThat(noMatch).isNull();
     }
 
     @Test
-    @Transactional
-    @Disabled
     public void deleteSubscriptionAndLocalSubscriptionBeforeDeletingMatch() {
         LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp");
