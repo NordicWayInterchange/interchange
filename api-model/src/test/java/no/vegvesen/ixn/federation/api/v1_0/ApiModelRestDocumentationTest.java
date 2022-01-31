@@ -126,4 +126,6 @@ public class ApiModelRestDocumentationTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
+
+
 }

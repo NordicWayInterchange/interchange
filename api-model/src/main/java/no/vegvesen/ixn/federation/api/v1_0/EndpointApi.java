@@ -14,8 +14,8 @@ public class EndpointApi {
     private String host;
     private Integer port;
 
-    private Integer maxBandwidth;
-    private Integer maxMessageRate;
+    private Integer maxBandwidth = 0;
+    private Integer maxMessageRate = 0;
 
     public EndpointApi() {
 
