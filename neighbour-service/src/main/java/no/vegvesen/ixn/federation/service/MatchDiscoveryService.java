@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,8 +50,15 @@ public class MatchDiscoveryService {
 
     public void removeMatchesToTearDown() {
         List<Match> matchesToTearDown = matchRepository.findAllByStatus(MatchStatus.TEAR_DOWN);
-        if (!matchesToTearDown.isEmpty()) {
-            matchRepository.deleteAll(matchesToTearDown);
+        Set<Match> matchesToRemove = new HashSet<>();
+        for (Match match : matchesToTearDown) {
+            if (match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)
+                    && match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                matchesToRemove.add(match);
+            }
+        }
+        if (!matchesToRemove.isEmpty()) {
+            matchRepository.deleteAll(matchesToRemove);
         }
     }
 }
