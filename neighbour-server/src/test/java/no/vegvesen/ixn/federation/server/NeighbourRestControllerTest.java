@@ -5,8 +5,9 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.onboard.SelfService;
+import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = NeighbourRestController.class)
-@ContextConfiguration(classes = {NeighbourRestController.class, CertService.class})
+@ContextConfiguration(classes = {NeighbourRestController.class, CertService.class, InterchangeNodeProperties.class})
 class NeighbourRestControllerTest {
 
 	private MockMvc mockMvc;
@@ -40,7 +41,7 @@ class NeighbourRestControllerTest {
 	NeighbourService neighbourService;
 
 	@MockBean
-	SelfService selfService;
+	ServiceProviderService serviceProviderService;
 
 	@Autowired
 	private NeighbourRestController neighbourRestController;

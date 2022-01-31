@@ -65,12 +65,6 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>onboard-service</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
             <artifactId>testcontainers-init-postgres</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
