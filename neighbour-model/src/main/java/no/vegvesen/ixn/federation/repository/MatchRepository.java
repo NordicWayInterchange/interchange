@@ -25,4 +25,8 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     List<Match> findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus... subscription_subscriptionStatus);
 
     Match findBySubscription_ExchangeName(String exchangeName);
+
+    List<Match> findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(String serviceProviderName, SubscriptionStatus... subscription_subscriptionStatus);
+
+    List<Match> findAllByServiceProviderNameAndStatus(String serviceProviderName, MatchStatus status);
 }

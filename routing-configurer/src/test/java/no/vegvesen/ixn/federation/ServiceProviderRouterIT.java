@@ -317,7 +317,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Match match = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REQUESTED);
 
-		when(matchRepository.findAllBySubscription_SubscriptionStatusIn(any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
+		when(matchRepository.findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(any(String.class), any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
 
 		router.setUpSubscriptionExchanges(serviceProviderName);
 
@@ -336,7 +336,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Match match = new Match(localSubscription, subscription, MatchStatus.TEAR_DOWN);
 
-		when(matchRepository.findAllBySubscription_SubscriptionStatusIn(any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
+		when(matchRepository.findAllByServiceProviderNameAndStatus(any(String.class), any(MatchStatus.class))).thenReturn(Arrays.asList(match));
 
 		router.tearDownSubscriptionExchanges(serviceProviderName);
 
