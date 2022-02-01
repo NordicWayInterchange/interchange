@@ -2,7 +2,10 @@ package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
+import no.vegvesen.ixn.federation.model.Match;
+import no.vegvesen.ixn.federation.model.MatchStatus;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,7 @@ public class MessageCollector {
     private final CollectorCreator collectorCreator;
     private GracefulBackoffProperties backoffProperties;
     private ListenerEndpointRepository listenerEndpointRepository;
+    private MatchRepository matchRepository;
 
     //NOTE: This is implicitly thread safe. If more than one thread can access the listeners map, the implementation of the listener Map will have to change.
     private Map<ListenerEndpoint, MessageCollectorListener> listeners;
@@ -25,11 +29,12 @@ public class MessageCollector {
 
 
     @Autowired
-    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties) {
+    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties, MatchRepository matchRepository) {
         this.listenerEndpointRepository = listenerEndpointRepository;
         this.collectorCreator = collectorCreator;
         this.listeners = new HashMap<>();
         this.backoffProperties = backoffProperties;
+        this.matchRepository = matchRepository;
     }
 
     @Scheduled(fixedRateString = "${collector.fixeddelay}")
@@ -59,7 +64,10 @@ public class MessageCollector {
             String neighbourName = listenerEndpoint.getNeighbourName();
             interchangeListenerEndpoints.add(listenerEndpoint);
             if (!listeners.containsKey(listenerEndpoint)) {
-                setUpConnectionToNeighbour(listenerEndpoint);
+                Match match = matchRepository.findBySubscription_ExchangeName(listenerEndpoint.getExchangeName());
+                if (match.getStatus().equals(MatchStatus.CREATED)) {
+                    setUpConnectionToNeighbour(listenerEndpoint);
+                }
             }
             else {
                 if (listeners.get(listenerEndpoint).isRunning()) {

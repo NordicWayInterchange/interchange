@@ -2,10 +2,9 @@ package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.model.Connection;
-import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
-import no.vegvesen.ixn.federation.model.ListenerEndpoint;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -31,7 +30,11 @@ public class MessageCollectorTest {
 
         when(collectorCreator.setupCollection(eq(two))).thenReturn(new MessageCollectorListener(sink,source));
 
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+        MatchRepository matchRepository = mock(MatchRepository.class);
+        when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
+
+
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
         collector.runSchedule();
 
         verify(collectorCreator,times(2)).setupCollection(any());
@@ -60,8 +63,12 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(one))).thenThrow(new MessageCollectorException("Expected exception"));
         when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
 
+        MatchRepository matchRepository = mock(MatchRepository.class);
+        when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
 
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+
+
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
         collector.runSchedule();
 
         verify(messageConnectionOne,times(1)).failedConnection(anyInt());
@@ -87,7 +94,11 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(one))).thenReturn(mock(MessageCollectorListener.class));
         when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
 
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+        MatchRepository matchRepository = mock(MatchRepository.class);
+        when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
+
+
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(2);
@@ -114,7 +125,11 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(one))).thenThrow(new MessageCollectorException("Expected exception"));
         when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
 
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+        MatchRepository matchRepository = mock(MatchRepository.class);
+        when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
+
+
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(1);
