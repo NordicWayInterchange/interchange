@@ -11,4 +11,10 @@ public class ServiceProviderImport {
         ServiceProviderApi[] serviceProviders = mapper.readValue(path.toFile(), ServiceProviderApi[].class);
         return serviceProviders;
     }
+
+    public static OldServiceProviderApi[] getOldServiceProviderApis(Path path) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        OldServiceProviderApi[] serviceProviders = mapper.readValue(path.toFile(),OldServiceProviderApi[].class);
+        return serviceProviders;
+    }
 }

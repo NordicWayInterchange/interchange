@@ -33,20 +33,20 @@ public class ImportServiceProvidersIT {
     public void importServiceProviders() throws IOException, URISyntaxException {
         Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
-        ServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getServiceProviderApis(path);
-        for (ServiceProviderApi serviceProviderApi : serviceProviderApis) {
+        OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(path);
+        for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
             ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName());
             Set<Capability> capabilities = transformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
             Capabilities capabilities1 = new Capabilities();
             capabilities1.setCapabilities(capabilities);
             serviceProvider.setCapabilities(capabilities1);
-            Set<LocalActorSubscription> subscriptions = serviceProviderApi.getSubscriptions();
-            for (LocalActorSubscription localActorSubscription : subscriptions) {
+            Set<OldLocalActorSubscription> subscriptions = serviceProviderApi.getSubscriptions();
+            for (OldLocalActorSubscription localActorSubscription : subscriptions) {
 
                 serviceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
                         localActorSubscription.getSelector(),
                         //localActorSubscription.isCreateNewQueue(), //createNewQueue is gone
-                        serviceProviderApi.getName()));
+                        serviceProviderApi.getName())); //already have the user from the Service provider
             }
 
             repository.save(serviceProvider);
