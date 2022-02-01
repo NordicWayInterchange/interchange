@@ -60,14 +60,6 @@ public class ServiceProviderRouter {
                     .filter(s -> s.getConsumerCommonName().equals(name))
                     .collect(Collectors.toSet());
 
-            //remove the queue and group member if we have no more subscriptions
-            if (newSubscriptions.isEmpty()) {
-                if (qpidClient.queueExists(name)) {
-                    qpidClient.removeQueue(name);
-                    logger.info("Removed queue for service provider {}", serviceProvider.getName());
-                }
-            }
-
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 if (serviceProvider.hasCapabilities() || (newSubscriptions.size() > consumerCommonNameAsServiceProviderName.size())) {
                     optionallyAddServiceProviderToGroup(groupMemberNames,name);
@@ -92,20 +84,20 @@ public class ServiceProviderRouter {
         }
     }
 
-    private Optional<LocalSubscription> processSubscription(String queueName, LocalSubscription subscription) {
+    private Optional<LocalSubscription> processSubscription(String serviceProviderName, LocalSubscription subscription) {
         Optional<LocalSubscription> newSubscription;
         switch (subscription.getStatus()) {
             case REQUESTED:
 			case CREATED:
-			    if (subscription.getConsumerCommonName().equals(queueName)) {
+			    if (subscription.getConsumerCommonName().equals(serviceProviderName)) {
                     newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
                 } else {
-				    newSubscription = onRequested(queueName, subscription);
+				    newSubscription = onRequested(serviceProviderName, subscription);
 			    }
                 break;
 			case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
-                newSubscription = onTearDown(queueName, subscription);
+                newSubscription = onTearDown(serviceProviderName, subscription);
                 break;
             default:
                 throw new IllegalStateException("Unknown subscription status encountered");
@@ -116,15 +108,16 @@ public class ServiceProviderRouter {
     private Optional<LocalSubscription> onTearDown(String queueName, LocalSubscription subscription) {
         removeBindingIfExists(queueName, subscription);
         Match match = matchRepository.findByLocalSubscriptionId(subscription.getId());
-        if (match == null) {
+        if (match == null && !qpidClient.queueExists(queueName)) {
             return Optional.empty();
         } else {
             return Optional.of(subscription);
         }
     }
 
-    private Optional<LocalSubscription> onRequested(String queueName, LocalSubscription subscription) {
-        optionallyCreateQueue(queueName);
+    private Optional<LocalSubscription> onRequested(String serviceProviderName, LocalSubscription subscription) {
+        String queueName = subscription.getQueueName();
+        optionallyCreateQueue(queueName, serviceProviderName);
         optionallyAddQueueBindings(queueName, subscription);
         return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
     }
@@ -144,11 +137,11 @@ public class ServiceProviderRouter {
         }
     }
 
-    private void optionallyCreateQueue(String queueName) {
+    private void optionallyCreateQueue(String queueName, String serviceProviderName) {
         if (!qpidClient.queueExists(queueName)) {
             logger.info("Creating queue {}", queueName);
             qpidClient.createQueue(queueName);
-            qpidClient.addReadAccess(queueName, queueName);
+            qpidClient.addReadAccess(serviceProviderName, queueName);
         }
     }
 
@@ -233,7 +226,7 @@ public class ServiceProviderRouter {
         for (Match match : matches) {
             if (match.getStatus().equals(MatchStatus.REQUESTED)) {
                 String exchangeName = match.getSubscription().getExchangeName();
-                String queueName = serviceProviderName;
+                String queueName = match.getLocalSubscription().getQueueName();
                 createSubscriptionExchange(exchangeName);
                 bindQueueToSubscriptionExchange(queueName, exchangeName, match.getLocalSubscription());
                 match.setStatus(MatchStatus.CREATED);
@@ -250,7 +243,7 @@ public class ServiceProviderRouter {
             if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
                 match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
                 String exchangeName = match.getSubscription().getExchangeName();
-                String queueName = serviceProviderName;
+                String queueName = match.getLocalSubscription().getQueueName();
                 String bindKey = match.getLocalSubscription().bindKey();
                 if (qpidClient.exchangeExists(exchangeName)) {
                     if (qpidClient.getQueueBindKeys(queueName).contains(bindKey)) {
@@ -258,8 +251,20 @@ public class ServiceProviderRouter {
                         qpidClient.removeDirectExchange(exchangeName);
                     }
                 }
+                removeLocalSubscriptionQueue(match.getLocalSubscription(), serviceProviderName);
                 match.setStatus(MatchStatus.TEAR_DOWN);
                 matchRepository.save(match);
+            }
+        }
+    }
+
+    public void removeLocalSubscriptionQueue(LocalSubscription subscription, String serviceProviderName) {
+        if (subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
+            String queueName = subscription.getQueueName();
+            if (qpidClient.queueExists(queueName)) {
+                qpidClient.removeReadAccess(serviceProviderName, queueName);
+                qpidClient.removeQueue(queueName);
+                logger.info("Removed queue for LocalSubscription {}", subscription);
             }
         }
     }

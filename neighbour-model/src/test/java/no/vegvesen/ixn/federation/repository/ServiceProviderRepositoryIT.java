@@ -192,7 +192,7 @@ public class ServiceProviderRepositoryIT {
 		String name = "my-service-provider";
 		ServiceProvider sp = new ServiceProvider(name);
 
-		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'", name);
+		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'", name, "");
 		sp.addLocalSubscription(sub);
 
 		repository.save(sp);

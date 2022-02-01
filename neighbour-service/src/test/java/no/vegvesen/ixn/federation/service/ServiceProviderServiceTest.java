@@ -112,6 +112,7 @@ public class ServiceProviderServiceTest {
         ServiceProviderService serviceProviderService = new ServiceProviderService(neighbourRepository,serviceProviderRepository);
         String neighbourName = "node-A";
         String selector = "a = b";
+        String queueName = "my-queue";
         int subscriptionId = 1;
         String localNodeName = "local-node";
         String serviceProviderName = "sp-1";
@@ -142,6 +143,7 @@ public class ServiceProviderServiceTest {
                 LocalDateTime.now(),
                 localNodeName,
                 new HashSet<>());
+        localSubscription.setQueueName(queueName);
         ServiceProvider serviceProvider = new ServiceProvider(
                 1,
                 serviceProviderName,
@@ -159,6 +161,6 @@ public class ServiceProviderServiceTest {
                 .hasSize(1)
                 .allMatch(b -> "messages.local-node".equals(b.getHost()))
                 .allMatch(b -> 5671 == b.getPort())
-                .allMatch(b -> serviceProviderName.equals(b.getSource()));
+                .allMatch(b -> queueName.equals(b.getSource()));
     }
 }

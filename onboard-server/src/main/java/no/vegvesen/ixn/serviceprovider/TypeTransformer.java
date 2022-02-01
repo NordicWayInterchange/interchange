@@ -58,9 +58,11 @@ public class TypeTransformer {
 
 
     public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription) {
+        String queueName = UUID.randomUUID().toString();
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
                 addSubscription.getSelector(),
-                addSubscription.getConsumerCommonName());
+                addSubscription.getConsumerCommonName(),
+                queueName);
     }
 
     public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {

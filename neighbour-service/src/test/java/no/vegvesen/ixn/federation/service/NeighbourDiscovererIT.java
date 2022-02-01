@@ -77,7 +77,7 @@ public class NeighbourDiscovererIT {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
 		Self self = new Self();
 		localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", "self"));
+		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", "self", ""));
 		self.setLocalSubscriptions(localSubscriptions);
 		self.setLastUpdatedLocalSubscriptions(lastUpdatedLocalSubscriptions);
 
