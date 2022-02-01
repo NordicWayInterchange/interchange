@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,15 +35,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(controllers = OnboardRestController.class)
-@ContextConfiguration(classes = {CertService.class, OnboardRestController.class})
+@ContextConfiguration(classes = {CertService.class, OnboardRestController.class, InterchangeNodeProperties.class})
 public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;
 
 	@MockBean
 	private ServiceProviderRepository serviceProviderRepository;
-	@MockBean
-	private SelfService selfService;
 
 	@Autowired
 	private OnboardRestController onboardRestController;
@@ -249,8 +247,6 @@ public class OnboardRestControllerTest {
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self
-		Self self = new Self();
-		self.setLocalSubscriptions(serviceProviderSubscriptionRequest);//same subscriptions as the service provider
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
 		// Subscription request api posted to the server
