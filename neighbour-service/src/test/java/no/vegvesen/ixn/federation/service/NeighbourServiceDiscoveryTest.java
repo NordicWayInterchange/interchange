@@ -530,7 +530,7 @@ public class NeighbourServiceDiscoveryTest {
 	@Test
 	public void calculatedSubscriptionRequestSameAsNeighbourSubscriptionsAllowsNextNeighbourToBeSaved() {
 		Set<LocalSubscription> selfLocalSubscriptions = new HashSet<>();
-		selfLocalSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", "self"));
+		selfLocalSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", "self", ""));
 		LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());

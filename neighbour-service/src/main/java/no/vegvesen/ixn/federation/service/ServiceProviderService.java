@@ -81,7 +81,7 @@ public class ServiceProviderService {
                             }
                             serviceProvider.updateSubscriptionWithHostAndPort(localSubscription, localEndpoints);
                         } else {
-                            LocalEndpoint localEndpoint = new LocalEndpoint(serviceProvider.getName(), messageChannelHost, Integer.parseInt(messageChannelPort));
+                            LocalEndpoint localEndpoint = new LocalEndpoint(localSubscription.getQueueName(), messageChannelHost, Integer.parseInt(messageChannelPort));
                             logger.info("Adding local endpoint with host {} and port {}, consumerCommonName the same as Ixn name, queue {}", localEndpoint.getHost(), localEndpoint.getPort(), localEndpoint.getSource());
                             Set<LocalEndpoint> localEndpoints = new HashSet<>(Arrays.asList(localEndpoint));
                             serviceProvider.updateSubscriptionWithHostAndPort(localSubscription, localEndpoints);
