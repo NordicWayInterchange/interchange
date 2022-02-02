@@ -7,18 +7,19 @@ import java.util.Set;
 public class DenmCapabilityApi extends CapabilityApi {
 	private Set<String> causeCode = new HashSet<>();
 
-	public DenmCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> causeCode) {
-		super(Constants.DENM, publisherId, originatingCountry, protocolVersion, quadTree);
+	public DenmCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> quadTree, Set<String> causeCode) {
+		super(Constants.DENM,publisherId,originatingCountry,protocolVersion,redirect,shardCount,infoUrl,quadTree);
 		if (causeCode != null) {
 			this.causeCode.addAll(causeCode);
 		}
 	}
 
+	public DenmCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> causeCode) {
+		this(publisherId,originatingCountry,protocolVersion,null,null,null,quadTree,causeCode);
+	}
+
 	public DenmCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Set<String> causeCode) {
-		super(Constants.DENM, publisherId, originatingCountry, protocolVersion, quadTree, redirect);
-		if (causeCode != null) {
-			this.causeCode.addAll(causeCode);
-		}
+		this(publisherId,originatingCountry,protocolVersion,redirect,null,null,quadTree,causeCode);
 	}
 
 	public DenmCapabilityApi() {
