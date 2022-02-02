@@ -12,12 +12,10 @@ import no.vegvesen.ixn.federation.model.DatexCapability;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Self;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -51,9 +49,6 @@ public class NeighbourDiscovererIT {
 	@MockBean
 	NeighbourFacade mockNeighbourFacade;
 
-	@MockBean
-	SelfService selfService;
-
 	@Autowired
 	NeighbourService neighbourService;
 
@@ -75,11 +70,9 @@ public class NeighbourDiscovererIT {
 	@Test
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
-		Self self = new Self();
 		localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", "self", ""));
-		self.setLocalSubscriptions(localSubscriptions);
-		self.setLastUpdatedLocalSubscriptions(lastUpdatedLocalSubscriptions);
+
 
 		Neighbour neighbour1 = new Neighbour();
 		neighbour1.setName("neighbour-one");

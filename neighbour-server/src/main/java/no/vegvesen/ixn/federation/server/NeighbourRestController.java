@@ -8,8 +8,8 @@ import no.vegvesen.ixn.federation.model.Capability;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
-import no.vegvesen.ixn.onboard.SelfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,18 +28,21 @@ import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES
 public class NeighbourRestController {
 
 	private final NeighbourService neighbourService;
-	private final SelfService selfService;
 	private final CertService certService;
+	private final InterchangeNodeProperties properties;
+	private final ServiceProviderService serviceProviderService;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
 	@Autowired
 	public NeighbourRestController(NeighbourService neighbourService,
 								   CertService certService,
-								   SelfService selfService) {
+								   InterchangeNodeProperties properties,
+								   ServiceProviderService serviceProviderService) {
 		this.neighbourService = neighbourService;
 		this.certService = certService;
-		this.selfService = selfService;
+		this.properties = properties;
+		this.serviceProviderService = serviceProviderService;
 	}
 
 	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -50,7 +53,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionResponseApi requestSubscriptions(@RequestBody SubscriptionRequestApi neighbourSubscriptionRequest) {
-		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), neighbourSubscriptionRequest.getName());
+		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourSubscriptionRequest.getName());
 		logger.info("Received incoming subscription request: {}", neighbourSubscriptionRequest.toString());
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
@@ -71,7 +74,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.GET, path = "/{ixnName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionResponseApi listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
-	    NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(),ixnName);
+	    NeighbourMDCUtil.setLogVariables(properties.getName(),ixnName);
 	    logger.info("Received request for subscriptions for neighbour {}", ixnName);
 	    certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.info("Common name matches Neighbour name in path.");
@@ -93,7 +96,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
-		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), ixnName);
+		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 		logger.info("Received poll of subscription from neighbour {}.", ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
@@ -112,7 +115,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
 	public CapabilitiesApi updateCapabilities(@RequestBody CapabilitiesApi neighbourCapabilities) {
-		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), neighbourCapabilities.getName());
+		NeighbourMDCUtil.setLogVariables(properties.getName(), neighbourCapabilities.getName());
 
 		logger.info("Received capability post: {}", neighbourCapabilities.toString());
 
@@ -120,9 +123,7 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.info("Common name of certificate matches Neighbour name in capability api object.");
 
-		//Self self = selfService.fetchSelf();
-		List<ServiceProvider> serviceProviders = selfService.getServiceProviders();
-		//Set<Capability> localCapabilities = self.getLocalCapabilities();
+		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Set<Capability> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
 		CapabilitiesApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
@@ -138,7 +139,7 @@ public class NeighbourRestController {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{ixnName}/subscriptions/{subscriptionId}")
 	@Secured("ROLE_USER")
 	public void deleteSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
-		NeighbourMDCUtil.setLogVariables(selfService.getNodeProviderName(), ixnName);
+		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 		logger.info("Received subscription to delete from neighbour {}.", ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.

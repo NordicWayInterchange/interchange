@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
@@ -30,9 +29,6 @@ public class OnboardRestControllerIT {
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
-
-    @Autowired
-    private SelfService selfService;
 
     @MockBean
     private CertService certService;

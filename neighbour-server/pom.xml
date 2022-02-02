@@ -32,12 +32,6 @@
 
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>onboard-service</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
             <artifactId>interchange-spring-security</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -31,7 +31,7 @@ public class ServiceProviderService {
         return serviceProviderRepository.findAll();
     }
 
-    //TODO don't need Self here. Getting the messageChannelUrl should be somwhere else?
+    //TODO Should get the list of serviceProviders and neighbours as arguments? And maybe lookup the host and port?
     public void updateLocalSubscriptions(String messageChannelHost, String messageChannelPort) {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         List<Neighbour> neighbours = neighbourRepository.findAll();
@@ -65,6 +65,10 @@ public class ServiceProviderService {
                 }
             }
         }
+    }
+
+    public List<ServiceProvider> getServiceProviders() {
+        return serviceProviderRepository.findAll();
     }
 
     public LocalEndpoint endpointToLocalEndpoint(Endpoint endpoint) {
