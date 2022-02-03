@@ -19,13 +19,50 @@ public class ApiModelRestDocumentationTest {
                                 "NPRA",
                                 "NO",
                                 "1.0",
+                                RedirectStatusApi.OPTIONAL,
+                                1,
+                                "https://my.capabilities-info.site/info",
                                 Collections.singleton("1234"),
                                 Collections.singleton("6")
+
                         )
                 )
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
+    }
+
+    @Test
+    public void datexCapability() throws JsonProcessingException {
+        DatexCapabilityApi datexCapabilityApi = new DatexCapabilityApi(
+                "NPRA",
+                "NO",
+                "1.0",
+                Collections.singleton("1234"),
+                RedirectStatusApi.OPTIONAL,
+                1,
+                "https://my.capabilities-info.site/datex/roadworks",
+                Collections.singleton("RoadWorks")
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(datexCapabilityApi));
+    }
+
+    @Test
+    public void iviCapability() throws JsonProcessingException {
+        IviCapabilityApi capability = new IviCapabilityApi(
+                "NPRA",
+                "NO",
+                "1.0",
+                Collections.singleton("1234"),
+                RedirectStatusApi.OPTIONAL,
+                1,
+                "https://my.capabilities-info.site/ivim/6",
+                Collections.singleton("6")
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capability));
+
     }
 
     @Test
@@ -37,6 +74,9 @@ public class ApiModelRestDocumentationTest {
                                 "NPRA",
                                 "NO",
                                 "1.0",
+                                RedirectStatusApi.OPTIONAL,
+                                1,
+                                "https://my.capabilities-info.site/info",
                                 Collections.singleton("1224"),
                                 Collections.singleton("5")
                         )
@@ -126,4 +166,6 @@ public class ApiModelRestDocumentationTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
+
+
 }

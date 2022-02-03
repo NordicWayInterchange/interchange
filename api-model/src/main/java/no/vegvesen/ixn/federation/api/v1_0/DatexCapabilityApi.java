@@ -11,18 +11,18 @@ public class DatexCapabilityApi extends CapabilityApi {
 	public DatexCapabilityApi(){
 	}
 
-	public DatexCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> publicationType) {
-		super(Constants.DATEX_2, publisherId, originatingCountry, protocolVersion, quadTree);
+	public DatexCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree,RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> publicationType) {
+		super(Constants.DATEX_2,publisherId,originatingCountry,protocolVersion,redirect,shardCount,infoUrl,quadTree);
 		if (publicationType != null) {
 			this.publicationType.addAll(publicationType);
 		}
 	}
+	public DatexCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> publicationType) {
+		this(publisherId,originatingCountry,protocolVersion,quadTree,null,null,null,publicationType);
+	}
 
 	public DatexCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Set<String> publicationType) {
-		super(Constants.DATEX_2, publisherId, originatingCountry, protocolVersion, quadTree, redirect);
-		if (publicationType != null) {
-			this.publicationType.addAll(publicationType);
-		}
+		this(publisherId,originatingCountry,protocolVersion,quadTree,redirect,null,null,publicationType);
 	}
 
 	public DatexCapabilityApi(String originatingCountry){

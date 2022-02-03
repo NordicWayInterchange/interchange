@@ -7,18 +7,19 @@ import java.util.Set;
 public class IviCapabilityApi extends CapabilityApi {
 	private Set<String> iviType = new HashSet<>();
 
-	public IviCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> iviType) {
-		super(Constants.IVI, publisherId, originatingCountry, protocolVersion, quadTree);
+	public IviCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> iviType) {
+		super(Constants.IVI,publisherId,originatingCountry,protocolVersion,redirect,shardCount,infoUrl,quadTree);
 		if (iviType != null) {
 			this.iviType.addAll(iviType);
 		}
 	}
 
+	public IviCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> iviType) {
+		this(publisherId,originatingCountry,protocolVersion,quadTree,null,null,null,iviType);
+	}
+
 	public IviCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Set<String> iviType) {
-		super(Constants.IVI, publisherId, originatingCountry, protocolVersion, quadTree, redirect);
-		if (iviType != null) {
-			this.iviType.addAll(iviType);
-		}
+		this(publisherId,originatingCountry,protocolVersion,quadTree,redirect,null,null,iviType);
 	}
 
 	public IviCapabilityApi() {

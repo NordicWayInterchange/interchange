@@ -31,11 +31,13 @@ public class CapabilityApi {
 	private String protocolVersion;
 	private final Set<String> quadTree = new HashSet<>();
 	private RedirectStatusApi redirect;
+	private Integer shardCount = 1;
+	private String infoUrl;
 
 	public CapabilityApi() {
 	}
 
-	public CapabilityApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+	public CapabilityApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, RedirectStatusApi redirect, Integer shardCount, String infoUrl,Set<String> quadTree) {
 		if (messageType == null) {
 			throw new IllegalArgumentException("messageType can not be null");
 		}
@@ -43,23 +45,20 @@ public class CapabilityApi {
 		this.publisherId = publisherId;
 		this.originatingCountry = originatingCountry;
 		this.protocolVersion = protocolVersion;
+		this.redirect = redirect;
+		this.shardCount = shardCount;
+		this.infoUrl = infoUrl;
 		if (quadTree != null) {
 			this.quadTree.addAll(quadTree);
 		}
 	}
 
+	public CapabilityApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+		this(messageType,publisherId,originatingCountry,protocolVersion,null,null,null, quadTree);
+	}
+
 	public CapabilityApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect) {
-		if (messageType == null) {
-			throw new IllegalArgumentException("messageType can not be null");
-		}
-		this.messageType = messageType;
-		this.publisherId = publisherId;
-		this.originatingCountry = originatingCountry;
-		this.protocolVersion = protocolVersion;
-		if (quadTree != null) {
-			this.quadTree.addAll(quadTree);
-		}
-		this.redirect = redirect;
+		this(messageType,publisherId,originatingCountry,protocolVersion,redirect,null,null,quadTree);
 	}
 
 	public String getOriginatingCountry() {
@@ -126,6 +125,24 @@ public class CapabilityApi {
 				", protocolVersion='" + protocolVersion + '\'' +
 				", quadTree=" + quadTree +
 				", redirect=" + redirect +
+				", shardCount=" + shardCount +
+				", infoUrl='" + infoUrl + '\'' +
 				'}';
+	}
+
+	public Integer getShardCount() {
+		return shardCount;
+	}
+
+	public void setShardCount(Integer shardCount) {
+		this.shardCount = shardCount;
+	}
+
+	public String getInfoUrl() {
+		return infoUrl;
+	}
+
+	public void setInfoUrl(String infoUrl) {
+		this.infoUrl = infoUrl;
 	}
 }
