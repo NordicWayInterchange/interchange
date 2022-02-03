@@ -49,11 +49,11 @@ public class MatchDiscoveryService {
     }
 
     public void removeMatchesToTearDown() {
-        List<Match> matchesToTearDown = matchRepository.findAllByStatus(MatchStatus.TEAR_DOWN);
+        List<Match> matchesToTearDown = matchRepository.findAllByStatus(MatchStatus.DELETED);
         Set<Match> matchesToRemove = new HashSet<>();
         for (Match match : matchesToTearDown) {
             if (match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)
-                    && match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                    || match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
                 matchesToRemove.add(match);
             }
         }

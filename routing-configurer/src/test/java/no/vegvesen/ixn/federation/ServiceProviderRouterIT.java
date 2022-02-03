@@ -164,7 +164,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						.collect(Collectors.toSet()));
 		LocalSubscription tearDownLocalSubscription = toreDownServiceProvider.getSubscriptions().stream().findFirst().get();
 
-		Match tearDownMatch = new Match(tearDownLocalSubscription, subscription, "tore-down-service-provider", MatchStatus.CREATED);
+		Match tearDownMatch = new Match(tearDownLocalSubscription, subscription, "tore-down-service-provider", MatchStatus.TEAR_DOWN);
 		when(matchRepository.findAllByServiceProviderNameAndStatus(any(String.class), any(MatchStatus.class))).thenReturn(Arrays.asList(tearDownMatch));
 
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
@@ -364,6 +364,75 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.tearDownSubscriptionExchanges(serviceProviderName);
 
 		assertThat(client.exchangeExists(subscription.getExchangeName())).isFalse();
+	}
+
+	@Test
+	public void setupAndDeleteSubscriptionExchangeAndQueue() {
+		String serviceProviderName = "my-service-provider";
+		String selector = "a=b";
+		String queueName = "my-queue";
+		String exchangeName = "my-exchange";
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "", queueName);
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
+		subscription.setExchangeName(exchangeName);
+
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		serviceProvider.addLocalSubscription(localSubscription);
+
+		Match match = new Match(localSubscription, subscription, MatchStatus.REQUESTED);
+		match.setServiceProviderName(serviceProviderName);
+
+		when(matchRepository.findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(any(String.class), any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
+
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+
+		assertThat(client.exchangeExists(exchangeName)).isTrue();
+		assertThat(client.queueExists(queueName)).isTrue();
+
+		subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+		match.setStatus(MatchStatus.TEAR_DOWN);
+
+		when(matchRepository.findAllByServiceProviderNameAndStatus(any(String.class), any(MatchStatus.class))).thenReturn(Arrays.asList(match));
+
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
+		assertThat(client.queueExists(queueName)).isTrue();
+	}
+
+	//TODO: Same as above, only the LocalSubscription is set to TEAR_DOWN
+	@Test
+	public void setupAndDeleteSubscriptionExchange() {
+		String serviceProviderName = "my-service-provider";
+		String selector = "a=b";
+		String queueName = "my-queue";
+		String exchangeName = "my-exchange";
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "", queueName);
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
+		subscription.setExchangeName(exchangeName);
+
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		serviceProvider.addLocalSubscription(localSubscription);
+
+		Match match = new Match(localSubscription, subscription, MatchStatus.REQUESTED);
+		match.setServiceProviderName(serviceProviderName);
+
+		when(matchRepository.findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(any(String.class), any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
+
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+
+		assertThat(client.exchangeExists(exchangeName)).isTrue();
+		assertThat(client.queueExists(queueName)).isTrue();
+
+		localSubscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
+		match.setStatus(MatchStatus.TEAR_DOWN);
+
+		when(matchRepository.findAllByServiceProviderNameAndStatus(any(String.class), any(MatchStatus.class))).thenReturn(Arrays.asList(match));
+
+		router.syncServiceProviders(Arrays.asList(serviceProvider));
+
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
+		assertThat(client.queueExists(queueName)).isFalse();
 	}
 
 	public SSLContext setUpTestSslContext(String s) {

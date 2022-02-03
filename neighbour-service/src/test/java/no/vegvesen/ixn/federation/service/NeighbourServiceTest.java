@@ -382,6 +382,9 @@ class NeighbourServiceTest {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("neighbour");
 
+		String exchangeName1 = "my-exchange1";
+		String exchangeName2 = "my-exchange2";
+
 		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
 		Set<Endpoint> endpoints = new HashSet<>();
 		Endpoint endpoint = new Endpoint("source-1","endpoint-1", 5671);
@@ -394,6 +397,12 @@ class NeighbourServiceTest {
 
 		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "source-1", "endpoint-1", 5671, new Connection());
 		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "source-2", "endpoint-2", 5671, new Connection());
+
+		listenerEndpoint1.setExchangeName(exchangeName1);
+		listenerEndpoint2.setExchangeName(exchangeName2);
+
+		Match match = new Match();
+		when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(match);
 
 		when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
 		neigbourDiscoveryService.tearDownListenerEndpoints(neighbour);

@@ -238,7 +238,7 @@ public class ServiceProviderRouter {
     }
 
     public void tearDownSubscriptionExchanges(String serviceProviderName) {
-        List<Match> matches = matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.CREATED);
+        List<Match> matches = matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.TEAR_DOWN);
         for (Match match : matches) {
             if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
                 match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
@@ -252,8 +252,9 @@ public class ServiceProviderRouter {
                     }
                 }
                 removeLocalSubscriptionQueue(match.getLocalSubscription(), serviceProviderName);
-                match.setStatus(MatchStatus.TEAR_DOWN);
+                match.setStatus(MatchStatus.DELETED);
                 matchRepository.save(match);
+                logger.info("Saved match {} with status DELETED", match.toString());
             }
         }
     }

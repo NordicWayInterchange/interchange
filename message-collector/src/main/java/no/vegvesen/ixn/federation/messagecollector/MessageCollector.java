@@ -83,11 +83,14 @@ public class MessageCollector {
 
         for (ListenerEndpoint listenerEndpoint : listeners.keySet()) {
             if (!interchangeListenerEndpoints.contains(listenerEndpoint)) {
+                //Match match = matchRepository.findBySubscription_ExchangeName(listenerEndpoint.getExchangeName());
                 String neighbourName = listenerEndpoint.getNeighbourName();
                 logger.info("Listener for {} with host {} and port {} is now being removed", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 MessageCollectorListener toRemove = listeners.get(listenerEndpoint);
                 logger.debug("Tearing down listener for {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 toRemove.teardown();
+                //match.setStatus(MatchStatus.TEAR_DOWN);
+                //matchRepository.save(match);
                 listenerKeysToRemove.add(listenerEndpoint);
             }
         }
