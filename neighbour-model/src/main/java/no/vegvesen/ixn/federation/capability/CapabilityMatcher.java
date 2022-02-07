@@ -136,4 +136,29 @@ public class CapabilityMatcher {
 		}
 		return matches;
 	}
+
+	public static boolean matchLocalDeliveryToServiceProviderCapabilities(Set<Capability> capabilities, LocalDelivery delivery) {
+		String selector = delivery.getSelector();
+		boolean finalMatch = false;
+		for (Capability capability : capabilities) {
+			logger.debug("Evaluating selector [{}] against capability {}", selector, capability);
+			String whiteSpaceTrimmedSelector = selector.replaceAll(REGEX_ALL_WHITESPACE, " ");
+			String quadTreeEvaluatedSelector = evaluateQuadTreeMatch(whiteSpaceTrimmedSelector, capability.getQuadTree());
+			JMSSelectorFilter selectorFilter = JMSSelectorFilterFactory.get(quadTreeEvaluatedSelector);
+			boolean match = false;
+			if (capability instanceof DatexCapability) {
+				match = matchDatex((DatexCapability) capability, selectorFilter);
+			} else if (capability instanceof DenmCapability) {
+				match = matchDenm((DenmCapability) capability, selectorFilter);
+				System.out.println(match);
+			} else {
+				logger.warn("Unknown Capability type {} ", capability.getClass().getName());
+			}
+			if (match) {
+				logger.debug("Selector [{}] matches capability {}", selector, capability);
+				finalMatch = true;
+			}
+		}
+		return finalMatch;
+	}
 }
