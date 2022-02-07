@@ -112,6 +112,7 @@ public class QpidClient {
 	public void createTopicExchange(String exchangeName) {
 		if (!exchangeExists(exchangeName)){
 			_createTopicExchange(exchangeName);
+			logger.info("Created exchange with name {}", exchangeName);
 		}
 	}
 

@@ -29,6 +29,8 @@ public class LocalSubscription {
 
     private String consumerCommonName;
 
+    private String queueName;
+
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locend_id", foreignKey = @ForeignKey(name = "fk_locend_sub"))
@@ -36,6 +38,13 @@ public class LocalSubscription {
 
     public LocalSubscription() {
 
+    }
+
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName, String queueName) {
+        this.status = status;
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
+        this.queueName = queueName;
     }
 
     public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
@@ -55,11 +64,12 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName, String queueName) {
         this.id = id;
         this.status = status;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
+        this.queueName = queueName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
@@ -119,6 +129,14 @@ public class LocalSubscription {
         }
     }
 
+    public String getQueueName() {
+        return queueName;
+    }
+
+    public void setQueueName(String queueName) {
+        this.queueName = queueName;
+    }
+
     //TODO lag et objekt av selector??
     public String bindKey() {
         return "" + selector.hashCode();
@@ -149,7 +167,8 @@ public class LocalSubscription {
                 "id=" + id +
                 ", status=" + status +
                 ", selector=" + selector +
-                ", queueConsumerUser=" + consumerCommonName +
+                ", consumerCommonName=" + consumerCommonName +
+                ", queueName=" + queueName +
                 '}';
     }
 
@@ -157,7 +176,7 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(id, newStatus, selector, consumerCommonName);
+            return new LocalSubscription(id, newStatus, selector, consumerCommonName, queueName);
         }
     }
 

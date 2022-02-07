@@ -5,6 +5,7 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -16,8 +17,8 @@ public class MessageCollectorTest {
 
     @Test
     public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() {
-        ListenerEndpoint one = new ListenerEndpoint("one", "", "", 5671,  new Connection(), "subscriptionExchange");
-        ListenerEndpoint two = new ListenerEndpoint("two", "", "", 5671,  new Connection(), "subscriptionExchange");
+        ListenerEndpoint one = new ListenerEndpoint("one", "", "", 5671,  new Connection(), "subscriptionExchange1");
+        ListenerEndpoint two = new ListenerEndpoint("two", "", "", 5671,  new Connection(), "subscriptionExchange2");
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
         ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
@@ -31,10 +32,12 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(two))).thenReturn(new MessageCollectorListener(sink,source));
 
         MatchRepository matchRepository = mock(MatchRepository.class);
-        when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
+        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
 
 
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
         collector.runSchedule();
 
         verify(collectorCreator,times(2)).setupCollection(any());
@@ -52,8 +55,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671,  messageConnectionOne, "subscriptionExchange");
-        ListenerEndpoint two = new ListenerEndpoint("two", "source-two", "endpoint-two", 5671,  messageConnectionTwo, "subscriptionExchange");
+        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671,  messageConnectionOne, "subscriptionExchange1");
+        ListenerEndpoint two = new ListenerEndpoint("two", "source-two", "endpoint-two", 5671,  messageConnectionTwo, "subscriptionExchange2");
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -64,11 +67,12 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
 
         MatchRepository matchRepository = mock(MatchRepository.class);
-        when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
+        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
 
 
-
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
         collector.runSchedule();
 
         verify(messageConnectionOne,times(1)).failedConnection(anyInt());
@@ -83,8 +87,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange");
-        ListenerEndpoint two = new ListenerEndpoint("one", "source-two", "endpoint-two", 5671, messageConnectionTwo, "subscriptionExchange");
+        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange1");
+        ListenerEndpoint two = new ListenerEndpoint("one", "source-two", "endpoint-two", 5671, messageConnectionTwo, "subscriptionExchange2");
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -95,10 +99,11 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
 
         MatchRepository matchRepository = mock(MatchRepository.class);
-        when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
+        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
 
-
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(2);
@@ -114,8 +119,8 @@ public class MessageCollectorTest {
         Connection messageConnectionTwo = mock(Connection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
-        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange");
-        ListenerEndpoint two = new ListenerEndpoint("one", "source-two", "endpoint-two", 5671, messageConnectionTwo, "subscriptionExchange");
+        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange1");
+        ListenerEndpoint two = new ListenerEndpoint("one", "source-two", "endpoint-two", 5671, messageConnectionTwo, "subscriptionExchange2");
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 
@@ -126,10 +131,11 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
 
         MatchRepository matchRepository = mock(MatchRepository.class);
-        when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
+        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
 
-
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(1);
