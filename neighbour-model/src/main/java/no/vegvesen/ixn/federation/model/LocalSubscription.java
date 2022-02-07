@@ -47,6 +47,12 @@ public class LocalSubscription {
         this.queueName = queueName;
     }
 
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
+        this.status = status;
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
+    }
+
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
         this.selector = selector;

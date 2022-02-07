@@ -42,10 +42,9 @@ public class ImportServiceProvidersIT {
             serviceProvider.setCapabilities(capabilities1);
             Set<OldLocalActorSubscription> subscriptions = serviceProviderApi.getSubscriptions();
             for (OldLocalActorSubscription localActorSubscription : subscriptions) {
-
+                //TODO have to generate queue name, as this was SP name before
                 serviceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
                         localActorSubscription.getSelector(),
-                        //localActorSubscription.isCreateNewQueue(), //createNewQueue is gone
                         serviceProviderApi.getName())); //already have the user from the Service provider
             }
 
