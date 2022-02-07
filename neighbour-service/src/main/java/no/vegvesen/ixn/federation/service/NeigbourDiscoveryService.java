@@ -169,6 +169,9 @@ public class NeigbourDiscoveryService {
             Set<Subscription> subscriptionsToRemove = new HashSet<>(existingSubscriptions);
             subscriptionsToRemove.removeAll(wantedSubscriptions);
             for (Subscription subscription : subscriptionsToRemove) {
+                if (!subscription.getEndpoints().isEmpty()) {
+                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                }
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
             }
             Connection controlConnection = neighbour.getControlConnection();
@@ -322,27 +325,28 @@ public class NeigbourDiscoveryService {
                 try {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
-                        if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
-                            //if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
-                            logger.info("Polled updated subscription with id {}", subscription.getId());
-                            Set<Endpoint> wantedEndpoints = lastUpdatedSubscription.getEndpoints();
-                            Set<Endpoint> existingEndpoints = subscription.getEndpoints();
+                            if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
+                                //if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
+                                logger.info("Polled updated subscription with id {}", subscription.getId());
+                                Set<Endpoint> wantedEndpoints = lastUpdatedSubscription.getEndpoints();
+                                Set<Endpoint> existingEndpoints = subscription.getEndpoints();
 
-                            Set<Endpoint> endpointsToRemove = new HashSet<>(existingEndpoints);
-                            endpointsToRemove.removeAll(wantedEndpoints);
-                            tearDownListenerEndpointsFromEndpointsList(neighbour, endpointsToRemove);
+                                Set<Endpoint> endpointsToRemove = new HashSet<>(existingEndpoints);
+                                endpointsToRemove.removeAll(wantedEndpoints);
+                                tearDownListenerEndpointsFromEndpointsList(neighbour, endpointsToRemove);
 
-                            Set<Endpoint> additionalEndpoints = new HashSet<>(wantedEndpoints);
-                            additionalEndpoints.removeAll(existingEndpoints);
-                            createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints, subscription.getExchangeName());
-                            subscription.setEndpoints(wantedEndpoints);
-                            //} else {
-                            //	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
-                            //}
-                        } else {
-                            subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                            logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
-                        }
+                                Set<Endpoint> additionalEndpoints = new HashSet<>(wantedEndpoints);
+                                additionalEndpoints.removeAll(existingEndpoints);
+                                createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints, subscription.getExchangeName());
+                                subscription.setEndpoints(wantedEndpoints);
+                                //} else {
+                                //	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
+                                //}
+                            } else {
+                                subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                                logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
+                            }
+
                     }
                 } catch (SubscriptionPollException e) {
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
@@ -360,7 +364,9 @@ public class NeigbourDiscoveryService {
     public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
         for(Endpoint endpoint : endpoints) {
             ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource());
-            listenerEndpointRepository.delete(listenerEndpoint);
+            if (listenerEndpoint != null) {
+                listenerEndpointRepository.delete(listenerEndpoint);
+            }
             logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", neighbour.getName(), endpoint.getHost(), endpoint.getSource());
         }
     }

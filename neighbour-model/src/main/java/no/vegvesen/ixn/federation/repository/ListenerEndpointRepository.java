@@ -18,5 +18,7 @@ public interface ListenerEndpointRepository extends CrudRepository<ListenerEndpo
     ListenerEndpoint findByNeighbourNameAndHostAndPortAndSource(String neighbourName, String host, int port, String source);
 
     List<ListenerEndpoint> findByMessageConnection_ConnectionStatus(ConnectionStatus connectionStatus);
+
+    ListenerEndpoint findByExchangeName(String exchangeName);
 }
 

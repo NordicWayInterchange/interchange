@@ -398,12 +398,6 @@ class NeighbourServiceTest {
 		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "source-1", "endpoint-1", 5671, new Connection());
 		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "source-2", "endpoint-2", 5671, new Connection());
 
-		listenerEndpoint1.setExchangeName(exchangeName1);
-		listenerEndpoint2.setExchangeName(exchangeName2);
-
-		Match match = new Match();
-		when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(match);
-
 		when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
 		neigbourDiscoveryService.tearDownListenerEndpoints(neighbour);
 

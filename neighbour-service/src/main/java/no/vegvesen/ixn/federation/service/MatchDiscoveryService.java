@@ -24,8 +24,7 @@ public class MatchDiscoveryService {
         this.matchRepository = matchRepository;
     }
 
-    public void syncLocalSubscriptionAndSubscriptionsToMatch(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours) {
-        removeMatchesToTearDown();
+    public void syncLocalSubscriptionAndSubscriptionsToCreateMatch(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours) {
         for (ServiceProvider serviceProvider : serviceProviders) {
             Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
             String serviceProviderName = serviceProvider.getName();
@@ -37,7 +36,7 @@ public class MatchDiscoveryService {
                     for (Subscription subscription : requestedSubscriptions) {
                         if(localSubscription.getSelector().equals(subscription.getSelector())){
                             if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
-                            Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REQUESTED);
+                            Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
                             matchRepository.save(newMatch);
                             logger.info("Saved new Match {}", newMatch);
                             }
@@ -48,17 +47,63 @@ public class MatchDiscoveryService {
         }
     }
 
-    public void removeMatchesToTearDown() {
-        List<Match> matchesToTearDown = matchRepository.findAllByStatus(MatchStatus.DELETED);
-        Set<Match> matchesToRemove = new HashSet<>();
-        for (Match match : matchesToTearDown) {
-            if (match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)
-                    || match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
-                matchesToRemove.add(match);
+    public List<Match> findMatchesToSetupExchangesFor(String serviceProviderName) {
+        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.SETUP_EXCHANGE);
+    }
+
+    public void updateMatchToSetupEndpoint(Match match) {
+        match.setStatus(MatchStatus.SETUP_ENDPOINT);
+        matchRepository.save(match);
+        logger.info("Saved match {} with status SETUP_ENDPOINT", match);
+    }
+
+    public Match findMatchesByExchangeName(String exchangeName) {
+        return matchRepository.findBySubscription_ExchangeName(exchangeName);
+    }
+
+    public void updateMatchToUp(Match match) {
+        match.setStatus(MatchStatus.UP);
+        matchRepository.save(match);
+        logger.info("Saved match {} with status UP", match);
+    }
+
+    public void syncLocalSubscriptionAndSubscriptionsToTearDownMatchResources() {
+        List<Match> matches = matchRepository.findAllByStatus(MatchStatus.UP);
+        for (Match match : matches) {
+            if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
+                    match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
+                matchRepository.save(match);
+                logger.info("Saved match {} with status TEARDOWN_ENDPOINT", match);
             }
         }
+    }
+
+    public void updateMatchToTearDownExchange(Match match) {
+        match.setStatus(MatchStatus.TEARDOWN_EXCHANGE);
+        matchRepository.save(match);
+        logger.info("Saved match {} with status TEARDOWN_EXCHANGE", match);
+    }
+
+    public List<Match> findMatchesToTearDownExchangesFor(String serviceProviderName) {
+        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.TEARDOWN_EXCHANGE);
+    }
+
+    public void updateMatchToDeleted(Match match) {
+        match.setStatus(MatchStatus.DELETED);
+        matchRepository.save(match);
+        logger.info("Saved match {} with status DELETED", match);
+    }
+
+    public void removeMatchesThatAreDeleted() {
+        List<Match> matchesToRemove = matchRepository.findAllByStatus(MatchStatus.DELETED);
         if (!matchesToRemove.isEmpty()) {
             matchRepository.deleteAll(matchesToRemove);
+            logger.info("Removed deleted Matches");
         }
+    }
+
+    public Match findMatchByLocalSubscriptionId(Integer id) {
+        return matchRepository.findByLocalSubscriptionId(id);
     }
 }

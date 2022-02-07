@@ -9,8 +9,10 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
+import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -40,7 +42,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 @SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
@@ -92,6 +94,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@MockBean
 	MatchRepository matchRepository;
+
+	@MockBean
+	ListenerEndpointRepository listenerEndpointRepository;
+
+	@MockBean
+	MatchDiscoveryService matchDiscoveryService;
 
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
@@ -147,9 +155,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "", queueName);
 		toreDownServiceProvider.addLocalSubscription(localSubscription);
 
-		Match match = new Match(localSubscription, subscription, "tore-down-service-provider", MatchStatus.REQUESTED);
+		Match match = new Match(localSubscription, subscription, "tore-down-service-provider", MatchStatus.SETUP_EXCHANGE);
 
-		when(matchRepository.findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(any(String.class), any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
+		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
 
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
@@ -164,8 +172,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						.collect(Collectors.toSet()));
 		LocalSubscription tearDownLocalSubscription = toreDownServiceProvider.getSubscriptions().stream().findFirst().get();
 
-		Match tearDownMatch = new Match(tearDownLocalSubscription, subscription, "tore-down-service-provider", MatchStatus.TEAR_DOWN);
-		when(matchRepository.findAllByServiceProviderNameAndStatus(any(String.class), any(MatchStatus.class))).thenReturn(Arrays.asList(tearDownMatch));
+		Match tearDownMatch = new Match(tearDownLocalSubscription, subscription, "tore-down-service-provider", MatchStatus.TEARDOWN_EXCHANGE);
+		when(matchDiscoveryService.findMatchesToTearDownExchangesFor(any(String.class))).thenReturn(Arrays.asList(tearDownMatch));
+		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Collections.emptyList());
 
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
 		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
@@ -338,9 +347,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		client.createQueue(queueName);
 
-		Match match = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REQUESTED);
+		Match match = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
 
-		when(matchRepository.findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(any(String.class), any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
+		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
 
 		router.setUpSubscriptionExchanges(serviceProviderName);
 
@@ -357,9 +366,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		client.createQueue(serviceProviderName);
 
-		Match match = new Match(localSubscription, subscription, MatchStatus.TEAR_DOWN);
+		Match match = new Match(localSubscription, subscription, MatchStatus.TEARDOWN_EXCHANGE);
 
-		when(matchRepository.findAllByServiceProviderNameAndStatus(any(String.class), any(MatchStatus.class))).thenReturn(Arrays.asList(match));
+		when(matchDiscoveryService.findMatchesToTearDownExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
 
 		router.tearDownSubscriptionExchanges(serviceProviderName);
 
@@ -379,20 +388,20 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);
 
-		Match match = new Match(localSubscription, subscription, MatchStatus.REQUESTED);
+		Match match = new Match(localSubscription, subscription, MatchStatus.SETUP_EXCHANGE);
 		match.setServiceProviderName(serviceProviderName);
 
-		when(matchRepository.findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(any(String.class), any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
+		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
 
 		assertThat(client.exchangeExists(exchangeName)).isTrue();
 		assertThat(client.queueExists(queueName)).isTrue();
 
-		subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
-		match.setStatus(MatchStatus.TEAR_DOWN);
+		Match match1 = new Match(localSubscription, subscription, MatchStatus.TEARDOWN_EXCHANGE);
 
-		when(matchRepository.findAllByServiceProviderNameAndStatus(any(String.class), any(MatchStatus.class))).thenReturn(Arrays.asList(match));
+		when(matchDiscoveryService.findMatchesToTearDownExchangesFor(any(String.class))).thenReturn(Arrays.asList(match1));
+		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Collections.emptyList());
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
 
@@ -400,7 +409,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists(queueName)).isTrue();
 	}
 
-	//TODO: Same as above, only the LocalSubscription is set to TEAR_DOWN
 	@Test
 	public void setupAndDeleteSubscriptionExchange() {
 		String serviceProviderName = "my-service-provider";
@@ -414,10 +422,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);
 
-		Match match = new Match(localSubscription, subscription, MatchStatus.REQUESTED);
+		Match match = new Match(localSubscription, subscription, MatchStatus.SETUP_EXCHANGE);
 		match.setServiceProviderName(serviceProviderName);
 
-		when(matchRepository.findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(any(String.class), any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
+		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
 
@@ -425,14 +433,37 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists(queueName)).isTrue();
 
 		localSubscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-		match.setStatus(MatchStatus.TEAR_DOWN);
 
-		when(matchRepository.findAllByServiceProviderNameAndStatus(any(String.class), any(MatchStatus.class))).thenReturn(Arrays.asList(match));
+		Match match1 = new Match(localSubscription, subscription, MatchStatus.TEARDOWN_EXCHANGE);
+
+		when(matchDiscoveryService.findMatchesToTearDownExchangesFor(any(String.class))).thenReturn(Arrays.asList(match1));
+		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Collections.emptyList());
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
 
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
 		assertThat(client.queueExists(queueName)).isFalse();
+	}
+
+	@Test
+	public void tearDownQueueWhenLocalSubscriptionIsDeletedAfterMatch() {
+		String serviceProviderName = "my-service-provider";
+		String selector = "a=b";
+		String queueName = "my-queue";
+
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "", queueName);
+
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		serviceProvider.addLocalSubscription(localSubscription);
+
+		client.createQueue(queueName);
+
+		when(matchDiscoveryService.findMatchByLocalSubscriptionId(any(Integer.class))).thenReturn(null);
+
+		router.processSubscription(serviceProviderName, localSubscription);
+
+		assertThat(client.queueExists(queueName)).isFalse();
+
 	}
 
 	public SSLContext setUpTestSslContext(String s) {

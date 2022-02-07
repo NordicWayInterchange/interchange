@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -77,7 +78,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
 
 		MatchRepository matchRepository = mock(MatchRepository.class);
-		when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
+		MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
+		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -86,7 +88,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				localIxnFederationPort,
 				"subscriptionExchange");
 
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
+		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
@@ -124,7 +126,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
 
 		MatchRepository matchRepository = mock(MatchRepository.class);
-		when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
+		MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
+		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -132,7 +135,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
+
+		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
