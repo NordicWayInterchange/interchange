@@ -115,6 +115,10 @@ public class NeighbourDiscoverer {
 		serviceProviderService.updateLocalSubscriptions(interchangeNodeProperties.getName(), interchangeNodeProperties.getMessageChannelPort());
 	}
 
+	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void updateLocalDeliveries() {
+		serviceProviderService.updateLocalDeliveries(interchangeNodeProperties.getName(), interchangeNodeProperties.getMessageChannelPort());
+	}
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void deleteSubscriptionAtKnownNeighbours() {
 		neigbourDiscoveryService.deleteSubscriptions(neighbourFacade);

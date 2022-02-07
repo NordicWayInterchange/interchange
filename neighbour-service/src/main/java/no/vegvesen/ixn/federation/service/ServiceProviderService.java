@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -40,6 +41,30 @@ public class ServiceProviderService {
             serviceProviderRepository.save(serviceProvider);
         }
     }
+    public void updateLocalDeliveries(String host, String port) {
+        List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+        for(ServiceProvider serviceProvider : serviceProviders) {
+            if (serviceProvider.hasCapabilities() && !serviceProvider.getDeliveries().isEmpty()) {
+                for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                    if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
+                        boolean match = CapabilityMatcher.matchLocalDeliveryToServiceProviderCapabilities(serviceProvider.getCapabilities().getCapabilities(), delivery);
+                        if (match) {
+                            LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(
+                                    host,
+                                    Integer.parseInt(port),
+                                    "onramp",
+                                    delivery.getSelector()
+                            );
+                            delivery.setEndpoints(Collections.singleton(endpoint));
+                            delivery.setStatus(LocalDeliveryStatus.CREATED);
+                        }
+                    }
+                }
+            }
+            serviceProviderRepository.save(serviceProvider);
+        }
+    }
+
     //TODO: make test for this method
     public void updateServiceProviderSubscriptionsWithHostAndPort(List<Neighbour> neighbours, ServiceProvider serviceProvider, String messageChannelHost, String messageChannelPort) {
         for(Neighbour neighbour : neighbours) {

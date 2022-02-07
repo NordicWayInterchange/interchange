@@ -20,6 +20,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -56,7 +59,10 @@ public class OnboardRestControllerIT {
 
         LocalActorCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
         //LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
-        restController.deleteCapability(serviceProviderName, Integer.parseInt(saved.getId()));
+        restController.deleteCapability(serviceProviderName, saved.getId());
+
+        //We did four calls to the controller, thus we should have checked the cert 4 times
+        verify(certService,times(4)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -72,9 +78,10 @@ public class OnboardRestControllerIT {
         assertThat(addedCapability).isNotNull();
         LocalActorCapability capability = addedCapability.getCapabilities().stream().findFirst()
                 .orElseThrow(() -> new AssertionError("No capabilities in response"));
-        GetCapabilityResponse response = restController.getServiceProviderCapability(serviceProviderName,Integer.parseInt(capability.getId()));
+        GetCapabilityResponse response = restController.getServiceProviderCapability(serviceProviderName,capability.getId());
         assertThat(response.getId()).isEqualTo(capability.getId());
 
+        verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -94,10 +101,11 @@ public class OnboardRestControllerIT {
 		assertThat(afterAddSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
 
 		LocalActorSubscription subscriptionApi = serviceProviderSubscriptions.getSubscriptions().stream().findFirst().get();
-        restController.deleteSubscription(serviceProviderName,Integer.parseInt(subscriptionApi.getId()));
+        restController.deleteSubscription(serviceProviderName,subscriptionApi.getId());
 
 		ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
 		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
+        verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
 
 	@Test
@@ -116,12 +124,13 @@ public class OnboardRestControllerIT {
 		assertThat(subscriptionUpdated).isPresent();
 
 		try {
-			restController.deleteSubscription(serviceProviderName, -1);
+			restController.deleteSubscription(serviceProviderName, "-1");
 		} catch (NotFoundException ignore) {
 		}
 		ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);
 
 		assertThat(savedSPAfterDelete.getSubscriptionUpdated()).isEqualTo(subscriptionUpdated);
+        verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
 
 	@Test
@@ -142,6 +151,7 @@ public class OnboardRestControllerIT {
         ListSubscriptionsResponse subscriptions = restController.listSubscriptions(serviceProviderName);
         Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();
         assertThat(localSubscriptionApis.size()).isEqualTo(1);
+        verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -149,5 +159,6 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription("ixn", selector))));
+        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 }
