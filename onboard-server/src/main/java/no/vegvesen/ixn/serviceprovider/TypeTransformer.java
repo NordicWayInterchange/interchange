@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -63,6 +64,41 @@ public class TypeTransformer {
                 addSubscription.getConsumerCommonName());
     }
 
+    public LocalDelivery transformDeliveryToLocalDelivery(SelectorApi delivery) {
+        return new LocalDelivery(delivery.getSelector(), LocalDeliveryStatus.REQUESTED);
+    }
+
+    public AddDeliveriesResponse transformToDeliveriesResponse(String serviceProviderName, Set<LocalDelivery> localDeliveries) {
+        return new AddDeliveriesResponse(serviceProviderName,
+                transformLocalDeliveryToDelivery(
+                        serviceProviderName,
+                        localDeliveries));
+    }
+
+    public Set<Delivery> transformLocalDeliveryToDelivery(String serviceProviderName, Set<LocalDelivery> localDeliveries) {
+        Set<Delivery> result = new HashSet<>();
+        for (LocalDelivery delivery : localDeliveries){
+            result.add(new Delivery(
+                    delivery.getId().toString(),
+                    createDeliveryPath(serviceProviderName, delivery.getId().toString()),
+                    delivery.getSelector(),
+                    transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
+                    transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus())
+                    )
+            );
+        }
+        return result;
+    }
+
+    public ListDeliveriesResponse transformToListDeliveriesResponse(String serviceProviderName, Set<LocalDelivery> localDeliveries) {
+        return new ListDeliveriesResponse(serviceProviderName,
+                transformLocalDeliveryToDelivery(
+                        serviceProviderName,
+                        localDeliveries
+                )
+        );
+    }
+
     public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         return new AddSubscriptionsResponse(serviceProviderName,
                 transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(
@@ -96,6 +132,10 @@ public class TypeTransformer {
         return String.format("/%s/capabilities/%s", serviceProviderName, capabilityId);
     }
 
+    private static String createDeliveryPath(String serviceProviderName, String deliveryId) {
+        return String.format("/%s/deliveries/%s", serviceProviderName, deliveryId);
+    }
+
     private long transformLocalDateTimeToEpochMili(LocalDateTime lastUpdated) {
         return lastUpdated == null ? 0 : ZonedDateTime.of(lastUpdated, ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
@@ -111,6 +151,18 @@ public class TypeTransformer {
         );
     }
 
+    public GetDeliveryResponse transformLocalDeliveryToGetDeliveryResponse(String serviceProviderName, LocalDelivery localDelivery) {
+        String id = localDelivery.getId().toString();
+        return new GetDeliveryResponse(
+                id,
+                transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints()),
+                createDeliveryPath(serviceProviderName, id),
+                localDelivery.getSelector(),
+                transformLocalDateTimeToEpochMili(localDelivery.getLastUpdatedTimestamp()),
+                transformLocalDeliveryStatusToDeliveryStatus(localDelivery.getStatus())
+
+        );
+    }
     private Set<LocalEndpointApi> transformLocalEndpointsToLocalEndpointApis(Set<LocalEndpoint> localEndpoints) {
         Set<LocalEndpointApi> result = new HashSet<>();
         for (LocalEndpoint localEndpoint : localEndpoints) {
@@ -119,6 +171,21 @@ public class TypeTransformer {
                     localEndpoint.getSource(),
                     localEndpoint.getMaxBandwidth(),
                     localEndpoint.getMaxMessageRate()));
+        }
+        return result;
+    }
+
+    private Set<DeliveryEndpoint> transformLocalDeliveryEndpointToDeliveryEndpoint(Set<LocalDeliveryEndpoint> endpoints) {
+        Set<DeliveryEndpoint> result = new HashSet<>();
+        for (LocalDeliveryEndpoint endpoint : endpoints) {
+            result.add(new DeliveryEndpoint(
+                    endpoint.getHost(),
+                    endpoint.getPort(),
+                    endpoint.getTarget(),
+                    endpoint.getSelector(),
+                    null,
+                    null
+            ));
         }
         return result;
     }
@@ -133,6 +200,19 @@ public class TypeTransformer {
                 return LocalActorSubscriptionStatusApi.NOT_VALID;
             default:
                 return LocalActorSubscriptionStatusApi.ILLEGAL;
+        }
+    }
+
+    private DeliveryStatus transformLocalDeliveryStatusToDeliveryStatus(LocalDeliveryStatus status) {
+        switch (status) {
+            case REQUESTED:
+                return DeliveryStatus.REQUESTED;
+            case CREATED:
+                return DeliveryStatus.CREATED;
+            case NOT_VALID:
+                return DeliveryStatus.NOT_VALID;
+            default:
+                return DeliveryStatus.ILLEGAL;
         }
     }
 
@@ -160,5 +240,15 @@ public class TypeTransformer {
                 createCapabilitiesPath(serviceProviderName,capabilityId),
                 capability.toApi()
         );
+    }
+
+    public static List<String> makeHostAndPortOfUrl(String url){
+        URI uri = URI.create(url);
+        String host = uri.getHost();
+        int port = uri.getPort();
+        if (port == -1){
+            port = 5671;
+        }
+        return new ArrayList<>(Arrays.asList(host, String.valueOf(port)));
     }
 }
