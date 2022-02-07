@@ -61,6 +61,19 @@ public class ServiceProvider {
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
+	public ServiceProvider(String name,
+						   Capabilities capabilities,
+						   Set<LocalSubscription> subscriptions,
+						   Set<PrivateChannel> privateChannels,
+						   LocalDateTime subscriptionUpdated) {
+
+		this.name = name;
+		this.capabilities = capabilities;
+		this.subscriptions = subscriptions;
+		this.privateChannels = privateChannels;
+		this.subscriptionUpdated = subscriptionUpdated;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -110,7 +123,7 @@ public class ServiceProvider {
 	public void removeLocalSubscription(Integer dataTypeId) {
 		LocalSubscription subscriptionToDelete = subscriptions
 				.stream()
-				.filter(subscription -> subscription.getSub_id().equals(dataTypeId))
+				.filter(subscription -> subscription.getId().equals(dataTypeId))
 				.findFirst()
 				.orElseThrow(
 						() -> new NotFoundException("The subscription to delete is not in the Service Provider subscriptions. Cannot delete subscription that don't exist.")
@@ -124,10 +137,10 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void updateSubscriptionWithBrokerUrl(LocalSubscription subscription, Set<LocalBroker> localBrokers) {
+	public void updateSubscriptionWithHostAndPort(LocalSubscription subscription, Set<LocalEndpoint> localEndpoints) {
 		for(LocalSubscription localSubscription : subscriptions) {
 			if (localSubscription.getSelector().equals(subscription.getSelector())){
-				localSubscription.setBrokers(localBrokers);
+				localSubscription.setLocalEndpoints(localEndpoints);
 			}
 		}
 	}

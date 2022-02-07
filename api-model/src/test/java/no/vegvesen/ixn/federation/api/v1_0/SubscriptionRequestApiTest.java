@@ -21,7 +21,7 @@ public class SubscriptionRequestApiTest {
     }
 
     @Test
-    public void subscriptionRequestWithBothCreateQueueAndWithout() throws JsonProcessingException {
+    public void subscriptionRequestWithBothConsumerCommonNameAsClientNameAndIxnName() throws JsonProcessingException {
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi(
                 "messageType='DENM' AND orginatingCountry='SE'"
         );

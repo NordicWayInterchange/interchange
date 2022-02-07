@@ -42,9 +42,9 @@ public class ServiceProviderServiceTest {
                 new SubscriptionRequest(),
                 new SubscriptionRequest()
         ))).when(neighbourRepository).findAll();
-        Self self = new Self("local-node");
+        String name = "local-node";
 
-        serviceProviderService.updateLocalSubscriptions(self);
+        serviceProviderService.updateLocalSubscriptions(name, "5671");
 
         verify(serviceProviderRepository).findAll();
         verify(neighbourRepository).findAll();
@@ -74,9 +74,10 @@ public class ServiceProviderServiceTest {
                                selector,
                                "local-node/subscriptions/1",
                                serviceProviderName,
-                               Collections.singleton(new Broker(
+                               Collections.singleton(new Endpoint(
                                        serviceProviderName,
-                                       "amqps://messages.node-A.eu"
+                                       "messages.node-A.eu",
+                                       5671
                                ))
                        ))
                 )
@@ -96,13 +97,14 @@ public class ServiceProviderServiceTest {
                 new HashSet<>(),
                 LocalDateTime.now()
         );
-        serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider,"amqps://messages.local-node");
+        serviceProviderService.updateServiceProviderSubscriptionsWithHostAndPort(neighbours,serviceProvider,"messages.local-node", "5671");
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.getLocalBrokers())
+        assertThat(subscription.getLocalEndpoints())
                 .hasSize(1)
-                .allMatch(b -> "amqps://messages.node-A.eu".equals(b.getMessageBrokerUrl()))
-                .allMatch(b -> serviceProviderName.equals(b.getQueueName()));
+                .allMatch(b -> "messages.node-A.eu".equals(b.getHost()))
+                .allMatch(b -> 5671 == b.getPort())
+                .allMatch(b -> serviceProviderName.equals(b.getSource()));
     }
 
     @Test
@@ -125,9 +127,10 @@ public class ServiceProviderServiceTest {
                                 selector,
                                 "local-node/subscriptions/1",
                                 null, //QueueconsumerUser is most often null from other node.
-                                Collections.singleton(new Broker(
+                                Collections.singleton(new Endpoint(
                                         localNodeName,
-                                        "amqps://messages.node-A.eu"
+                                        "messages.node-A.eu",
+                                        5671
                                 ))
                         ))
                 )
@@ -147,13 +150,15 @@ public class ServiceProviderServiceTest {
                 new HashSet<>(),
                 LocalDateTime.now()
         );
-        final String localMessageBrokerUrl = "amqps://messages.local-node";
-        serviceProviderService.updateServiceProviderSubscriptionsWithBrokerUrl(neighbours,serviceProvider, localMessageBrokerUrl);
+        final String localMessageHost = "messages.local-node";
+        final String localMessagePort = "5671";
+        serviceProviderService.updateServiceProviderSubscriptionsWithHostAndPort(neighbours,serviceProvider, localMessageHost, localMessagePort);
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
         LocalSubscription subscription = serviceProvider.getSubscriptions().stream().findFirst().get();
-        assertThat(subscription.getLocalBrokers())
+        assertThat(subscription.getLocalEndpoints())
                 .hasSize(1)
-                .allMatch(b -> localMessageBrokerUrl.equals(b.getMessageBrokerUrl()))
-                .allMatch(b -> serviceProviderName.equals(b.getQueueName()));
+                .allMatch(b -> "messages.local-node".equals(b.getHost()))
+                .allMatch(b -> 5671 == b.getPort())
+                .allMatch(b -> serviceProviderName.equals(b.getSource()));
     }
 }

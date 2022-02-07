@@ -12,14 +12,10 @@ import no.vegvesen.ixn.federation.model.DatexCapability;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Self;
 import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
-import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -43,6 +39,7 @@ import static org.mockito.Mockito.*;
 @Transactional
 public class NeighbourDiscovererIT {
 
+	private final LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 	@MockBean
 	SSLContext mockedSSL;
 
@@ -51,9 +48,6 @@ public class NeighbourDiscovererIT {
 
 	@MockBean
 	NeighbourFacade mockNeighbourFacade;
-
-	@MockBean
-	SelfService selfService;
 
 	@Autowired
 	NeighbourService neighbourService;
@@ -66,6 +60,7 @@ public class NeighbourDiscovererIT {
 
 	@Autowired
 	InterchangeNodeProperties nodeProperties;
+	private Set<LocalSubscription> localSubscriptions;
 
 	@Test
 	public void discovererIsAutowired() {
@@ -75,12 +70,8 @@ public class NeighbourDiscovererIT {
 	@Test
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
-		Self self = new Self(nodeProperties.getName());
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+		localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", "self"));
-		self.setLocalSubscriptions(localSubscriptions);
-		self.setLastUpdatedLocalSubscriptions(LocalDateTime.now());
-		when(selfService.fetchSelf()).thenReturn(self);
 
 		Neighbour neighbour1 = new Neighbour();
 		neighbour1.setName("neighbour-one");
@@ -94,16 +85,13 @@ public class NeighbourDiscovererIT {
 		checkForNewNeighbours();
 		performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(neighbour1, neighbour2, c1, c2);
 		String selector = String.format("messageType = %s and originatingCountry = 'NO'", Constants.DATEX_2);
-		SubscriptionRequest subscriptionRequestResponse = new SubscriptionRequest(
-				SubscriptionRequestStatus.REQUESTED,
-				new HashSet<>(Arrays.asList(
-						new Subscription(selector,SubscriptionStatus.ACCEPTED, "self"),
-						new Subscription(selector,SubscriptionStatus.ACCEPTED, "self")
-				))
-		);
-		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptionRequestResponse);
+		HashSet<Subscription> subscriptions = new HashSet<>(Arrays.asList(
+				new Subscription(selector, SubscriptionStatus.ACCEPTED, "self"),
+				new Subscription(selector, SubscriptionStatus.ACCEPTED, "self")
+		));
+		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptions);
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), selfService.fetchSelf(), mockNeighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), Optional.ofNullable(lastUpdatedLocalSubscriptions), localSubscriptions, mockNeighbourFacade);
 
 		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
 		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
@@ -128,11 +116,9 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		Self self = selfService.fetchSelf();
-		self.setLastUpdatedLocalCapabilities(LocalDateTime.now());
 
-		neigbourDiscoveryService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
-		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any() );
+		neigbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
+		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any(), any());
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
@@ -142,7 +128,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Sets.newLinkedHashSet(new DatexCapabilityApi("NO"))), selfService.fetchSelf());
+		neighbourService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Sets.newLinkedHashSet(new DatexCapabilityApi("NO"))), Collections.emptySet());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -155,12 +141,12 @@ public class NeighbourDiscovererIT {
 	}
 
 	private void performCapabilityExchangeAndVerifyNeighbourRestFacadeCalls(Neighbour neighbour1, Neighbour neighbour2, Capabilities c1, Capabilities c2) {
-		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any())).thenReturn(c1);
-		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any() )).thenReturn(c2);
+		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any(), any())).thenReturn(c1);
+		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any(), any())).thenReturn(c2);
 
-		neigbourDiscoveryService.capabilityExchangeWithNeighbours(selfService.fetchSelf(), mockNeighbourFacade);
+		neigbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.empty());
 
-		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any());
+		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
 		assertThat(known).hasSize(2);
 	}

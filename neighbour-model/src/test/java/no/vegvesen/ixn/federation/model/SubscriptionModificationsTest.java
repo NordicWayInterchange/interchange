@@ -48,13 +48,13 @@ class SubscriptionModificationsTest {
 	}
 
 	@Test
-	void addBrokersToSubscription() {
+	void addEndpointsToSubscription() {
 		Subscription sub = new Subscription("dataType = 'DATEX2'", SubscriptionStatus.ACCEPTED, "");
-		Broker broker1 = new Broker("queue-1", "broker-1");
-		Broker broker2 = new Broker("queue-2", "broker-2");
-		sub.setBrokers(Sets.newSet(broker1, broker2));
+		Endpoint endpoint1 = new Endpoint("queue-1", "endpoint-1", 5671);
+		Endpoint endpoint2 = new Endpoint("queue-2", "endpoint-2", 5671);
+		sub.setEndpoints(Sets.newSet(endpoint1, endpoint2));
 
-		assertThat(sub.getBrokers()).hasSize(2);
+		assertThat(sub.getEndpoints()).hasSize(2);
 	}
 
 }

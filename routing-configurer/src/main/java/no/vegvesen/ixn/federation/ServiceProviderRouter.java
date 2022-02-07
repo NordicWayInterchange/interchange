@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidAcl;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,13 @@ public class ServiceProviderRouter {
 
     private final ServiceProviderRepository repository;
     private final QpidClient qpidClient;
+    private final MatchRepository matchRepository;
 
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, QpidClient qpidClient) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, QpidClient qpidClient, MatchRepository matchRepository) {
         this.repository = repository;
         this.qpidClient = qpidClient;
+        this.matchRepository = matchRepository;
     }
 
 
@@ -43,6 +46,7 @@ public class ServiceProviderRouter {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
             syncPrivateChannels(serviceProvider);
+            tearDownSubscriptionExchanges(name);
             Set<LocalSubscription> newSubscriptions = new HashSet<>();
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
 
@@ -74,6 +78,9 @@ public class ServiceProviderRouter {
                 }
             }
 
+            setUpSubscriptionExchanges(name);
+
+
             //save if it has changed from the initial
             if (! newSubscriptions.equals(serviceProvider.getSubscriptions())) {
                 serviceProvider.updateSubscriptions(newSubscriptions);
@@ -85,20 +92,20 @@ public class ServiceProviderRouter {
         }
     }
 
-    private Optional<LocalSubscription> processSubscription(String name, LocalSubscription subscription) {
+    private Optional<LocalSubscription> processSubscription(String queueName, LocalSubscription subscription) {
         Optional<LocalSubscription> newSubscription;
         switch (subscription.getStatus()) {
             case REQUESTED:
 			case CREATED:
-			    if (subscription.getConsumerCommonName().equals(name)) {
+			    if (subscription.getConsumerCommonName().equals(queueName)) {
                     newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
                 } else {
-				    newSubscription = onRequested(name, subscription);
+				    newSubscription = onRequested(queueName, subscription);
 			    }
                 break;
 			case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
-                newSubscription = onTearDown(name, subscription);
+                newSubscription = onTearDown(queueName, subscription);
                 break;
             default:
                 throw new IllegalStateException("Unknown subscription status encountered");
@@ -106,39 +113,42 @@ public class ServiceProviderRouter {
         return newSubscription;
     }
 
-    private Optional<LocalSubscription> onTearDown(String name, LocalSubscription subscription) {
-        removeBindingIfExists(name, subscription);
-        return Optional.empty();
+    private Optional<LocalSubscription> onTearDown(String queueName, LocalSubscription subscription) {
+        removeBindingIfExists(queueName, subscription);
+        Match match = matchRepository.findByLocalSubscriptionId(subscription.getId());
+        if (match == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(subscription);
+        }
     }
 
-    private Optional<LocalSubscription> onRequested(String name, LocalSubscription subscription) {
-        optionallyCreateQueue(name);
-        optionallyAddQueueBindings(name, subscription);
+    private Optional<LocalSubscription> onRequested(String queueName, LocalSubscription subscription) {
+        optionallyCreateQueue(queueName);
+        optionallyAddQueueBindings(queueName, subscription);
         return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
     }
 
-    private void removeBindingIfExists(String name, LocalSubscription subscription) {
-        if (qpidClient.queueExists(name)) {
-            if (qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
-                qpidClient.unbindBindKey(name, subscription.bindKey(), "outgoingExchange");
-                qpidClient.unbindBindKey(name, subscription.bindKey(), "incomingExchange");
+    private void removeBindingIfExists(String queueName, LocalSubscription subscription) {
+        if (qpidClient.queueExists(queueName)) {
+            if (qpidClient.getQueueBindKeys(queueName).contains(subscription.bindKey())) {
+                qpidClient.unbindBindKey(queueName, subscription.bindKey(), "outgoingExchange");
             }
         }
     }
 
-    private void optionallyAddQueueBindings(String name, LocalSubscription subscription) {
-        if (!qpidClient.getQueueBindKeys(name).contains(subscription.bindKey())) {
-            logger.debug("Adding bindings to the queue {}", name);
-            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "outgoingExchange");
-            qpidClient.addBinding(subscription.getSelector(), name, subscription.bindKey(), "incomingExchange");
+    private void optionallyAddQueueBindings(String queueName, LocalSubscription subscription) {
+        if (!qpidClient.getQueueBindKeys(queueName).contains(subscription.bindKey())) {
+            logger.debug("Adding bindings to the queue {}", queueName);
+            qpidClient.addBinding(subscription.getSelector(), queueName, subscription.bindKey(), "outgoingExchange");
         }
     }
 
-    private void optionallyCreateQueue(String name) {
-        if (!qpidClient.queueExists(name)) {
-            logger.info("Creating queue {}", name);
-            qpidClient.createQueue(name);
-            qpidClient.addReadAccess(name, name);
+    private void optionallyCreateQueue(String queueName) {
+        if (!qpidClient.queueExists(queueName)) {
+            logger.info("Creating queue {}", queueName);
+            qpidClient.createQueue(queueName);
+            qpidClient.addReadAccess(queueName, queueName);
         }
     }
 
@@ -216,5 +226,50 @@ public class ServiceProviderRouter {
                 qpidClient.removeQueue(queueName);
             }
         }
+    }
+
+    public void setUpSubscriptionExchanges(String serviceProviderName) {
+        List<Match> matches = matchRepository.findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(serviceProviderName, SubscriptionStatus.REQUESTED, SubscriptionStatus.CREATED);
+        for (Match match : matches) {
+            if (match.getStatus().equals(MatchStatus.REQUESTED)) {
+                String exchangeName = match.getSubscription().getExchangeName();
+                String queueName = serviceProviderName;
+                createSubscriptionExchange(exchangeName);
+                bindQueueToSubscriptionExchange(queueName, exchangeName, match.getLocalSubscription());
+                match.setStatus(MatchStatus.CREATED);
+                matchRepository.save(match);
+                logger.info("Saved match {} with status CREATED", match.toString());
+                logger.info("Created exchange with name {}", exchangeName);
+                }
+        }
+    }
+
+    public void tearDownSubscriptionExchanges(String serviceProviderName) {
+        List<Match> matches = matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.CREATED);
+        for (Match match : matches) {
+            if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
+                match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                String exchangeName = match.getSubscription().getExchangeName();
+                String queueName = serviceProviderName;
+                String bindKey = match.getLocalSubscription().bindKey();
+                if (qpidClient.exchangeExists(exchangeName)) {
+                    if (qpidClient.getQueueBindKeys(queueName).contains(bindKey)) {
+                        qpidClient.unbindBindKey(queueName, bindKey, exchangeName);
+                        qpidClient.removeDirectExchange(exchangeName);
+                    }
+                }
+                match.setStatus(MatchStatus.TEAR_DOWN);
+                matchRepository.save(match);
+            }
+        }
+    }
+
+    private void createSubscriptionExchange(String exchangeName) {
+        qpidClient.createTopicExchange(exchangeName);
+    }
+
+    private void bindQueueToSubscriptionExchange(String queueName, String exchangeName, LocalSubscription localSubscription) {
+        logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
+        qpidClient.addBinding(localSubscription.getSelector(), queueName, localSubscription.bindKey(), exchangeName);
     }
 }

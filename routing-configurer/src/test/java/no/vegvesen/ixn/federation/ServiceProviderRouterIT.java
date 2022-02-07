@@ -9,17 +9,17 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -28,6 +28,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
@@ -39,6 +40,8 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 @SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
@@ -87,6 +90,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
  	@Autowired
 	ServiceProviderRouter router;
+
+	@MockBean
+	MatchRepository matchRepository;
 
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
@@ -297,6 +303,45 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Assertions.assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
 	}
 
+	@Test
+	public void setUpSubscriptionExchange() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		String selector = "a=b";
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "");
+		serviceProvider.addLocalSubscription(localSubscription);
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
+		subscription.setExchangeName("subscription-exchange");
+
+		client.createQueue(serviceProviderName);
+
+		Match match = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REQUESTED);
+
+		when(matchRepository.findAllByServiceProviderNameAndSubscription_SubscriptionStatusIn(any(String.class), any(SubscriptionStatus.class))).thenReturn(Arrays.asList(match));
+
+		router.setUpSubscriptionExchanges(serviceProviderName);
+
+		assertThat(client.exchangeExists(subscription.getExchangeName())).isTrue();
+	}
+
+	@Test
+	public void tearDownSubscriptionExchange() {
+		String serviceProviderName = "my-service-provider";
+		String selector = "a=b";
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector);
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN);
+		subscription.setExchangeName("subscription-exchange");
+
+		client.createQueue(serviceProviderName);
+
+		Match match = new Match(localSubscription, subscription, MatchStatus.TEAR_DOWN);
+
+		when(matchRepository.findAllByServiceProviderNameAndStatus(any(String.class), any(MatchStatus.class))).thenReturn(Arrays.asList(match));
+
+		router.tearDownSubscriptionExchanges(serviceProviderName);
+
+		assertThat(client.exchangeExists(subscription.getExchangeName())).isFalse();
+	}
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(

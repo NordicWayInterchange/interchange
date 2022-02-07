@@ -44,42 +44,44 @@ public class TypeTransformer {
     private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : subscriptions) {
-            String sub_id = subscription.getSub_id() == null ? null : subscription.getSub_id().toString();
+            String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
             result.add(new LocalActorSubscription(
                     sub_id,
                     createSubscriptionPath(name,sub_id),
                     subscription.getSelector(),
+                    subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())));
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())));
         }
         return result;
     }
 
 
-    public LocalSubscription transformSelectorApiToLocalSubscription(String serviceProviderName, SelectorApi selectorApi) {
+    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                selectorApi.getSelector(),
-                serviceProviderName);
+                addSubscription.getSelector(),
+                addSubscription.getConsumerCommonName());
     }
 
     public AddSubscriptionsResponse transformLocalSubscriptionsToSubscriptionPostResponseApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         return new AddSubscriptionsResponse(serviceProviderName,
-                tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(
+                transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(
                         serviceProviderName,
                         localSubscriptions)
         );
     }
 
-    private Set<LocalActorSubscription> tranformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
+    public Set<LocalActorSubscription> transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(String serviceProviderName, Set<LocalSubscription> localSubscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : localSubscriptions) {
-            String subscriptionId = subscription.getSub_id().toString();
+            String subscriptionId = subscription.getId().toString();
             result.add(new LocalActorSubscription(
                     subscriptionId,
                     createSubscriptionPath(serviceProviderName, subscriptionId),
                     subscription.getSelector(),
+                    subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
-                    transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(subscription.getStatus())
+                    transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())
                     )
             );
         }
@@ -100,27 +102,28 @@ public class TypeTransformer {
 
     public GetSubscriptionResponse transformLocalSubscriptionToGetSubscriptionResponse(String serviceProviderName, LocalSubscription localSubscription) {
         return new GetSubscriptionResponse(
-                localSubscription.getSub_id().toString(),
-                createSubscriptionPath(serviceProviderName,localSubscription.getSub_id().toString()),
+                localSubscription.getId().toString(),
+                createSubscriptionPath(serviceProviderName,localSubscription.getId().toString()),
                 localSubscription.getSelector(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
-                transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
-                transformLocalBrokersToEndpoints(localSubscription.getLocalBrokers())
+                transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
+                transformLocalEndpointsToLocalEndpointApis(localSubscription.getLocalEndpoints())
         );
     }
 
-    private Set<Endpoint> transformLocalBrokersToEndpoints(Set<LocalBroker> localBrokers) {
-        Set<Endpoint> result = new HashSet<>();
-        for (LocalBroker broker : localBrokers) {
-            result.add(new Endpoint(broker.getMessageBrokerUrl(),
-                    broker.getQueueName(),
-                    broker.getMaxBandwidth(),
-                    broker.getMaxMessageRate()));
+    private Set<LocalEndpointApi> transformLocalEndpointsToLocalEndpointApis(Set<LocalEndpoint> localEndpoints) {
+        Set<LocalEndpointApi> result = new HashSet<>();
+        for (LocalEndpoint localEndpoint : localEndpoints) {
+            result.add(new LocalEndpointApi(localEndpoint.getHost(),
+                    localEndpoint.getPort(),
+                    localEndpoint.getSource(),
+                    localEndpoint.getMaxBandwidth(),
+                    localEndpoint.getMaxMessageRate()));
         }
         return result;
     }
 
-    private LocalActorSubscriptionStatusApi transformLocalSubscriptionStaturToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {
+    private LocalActorSubscriptionStatusApi transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {
         switch (status) {
             case REQUESTED:
                 return LocalActorSubscriptionStatusApi.REQUESTED;

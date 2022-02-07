@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,15 +35,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(controllers = OnboardRestController.class)
-@ContextConfiguration(classes = {CertService.class, OnboardRestController.class})
+@ContextConfiguration(classes = {CertService.class, OnboardRestController.class, InterchangeNodeProperties.class})
 public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;
 
 	@MockBean
 	private ServiceProviderRepository serviceProviderRepository;
-	@MockBean
-	private SelfService selfService;
 
 	@Autowired
 	private OnboardRestController onboardRestController;
@@ -93,7 +91,6 @@ public class OnboardRestControllerTest {
 			}
 			return s;
 		});
-		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
 		mockMvc.perform(
 				post(String.format("/%s/capabilities", firstServiceProvider))
@@ -119,7 +116,6 @@ public class OnboardRestControllerTest {
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
 		secondServiceProvider.setCapabilities(secondServiceProviderCapabilities);
-		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
 		doReturn(secondServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
@@ -130,6 +126,7 @@ public class OnboardRestControllerTest {
 						.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isNoContent());
+
 	}
 
 	@Test
@@ -161,10 +158,11 @@ public class OnboardRestControllerTest {
 		String firstServiceProvider = "FirstServiceProvider";
 		mockCertificate(firstServiceProvider);
 
-		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'");
+		String selector = "messageType = 'DATEX2' and originatingCountry = 'SE'";
+		AddSubscription subscription1 = new AddSubscription("ixn", selector);
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProvider,
-				Collections.singleton(selectorApi)
+				Collections.singleton(subscription1)
 		);
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);
@@ -175,12 +173,11 @@ public class OnboardRestControllerTest {
 			s.setId(1);
 			int j = 0;
 			for (LocalSubscription subscription : s.getSubscriptions()) {
-				subscription.setSub_id(j++);
+				subscription.setId(j++);
 				subscription.setLastUpdated(LocalDateTime.now());
 			}
 			return s;
 		});
-		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
 		mockMvc.perform(
 				post(String.format("/%s/subscriptions", firstServiceProvider))
@@ -198,7 +195,8 @@ public class OnboardRestControllerTest {
 
 		AddSubscriptionsRequest request = new AddSubscriptionsRequest(
 				firstServiceProvider,
-				Collections.singleton(new SelectorApi(
+				Collections.singleton(new AddSubscription(
+						"ixn",
 						"originatingCountry = 'NO'"
 				))
 		);
@@ -249,9 +247,6 @@ public class OnboardRestControllerTest {
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
 
 		//Self
-		Self self = new Self("this-server-name");
-		self.setLocalSubscriptions(serviceProviderSubscriptionRequest);//same subscriptions as the service provider
-		doReturn(self).when(selfService).fetchSelf();
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
 		// Subscription request api posted to the server
@@ -273,7 +268,6 @@ public class OnboardRestControllerTest {
 		// The existing subscriptions of the Service Provider
 		ServiceProvider firstServiceProvider = new ServiceProvider(firstServiceProviderName);
 		doReturn(firstServiceProvider).when(serviceProviderRepository).findByName(any(String.class));
-		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
 		// Subscription request api posted to the server
 
@@ -293,7 +287,6 @@ public class OnboardRestControllerTest {
 
 		// The existing subscriptions of the Service Provider
 		doReturn(null).when(serviceProviderRepository).findByName(any(String.class));
-		when(selfService.fetchSelf()).thenReturn(new Self("myName"));
 
 		// Subscription request api posted to the server
 
@@ -312,10 +305,11 @@ public class OnboardRestControllerTest {
 		String secondServiceProviderName = "SecondServiceProvider";
 		mockCertificate(secondServiceProviderName);
 
-		SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' and originatingCountry = 'SE'");
+		String selector = "messageType = 'DATEX2' and originatingCountry = 'SE'";
+		AddSubscription addSubscription = new AddSubscription("ixn", selector);
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProviderName,
-				Collections.singleton(selectorApi)
+				Collections.singleton(addSubscription)
 		);
 
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(requestApi);

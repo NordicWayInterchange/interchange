@@ -46,7 +46,6 @@ public class NeighbourRESTFacadeTest {
 			subscriptionRequestTransformer);
 
 	private Neighbour ericsson;
-	private Self self;
 
 	private MockRestServiceServer server;
 
@@ -55,9 +54,6 @@ public class NeighbourRESTFacadeTest {
 		ericsson = new Neighbour();
 		ericsson.setName("ericsson.itsinterchange.eu");
 		ericsson.setControlChannelPort("8080");
-
-		self = new Self();
-
 		this.server = MockRestServiceServer.createServer(restTemplate);
 	}
 
@@ -73,7 +69,7 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
 		CapabilityApi capabilityApi = new DatexCapabilityApi("NO");
-		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(capabilityApi));
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("ericsson.itsinterchange.eu", Collections.singleton(capabilityApi));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
@@ -82,7 +78,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self );
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", Collections.emptySet());
 
 		assertThat(res.getCapabilities()).hasSize(1);
 
@@ -96,7 +92,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDenmCapabilities() throws Exception {
 		DenmCapabilityApi capbility = new DenmCapabilityApi("NO-123123", "NO", "P1", Sets.newSet("aaa"), Sets.newSet("road"));
-		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(capbility));
+		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("ericsson.itsinterchange.eu", Collections.singleton(capbility));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
 
@@ -105,7 +101,8 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
+		Set<Capability> localCapabilities = Collections.emptySet();
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 
 		assertThat(res.getCapabilities()).hasSize(1);
 
@@ -128,7 +125,8 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
+		Set<Capability> localCapabilities = Collections.emptySet();
+		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 
 		assertThat(res.getCapabilities()).hasSize(1);
 
@@ -144,7 +142,7 @@ public class NeighbourRESTFacadeTest {
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
 		subscription.setId(1);
 		subscription.setPath("bouvet/subscriptions/1");
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, "ericsson.itsinterchange.eu", "bouvet");
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, "ericsson.itsinterchange.eu", "bouvet", "5671");
 		String remoteServerJson = new ObjectMapper().writeValueAsString(responseApi);
 
 		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/bouvet/subscriptions/1"))
@@ -170,7 +168,8 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
+			Set<Capability> localCapabilities = Collections.emptySet();
+			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 		});
 	}
 
@@ -188,7 +187,7 @@ public class NeighbourRESTFacadeTest {
 		Set<Subscription> subscriptionSet = Collections.emptySet();
 
 		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, self.getName());
+			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, "localserver");
 		});
 	}
 
@@ -210,7 +209,7 @@ public class NeighbourRESTFacadeTest {
 
 
 		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, self.getName());
+			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptionSet, "localserver");
 		});
 	}
 
@@ -230,7 +229,7 @@ public class NeighbourRESTFacadeTest {
 				.andRespond((request) -> mock);
 
 		assertThatExceptionOfType(SubscriptionRequestException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptions, self.getName());
+			neighbourRESTFacade.postSubscriptionRequest(ericsson, subscriptions, "localserver");
 		});
 	}
 
@@ -245,7 +244,8 @@ public class NeighbourRESTFacadeTest {
 				.andRespond((request) -> mock);
 
 		assertThatExceptionOfType(CapabilityPostException.class).isThrownBy(() -> {
-			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, self);
+			Set<Capability> localCapabilities = Collections.emptySet();
+			neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 		});
 	}
 

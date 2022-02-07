@@ -268,7 +268,6 @@
         <module>debugclient</module>
         <module>message-collector</module>
         <module>quadtree-tool</module>
-        <module>onboard-service</module>
         <module>onboard-rest-api</module>
         <module>onboard-server</module>
         <module>onboard-server-app</module>

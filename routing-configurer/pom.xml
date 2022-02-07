@@ -20,19 +20,12 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>onboard-service</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
+       <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>ssl-utils</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>

@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
@@ -19,10 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +34,7 @@ public class NeigbourDiscoveryService {
     private final InterchangeNodeProperties interchangeNodeProperties;
     private final GracefulBackoffProperties backoffProperties;
     private final NeighbourDiscovererProperties discovererProperties;
+    private final MatchRepository matchRepository;
 
     @Autowired
     public NeigbourDiscoveryService(DNSFacade dnsFacade,
@@ -43,13 +42,14 @@ public class NeigbourDiscoveryService {
                                     ListenerEndpointRepository listenerEndpointRepository,
                                     InterchangeNodeProperties interchangeNodeProperties,
                                     GracefulBackoffProperties backoffProperties,
-                                    NeighbourDiscovererProperties discovererProperties) {
+                                    NeighbourDiscovererProperties discovererProperties, MatchRepository matchRepository) {
         this.dnsFacade = dnsFacade;
         this.neighbourRepository = neighbourRepository;
         this.listenerEndpointRepository = listenerEndpointRepository;
         this.interchangeNodeProperties = interchangeNodeProperties;
         this.backoffProperties = backoffProperties;
         this.discovererProperties = discovererProperties;
+        this.matchRepository = matchRepository;
     }
     public void checkForNewNeighbours() {
         logger.info("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
@@ -69,23 +69,23 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void capabilityExchangeWithNeighbours(Self self, NeighbourFacade neighbourFacade) {
+    public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
                 Capabilities.CapabilitiesStatus.UNKNOWN,
                 Capabilities.CapabilitiesStatus.KNOWN,
                 Capabilities.CapabilitiesStatus.FAILED);
-        capabilityExchange(neighboursForCapabilityExchange, self, neighbourFacade);
+        capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
-    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Self self, NeighbourFacade neighbourFacade) {
+    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         for (Neighbour neighbour : neighboursForCapabilityExchange) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-                    if (neighbour.needsOurUpdatedCapabilities(self.getLastUpdatedLocalCapabilities())) {
+                    if (neighbour.needsOurUpdatedCapabilities(lastUpdatedLocalCapabilities)) {
                         logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
-                        postCapabilities(self, neighbour, neighbourFacade);
+                        postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), localCapabilities);
                     } else {
                         logger.debug("Neighbour has our last capabilities");
                     }
@@ -100,14 +100,14 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void retryUnreachable(Self self, NeighbourFacade neighbourFacade) {
+    public void retryUnreachable(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities) {
         List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
         if (!unreachableNeighbours.isEmpty()) {
             logger.info("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
             for (Neighbour neighbour : unreachableNeighbours) {
                 try {
                     NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-                    postCapabilities(self, neighbour, neighbourFacade);
+                    postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), localCapabilities);
                 } catch (Exception e) {
                     logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
                 } finally {
@@ -117,9 +117,9 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    private void postCapabilities(Self self, Neighbour neighbour, NeighbourFacade neighbourFacade) {
+    private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<Capability> localCapabilities) {
         try {
-            Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, self);
+            Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             capabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.setCapabilities(capabilities);
             neighbour.getControlConnection().okConnection();
@@ -135,15 +135,14 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Self self, NeighbourFacade neighbourFacade) {
-        Optional<LocalDateTime> lastUpdatedLocalSubscriptions = self.getLastUpdatedLocalSubscriptions();
+    public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
                     if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
-                        postSubscriptionRequest(neighbour, self, neighbourFacade);
+                        postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
                     } else {
                         logger.debug("No need to calculateCustomSubscriptionForNeighbour based on timestamps on local subscriptions, neighbour capabilities, last subscription request");
                     }
@@ -159,33 +158,43 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void postSubscriptionRequest(Neighbour neighbour, Self self, NeighbourFacade neighbourFacade) {
-        logger.info("Found neighbour for subscription request: {}", neighbour.getName());
-        Set<Subscription> wantedSubscriptions = calculateCustomSubscriptionForNeighbour(neighbour, self.getLocalSubscriptions());
-        Set<Subscription> existingSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+    public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
+        String neighbourName = neighbour.getName();
+        Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
+        SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
+        logger.info("Found neighbour for subscription request: {}", neighbourName);
+        Set<Subscription> wantedSubscriptions = calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, neighbourName);
+        Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
             Set<Subscription> subscriptionsToRemove = new HashSet<>(existingSubscriptions);
             subscriptionsToRemove.removeAll(wantedSubscriptions);
             for (Subscription subscription : subscriptionsToRemove) {
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
             }
+            Connection controlConnection = neighbour.getControlConnection();
             try {
-                if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
+                if (controlConnection.canBeContacted(backoffProperties)) {
                     Set<Subscription> additionalSubscriptions = new HashSet<>(wantedSubscriptions);
                     additionalSubscriptions.removeAll(existingSubscriptions);
                     if (!additionalSubscriptions.isEmpty()) {
-                        SubscriptionRequest subscriptionRequestResponse = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, self.getName());
-                        subscriptionRequestResponse.setSuccessfulRequest(LocalDateTime.now());
-                        neighbour.getOurRequestedSubscriptions().addNewSubscriptions(subscriptionRequestResponse.getSubscriptions());
+                        Set<Subscription> responseSubscriptions = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
+                        for(Subscription subscription : responseSubscriptions) {
+                            String exchangeName = UUID.randomUUID().toString();
+                            subscription.setExchangeName(exchangeName);
+                        }
+                        ourRequestedSubscriptionsFromNeighbour.addNewSubscriptions(responseSubscriptions);
+                        ourRequestedSubscriptionsFromNeighbour.setSuccessfulRequest(LocalDateTime.now());
+                        //TODO we never changed the subscription status. We don't now either. Is that OK?
+
                     }
-                    neighbour.getControlConnection().okConnection();
+                    controlConnection.okConnection();
                     logger.info("Successfully posted subscription request to neighbour.");
                 } else {
                     logger.info("Too soon to post subscription request to neighbour when backing off");
                 }
             } catch (SubscriptionRequestException e) {
-                neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.FAILED);
-                neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
+                ourRequestedSubscriptionsFromNeighbour.setStatus(SubscriptionRequestStatus.FAILED);
+                controlConnection.failedConnection(backoffProperties.getNumberOfAttempts());
                 logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
             }
             // Successful subscription request, update discovery state subscription request timestamp.
@@ -196,9 +205,8 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    Set<Subscription> calculateCustomSubscriptionForNeighbour(Neighbour neighbour, Set<LocalSubscription> localSubscriptions) {
-        logger.info("Calculating custom subscription for neighbour: {}", neighbour.getName());
-        Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
+    Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<Capability> neighbourCapabilities, String neighbourName) {
+        logger.info("Calculating custom subscription for neighbour: {}", neighbourName);
         logger.debug("Neighbour capabilities {}", neighbourCapabilities);
         logger.debug("Local subscriptions {}", localSubscriptions);
         Set<LocalSubscription> existingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
@@ -209,7 +217,7 @@ public class NeigbourDiscoveryService {
                     subscription.getConsumerCommonName());
             calculatedSubscriptions.add(newSubscription);
         }
-        logger.info("Calculated custom subscription for neighbour {}: {}", neighbour.getName(), calculatedSubscriptions);
+        logger.info("Calculated custom subscription for neighbour {}: {}", neighbourName, calculatedSubscriptions);
         return calculatedSubscriptions;
     }
 
@@ -245,14 +253,14 @@ public class NeigbourDiscoveryService {
                         subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
                         subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
                         subscription.setConsumerCommonName(polledSubscription.getConsumerCommonName());
-                        subscription.setBrokers(polledSubscription.getBrokers());
+                        subscription.setEndpoints(polledSubscription.getEndpoints());
                         subscription.setLastUpdatedTimestamp(polledSubscription.getLastUpdatedTimestamp());
                         neighbour.getControlConnection().okConnection();
                         if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
                             logger.info("Subscription for neighbour {} with path {} is CREATED",neighbour.getName(),subscription.getPath());
                             if (polledSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getBrokers());
-                                createListenerEndpointFromBrokersList(neighbour, polledSubscription.getBrokers());
+                                logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getEndpoints());
+                                createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                             }
                         }
                         //utvide med ListenerEndpoint lookup + lage ny om det trengs
@@ -274,15 +282,15 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void createListenerEndpointFromBrokersList(Neighbour neighbour, Set<Broker> brokers) {
-        for(Broker broker : brokers) {
-            createListenerEndpoint(broker.getMessageBrokerUrl(), broker.getQueueName(), neighbour);
+    public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
+        for(Endpoint endpoint : endpoints) {
+            createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour);
         }
     }
 
-    public void createListenerEndpoint(String brokerUrl, String queueName, Neighbour neighbour) {
-        if(listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), brokerUrl, queueName) == null){
-            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), brokerUrl, queueName, new Connection()));
+    public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
+        if(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), host, port, source) == null){
+            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
             logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
         }
     }
@@ -314,23 +322,26 @@ public class NeigbourDiscoveryService {
                 try {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
-                        if (!lastUpdatedSubscription.getBrokers().isEmpty() || !subscription.getBrokers().equals(lastUpdatedSubscription.getBrokers())) {
+                        if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                             //if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
                             logger.info("Polled updated subscription with id {}", subscription.getId());
-                            Set<Broker> wantedBrokers = lastUpdatedSubscription.getBrokers();
-                            Set<Broker> existingBrokers = subscription.getBrokers();
+                            Set<Endpoint> wantedEndpoints = lastUpdatedSubscription.getEndpoints();
+                            Set<Endpoint> existingEndpoints = subscription.getEndpoints();
 
-                            Set<Broker> brokersToRemove = new HashSet<>(existingBrokers);
-                            brokersToRemove.removeAll(wantedBrokers);
-                            tearDownListenerEndpointsFromBrokersList(neighbour, brokersToRemove);
+                            Set<Endpoint> endpointsToRemove = new HashSet<>(existingEndpoints);
+                            endpointsToRemove.removeAll(wantedEndpoints);
+                            tearDownListenerEndpointsFromEndpointsList(neighbour, endpointsToRemove);
 
-                            Set<Broker> additionalBrokers = new HashSet<>(wantedBrokers);
-                            additionalBrokers.removeAll(existingBrokers);
-                            createListenerEndpointFromBrokersList(neighbour, additionalBrokers);
-                            subscription.setBrokers(wantedBrokers);
+                            Set<Endpoint> additionalEndpoints = new HashSet<>(wantedEndpoints);
+                            additionalEndpoints.removeAll(existingEndpoints);
+                            createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints, subscription.getExchangeName());
+                            subscription.setEndpoints(wantedEndpoints);
                             //} else {
                             //	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
                             //}
+                        } else {
+                            subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                            logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                         }
                     }
                 } catch (SubscriptionPollException e) {
@@ -346,11 +357,11 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void tearDownListenerEndpointsFromBrokersList(Neighbour neighbour, Set<Broker> brokers) {
-        for(Broker broker : brokers) {
-            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndBrokerUrlAndQueue(neighbour.getName(), broker.getMessageBrokerUrl(), broker.getQueueName());
+    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+        for(Endpoint endpoint : endpoints) {
+            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource());
             listenerEndpointRepository.delete(listenerEndpoint);
-            logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), broker.getMessageBrokerUrl(), broker.getQueueName());
+            logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", neighbour.getName(), endpoint.getHost(), endpoint.getSource());
         }
     }
 
@@ -362,8 +373,11 @@ public class NeigbourDiscoveryService {
                 for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                     if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
                         try{
-                            neighbourFacade.deleteSubscription(neighbour, subscription);
-                            subscriptionsToDelete.add(subscription);
+                            Match match = matchRepository.findBySubscriptionId(subscription.getId());
+                            if (match == null) {
+                                neighbourFacade.deleteSubscription(neighbour, subscription);
+                                subscriptionsToDelete.add(subscription);
+                            }
                         } catch(SubscriptionDeleteException e) {
                             logger.error("Exception when deleting subscription {} to neighbour {}", subscription.getId(), neighbour.getName(), e);
                         }
@@ -385,12 +399,13 @@ public class NeigbourDiscoveryService {
         List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
         Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
 
-        Set<String> brokerUrlList = subscriptions.stream().flatMap(subscription -> subscription.getBrokers().stream()).map(Broker::getMessageBrokerUrl).collect(Collectors.toSet());
+        Set<String> sourceList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getSource).collect(Collectors.toSet());
+        Set<String> hostList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getHost).collect(Collectors.toSet());
 
         for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
-            if (!brokerUrlList.contains(listenerEndpoint.getBrokerUrl())) {
+            if (!sourceList.contains(listenerEndpoint.getSource()) && !hostList.contains(listenerEndpoint.getHost())) {
                 listenerEndpointRepository.delete(listenerEndpoint);
-                logger.info("Tearing down listenerEndpoint for neighbour {} with brokerUrl {} and queue {}", neighbour.getName(), listenerEndpoint.getBrokerUrl(), listenerEndpoint.getQueue());
+                logger.info("Tearing down listenerEndpoint for neighbour {} with host {}, port {} and source {}", neighbour.getName(), listenerEndpoint.getHost(), listenerEndpoint.getPort(), listenerEndpoint.getSource());
             }
         }
     }

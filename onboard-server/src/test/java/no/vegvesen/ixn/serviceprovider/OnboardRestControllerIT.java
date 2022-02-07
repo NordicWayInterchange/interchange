@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.onboard.SelfService;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
@@ -30,9 +29,6 @@ public class OnboardRestControllerIT {
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
-
-    @Autowired
-    private SelfService selfService;
 
     @MockBean
     private CertService certService;
@@ -85,9 +81,10 @@ public class OnboardRestControllerIT {
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
-        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscription addSubscription = new AddSubscription("ixn", selector);
 
-        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(selectorApi));
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         restController.addSubscriptions(serviceProviderName, requestApi);
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
@@ -108,7 +105,7 @@ public class OnboardRestControllerIT {
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 		        serviceProviderName,
-                Collections.singleton(new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'"))
+                Collections.singleton(new AddSubscription("ixn", "messageType = 'DATEX2' AND originatingCountry = 'NO'"))
         );
         restController.addSubscriptions(serviceProviderName, requestApi);
 
@@ -130,8 +127,8 @@ public class OnboardRestControllerIT {
 	@Test
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
-        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
+        String selector= "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription("service-provider-create-new-queue", selector))));
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -150,8 +147,7 @@ public class OnboardRestControllerIT {
     @Test
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
-        SelectorApi selectorApi = new SelectorApi("messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(selectorApi)));
-
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription("ixn", selector))));
     }
 }

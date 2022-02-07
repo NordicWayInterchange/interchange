@@ -17,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
@@ -164,5 +163,13 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		acl = client.getQpidAcl();
 		assertThat(acl.containsRule(QpidAcl.createQueueWriteAccessRule(subscriberName,queueName))).isFalse();
+	}
+
+	@Test
+	public void testRemovingDirectExchange() {
+		client._createDirectExchange("my-exchange");
+		client.removeDirectExchange("my-exchange");
+
+		assertThat(client.exchangeExists("my-exchange")).isFalse();
 	}
 }

@@ -1,13 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.IviCapabilityApi;
-import no.vegvesen.ixn.federation.model.Capability;
-import no.vegvesen.ixn.federation.model.DatexCapability;
-import no.vegvesen.ixn.federation.model.DenmCapability;
-import no.vegvesen.ixn.federation.model.IviCapability;
+import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +14,7 @@ public class CapabilityToCapabilityApiTransformer {
 	public CapabilityToCapabilityApiTransformer() {
 	}
 
-	Set<CapabilityApi> capabilitiesToCapabilityApis(Set<Capability> capabilities) {
+	public Set<CapabilityApi> capabilitiesToCapabilityApis(Set<Capability> capabilities) {
 		Set<CapabilityApi> apis = new HashSet<>();
 		for (Capability capability : capabilities) {
 			CapabilityApi capabilityApi = capability.toApi();
@@ -40,18 +34,41 @@ public class CapabilityToCapabilityApiTransformer {
 		return capabilities;
 	}
 
+	//TODO: Re-evaluate, put in null-checks on RedirectStatus but that should not be there now?
 	public Capability capabilityApiToCapability(CapabilityApi capabilityApi) {
 		if (capabilityApi instanceof DatexCapabilityApi){
-			return new DatexCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((DatexCapabilityApi) capabilityApi).getPublicationType());
+			if(capabilityApi.getRedirect() != null){
+				return new DatexCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((DatexCapabilityApi) capabilityApi).getPublicationType());
+			} else {
+				return new DatexCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((DatexCapabilityApi) capabilityApi).getPublicationType());
+			}
 		}
 		else if (capabilityApi instanceof DenmCapabilityApi) {
-			return new DenmCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((DenmCapabilityApi) capabilityApi).getCauseCode());
+			if(capabilityApi.getRedirect() != null) {
+				return new DenmCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((DenmCapabilityApi) capabilityApi).getCauseCode());
+			} else {
+				return new DenmCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((DenmCapabilityApi) capabilityApi).getCauseCode());
+			}
 		}
 		else if (capabilityApi instanceof IviCapabilityApi) {
-			return new IviCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((IviCapabilityApi) capabilityApi).getIviType());
+			if(capabilityApi.getRedirect() != null) {
+				return new IviCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((IviCapabilityApi) capabilityApi).getIviType());
+			} else {
+				return new IviCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), ((IviCapabilityApi) capabilityApi).getIviType());
+			}
 		}
 		throw new RuntimeException("Subclass of CapabilityApi not possible to convert: " + capabilityApi.getClass().getSimpleName());
 	}
 
+	private RedirectStatus transformRedirectStatusApiToRedirectStatus(RedirectStatusApi status) {
+		switch (status) {
+			case MANDATORY:
+				return RedirectStatus.MANDATORY;
+			case NOT_AVAILABLE:
+				return RedirectStatus.NOT_AVAILABLE;
+			default:
+				return RedirectStatus.OPTIONAL;
+		}
+	}
 
 }

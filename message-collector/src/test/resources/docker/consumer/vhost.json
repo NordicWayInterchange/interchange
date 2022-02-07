@@ -4,7 +4,7 @@
   "modelVersion": "7.0",
   "exchanges": [
     {
-      "name": "incomingExchange",
+      "name": "subscriptionExchange",
       "type": "headers",
       "durable": true,
       "durableBindings": [

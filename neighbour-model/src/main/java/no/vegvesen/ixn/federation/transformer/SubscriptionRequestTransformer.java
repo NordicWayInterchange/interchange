@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
-import no.vegvesen.ixn.federation.model.Broker;
+import no.vegvesen.ixn.federation.model.Endpoint;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
 import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
@@ -38,10 +38,6 @@ public class SubscriptionRequestTransformer {
 	}
 
 
-	public SubscriptionRequest subscriptionResponseApiToSubscriptionRequest(SubscriptionResponseApi responseApi, SubscriptionRequestStatus status) {
-		return new SubscriptionRequest(status,subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions()));
-	}
-
 	public SubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 		return subscriptionRequest;
@@ -55,33 +51,34 @@ public class SubscriptionRequestTransformer {
 		subscription.setLastUpdatedTimestamp(subscriptionApi.getLastUpdatedTimestamp());
 		subscription.setConsumerCommonName(subscriptionApi.getConsumerCommonName());
 
-		Set<Broker> brokers = new HashSet<>();
-		for(BrokerApi brokerApi : subscriptionApi.getBrokers()){
-			Broker broker = new Broker(brokerApi.getQueueName(), brokerApi.getMessageBrokerUrl());
-			if(brokerApi.getMaxBandwidth() != null && brokerApi.getMaxMessageRate() != null) {
-				broker.setMaxBandwidth(brokerApi.getMaxBandwidth());
-				broker.setMaxMessageRate(brokerApi.getMaxMessageRate());
+		Set<Endpoint> endpoints = new HashSet<>();
+		for(EndpointApi endpointApi : subscriptionApi.getEndpoints()){
+			Endpoint endpoint = new Endpoint(endpointApi.getSource(), endpointApi.getHost(), endpointApi.getPort());
+			if(endpointApi.getMaxBandwidth() != null && endpointApi.getMaxMessageRate() != null) {
+				endpoint.setMaxBandwidth(endpointApi.getMaxBandwidth());
+				endpoint.setMaxMessageRate(endpointApi.getMaxMessageRate());
 			}
-			brokers.add(broker);
+			endpoints.add(endpoint);
 		}
-		subscription.setBrokers(brokers);
+		subscription.setEndpoints(endpoints);
 		return subscription;
 
 	}
 
-	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelUrl) {
+	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelHost, String messageChannelPort) {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
-		response.setConsumerCommonName(response.getConsumerCommonName());
+		response.setConsumerCommonName(subscription.getConsumerCommonName());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			BrokerApi broker = new BrokerApi(
+			EndpointApi endpointApi = new EndpointApi(
 					neighbourName,
-					messageChannelUrl
+					messageChannelHost,
+					Integer.parseInt(messageChannelPort)
 			);
-			response.setBrokers(Collections.singleton(broker));
+			response.setEndpoints(Collections.singleton(endpointApi));
 		}
 		return response;
 	}

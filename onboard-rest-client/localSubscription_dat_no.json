@@ -1,3 +1,9 @@
-{
-  "selector": "messageType = 'DATEX2' AND originatingCountry = 'NO' AND (quadTree like '%,01220123%')"
+{	"name" : "king_gustaf.bouvetinterchange.eu",
+    "version" : "1.0",
+    "subscriptions" : [
+    {
+        "consumerCommonName" : "remote.bouvetinterchange.eu",
+        "selector" : "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'"
+
+    }]
 }

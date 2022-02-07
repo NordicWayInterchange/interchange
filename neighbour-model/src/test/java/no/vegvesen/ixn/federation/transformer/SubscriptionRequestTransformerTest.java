@@ -5,17 +5,14 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(MockitoExtension.class)
 public class SubscriptionRequestTransformerTest {
 
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
@@ -51,13 +48,13 @@ public class SubscriptionRequestTransformerTest {
 	}
 
 	@Test
-	public void emptySubscriptionsToSubscriptionRequestApi() {
+	public void emptySubscriptionResponseApiToSubscriptions() {
 		String name = "myNode";
 		SubscriptionResponseApi responseApi = subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(name,Collections.emptySet());
 		assertThat(responseApi.getName()).isEqualTo(name);
 		assertThat(responseApi.getSubscriptions()).isEmpty();
-		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionResponseApiToSubscriptionRequest(responseApi,SubscriptionRequestStatus.REQUESTED);
-		assertThat(result.getSubscriptions()).isEmpty();
+		Set<Subscription> subscriptions = subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions());
+		assertThat(subscriptions).isEmpty();
 	}
 
 	@Test
@@ -68,7 +65,7 @@ public class SubscriptionRequestTransformerTest {
 		String path = "myName/subscriptions/1";
 		String consumerCommonName = "myName";
 		Subscription subscription = new Subscription(1,SubscriptionStatus.REQUESTED,selector,path,consumerCommonName);
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, thisNodeName);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, thisNodeName, "5671");
 		assertThat(responseApi.getPath()).isEqualTo(path);
 		assertThat(responseApi.getSelector()).isEqualTo(selector);
 		assertThat(responseApi.getStatus()).isEqualTo(SubscriptionStatusApi.REQUESTED);
@@ -81,13 +78,15 @@ public class SubscriptionRequestTransformerTest {
 	@Test
 	public void subscriptionPollResponseApiWithStatusCreated() {
 		String neighbourName = "myNeighbour";
-		String brokerUrl = "amqps://myName";
+		String hostName = "myName";
+		String port = "5671";
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
 		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path, "myNeighbour");
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, brokerUrl);
-		assertThat(responseApi.getBrokers().size()).isEqualTo(1);
-		assertThat(new ArrayList<>(responseApi.getBrokers()).get(0).getMessageBrokerUrl()).isEqualTo(brokerUrl);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription, neighbourName, hostName, port);
+		assertThat(responseApi.getEndpoints().size()).isEqualTo(1);
+		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getHost()).isEqualTo(hostName);
+		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getPort().toString()).isEqualTo(port);
 	}
 
 	@Test
@@ -101,7 +100,7 @@ public class SubscriptionRequestTransformerTest {
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 
 		SubscriptionResponseApi response = subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi("bouvet", Collections.singleton(subscription));
-		assertThat(response.getVersion()).isEqualTo("1.1NW3");
+		assertThat(response.getVersion()).isEqualTo("1.3NW3");
 		assertThat(response.getName()).isEqualTo("bouvet");
 		assertThat(response.getSubscriptions()).hasSize(1);
 

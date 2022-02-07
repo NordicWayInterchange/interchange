@@ -9,6 +9,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestedSubscriptionApi {
+
+
     private String selector;
 
     @JsonInclude(Include.NON_NULL)

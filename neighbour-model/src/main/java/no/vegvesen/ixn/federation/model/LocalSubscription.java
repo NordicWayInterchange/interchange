@@ -14,7 +14,7 @@ public class LocalSubscription {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsub_seq")
     @Column(name="id")
-    private Integer sub_id;
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
@@ -31,8 +31,8 @@ public class LocalSubscription {
 
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "locbrok_id", foreignKey = @ForeignKey(name = "fk_locbrok_sub"))
-    private Set<LocalBroker> localBrokers = new HashSet<>();
+    @JoinColumn(name = "locend_id", foreignKey = @ForeignKey(name = "fk_locend_sub"))
+    private Set<LocalEndpoint> localEndpoints = new HashSet<>();
 
     public LocalSubscription() {
 
@@ -50,32 +50,32 @@ public class LocalSubscription {
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
-        this.sub_id = id;
+        this.id = id;
         this.status = status;
         this.selector = selector;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
-        this.sub_id = id;
+        this.id = id;
         this.status = status;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
-        this.sub_id = id;
+        this.id = id;
         this.status = status;
         this.selector = selector;
         this.lastUpdated = lastUpdated;
     }
 
-    public LocalSubscription(Integer sub_id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalBroker> localBrokers) {
-        this.sub_id = sub_id;
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalEndpoint> localEndpoints) {
+        this.id = id;
         this.status = status;
         this.selector = selector;
         this.lastUpdated = lastUpdated;
         this.consumerCommonName = consumerCommonName;
-        this.localBrokers = localBrokers;
+        this.localEndpoints = localEndpoints;
     }
 
     public void setStatus(LocalSubscriptionStatus status) {
@@ -103,19 +103,19 @@ public class LocalSubscription {
         return consumerCommonName;
     }
 
-    public void setConsumerCommonName(String queueConsumerUser) {
-        this.consumerCommonName = queueConsumerUser;
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
 
-    public Set<LocalBroker> getLocalBrokers() {
-        return localBrokers;
+    public Set<LocalEndpoint> getLocalEndpoints() {
+        return localEndpoints;
     }
 
-    public void setBrokers(Set<LocalBroker> newLocalBrokers) {
-        this.localBrokers.clear();
-        if (newLocalBrokers != null) {
-            this.localBrokers.addAll(newLocalBrokers);
+    public void setLocalEndpoints(Set<LocalEndpoint> newLocalEndpoints) {
+        this.localEndpoints.clear();
+        if (newLocalEndpoints != null) {
+            this.localEndpoints.addAll(newLocalEndpoints);
         }
     }
 
@@ -139,14 +139,14 @@ public class LocalSubscription {
         return Objects.hash(status, selector, consumerCommonName);
     }
 
-    public Integer getSub_id() {
-        return sub_id;
+    public Integer getId() {
+        return id;
     }
 
     @Override
     public String toString() {
         return "LocalSubscription{" +
-                "sub_id=" + sub_id +
+                "id=" + id +
                 ", status=" + status +
                 ", selector=" + selector +
                 ", queueConsumerUser=" + consumerCommonName +
@@ -157,7 +157,7 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(sub_id, newStatus, selector, consumerCommonName);
+            return new LocalSubscription(id, newStatus, selector, consumerCommonName);
         }
     }
 
@@ -165,8 +165,8 @@ public class LocalSubscription {
         return lastUpdated;
     }
 
-    public void setSub_id(Integer sub_id) {
-        this.sub_id = sub_id;
+    public void setId(Integer sub_id) {
+        this.id = sub_id;
     }
 
     public void setLastUpdated(LocalDateTime lastUpdated) {

@@ -22,7 +22,7 @@ public class SubscriptionPollResponseApi {
     private long lastUpdatedTimestamp;
 
 
-    private Set<BrokerApi> brokers = Collections.emptySet();
+    private Set<EndpointApi> endpoints = Collections.emptySet();
 
     public SubscriptionPollResponseApi() {
     }
@@ -44,13 +44,13 @@ public class SubscriptionPollResponseApi {
                                        String path,
                                        SubscriptionStatusApi status,
                                        String consumerCommonName,
-                                       Set<BrokerApi> brokers) {
+                                       Set<EndpointApi> endpoints) {
         this.id = id;
         this.selector = selector;
         this.path = path;
         this.status = status;
         this.consumerCommonName = consumerCommonName;
-        this.brokers = brokers;
+        this.endpoints = endpoints;
     }
 
     public String getId() {
@@ -101,12 +101,12 @@ public class SubscriptionPollResponseApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public Set<BrokerApi> getBrokers() {
-        return brokers;
+    public Set<EndpointApi> getEndpoints() {
+        return endpoints;
     }
 
-    public void setBrokers(Set<BrokerApi> brokers) {
-        this.brokers = brokers;
+    public void setEndpoints(Set<EndpointApi> endpoints) {
+        this.endpoints = endpoints;
     }
 
     @Override
@@ -120,7 +120,7 @@ public class SubscriptionPollResponseApi {
                 path.equals(that.path) &&
                 status == that.status &&
                 Objects.equals(lastUpdatedTimestamp, that.lastUpdatedTimestamp) &&
-                Objects.equals(brokers, that.brokers);
+                Objects.equals(endpoints, that.endpoints);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class SubscriptionPollResponseApi {
                 path,
                 status,
                 lastUpdatedTimestamp,
-                brokers);
+                endpoints);
     }
 
     @Override
@@ -143,7 +143,7 @@ public class SubscriptionPollResponseApi {
                 ", path='" + path + '\'' +
                 ", status=" + status +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
-                ", brokers=" + brokers +
+                ", endpoints=" + endpoints +
                 '}';
     }
 }

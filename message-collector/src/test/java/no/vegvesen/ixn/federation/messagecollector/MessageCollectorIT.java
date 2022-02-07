@@ -5,10 +5,9 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.model.Connection;
-import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
-import no.vegvesen.ixn.federation.model.ListenerEndpoint;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -24,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -71,19 +71,22 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "amqps://localhost:" + producerPort.toString(), "localhost", new Connection());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", producerPort, new Connection(), "subscriptionExchange");
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
+
+		MatchRepository matchRepository = mock(MatchRepository.class);
+		when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
 				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
-				"incomingExchange");
+				"subscriptionExchange");
 
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");
@@ -115,18 +118,21 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Integer producerPort = producerContainer.getMappedPort(AMQPS_PORT);
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "amqps://localhost:" + producerPort.toString(), "localhost", new Connection());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection(), "subscriptionExchange");
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
+
+		MatchRepository matchRepository = mock(MatchRepository.class);
+		when(matchRepository.findBySubscription_ExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.CREATED));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
 				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
-				"incomingExchange");
-		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
+				"subscriptionExchange");
+		MessageCollector forwarder = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchRepository);
 		forwarder.runSchedule();
 
 		Source source = createSource(producerPort, "localhost", "sp_producer.p12");

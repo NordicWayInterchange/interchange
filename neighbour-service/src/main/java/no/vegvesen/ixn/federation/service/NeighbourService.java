@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
@@ -32,16 +33,22 @@ public class NeighbourService {
 	private CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
-
+	private InterchangeNodeProperties interchangeNodeProperties;
 
 	@Autowired
 	public NeighbourService(NeighbourRepository neighbourRepository,
-							DNSFacade dnsFacade) {
+							DNSFacade dnsFacade,
+							InterchangeNodeProperties interchangeNodeProperties) {
 		this.neighbourRepository = neighbourRepository;
 		this.dnsFacade = dnsFacade;
+		this.interchangeNodeProperties = interchangeNodeProperties;
 	}
 
-	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Self self) {
+	public List<Neighbour> findAllNeighbours() {
+		return neighbourRepository.findAll();
+	}
+
+	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Set<Capability> localCapabilities) {
 		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
@@ -58,7 +65,7 @@ public class NeighbourService {
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
-		return capabilitiesTransformer.selfToCapabilityApi(self);
+		return capabilitiesTransformer.selfToCapabilityApi(interchangeNodeProperties.getName(), localCapabilities);
 	}
 
 	Neighbour findNeighbour(String neighbourName) {
@@ -141,7 +148,7 @@ public class NeighbourService {
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 	}
 
-	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId, String messageChannelUrl) {
+	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, Integer subscriptionId) {
 		logger.info("Looking up polling Neighbour in DB.");
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
@@ -151,7 +158,10 @@ public class NeighbourService {
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),messageChannelUrl);
+			String messageChannelHost = interchangeNodeProperties.getName();
+			String messageChannelPort = interchangeNodeProperties.getMessageChannelPort();
+
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),messageChannelHost, messageChannelPort);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
