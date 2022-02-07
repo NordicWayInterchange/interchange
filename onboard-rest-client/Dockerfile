@@ -16,6 +16,7 @@ ADD localSubscription_dat_no.json /
 ADD false_localSubscription_dat_no.json /
 ADD local_private_channel.json /
 ADD remote_private_channel.json /
+ADD denm_no_delivery.json /
 ADD ivi_no_localSubscription.json /
 ADD denm_no_delivery.json /
 ENTRYPOINT ["/entrypoint.sh"]
