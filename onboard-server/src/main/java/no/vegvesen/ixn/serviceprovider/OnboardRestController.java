@@ -138,10 +138,10 @@ public class OnboardRestController {
 
 		logger.info("Service provider {} Incoming subscription selector {}", serviceProviderName, requestApi.getSubscriptions());
 
-		//LocalSubscription localSubscription = typeTransformer.transformSelectorApiToLocalSubscription(serviceProviderName,selector);
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
-			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription));
+			String queueName = UUID.randomUUID().toString();
+			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, queueName));
 		}
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);

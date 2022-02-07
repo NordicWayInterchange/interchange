@@ -58,8 +58,7 @@ public class TypeTransformer {
     }
 
 
-    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription) {
-        String queueName = UUID.randomUUID().toString();
+    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription, String queueName) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
                 addSubscription.getSelector(),
                 addSubscription.getConsumerCommonName(),
