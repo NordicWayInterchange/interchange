@@ -15,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class ExportServiceProvidersIT {
 
 
     @Test
-    @Disabled
+    @Transactional
     public void getServiceProviders() throws IOException {
         ServiceProvider serviceProvider = new ServiceProvider("testuser");
         serviceProvider.setCapabilities(
