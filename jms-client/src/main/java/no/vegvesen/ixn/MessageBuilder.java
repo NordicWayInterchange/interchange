@@ -111,4 +111,9 @@ public class MessageBuilder {
         message.setStringProperty(MessageProperty.PUBLICATION_SUB_TYPE.getName(), subType);
         return this;
     }
+
+    public MessageBuilder iviType(String iviType) throws JMSException {
+        message.setStringProperty(MessageProperty.IVI_TYPE.getName(), iviType);
+        return this;
+    }
 }

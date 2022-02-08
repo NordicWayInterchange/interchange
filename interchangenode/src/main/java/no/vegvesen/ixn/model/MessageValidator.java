@@ -31,8 +31,8 @@ public class MessageValidator {
 			case Constants.DENM:
 				mandatoryPropertyNames = MessageProperty.mandatoryDenmPropertyNames;
 				break;
-			case Constants.IVI:
-				mandatoryPropertyNames = MessageProperty.mandatoryIviPropertyNames;
+			case Constants.IVIM:
+				mandatoryPropertyNames = MessageProperty.mandatoryIvimPropertyNames;
 				break;
 			default:
 				return false;

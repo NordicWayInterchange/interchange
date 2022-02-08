@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.model.DatexCapability;
 import no.vegvesen.ixn.federation.model.DenmCapability;
-import no.vegvesen.ixn.federation.model.IviCapability;
+import no.vegvesen.ixn.federation.model.IvimCapability;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -32,7 +32,7 @@ public class MessageValidatingSelectorCreatorTest {
 
     @Test
     public void createIviMessageValidator() {
-        String selector = MessageValidatingSelectorCreator.makeSelector(new IviCapability(
+        String selector = MessageValidatingSelectorCreator.makeSelector(new IvimCapability(
                 "NO-123",
                 "NO",
                 "1.0",

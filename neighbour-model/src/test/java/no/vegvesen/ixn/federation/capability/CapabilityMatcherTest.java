@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
-import no.vegvesen.ixn.federation.model.DatexCapability;
-import no.vegvesen.ixn.federation.model.DenmCapability;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 
@@ -124,6 +121,14 @@ class CapabilityMatcherTest {
 				Sets.newLinkedHashSet(subscription)
 		);
 		assertThat(commonInterest).hasSize(1);
+	}
+
+	@Test
+	public void matchIviSelectorWithQuadTree() {
+		IvimCapability capability = new IvimCapability("NO-12345", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")), Sets.newHashSet(Collections.emptySet()));
+		LocalSubscription localSubscription = new LocalSubscription();
+		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%'");
+		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)));
 	}
 
 }

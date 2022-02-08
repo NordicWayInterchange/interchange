@@ -19,7 +19,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.CapabilityApi.*;
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = DatexCapabilityApi.class, name = Constants.DATEX_2),
 		@JsonSubTypes.Type(value = DenmCapabilityApi.class, name = Constants.DENM),
-		@JsonSubTypes.Type(value = IviCapabilityApi.class, name = Constants.IVI),
+		@JsonSubTypes.Type(value = IvimCapabilityApi.class, name = Constants.IVIM),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
