@@ -31,8 +31,8 @@ public class CapabilityMatcher {
 					match = matchDatex((DatexCapability) capability, selectorFilter);
 				} else if (capability instanceof DenmCapability) {
 					match = matchDenm((DenmCapability) capability, selectorFilter);
-				} else if (capability instanceof IviCapability) {
-					match = matchIvi((IviCapability) capability, selectorFilter);
+				} else if (capability instanceof IvimCapability) {
+					match = matchIvi((IvimCapability) capability, selectorFilter);
 				} else {
 					logger.warn("Unknown Capability type {} ", capability.getClass().getName());
 				}
@@ -53,7 +53,7 @@ public class CapabilityMatcher {
 		return matchArrayValues(selectorFilter, capability, MessageProperty.CAUSE_CODE, capability.getCauseCodes());
 	}
 
-	private static boolean matchIvi(IviCapability  capability, JMSSelectorFilter selectorFilter) {
+	private static boolean matchIvi(IvimCapability capability, JMSSelectorFilter selectorFilter) {
 		return matchArrayValues(selectorFilter, capability, MessageProperty.IVI_TYPE, capability.getIviTypes());
 	}
 
@@ -124,8 +124,8 @@ public class CapabilityMatcher {
 				match = matchDatex((DatexCapability) capability, selectorFilter);
 			} else if (capability instanceof DenmCapability) {
 				match = matchDenm((DenmCapability) capability, selectorFilter);
-			} else if (capability instanceof IviCapability) {
-				match = matchIvi((IviCapability) capability, selectorFilter);
+			} else if (capability instanceof IvimCapability) {
+				match = matchIvi((IvimCapability) capability, selectorFilter);
 			} else {
 				logger.warn("Unknown Capability type {} ", capability.getClass().getName());
 			}

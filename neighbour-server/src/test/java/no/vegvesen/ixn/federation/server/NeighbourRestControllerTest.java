@@ -118,13 +118,13 @@ class NeighbourRestControllerTest {
 	}
 
 	@Test
-	void postingIviCapabilitiesReturnsStatusOK() throws Exception {
+	void postingIvimCapabilitiesReturnsStatusOK() throws Exception {
 		mockCertificate("ericsson");
 
 		// Mock incoming capabiity API
 		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
-		IviCapabilityApi ericssonDataType = new IviCapabilityApi();
+		IvimCapabilityApi ericssonDataType = new IvimCapabilityApi();
 		ericssonDataType.setIviType(Sets.newLinkedHashSet("3993"));
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 

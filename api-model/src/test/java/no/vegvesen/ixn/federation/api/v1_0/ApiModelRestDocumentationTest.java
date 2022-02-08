@@ -50,7 +50,7 @@ public class ApiModelRestDocumentationTest {
 
     @Test
     public void iviCapability() throws JsonProcessingException {
-        IviCapabilityApi capability = new IviCapabilityApi(
+        IvimCapabilityApi capability = new IvimCapabilityApi(
                 "NPRA",
                 "NO",
                 "1.0",
