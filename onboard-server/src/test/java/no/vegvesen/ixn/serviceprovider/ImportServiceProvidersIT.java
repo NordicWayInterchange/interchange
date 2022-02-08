@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
@@ -21,17 +24,32 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
+@ContextConfiguration(initializers = {ImportServiceProvidersIT.LocalhostInitializer.class})
 public class ImportServiceProvidersIT {
+
+
+    public static class LocalhostInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+
+            TestPropertyValues.of(
+                    "spring.datasource.url: jdbc:postgresql://localhost:5432/federation",
+                    "spring.datasource.username: federation",
+                    "spring.datasource.password: federation",
+                    "spring.datasource.driver-class-name: org.postgresql.Driver"
+            ).applyTo(configurableApplicationContext.getEnvironment());        }
+    }
 
     @Autowired
     ServiceProviderRepository repository;
 
     //TODO private Channels
     @Test
-    @Disabled
+    //@Disabled
     public void importServiceProviders() throws IOException, URISyntaxException {
-        Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
+        //Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
+        Path path = Paths.get("C:\\interchange_dumps\\pre_upgrade_1_3NW3","finalDump.json");
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
         OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(path);
         for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
@@ -40,6 +58,7 @@ public class ImportServiceProvidersIT {
             Capabilities capabilities1 = new Capabilities();
             capabilities1.setCapabilities(capabilities);
             serviceProvider.setCapabilities(capabilities1);
+            /*
             Set<OldLocalActorSubscription> subscriptions = serviceProviderApi.getSubscriptions();
             for (OldLocalActorSubscription localActorSubscription : subscriptions) {
                 //TODO have to generate queue name, as this was SP name before
@@ -47,11 +66,11 @@ public class ImportServiceProvidersIT {
                         localActorSubscription.getSelector(),
                         serviceProviderApi.getName())); //already have the user from the Service provider
             }
-
+*/
             repository.save(serviceProvider);
         }
-        List<ServiceProvider> savedServiceProviders = repository.findAll();
-        assertThat(serviceProviderApis.length).isEqualTo(savedServiceProviders.size());
+        //List<ServiceProvider> savedServiceProviders = repository.findAll();
+        //assertThat(serviceProviderApis.length).isEqualTo(savedServiceProviders.size());
 
     }
 }
