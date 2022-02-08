@@ -136,9 +136,4 @@ public class MessageBuilder {
         message.setStringProperty(MessageProperty.VEHICLE_ROLE.getName(), vehicleRole);
         return this;
     }
-
-    public MessageBuilder iviType(String iviType) throws JMSException {
-        message.setStringProperty(MessageProperty.IVI_TYPE.getName(), iviType);
-        return this;
-    }
 }
