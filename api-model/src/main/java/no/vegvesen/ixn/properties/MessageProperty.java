@@ -32,8 +32,8 @@ public class MessageProperty {
 			LONGITUDE
 	);
 
-
-	public static final MessageProperty PUBLICATION_TYPE = new MessageProperty("publicationType", true, true, MessagePropertyType.STRING);
+	//public static final MessageProperty PUBLISHER_NAME = new MessageProperty("publisherName", true, true, MessagePropertyType.STRING);
+	public static final MessageProperty PUBLICATION_TYPE = new MessageProperty("publicationType", true, true, MessagePropertyType.STRING_ARRAY);
 	public static final MessageProperty PUBLICATION_SUB_TYPE = new MessageProperty("publicationSubType", false, true, MessagePropertyType.STRING_ARRAY);
 	public static final List<MessageProperty> datex2ApplicationProperties = Arrays.asList(
 			PUBLICATION_TYPE,
@@ -44,14 +44,14 @@ public class MessageProperty {
 			SERVICE_TYPE
 	);
 
-	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.STRING_ARRAY);
+	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.STRING);
 	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", true, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> denmApplicationProperties = Arrays.asList(
 			CAUSE_CODE,
 			SUB_CAUSE_CODE
 	);
 
-	public static final MessageProperty IVI_TYPE = new MessageProperty("iviType", false, true, MessagePropertyType.INTEGER_ARRAY);
+	public static final MessageProperty IVI_TYPE = new MessageProperty("iviType", false, true, MessagePropertyType.STRING_ARRAY);
 	public static final MessageProperty PICTOGRAM_CATEGORY_CODE = new MessageProperty("pictogramCategoryCode", false, true, MessagePropertyType.INTEGER_ARRAY);
 
 	/* TODO This is specified as String, but obviously has some string-array properties. Double check that this is not a mistake in spec */
@@ -61,6 +61,27 @@ public class MessageProperty {
 			PICTOGRAM_CATEGORY_CODE,
 			IVI_CONTAINER
 	);
+
+	public static final MessageProperty IDS = new MessageProperty("id", false, true, MessagePropertyType.STRING_ARRAY);
+	public static final MessageProperty NAME = new MessageProperty("name", false, true, MessagePropertyType.STRING);
+
+	public static final List<MessageProperty> spatemMapemApplicationProperties = Arrays.asList(
+			IDS,
+			NAME
+	);
+
+	public static final List<MessageProperty> sremSsemApplicationProperties = Arrays.asList(
+			IDS
+	);
+
+	public static final MessageProperty STATION_TYPE = new MessageProperty("stationType", true, true, MessagePropertyType.STRING_ARRAY);
+	public static final MessageProperty VEHICLE_ROLE = new MessageProperty("vehicleRole", false, true, MessagePropertyType.STRING);
+
+	public static final List<MessageProperty> camApplicationProperties = Arrays.asList(
+			STATION_TYPE,
+			VEHICLE_ROLE
+	);
+
 
 	public static Set<String> mandatoryDatex2PropertyNames = Stream.of(
 			commonApplicationProperties,
@@ -81,6 +102,30 @@ public class MessageProperty {
 			commonApplicationProperties,
 			itsG5ApplicationProperties,
 			ivimApplicationProperties).flatMap(Collection::stream)
+			.filter(MessageProperty::isMandatory)
+			.map(MessageProperty::getName)
+			.collect(Collectors.toSet());
+
+	public static Set<String> mandatorySpatemMapemPropertyNames = Stream.of(
+			commonApplicationProperties,
+			itsG5ApplicationProperties,
+			spatemMapemApplicationProperties).flatMap(Collection::stream)
+			.filter(MessageProperty::isMandatory)
+			.map(MessageProperty::getName)
+			.collect(Collectors.toSet());
+
+	public static Set<String> mandatorySremSsemPropertyNames = Stream.of(
+			commonApplicationProperties,
+			itsG5ApplicationProperties,
+			sremSsemApplicationProperties).flatMap(Collection::stream)
+			.filter(MessageProperty::isMandatory)
+			.map(MessageProperty::getName)
+			.collect(Collectors.toSet());
+
+	public static Set<String> mandatoryCamPropertyNames = Stream.of(
+			commonApplicationProperties,
+			itsG5ApplicationProperties,
+			camApplicationProperties).flatMap(Collection::stream)
 			.filter(MessageProperty::isMandatory)
 			.map(MessageProperty::getName)
 			.collect(Collectors.toSet());

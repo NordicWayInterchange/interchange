@@ -107,11 +107,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             try (Source source = new Source(qpidContainer.getAmqpsUrl(),exchangeName,sslContext)) {
                 //5. Create a Sink, listens to queue. Check that sink get 1 message.
                 source.start();
-                source.sendNonPersistentMessage(getJmsMessage(source, "NO", ",1234"));
+                source.sendNonPersistentMessage(getJmsMessage(source, "NO", ",1234,"));
                 String messageText = "{}";
                 byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
                 source.sendNonPersistentMessage(createMonotchMessage(source, bytemessage));
-                source.sendNonPersistentMessage(getJmsMessage(source, "SE", ",1134"));
+                source.sendNonPersistentMessage(getJmsMessage(source, "SE", ",1134,"));
             }
             Thread.sleep(200);
         }

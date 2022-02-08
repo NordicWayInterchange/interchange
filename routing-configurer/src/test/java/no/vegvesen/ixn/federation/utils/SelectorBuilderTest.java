@@ -3,6 +3,9 @@ package no.vegvesen.ixn.federation.utils;
 import no.vegvesen.ixn.federation.SelectorBuilder;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SelectorBuilderTest {
@@ -22,6 +25,17 @@ public class SelectorBuilderTest {
                 .quadTree("abc,def").toSelector();
         assertThat(selector).contains("%,abc%");
         assertThat(selector).contains("%,def%");
+        System.out.println(selector);
+    }
+
+    @Test
+    public void selectorWithStringArayAndQuadTree() {
+        String selector = new SelectorBuilder().quadTree("123,124")
+                .iviTypes(new HashSet<>(Arrays.asList("5","6")))
+                .toSelector();
+        assertThat(selector).contains("iviType like '%,6,%'");
+        assertThat(selector).contains("iviType like '%,5,%'");
+
         System.out.println(selector);
     }
 }
