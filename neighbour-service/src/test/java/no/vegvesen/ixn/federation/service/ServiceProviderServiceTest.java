@@ -87,7 +87,6 @@ public class ServiceProviderServiceTest {
                 LocalSubscriptionStatus.REQUESTED,
                 selector,
                 LocalDateTime.now(),
-                serviceProviderName,
                 new HashSet<>());
         ServiceProvider serviceProvider = new ServiceProvider(
                 1,
@@ -141,7 +140,6 @@ public class ServiceProviderServiceTest {
                 LocalSubscriptionStatus.REQUESTED,
                 selector,
                 LocalDateTime.now(),
-                localNodeName,
                 new HashSet<>());
         localSubscription.setQueueName(queueName);
         ServiceProvider serviceProvider = new ServiceProvider(

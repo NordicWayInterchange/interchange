@@ -165,7 +165,7 @@ public class MatchRepositoryIT {
 
     @Test
     public void tryAddingMatchWithLocalSubscriptionFromBase() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour", "");
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-queu");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
         serviceProviderRepository.save(sp);
 
@@ -193,7 +193,7 @@ public class MatchRepositoryIT {
 
     @Test
     public void findMatchByOneSubscriptionStatus() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour", "");
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
         serviceProviderRepository.save(sp);
 
@@ -221,7 +221,7 @@ public class MatchRepositoryIT {
 
     @Test
     public void findMatchByTwoSubscriptionStatuses() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour", "");
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
@@ -259,7 +259,7 @@ public class MatchRepositoryIT {
 
     @Test
     public void localSubscriptionIsNotRemovedWhenMatchIsRemoved() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour", "");
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
@@ -295,7 +295,7 @@ public class MatchRepositoryIT {
 
     @Test
     public void subscriptionIsNotRemovedWhenMatchIsRemoved() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour", "");
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
@@ -331,7 +331,7 @@ public class MatchRepositoryIT {
 
     @Test
     public void matchIsNotRemovedWhenLocalSubscriptionIsRemoved() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour", "");
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
@@ -370,7 +370,7 @@ public class MatchRepositoryIT {
 
     @Test
     public void matchIsNotRemovedWhenSubscriptionIsRemoved() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-neighbour", "");
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);

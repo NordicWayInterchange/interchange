@@ -27,7 +27,7 @@ public class LocalSubscription {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
-    private String consumerCommonName;
+    //private String consumerCommonName;
 
     private String queueName;
 
@@ -40,18 +40,13 @@ public class LocalSubscription {
 
     }
 
-    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName, String queueName) {
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String queueName) {
         this.status = status;
         this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
+//        this.consumerCommonName = consumerCommonName;
         this.queueName = queueName;
     }
 
-    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
-        this.status = status;
-        this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
-    }
 
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
@@ -64,11 +59,11 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName, String queueName) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String queueName) {
         this.id = id;
         this.status = status;
         this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
+//        this.consumerCommonName = consumerCommonName;
         this.queueName = queueName;
     }
 
@@ -79,12 +74,12 @@ public class LocalSubscription {
         this.lastUpdated = lastUpdated;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalEndpoint> localEndpoints) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, Set<LocalEndpoint> localEndpoints) {
         this.id = id;
         this.status = status;
         this.selector = selector;
         this.lastUpdated = lastUpdated;
-        this.consumerCommonName = consumerCommonName;
+//        this.consumerCommonName = consumerCommonName;
         this.localEndpoints = localEndpoints;
     }
 
@@ -109,14 +104,20 @@ public class LocalSubscription {
         this.selector = selector;
     }
 
+    /*
     public String getConsumerCommonName() {
         return consumerCommonName;
     }
 
+     */
+
+    /*
     public void setConsumerCommonName(String consumerCommonName) {
         this.consumerCommonName = consumerCommonName;
     }
 
+
+     */
 
     public Set<LocalEndpoint> getLocalEndpoints() {
         return localEndpoints;
@@ -148,13 +149,12 @@ public class LocalSubscription {
         if (o == null || getClass() != o.getClass()) return false;
         LocalSubscription that = (LocalSubscription) o;
         return status == that.status &&
-                Objects.equals(selector, that.selector) &&
-                Objects.equals(consumerCommonName, that.consumerCommonName);
+                Objects.equals(selector, that.selector); //&& Objects.equals(consumerCommonName, that.consumerCommonName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status, selector, consumerCommonName);
+        return Objects.hash(status, selector); //, consumerCommonName);
     }
 
     public Integer getId() {
@@ -167,7 +167,7 @@ public class LocalSubscription {
                 "id=" + id +
                 ", status=" + status +
                 ", selector=" + selector +
-                ", consumerCommonName=" + consumerCommonName +
+//                ", consumerCommonName=" + consumerCommonName +
                 ", queueName=" + queueName +
                 '}';
     }
@@ -176,7 +176,8 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(id, newStatus, selector, consumerCommonName, queueName);
+            //return new LocalSubscription(id, newStatus, selector, consumerCommonName, queueName);
+            return new LocalSubscription(id, newStatus, selector, queueName);
         }
     }
 

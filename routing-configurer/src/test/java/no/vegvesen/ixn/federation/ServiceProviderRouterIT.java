@@ -18,6 +18,7 @@ import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,14 +120,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	private LocalSubscription createSubscription(String messageType, String originatingCountry, String consumerCommonName, String queueName) {
 		String selector = "messageType = '" + messageType + "' and originatingCountry = '" + originatingCountry +"'";
-		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, consumerCommonName, queueName);
+		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, queueName);
 	}
 
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
 		String queueName = "king_gustaf_queue";
-		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"", "", queueName));
+		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"", queueName));
 
 		router.syncServiceProviders(Arrays.asList(king_gustaf));
 
@@ -152,7 +153,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
 		String queueName = "my-queue";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "", queueName);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", queueName);
 		toreDownServiceProvider.addLocalSubscription(localSubscription);
 
 		Match match = new Match(localSubscription, subscription, "tore-down-service-provider", MatchStatus.SETUP_EXCHANGE);
@@ -218,12 +219,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	@Disabled("This no longer applies, as we don't have consumercommonname on localsubscription")
 	public void doNotSetUpQueueWhenOnlySubscriptionHasSameConsumerCommonNameAsServiceProviderName() {
 		String queueName = "my-queue";
 		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", "my-service-provider-3", queueName);
+				"AND originatingCountry = 'NO'", queueName);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider-3");
 		serviceProvider.addLocalSubscription(sub);
@@ -239,11 +241,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'NO'", "my-service-provider", queueName1);
+						"AND originatingCountry = 'NO'", queueName1);
 		LocalSubscription sub2 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'SE'", "", queueName2);
+						"AND originatingCountry = 'SE'", queueName2);
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 		serviceProvider.addLocalSubscription(sub1);
@@ -340,7 +342,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "my-queue";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		String selector = "a=b";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "", queueName);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, queueName);
 		serviceProvider.addLocalSubscription(localSubscription);
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
 		subscription.setExchangeName("subscription-exchange");
@@ -381,7 +383,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		String queueName = "my-queue";
 		String exchangeName = "my-exchange";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "", queueName);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, queueName);
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
 		subscription.setExchangeName(exchangeName);
 
@@ -415,7 +417,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		String queueName = "my-queue";
 		String exchangeName = "my-exchange";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "", queueName);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, queueName);
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
 		subscription.setExchangeName(exchangeName);
 
@@ -451,7 +453,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		String queueName = "my-queue";
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "", queueName);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, queueName);
 
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);

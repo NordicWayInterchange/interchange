@@ -56,13 +56,18 @@ public class ServiceProviderRouter {
             }
 
             //making a set of LocalSubscriptions that has consumerCommonName same as ServiceProvider name
+            /*
+            TODO this no longer makes sense. We don't have consumerCommonName on the local subscription anymore
             Set<LocalSubscription> consumerCommonNameAsServiceProviderName = newSubscriptions
                     .stream()
                     .filter(s -> s.getConsumerCommonName().equals(name))
                     .collect(Collectors.toSet());
 
+             */
+
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
-                if (serviceProvider.hasCapabilities() || (newSubscriptions.size() > consumerCommonNameAsServiceProviderName.size())) {
+                //if (serviceProvider.hasCapabilities() || (newSubscriptions.size() > consumerCommonNameAsServiceProviderName.size())) {
+                if (serviceProvider.hasCapabilities() || (! newSubscriptions.isEmpty())) {
                     optionallyAddServiceProviderToGroup(groupMemberNames,name);
                 }
             } else {
