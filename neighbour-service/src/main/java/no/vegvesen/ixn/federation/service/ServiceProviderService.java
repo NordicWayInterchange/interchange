@@ -71,6 +71,7 @@ public class ServiceProviderService {
             for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
                 for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
                     if (localSubscription.getSelector().equals(subscription.getSelector())) {
+                        /*
                         if (localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
                             //TODO What about changes to endpoints? We also write ALL service provider Endpoints every time!
                             Set<Endpoint> endpoints = subscription.getEndpoints();
@@ -81,11 +82,16 @@ public class ServiceProviderService {
                             }
                             serviceProvider.updateSubscriptionWithHostAndPort(localSubscription, localEndpoints);
                         } else {
+
+                         */
                             LocalEndpoint localEndpoint = new LocalEndpoint(localSubscription.getQueueName(), messageChannelHost, Integer.parseInt(messageChannelPort));
                             logger.info("Adding local endpoint with host {} and port {}, consumerCommonName the same as Ixn name, queue {}", localEndpoint.getHost(), localEndpoint.getPort(), localEndpoint.getSource());
                             Set<LocalEndpoint> localEndpoints = new HashSet<>(Arrays.asList(localEndpoint));
                             serviceProvider.updateSubscriptionWithHostAndPort(localSubscription, localEndpoints);
+                            /*
                         }
+
+                             */
                     }
                 }
             }

@@ -90,11 +90,17 @@ public class ServiceProviderRouter {
         switch (subscription.getStatus()) {
             case REQUESTED:
 			case CREATED:
+                /*
 			    if (subscription.getConsumerCommonName().equals(serviceProviderName)) {
                     newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
                 } else {
+
+                 */
 				    newSubscription = onRequested(serviceProviderName, subscription);
+                    /*
 			    }
+
+                     */
                 break;
 			case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
