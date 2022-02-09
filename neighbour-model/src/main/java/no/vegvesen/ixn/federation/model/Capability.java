@@ -118,9 +118,21 @@ public abstract class Capability {
 		}
 	}
 
-	public abstract CapabilityApi toApi();
+	public RedirectStatusApi toRedirectStatusApi(RedirectStatus status) {
+		if (status == null) {
+			return RedirectStatusApi.OPTIONAL;
+		}
+		switch (status) {
+			case MANDATORY:
+				return RedirectStatusApi.MANDATORY;
+			case NOT_AVAILABLE:
+				return RedirectStatusApi.NOT_AVAILABLE;
+			default:
+				return RedirectStatusApi.OPTIONAL;
+		}
+	}
 
-	public abstract RedirectStatusApi toRedirectStatusApi(RedirectStatus status);
+	public abstract CapabilityApi toApi();
 
 	public abstract String messageType();
 

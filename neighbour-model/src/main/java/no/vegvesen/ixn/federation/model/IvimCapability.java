@@ -46,21 +46,6 @@ public class IvimCapability extends Capability {
 	}
 
 	@Override
-	public RedirectStatusApi toRedirectStatusApi(RedirectStatus status) {
-		if (status == null) {
-			return RedirectStatusApi.OPTIONAL;
-		}
-		switch (status) {
-			case MANDATORY:
-				return RedirectStatusApi.MANDATORY;
-			case NOT_AVAILABLE:
-				return RedirectStatusApi.NOT_AVAILABLE;
-			default:
-				return RedirectStatusApi.OPTIONAL;
-		}
-	}
-
-	@Override
 	public String messageType() {
 		return Constants.IVIM;
 	}

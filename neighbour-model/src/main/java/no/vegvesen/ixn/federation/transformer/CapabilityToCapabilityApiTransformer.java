@@ -96,6 +96,9 @@ public class CapabilityToCapabilityApiTransformer {
 	}
 
 	private RedirectStatus transformRedirectStatusApiToRedirectStatus(RedirectStatusApi status) {
+		if (status == null) {
+			return RedirectStatus.OPTIONAL;
+		}
 		switch (status) {
 			case MANDATORY:
 				return RedirectStatus.MANDATORY;
