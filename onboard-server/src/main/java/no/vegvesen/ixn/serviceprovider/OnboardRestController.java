@@ -141,7 +141,7 @@ public class OnboardRestController {
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
 			String queueName = UUID.randomUUID().toString();
-			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, queueName));
+			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName,queueName));
 		}
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);

@@ -16,7 +16,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("ixn", "countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"));
+        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "kyrre",
                 addSubscriptions
@@ -28,8 +28,8 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSubscriptionRequest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("ixn1", "countryCode = 'NO' and messageType = 'DENM'"));
-        addSubscriptions.add(new AddSubscription("ixn1", "countryCode = 'SE' and messageType = 'DENM'"));
+        addSubscriptions.add(new AddSubscription("countryCode = 'NO' and messageType = 'DENM'"));
+        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "serviceprovider1",
                 addSubscriptions
