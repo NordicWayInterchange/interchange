@@ -165,7 +165,7 @@ public class MatchRepositoryIT {
 
     @Test
     public void tryAddingMatchWithLocalSubscriptionFromBase() {
-        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-queu");
+        LocalSubscription locSub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
         serviceProviderRepository.save(sp);
 

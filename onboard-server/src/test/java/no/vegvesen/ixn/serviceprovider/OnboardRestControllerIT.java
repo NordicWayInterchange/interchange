@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -132,6 +133,22 @@ public class OnboardRestControllerIT {
 		assertThat(savedSPAfterDelete.getSubscriptionUpdated()).isEqualTo(subscriptionUpdated);
         verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
+
+    @Test
+    public void testGetSingleSubscription() {
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
+        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'"));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                "king_olav.bouvetinterchange.eu",
+                addSubscriptions
+        );
+        AddSubscriptionsResponse response = restController.addSubscriptions("king_olav.bouvetinterchange.eu", request);
+
+        Optional<LocalActorSubscription> anySubscription = response.getSubscriptions().stream().findAny();
+        LocalActorSubscription subscription = anySubscription.get();
+        GetSubscriptionResponse getSubscriptionResponse = restController.getServiceProviderSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
+    }
+
 
 	@Test
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {

@@ -6,7 +6,6 @@ public class LocalActorSubscription {
     String id;
     String path;
     String selector;
-    String consumerCommonName;
     long lastUpdatedTimeStamp;
     LocalActorSubscriptionStatusApi status;
 
@@ -17,15 +16,6 @@ public class LocalActorSubscription {
         this.id = id;
         this.path = path;
         this.selector = selector;
-        this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
-        this.status = status;
-    }
-
-    public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status) {
-        this.id = id;
-        this.path = path;
-        this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
         this.status = status;
     }
@@ -54,18 +44,6 @@ public class LocalActorSubscription {
         this.selector = selector;
     }
 
-    public String getConsumerCommonName() {
-        return consumerCommonName;
-    }
-
-    public void setConsumerCommonName(String consumerCommonName) {
-        this.consumerCommonName = consumerCommonName;
-    }
-
-    public long getLastUpdatedTimeStamp() {
-        return lastUpdatedTimeStamp;
-    }
-
     public void setLastUpdatedTimeStamp(long lastUpdatedTimeStamp) {
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
     }
@@ -83,12 +61,12 @@ public class LocalActorSubscription {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocalActorSubscription that = (LocalActorSubscription) o;
-        return lastUpdatedTimeStamp == that.lastUpdatedTimeStamp && Objects.equals(id, that.id) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status;
+        return lastUpdatedTimeStamp == that.lastUpdatedTimeStamp && Objects.equals(id, that.id) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, path, selector, consumerCommonName, lastUpdatedTimeStamp, status);
+        return Objects.hash(id, path, selector, lastUpdatedTimeStamp, status);
     }
 
     @Override
@@ -97,7 +75,6 @@ public class LocalActorSubscription {
                 "id='" + id + '\'' +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
-                ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", lastUpdatedTimeStamp=" + lastUpdatedTimeStamp +
                 ", status=" + status +
                 '}';

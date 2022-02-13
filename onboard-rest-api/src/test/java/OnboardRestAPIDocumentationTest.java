@@ -16,7 +16,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"));
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "kyrre",
                 addSubscriptions
@@ -28,8 +28,8 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSubscriptionRequest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("countryCode = 'NO' and messageType = 'DENM'"));
-        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'"));
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'NO' and messageType = 'DENM'"));
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "serviceprovider1",
                 addSubscriptions
@@ -39,16 +39,30 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
+    public void addSingleSubscriptionForSystemTest() throws JsonProcessingException {
+        //TODO for local
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'"));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                "king_olav.bouvetinterchange.eu",
+                addSubscriptions
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
+    }
+
+
+    @Test
     public void addSubscriptionsResponse() throws JsonProcessingException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
         subscriptions.add(new LocalActorSubscription("1",
                 "/serviceprovider1/subscriptions/1",
-                "countryCode = 'NO' and messageType = 'DENM'",
+                "originatingCountry = 'NO' and messageType = 'DENM'",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.REQUESTED));
         subscriptions.add(new LocalActorSubscription("2",
                 "/serviceprovider1/subscriptions/2",
-                "countryCode = 'SE' and messageType = 'DENM'",
+                "originatingCountry = 'SE' and messageType = 'DENM'",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.REQUESTED
                 ));
@@ -68,12 +82,12 @@ public class OnboardRestAPIDocumentationTest {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
         subscriptions.add(new LocalActorSubscription("1",
                 "/serviceprovider1/subscriptions/1",
-                "countryCode = 'NO' and messageType = 'DENM'",
+                "originatingCountry = 'NO' and messageType = 'DENM'",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED));
         subscriptions.add(new LocalActorSubscription("2",
                 "/serviceprovider1/subscriptions/2",
-                "countryCode = 'SE' and messageType = 'DENM'",
+                "originatingCountry = 'SE' and messageType = 'DENM'",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED
         ));
@@ -140,6 +154,26 @@ public class OnboardRestAPIDocumentationTest {
                                 "1.0",
                                 Collections.singleton("1234"),
                                 Collections.singleton("6")
+                        )
+                )
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
+
+    }
+
+    @Test
+    public void addCapabilitiesRequestForSystemtest() throws JsonProcessingException {
+        //TODO for remote
+        AddCapabilitiesRequest request = new AddCapabilitiesRequest(
+                "king_gustaf.bouvetinterchange.eu",
+                Collections.singleton(
+                        new DenmCapabilityApi(
+                                "STV",
+                                "SE",
+                                "1.0",
+                                Collections.emptySet(),
+                                Collections.emptySet()
                         )
                 )
         );

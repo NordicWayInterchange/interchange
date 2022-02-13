@@ -57,10 +57,9 @@ public class TypeTransformer {
     }
 
 
-    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription, String serviceProviderName, String queueName) {
+    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                addSubscription.getSelector(),
-                queueName);
+                addSubscription.getSelector());
     }
 
     public LocalDelivery transformDeliveryToLocalDelivery(SelectorApi delivery) {
@@ -190,6 +189,7 @@ public class TypeTransformer {
 
     private LocalActorSubscriptionStatusApi transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {
         switch (status) {
+            //case ASSIGN_QUEUE:
             case REQUESTED:
                 return LocalActorSubscriptionStatusApi.REQUESTED;
             case CREATED:

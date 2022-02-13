@@ -6,6 +6,7 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
@@ -37,6 +38,7 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,7 +48,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-@SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
+@SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, InterchangeNodeProperties.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
 @ContextConfiguration(initializers = {ServiceProviderRouterIT.Initializer.class})
 @Testcontainers
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
@@ -79,7 +81,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
 					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
+					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12"),
+					"interchange.node-provider.name=localhost"
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -105,35 +108,60 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
 		ServiceProvider nordea = new ServiceProvider("nordea");
-		String queueName1 = "my-queue-1";
-		String queueName2 = "my-queue-2";
-		nordea.addLocalSubscription(createSubscription("DATEX2", "NO", "", queueName1));
+		nordea.addLocalSubscription(createSubscription("DATEX2", "NO"));
+
+
+
 		router.syncServiceProviders(Arrays.asList(nordea));
-		Set<String> nordeaBindKeys1 = client.getQueueBindKeys(queueName1);
+		Set<LocalEndpoint> endpoints = nordea.getSubscriptions().stream().flatMap(s -> s.getLocalEndpoints().stream()).collect(Collectors.toSet());
+		assertThat(endpoints).hasSize(1);
+		LocalEndpoint endpoint = endpoints.stream().findFirst().get();
+
+		Set<String> nordeaBindKeys1 = client.getQueueBindKeys(endpoint.getSource());
 		assertThat(nordeaBindKeys1).hasSize(1);
 
-		nordea.addLocalSubscription(createSubscription("DATEX2", "FI", "", queueName2));
+		nordea.addLocalSubscription(createSubscription("DATEX2", "FI"));
 		router.syncServiceProviders(Arrays.asList(nordea));
-		Set<String> nordeaBindKeys2 = client.getQueueBindKeys(queueName2);
+		Set<LocalEndpoint> endpoints2 = nordea.getSubscriptions().stream()
+				.filter(s -> s.getSelector().contains("'FI'"))
+				.flatMap(s -> s.getLocalEndpoints().stream())
+				.collect(Collectors.toSet());
+		assertThat(endpoints2).hasSize(1);
+		LocalEndpoint endpoint2 = endpoints2.stream().findFirst().get();
+		Set<String> nordeaBindKeys2 = client.getQueueBindKeys(endpoint2.getSource());
 		assertThat(nordeaBindKeys2).hasSize(1);
 	}
 
-	private LocalSubscription createSubscription(String messageType, String originatingCountry, String consumerCommonName, String queueName) {
+	private LocalSubscription createSubscription(String messageType, String originatingCountry) {
 		String selector = "messageType = '" + messageType + "' and originatingCountry = '" + originatingCountry +"'";
-		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, queueName);
+		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
 	}
 
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
-		String queueName = "king_gustaf_queue";
-		king_gustaf.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"", queueName));
-
+		String source = "king_gustaf_source";
+		king_gustaf.addLocalSubscription(new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.REQUESTED,
+				"",
+				LocalDateTime.now(),
+				Collections.singleton(new LocalEndpoint(
+								source,
+								qpidContainer.getHost(),
+								qpidContainer.getAmqpsPort()
+						)
+				)
+		));
 		router.syncServiceProviders(Arrays.asList(king_gustaf));
 
 		SSLContext kingGustafSslContext = setUpTestSslContext("king_gustaf.p12");
+		//TODO the actual name of the container is the name of the cluster as well....
 		String amqpsUrl = qpidContainer.getAmqpsUrl();
-		Sink readKingGustafQueue = new Sink(amqpsUrl, queueName, kingGustafSslContext);
+		Set<LocalEndpoint> sinkEndpoints = king_gustaf.getSubscriptions().stream().flatMap(s -> s.getLocalEndpoints().stream()).collect(Collectors.toSet());
+		assertThat(sinkEndpoints).hasSize(1);
+		LocalEndpoint endpoint = sinkEndpoints.stream().findFirst().get();
+		Sink readKingGustafQueue = new Sink(amqpsUrl, endpoint.getSource(), kingGustafSslContext);
 		readKingGustafQueue.start();
 		Source writeOnrampQueue = new Source(amqpsUrl, "onramp", kingGustafSslContext);
 		writeOnrampQueue.start();
@@ -152,8 +180,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 
 		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
-		String queueName = "my-queue";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", queueName);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
 		toreDownServiceProvider.addLocalSubscription(localSubscription);
 
 		Match match = new Match(localSubscription, subscription, "tore-down-service-provider", MatchStatus.SETUP_EXCHANGE);
@@ -164,7 +191,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
 		assertThat(localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED));
 		assertThat(client.exchangeExists("subscription-exchange")).isTrue();
-		assertThat(client.queueExists(queueName)).isTrue();
+
+		Set<LocalEndpoint> localEndpoints = toreDownServiceProvider.getSubscriptions().stream()
+				.flatMap(s -> s.getLocalEndpoints().stream())
+				.collect(Collectors.toSet());
+		assertThat(localEndpoints).hasSize(1);
+		LocalEndpoint endpoint = localEndpoints.stream().findFirst().get();
+
+		assertThat(client.queueExists(endpoint.getSource())).isTrue();
 
 
 		toreDownServiceProvider.setSubscriptions(
@@ -181,7 +215,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
 		assertThat(client.exchangeExists("subscription-exchange")).isFalse();
-		assertThat(client.queueExists(queueName)).isFalse();
+		assertThat(client.queueExists(endpoint.getSource())).isFalse();
 	}
 
 	/*
@@ -224,8 +258,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "my-queue";
 		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
-				"AND messageType = 'DATEX2' " +
-				"AND originatingCountry = 'NO'", queueName);
+						"AND messageType = 'DATEX2' " +
+						"AND originatingCountry = 'NO'");
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider-3");
 		serviceProvider.addLocalSubscription(sub);
@@ -236,23 +270,29 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void doSetUpQueueWhenSubscriptionHasConsumerCommonNameSameAsIxnNameAndServiceProviderName() {
-		String queueName1 = "my-queue-1";
-		String queueName2 = "my-queue-2";
 		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'NO'", queueName1);
+						"AND originatingCountry = 'NO'");
 		LocalSubscription sub2 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'SE'", queueName2);
+						"AND originatingCountry = 'SE'");
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 		serviceProvider.addLocalSubscription(sub1);
 		serviceProvider.addLocalSubscription(sub2);
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
-		assertThat(client.queueExists(queueName2)).isTrue();
+
+		assertThat(sub1.getLocalEndpoints()).hasSize(1);
+		LocalEndpoint endpoint1 = sub1.getLocalEndpoints().stream().findFirst().get();
+		assertThat(client.queueExists(endpoint1.getSource())).isTrue();
+
+		assertThat(sub2.getLocalEndpoints()).hasSize(1);
+		LocalEndpoint endpoint2 = sub2.getLocalEndpoints().stream().findFirst().get();
+
+		assertThat(client.queueExists(endpoint2.getSource())).isTrue();
 	}
 
 	@Test
@@ -342,7 +382,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "my-queue";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		String selector = "a=b";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, queueName);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector);
 		serviceProvider.addLocalSubscription(localSubscription);
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
 		subscription.setExchangeName("subscription-exchange");
@@ -383,7 +423,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		String queueName = "my-queue";
 		String exchangeName = "my-exchange";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, queueName);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector);
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
 		subscription.setExchangeName(exchangeName);
 
@@ -417,7 +457,18 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		String queueName = "my-queue";
 		String exchangeName = "my-exchange";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, queueName);
+		LocalSubscription localSubscription = new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.CREATED,
+				selector,
+				LocalDateTime.now(),
+				Collections.singleton(new LocalEndpoint(
+						queueName,
+						qpidContainer.getHost(),
+						qpidContainer.getAmqpsPort()
+
+				))
+		);
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
 		subscription.setExchangeName(exchangeName);
 
@@ -452,9 +503,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		String selector = "a=b";
 		String queueName = "my-queue";
-
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, queueName);
-
+		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector);
+		localSubscription.setLocalEndpoints(Collections.singleton(
+				new LocalEndpoint(queueName,
+						nodeProperties.getName(),
+						Integer.parseInt(nodeProperties.getMessageChannelPort())
+				)
+		));
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);
 
@@ -462,7 +518,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(matchDiscoveryService.findMatchByLocalSubscriptionId(any(Integer.class))).thenReturn(null);
 
-		router.processSubscription(serviceProviderName, localSubscription);
+		router.processSubscription(serviceProviderName, localSubscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
 
 		assertThat(client.queueExists(queueName)).isFalse();
 

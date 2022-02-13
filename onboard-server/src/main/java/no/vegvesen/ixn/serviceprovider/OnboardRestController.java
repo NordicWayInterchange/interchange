@@ -140,8 +140,7 @@ public class OnboardRestController {
 
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
-			String queueName = UUID.randomUUID().toString();
-			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName,queueName));
+			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription));
 		}
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
@@ -205,9 +204,15 @@ public class OnboardRestController {
 	public GetSubscriptionResponse getServiceProviderSubscription(@PathVariable String serviceProviderName, @PathVariable String subscriptionId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		Integer subsId;
+		try {
+			subsId = Integer.parseInt(subscriptionId);
+		} catch (Exception e) {
+			throw new NotFoundException(String.format("Could not find subscription with id %s",subscriptionId));
+		}
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		LocalSubscription localSubscription = serviceProvider.getSubscriptions().stream().filter(s ->
-				s.getId().equals(subscriptionId))
+				s.getId().equals(subsId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,serviceProviderName)));
 		logger.info("Received poll from Service Provider {} ", serviceProviderName);
