@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -89,7 +90,7 @@ public class OnboardRestControllerIT {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscription addSubscription = new AddSubscription("ixn", selector);
+        AddSubscription addSubscription = new AddSubscription(selector);
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         restController.addSubscriptions(serviceProviderName, requestApi);
@@ -113,7 +114,7 @@ public class OnboardRestControllerIT {
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 		        serviceProviderName,
-                Collections.singleton(new AddSubscription("ixn", "messageType = 'DATEX2' AND originatingCountry = 'NO'"))
+                Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'"))
         );
         restController.addSubscriptions(serviceProviderName, requestApi);
 
@@ -133,11 +134,27 @@ public class OnboardRestControllerIT {
         verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
 
+    @Test
+    public void testGetSingleSubscription() {
+        Set<AddSubscription> addSubscriptions = new HashSet<>();
+        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'"));
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                "king_olav.bouvetinterchange.eu",
+                addSubscriptions
+        );
+        AddSubscriptionsResponse response = restController.addSubscriptions("king_olav.bouvetinterchange.eu", request);
+
+        Optional<LocalActorSubscription> anySubscription = response.getSubscriptions().stream().findAny();
+        LocalActorSubscription subscription = anySubscription.get();
+        GetSubscriptionResponse getSubscriptionResponse = restController.getServiceProviderSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
+    }
+
+
 	@Test
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector= "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription("service-provider-create-new-queue", selector))));
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(selector))));
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -146,7 +163,12 @@ public class OnboardRestControllerIT {
         Set<LocalSubscription> localSubscriptions = savedSP.getSubscriptions();
         assertThat(localSubscriptions).hasSize(1);
         LocalSubscription subscription = localSubscriptions.stream().findFirst().get();
+        /*
+        TODO this no longer makes sense
+
         assertThat(subscription.getConsumerCommonName()).isEqualTo(serviceProviderName);
+
+         */
 
         ListSubscriptionsResponse subscriptions = restController.listSubscriptions(serviceProviderName);
         Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();
@@ -158,7 +180,7 @@ public class OnboardRestControllerIT {
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription("ixn", selector))));
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(selector))));
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 }

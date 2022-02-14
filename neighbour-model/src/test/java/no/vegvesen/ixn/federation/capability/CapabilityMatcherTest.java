@@ -110,9 +110,7 @@ class CapabilityMatcherTest {
 		LocalSubscription subscription = new LocalSubscription(
 				52,
 				LocalSubscriptionStatus.CREATED,
-				"originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'",
-				"kyrre",
-				""
+				"originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"
 		);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(capability),

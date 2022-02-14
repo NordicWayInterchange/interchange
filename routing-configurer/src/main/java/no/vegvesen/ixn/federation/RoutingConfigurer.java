@@ -81,20 +81,8 @@ public class RoutingConfigurer {
 				Set<Subscription> allAcceptedSubscriptions = new HashSet<>();
 				allAcceptedSubscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
-				//Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
-				//Set<Capability> capabilities = CapabilityCalculator.calculateSelfCapabilities(serviceProviders);
 				for(Subscription subscription : acceptedSubscriptions){
 					setUpRedirectedRouting(subscription);
-					//TODO: Implement redirect using RedirectStatus from matching Capability
-					/*Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(capabilities, subscription);
-					for(Capability cap : matchingCaps){
-						if(cap.getRedirect().equals(RedirectStatus.NOT_AVAILABLE)) {
-							subscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
-							logger.info("Routing for subscription is ILLEGAL");
-						} else {
-							setUpRedirectedRouting(subscription);
-						}
-					}*/
 					allAcceptedSubscriptions.remove(subscription);
 				}
 				if(!allAcceptedSubscriptions.isEmpty()){
@@ -102,17 +90,6 @@ public class RoutingConfigurer {
 					for(Subscription subscription : allAcceptedSubscriptions){
 						subscriptionsToSetUpRoutingFor.add(subscription);
 						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-						//TODO: Implement redirect using RedirectStatus from matching Capability
-						/*Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(capabilities, subscription);
-						for(Capability cap : matchingCaps){
-							if(cap.getRedirect().equals(RedirectStatus.MANDATORY)){
-								subscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
-								logger.info("Routing for subscription is ILLEGAL");
-							} else{
-								subscriptionsToSetUpRoutingFor.add(subscription);
-								subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-							}
-						}*/
 					}
 					if(!subscriptionsToSetUpRoutingFor.isEmpty()){
 						createQueue(neighbour.getName());
@@ -129,18 +106,6 @@ public class RoutingConfigurer {
 					subscriptionsToSetUpRoutingFor.add(subscription);
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 					//TODO: Implement redirect using RedirectStatus from matching Capability
-					/*Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
-					Set<Capability> capabilities = CapabilityCalculator.calculateSelfCapabilities(serviceProviders);
-					Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilityToSubscriptionSelector(capabilities, subscription);
-					for(Capability cap : matchingCaps){
-						if(cap.getRedirect().equals(RedirectStatus.MANDATORY)){
-							subscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
-							logger.info("Routing for subscription is ILLEGAL");
-						} else{
-							subscriptionsToSetUpRoutingFor.add(subscription);
-							subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-						}
-					}*/
 				}
 				//TODO: Are we supposed to set up routing for Neighbour with an empty SubscriptionRequest?
 				if(!subscriptionsToSetUpRoutingFor.isEmpty()){

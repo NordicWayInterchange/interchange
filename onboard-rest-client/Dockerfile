@@ -20,4 +20,6 @@ ADD ivi_no_localSubscription.json /
 ADD denm_no_delivery.json /
 ADD ivi_no_localSubscription.json /
 ADD denm_no_delivery.json /
+ADD systemtest_local_subs.json /
+ADD systemtest_remote_cap.json /
 ENTRYPOINT ["/entrypoint.sh"]

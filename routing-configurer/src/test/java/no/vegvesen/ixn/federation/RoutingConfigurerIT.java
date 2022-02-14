@@ -111,13 +111,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "flounder"));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider firstServiceProvider = new ServiceProvider();
-		firstServiceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,Collections.singleton(cap)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(firstServiceProvider));*/
-
 		routingConfigurer.setupNeighbourRouting(flounder);
 		assertThat(client.queueExists(flounder.getName())).isTrue();
 	}
@@ -130,14 +123,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
-
 		routingConfigurer.setupNeighbourRouting(halibut);
 		assertThat(client.queueExists(halibut.getName())).isTrue();
 	}
@@ -151,18 +136,15 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour salmon = new Neighbour("salmon", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
-
 		routingConfigurer.setupNeighbourRouting(salmon);
 		assertThat(client.queueExists(salmon.getName())).isTrue();
 		Set<String> queueBindKeys = client.getQueueBindKeys(salmon.getName());
 		assertThat(queueBindKeys).hasSize(1);
-		Set<Subscription> createdSubscriptions = salmon.getNeighbourRequestedSubscriptions().getSubscriptions().stream().filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)).collect(Collectors.toSet());
+		Set<Subscription> createdSubscriptions = salmon.getNeighbourRequestedSubscriptions()
+				.getSubscriptions()
+				.stream()
+				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED))
+				.collect(Collectors.toSet());
 		assertThat(createdSubscriptions).hasSize(1);
 	}
 
@@ -171,12 +153,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') AND publicationType = 'Road Block' AND messageType = 'DATEX2' AND originatingCountry = 'NO' AND protocolVersion = '1.0' AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "seabass"));
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
-
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
 
 		routingConfigurer.setupNeighbourRouting(seabass);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
@@ -192,13 +168,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour trout = new Neighbour("trout", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
-
 		routingConfigurer.setupNeighbourRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(2);
 
@@ -208,14 +177,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		routingConfigurer.setupNeighbourRouting(trout);
 		assertThat(client.getQueueBindKeys(trout.getName())).hasSize(1);
-	}
-
-	private static String getFilePathFromClasspathResource(String classpathResource) {
-		URL resource = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
-		if (resource != null) {
-			return resource.getFile();
-		}
-		throw new RuntimeException("Could not load classpath resource " + classpathResource);
 	}
 
 	@Test
@@ -233,12 +194,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()),
 				new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions),
 				null);
-
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
 
 		routingConfigurer.setupNeighbourRouting(nordea);
 		SSLContext nordeaSslContext = setUpTestSslContext("nordea.p12");
@@ -278,12 +233,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
-
 		routingConfigurer.setupNeighbourRouting(toreDownNeighbour);
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).contains(toreDownNeighbour.getName());
 
@@ -313,12 +262,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour hammershark = new Neighbour("hammershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
-
 		routingConfigurer.setupNeighbourRouting(hammershark);
 		assertThat(client.queueExists("hammershark")).isTrue();
 		assertThat(client.getQueueBindKeys("hammershark").size()).isEqualTo(1);
@@ -336,12 +279,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap1)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
-
 		routingConfigurer.setupNeighbourRouting(tigershark);
 		assertThat(client.queueExists("tigershark")).isTrue();
 		assertThat(client.getQueueBindKeys("tigershark").size()).isEqualTo(1);
@@ -354,11 +291,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "tigershark"));
 
 		tigershark.setNeighbourRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs));
-
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
 
 		routingConfigurer.setupNeighbourRouting(tigershark);
 		assertThat(client.getQueueBindKeys("tigershark").size()).isEqualTo(2);
@@ -377,12 +309,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
 
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.MANDATORY, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
-
 		routingConfigurer.setupNeighbourRouting(neigh);
 		assertThat(client.queueExists("remote-service-provider")).isTrue();
 	}
@@ -397,12 +323,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "neigh-false"));
 
 		Neighbour neigh = new Neighbour("neigh-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
-
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
 
 		routingConfigurer.setupNeighbourRouting(neigh);
 		assertThat(client.queueExists(neigh.getName())).isTrue();
@@ -426,13 +346,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "neigh-true-and-false"));
 
 		Neighbour neigh = new Neighbour("neigh-true-and-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
-
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.MANDATORY, new HashSet<>(Arrays.asList("Road Block")));
-		Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet(cap1, cap2)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
 
 		routingConfigurer.setupNeighbourRouting(neigh);
 		assertThat(client.queueExists("remote-service-provider")).isTrue();
@@ -475,15 +388,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour clownfish = new Neighbour("clownfish", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
-
 		routingConfigurer.setupNeighbourRouting(clownfish);
 		assertThat(client.queueExists(clownfish.getName())).isFalse();
-		//assertThat(clownfish.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get().getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ILLEGAL);
 	}
 
 	@Test
@@ -504,12 +410,6 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "neigh-both"));
 
 		Neighbour neigh = new Neighbour("neigh-both", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
-
-		//TODO: Comment in again when we are using RedirectStatus on Capability object for matching
-		/*Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Arrays.asList("Road Block")));
-		ServiceProvider serviceProvider = new ServiceProvider();
-		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap1)));
-		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(serviceProvider));*/
 
 		routingConfigurer.setupNeighbourRouting(neigh);
 		assertThat(client.queueExists("remote-sp")).isTrue();
