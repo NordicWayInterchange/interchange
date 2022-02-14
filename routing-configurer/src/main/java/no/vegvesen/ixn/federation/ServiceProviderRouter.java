@@ -89,7 +89,7 @@ public class ServiceProviderRouter {
                 }
                 //NOTE fallthrough!
             case CREATED:
-				    newSubscription = onRequested(serviceProviderName, subscription, nodeName, messageChannelPort);
+				    newSubscription = onRequested(serviceProviderName, subscription);
                 break;
 			case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
@@ -124,7 +124,7 @@ public class ServiceProviderRouter {
         }
     }
 
-    private Optional<LocalSubscription> onRequested(String serviceProviderName, LocalSubscription subscription, String nodeName, String messageChannelPort) {
+    private Optional<LocalSubscription> onRequested(String serviceProviderName, LocalSubscription subscription) {
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
             optionallyCreateQueue(source, serviceProviderName);
@@ -274,13 +274,6 @@ public class ServiceProviderRouter {
             }
         }
     }
-
-    //public void removeQueueWhenMatchIsGone(LocalSubscription localSubscription) {
-    //    Match match = matchDiscoveryService.findMatchByLocalSubscriptionId(localSubscription.getId());
-    //    if (match == null && localSubscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
-    //
-    //    }
-    //}
 
     private void createSubscriptionExchange(String exchangeName) {
         qpidClient.createTopicExchange(exchangeName);

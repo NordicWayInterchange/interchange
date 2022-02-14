@@ -19,14 +19,11 @@ import static org.mockito.Mockito.*;
 public class ServiceProviderServiceTest {
 
     @Mock
-    NeighbourRepository neighbourRepository;
-
-    @Mock
     ServiceProviderRepository serviceProviderRepository;
 
     @Test
     public void updateServiceProviderDeliveryWithOnramp() {
-        ServiceProviderService serviceProviderService = new ServiceProviderService(neighbourRepository,serviceProviderRepository);
+        ServiceProviderService serviceProviderService = new ServiceProviderService(serviceProviderRepository);
         String selector = "originatingCountry = 'NO' AND protocolVersion = 'DENM:1.1.0' AND quadTree like '%,123%,' AND causeCode like '%,1,%'";
         String localNodeName = "local-node";
         String serviceProviderName = "sp-1";

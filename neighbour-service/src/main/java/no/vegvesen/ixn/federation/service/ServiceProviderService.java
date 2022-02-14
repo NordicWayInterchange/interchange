@@ -18,13 +18,10 @@ public class ServiceProviderService {
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderService.class);
 
-    private NeighbourRepository neighbourRepository;
     private ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
-    public ServiceProviderService(NeighbourRepository neighbourRepository,
-                                  ServiceProviderRepository serviceProviderRepository) {
-        this.neighbourRepository = neighbourRepository;
+    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository) {
         this.serviceProviderRepository = serviceProviderRepository;
     }
 
