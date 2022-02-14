@@ -192,7 +192,7 @@ public class ServiceProviderRepositoryIT {
 		String name = "my-service-provider";
 		ServiceProvider sp = new ServiceProvider(name);
 
-		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'", name, "");
+		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'");
 		sp.addLocalSubscription(sub);
 
 		repository.save(sp);
@@ -206,7 +206,12 @@ public class ServiceProviderRepositoryIT {
 				.findFirst()
 				.get();
 
+		/*
+		TODO this no longer makes sense
+
 		assertThat(savedSub.getConsumerCommonName().equals(name)).isTrue();
+
+		 */
 	}
 
 	@Test

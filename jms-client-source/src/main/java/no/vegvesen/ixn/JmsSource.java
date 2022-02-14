@@ -36,15 +36,15 @@ public class JmsSource implements CommandLineRunner {
         try(Source s = new Source(properties.getUrl(),properties.getSendQueue(),sslContext)) {
             s.start();
             s.send(s.createMessageBuilder()
-                    .textMessage("Dette er en test, FISK!")
-                    .userId("king_olav")
-                    .publisherId("NO-123")
+                    .textMessage("Dette er en test, hehehehe!")
+                    .userId("pilotinterchange.eu.tlex.se.bouvet.no.anna")
+                    .publisherId("NO00001")
                     .messageType(Constants.DENM)
-                    .causeCode("6")
+                    .causeCode("5")
                     .subCauseCode("61")
                     .originatingCountry("NO")
-                    .protocolVersion("1.0")
-                    .quadTreeTiles(",12003")
+                    .protocolVersion("DENM:1,2.2")
+                    .quadTreeTiles(",12004")
                     .timestamp(System.currentTimeMillis())
                     .build());
         }

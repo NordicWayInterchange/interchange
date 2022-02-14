@@ -212,12 +212,12 @@ public class NeigbourDiscoveryService {
         logger.info("Calculating custom subscription for neighbour: {}", neighbourName);
         logger.debug("Neighbour capabilities {}", neighbourCapabilities);
         logger.debug("Local subscriptions {}", localSubscriptions);
-        Set<LocalSubscription> existingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
+        Set<LocalSubscription> matchingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
         Set<Subscription> calculatedSubscriptions = new HashSet<>();
-        for (LocalSubscription subscription : existingSubscriptions) {
+        for (LocalSubscription subscription : matchingSubscriptions) {
             Subscription newSubscription = new Subscription(subscription.getSelector(),
                     SubscriptionStatus.REQUESTED,
-                    subscription.getConsumerCommonName());
+                    interchangeNodeProperties.getName());
             calculatedSubscriptions.add(newSubscription);
         }
         logger.info("Calculated custom subscription for neighbour {}: {}", neighbourName, calculatedSubscriptions);

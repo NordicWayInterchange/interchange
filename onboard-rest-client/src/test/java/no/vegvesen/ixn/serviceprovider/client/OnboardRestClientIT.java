@@ -113,7 +113,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
 
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        client.addSubscription(new AddSubscriptionsRequest(USER, Collections.singleton(new AddSubscription("ixn", selector))));
+        client.addSubscription(new AddSubscriptionsRequest(USER, Collections.singleton(new AddSubscription(selector))));
 
         ListSubscriptionsResponse localSubscriptions = client.getServiceProviderSubscriptions();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -135,7 +135,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         ObjectMapper objectMapper = new ObjectMapper();
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscriptionsResponse addedSubscription = client.addSubscription(
-                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription("ixn", selector)))
+                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector)))
         );
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 

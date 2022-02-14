@@ -39,12 +39,12 @@ public class MessageValidatingSelectorCreatorTest {
                 new HashSet<>(Arrays.asList("122,123")),
                new HashSet<>(Arrays.asList("5","6"))
         ));
-        assertThat(selector).contains("messageType = 'IVI'");
+        assertThat(selector).contains("messageType = 'IVIM'");
         assertThat(selector).contains("publisherId = 'NO-123'");
         assertThat(selector).contains("originatingCountry = 'NO'");
         assertThat(selector).contains("protocolVersion = '1.0'");
         assertThat(selector).contains("quadTree like");
-        assertThat(selector).contains("iviType = ");
+        assertThat(selector).contains("iviType like ");
         System.out.println(selector);
     }
 
@@ -64,7 +64,7 @@ public class MessageValidatingSelectorCreatorTest {
         assertThat(selector).contains("originatingCountry = 'NO'");
         assertThat(selector).contains("protocolVersion = '1.0'");
         assertThat(selector).contains("quadTree like");
-        assertThat(selector).contains("publicationType =");
+        assertThat(selector).contains("publicationType like");
         System.out.println(selector);
     }
 }

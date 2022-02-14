@@ -2,12 +2,10 @@ package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.model.*;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -112,9 +110,7 @@ class CapabilityMatcherTest {
 		LocalSubscription subscription = new LocalSubscription(
 				52,
 				LocalSubscriptionStatus.CREATED,
-				"originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'",
-				"kyrre",
-				""
+				"originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"
 		);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(capability),
@@ -129,6 +125,49 @@ class CapabilityMatcherTest {
 		LocalSubscription localSubscription = new LocalSubscription();
 		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%'");
 		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)));
+	}
+
+	@Test
+	public void matchSpatemSelectorWithQuadTree() {
+		SpatemCapability capability = new SpatemCapability(
+				"NO-12345",
+				"NO",
+				"SPATEM:1.0",
+				Sets.newHashSet(Collections.singleton("12003")),
+				Sets.newHashSet(Arrays.asList("1", "2"))
+		);
+		LocalSubscription localSubscription = new LocalSubscription();
+		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id like '%,2,%' or id like '%,3,%'");
+		System.out.println(localSubscription.getSelector());
+		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription));
+		assertThat(localSubscriptions).isNotEmpty();
+	}
+
+	@Test
+	void camCapabilitiesMatchCamSelectorInsideQuadTreeAndStationType() {
+		Set<String> statTypes = Sets.newLinkedHashSet("pedestrian", "cyclist", "moped");
+		CamCapability camCapability = new CamCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, statTypes);
+		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
+				Sets.newLinkedHashSet(camCapability),
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'CAM' and quadTree like '%,012100%' and stationType = 'cyclist'")));
+		assertThat(commonInterest).isNotEmpty();
+	}
+
+	@Test
+	@Disabled("At the moment, it's not possible to filter on optional fields that are not a part of the set of properties")
+	void mathcCapabilityWithSelectorOfOnlyOptionalField() {
+		SpatemCapability capability = new SpatemCapability(
+				"NO-12345",
+				"NO",
+				"SPATEM:1.0",
+				Sets.newHashSet(Collections.singleton("12003")),
+				Sets.newHashSet(Arrays.asList("1", "2"))
+		);
+		LocalSubscription localSubscription = new LocalSubscription();
+		localSubscription.setSelector("name = 'fish'");
+		System.out.println(localSubscription.getSelector());
+		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription));
+		assertThat(localSubscriptions).isNotEmpty();
 	}
 
 }

@@ -18,13 +18,10 @@ public class ServiceProviderService {
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderService.class);
 
-    private NeighbourRepository neighbourRepository;
     private ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
-    public ServiceProviderService(NeighbourRepository neighbourRepository,
-                                  ServiceProviderRepository serviceProviderRepository) {
-        this.neighbourRepository = neighbourRepository;
+    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository) {
         this.serviceProviderRepository = serviceProviderRepository;
     }
 
@@ -32,15 +29,6 @@ public class ServiceProviderService {
         return serviceProviderRepository.findAll();
     }
 
-    //TODO Should get the list of serviceProviders and neighbours as arguments? And maybe lookup the host and port?
-    public void updateLocalSubscriptions(String messageChannelHost, String messageChannelPort) {
-        List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-        List<Neighbour> neighbours = neighbourRepository.findAll();
-        for(ServiceProvider serviceProvider : serviceProviders) {
-            updateServiceProviderSubscriptionsWithHostAndPort(neighbours, serviceProvider, messageChannelHost, messageChannelPort);
-            serviceProviderRepository.save(serviceProvider);
-        }
-    }
     public void updateLocalDeliveries(String host, String port) {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         for(ServiceProvider serviceProvider : serviceProviders) {
@@ -65,38 +53,8 @@ public class ServiceProviderService {
         }
     }
 
-    //TODO: make test for this method
-    public void updateServiceProviderSubscriptionsWithHostAndPort(List<Neighbour> neighbours, ServiceProvider serviceProvider, String messageChannelHost, String messageChannelPort) {
-        for(Neighbour neighbour : neighbours) {
-            for(LocalSubscription localSubscription : serviceProvider.getSubscriptions()){
-                for(Subscription subscription : neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()){
-                    if (localSubscription.getSelector().equals(subscription.getSelector())) {
-                        if (localSubscription.getConsumerCommonName().equals(serviceProvider.getName())) {
-                            //TODO What about changes to endpoints? We also write ALL service provider Endpoints every time!
-                            Set<Endpoint> endpoints = subscription.getEndpoints();
-                            Set<LocalEndpoint> localEndpoints = new HashSet<>();
-                            for (Endpoint endpoint : endpoints) {
-                                logger.info("Adding local endpoint with host {} and consumerCommonName same as serviceProvider name, source {}", endpoint.getHost(), endpoint.getSource());
-                                localEndpoints.add(endpointToLocalEndpoint(endpoint));
-                            }
-                            serviceProvider.updateSubscriptionWithHostAndPort(localSubscription, localEndpoints);
-                        } else {
-                            LocalEndpoint localEndpoint = new LocalEndpoint(localSubscription.getQueueName(), messageChannelHost, Integer.parseInt(messageChannelPort));
-                            logger.info("Adding local endpoint with host {} and port {}, consumerCommonName the same as Ixn name, queue {}", localEndpoint.getHost(), localEndpoint.getPort(), localEndpoint.getSource());
-                            Set<LocalEndpoint> localEndpoints = new HashSet<>(Arrays.asList(localEndpoint));
-                            serviceProvider.updateSubscriptionWithHostAndPort(localSubscription, localEndpoints);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     public List<ServiceProvider> getServiceProviders() {
         return serviceProviderRepository.findAll();
     }
 
-    public LocalEndpoint endpointToLocalEndpoint(Endpoint endpoint) {
-        return new LocalEndpoint(endpoint.getSource(), endpoint.getHost(), endpoint.getPort());
-    }
 }

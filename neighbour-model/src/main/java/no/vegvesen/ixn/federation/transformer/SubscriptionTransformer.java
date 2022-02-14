@@ -16,10 +16,14 @@ public class SubscriptionTransformer {
 	public Set<Subscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request, String ixnName) {
 		ArrayList<Subscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
+			String consumerCommonName = subscriptionRequestApi.getConsumerCommonName();
+			if (consumerCommonName == null) {
+				consumerCommonName = ixnName;
+			}
 			Subscription subscription = new Subscription(
 					subscriptionRequestApi.getSelector(),
 					SubscriptionStatus.REQUESTED,
-					subscriptionRequestApi.getConsumerCommonName());
+					consumerCommonName);
 			subscriptions.add(subscription);
 		}
 		return new HashSet<>(subscriptions);
