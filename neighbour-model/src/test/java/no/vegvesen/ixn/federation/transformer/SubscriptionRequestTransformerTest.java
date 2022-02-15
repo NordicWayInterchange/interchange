@@ -76,6 +76,21 @@ public class SubscriptionRequestTransformerTest {
 	}
 
 	@Test
+	public void subscriptionPollApiWithNullEndpoint() {
+		SubscriptionPollResponseApi api = new SubscriptionPollResponseApi(
+				"1",
+				"t = b",
+				"/mynode/1",
+				SubscriptionStatusApi.REQUESTED,
+				"mynode",
+				null
+		);
+		Subscription subscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(api);
+		assertThat(subscription.getEndpoints()).isEmpty();
+
+	}
+
+	@Test
 	public void subscriptionPollResponseApiWithStatusCreated() {
 		String neighbourName = "myNeighbour";
 		String hostName = "myName";
