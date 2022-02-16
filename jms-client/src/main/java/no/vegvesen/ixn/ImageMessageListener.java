@@ -2,25 +2,16 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.jms.*;
-import javax.net.ssl.SSLContext;
-import java.io.File;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Enumeration;
 
-public class ImageSink extends Sink {
-
-    private static Logger logger = LoggerFactory.getLogger(ImageSink.class);
-
-    public ImageSink(String url, String queueName, SSLContext sslContext) {
-        super(url, queueName, sslContext);
-    }
+public class ImageMessageListener implements MessageListener {
 
     @Override
     public void onMessage(Message message) {
@@ -28,18 +19,18 @@ public class ImageSink extends Sink {
             message.acknowledge();
             long delay = -1;
             try {
-                long  timestamp = message.getLongProperty(MessageProperty.TIMESTAMP.getName());
+                long timestamp = message.getLongProperty(MessageProperty.TIMESTAMP.getName());
                 delay = System.currentTimeMillis() - timestamp;
             } catch (Exception e) {
                 System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
             }
             System.out.println("** Message received **");
-            @SuppressWarnings("rawtypes") Enumeration messageNames =  message.getPropertyNames();
+            @SuppressWarnings("rawtypes") Enumeration messageNames = message.getPropertyNames();
 
             while (messageNames.hasMoreElements()) {
                 String messageName = (String) messageNames.nextElement();
                 String value = message.getStringProperty(messageName);
-                System.out.println(String.format("%s:%s",messageName,value));
+                System.out.println(String.format("%s:%s", messageName, value));
             }
 
             System.out.println(" BYTES message");

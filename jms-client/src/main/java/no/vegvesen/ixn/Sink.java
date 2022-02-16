@@ -18,7 +18,7 @@ import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
 import java.util.Enumeration;
 
-public class Sink implements MessageListener, AutoCloseable {
+public class Sink implements AutoCloseable {
 
 	private static Logger logger = LoggerFactory.getLogger(Sink.class);
 
@@ -28,12 +28,21 @@ public class Sink implements MessageListener, AutoCloseable {
     private final SSLContext sslContext;
     protected Connection connection;
 	private MessageConsumer consumer;
+	private MessageListener listener;
 
     public Sink(String url, String queueName, SSLContext sslContext) {
         this.url = url;
         this.queueName = queueName;
         this.sslContext = sslContext;
+		this.listener = new DefaultMessageListener();
     }
+
+	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener) {
+		this.url = url;
+		this.queueName = queueName;
+		this.sslContext = sslContext;
+		this.listener = listener;
+	}
 
 	public void startWithMessageListener(MessageListener newListener) throws JMSException, NamingException {
     	if (this.consumer != null) {
@@ -51,7 +60,7 @@ public class Sink implements MessageListener, AutoCloseable {
 
     public void start() throws JMSException, NamingException {
 		this.consumer = createConsumer();
-		consumer.setMessageListener(this);
+		consumer.setMessageListener(listener);
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, this);
     }
 
@@ -70,25 +79,27 @@ public class Sink implements MessageListener, AutoCloseable {
 		connection = ixnContext.createConnection(sslContext);
 	}
 
-	@Override
-    public void onMessage(Message message) {
-        try {
-            message.acknowledge();
-			long delay = -1;
-			try {
-				long  timestamp = message.getLongProperty(MessageProperty.TIMESTAMP.getName());
-				delay = System.currentTimeMillis() - timestamp;
-			} catch (Exception e) {
-				System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
-			}
-			System.out.println("** Message received **");
-			@SuppressWarnings("rawtypes") Enumeration messageNames =  message.getPropertyNames();
+	public static class DefaultMessageListener implements MessageListener {
 
-			while (messageNames.hasMoreElements()) {
-				String messageName = (String) messageNames.nextElement();
-				String value = message.getStringProperty(messageName);
-				System.out.println(String.format("%s:%s",messageName,value));
-			}
+		@Override
+		public void onMessage(Message message) {
+			try {
+				message.acknowledge();
+				long delay = -1;
+				try {
+					long  timestamp = message.getLongProperty(MessageProperty.TIMESTAMP.getName());
+					delay = System.currentTimeMillis() - timestamp;
+				} catch (Exception e) {
+					System.err.printf("Could not get message property '%s' to calculate delay;\n", MessageProperty.TIMESTAMP.getName());
+				}
+				System.out.println("** Message received **");
+				@SuppressWarnings("rawtypes") Enumeration messageNames =  message.getPropertyNames();
+
+				while (messageNames.hasMoreElements()) {
+					String messageName = (String) messageNames.nextElement();
+					String value = message.getStringProperty(messageName);
+					System.out.println(String.format("%s:%s",messageName,value));
+				}
 
 				String messageBody;
 				if (message instanceof JmsBytesMessage){
@@ -110,18 +121,19 @@ public class Sink implements MessageListener, AutoCloseable {
 				System.out.println(messageBody);
 				System.out.println("/Body -----------");
 				System.out.println("Delay " + delay + " ms \n");
-		} catch (Exception e) {
-        	e.printStackTrace();
-			throw new RuntimeException(e);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
 		}
-    }
+	}
 
-    @Override
-    public void close() throws Exception {
-        if (connection != null)  {
-            connection.close();
-        }
-    }
+	@Override
+	public void close() throws Exception {
+		if (connection != null)  {
+			connection.close();
+		}
+	}
 
 	public void setExceptionListener(ExceptionListener exceptionListener) {
 		try {
@@ -130,5 +142,10 @@ public class Sink implements MessageListener, AutoCloseable {
 			logger.error("Could not set exceptionListener {}", exceptionListener, e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	//TODO this should go!
+	public MessageListener getListener() {
+		return listener;
 	}
 }

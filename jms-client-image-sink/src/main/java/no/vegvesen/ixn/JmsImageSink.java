@@ -33,7 +33,7 @@ public class JmsImageSink implements CommandLineRunner {
 
         String url = properties.getUrl();
         String receiveQueue = properties.getReceiveQueue();
-        ImageSink sink = new ImageSink(url,receiveQueue,sslContext);
+        Sink sink = new Sink(url,receiveQueue,sslContext,new ImageMessageListener());
         System.out.println(String.format("Listening for messages from queue [%s] on server [%s]", receiveQueue, url));
         sink.start();
     }
