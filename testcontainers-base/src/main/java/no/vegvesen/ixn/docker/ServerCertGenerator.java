@@ -54,4 +54,16 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
         this.withCommand(domainName,caKeyInContainer,caCertInContainer,chainInContainer,countryCode);
     }
+
+    public Path getKeyOnHost() {
+        return targetPath.resolve(String.format("%s.key.pem",domainName));
+    }
+
+    public Path getCertOnHost() {
+        return targetPath.resolve(String.format("%s.crt.pem",domainName));
+    }
+
+    public Path getCertChainOnHost() {
+        return targetPath.resolve(String.format("chain.%s.crt.pem",domainName));
+    }
 }

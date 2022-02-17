@@ -59,4 +59,13 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
         this.withCommand(csrPathInContainer,domainName,caCertPathInContainer,caKeyPathInContainer,countryCode);
     }
+
+
+    public Path getSingleCertOnHost() {
+        return targetPath.resolve(String.format("int.%s.crt.pem",domainName));
+    }
+
+    public Path getChainCertOnHost() {
+        return targetPath.resolve(String.format("chain.%s.crt.pem",domainName));
+    }
 }

@@ -29,4 +29,12 @@ public class ServiceProviderCSRGenerator extends GenericContainer<ServiceProvide
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 
+    public Path getKeyOnHost() {
+        return keysPath.resolve(String.format("%s.key.pem",username));
+    }
+
+    public Path getCsrOnHost() {
+        return keysPath.resolve(String.format("%s.csr.pem",username));
+    }
+
 }

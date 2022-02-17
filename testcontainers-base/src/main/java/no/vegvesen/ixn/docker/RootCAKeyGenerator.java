@@ -29,4 +29,17 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
         this.withCommand(caDomain,countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
+
+    public Path getKeysFolderOnHost() {
+        return keysFolder;
+    }
+
+    public Path getCaKeyOnHost() {
+        return keysFolder.resolve(String.format("ca.%s.key.pem",caDomain));
+    }
+
+    public Path getCaCertOnHost() {
+        return keysFolder.resolve(String.format("ca.%s.crt.pem",caDomain));
+    }
+
 }

@@ -22,6 +22,7 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
     private final String containerCertChainPath;
     private Path intermediateCaCertChainPath;
     private final String hostOutputPath;
+    private final Path outputPath;
     private final String containerOutputPath;
     private String clientName;
 
@@ -43,6 +44,7 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
         this.containerCaKeyPath = INTERMEDIATE_CA_IN_FOLDER + intermediateCaKeyPath.getFileName().toString();
         this.intermediateCaCertChainPath = intermediateCaCertChainPath;
         this.hostOutputPath = outputPath.toString();
+        this.outputPath = outputPath;
         this.containerOutputPath = CERT_OUT_FOLDER;
         this.containerCertChainPath = INTERMEDIATE_CA_IN_FOLDER + intermediateCaCertChainPath.getFileName().toString();
 
@@ -58,6 +60,14 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
         this.withCommand(containerCsrPath,clientName,containerCaCertPath,containerCaKeyPath,containerCertChainPath);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
 
+    }
+
+    public Path getCertOnHost() {
+        return outputPath.resolve(String.format("%s.crt.pem",clientName));
+    }
+
+    public Path getCertChainOnHost() {
+        return outputPath.resolve(String.format("chain.%s.crt.pem",clientName));
     }
 
 }
