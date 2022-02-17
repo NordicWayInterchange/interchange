@@ -125,10 +125,10 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
         try (Sink sink = new Sink(
                 String.format("amqps://%s:%d",actualEndpoint.getHost(),actualEndpoint.getPort()),
                 actualEndpoint.getSource(),
-                sslContext
+                sslContext,
+                message -> System.out.println(message)
         ))  {
-            sink.startWithMessageListener( message -> System.out.println(message));
-            //System.out.println();
+            sink.start();
 
         } catch (Exception e) {
             e.printStackTrace();

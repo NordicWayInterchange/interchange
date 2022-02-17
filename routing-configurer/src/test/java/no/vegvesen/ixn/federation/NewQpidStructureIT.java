@@ -102,8 +102,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         System.out.println(qpidContainer.getHttpUrl());
         //4. Create a Source, sending one good message, and one bad
         AtomicInteger numMessages = new AtomicInteger();
-        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),queueName,sslContext)) {
-            sink.startWithMessageListener( message -> numMessages.incrementAndGet());
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
+                queueName,
+                sslContext,
+                message -> numMessages.incrementAndGet())) {
+            sink.start();
             try (Source source = new Source(qpidContainer.getAmqpsUrl(),exchangeName,sslContext)) {
                 //5. Create a Sink, listens to queue. Check that sink get 1 message.
                 source.start();

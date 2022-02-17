@@ -138,7 +138,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testConsumer = sink.createConsumer();
 		Message receive = testConsumer.receive(1000);
-		sink.onMessage(receive);
+		//TODO this is weird!
+		sink.getListener().onMessage(receive);
 		assertThat(receive).isNotNull();
 	}
 
@@ -167,7 +168,8 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testConsumer = sink.createConsumer();
 		Message receive = testConsumer.receive(1000);
-		sink.onMessage(receive);
+		//TODO this is weird!
+		sink.getListener().onMessage(receive);
 		assertThat(receive).isNotNull();
 	}
 
@@ -179,10 +181,11 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		source.start();
 		source.sendNonPersistentByteMessageWithImage("NO", "", "src/images/cabin_view.jpg");
 
-		try (ImageSink sink = new ImageSink(URL, "test-queue", KING_HARALD_SSL_CONTEXT)) {
+		//TODO this is weird!
+		try (Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT,new ImageMessageListener())) {
 			MessageConsumer testConsumer = sink.createConsumer();
 			Message receive = testConsumer.receive(1000);
-			sink.onMessage(receive);
+			sink.getListener().onMessage(receive);
 			assertThat(receive).isNotNull();
 		} catch (Exception e) {
 			fail("unexpected exception",e);
