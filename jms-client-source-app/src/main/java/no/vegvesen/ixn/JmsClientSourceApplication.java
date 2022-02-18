@@ -26,27 +26,6 @@ public class JmsClientSourceApplication implements Callable<Integer> {
     @Parameters(index = "1", description = "The queueName for the Service Provider")
     private String queueName;
 
-    @Parameters(index = "2", description = "The message to be sent")
-    String message;
-
-    @Parameters(index = "3", description = "The user id of the sender")
-    String userid;
-
-    @Parameters(index = "4", description = "The publisher id of the sender")
-    String publisherId;
-
-    @Parameters(index = "5", description = "The type of the message to be sent")
-    String messageType;
-
-    @Parameters(index = "6", description = "The originating country of the message")
-    String originatingCountry;
-
-    @Parameters(index = "7", description = "The protocol version of the message")
-    String protocolVersion;
-
-    @Parameters(index = "8", description = "The quadtree tiles of the message")
-    String quadTreeTiles;
-
     @Option(names = {"-k","--keystorepath"}, description = "Path to the service provider p12 keystore")
     private String keystorePath;
 
@@ -68,27 +47,55 @@ public class JmsClientSourceApplication implements Callable<Integer> {
         @ParentCommand
         JmsClientSourceApplication parentCommand;
 
+        @Parameters(index = "0", description = "The user id of the sender")
+        String userid;
+
+        @Parameters(index = "1", description = "The publisher id of the sender")
+        String publisherId;
+
+        @Parameters(index = "2", description = "The type of the message to be sent")
+        String messageType;
+
+        @Parameters(index = "3", description = "The originating country of the message")
+        String originatingCountry;
+
+        @Parameters(index = "4", description = "The protocol version of the message")
+        String protocolVersion;
+
+        @Parameters(index = "5", description = "The quadtree tiles of the message")
+        String quadTreeTiles;
+
+        @Parameters(index = "6", description = "The message to be sent")
+        String message;
+
         @Override
         public Integer call() throws Exception {
-            try(Source source = parentCommand.createClient()){
-                source.start();
-                String messageText = parentCommand.message;
+            //try(Source source = parentCommand.createClient()){
+                //source.start();
+                String messageText = message;
                 byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
 
-                source.sendNonPersistentMessage(source.createMessageBuilder()
+                /*source.sendNonPersistentMessage(source.createMessageBuilder()
                         .bytesMessage(bytemessage)
-                        .userId(parentCommand.userid)
-                        .messageType(parentCommand.messageType)
-                        .publisherId(parentCommand.publisherId)
-                        .originatingCountry(parentCommand.originatingCountry)
-                        .protocolVersion(parentCommand.protocolVersion)
-                        .quadTreeTiles(parentCommand.quadTreeTiles)
+                        .userId(userid)
+                        .messageType(messageType)
+                        .publisherId(publisherId)
+                        .originatingCountry(originatingCountry)
+                        .protocolVersion(protocolVersion)
+                        .quadTreeTiles(quadTreeTiles)
                         .causeCode("6")
                         .subCauseCode("76")
-                        .build());
-            } catch (Exception e){
-                e.printStackTrace();
-            }
+                        .build());*/
+                System.out.println(messageText);
+                System.out.println(userid);
+                System.out.println(publisherId);
+                System.out.println(messageType);
+                System.out.println(originatingCountry);
+                System.out.println(protocolVersion);
+                System.out.println(quadTreeTiles);
+            //} catch (Exception e){
+            //    e.printStackTrace();
+            //}
             return 0;
         }
     }

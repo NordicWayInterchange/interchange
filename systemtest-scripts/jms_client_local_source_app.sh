@@ -1,20 +1,18 @@
 #!/bin/bash
 
-cd /Users/anna.fossen-helle/git/interchange/jms-client-source-app
-
-java -jar target/jms-client-source-app-1.0.3-SNAPSHOT.jar \
-        -k ../tmp/keys/king_olav.bouvetinterchange.eu.p12 \
-        -s password \
-        -p password\
-        -t ../tmp/keys/truststore.jks \
-        -w password \
-        amqps://local.bouvetinterchange.eu \
-        onramp \
-        this is a message \
-        king_olav.bouvetinterchange.eu \
-        NO12345 \
-        DENM \
-        NO \
-        DENM:1.2.2 \
-        ,12003 \
-        ${1}
+docker run \
+  -it \
+  --rm \
+  --name jms_client_source_app \
+  --network=systemtest-scripts_testing_net \
+  --dns=172.28.1.1 \
+  -v ${PWD}/../tmp/keys:/keys \
+  -e URL=amqps://local.bouvetinterchange.eu \
+  -e QUEUE=onramp \
+  -e KEY_STORE_PATH=/keys/king_olav.bouvetinterchange.eu.p12 \
+  -e KEY_STORE_PASS=password \
+  -e KEY_PASS=password \
+  -e TRUST_STORE_PATH=/keys/truststore.jks \
+  -e TRUST_STORE_PASS=password \
+  --link local_qpid:local.bouvetinterchange.eu \
+  --entrypoint bash jms_client_source_app
