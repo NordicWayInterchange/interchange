@@ -22,44 +22,20 @@ public class FullChainKeyGeneratorIT {
       assertThat(rootCaDetails.getCaCertOnHost()).exists();
       String intermediateDomain = "node-domain.no";
       String intermediateNodeCountry = "NO";
-      IntermediateCaCSRGenerator hostCsrGenerator = new IntermediateCaCSRGenerator(
-              imageBaseFolder.resolve("intermediateca/csr"),
-              keysPath,
-              intermediateDomain,
-              intermediateNodeCountry
-      );
-      hostCsrGenerator.start();
-      assertThat(hostCsrGenerator.getCsrOnHost()).exists();
+      HostCsrDetail hostCsrDetail = getHostCsrDetail(imageBaseFolder, intermediateDomain, intermediateNodeCountry);
+      assertThat(hostCsrDetail.getCsrOnHost()).exists();
       //TODO this is a really bad name. It's the CA that signs the intermediate ca.
-      IntermediateCACertGenerator intermediateCACertGenerator = new IntermediateCACertGenerator(
-              imageBaseFolder.resolve("rootca/sign_intermediate"),
-              hostCsrGenerator.getCsrOnHost(),
-              intermediateDomain,
-              rootCaDetails.getCaCertOnHost(),
-              rootCaDetails.getCaKeyOnHost(),
-              intermediateNodeCountry,
-              keysPath
-      );
-      intermediateCACertGenerator.start();
-      assertThat(intermediateCACertGenerator.getSingleCertOnHost()).exists();
-      assertThat(intermediateCACertGenerator.getChainCertOnHost()).exists();
+      IntermedateCaDetails intermedateCaDetails = getIntermedateCaDetails(imageBaseFolder, rootCaDetails, intermediateDomain, intermediateNodeCountry, hostCsrDetail);
+      assertThat(intermedateCaDetails.getSingleCertOnHost()).exists();
+      assertThat(intermedateCaDetails.getChainCertOnHost()).exists();
       //Now we have top ca, intermediate ca.
       //Now we need 1 server ca for messages container, and 2 Service Provider certs
       String serverDomainName = "messages.node-domain.no";
       String serverCountryCode = "NO";
-      ServerCertGenerator serverCertGenerator = new ServerCertGenerator(
-              imageBaseFolder.resolve("server"),
-              serverDomainName,
-              intermediateCACertGenerator.getSingleCertOnHost(),
-              hostCsrGenerator.getKeyOnHost(),
-              intermediateCACertGenerator.getChainCertOnHost(),
-              serverCountryCode,
-              keysPath
-      );
-      serverCertGenerator.start();
-      assertThat(serverCertGenerator.getKeyOnHost()).exists();
-      assertThat(serverCertGenerator.getCertOnHost()).exists();
-      assertThat(serverCertGenerator.getCertChainOnHost()).exists();
+      ServerCertDetails serverCertDetails = getServerCertDetails(imageBaseFolder, hostCsrDetail, intermedateCaDetails, serverDomainName, serverCountryCode);
+      assertThat(serverCertDetails.getKeyOnHost()).exists();
+      assertThat(serverCertDetails.getCertOnHost()).exists();
+      assertThat(serverCertDetails.getCertChainOnHost()).exists();
       String username = "service-provider";
       String serviceProviderCountry = "NO";
       ServiceProviderCSRGenerator serviceProviderCSRGenerator = new ServiceProviderCSRGenerator(
@@ -69,21 +45,70 @@ public class FullChainKeyGeneratorIT {
               serviceProviderCountry
       );
       serviceProviderCSRGenerator.start();
-      assertThat(serviceProviderCSRGenerator.getCsrOnHost()).exists();
-      assertThat(serviceProviderCSRGenerator.getKeyOnHost()).exists();
+      ServiceProviderCsrDetails serviceProviderCsrDetails = new ServiceProviderCsrDetails(serviceProviderCSRGenerator.getCsrOnHost(),serviceProviderCSRGenerator.getKeyOnHost());
+      assertThat(serviceProviderCsrDetails.getCsrOnHost()).exists();
+      assertThat(serviceProviderCsrDetails.getKeyOnHost()).exists();
+      ServiceProviderCertDetails serviceProviderCertDetails = getServiceProviderCertDetails(imageBaseFolder, hostCsrDetail, intermedateCaDetails, username, serviceProviderCsrDetails);
+      assertThat(serviceProviderCertDetails.getCertOnHost()).exists();
+      assertThat(serviceProviderCertDetails.getCertChainOnHost()).exists();
+
+   }
+
+   private ServiceProviderCertDetails getServiceProviderCertDetails(Path imageBaseFolder, HostCsrDetail hostCsrDetail, IntermedateCaDetails intermedateCaDetails, String username, ServiceProviderCsrDetails serviceProviderCsrDetails) {
       ServiceProviderCertGenerator serviceProviderCertGenerator = new ServiceProviderCertGenerator(
               imageBaseFolder.resolve("intermediateca/sign_sp"),
-              serviceProviderCSRGenerator.getCsrOnHost(),
+              serviceProviderCsrDetails.getCsrOnHost(),
               username,
-              intermediateCACertGenerator.getSingleCertOnHost(),
-              hostCsrGenerator.getKeyOnHost(),
-              intermediateCACertGenerator.getChainCertOnHost(),
+              intermedateCaDetails.getSingleCertOnHost(),
+              hostCsrDetail.getKeyOnHost(),
+              intermedateCaDetails.getChainCertOnHost(),
               keysPath
       );
       serviceProviderCertGenerator.start();
-      assertThat(serviceProviderCertGenerator.getCertOnHost()).exists();
-      assertThat(serviceProviderCertGenerator.getCertChainOnHost()).exists();
+      ServiceProviderCertDetails serviceProviderCertDetails = new ServiceProviderCertDetails(serviceProviderCertGenerator.getCertOnHost(),serviceProviderCertGenerator.getCertChainOnHost());
+      return serviceProviderCertDetails;
+   }
 
+   private ServerCertDetails getServerCertDetails(Path imageBaseFolder, HostCsrDetail hostCsrDetail, IntermedateCaDetails intermedateCaDetails, String serverDomainName, String serverCountryCode) {
+      ServerCertGenerator serverCertGenerator = new ServerCertGenerator(
+              imageBaseFolder.resolve("server"),
+              serverDomainName,
+              intermedateCaDetails.getSingleCertOnHost(),
+              hostCsrDetail.getKeyOnHost(),
+              intermedateCaDetails.getChainCertOnHost(),
+              serverCountryCode,
+              keysPath
+      );
+      serverCertGenerator.start();
+      ServerCertDetails serverCertDetails = new ServerCertDetails(serverCertGenerator.getKeyOnHost(),serverCertGenerator.getCertOnHost(),serverCertGenerator.getCertChainOnHost());
+      return serverCertDetails;
+   }
+
+   private IntermedateCaDetails getIntermedateCaDetails(Path imageBaseFolder, RootCaDetails rootCaDetails, String intermediateDomain, String intermediateNodeCountry, HostCsrDetail hostCsrDetail) {
+      IntermediateCACertGenerator intermediateCACertGenerator = new IntermediateCACertGenerator(
+              imageBaseFolder.resolve("rootca/sign_intermediate"),
+              hostCsrDetail.getCsrOnHost(),
+              intermediateDomain,
+              rootCaDetails.getCaCertOnHost(),
+              rootCaDetails.getCaKeyOnHost(),
+              intermediateNodeCountry,
+              keysPath
+      );
+      intermediateCACertGenerator.start();
+      IntermedateCaDetails intermedateCaDetails = new IntermedateCaDetails(intermediateCACertGenerator.getSingleCertOnHost(),intermediateCACertGenerator.getChainCertOnHost());
+      return intermedateCaDetails;
+   }
+
+   private HostCsrDetail getHostCsrDetail(Path imageBaseFolder, String intermediateDomain, String intermediateNodeCountry) {
+      IntermediateCaCSRGenerator hostCsrGenerator = new IntermediateCaCSRGenerator(
+              imageBaseFolder.resolve("intermediateca/csr"),
+              keysPath,
+              intermediateDomain,
+              intermediateNodeCountry
+      );
+      hostCsrGenerator.start();
+      HostCsrDetail hostCsrDetail = new HostCsrDetail(hostCsrGenerator.getCsrOnHost(), hostCsrGenerator.getKeyOnHost());
+      return hostCsrDetail;
    }
 
    private RootCaDetails getRootCaDetails(Path imageBaseFolder, String caDomain, String caCountry) {
@@ -117,4 +142,99 @@ public class FullChainKeyGeneratorIT {
       }
    }
 
+   private class HostCsrDetail {
+      private final Path csrOnHost;
+      private final Path keyOnHost;
+
+      public HostCsrDetail(Path csrOnHost, Path keyOnHost) {
+         this.csrOnHost = csrOnHost;
+         this.keyOnHost = keyOnHost;
+      }
+
+      public Path getCsrOnHost() {
+         return csrOnHost;
+      }
+
+      public Path getKeyOnHost() {
+         return keyOnHost;
+      }
+   }
+
+   private class IntermedateCaDetails {
+      private final Path singleCertOnHost;
+      private final Path chainCertOnHost;
+
+      public IntermedateCaDetails(Path singleCertOnHost, Path chainCertOnHost) {
+         this.singleCertOnHost = singleCertOnHost;
+         this.chainCertOnHost = chainCertOnHost;
+      }
+
+      public Path getSingleCertOnHost() {
+         return singleCertOnHost;
+      }
+
+      public Path getChainCertOnHost() {
+         return chainCertOnHost;
+      }
+   }
+
+   private class ServerCertDetails {
+      private final Path keyOnHost;
+      private final Path certOnHost;
+      private final Path certChainOnHost;
+
+      public ServerCertDetails(Path keyOnHost, Path certOnHost, Path certChainOnHost) {
+         this.keyOnHost = keyOnHost;
+         this.certOnHost = certOnHost;
+         this.certChainOnHost = certChainOnHost;
+      }
+
+      public Path getKeyOnHost() {
+         return keyOnHost;
+      }
+
+      public Path getCertOnHost() {
+         return certOnHost;
+      }
+
+      public Path getCertChainOnHost() {
+         return certChainOnHost;
+      }
+   }
+
+   private class ServiceProviderCsrDetails {
+      private final Path csrOnHost;
+      private final Path keyOnHost;
+
+      public ServiceProviderCsrDetails(Path csrOnHost, Path keyOnHost) {
+         this.csrOnHost = csrOnHost;
+         this.keyOnHost = keyOnHost;
+      }
+
+      public Path getCsrOnHost() {
+         return csrOnHost;
+      }
+
+      public Path getKeyOnHost() {
+         return keyOnHost;
+      }
+   }
+
+   private class ServiceProviderCertDetails {
+      private final Path certOnHost;
+      private final Path certChainOnHost;
+
+      public ServiceProviderCertDetails(Path certOnHost, Path certChainOnHost) {
+         this.certOnHost = certOnHost;
+         this.certChainOnHost = certChainOnHost;
+      }
+
+      public Path getCertOnHost() {
+         return certOnHost;
+      }
+
+      public Path getCertChainOnHost() {
+         return certChainOnHost;
+      }
+   }
 }
