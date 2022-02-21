@@ -36,4 +36,8 @@ public class IntermediateCaCSRGenerator extends GenericContainer<IntermediateCaC
     public Path getKeyOnHost() {
         return keysFolder.resolve(String.format("int.%s.key.pem",intermediateDomain));
     }
+
+    public HostCsrDetail getHostCsrDetails() {
+        return new HostCsrDetail(getCsrOnHost(),getKeyOnHost());
+    }
 }

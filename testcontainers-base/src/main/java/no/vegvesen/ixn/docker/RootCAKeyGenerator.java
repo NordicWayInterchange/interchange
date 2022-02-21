@@ -2,7 +2,6 @@ package no.vegvesen.ixn.docker;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
@@ -40,6 +39,10 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
 
     public Path getCaCertOnHost() {
         return keysFolder.resolve(String.format("ca.%s.crt.pem",caDomain));
+    }
+
+    public RootCaDetails getRootCaDetails() {
+        return new RootCaDetails(getCaKeyOnHost(),getCaCertOnHost());
     }
 
 }

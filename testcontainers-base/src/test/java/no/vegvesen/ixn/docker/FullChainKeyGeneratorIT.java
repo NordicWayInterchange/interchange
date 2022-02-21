@@ -38,6 +38,16 @@ public class FullChainKeyGeneratorIT {
       assertThat(serverCertDetails.getCertChainOnHost()).exists();
       String username = "service-provider";
       String serviceProviderCountry = "NO";
+      ServiceProviderCsrDetails serviceProviderCsrDetails = getServiceProviderCsrDetails(imageBaseFolder, username, serviceProviderCountry);
+      assertThat(serviceProviderCsrDetails.getCsrOnHost()).exists();
+      assertThat(serviceProviderCsrDetails.getKeyOnHost()).exists();
+      ServiceProviderCertDetails serviceProviderCertDetails = getServiceProviderCertDetails(imageBaseFolder, hostCsrDetail, intermedateCaDetails, username, serviceProviderCsrDetails);
+      assertThat(serviceProviderCertDetails.getCertOnHost()).exists();
+      assertThat(serviceProviderCertDetails.getCertChainOnHost()).exists();
+
+   }
+
+   private ServiceProviderCsrDetails getServiceProviderCsrDetails(Path imageBaseFolder, String username, String serviceProviderCountry) {
       ServiceProviderCSRGenerator serviceProviderCSRGenerator = new ServiceProviderCSRGenerator(
               imageBaseFolder.resolve("serviceprovider/csr"),
               keysPath,
@@ -45,13 +55,7 @@ public class FullChainKeyGeneratorIT {
               serviceProviderCountry
       );
       serviceProviderCSRGenerator.start();
-      ServiceProviderCsrDetails serviceProviderCsrDetails = new ServiceProviderCsrDetails(serviceProviderCSRGenerator.getCsrOnHost(),serviceProviderCSRGenerator.getKeyOnHost());
-      assertThat(serviceProviderCsrDetails.getCsrOnHost()).exists();
-      assertThat(serviceProviderCsrDetails.getKeyOnHost()).exists();
-      ServiceProviderCertDetails serviceProviderCertDetails = getServiceProviderCertDetails(imageBaseFolder, hostCsrDetail, intermedateCaDetails, username, serviceProviderCsrDetails);
-      assertThat(serviceProviderCertDetails.getCertOnHost()).exists();
-      assertThat(serviceProviderCertDetails.getCertChainOnHost()).exists();
-
+      return serviceProviderCSRGenerator.getServiceProviderCsrDetails();
    }
 
    private ServiceProviderCertDetails getServiceProviderCertDetails(Path imageBaseFolder, HostCsrDetail hostCsrDetail, IntermedateCaDetails intermedateCaDetails, String username, ServiceProviderCsrDetails serviceProviderCsrDetails) {
@@ -65,8 +69,7 @@ public class FullChainKeyGeneratorIT {
               keysPath
       );
       serviceProviderCertGenerator.start();
-      ServiceProviderCertDetails serviceProviderCertDetails = new ServiceProviderCertDetails(serviceProviderCertGenerator.getCertOnHost(),serviceProviderCertGenerator.getCertChainOnHost());
-      return serviceProviderCertDetails;
+      return serviceProviderCertGenerator.getServiceProviderCertDetails();
    }
 
    private ServerCertDetails getServerCertDetails(Path imageBaseFolder, HostCsrDetail hostCsrDetail, IntermedateCaDetails intermedateCaDetails, String serverDomainName, String serverCountryCode) {
@@ -80,8 +83,7 @@ public class FullChainKeyGeneratorIT {
               keysPath
       );
       serverCertGenerator.start();
-      ServerCertDetails serverCertDetails = new ServerCertDetails(serverCertGenerator.getKeyOnHost(),serverCertGenerator.getCertOnHost(),serverCertGenerator.getCertChainOnHost());
-      return serverCertDetails;
+      return serverCertGenerator.getServiceCertDetails();
    }
 
    private IntermedateCaDetails getIntermedateCaDetails(Path imageBaseFolder, RootCaDetails rootCaDetails, String intermediateDomain, String intermediateNodeCountry, HostCsrDetail hostCsrDetail) {
@@ -95,8 +97,7 @@ public class FullChainKeyGeneratorIT {
               keysPath
       );
       intermediateCACertGenerator.start();
-      IntermedateCaDetails intermedateCaDetails = new IntermedateCaDetails(intermediateCACertGenerator.getSingleCertOnHost(),intermediateCACertGenerator.getChainCertOnHost());
-      return intermedateCaDetails;
+      return intermediateCACertGenerator.getIntermediateCaDetails();
    }
 
    private HostCsrDetail getHostCsrDetail(Path imageBaseFolder, String intermediateDomain, String intermediateNodeCountry) {
@@ -107,8 +108,7 @@ public class FullChainKeyGeneratorIT {
               intermediateNodeCountry
       );
       hostCsrGenerator.start();
-      HostCsrDetail hostCsrDetail = new HostCsrDetail(hostCsrGenerator.getCsrOnHost(), hostCsrGenerator.getKeyOnHost());
-      return hostCsrDetail;
+      return hostCsrGenerator.getHostCsrDetails();
    }
 
    private RootCaDetails getRootCaDetails(Path imageBaseFolder, String caDomain, String caCountry) {
@@ -119,122 +119,7 @@ public class FullChainKeyGeneratorIT {
               caCountry
       );
       rootCAKeyGenerator.start();
-      RootCaDetails rootCaDetails = new RootCaDetails(rootCAKeyGenerator.getCaKeyOnHost(), rootCAKeyGenerator.getCaCertOnHost());
-      return rootCaDetails;
+      return rootCAKeyGenerator.getRootCaDetails();
    }
 
-   public static class RootCaDetails {
-
-      private final Path caKeyOnHost;
-      private final Path caCertOnHost;
-
-      public RootCaDetails(Path caKeyOnHost, Path caCertOnHost) {
-         this.caKeyOnHost = caKeyOnHost;
-         this.caCertOnHost = caCertOnHost;
-      }
-
-      public Path getCaKeyOnHost() {
-         return caKeyOnHost;
-      }
-
-      public Path getCaCertOnHost() {
-         return caCertOnHost;
-      }
-   }
-
-   private class HostCsrDetail {
-      private final Path csrOnHost;
-      private final Path keyOnHost;
-
-      public HostCsrDetail(Path csrOnHost, Path keyOnHost) {
-         this.csrOnHost = csrOnHost;
-         this.keyOnHost = keyOnHost;
-      }
-
-      public Path getCsrOnHost() {
-         return csrOnHost;
-      }
-
-      public Path getKeyOnHost() {
-         return keyOnHost;
-      }
-   }
-
-   private class IntermedateCaDetails {
-      private final Path singleCertOnHost;
-      private final Path chainCertOnHost;
-
-      public IntermedateCaDetails(Path singleCertOnHost, Path chainCertOnHost) {
-         this.singleCertOnHost = singleCertOnHost;
-         this.chainCertOnHost = chainCertOnHost;
-      }
-
-      public Path getSingleCertOnHost() {
-         return singleCertOnHost;
-      }
-
-      public Path getChainCertOnHost() {
-         return chainCertOnHost;
-      }
-   }
-
-   private class ServerCertDetails {
-      private final Path keyOnHost;
-      private final Path certOnHost;
-      private final Path certChainOnHost;
-
-      public ServerCertDetails(Path keyOnHost, Path certOnHost, Path certChainOnHost) {
-         this.keyOnHost = keyOnHost;
-         this.certOnHost = certOnHost;
-         this.certChainOnHost = certChainOnHost;
-      }
-
-      public Path getKeyOnHost() {
-         return keyOnHost;
-      }
-
-      public Path getCertOnHost() {
-         return certOnHost;
-      }
-
-      public Path getCertChainOnHost() {
-         return certChainOnHost;
-      }
-   }
-
-   private class ServiceProviderCsrDetails {
-      private final Path csrOnHost;
-      private final Path keyOnHost;
-
-      public ServiceProviderCsrDetails(Path csrOnHost, Path keyOnHost) {
-         this.csrOnHost = csrOnHost;
-         this.keyOnHost = keyOnHost;
-      }
-
-      public Path getCsrOnHost() {
-         return csrOnHost;
-      }
-
-      public Path getKeyOnHost() {
-         return keyOnHost;
-      }
-   }
-
-   private class ServiceProviderCertDetails {
-      private final Path certOnHost;
-      private final Path certChainOnHost;
-
-      public ServiceProviderCertDetails(Path certOnHost, Path certChainOnHost) {
-         this.certOnHost = certOnHost;
-         this.certChainOnHost = certChainOnHost;
-      }
-
-      public Path getCertOnHost() {
-         return certOnHost;
-      }
-
-      public Path getCertChainOnHost() {
-         return certChainOnHost;
-      }
-   }
 }

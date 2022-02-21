@@ -37,4 +37,7 @@ public class ServiceProviderCSRGenerator extends GenericContainer<ServiceProvide
         return keysPath.resolve(String.format("%s.csr.pem",username));
     }
 
+    public ServiceProviderCsrDetails getServiceProviderCsrDetails() {
+        return new ServiceProviderCsrDetails(getCsrOnHost(),getKeyOnHost());
+    }
 }

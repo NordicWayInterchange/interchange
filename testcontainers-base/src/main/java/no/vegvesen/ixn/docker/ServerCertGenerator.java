@@ -66,4 +66,8 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
     public Path getCertChainOnHost() {
         return targetPath.resolve(String.format("chain.%s.crt.pem",domainName));
     }
+
+    public ServerCertDetails getServiceCertDetails() {
+        return new ServerCertDetails(getKeyOnHost(),getCertOnHost(),getCertChainOnHost());
+    }
 }
