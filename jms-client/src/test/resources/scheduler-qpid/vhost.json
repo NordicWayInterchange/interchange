@@ -1,0 +1,24 @@
+{
+  "type": "Memory",
+  "name": "localhost",
+  "modelVersion": "7.0",
+  "exchanges": [],
+  "queues": [
+    {
+      "name": "test-queue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": "sender"
+    },
+    {
+      "name": "expiry-queue",
+      "type": "standard",
+      "durable": true,
+      "holdOnPublishEnabled": false,
+      "owner": "king_harald",
+      "maximumMessageTtl": 1000
+    }
+  ],
+  "virtualhostaccesscontrolproviders": []
+}

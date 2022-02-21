@@ -53,7 +53,7 @@ public class DockerBaseIT {
 
 	}
 
-	protected static KeysContainer getKeyContainer(Class<?> clazz, String ca, String ... serverOrUserCns) {
+	public static KeysContainer getKeyContainer(Class<?> clazz, String ca, String ... serverOrUserCns) {
 		Path imagePath = getFolderPath("key-gen");
 		Path keysOutputPath = getTargetFolderPathForTestClass(clazz);
 		return new KeysContainer(imagePath,keysOutputPath,ca,serverOrUserCns);
