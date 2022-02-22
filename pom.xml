@@ -73,6 +73,11 @@
                     <configuration>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>antlr4-maven-plugin</artifactId>
+                    <version>4.7</version>
+                </plugin>
 
             </plugins>
         </pluginManagement>
@@ -175,6 +180,11 @@
                 <groupId>com.github.stephenc.jcip</groupId>
                 <artifactId>jcip-annotations</artifactId>
                 <version>1.0-1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>4.7</version>
             </dependency>
 
         </dependencies>
@@ -283,5 +293,6 @@
         <module>jms-client-image-source</module>
         <module>jms-client-sink-app</module>
         <module>jms-client-source-app</module>
+        <module>selector-parser</module>
     </modules>
 </project>
