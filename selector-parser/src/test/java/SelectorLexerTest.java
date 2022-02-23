@@ -8,9 +8,13 @@ public class SelectorLexerTest {
 
     @Test
     public void testLexingSelector() {
-        String expression = "( TRUE )";
+        //TODO negative and other numeric literals
+        String expression = "( TRUE  trUe anD FalSe 123";
         CommonTokenStream tokenStream = tokenizeExpression(expression);
         assertThat(tokenStream).isNotNull();
+        for (Token token :tokenStream.getTokens()) {
+            System.out.println(token);
+        }
 
     }
 
