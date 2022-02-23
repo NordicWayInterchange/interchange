@@ -5,7 +5,6 @@ import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import picocli.CommandLine;
-import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Option;
@@ -14,9 +13,7 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
-@Command(name = "jmsclientsource", description = "JMS Client Source Application", subcommands = {
-        JmsClientSourceApplication.SendBytesMessage.class
-})
+@Command(name = "jmsclientsource", description = "JMS Client Source Application")
 public class JmsClientSourceApplication implements Callable<Integer> {
 
     @Parameters(index = "0", description = "The url to the AMQP client")
@@ -24,6 +21,27 @@ public class JmsClientSourceApplication implements Callable<Integer> {
 
     @Parameters(index = "1", description = "The queueName for the Service Provider")
     private String queueName;
+
+    @Parameters(index = "2", description = "The user id of the sender")
+    String userid;
+
+    @Parameters(index = "3", description = "The publisher id of the sender")
+    String publisherId;
+
+    @Parameters(index = "4", description = "The type of the message to be sent")
+    String messageType;
+
+    @Parameters(index = "5", description = "The originating country of the message")
+    String originatingCountry;
+
+    @Parameters(index = "6", description = "The protocol version of the message")
+    String protocolVersion;
+
+    @Parameters(index = "7", description = "The quadtree tiles of the message")
+    String quadTreeTiles;
+
+    @Parameters(index = "8", description = "The message to be sent")
+    String message;
 
     @Option(names = {"-k","--keystorepath"}, description = "Path to the service provider p12 keystore")
     private String keystorePath;
@@ -40,57 +58,6 @@ public class JmsClientSourceApplication implements Callable<Integer> {
     @Option(names = {"-w","--truststorepassword"}, description = "The password of the jks trust store")
     String trustStorePassword;
 
-    @Command(name = "sendbytesmessage", description = "Send a byte message")
-    static class SendBytesMessage implements Callable<Integer> {
-
-        @ParentCommand
-        JmsClientSourceApplication parentCommand;
-
-        @Parameters(index = "0", description = "The user id of the sender")
-        String userid;
-
-        @Parameters(index = "1", description = "The publisher id of the sender")
-        String publisherId;
-
-        @Parameters(index = "2", description = "The type of the message to be sent")
-        String messageType;
-
-        @Parameters(index = "3", description = "The originating country of the message")
-        String originatingCountry;
-
-        @Parameters(index = "4", description = "The protocol version of the message")
-        String protocolVersion;
-
-        @Parameters(index = "5", description = "The quadtree tiles of the message")
-        String quadTreeTiles;
-
-        @Parameters(index = "6", description = "The message to be sent")
-        String message;
-
-        @Override
-        public Integer call() throws Exception {
-            try(Source source = parentCommand.createClient()){
-                source.start();
-                String messageText = message;
-                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
-
-                source.sendNonPersistentMessage(source.createMessageBuilder()
-                        .bytesMessage(bytemessage)
-                        .userId(userid)
-                        .messageType(messageType)
-                        .publisherId(publisherId)
-                        .originatingCountry(originatingCountry)
-                        .protocolVersion(protocolVersion)
-                        .quadTreeTiles(quadTreeTiles)
-                        .causeCode("6")
-                        .subCauseCode("76")
-                        .build());
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-            return 0;
-        }
-    }
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new JmsClientSourceApplication()).execute(args);
@@ -99,6 +66,21 @@ public class JmsClientSourceApplication implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+        try(Source source = new Source(url, queueName, createSSLContext())){
+            source.start();
+            String messageText = message;
+            byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+
+            source.send(source.createMessageBuilder()
+                    .bytesMessage(bytemessage)
+                    .userId(userid)
+                    .messageType(messageType)
+                    .publisherId(publisherId)
+                    .originatingCountry(originatingCountry)
+                    .protocolVersion(protocolVersion)
+                    .quadTreeTiles(quadTreeTiles)
+                    .build());
+        }
         return 0;
     }
 
@@ -111,7 +93,4 @@ public class JmsClientSourceApplication implements Callable<Integer> {
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
     }
 
-    public Source createClient() {
-        return new Source(url, queueName, createSSLContext());
-    }
 }
