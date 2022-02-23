@@ -1,12 +1,10 @@
 #!/bin/bash -eu
 
-cd ../jms-client
-mvn clean install
-cd ../jms-client-sink
-mvn clean package
+cd ../
+mvn clean package -pl :jms-client-sink,:jms-client-source -am
+cd jms-client-sink
 docker build . -t jms_client_sink
 cd ../jms-client-source
-mvn clean package
 docker build . -t jms_client_source
 
 
