@@ -1,10 +1,10 @@
 #!/bin/bash
 
 java -jar jms-client-source-app.jar \
-  -k $KEY_STORE \
-  -p $KEY_STORE_PASSWORD \
-  -s $KEY_PASSWORD \
+  -k $KEY_STORE_PATH \
+  -p $KEY_STORE_PASS \
+  -s $KEY_PASS \
   -t $TRUST_STORE_PATH \
-  -w $TRUST_STORE_PASSWORD \
+  -w $TRUST_STORE_PASS \
   $URL \
   $QUEUE "$@"

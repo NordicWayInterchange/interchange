@@ -1,7 +1,6 @@
 package no.vegvesen.ixn;
 
 
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -70,12 +69,12 @@ public class JmsClientSourceApplication implements Callable<Integer> {
 
         @Override
         public Integer call() throws Exception {
-            //try(Source source = parentCommand.createClient()){
-                //source.start();
+            try(Source source = parentCommand.createClient()){
+                source.start();
                 String messageText = message;
                 byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
 
-                /*source.sendNonPersistentMessage(source.createMessageBuilder()
+                source.sendNonPersistentMessage(source.createMessageBuilder()
                         .bytesMessage(bytemessage)
                         .userId(userid)
                         .messageType(messageType)
@@ -85,17 +84,10 @@ public class JmsClientSourceApplication implements Callable<Integer> {
                         .quadTreeTiles(quadTreeTiles)
                         .causeCode("6")
                         .subCauseCode("76")
-                        .build());*/
-                System.out.println(messageText);
-                System.out.println(userid);
-                System.out.println(publisherId);
-                System.out.println(messageType);
-                System.out.println(originatingCountry);
-                System.out.println(protocolVersion);
-                System.out.println(quadTreeTiles);
-            //} catch (Exception e){
-            //    e.printStackTrace();
-            //}
+                        .build());
+            } catch (Exception e){
+                e.printStackTrace();
+            }
             return 0;
         }
     }
