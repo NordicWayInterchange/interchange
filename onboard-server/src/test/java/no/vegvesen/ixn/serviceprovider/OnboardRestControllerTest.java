@@ -44,6 +44,9 @@ public class OnboardRestControllerTest {
 	@MockBean
 	private ServiceProviderRepository serviceProviderRepository;
 
+	@MockBean
+	private NeighbourRepository neighbourRepository;
+
 	@Autowired
 	private OnboardRestController onboardRestController;
 
