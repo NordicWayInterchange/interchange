@@ -42,8 +42,8 @@ public class OnboardRESTClient {
         return restTemplate.getForEntity(server + "/" + user + "/capabilities", ListCapabilitiesResponse.class).getBody();
     }
 
-    public ListCapabilitiesResponse fetchAllCapabilities() {
-        return restTemplate.getForEntity(server + "/" + user + "/network/capabilities", ListCapabilitiesResponse.class).getBody();
+    public FetchCapabilitiesResponse fetchAllCapabilities() {
+        return restTemplate.getForEntity(server + "/" + user + "/network/capabilities", FetchCapabilitiesResponse.class).getBody();
     }
 
     public ListSubscriptionsResponse getServiceProviderSubscriptions() {
