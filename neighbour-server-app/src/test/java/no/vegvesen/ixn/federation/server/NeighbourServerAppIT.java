@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
-public class NeighbourServerAppTest {
+public class NeighbourServerAppIT {
 
 	@Autowired
 	NeighbourService neighbourService;
