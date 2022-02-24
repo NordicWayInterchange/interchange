@@ -43,7 +43,7 @@ public class OnboardRESTClient {
     }
 
     public ListCapabilitiesResponse fetchAllCapabilities() {
-        return restTemplate.getForEntity(server + "/" + user + "/capabilities/fetch", ListCapabilitiesResponse.class).getBody();
+        return restTemplate.getForEntity(server + "/" + user + "/network/capabilities", ListCapabilitiesResponse.class).getBody();
     }
 
     public ListSubscriptionsResponse getServiceProviderSubscriptions() {
