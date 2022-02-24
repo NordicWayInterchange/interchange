@@ -36,6 +36,14 @@ public class TypeTransformer {
                 capability.toApi());
     }
 
+    public FetchCapabilitiesResponse fetchCapabilitiesResponse(Set<Capability> capabilities) {
+        Set<FetchCapability> fetchCapabilities = new HashSet<>();
+        for (Capability capability : capabilities) {
+            fetchCapabilities.add(new FetchCapability(capability.toApi()));
+        }
+        return new FetchCapabilitiesResponse(fetchCapabilities);
+    }
+
 
     public ListSubscriptionsResponse transformLocalSubscriptionsToListSubscriptionResponse(String name, Set<LocalSubscription> subscriptions) {
         return new ListSubscriptionsResponse(name,transformLocalSubscriptionsToLocalActorSubscription(name,subscriptions));

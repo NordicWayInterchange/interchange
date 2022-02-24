@@ -309,4 +309,24 @@ public class OnboardRestAPIDocumentationTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
+
+    @Test
+    public void fetchCapabilitiesResponse() throws JsonProcessingException {
+        FetchCapabilitiesResponse response = new FetchCapabilitiesResponse(
+                Collections.singleton(
+                        new FetchCapability(
+                                new DenmCapabilityApi(
+                                        "NPRA",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("1234"),
+                                        Collections.singleton("6")
+                                )
+                        )
+                )
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
 }

@@ -42,6 +42,9 @@ public class OnboardRESTClient {
         return restTemplate.getForEntity(server + "/" + user + "/capabilities", ListCapabilitiesResponse.class).getBody();
     }
 
+    public ListCapabilitiesResponse fetchAllCapabilities() {
+        return restTemplate.getForEntity(server + "/" + user + "/capabilities/fetch", ListCapabilitiesResponse.class).getBody();
+    }
 
     public ListSubscriptionsResponse getServiceProviderSubscriptions() {
 		String url = String.format("%s/%s/subscriptions/", server, user);
