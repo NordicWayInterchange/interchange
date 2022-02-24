@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class OnboardRestController {
 
 	private final ServiceProviderRepository serviceProviderRepository;
+	private final NeighbourRepository neighbourRepository;
 	private final CertService certService;
 	private final InterchangeNodeProperties nodeProperties;
 	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
@@ -33,9 +35,11 @@ public class OnboardRestController {
 
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
+								 NeighbourRepository neighbourRepository,
 								 CertService certService,
 								 InterchangeNodeProperties nodeProperties) {
 		this.serviceProviderRepository = serviceProviderRepository;
+		this.neighbourRepository = neighbourRepository;
 		this.certService = certService;
 		this.nodeProperties = nodeProperties;
 	}
@@ -81,6 +85,37 @@ public class OnboardRestController {
 		ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(serviceProviderName,serviceProvider.getCapabilities().getCapabilities());
 		OnboardMDCUtil.removeLogVariables();
 		return response;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/network/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+	public FetchCapabilitiesResponse fetchCapabilities(@PathVariable String serviceProviderName) {
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
+		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
+		allCapabilities.addAll(getAllLocalCapabilities(serviceProvider));
+		FetchCapabilitiesResponse response = typeTransformer.fetchCapabilitiesResponse(allCapabilities);
+		OnboardMDCUtil.removeLogVariables();
+		return response;
+	}
+
+	private Set<Capability> getAllLocalCapabilities(ServiceProvider serviceProvider) {
+		Set<Capability> capabilities = new HashSet<>();
+		List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+		serviceProviders.remove(serviceProvider);
+		for (ServiceProvider otherServiceProvider : serviceProviders) {
+			capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
+		}
+		return capabilities;
+	}
+
+	private Set<Capability> getAllNeighbourCapabilities() {
+		Set<Capability> capabilities = new HashSet<>();
+		List<Neighbour> neighbours = neighbourRepository.findAll();
+		for (Neighbour neighbour : neighbours) {
+			capabilities.addAll(neighbour.getCapabilities().getCapabilities());
+		}
+		return capabilities;
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/capabilities/{capabilityId}")
@@ -187,6 +222,7 @@ public class OnboardRestController {
 		if (serviceProvider == null) {
 			serviceProvider = new ServiceProvider(serviceProviderName);
 		}
+		//TODO: Save serviceProviderToRepository here? Thinking of get-cases where serviceProvider is new..
 		return serviceProvider;
 	}
 

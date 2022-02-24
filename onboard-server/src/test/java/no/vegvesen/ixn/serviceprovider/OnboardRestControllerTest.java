@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
@@ -42,6 +43,9 @@ public class OnboardRestControllerTest {
 
 	@MockBean
 	private ServiceProviderRepository serviceProviderRepository;
+
+	@MockBean
+	private NeighbourRepository neighbourRepository;
 
 	@Autowired
 	private OnboardRestController onboardRestController;

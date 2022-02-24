@@ -2,8 +2,8 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -33,6 +33,9 @@ public class OnboardRestControllerIT {
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    private NeighbourRepository neighbourRepository;
 
     @MockBean
     private CertService certService;
@@ -147,6 +150,8 @@ public class OnboardRestControllerIT {
         Optional<LocalActorSubscription> anySubscription = response.getSubscriptions().stream().findAny();
         LocalActorSubscription subscription = anySubscription.get();
         GetSubscriptionResponse getSubscriptionResponse = restController.getServiceProviderSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
+        assertThat(getSubscriptionResponse).isNotNull();
+        verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
 
@@ -181,6 +186,87 @@ public class OnboardRestControllerIT {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(selector))));
+        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+    }
+
+    @Test
+    void testFetchingAllCapabilitiesWhenServiceProviderExists() {
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+        serviceProvider.setCapabilities(new Capabilities(
+                Capabilities.CapabilitiesStatus.KNOWN,
+                Collections.singleton(new DenmCapability(
+                        "NPRA",
+                        "NO",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                ))));
+        serviceProviderRepository.save(serviceProvider);
+        ServiceProvider otherServiceProvider = new ServiceProvider();
+        otherServiceProvider.setCapabilities(new Capabilities(
+                Capabilities.CapabilitiesStatus.KNOWN,
+                Collections.singleton(new DenmCapability(
+                        "SPRA",
+                        "SE",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                ))));
+        serviceProviderRepository.save(otherServiceProvider);
+
+        Neighbour neighbour = new Neighbour();
+        neighbour.setCapabilities(new Capabilities(
+                Capabilities.CapabilitiesStatus.KNOWN,
+                Collections.singleton(new DenmCapability(
+                        "DPRA",
+                        "DK",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                ))));
+        neighbourRepository.save(neighbour);
+        assertThat(serviceProviderRepository.findAll()).hasSize(2);
+        assertThat(neighbourRepository.findAll()).hasSize(1);
+
+        FetchCapabilitiesResponse response = restController.fetchCapabilities("service-provider");
+        assertThat(response.getCapabilities()).hasSize(2);
+        assertThat(serviceProviderRepository.findAll()).hasSize(2);
+        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+    }
+
+    @Test
+    void testFetchingAllCapabilitiesWhenServiceProviderDoesNotExist() {
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+
+        ServiceProvider otherServiceProvider = new ServiceProvider();
+        otherServiceProvider.setCapabilities(new Capabilities(
+                Capabilities.CapabilitiesStatus.KNOWN,
+                Collections.singleton(new DenmCapability(
+                        "SPRA",
+                        "SE",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                ))));
+        serviceProviderRepository.save(otherServiceProvider);
+
+        Neighbour neighbour = new Neighbour();
+        neighbour.setCapabilities(new Capabilities(
+                Capabilities.CapabilitiesStatus.KNOWN,
+                Collections.singleton(new DenmCapability(
+                        "DPRA",
+                        "DK",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                ))));
+        neighbourRepository.save(neighbour);
+        assertThat(serviceProviderRepository.findAll()).hasSize(1);
+        assertThat(neighbourRepository.findAll()).hasSize(1);
+
+        FetchCapabilitiesResponse response = restController.fetchCapabilities("service-provider");
+        assertThat(response.getCapabilities()).hasSize(2);
+        assertThat(serviceProviderRepository.findAll()).hasSize(1);
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 }
