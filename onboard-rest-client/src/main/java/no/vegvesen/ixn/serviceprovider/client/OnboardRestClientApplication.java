@@ -34,7 +34,9 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.GetSubscription.class,
         OnboardRestClientApplication.AddPrivateChannel.class,
         OnboardRestClientApplication.GetPrivateChannels.class,
-        OnboardRestClientApplication.DeletePrivateChannel.class
+        OnboardRestClientApplication.DeletePrivateChannel.class,
+        OnboardRestClientApplication.FetchCapabilities.class,
+        OnboardRestClientApplication.FetchMatchingCapabilities.class
 })
 public class OnboardRestClientApplication implements Callable<Integer> {
 
@@ -310,6 +312,42 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
             PrivateChannelListApi result = client.getPrivateChannels();
+            System.out.println(mapper.writeValueAsString(result));
+            return 0;
+        }
+    }
+
+    @Command(name = "fetchcapabilities", description = "Fetch all capabilities in the network")
+    static class FetchCapabilities implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            FetchCapabilitiesResponse result = client.fetchAllCapabilities();
+            System.out.println(mapper.writeValueAsString(result));
+            return 0;
+        }
+    }
+
+    @Command(name = "fetchmatchingcapabilities", description = "Fetch all capabilities in the network matching a selector")
+    static class FetchMatchingCapabilities implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Option(names = {"-f","--filename"}, description = "The selector json file")
+        File file;
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            SelectorApi selector = mapper.readValue(file,SelectorApi.class);
+            FetchMatchingCapabilitiesResponse result = client.fetchMatchingCapabilities(selector);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
