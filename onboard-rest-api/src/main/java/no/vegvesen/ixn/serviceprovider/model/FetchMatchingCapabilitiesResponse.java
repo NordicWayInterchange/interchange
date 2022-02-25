@@ -4,14 +4,15 @@ import java.util.Set;
 
 public class FetchMatchingCapabilitiesResponse {
     private Set<FetchCapability> capabilities;
-    private SelectorApi selectorApi;
+    private SelectorApi selector;
 
     public FetchMatchingCapabilitiesResponse(){
 
     }
 
-    public FetchMatchingCapabilitiesResponse(Set<FetchCapability> fetchCapabilities){
+    public FetchMatchingCapabilitiesResponse(Set<FetchCapability> fetchCapabilities, SelectorApi selector){
         this.capabilities = fetchCapabilities;
+        this.selector = selector;
     }
 
     public Set<FetchCapability> getCapabilities() {
@@ -23,18 +24,18 @@ public class FetchMatchingCapabilitiesResponse {
     }
 
     public SelectorApi getSelectorApi() {
-        return selectorApi;
+        return selector;
     }
 
-    public void setSelectorApi(SelectorApi selectorApi) {
-        this.selectorApi = selectorApi;
+    public void setSelectorApi(SelectorApi selector) {
+        this.selector = selector;
     }
 
     @Override
     public String toString() {
         return "FetchMatchingCapabilitiesResponse{" +
                 "capabilities=" + capabilities +
-                ", selectorApi=" + selectorApi +
+                ", selectorApi=" + selector +
                 '}';
     }
 }

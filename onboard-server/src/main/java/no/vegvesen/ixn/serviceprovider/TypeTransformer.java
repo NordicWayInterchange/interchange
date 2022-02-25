@@ -36,7 +36,7 @@ public class TypeTransformer {
                 capability.toApi());
     }
 
-    public FetchCapabilitiesResponse fetchCapabilitiesResponse(Set<Capability> capabilities) {
+    public FetchCapabilitiesResponse transformCapabilitiesToFetchCapabilitiesResponse(Set<Capability> capabilities) {
         Set<FetchCapability> fetchCapabilities = new HashSet<>();
         for (Capability capability : capabilities) {
             fetchCapabilities.add(new FetchCapability(capability.toApi()));
@@ -44,6 +44,13 @@ public class TypeTransformer {
         return new FetchCapabilitiesResponse(fetchCapabilities);
     }
 
+    public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(Set<Capability> capabilities, SelectorApi selector) {
+        Set<FetchCapability> fetchCapabilities = new HashSet<>();
+        for (Capability capability : capabilities) {
+            fetchCapabilities.add(new FetchCapability(capability.toApi()));
+        }
+        return new FetchMatchingCapabilitiesResponse(fetchCapabilities, selector);
+    }
 
     public ListSubscriptionsResponse transformLocalSubscriptionsToListSubscriptionResponse(String name, Set<LocalSubscription> subscriptions) {
         return new ListSubscriptionsResponse(name,transformLocalSubscriptionsToLocalActorSubscription(name,subscriptions));

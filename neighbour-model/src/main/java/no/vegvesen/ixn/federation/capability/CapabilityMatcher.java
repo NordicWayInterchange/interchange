@@ -184,10 +184,10 @@ public class CapabilityMatcher {
 		return evaluatedSelector;
 	}
 
-	public static Set<Capability> matchCapabilityToSubscriptionSelector(Set<Capability> capabilities, Subscription subscriptionSelector) {
+	public static Set<Capability> matchCapabilitiesToSelector(Set<Capability> capabilities, String selector) {
 		Set<Capability> matches = new HashSet<>();
 		for (Capability capability : capabilities) {
-			String whiteSpaceTrimmedSelector = subscriptionSelector.getSelector().replaceAll(REGEX_ALL_WHITESPACE, " ");
+			String whiteSpaceTrimmedSelector = selector.replaceAll(REGEX_ALL_WHITESPACE, " ");
 			String quadTreeEvaluatedSelector = evaluateQuadTreeMatch(whiteSpaceTrimmedSelector, capability.getQuadTree());
 			JMSSelectorFilter selectorFilter = JMSSelectorFilterFactory.get(quadTreeEvaluatedSelector);
 			boolean match = false;
@@ -197,11 +197,21 @@ public class CapabilityMatcher {
 				match = matchDenm((DenmCapability) capability, selectorFilter);
 			} else if (capability instanceof IvimCapability) {
 				match = matchIvi((IvimCapability) capability, selectorFilter);
+			} else if (capability instanceof SpatemCapability) {
+				match = matchSpatem((SpatemCapability) capability, selectorFilter);
+			} else if (capability instanceof MapemCapability) {
+				match = matchMapem((MapemCapability) capability, selectorFilter);
+			} else if (capability instanceof SremCapability) {
+				match = matchSrem((SremCapability) capability, selectorFilter);
+			} else if (capability instanceof SsemCapability) {
+				match = matchSsem((SsemCapability) capability, selectorFilter);
+			} else if (capability instanceof CamCapability) {
+				match = matchCam((CamCapability) capability, selectorFilter);
 			} else {
 				logger.warn("Unknown Capability type {} ", capability.getClass().getName());
 			}
 			if (match) {
-				logger.debug("Selector [{}] matches capability {}", subscriptionSelector, capability);
+				logger.debug("Selector [{}] matches capability {}", selector, capability);
 				matches.add(capability);
 			}
 		}

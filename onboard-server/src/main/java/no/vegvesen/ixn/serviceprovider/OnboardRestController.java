@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryException;
 import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
@@ -94,9 +95,26 @@ public class OnboardRestController {
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
 		allCapabilities.addAll(getAllLocalCapabilities(serviceProvider));
-		FetchCapabilitiesResponse response = typeTransformer.fetchCapabilitiesResponse(allCapabilities);
+		FetchCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchCapabilitiesResponse(allCapabilities);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/network/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable String serviceProviderName, @RequestBody SelectorApi selector) {
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
+		Set<Capability> matchingCapabilities = getAllMatchingCapabilities(selector.getSelector(), serviceProvider);
+		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(matchingCapabilities, selector);
+		OnboardMDCUtil.removeLogVariables();
+		return response;
+	}
+
+	private Set<Capability> getAllMatchingCapabilities(String selector, ServiceProvider serviceProvider) {
+		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
+		allCapabilities.addAll(getAllLocalCapabilities(serviceProvider));
+		return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
 	}
 
 	private Set<Capability> getAllLocalCapabilities(ServiceProvider serviceProvider) {
@@ -222,7 +240,6 @@ public class OnboardRestController {
 		if (serviceProvider == null) {
 			serviceProvider = new ServiceProvider(serviceProviderName);
 		}
-		//TODO: Save serviceProviderToRepository here? Thinking of get-cases where serviceProvider is new..
 		return serviceProvider;
 	}
 
