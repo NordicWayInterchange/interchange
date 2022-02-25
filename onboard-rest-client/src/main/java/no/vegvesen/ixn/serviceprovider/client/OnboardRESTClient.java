@@ -42,15 +42,9 @@ public class OnboardRESTClient {
         return restTemplate.getForEntity(server + "/" + user + "/capabilities", ListCapabilitiesResponse.class).getBody();
     }
 
-    public FetchCapabilitiesResponse fetchAllCapabilities() {
-        return restTemplate.getForEntity(server + "/" + user + "/network/capabilities", FetchCapabilitiesResponse.class).getBody();
-    }
-
-    public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(SelectorApi selector) {
-        HttpHeaders headers =  new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<SelectorApi> entity = new HttpEntity<>(selector, headers);
-        return restTemplate.exchange(server + "/" + user + "/network/capabilities", HttpMethod.POST, entity, FetchMatchingCapabilitiesResponse.class).getBody();
+    public FetchMatchingCapabilitiesResponse fetchAllMatchingCapabilities(String selector) {
+        String url = String.format("%s/%s/network/capabilities/%s", server, user, selector);
+        return restTemplate.getForEntity(url, FetchMatchingCapabilitiesResponse.class).getBody();
     }
 
     public ListSubscriptionsResponse getServiceProviderSubscriptions() {

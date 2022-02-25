@@ -88,32 +88,22 @@ public class OnboardRestController {
 		return response;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/network/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-	public FetchCapabilitiesResponse fetchCapabilities(@PathVariable String serviceProviderName) {
+	@RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/network/capabilities/{selector}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable String serviceProviderName, @PathVariable String selector) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
 		allCapabilities.addAll(getAllLocalCapabilities(serviceProvider));
-		FetchCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchCapabilitiesResponse(allCapabilities);
+		if (!selector.isEmpty()) {
+			allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
+		}
+		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(serviceProviderName, selector, allCapabilities);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/network/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable String serviceProviderName, @RequestBody SelectorApi selector) {
-		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		Set<Capability> matchingCapabilities = getAllMatchingCapabilities(selector.getSelector(), serviceProvider);
-		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(matchingCapabilities, selector);
-		OnboardMDCUtil.removeLogVariables();
-		return response;
-	}
-
-	private Set<Capability> getAllMatchingCapabilities(String selector, ServiceProvider serviceProvider) {
-		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
-		allCapabilities.addAll(getAllLocalCapabilities(serviceProvider));
+	private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
 		return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
 	}
 

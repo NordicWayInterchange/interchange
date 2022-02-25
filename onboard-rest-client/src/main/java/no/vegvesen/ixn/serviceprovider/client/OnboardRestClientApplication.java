@@ -35,7 +35,6 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.AddPrivateChannel.class,
         OnboardRestClientApplication.GetPrivateChannels.class,
         OnboardRestClientApplication.DeletePrivateChannel.class,
-        OnboardRestClientApplication.FetchCapabilities.class,
         OnboardRestClientApplication.FetchMatchingCapabilities.class
 })
 public class OnboardRestClientApplication implements Callable<Integer> {
@@ -317,37 +316,20 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         }
     }
 
-    @Command(name = "fetchcapabilities", description = "Fetch all capabilities in the network")
-    static class FetchCapabilities implements Callable<Integer> {
-
-        @ParentCommand
-        OnboardRestClientApplication parentCommand;
-
-        @Override
-        public Integer call() throws Exception {
-            OnboardRESTClient client = parentCommand.createClient();
-            ObjectMapper mapper = new ObjectMapper();
-            FetchCapabilitiesResponse result = client.fetchAllCapabilities();
-            System.out.println(mapper.writeValueAsString(result));
-            return 0;
-        }
-    }
-
     @Command(name = "fetchmatchingcapabilities", description = "Fetch all capabilities in the network matching a selector")
     static class FetchMatchingCapabilities implements Callable<Integer> {
 
         @ParentCommand
         OnboardRestClientApplication parentCommand;
 
-        @Option(names = {"-f","--filename"}, description = "The selector json file")
-        File file;
+        @Parameters(index = "0", description = "The selector to match with the capabilities")
+        String selector;
 
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            SelectorApi selector = mapper.readValue(file,SelectorApi.class);
-            FetchMatchingCapabilitiesResponse result = client.fetchMatchingCapabilities(selector);
+            FetchMatchingCapabilitiesResponse result = client.fetchAllMatchingCapabilities(selector);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }

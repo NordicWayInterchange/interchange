@@ -228,7 +228,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchCapabilitiesResponse response = restController.fetchCapabilities(serviceProvider.getName());
+        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), "");
         assertThat(response.getCapabilities()).hasSize(2);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -264,7 +264,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchCapabilitiesResponse response = restController.fetchCapabilities(serviceProvider.getName());
+        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), "");
         assertThat(response.getCapabilities()).hasSize(2);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -309,7 +309,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        SelectorApi selector = new SelectorApi("messageType = 'DENM' and quadTree like '%,1234%'");
+        String selector = "messageType = 'DENM' and quadTree like '%,1234%'";
 
         FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), selector);
         assertThat(response.getCapabilities()).hasSize(2);
