@@ -13,7 +13,7 @@ RUN cd /usr/local && \
 RUN mkdir -p /work
 ENV QPID_WORK="/work"
 ENV QPID_HOME="/usr/local/qpid"
-ENV VHOST_FILE="/config/vhost.json"
+ENV VHOST_FILE="file:/config/vhost.json"
 ENV PASSWD_FILE="/config/passwd"
 ENV GROUPS_FILE="/config/groups"
 ENV QPID_OPTS="-Djdk.tls.client.protocols=\"TLSv1.3\""

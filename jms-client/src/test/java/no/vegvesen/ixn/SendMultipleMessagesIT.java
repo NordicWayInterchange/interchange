@@ -52,7 +52,7 @@ public class SendMultipleMessagesIT {
             service.scheduleAtFixedRate(() -> {
                         try {
                             System.out.println("Sending!");
-                            source.sendNonPersistentMessage(source.createMessageBuilder()
+                            source.send(source.createMessageBuilder()
                                     .textMessage("Work, goddamit!")
                                     .userId("sender")
                                     .messageType(Constants.DATEX_2)

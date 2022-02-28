@@ -75,8 +75,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			qpidContainer.followOutput(new Slf4jLogConsumer(logger));
 			String httpsUrl = qpidContainer.getHttpsUrl();
 			String httpUrl = qpidContainer.getHttpUrl();
-			logger.info("server url: " + httpsUrl);
-			logger.info("server url: " + httpUrl);
+			logger.info("server admin url: " + httpUrl);
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",

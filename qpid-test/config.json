@@ -128,7 +128,7 @@
       "name": "default",
       "type": "JSON",
       "defaultVirtualHostNode": "true",
-      "storePath":"${VHOST_FILE}"
+      "virtualHostInitialConfiguration": "${VHOST_FILE}"
     }
   ],
   "groupproviders" : [ {

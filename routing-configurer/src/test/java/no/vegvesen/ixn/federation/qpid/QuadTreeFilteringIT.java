@@ -156,7 +156,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
 		source.start();
-		source.sendNonPersistentMessage(source.createMessageBuilder()
+		source.send(source.createMessageBuilder()
 				.textMessage("fisk")
 				.userId("localhost")
 				.messageType(Constants.DATEX_2)
@@ -189,7 +189,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
 			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
 		}
-		source.sendNonPersistentMessage(source.createMessageBuilder()
+		source.send(source.createMessageBuilder()
 				.textMessage("fisk")
 				.userId("localhost")
 				.messageType(Constants.DATEX_2)

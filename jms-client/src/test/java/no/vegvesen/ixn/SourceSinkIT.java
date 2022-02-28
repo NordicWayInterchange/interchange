@@ -97,7 +97,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 				.quadTreeTiles(null)
 				.timestamp(System.currentTimeMillis())
 				.build();
-		kingHaraldTestQueueSource.sendNonPersistentMessage(message);
+		kingHaraldTestQueueSource.send(message);
 
 		Thread.sleep(2000); // let the message expire on the queue with queue declaration "maximumMessageTtl": 1000
 
@@ -121,7 +121,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Source source = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		source.start();
 		byte[] bytemessage = "FIIIIIISK!".getBytes(StandardCharsets.UTF_8);
-		source.sendNonPersistentMessage(source.createMessageBuilder()
+		source.send(source.createMessageBuilder()
 				.bytesMessage(bytemessage)
 				.userId("localhost")
 				.messageType("DENM")
@@ -163,7 +163,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 				.stringProperty(MessageProperty.PICTOGRAM_CATEGORY_CODE.getName(), "557")
 				.build();
 
-		source.sendNonPersistentMessage(message);
+		source.send(message);
 
 		Sink sink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testConsumer = sink.createConsumer();
