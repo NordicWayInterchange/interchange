@@ -311,8 +311,9 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void fetchCapabilitiesResponse() throws JsonProcessingException {
-        FetchCapabilitiesResponse response = new FetchCapabilitiesResponse(
+    public void fetchMatchingCapabilitiesResponseWithoutSelector() throws JsonProcessingException {
+        FetchMatchingCapabilitiesResponse response = new FetchMatchingCapabilitiesResponse(
+                "service-provider",
                 Collections.singleton(
                         new FetchCapability(
                                 new DenmCapabilityApi(
@@ -328,5 +329,34 @@ public class OnboardRestAPIDocumentationTest {
 
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+
+    @Test
+    public void fetchMatchingCapabilitiesResponseWithSelector() throws JsonProcessingException {
+        FetchMatchingCapabilitiesResponse response = new FetchMatchingCapabilitiesResponse(
+                "service-provider",
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'",
+                Collections.singleton(
+                        new FetchCapability(
+                                new DenmCapabilityApi(
+                                        "NPRA",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("1234"),
+                                        Collections.singleton("6")
+                                )
+                        )
+                )
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+
+    @Test
+    public void selectorApi() throws JsonProcessingException {
+        SelectorApi selector = new SelectorApi("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'");
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(selector));
     }
 }

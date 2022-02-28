@@ -1,17 +1,50 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.util.Set;
 
+@JsonPropertyOrder({"name", "selector", "capabilities", "version"})
 public class FetchMatchingCapabilitiesResponse {
+    private String name;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String selector;
+
     private Set<FetchCapability> capabilities;
-    private SelectorApi selectorApi;
+
+    private String version = "1.0";
 
     public FetchMatchingCapabilitiesResponse(){
 
     }
 
-    public FetchMatchingCapabilitiesResponse(Set<FetchCapability> fetchCapabilities){
+    public FetchMatchingCapabilitiesResponse(String name, Set<FetchCapability> fetchCapabilities){
+        this.name = name;
         this.capabilities = fetchCapabilities;
+    }
+
+    public FetchMatchingCapabilitiesResponse(String name, String selector, Set<FetchCapability> fetchCapabilities){
+        this.name = name;
+        this.selector = selector;
+        this.capabilities = fetchCapabilities;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSelector() {
+        return selector;
+    }
+
+    public void setSelector(String selector) {
+        this.selector = selector;
     }
 
     public Set<FetchCapability> getCapabilities() {
@@ -22,19 +55,21 @@ public class FetchMatchingCapabilitiesResponse {
         this.capabilities = capabilities;
     }
 
-    public SelectorApi getSelectorApi() {
-        return selectorApi;
+    public String getVersion() {
+        return version;
     }
 
-    public void setSelectorApi(SelectorApi selectorApi) {
-        this.selectorApi = selectorApi;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     @Override
     public String toString() {
         return "FetchMatchingCapabilitiesResponse{" +
-                "capabilities=" + capabilities +
-                ", selectorApi=" + selectorApi +
+                "name='" + name + '\'' +
+                ", selector=" + selector +
+                ", capabilities=" + capabilities +
+                ", version='" + version + '\'' +
                 '}';
     }
 }

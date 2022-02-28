@@ -34,7 +34,8 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.GetSubscription.class,
         OnboardRestClientApplication.AddPrivateChannel.class,
         OnboardRestClientApplication.GetPrivateChannels.class,
-        OnboardRestClientApplication.DeletePrivateChannel.class
+        OnboardRestClientApplication.DeletePrivateChannel.class,
+        OnboardRestClientApplication.FetchMatchingCapabilities.class
 })
 public class OnboardRestClientApplication implements Callable<Integer> {
 
@@ -310,6 +311,25 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
             PrivateChannelListApi result = client.getPrivateChannels();
+            System.out.println(mapper.writeValueAsString(result));
+            return 0;
+        }
+    }
+
+    @Command(name = "fetchmatchingcapabilities", description = "Fetch all capabilities in the network matching a selector")
+    static class FetchMatchingCapabilities implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Parameters(index = "0", description = "The selector to match with the capabilities")
+        String selector;
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            FetchMatchingCapabilitiesResponse result = client.fetchAllMatchingCapabilities(selector);
             System.out.println(mapper.writeValueAsString(result));
             return 0;
         }
