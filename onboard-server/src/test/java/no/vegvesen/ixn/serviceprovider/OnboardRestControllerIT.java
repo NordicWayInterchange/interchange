@@ -264,7 +264,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), null);
+        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), "");
         assertThat(response.getCapabilities()).hasSize(2);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());

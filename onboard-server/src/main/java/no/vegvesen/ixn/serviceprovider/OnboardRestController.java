@@ -96,7 +96,9 @@ public class OnboardRestController {
 		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
 		allCapabilities.addAll(getAllLocalCapabilities(serviceProvider));
 		if (selector != null) {
-			allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
+			if (!selector.isEmpty()) {
+				allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
+			}
 		}
 		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(serviceProviderName, selector, allCapabilities);
 		OnboardMDCUtil.removeLogVariables();

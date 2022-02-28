@@ -42,7 +42,7 @@ public class TypeTransformer {
         for (Capability capability : capabilities) {
             fetchCapabilities.add(new FetchCapability(capability.toApi()));
         }
-        if (selector == null) {
+        if (selector == null || selector.isEmpty()) {
             return new FetchMatchingCapabilitiesResponse(serviceProviderName, fetchCapabilities);
         } else {
             return new FetchMatchingCapabilitiesResponse(serviceProviderName, selector, fetchCapabilities);
