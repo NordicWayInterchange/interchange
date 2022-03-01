@@ -1,5 +1,7 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.docker.KeysContainer;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.messaging.IxnMessageConsumerCreator;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -29,7 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class InterchangeAppIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(InterchangeAppIT.class);
-    private static Path testKeysPath = generateKeys(InterchangeAppIT.class, "my_ca", "localhost", "king_harald");
+
+
+    @Container
+    public static KeysContainer keysContainer = getKeyContainer(InterchangeAppIT.class, "my_ca", "localhost", "king_harald");
 
     private static final String JKS_KING_HARALD_P_12 = "king_harald.p12";
     private static final String TRUSTSTORE_JKS = "truststore.jks";
@@ -52,14 +57,14 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
-    public static final GenericContainer qpidContainer = getQpidTestContainer(
+    public static final QpidContainer qpidContainer = getQpidTestContainer(
             "qpid",
-            testKeysPath,
+            keysContainer.getKeyFolderOnHost(),
             "localhost.p12",
             "password",
             "truststore.jks",
 			"password",
-            "localhost");
+            "localhost").dependsOn(keysContainer);
 
 	private String getQpidURI() {
 		String url = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
@@ -72,7 +77,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 		consumerCreator.setupConsumer();
 	    String sendUrl = getQpidURI();
 
-	    try (Source source = new Source(sendUrl,"onramp", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+	    try (Source source = new Source(sendUrl,"onramp", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
             source.start();
             logger.debug("Sending message");
             JmsMessage textMessage = source.createMessageBuilder()
@@ -88,14 +93,14 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
                     .build();
 
 
-            try (Sink sink = new Sink(getQpidURI(), "NO-out", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+            try (Sink sink = new Sink(getQpidURI(), "NO-out", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
 
                 logger.debug("Creating consumer");
                 MessageConsumer consumer = sink.createConsumer();
                 logger.debug("Starting receive");
 
 				long ttl = 2000L;
-				source.sendNonPersistentMessage(textMessage, ttl);
+				source.send(textMessage, ttl);
 				long expectedExpiration = System.currentTimeMillis() + ttl;
 				logger.debug("Message sendt with expected expiry {}", expectedExpiration);
 
@@ -112,7 +117,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
     public void sendReceiveWithoutInterchangeAppKeepsJmsExpiration() throws Exception {
 	    String sendUrl = getQpidURI();
 
-	    try (Source source = new Source(sendUrl,"NO-private", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+	    try (Source source = new Source(sendUrl,"NO-private", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
             source.start();
             logger.debug("Sending message");
             //JmsTextMessage textMessage = source.createTextMessage("Yo!");
@@ -127,10 +132,10 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
                     .publicationType("SituationPublication")
                     .build();
 
-            source.sendNonPersistentMessage(textMessage, 9999L);
+            source.send(textMessage, 9999L);
             long estimateExpiry = System.currentTimeMillis() + 9999L;
             logger.debug("Message sendt");
-            try (Sink sink = new Sink(getQpidURI(), "NO-private", TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+            try (Sink sink = new Sink(getQpidURI(), "NO-private", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
                 logger.debug("Creating consumer");
                 MessageConsumer consumer = sink.createConsumer();
                 logger.debug("Starting receive");

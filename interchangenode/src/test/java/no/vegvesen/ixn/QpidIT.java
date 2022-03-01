@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -36,7 +37,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(initializers = {QpidIT.Initializer.class})
 @Testcontainers
 public class QpidIT extends QpidDockerBaseIT {
-	static Path testKeysPath = generateKeys(QpidIT.class, "my_ca", "localhost", "king_harald");
+
+
+	@Container
+	static KeysContainer keysContainer = getKeyContainer(QpidIT.class, "my_ca", "localhost", "king_harald");
 
 	private static final long RECEIVE_TIMEOUT = 2000;
 	private static final String NO_OUT = "NO-out";
@@ -53,12 +57,13 @@ public class QpidIT extends QpidDockerBaseIT {
 	@SuppressWarnings("rawtypes")
 	@Container
 	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid",
-			testKeysPath,
+			keysContainer.getKeyFolderOnHost(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost");
+			"localhost")
+			.dependsOn(keysContainer);
 
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -109,7 +114,7 @@ public class QpidIT extends QpidDockerBaseIT {
 			builder.stringProperty(entry.getKey(), entry.getValue());
 
 		}
-		producer.sendNonPersistentMessage(builder.build(), timeToLive);
+		producer.send(builder.build(), timeToLive);
 
 	}
 	public void sendBadMessage(String messageId, String country, float lat, float lon) throws JMSException {

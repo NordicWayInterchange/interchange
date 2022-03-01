@@ -54,7 +54,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Source kingHaraldTestQueueSource = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		kingHaraldTestQueueSource.start();
 		JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder().textMessage("fisk").build();
-		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 2000);
+		kingHaraldTestQueueSource.send(fisk, 2000);
 
 		Sink kingHaraldTestQueueSink = new Sink(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		MessageConsumer testQueueConsumer = kingHaraldTestQueueSink.createConsumer();
@@ -68,7 +68,7 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 		Source kingHaraldTestQueueSource = new Source(URL, "test-queue", KING_HARALD_SSL_CONTEXT);
 		kingHaraldTestQueueSource.start();
 		JmsMessage fisk = kingHaraldTestQueueSource.createMessageBuilder().textMessage("fisk").build();
-		kingHaraldTestQueueSource.sendNonPersistentMessage(fisk, 200);
+		kingHaraldTestQueueSource.send(fisk, 200);
 
 		Thread.sleep(1000);
 

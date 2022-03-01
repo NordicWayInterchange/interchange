@@ -50,7 +50,7 @@ public class ImageSource extends Source{
                 .subCauseCode("6")
                 .timestamp(System.currentTimeMillis())
                 .build();
-        sendNonPersistentMessage(message, Message.DEFAULT_TIME_TO_LIVE);
+        send(message, Message.DEFAULT_TIME_TO_LIVE);
     }
 
     public static byte[] convertImageToByteArray(String imageName) throws IOException {

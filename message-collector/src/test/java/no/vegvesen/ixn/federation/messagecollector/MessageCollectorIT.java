@@ -97,7 +97,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 		Sink sink = createSink(consumerContainer.getMappedPort(AMQPS_PORT), "sp_consumer", "sp_consumer.p12");
 		MessageConsumer consumer = sink.createConsumer();
 
-		source.sendNonPersistentMessage(source.createMessageBuilder()
+		source.send(source.createMessageBuilder()
 				.textMessage("fishy fishy")
 				.userId("localhost")
 				.messageType(Constants.DATEX_2)
@@ -153,7 +153,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				.timestamp(System.currentTimeMillis())
 				.build();
 		JmsMessage senderMessage = message1;
-		source.sendNonPersistentMessage(senderMessage, 1000L);
+		source.send(senderMessage, 1000L);
 
 		Thread.sleep(2000); // wait for the message to expire with extra margin
 

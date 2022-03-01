@@ -1,5 +1,5 @@
 {
-  "type": "Memory",
+  "type": "BDB",
   "name": "localhost",
   "modelVersion": "8.0",
   "exchanges": [
