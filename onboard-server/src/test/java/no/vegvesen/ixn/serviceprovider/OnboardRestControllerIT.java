@@ -228,7 +228,7 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         assertThat(neighbourRepository.findAll()).hasSize(1);
 
-        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), "");
+        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(2);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
@@ -312,6 +312,51 @@ public class OnboardRestControllerIT {
         String selector = "messageType = 'DENM' and quadTree like '%,1234%'";
 
         FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), selector);
+        assertThat(response.getCapabilities()).hasSize(2);
+        assertThat(serviceProviderRepository.findAll()).hasSize(2);
+        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+    }
+
+    @Test
+    void testFetchingAllMatchingCapabilitiesWhenSelectorIsNull() {
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+        serviceProvider.setCapabilities(new Capabilities(
+                Capabilities.CapabilitiesStatus.KNOWN,
+                Collections.singleton(new DenmCapability(
+                        "NPRA",
+                        "NO",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                ))));
+        serviceProviderRepository.save(serviceProvider);
+        ServiceProvider otherServiceProvider = new ServiceProvider();
+        otherServiceProvider.setCapabilities(new Capabilities(
+                Capabilities.CapabilitiesStatus.KNOWN,
+                Collections.singleton(new DenmCapability(
+                        "SPRA",
+                        "SE",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                ))));
+        serviceProviderRepository.save(otherServiceProvider);
+
+        Neighbour neighbour = new Neighbour();
+        neighbour.setCapabilities(new Capabilities(
+                Capabilities.CapabilitiesStatus.KNOWN,
+                Collections.singleton(new DenmCapability(
+                        "DPRA",
+                        "DK",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                ))));
+        neighbourRepository.save(neighbour);
+        assertThat(serviceProviderRepository.findAll()).hasSize(2);
+        assertThat(neighbourRepository.findAll()).hasSize(1);
+
+        FetchMatchingCapabilitiesResponse response = restController.fetchMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(2);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
