@@ -48,12 +48,7 @@ public class Source implements AutoCloseable {
 	}
 
 	public void send(JmsMessage message) throws JMSException {
-		producer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-	}
-
-	public void sendNonPersistentMessage(JmsMessage message, long timeToLive) throws JMSException {
-		logger.info("Message: {}", message);
-		producer.send(message,  DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
+		producer.send(message);
 	}
 
 	@Override
