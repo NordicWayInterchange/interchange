@@ -45,7 +45,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             TestPropertyValues.of(
-                    String.format("amqphub.amqp10jms.remote-url=amqp://localhost:%d",qpidContainer.getMappedPort(AMQP_PORT)),
+                    String.format("amqphub.amqp10jms.remote-url=%s",qpidContainer.getAmqpUrl()),
                     "amqphub.amqp10jms.username=interchange",
                     "amqphub.amqp10jms.password=12345678"
             ).applyTo(configurableApplicationContext.getEnvironment());
@@ -66,16 +66,10 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 			"password",
             "localhost").dependsOn(keysContainer);
 
-	private String getQpidURI() {
-		String url = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
-		logger.info("connection string to local message broker {}", url);
-		return url;
-	}
-
-	@Test
+    @Test
     public void messageIsRoutedViaInterchangeAppWithExpiration() throws Exception {
 		consumerCreator.setupConsumer();
-	    String sendUrl = getQpidURI();
+	    String sendUrl = qpidContainer.getAmqpsUrl();
 
 	    try (Source source = new Source(sendUrl,"onramp", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
             source.start();
@@ -93,7 +87,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
                     .build();
 
 
-            try (Sink sink = new Sink(getQpidURI(), "NO-out", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+            try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), "NO-out", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
 
                 logger.debug("Creating consumer");
                 MessageConsumer consumer = sink.createConsumer();
@@ -115,7 +109,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
 
 	@Test
     public void sendReceiveWithoutInterchangeAppKeepsJmsExpiration() throws Exception {
-	    String sendUrl = getQpidURI();
+	    String sendUrl = qpidContainer.getAmqpsUrl();
 
 	    try (Source source = new Source(sendUrl,"NO-private", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
             source.start();
@@ -135,7 +129,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
             source.send(textMessage, 9999L);
             long estimateExpiry = System.currentTimeMillis() + 9999L;
             logger.debug("Message sendt");
-            try (Sink sink = new Sink(getQpidURI(), "NO-private", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
+            try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(), "NO-private", TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), JKS_KING_HARALD_P_12, TRUSTSTORE_JKS))) {
                 logger.debug("Creating consumer");
                 MessageConsumer consumer = sink.createConsumer();
                 logger.debug("Starting receive");
