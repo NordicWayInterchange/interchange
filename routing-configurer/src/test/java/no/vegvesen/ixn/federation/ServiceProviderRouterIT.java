@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -104,6 +105,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@MockBean
 	MatchDiscoveryService matchDiscoveryService;
+
+	@MockBean
+	OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {

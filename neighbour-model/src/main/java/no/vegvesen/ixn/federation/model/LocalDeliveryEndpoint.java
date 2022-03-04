@@ -86,6 +86,10 @@ public class LocalDeliveryEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public String bindKey() {
+        return "" + selector.hashCode();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

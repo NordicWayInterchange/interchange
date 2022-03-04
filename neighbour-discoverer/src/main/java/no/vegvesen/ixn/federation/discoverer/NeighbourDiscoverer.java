@@ -45,6 +45,7 @@ public class NeighbourDiscoverer {
 	private final InterchangeNodeProperties interchangeNodeProperties;
 	private final MatchDiscoveryService matchDiscoveryService;
 	private final NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
+	private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
 
 	@Autowired
@@ -54,7 +55,8 @@ public class NeighbourDiscoverer {
 						NeigbourDiscoveryService neigbourDiscoveryService,
 						InterchangeNodeProperties interchangeNodeProperties,
 						MatchDiscoveryService matchDiscoveryService,
-						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService) {
+						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService,
+						OutgoingMatchDiscoveryService outgoingMatchDiscoveryService) {
 		this.neighbourService = neighbourService;
 		this.neighbourFacade = neighbourFacade;
 		this.serviceProviderService = serviceProviderService;
@@ -62,6 +64,7 @@ public class NeighbourDiscoverer {
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.matchDiscoveryService = matchDiscoveryService;
 		this.neighbourSubscriptionDeleteService = neighbourSubscriptionDeleteService;
+		this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
 		NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), null);
 	}
 
@@ -128,6 +131,11 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void createMatches() {
 		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderService.findAllServiceProviders(), neighbourService.findAllNeighbours());
+	}
+
+	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void createOutgoingMatches() {
+		outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(serviceProviderService.findAllServiceProviders());
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")

@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.qpid.QpidAcl;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +26,15 @@ public class ServiceProviderRouter {
     private final ServiceProviderRepository repository;
     private final QpidClient qpidClient;
     private final MatchDiscoveryService matchDiscoveryService;
+    private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
     private final InterchangeNodeProperties nodeProperties;
 
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, QpidClient qpidClient, MatchDiscoveryService matchDiscoveryService, InterchangeNodeProperties nodeProperties) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, QpidClient qpidClient, MatchDiscoveryService matchDiscoveryService, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService, InterchangeNodeProperties nodeProperties) {
         this.repository = repository;
         this.qpidClient = qpidClient;
         this.matchDiscoveryService = matchDiscoveryService;
+        this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
         this.nodeProperties = nodeProperties;
     }
 
@@ -66,6 +69,7 @@ public class ServiceProviderRouter {
             }
 
             setUpSubscriptionExchanges(name);
+            setUpDeliveryQueue(name, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
 
 
             //save if it has changed from the initial
@@ -128,7 +132,7 @@ public class ServiceProviderRouter {
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
             optionallyCreateQueue(source, serviceProviderName);
-            optionallyAddQueueBindings(source, subscription);
+            optionallyAddQueueBindings(source, subscription.getSelector(), subscription.bindKey());
         }
         return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
     }
@@ -141,10 +145,10 @@ public class ServiceProviderRouter {
         }
     }
 
-    private void optionallyAddQueueBindings(String queueName, LocalSubscription subscription) {
-        if (!qpidClient.getQueueBindKeys(queueName).contains(subscription.bindKey())) {
+    private void optionallyAddQueueBindings(String queueName, String selector, String bindKey) {
+        if (!qpidClient.getQueueBindKeys(queueName).contains(bindKey)) {
             logger.debug("Adding bindings to the queue {}", queueName);
-            qpidClient.addBinding(subscription.getSelector(), queueName, subscription.bindKey(), "outgoingExchange");
+            qpidClient.addBinding(selector, queueName, bindKey, "outgoingExchange");
         }
     }
 
@@ -153,6 +157,14 @@ public class ServiceProviderRouter {
             logger.info("Creating queue {}", queueName);
             qpidClient.createQueue(queueName);
             qpidClient.addReadAccess(serviceProviderName, queueName);
+        }
+    }
+
+    private void optionallyCreateWriteQueue(String queueName, String serviceProviderName) {
+        if (!qpidClient.queueExists(queueName)) {
+            logger.info("Creating queue {}", queueName);
+            qpidClient.createQueue(queueName);
+            qpidClient.addWriteAccess(serviceProviderName, queueName);
         }
     }
 
@@ -273,6 +285,32 @@ public class ServiceProviderRouter {
                 }
             }
         }
+    }
+
+    public void setUpDeliveryQueue(String serviceProviderName, String nodeName, String port) {
+        List<OutgoingMatch> deliveriesToSetupQueueFor = outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(serviceProviderName);
+        for (OutgoingMatch match : deliveriesToSetupQueueFor) {
+            LocalDelivery delivery = match.getLocalDelivery();
+            updateDeliveryWithEndpoint(match.getCapability(), delivery, nodeName, Integer.parseInt(port));
+            for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                optionallyCreateWriteQueue(endpoint.getTarget(), serviceProviderName);
+                optionallyAddQueueBindings(endpoint.getTarget(), endpoint.getSelector(), endpoint.bindKey());
+            }
+            outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
+        }
+    }
+
+    public void updateDeliveryWithEndpoint(Capability capability, LocalDelivery delivery, String nodeName, Integer port) {
+        String selector = joinDeliverySelectorWitCapabilitySelector(capability, delivery.getSelector());
+        String target = UUID.randomUUID().toString();
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(nodeName, port, target, selector);
+        delivery.setEndpoints(new HashSet<>(Arrays.asList(endpoint)));
+    }
+
+    public String joinDeliverySelectorWitCapabilitySelector(Capability capability, String selector) {
+        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
+        String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, selector);
+        return joinedSelector;
     }
 
     private void createSubscriptionExchange(String exchangeName) {
