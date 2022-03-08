@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 @Service
 public class MatchDiscoveryService {
 
-    private MatchRepository matchRepository;
+    public MatchRepository matchRepository;
 
     private Logger logger = LoggerFactory.getLogger(MatchDiscoveryService.class);
 
@@ -36,9 +35,9 @@ public class MatchDiscoveryService {
                     for (Subscription subscription : requestedSubscriptions) {
                         if(localSubscription.getSelector().equals(subscription.getSelector())){
                             if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
-                            Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
-                            matchRepository.save(newMatch);
-                            logger.info("Saved new Match {}", newMatch);
+                                Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
+                                matchRepository.save(newMatch);
+                                logger.info("Saved new Match {}", newMatch);
                             }
                         }
                     }
