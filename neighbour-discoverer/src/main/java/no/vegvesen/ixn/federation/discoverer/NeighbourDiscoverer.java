@@ -119,10 +119,12 @@ public class NeighbourDiscoverer {
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	//TODO: Removed now that we have OutgoingMatch
+	/* @Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void updateLocalDeliveries() {
 		serviceProviderService.updateLocalDeliveries(interchangeNodeProperties.getName(), interchangeNodeProperties.getMessageChannelPort());
-	}
+	} */
+
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void deleteSubscriptionAtKnownNeighbours() {
 		neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);

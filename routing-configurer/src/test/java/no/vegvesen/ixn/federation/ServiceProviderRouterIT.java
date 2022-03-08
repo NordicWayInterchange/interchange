@@ -528,6 +528,36 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	}
 
+	@Test
+	public void createTargetAndConnectForServiceProvider() {
+		String serviceProviderName = "my-service-provider";
+		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
+
+		Capability denmCapability = new DenmCapability(
+				"NPRA",
+				"NO",
+				"1.0",
+				Collections.singleton("1234"),
+				Collections.singleton("6")
+		);
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+
+		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match));
+		router.setUpDeliveryQueue(serviceProviderName, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+
+		LocalDeliveryEndpoint endpoint = match.getLocalDelivery().getEndpoints().stream().findFirst().get();
+		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
+
+		assertThat(client.queueExists(endpoint.getTarget())).isTrue();
+		assertThat(endpoint.getSelector()).contains("AND (originatingCountry = 'NO')");
+		assertThat(endpoint.getSelector()).contains(capabilitySelector);
+		assertThat(endpoint.getHost()).isEqualTo(nodeProperties.getName());
+		assertThat(endpoint.getPort()).isEqualTo(Integer.parseInt(nodeProperties.getMessageChannelPort()));
+	}
+
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),

@@ -40,6 +40,7 @@ public class OutgoingMatchDiscoveryService {
                         }
                         if (!isValid) {
                             delivery.setStatus(LocalDeliveryStatus.ILLEGAL);
+                            logger.info("Delivery with selector {} does not match any service provider capability", delivery.getSelector());
                         }
                     }
                 }
@@ -57,8 +58,4 @@ public class OutgoingMatchDiscoveryService {
         logger.info("Saved match {} with status UP", match);
     }
 
-    private String joinSelectorFromDeliveryAndCapability(LocalDelivery delivery, Capability capability) {
-        //String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
-        return null;
-    }
 }
