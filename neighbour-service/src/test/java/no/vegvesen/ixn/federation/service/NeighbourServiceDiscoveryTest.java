@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
@@ -27,7 +28,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {NeighbourService.class, NeigbourDiscoveryService.class, InterchangeNodeProperties.class, GracefulBackoffProperties.class})
+@SpringBootTest(classes = {NeighbourService.class, NeigbourDiscoveryService.class, InterchangeNodeProperties.class})
 public class NeighbourServiceDiscoveryTest {
 
 	@MockBean
@@ -42,7 +43,8 @@ public class NeighbourServiceDiscoveryTest {
 	private NeighbourFacade neighbourFacade;
 	@MockBean
 	private NeighbourDiscovererProperties discovererProperties;
-
+	@MockBean
+	private GracefulBackoffProperties backoffProperties;
 	@Autowired
 	InterchangeNodeProperties interchangeNodeProperties;
 
@@ -421,7 +423,7 @@ public class NeighbourServiceDiscoveryTest {
 	@Test
 	public void allSubscriptionsHaveFinalStatusFlipsFedInStatusToEstablished(){
 
-		Neighbour spyNeighbour = spy(Neighbour.class);
+		Neighbour spyNeighbour = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
 		subscription.setNumberOfPolls(0);
@@ -441,7 +443,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void allSubscriptionsRejectedFlipsFedInStatusToRejected(){
-		Neighbour spyNeighbour = spy(Neighbour.class);
+		Neighbour spyNeighbour = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
 		subscription.setNumberOfPolls(0);
@@ -461,7 +463,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void subscriptionStatusAcceptedKeepsFedInStatusRequested(){
-		Neighbour spyNeighbour = spy(Neighbour.class);
+		Neighbour spyNeighbour = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
 		subscription.setNumberOfPolls(0);
@@ -587,7 +589,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void listenerEndpointIsSavedWhenSubscriptionWithCreatedStatusIsPolled(){
-		Neighbour spyNeighbour1 = spy(Neighbour.class);
+		Neighbour spyNeighbour1 = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
@@ -614,7 +616,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void listenerEndpointsAreSavedWhenSubscriptionWithCreatedStatusAndEndpointsIsPolled(){
-		Neighbour spyNeighbour1 = spy(Neighbour.class);
+		Neighbour spyNeighbour1 = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
@@ -639,7 +641,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void listenerEndpointsAreSavedWhenSubscriptionWithCreatedStatusAndMultipleEndpointsIsPolled(){
-		Neighbour spyNeighbour1 = spy(Neighbour.class);
+		Neighbour spyNeighbour1 = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
@@ -668,7 +670,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void listenerEndpointsAreRemovedWhenEndpointsListIsUpdated() {
-		Neighbour spyNeighbour1 = spy(Neighbour.class);
+		Neighbour spyNeighbour1 = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
@@ -697,8 +699,8 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	@Test
-	public void listenerEndpointIsNotSavedWhenSubscriptionWithRequestedStatusIsPolled(){
-		Neighbour spyNeighbour1 = spy(Neighbour.class);
+	public void listenerEndpointIsNotSavedWhenSubscriptionWithRequestedStatusIsPolled() {
+		Neighbour spyNeighbour1 = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
 		subscription.setNumberOfPolls(0);
@@ -710,7 +712,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
 		Set<Endpoint> endpoints = new HashSet<>();
-		Endpoint endpoint = new Endpoint("spy-neighbour1","spy-neighbour1", 5671);
+		Endpoint endpoint = new Endpoint("spy-neighbour1", "spy-neighbour1", 5671);
 		endpoints.add(endpoint);
 		createdSubscription.setEndpoints(endpoints);
 
@@ -721,5 +723,46 @@ public class NeighbourServiceDiscoveryTest {
 		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
 
 		verify(listenerEndpointRepository, times(0)).save(any(ListenerEndpoint.class));
+	}
+
+	@Test
+	public void testPollOneNeighbour() {
+		Subscription subscription = new Subscription(
+				1,
+				SubscriptionStatus.CREATED,
+				"originatingCountry = 'NO'",
+				"/mynode/subscriptions/1",
+				"kyrre",
+				Collections.emptySet()
+		);
+		Neighbour  neighbour = new Neighbour(
+				"test",
+				new Capabilities(),
+				new SubscriptionRequest(),
+				new SubscriptionRequest(
+						SubscriptionRequestStatus.ESTABLISHED,
+						Collections.singleton(
+								subscription
+						)
+				),
+				new Connection()
+		);
+		assertThat(neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()).hasSize(1);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1); //TODO what???
+		when(backoffProperties.getNumberOfAttempts()).thenReturn(1); //TODO this is the one in use!
+
+		when(neighbourFacade.pollSubscriptionLastUpdatedTime(subscription,neighbour)).thenThrow(new SubscriptionPollException("Error"));
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions(),neighbourFacade);
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
+		assertThat(subscription.getNumberOfPolls()).isEqualTo(0); //TODO we start at 0, which mght be a bit confusing. The first fail is not a backoff attempt, by the looks of things.
+		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(new SubscriptionPollException("Eror 2"));
+		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbour.getSubscriptionsForPolling(),neighbourFacade);
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
+		assertThat(subscription.getNumberOfPolls()).isEqualTo(1);
+		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbour.getSubscriptionsForPolling(),neighbourFacade);
+		assertThat(subscription.getNumberOfPolls()).isEqualTo(1); //TODO there was not actually a poll on the last call, so the attempts should not be changed.
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.GIVE_UP);
+		//TODO test that this actually works the same way when we do it through the triggered methods.
+
 	}
 }

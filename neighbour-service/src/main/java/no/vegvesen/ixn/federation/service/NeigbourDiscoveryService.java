@@ -244,7 +244,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    private void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
+    public void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
         try {
             for (Subscription subscription : subscriptions) {
                 try {
@@ -275,6 +275,7 @@ public class NeigbourDiscoveryService {
                     }
                 } catch (SubscriptionPollException e) {
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
+                    subscription.incrementNumberOfPolls();
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 }
@@ -340,10 +341,14 @@ public class NeigbourDiscoveryService {
                                 );
                                 subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
                             } else {
-                                subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                                logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
+                                //TODO this is wrong! this should be in the blow else statement
+                                logger.info("No subscription change for neighbour {}", neighbour.getName());
                             }
 
+                    } else {
+                        subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                        logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
+                        //TODO we should not do anything here, other than setting
                     }
                 } catch (SubscriptionPollException e) {
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
