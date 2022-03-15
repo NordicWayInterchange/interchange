@@ -25,7 +25,7 @@ services:
     depends_on:
       - mock-dns-server
     ports:
-      - 5432
+      - 15432:5432
     environment:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
@@ -206,7 +206,7 @@ services:
     depends_on:
     - mock-dns-server
     ports:
-      - 5432
+      - 25432:5432
     environment:
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
