@@ -15,7 +15,10 @@ public class LocalDeliveryEndpoint {
     private String host;
     private int port;
     private String target;
+
+    @Column(length = 1024)
     private String selector;
+
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 

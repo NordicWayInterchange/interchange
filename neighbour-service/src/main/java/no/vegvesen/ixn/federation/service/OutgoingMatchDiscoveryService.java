@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -22,7 +23,8 @@ public class OutgoingMatchDiscoveryService {
         this.repository = repository;
     }
 
-    public void syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(List<ServiceProvider> serviceProviders) {
+    public List<ServiceProvider> syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(List<ServiceProvider> serviceProviders) {
+        List<ServiceProvider> serviceProvidersToSave = new ArrayList<>();
         for (ServiceProvider serviceProvider: serviceProviders) {
             if (serviceProvider.hasCapabilities() && !serviceProvider.getDeliveries().isEmpty()) {
                 for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
@@ -45,17 +47,37 @@ public class OutgoingMatchDiscoveryService {
                     }
                 }
             }
+            serviceProvidersToSave.add(serviceProvider);
         }
+        return serviceProvidersToSave;
     }
 
     public List<OutgoingMatch> findMatchesToSetupEndpointFor(String serviceProviderName) {
         return repository.findAllByServiceProviderNameAndStatus(serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
     }
 
+    public OutgoingMatch findMatchFromDeliveryId(Integer deliveryId) {
+        return repository.findByLocalDelivery_Id(deliveryId);
+    }
+
+    public List<OutgoingMatch> findMatchesFromCapabilityId(Integer capabilityId) {
+        return repository.findAllByCapability_Id(capabilityId);
+    }
+
     public void updateOutgoingMatchToUp(OutgoingMatch match) {
         match.setStatus(OutgoingMatchStatus.UP);
         repository.save(match);
         logger.info("Saved match {} with status UP", match);
+    }
+
+    public void removeOutgoingMatch(OutgoingMatch match) {
+        logger.info("Removing match {}", match);
+        repository.delete(match);
+    }
+
+    public void removeListOfOutgoingMatches(List<OutgoingMatch> matches, Integer capabilityId) {
+        logger.info("Removed all matches for capability with id {}", capabilityId);
+        repository.deleteAll(matches);
     }
 
 }

@@ -300,6 +300,36 @@ public class ServiceProviderRouter {
         }
     }
 
+    public void removeDeliveryQueueByCapability(Integer capabilityId) {
+        List<OutgoingMatch> matches = outgoingMatchDiscoveryService.findMatchesFromCapabilityId(capabilityId);
+        for (OutgoingMatch match : matches) {
+            LocalDelivery delivery = match.getLocalDelivery();
+            removeDeliveryQueue(match.getServiceProviderName(), delivery);
+            delivery.removeAllEndpoints(delivery.getEndpoints());
+        }
+        outgoingMatchDiscoveryService.removeListOfOutgoingMatches(matches, capabilityId);
+    }
+
+    public void removeDeliveryQueueByDelivery(Integer deliveryId) {
+        OutgoingMatch match = outgoingMatchDiscoveryService.findMatchFromDeliveryId(deliveryId);
+        LocalDelivery delivery = match.getLocalDelivery();
+        removeDeliveryQueue(match.getServiceProviderName(), delivery);
+        outgoingMatchDiscoveryService.removeOutgoingMatch(match);
+    }
+
+    public void removeDeliveryQueue(String serviceProviderName, LocalDelivery delivery) {
+        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+            String target = endpoint.getTarget();
+            if (qpidClient.queueExists(target)) {
+                if (qpidClient.getQueueBindKeys(target).contains(endpoint.bindKey())) {
+                    qpidClient.unbindBindKey(target, endpoint.bindKey(), "outgoingExchange");
+                }
+                qpidClient.removeWriteAccess(serviceProviderName, target);
+                qpidClient.removeQueue(target);
+            }
+        }
+    }
+
     public void updateDeliveryWithEndpoint(Capability capability, LocalDelivery delivery, String nodeName, Integer port) {
         String selector = joinDeliverySelectorWitCapabilitySelector(capability, delivery.getSelector());
         String target = UUID.randomUUID().toString();

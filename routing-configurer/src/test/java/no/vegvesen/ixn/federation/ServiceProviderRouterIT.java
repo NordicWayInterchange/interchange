@@ -558,6 +558,69 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(endpoint.getPort()).isEqualTo(Integer.parseInt(nodeProperties.getMessageChannelPort()));
 	}
 
+
+	@Test
+	public void tearDownTargetForDeliveryByDeletedDelivery() {
+		String serviceProviderName = "my-service-provider";
+		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
+
+		Capability denmCapability = new DenmCapability(
+				"NPRA",
+				"NO",
+				"1.0",
+				Collections.singleton("1234"),
+				Collections.singleton("6")
+		);
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		delivery.setId(1);
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+
+		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match));
+		router.setUpDeliveryQueue(serviceProviderName, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+
+		LocalDeliveryEndpoint endpoint = match.getLocalDelivery().getEndpoints().stream().findFirst().get();
+
+		when(outgoingMatchDiscoveryService.findMatchFromDeliveryId(any(Integer.class))).thenReturn(match);
+		router.removeDeliveryQueueByDelivery(1);
+
+		assertThat(client.queueExists(endpoint.getTarget())).isFalse();
+
+	}
+
+	@Test
+	public void tearDownTargetForDeliveryByDeletedCapability() {
+		String serviceProviderName = "my-service-provider";
+		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
+
+		Capability denmCapability = new DenmCapability(
+				"NPRA",
+				"NO",
+				"1.0",
+				Collections.singleton("1234"),
+				Collections.singleton("6")
+		);
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		delivery.setId(1);
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+
+		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match));
+		router.setUpDeliveryQueue(serviceProviderName, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+
+		assertThat(delivery.getEndpoints()).isNotEmpty();
+
+		LocalDeliveryEndpoint endpoint = match.getLocalDelivery().getEndpoints().stream().findFirst().get();
+
+		when(outgoingMatchDiscoveryService.findMatchesFromCapabilityId(any(Integer.class))).thenReturn(Arrays.asList(match));
+		router.removeDeliveryQueueByCapability(1);
+
+		assertThat(client.queueExists(endpoint.getTarget())).isFalse();
+		assertThat(delivery.getEndpoints()).isEmpty();
+	}
+
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),

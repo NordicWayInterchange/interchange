@@ -137,7 +137,8 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void createOutgoingMatches() {
-		outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(serviceProviderService.findAllServiceProviders());
+		List<ServiceProvider> serviceProvidersToSave = outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(serviceProviderService.findAllServiceProviders());
+		serviceProviderService.saveAllServiceProviders(serviceProvidersToSave);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")

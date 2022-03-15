@@ -57,4 +57,8 @@ public class ServiceProviderService {
         return serviceProviderRepository.findAll();
     }
 
+    public void saveAllServiceProviders(List<ServiceProvider> serviceProviders) {
+        serviceProviderRepository.saveAll(serviceProviders);
+    }
+
 }

@@ -107,6 +107,10 @@ public class LocalDelivery {
         this.status = status;
     }
 
+    public void removeAllEndpoints(Set<LocalDeliveryEndpoint> endpointsToRemove) {
+        endpoints.removeAll(endpointsToRemove);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
