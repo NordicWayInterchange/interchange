@@ -233,7 +233,7 @@ public class NeigbourDiscoveryService {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-                    pollSubscriptionsOneNeighbour(neighbour, neighbour.getSubscriptionsForPolling(), neighbourFacade);
+                    pollSubscriptionsOneNeighbour(neighbour, neighbourFacade);
                 }
             } catch (Exception e) {
                 logger.error("Unknown error while polling subscriptions for one neighbour",e);
@@ -244,9 +244,41 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void pollSubscriptionsOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
+    public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
+        for(Endpoint endpoint : endpoints) {
+            createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour);
+        }
+    }
+
+    public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
+        if(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), host, port, source) == null){
+            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
+            logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
+        }
+    }
+
+    public void pollSubscriptionsWithStatusCreated(NeighbourFacade neighbourFacade) {
+        List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
+                SubscriptionStatus.CREATED);
+        for (Neighbour neighbour : neighboursToPoll) {
+            try {
+                NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
+                if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
+                    pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, neighbourFacade);
+                }
+            } catch (Exception e) {
+                logger.error("Unknown error while polling subscription with status CREATED",e);
+            }
+            finally {
+                NeighbourMDCUtil.removeLogVariables();
+            }
+        }
+    }
+
+    public void pollSubscriptionsOneNeighbour(Neighbour neighbour, NeighbourFacade neighbourFacade) {
         try {
-            for (Subscription subscription : subscriptions) {
+            Set<Subscription> subscriptionsForPolling = neighbour.getSubscriptionsForPolling();
+            for (Subscription subscription : subscriptionsForPolling) {
                 try {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
                         logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
@@ -286,48 +318,17 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
-        for(Endpoint endpoint : endpoints) {
-            createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour);
-        }
-    }
-
-    public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
-        if(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), host, port, source) == null){
-            ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
-            logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
-        }
-    }
-
-    public void pollSubscriptionsWithStatusCreated(NeighbourFacade neighbourFacade) {
-        List<Neighbour> neighboursToPoll = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
-                SubscriptionStatus.CREATED);
-        for (Neighbour neighbour : neighboursToPoll) {
-            try {
-                NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-                if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-                    pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions(), neighbourFacade);
-                }
-            } catch (Exception e) {
-                logger.error("Unknown error while polling subscription with status CREATED",e);
-            }
-            finally {
-                NeighbourMDCUtil.removeLogVariables();
-            }
-        }
-    }
-
     //TODO have to have a look at this again. The problem is that we might have non-updated subscriptions on the neighbour side, but for some reason not set it up on our side. The lastUpdated prevents us from setting it up again.
     //need to somehow check is the listenerEndpoint is already there before checking the updated timestamp.
     //It's already done in createListenerEndpointOneNeighbour, but should probably be done earlier. This
-    public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, Set<Subscription> subscriptions, NeighbourFacade neighbourFacade) {
+    public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, NeighbourFacade neighbourFacade) {
         try {
-            for (Subscription subscription : subscriptions) {
+            Set<Subscription> createdSubscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
+            for (Subscription subscription : createdSubscriptions) {
                 try {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
-                        Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionLastUpdatedTime(subscription, neighbour);
+                        Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
                             if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
-                                //if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
                                 logger.info("Polled updated subscription with id {}", subscription.getId());
                                 EndpointCalculator endpointCalculator = new EndpointCalculator(
                                         subscription.getEndpoints(),
@@ -341,7 +342,6 @@ public class NeigbourDiscoveryService {
                                 );
                                 subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
                             } else {
-                                //TODO this is wrong! this should be in the blow else statement
                                 logger.info("No subscription change for neighbour {}", neighbour.getName());
                             }
 
@@ -418,4 +418,20 @@ public class NeigbourDiscoveryService {
         }
     }
 
+    public void cleanupStaleSubscriptions() {
+        List<Neighbour> neighbours = neighbourRepository.findAll();
+        Set<Subscription> subscriptions = neighbours.stream()
+                .flatMap(n -> n.getOurRequestedSubscriptions().getSubscriptions().stream())
+                .filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.GIVE_UP))
+                .collect(Collectors.toSet());
+        for (Subscription subscription : subscriptions) {
+            //can we find the match from here?
+            Match match = matchRepository.findBySubscriptionId(subscription.getId());
+            if (match != null) {
+
+            }
+
+        }
+
+    }
 }

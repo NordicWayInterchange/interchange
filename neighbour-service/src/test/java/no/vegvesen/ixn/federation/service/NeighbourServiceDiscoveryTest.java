@@ -224,7 +224,7 @@ public class NeighbourServiceDiscoveryTest {
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		verify(neighbourFacade, times(0)).pollSubscriptionLastUpdatedTime(any(Subscription.class), any(Neighbour.class));
+		verify(neighbourFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
 
 	@Test
@@ -305,7 +305,7 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription ericssonSubscriptionUpdated = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "");
 		ericssonSubscriptionUpdated.setLastUpdatedTimestamp(2);
 		ericssonSubscriptionUpdated.setEndpoints(Sets.newLinkedHashSet(endpoint));
-		doReturn(ericssonSubscriptionUpdated).when(neighbourFacade).pollSubscriptionLastUpdatedTime(any(Subscription.class), any(Neighbour.class));
+		doReturn(ericssonSubscriptionUpdated).when(neighbourFacade).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.getControlConnection().setBackoffStart(pastTime);
@@ -314,7 +314,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
 
-		verify(neighbourFacade, times(1)).pollSubscriptionLastUpdatedTime(any(Subscription.class), any(Neighbour.class));
+		verify(neighbourFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
 
 	@Test
@@ -390,7 +390,7 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription polledSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, "");
 		polledSubscription.setEndpoints(Sets.newLinkedHashSet(endpoint));
 		polledSubscription.setLastUpdatedTimestamp(2);
-		when(neighbourFacade.pollSubscriptionLastUpdatedTime(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
+		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
@@ -658,7 +658,7 @@ public class NeighbourServiceDiscoveryTest {
 		createdSubscription.setEndpoints(Sets.newLinkedHashSet(endpoint1, endpoint2));
 		createdSubscription.setLastUpdatedTimestamp(2);
 
-		when(neighbourFacade.pollSubscriptionLastUpdatedTime(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
+		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		when(listenerEndpointRepository.save(any(ListenerEndpoint.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
@@ -688,7 +688,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(spyNeighbour1.getName(), "spy-neighbour", "spy-neighbour", 5671, new Connection());
 
-		when(neighbourFacade.pollSubscriptionLastUpdatedTime(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
+		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(spyNeighbour1.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource())).thenReturn(listenerEndpoint);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
@@ -751,18 +751,18 @@ public class NeighbourServiceDiscoveryTest {
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1); //TODO what???
 		when(backoffProperties.getNumberOfAttempts()).thenReturn(1); //TODO this is the one in use!
 
-		when(neighbourFacade.pollSubscriptionLastUpdatedTime(subscription,neighbour)).thenThrow(new SubscriptionPollException("Error"));
-		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions(),neighbourFacade);
+		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(new SubscriptionPollException("Error"));
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbourFacade);
 		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
 		assertThat(subscription.getNumberOfPolls()).isEqualTo(0); //TODO we start at 0, which mght be a bit confusing. The first fail is not a backoff attempt, by the looks of things.
-		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(new SubscriptionPollException("Eror 2"));
-		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbour.getSubscriptionsForPolling(),neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbourFacade);
 		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
 		assertThat(subscription.getNumberOfPolls()).isEqualTo(1);
-		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbour.getSubscriptionsForPolling(),neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbourFacade);
 		assertThat(subscription.getNumberOfPolls()).isEqualTo(1); //TODO there was not actually a poll on the last call, so the attempts should not be changed.
 		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.GIVE_UP);
 		//TODO test that this actually works the same way when we do it through the triggered methods.
+		verify(neighbourFacade,times(2)).pollSubscriptionStatus(any(),any());
 
 	}
 }
