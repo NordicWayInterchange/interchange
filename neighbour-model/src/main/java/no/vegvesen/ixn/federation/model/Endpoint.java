@@ -22,18 +22,21 @@ public class Endpoint {
 
     }
 
-    public Endpoint(String source, String host, Integer port) {
+    public Endpoint(Integer id, String source, String host, Integer port, Integer maxMessageRate, Integer maxBandwidth) {
+        this.id = id;
         this.source = source;
         this.host = host;
         this.port = port;
+        this.maxMessageRate = maxMessageRate;
+        this.maxBandwidth = maxBandwidth;
+    }
+
+    public Endpoint(String source, String host, Integer port) {
+        this(null,source,host,port,null,null);
     }
 
     public Endpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
-        this.source = source;
-        this.host = host;
-        this.port = port;
-        this.maxBandwidth = maxBandwidth;
-        this.maxMessageRate = maxMessageRate;
+        this(null,source,host,port,maxMessageRate,maxBandwidth);
     }
 
     public String getSource() {
@@ -85,15 +88,14 @@ public class Endpoint {
         if (this == o) return true;
         if (!(o instanceof Endpoint)) return false;
         Endpoint endpoint = (Endpoint) o;
-        return id.equals(endpoint.id) &&
-                source.equals(endpoint.source) &&
+        return source.equals(endpoint.source) &&
                 host.equals(endpoint.host) &&
                 port.equals(endpoint.port);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, source, host, port);
+        return Objects.hash(source, host, port);
     }
 
     @Override
