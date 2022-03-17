@@ -339,9 +339,6 @@ public class NeigbourDiscoveryService {
                                 additionalEndpoints.removeAll(existingEndpoints);
                                 createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints, subscription.getExchangeName());
                                 subscription.setEndpoints(wantedEndpoints);
-                                //} else {
-                                //	logger.info("Polled subscription with id {}, has not been updated since {}", subscription.getId(), subscription.getLastUpdatedTimestamp());
-                                //}
                             } else {
                                 subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                                 logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");

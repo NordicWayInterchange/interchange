@@ -93,4 +93,8 @@ public class Match {
                 ", subscription=" + subscription +
                 '}';
     }
+
+    public Integer getId() {
+        return id;
+    }
 }
