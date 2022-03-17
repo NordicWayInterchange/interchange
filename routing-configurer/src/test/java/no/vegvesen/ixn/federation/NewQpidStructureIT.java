@@ -6,7 +6,7 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.model.DenmCapability;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
@@ -26,6 +26,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -129,7 +130,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .publisherId("NO-123")
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
-                .quadTreeTiles(",12003")
+                .quadTreeTiles(",12003,")
                 .causeCode("6")
                 .subCauseCode("76")
                 .build();
@@ -149,5 +150,92 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .quadTreeTiles(quadTreeTiles)
                 .timestamp(System.currentTimeMillis())
                 .build();
+    }
+
+    @Test
+    public void testUseOfDeliveryQueueForSendingToOutgoingExchange() throws Exception {
+        String exchangeName = "outgoingExchange";
+        String inQueueName = "delivery-queue";
+        String outQueueName = "king_gustaf";
+
+        Subscription subscription = new Subscription(
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'",
+                SubscriptionStatus.CREATED
+        );
+
+        DenmCapability capability = new DenmCapability(
+                "NO-123",
+                "NO",
+                "DENM:1.2.2",
+                new HashSet<>(Arrays.asList("12003")),
+                new HashSet<>(Arrays.asList("6"))
+        );
+
+        LocalDelivery delivery = new LocalDelivery(
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'",
+                LocalDeliveryStatus.CREATED
+        );
+
+        //1. Creating delivery queue and adding write access.
+        qpidClient.createQueue(inQueueName);
+        qpidClient.addWriteAccess("routing_configurer", inQueueName);
+
+        //2. Creating read queue and adding read access.
+        qpidClient.createQueue(outQueueName);
+        qpidClient.addReadAccess("king_gustaf", outQueueName);
+
+        //3. Making Capability selector and joining with delivery selector.
+        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
+        String capabilitySelector = creator.makeSelector(capability);
+        System.out.println(capabilitySelector);
+
+        String deliverySelector = delivery.getSelector();
+        System.out.println(deliverySelector);
+
+        String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, deliverySelector);
+        System.out.println(joinedSelector);
+
+        //4. Adding binding on deliveryQueue to outgoingExchange
+        qpidClient.addBinding(deliverySelector, inQueueName, "" + deliverySelector.hashCode(), exchangeName);
+
+        //5. Adding binding on out queue to outgoingExchange
+        String subscriptionSelector = subscription.getSelector();
+        System.out.println(subscriptionSelector);
+
+        qpidClient.addBinding(subscriptionSelector, outQueueName, "" + subscriptionSelector.hashCode(), exchangeName);
+
+        //6. Allowing inQueue To publish on exchange
+        //qpidClient.createPublishAccessOnExchangeForQueue("routing_configurer", inQueueName);
+        //qpidClient.createConsumeAccessOnQueueForExchange(inQueueName);
+
+        //7. Creating a Source and Sink to send message
+        AtomicInteger numMessages = new AtomicInteger();
+
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
+                outQueueName,
+                sslContext,
+                message -> numMessages.incrementAndGet())) {
+            sink.start();
+            try (Source source = new Source(qpidContainer.getAmqpsUrl(),inQueueName,sslContext)) {
+                source.start();
+                String messageText = "This is my DENM message :) ";
+                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                        .bytesMessage(bytemessage)
+                        .userId("routing_configurer")
+                        .publisherId("NO-123")
+                        .messageType(Constants.DENM)
+                        .causeCode("6")
+                        .subCauseCode("61")
+                        .originatingCountry("NO")
+                        .protocolVersion("DENM:1.2.2")
+                        .quadTreeTiles("12003")
+                        .timestamp(System.currentTimeMillis())
+                .build());
+            }
+            System.out.println();
+            Thread.sleep(200);
+        }
+       // assertThat(numMessages.get()).isEqualTo(1);
     }
 }

@@ -297,6 +297,18 @@ public class QpidClient {
 
 	}
 
+	public void createPublishAccessOnExchangeForQueue(String subscriberName, String queue) {
+		QpidAcl qpidAcl = getQpidAcl();
+		qpidAcl.createPublishAccessOnExchangeForQueue(subscriberName, queue);
+		postQpidAcl(qpidAcl);
+	}
+
+	public void createConsumeAccessOnQueueForExchange(String queue) {
+		QpidAcl qpidAcl = getQpidAcl();
+		qpidAcl.createConsumeAccessOnQueueForExchange(queue);
+		postQpidAcl(qpidAcl);
+	}
+
 	public QpidAcl getQpidAcl() {
 		ResponseEntity<String> aclRulesResponse = restTemplate.getForEntity(aclRulesUrl + "/extractRules", String.class);
 		String aclRulesS = aclRulesResponse.getBody();

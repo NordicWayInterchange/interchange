@@ -295,6 +295,7 @@ public class ServiceProviderRouter {
             for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
                 optionallyCreateWriteQueue(endpoint.getTarget(), serviceProviderName);
                 optionallyAddQueueBindings(endpoint.getTarget(), endpoint.getSelector(), endpoint.bindKey());
+                qpidClient.createPublishAccessOnExchangeForQueue(serviceProviderName, endpoint.getTarget());
             }
             outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
         }
