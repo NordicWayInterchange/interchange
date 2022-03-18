@@ -116,6 +116,13 @@ public class QpidClient {
 		}
 	}
 
+	public void createDirectExchange(String exchangeName) {
+		if (!exchangeExists(exchangeName)){
+			_createDirectExchange(exchangeName);
+			logger.info("Created exchange with name {}", exchangeName);
+		}
+	}
+
 	void _createQueue(String queueName) {
 		JSONObject json = new JSONObject();
 		json.put("name", queueName);

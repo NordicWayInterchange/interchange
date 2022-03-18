@@ -293,9 +293,12 @@ public class ServiceProviderRouter {
             LocalDelivery delivery = match.getLocalDelivery();
             updateDeliveryWithEndpoint(match.getCapability(), delivery, nodeName, Integer.parseInt(port));
             for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                optionallyCreateWriteQueue(endpoint.getTarget(), serviceProviderName);
-                optionallyAddQueueBindings(endpoint.getTarget(), endpoint.getSelector(), endpoint.bindKey());
-                qpidClient.createPublishAccessOnExchangeForQueue(serviceProviderName, endpoint.getTarget());
+                qpidClient.createDirectExchange(endpoint.getTarget());
+                qpidClient.addWriteAccess(serviceProviderName, endpoint.getTarget());
+                //optionallyCreateWriteQueue(endpoint.getTarget(), serviceProviderName);
+                //optionallyAddQueueBindings(endpoint.getTarget(), endpoint.getSelector(), endpoint.bindKey());
+                //qpidClient.createPublishAccessOnExchangeForQueue(serviceProviderName, endpoint.getTarget());
+                qpidClient.addBinding(endpoint.getSelector(), endpoint.getTarget(), endpoint.bindKey(), "outgoingExchange");
             }
             outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
         }

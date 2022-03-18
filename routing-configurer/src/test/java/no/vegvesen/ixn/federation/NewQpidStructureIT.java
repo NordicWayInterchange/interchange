@@ -177,7 +177,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         );
 
         //1. Creating delivery queue and adding write access.
-        qpidClient.createQueue(inQueueName);
+        qpidClient.createDirectExchange(inQueueName);
         qpidClient.addWriteAccess("routing_configurer", inQueueName);
 
         //2. Creating read queue and adding read access.
@@ -236,6 +236,49 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             System.out.println();
             Thread.sleep(200);
         }
-       // assertThat(numMessages.get()).isEqualTo(1);
+        //assertThat(numMessages.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void sendMessageFromExchangeToExchange() throws Exception{
+        String input = "input_exchange";
+        String output = "output_exchange";
+
+        qpidClient.createTopicExchange(input);
+        qpidClient.addWriteAccess("routing_configurer", input);
+
+        qpidClient.createTopicExchange(output);
+
+        String selector = "originatingCountry = 'NO'";
+
+        qpidClient.addBinding(selector, input, output, output);
+
+        AtomicInteger numMessages = new AtomicInteger();
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
+                output,
+                sslContext,
+                message -> numMessages.incrementAndGet())) {
+            sink.start();
+            try (Source source = new Source(qpidContainer.getAmqpsUrl(),input,sslContext)) {
+                source.start();
+                String messageText = "This is my DENM message :) ";
+                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                        .bytesMessage(bytemessage)
+                        .userId("anna")
+                        .publisherId("NO-123")
+                        .messageType(Constants.DENM)
+                        .causeCode("6")
+                        .subCauseCode("61")
+                        .originatingCountry("NO")
+                        .protocolVersion("DENM:1.2.2")
+                        .quadTreeTiles(",12003,")
+                        .timestamp(System.currentTimeMillis())
+                        .build());
+            }
+            System.out.println();
+            Thread.sleep(200);
+        }
+        //assertThat(numMessages.get()).isEqualTo(1);
     }
 }
