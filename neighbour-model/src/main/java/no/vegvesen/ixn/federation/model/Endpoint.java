@@ -39,6 +39,10 @@ public class Endpoint {
         this(null,source,host,port,maxMessageRate,maxBandwidth);
     }
 
+    public Endpoint(Integer id, String source, String host, Integer port) {
+        this(id,source,host,port,null,null);
+    }
+
     public String getSource() {
         return source;
     }

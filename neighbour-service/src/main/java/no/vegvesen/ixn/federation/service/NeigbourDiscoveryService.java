@@ -328,17 +328,17 @@ public class NeigbourDiscoveryService {
                             if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                                 //if (lastUpdatedSubscription.getLastUpdatedTimestamp() != subscription.getLastUpdatedTimestamp()) {
                                 logger.info("Polled updated subscription with id {}", subscription.getId());
-                                Set<Endpoint> wantedEndpoints = lastUpdatedSubscription.getEndpoints();
-                                Set<Endpoint> existingEndpoints = subscription.getEndpoints();
-
-                                Set<Endpoint> endpointsToRemove = new HashSet<>(existingEndpoints);
-                                endpointsToRemove.removeAll(wantedEndpoints);
-                                tearDownListenerEndpointsFromEndpointsList(neighbour, endpointsToRemove);
-
-                                Set<Endpoint> additionalEndpoints = new HashSet<>(wantedEndpoints);
-                                additionalEndpoints.removeAll(existingEndpoints);
-                                createListenerEndpointFromEndpointsList(neighbour, additionalEndpoints, subscription.getExchangeName());
-                                subscription.setEndpoints(wantedEndpoints);
+                                EndpointCalculator endpointCalculator = new EndpointCalculator(
+                                        subscription.getEndpoints(),
+                                        lastUpdatedSubscription.getEndpoints()
+                                );
+                                tearDownListenerEndpointsFromEndpointsList(neighbour,endpointCalculator.getEndpointsToRemove());
+                                createListenerEndpointFromEndpointsList(
+                                        neighbour,
+                                        endpointCalculator.getNewEndpoints(),
+                                        subscription.getExchangeName()
+                                );
+                                subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
                             } else {
                                 subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                                 logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
