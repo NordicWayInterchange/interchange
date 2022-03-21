@@ -6,16 +6,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class EndpointCalculator {
-    private final Set<Endpoint> ourEndpoints;
-    private final Set<Endpoint> neighbourEndpoints;
     private final Set<Endpoint> endpointsToRemove;
     private final Set<Endpoint> newEndpoints;
     private final Set<Endpoint> calculatedEndpoints;
 
 
     public EndpointCalculator(Set<Endpoint> ourEndpoints, Set<Endpoint> neighbourEndpoints) {
-        this.ourEndpoints = ourEndpoints;
-        this.neighbourEndpoints = neighbourEndpoints;
         this.endpointsToRemove = calculateEndpointsToRemove(ourEndpoints,neighbourEndpoints);
         this.newEndpoints = calculateNewEndpoints(ourEndpoints,neighbourEndpoints);
         this.calculatedEndpoints = calculateResultingEndpoints(ourEndpoints);
