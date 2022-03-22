@@ -36,6 +36,15 @@ public class LocalEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public LocalEndpoint(Integer id, String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
+        this.id = id;
+        this.source = source;
+        this.host = host;
+        this.port = port;
+        this.maxBandwidth = maxBandwidth;
+        this.maxMessageRate = maxMessageRate;
+    }
+
     public String getSource() {
         return source;
     }
@@ -85,15 +94,14 @@ public class LocalEndpoint {
         if (this == o) return true;
         if (!(o instanceof LocalEndpoint)) return false;
         LocalEndpoint that = (LocalEndpoint) o;
-        return id.equals(that.id) &&
-                source.equals(that.source) &&
+        return source.equals(that.source) &&
                 host.equals(that.host) &&
                 port.equals(that.port);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, source, host, port);
+        return Objects.hash(source, host, port);
     }
 
     @Override
