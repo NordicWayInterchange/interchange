@@ -158,6 +158,10 @@ public class NeigbourDiscoveryService {
         }
     }
 
+    //TODO this really has to be tested.
+    //1. 1 LocalSubscription, matching several neighbour capabilities, thus making a 1-to-n relationship LocalSubscription -> Subscription
+    //2. N LocalSubscriptions, matching 1 neighbour capability, thus making a n-to-1 relationship LocalSubscription -> Subscription
+    //3. N LocalSubscriptions, each matching the same capability, thus making a n-to-n relationship LocalSubscription -> Subscription
     public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
         String neighbourName = neighbour.getName();
         Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
@@ -428,6 +432,7 @@ public class NeigbourDiscoveryService {
             //can we find the match from here?
             Match match = matchRepository.findBySubscriptionId(subscription.getId());
             if (match != null) {
+                //TODO which state are we in??
 
             }
 

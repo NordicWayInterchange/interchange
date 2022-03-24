@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class MatchDiscoveryService {
@@ -29,15 +28,20 @@ public class MatchDiscoveryService {
             String serviceProviderName = serviceProvider.getName();
             for (LocalSubscription localSubscription : localSubscriptions) {
                 for (Neighbour neighbour : neighbours) {
-                    Set<Subscription> requestedSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions().stream()
-                            .filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED))
-                            .collect(Collectors.toSet());
-                    for (Subscription subscription : requestedSubscriptions) {
-                        if(localSubscription.getSelector().equals(subscription.getSelector())){
-                            if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
-                                Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
-                                matchRepository.save(newMatch);
-                                logger.info("Saved new Match {}", newMatch);
+                    for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
+                        if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
+                            //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
+                            //this ending up with the same selector.
+                            //TODO this really is the most telltale sign that we need to promote Selector to a class
+                            if (localSubscription.getSelector().equals(subscription.getSelector())) {
+                                //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
+                                //this would make a method that is completely independent on the repos.
+                                //TODO AND this will fail if we match more than one Subscription, which is possible!
+                                if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
+                                    Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
+                                    matchRepository.save(newMatch);
+                                    logger.info("Saved new Match {}", newMatch);
+                                }
                             }
                         }
                     }
@@ -47,11 +51,11 @@ public class MatchDiscoveryService {
     }
 
     public List<Match> findMatchesToSetupExchangesFor(String serviceProviderName) {
-        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.SETUP_EXCHANGE);
+        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
     }
 
     public void updateMatchToSetupEndpoint(Match match) {
-        match.setStatus(MatchStatus.SETUP_ENDPOINT);
+        match.setStatus(MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR);
         matchRepository.save(match);
         logger.info("Saved match {} with status SETUP_ENDPOINT", match);
     }

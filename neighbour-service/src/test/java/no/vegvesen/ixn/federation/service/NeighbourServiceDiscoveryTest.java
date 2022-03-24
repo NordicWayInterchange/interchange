@@ -83,13 +83,16 @@ public class NeighbourServiceDiscoveryTest {
 
 	@Test
 	public void testNewNeighbourIsAddedToDatabase(){
-		when(dnsFacade.lookupNeighbours()).thenReturn(Collections.singletonList(createNeighbour()));
+		Neighbour neighbour = new Neighbour();
+		neighbour.setName("ericsson.itsinterchange.eu");
+		neighbour.setControlChannelPort("8080");
+		when(dnsFacade.lookupNeighbours()).thenReturn(Collections.singletonList(neighbour));
 		when(neighbourRepository.findByName(any(String.class))).thenReturn(null);
 		when(neighbourRepository.save(any(Neighbour.class))).thenReturn(mock(Neighbour.class));
 
 		neigbourDiscoveryService.checkForNewNeighbours();
 
-		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
+		verify(neighbourRepository, times(1)).save(neighbour);
 	}
 
 	@Test
@@ -763,6 +766,13 @@ public class NeighbourServiceDiscoveryTest {
 		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.GIVE_UP);
 		//TODO test that this actually works the same way when we do it through the triggered methods.
 		verify(neighbourFacade,times(2)).pollSubscriptionStatus(any(),any());
-
 	}
+
+
+
+	@Test
+	public void testPostSubscriptonRequest() {
+		neigbourDiscoveryService.postSubscriptionRequest(new Neighbour(),Collections.emptySet(),neighbourFacade);
+	}
+
 }

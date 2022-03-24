@@ -183,7 +183,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
 		toreDownServiceProvider.addLocalSubscription(localSubscription);
 
-		Match match = new Match(localSubscription, subscription, "tore-down-service-provider", MatchStatus.SETUP_EXCHANGE);
+		Match match = new Match(localSubscription, subscription, "tore-down-service-provider", MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
 
 		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
 
@@ -389,7 +389,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		client.createQueue(queueName);
 
-		Match match = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
+		Match match = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
 
 		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
 
@@ -430,7 +430,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);
 
-		Match match = new Match(localSubscription, subscription, MatchStatus.SETUP_EXCHANGE);
+		Match match = new Match(localSubscription, subscription, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
 		match.setServiceProviderName(serviceProviderName);
 
 		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
@@ -475,7 +475,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		serviceProvider.addLocalSubscription(localSubscription);
 
-		Match match = new Match(localSubscription, subscription, MatchStatus.SETUP_EXCHANGE);
+		Match match = new Match(localSubscription, subscription, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
 		match.setServiceProviderName(serviceProviderName);
 
 		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));

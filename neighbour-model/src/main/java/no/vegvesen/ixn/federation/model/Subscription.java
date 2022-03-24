@@ -42,6 +42,12 @@ public class Subscription {
 		this.subscriptionStatus = subscriptionStatus;
 	}
 
+	public Subscription(String selector, String consumerCommonName,SubscriptionStatus subscriptionStatus) {
+		this.selector = selector;
+		this.consumerCommonName = consumerCommonName;
+		this.subscriptionStatus = subscriptionStatus;
+	}
+
 	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
 		this.id = id;
 		this.subscriptionStatus = subscriptionStatus;

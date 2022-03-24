@@ -86,16 +86,10 @@ class NeighbourServiceTest {
 		));
 
 		// Mock saving Neighbour to Neighbour repository
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		Subscription firstSubscription = new Subscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED, "ericsson");
 		firstSubscription.setPath("/ericsson/subscriptions/1");
-		SubscriptionRequest returnedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(firstSubscription));
-		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
 
-		// Mock response from DNS facade on Server
-		Neighbour ericssonNeighbour = new Neighbour();
-		ericssonNeighbour.setName("ericsson");
-
+		when(neighbourRepository.findByName(anyString())).thenReturn(null);
 		Throwable thrown = catchThrowable(() -> neighbourService.incomingSubscriptionRequest(ericsson));
 
 		assertThat(thrown).isInstanceOf(SubscriptionRequestException.class);
@@ -198,9 +192,9 @@ class NeighbourServiceTest {
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'"));
 
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
-		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbour.getCapabilities().getCapabilities(), neighbour.getName());
+		Set<Capability> capabilities = Sets.newSet(getDatexCapability("NO"));
+		String name = "neighbour";
+		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, name);
 
 		assertThat(calculatedSubscription).hasSize(1);
 		assertThat(calculatedSubscription.iterator().next().getSelector()).isEqualTo("originatingCountry = 'NO'");
@@ -211,9 +205,13 @@ class NeighbourServiceTest {
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'"));
 
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
-		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbour.getCapabilities().getCapabilities(), neighbour.getName());
+		Set<Capability> capabilities = Sets.newSet(getDatexCapability("NO"));
+		String name = "neighbour";
+		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(
+				localSubscriptions,
+				capabilities,
+				name
+		);
 
 		assertThat(calculatedSubscription).hasSize(1);
 		assertThat(calculatedSubscription.iterator().next().getSelector())
@@ -224,9 +222,13 @@ class NeighbourServiceTest {
 
 	@Test
 	public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
-		Capabilities neighbourCapabilitiesDatexNo = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Sets.newSet(getDatexCapability("NO")));
-		Neighbour neighbour = new Neighbour("neighbour", neighbourCapabilitiesDatexNo, new SubscriptionRequest(), new SubscriptionRequest());
-		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(Collections.emptySet(), neighbour.getCapabilities().getCapabilities(), neighbour.getName());
+		Set<Capability> capabilities = Sets.newSet(getDatexCapability("NO"));
+		String name = "neighbour";
+		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(
+				Collections.emptySet(),
+				capabilities,
+				name
+		);
 		assertThat(calculatedSubscription).hasSize(0);
 	}
 
@@ -383,9 +385,6 @@ class NeighbourServiceTest {
 	public void deleteListenerEndpointWhenThereAreMoreListenerEndpointsThanSubscriptions() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("neighbour");
-
-		String exchangeName1 = "my-exchange1";
-		String exchangeName2 = "my-exchange2";
 
 		Subscription sub1 = new Subscription(1, SubscriptionStatus.CREATED, "originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
 		Set<Endpoint> endpoints = new HashSet<>();

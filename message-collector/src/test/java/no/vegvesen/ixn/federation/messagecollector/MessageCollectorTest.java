@@ -33,8 +33,8 @@ public class MessageCollectorTest {
 
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
 
 
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
@@ -68,8 +68,8 @@ public class MessageCollectorTest {
 
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
 
 
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
@@ -100,8 +100,8 @@ public class MessageCollectorTest {
 
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
 
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
         collector.runSchedule();
@@ -132,8 +132,8 @@ public class MessageCollectorTest {
 
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
 
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
         collector.runSchedule();

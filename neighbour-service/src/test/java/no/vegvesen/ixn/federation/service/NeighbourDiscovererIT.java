@@ -9,10 +9,13 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.Capability;
 import no.vegvesen.ixn.federation.model.DatexCapability;
+import no.vegvesen.ixn.federation.model.DenmCapability;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.Subscription;
+import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -31,6 +34,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -53,7 +57,7 @@ public class NeighbourDiscovererIT {
 	NeighbourService neighbourService;
 
 	@Autowired
-	NeigbourDiscoveryService neigbourDiscoveryService;
+	NeigbourDiscoveryService neighbourDiscoveryService;
 
 	@Autowired
 	NeighbourRepository repository;
@@ -91,7 +95,7 @@ public class NeighbourDiscovererIT {
 		));
 		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptions);
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), Optional.ofNullable(lastUpdatedLocalSubscriptions), localSubscriptions, mockNeighbourFacade);
+		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(Lists.newArrayList(neighbour1, neighbour2), Optional.ofNullable(lastUpdatedLocalSubscriptions), localSubscriptions, mockNeighbourFacade);
 
 		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
 		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
@@ -117,7 +121,7 @@ public class NeighbourDiscovererIT {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
 
-		neigbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
+		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
 		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any(), any());
 
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
@@ -133,8 +137,157 @@ public class NeighbourDiscovererIT {
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
 
+	@Test
+	public void postEmptySubscriptionRequest() {
+		neighbourDiscoveryService.postSubscriptionRequest(new Neighbour(),Collections.emptySet(),mockNeighbourFacade);
+	}
+
+	@Test
+	public void postSubscriptionRequestLocalSubscriptionsMatchesNeighbourState() {
+		Set<LocalSubscription> localSubscriptions = Collections.singleton(
+				new LocalSubscription(
+						LocalSubscriptionStatus.CREATED,
+						"originatingCountry = 'NO'"
+				)
+		);
+		Neighbour neighbour = new Neighbour(
+				"neighour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						Collections.singleton(
+								new DatexCapability(
+										"NO0001",
+										"NO",
+										"1.0",
+										Collections.emptySet(),
+										Collections.emptySet()
+								)
+						),
+						LocalDateTime.now()
+				),
+				new SubscriptionRequest(),
+				new SubscriptionRequest(
+						SubscriptionRequestStatus.ESTABLISHED,
+						Collections.singleton(
+								new Subscription(
+										"originatingCountry = 'NO'",
+										"bouvet.itsinterchange.eu",
+										SubscriptionStatus.CREATED
+
+								)
+						)
+				)
+		);
+		repository.save(neighbour);
+		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions,mockNeighbourFacade);
+		verify(mockNeighbourFacade,never()).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString());
+	}
+
+	@Test
+	public void oneLocalSubscriptionMatchingOneCapability() {
+		Set<LocalSubscription> localSubscriptions = Collections.singleton(
+				new LocalSubscription(
+						LocalSubscriptionStatus.CREATED,
+						"originatingCountry = 'NO'"
+				)
+		);
+		Neighbour neighbour = new Neighbour(
+				"neighour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						Collections.singleton(
+								new DatexCapability(
+										"NO0001",
+										"NO",
+										"1.0",
+										Collections.emptySet(),
+										Collections.emptySet()
+								)
+						),
+						LocalDateTime.now()
+				),
+				new SubscriptionRequest(),
+				new SubscriptionRequest()
+		);
+		repository.save(neighbour);
+		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
+				.thenReturn(Collections.singleton(
+						new Subscription(
+								"originatingCountry = 'NO'",
+								SubscriptionStatus.REQUESTED
+						)
+				)
+
+		);
+		neighbourDiscoveryService.postSubscriptionRequest(neighbour,localSubscriptions,mockNeighbourFacade);
+		verify(mockNeighbourFacade,times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString());
+	}
+
+
+	@Test
+	public void oneLocalSubscriptionsBothMatchingTwoCapabilities() {
+		Set<LocalSubscription> localSubscriptions = new HashSet<>(Arrays.asList(
+				new LocalSubscription(
+						LocalSubscriptionStatus.CREATED,
+						"originatingCountry = 'NO'"
+				)
+		));
+		Neighbour neighbour = new Neighbour(
+				"neighour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Arrays.asList(
+								new DatexCapability(
+										"NO0001",
+										"NO",
+										"1.0",
+										Collections.emptySet(),
+										Collections.emptySet()
+								),
+								new DenmCapability(
+										"NO0001",
+										"NO",
+										"1.0",
+										Collections.emptySet(),
+										Collections.emptySet()
+								)
+						)),
+						LocalDateTime.now()
+				),
+				new SubscriptionRequest(),
+				new SubscriptionRequest()
+		);
+		repository.save(neighbour);
+		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
+				.thenReturn(new HashSet<>(Arrays.asList(
+								new Subscription(
+										"originatingCountry = 'NO'",
+										SubscriptionStatus.REQUESTED,
+										"bouvet.itsinterchange.eu"
+								),
+								new Subscription(
+										"originatingCountry = 'NO'",
+										SubscriptionStatus.REQUESTED,
+										"bouvet.itsinterchange.eu"
+
+								)
+						)
+						)
+				);
+		neighbourDiscoveryService.postSubscriptionRequest(neighbour,localSubscriptions,mockNeighbourFacade);
+		verify(mockNeighbourFacade,times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString());
+		List<Neighbour> neighbours = repository.findAll();
+		assertThat(neighbours).hasSize(1);
+		//TODO here's a problem. When requesting several subscriptions with the same selector, we only store one.
+		//TODO need to check against the protocol.
+		//This might not actually be wrong! How do the neighbour do this? How do we do this? (after our change)
+		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
+		//neighbours.get(0).getOurRequestedSubscriptions().getSubscriptions().stream().allMatch()
+
+	}
+
 	private void checkForNewNeighbours() {
-		neigbourDiscoveryService.checkForNewNeighbours();
+		neighbourDiscoveryService.checkForNewNeighbours();
 		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
 		assertThat(unknown).hasSize(2);
 		assertThat(repository.findAll()).hasSize(2);
@@ -144,7 +297,7 @@ public class NeighbourDiscovererIT {
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any(), any())).thenReturn(c1);
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any(), any())).thenReturn(c2);
 
-		neigbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.empty());
+		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.empty());
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
 		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
@@ -153,7 +306,7 @@ public class NeighbourDiscovererIT {
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
 		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED, ""));
-		neigbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
+		neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
 		assertThat(found1.getOurRequestedSubscriptions()).isNotNull();

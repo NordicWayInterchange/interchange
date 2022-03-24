@@ -65,7 +65,7 @@ public class MessageCollector {
             interchangeListenerEndpoints.add(listenerEndpoint);
             if (!listeners.containsKey(listenerEndpoint)) {
                 Match match = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName());
-                if (match.getStatus().equals(MatchStatus.SETUP_ENDPOINT)) {
+                if (match.getStatus().equals(MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR)) {
                     setUpConnectionToNeighbour(listenerEndpoint);
                     matchDiscoveryService.updateMatchToUp(match);
                 }
