@@ -169,10 +169,9 @@ public class NeigbourDiscoveryService {
         logger.info("Found neighbour for subscription request: {}", neighbourName);
         Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, interchangeNodeProperties.getName());
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
+        SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
-            Set<Subscription> subscriptionsToRemove = new HashSet<>(existingSubscriptions);
-            subscriptionsToRemove.removeAll(wantedSubscriptions);
-            for (Subscription subscription : subscriptionsToRemove) {
+            for (Subscription subscription : subscriptionPostCalculator.getSubscriptionsToRemove()) {
                 if (!subscription.getEndpoints().isEmpty()) {
                     tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                 }
@@ -181,8 +180,7 @@ public class NeigbourDiscoveryService {
             Connection controlConnection = neighbour.getControlConnection();
             try {
                 if (controlConnection.canBeContacted(backoffProperties)) {
-                    Set<Subscription> additionalSubscriptions = new HashSet<>(wantedSubscriptions);
-                    additionalSubscriptions.removeAll(existingSubscriptions);
+                    Set<Subscription> additionalSubscriptions = subscriptionPostCalculator.getNewSubscriptions();
                     if (!additionalSubscriptions.isEmpty()) {
                         Set<Subscription> responseSubscriptions = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
                         for(Subscription subscription : responseSubscriptions) {
