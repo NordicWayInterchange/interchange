@@ -258,31 +258,23 @@ public class NeighbourDiscovererIT {
 				new SubscriptionRequest()
 		);
 		repository.save(neighbour);
+		//NOTE this will only return one subscription as per SubscriptionCalculator.calculateCustomSubscriptionForNeighbour
 		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
 				.thenReturn(new HashSet<>(Arrays.asList(
 								new Subscription(
 										"originatingCountry = 'NO'",
 										SubscriptionStatus.REQUESTED,
 										"bouvet.itsinterchange.eu"
-								),
-								new Subscription(
-										"originatingCountry = 'NO'",
-										SubscriptionStatus.REQUESTED,
-										"bouvet.itsinterchange.eu"
 
 								)
-						)
-						)
+						))
 				);
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour,localSubscriptions,mockNeighbourFacade);
 		verify(mockNeighbourFacade,times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString());
 		List<Neighbour> neighbours = repository.findAll();
 		assertThat(neighbours).hasSize(1);
-		//TODO here's a problem. When requesting several subscriptions with the same selector, we only store one.
-		//TODO need to check against the protocol.
-		//This might not actually be wrong! How do the neighbour do this? How do we do this? (after our change)
-		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
-		//neighbours.get(0).getOurRequestedSubscriptions().getSubscriptions().stream().allMatch()
+		//NOTE this will only return one subscription as per SubscriptionCalculator.calculateCustomSubscriptionForNeighbour
+		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 
 	}
 

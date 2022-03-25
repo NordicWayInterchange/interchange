@@ -3,6 +3,8 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +31,21 @@ public class MatchRepositoryIT {
     @Autowired
     ServiceProviderRepository serviceProviderRepository;
 
+    @AfterEach
+    public void tearDown() {
+        matchRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
+        neighbourRepository.deleteAll();
+    }
+
+
+    @BeforeEach
+    public void setUp() {
+        assertThat(matchRepository.findAll()).isEmpty();
+        assertThat(serviceProviderRepository.findAll()).isEmpty();
+        assertThat(neighbourRepository.findAll()).isEmpty();
+    }
+
     @Test
     public void saveNeighbourAndServiceProviderBeforeSavingMatch() {
         LocalSubscription locSub = new LocalSubscription();
@@ -47,10 +64,6 @@ public class MatchRepositoryIT {
 
         List<Match> allMatches = matchRepository.findAll();
         assertThat(allMatches).hasSize(1);
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -76,10 +89,6 @@ public class MatchRepositoryIT {
 
         Neighbour neighbourFromDb = neighbourRepository.findByName("neighbour");
         assertThat(neighbourFromDb.getOurRequestedSubscriptions().getSubscriptions()).isNotEmpty();
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -116,10 +125,6 @@ public class MatchRepositoryIT {
         assertThat(allMatches).hasSize(0);
         assertThat(requestedSubscriptions).hasSize(1);
         assertThat(localSubscriptions).hasSize(1);
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -138,7 +143,7 @@ public class MatchRepositoryIT {
         neighbourRepository.save(neighbour);
         neighbourRepository.save(neighbour1);
 
-        assertThat(locSub.getId()).isNotNull(); //TODO in other words, no need to assign it to a new variable, the original one has been updated.
+        assertThat(locSub.getId()).isNotNull(); //in other words, no need to assign it to a new variable, the original one has been updated.
 
         Match match = new Match(locSub, sub, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
         Match match1 = new Match(locSub, sub1, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
@@ -150,11 +155,7 @@ public class MatchRepositoryIT {
 
 
         //TODO test that we can use this method with more than one matches with a local subscription.
-        Match byLocalSubscriptionId = matchRepository.findByLocalSubscriptionId(locSub.getId());
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
+        List<Match> byLocalSubscriptionId = matchRepository.findByLocalSubscriptionId(locSub.getId());
     }
 
     @Test
@@ -179,10 +180,6 @@ public class MatchRepositoryIT {
 
         assertThat(matchRepository.findAll()).hasSize(1);
 
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -207,10 +204,6 @@ public class MatchRepositoryIT {
 
         assertThat(matchRepository.findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED)).hasSize(1);
 
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -245,10 +238,6 @@ public class MatchRepositoryIT {
         matchRepository.save(match1);
 
         assertThat(matchRepository.findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus.REQUESTED, SubscriptionStatus.CREATED)).hasSize(2);
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -281,10 +270,6 @@ public class MatchRepositoryIT {
         ServiceProvider getServiceProvider = serviceProviderRepository.findByName("my-sp");
 
         assertThat(getServiceProvider.getSubscriptions()).hasSize(1);
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -317,10 +302,6 @@ public class MatchRepositoryIT {
         Neighbour getNeighbour = neighbourRepository.findByName("neighbour");
 
         assertThat(getNeighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -356,10 +337,6 @@ public class MatchRepositoryIT {
         Match savedMatch = matchRepository.findAll().get(0);
 
         assertThat(savedMatch).isNotNull();
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 
     @Test
@@ -395,9 +372,5 @@ public class MatchRepositoryIT {
         Match savedMatch = matchRepository.findAll().get(0);
 
         assertThat(savedMatch).isNotNull();
-        //clean-up
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
     }
 }

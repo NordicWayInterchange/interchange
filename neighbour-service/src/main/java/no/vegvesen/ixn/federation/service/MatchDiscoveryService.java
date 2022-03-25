@@ -37,6 +37,7 @@ public class MatchDiscoveryService {
                                 //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
                                 //this would make a method that is completely independent on the repos.
                                 //TODO AND this will fail if we match more than one Subscription, which is possible!
+                                //Well, in theory. But in effect, it will never happen. Should possibly create a constraint in the db.
                                 if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
                                     Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
                                     matchRepository.save(newMatch);
@@ -106,7 +107,7 @@ public class MatchDiscoveryService {
         }
     }
 
-    public Match findMatchByLocalSubscriptionId(Integer id) {
+    public List<Match> findMatchByLocalSubscriptionId(Integer id) {
         return matchRepository.findByLocalSubscriptionId(id);
     }
 }

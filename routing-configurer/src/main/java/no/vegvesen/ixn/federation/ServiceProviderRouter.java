@@ -102,12 +102,12 @@ public class ServiceProviderRouter {
     }
 
     private Optional<LocalSubscription> onTearDown(String serviceProviderName, LocalSubscription subscription) {
-        Match match = matchDiscoveryService.findMatchByLocalSubscriptionId(subscription.getId());
+        List<Match> match = matchDiscoveryService.findMatchByLocalSubscriptionId(subscription.getId());
         Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
             removeBindingIfExists(source, subscription);
-            if (match == null) {
+            if (match.isEmpty()) {
                 if (qpidClient.queueExists(source)) {
                     qpidClient.removeReadAccess(serviceProviderName, source);
                     qpidClient.removeQueue(source);
@@ -117,7 +117,7 @@ public class ServiceProviderRouter {
             endpointsToRemove.add(endpoint);
         }
         subscription.getLocalEndpoints().removeAll(endpointsToRemove);
-        if (match == null) {
+        if (match.isEmpty()) {
             return Optional.empty();
         } else {
             return Optional.of(subscription);

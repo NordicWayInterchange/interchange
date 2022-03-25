@@ -87,9 +87,9 @@ public class MatchDiscoveryServiceTest {
         verify(matchRepository,times(1)).save(any(Match.class));
     }
 
-    //TODO one LocalSubscription, two matching Subscriptions
+    //NOTE A localsubscription matching several capabilities at neighbour will only create one subscription on the neighbour.
     @Test
-    public void serviceProviderMatchesTwoSubscriptionForOneNeighbour() {
+    public void serviceProviderMatchesTwoNeighbourSubscriptions() {
        ServiceProvider sp = new ServiceProvider(
                "SP",
                new Capabilities(),
@@ -111,15 +111,32 @@ public class MatchDiscoveryServiceTest {
                                new Subscription(
                                        "originatingCountry = 'NO'",
                                        SubscriptionStatus.REQUESTED
-                               ),
-                               new Subscription(
-                                       //TODO How the hell do we match to create the darned subscriptions?
-
                                )
                        ))
                ),
                new Connection()
        );
+        Neighbour otherNeighbour = new Neighbour(
+                "neighbour",
+                new Capabilities(),
+                new SubscriptionRequest(),
+                new SubscriptionRequest(
+                        SubscriptionRequestStatus.REQUESTED,
+                        new HashSet<>(Arrays.asList(
+                                new Subscription(
+                                        "originatingCountry = 'NO'",
+                                        SubscriptionStatus.REQUESTED
+                                )
+                        ))
+                ),
+                new Connection()
+        );
+       matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
+               Collections.singletonList(sp),
+               Arrays.asList(neighbour,otherNeighbour)
+       );
+       verify(matchRepository,times(2)).findBySubscriptionId(any());
+       verify(matchRepository,times(2)).save(any(Match.class));
     }
 
 

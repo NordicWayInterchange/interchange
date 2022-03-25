@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
@@ -13,6 +12,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +167,7 @@ public class NeigbourDiscoveryService {
         Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
         logger.info("Found neighbour for subscription request: {}", neighbourName);
-        Set<Subscription> wantedSubscriptions = calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, neighbourName);
+        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, interchangeNodeProperties.getName());
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
             Set<Subscription> subscriptionsToRemove = new HashSet<>(existingSubscriptions);
@@ -210,22 +210,6 @@ public class NeigbourDiscoveryService {
         } else {
             logger.info("Neighbour has our last subscription request");
         }
-    }
-
-    Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<Capability> neighbourCapabilities, String neighbourName) {
-        logger.info("Calculating custom subscription for neighbour: {}", neighbourName);
-        logger.debug("Neighbour capabilities {}", neighbourCapabilities);
-        logger.debug("Local subscriptions {}", localSubscriptions);
-        Set<LocalSubscription> matchingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
-        Set<Subscription> calculatedSubscriptions = new HashSet<>();
-        for (LocalSubscription subscription : matchingSubscriptions) {
-            Subscription newSubscription = new Subscription(subscription.getSelector(),
-                    SubscriptionStatus.REQUESTED,
-                    interchangeNodeProperties.getName());
-            calculatedSubscriptions.add(newSubscription);
-        }
-        logger.info("Calculated custom subscription for neighbour {}: {}", neighbourName, calculatedSubscriptions);
-        return calculatedSubscriptions;
     }
 
     public void pollSubscriptions(NeighbourFacade neighbourFacade) {

@@ -45,7 +45,6 @@ class NeighbourServiceTest {
 
 	NeighbourService neighbourService;
 	NeigbourDiscoveryService neigbourDiscoveryService;
-	InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName,null);
 
 	@BeforeEach
 	void setUp() {
@@ -58,6 +57,7 @@ class NeighbourServiceTest {
 	void isAutowired() {
 		assertThat(neighbourService).isNotNull();
 	}
+
 
 	@Test
 	void postDatexDataTypeCapability() {
@@ -188,51 +188,6 @@ class NeighbourServiceTest {
 	}
 
 	@Test
-	public void calculateCustomSubscriptionForNeighbour_localSubscriptionOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'"));
-
-		Set<Capability> capabilities = Sets.newSet(getDatexCapability("NO"));
-		String name = "neighbour";
-		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, name);
-
-		assertThat(calculatedSubscription).hasSize(1);
-		assertThat(calculatedSubscription.iterator().next().getSelector()).isEqualTo("originatingCountry = 'NO'");
-	}
-
-	@Test
-	public void calculateCustomSubscriptionForNeighbour_localSubscriptionMessageTypeAndOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'"));
-
-		Set<Capability> capabilities = Sets.newSet(getDatexCapability("NO"));
-		String name = "neighbour";
-		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(
-				localSubscriptions,
-				capabilities,
-				name
-		);
-
-		assertThat(calculatedSubscription).hasSize(1);
-		assertThat(calculatedSubscription.iterator().next().getSelector())
-				.contains("originatingCountry = 'NO'")
-				.contains(" AND ")
-				.contains("messageType = 'DATEX2'");
-	}
-
-	@Test
-	public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
-		Set<Capability> capabilities = Sets.newSet(getDatexCapability("NO"));
-		String name = "neighbour";
-		Set<Subscription> calculatedSubscription = neigbourDiscoveryService.calculateCustomSubscriptionForNeighbour(
-				Collections.emptySet(),
-				capabilities,
-				name
-		);
-		assertThat(calculatedSubscription).hasSize(0);
-	}
-
-	@Test
 	public void findSubscriptionsHappyCase() {
 		String neighbourName = "neighbour";
 		int id = 1;
@@ -258,7 +213,7 @@ class NeighbourServiceTest {
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'"));
 
-		Subscription subscription = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", interchangeNodeProperties.getName());
+		Subscription subscription = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", myName);
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));

@@ -18,8 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
 public class ServiceProviderRepositoryIT {
+
 	@Autowired
 	ServiceProviderRepository repository;
+
+	@Test
+	public void makeSureWeHaveACleanDatabase() {
+		assertThat(repository.findAll()).isEmpty();
+	}
 
 	@Test
 	public void storedServiceProviderGetsId() {
