@@ -404,21 +404,4 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void cleanupStaleSubscriptions() {
-        List<Neighbour> neighbours = neighbourRepository.findAll();
-        Set<Subscription> subscriptions = neighbours.stream()
-                .flatMap(n -> n.getOurRequestedSubscriptions().getSubscriptions().stream())
-                .filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.GIVE_UP))
-                .collect(Collectors.toSet());
-        for (Subscription subscription : subscriptions) {
-            //can we find the match from here?
-            Match match = matchRepository.findBySubscriptionId(subscription.getId());
-            if (match != null) {
-                //TODO which state are we in??
-
-            }
-
-        }
-
-    }
 }

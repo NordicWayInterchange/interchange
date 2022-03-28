@@ -79,7 +79,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		MatchRepository matchRepository = mock(MatchRepository.class);
 		MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
+		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -127,7 +127,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		MatchRepository matchRepository = mock(MatchRepository.class);
 		MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR));
+		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT));
 
 		String localIxnFederationPort = consumerContainer.getMappedPort(AMQPS_PORT).toString();
 		CollectorCreator collectorCreator = new CollectorCreator(

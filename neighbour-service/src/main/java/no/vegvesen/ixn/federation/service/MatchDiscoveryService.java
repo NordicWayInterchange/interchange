@@ -39,7 +39,7 @@ public class MatchDiscoveryService {
                                 //TODO AND this will fail if we match more than one Subscription, which is possible!
                                 //Well, in theory. But in effect, it will never happen. Should possibly create a constraint in the db.
                                 if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
-                                    Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
+                                    Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
                                     matchRepository.save(newMatch);
                                     logger.info("Saved new Match {}", newMatch);
                                 }
@@ -52,11 +52,11 @@ public class MatchDiscoveryService {
     }
 
     public List<Match> findMatchesToSetupExchangesFor(String serviceProviderName) {
-        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.SETUP_NEIGHBOUR_SUBSCRIPTION_EXCHANGE);
+        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.SETUP_EXCHANGE);
     }
 
     public void updateMatchToSetupEndpoint(Match match) {
-        match.setStatus(MatchStatus.SETUP_ENDPOINT_FOR_MESSAGE_COLLECTOR);
+        match.setStatus(MatchStatus.SETUP_ENDPOINT);
         matchRepository.save(match);
         logger.info("Saved match {} with status SETUP_ENDPOINT", match);
     }

@@ -134,8 +134,4 @@ public class NeighbourDiscoverer {
 		matchDiscoveryService.removeMatchesThatAreDeleted();
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString ="${discoverer.local-subscription-initial-delay}" )
-	public void removeGiveUpSubscriptions() {
-		neigbourDiscoveryService.cleanupStaleSubscriptions();
-	}
 }
