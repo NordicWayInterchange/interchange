@@ -37,15 +37,11 @@ public class JmsSource implements CommandLineRunner {
             s.start();
             s.send(s.createMessageBuilder()
                     .textMessage("Dette er en test, hehehehe!")
-                    .userId("pilotinterchange.eu.tlex.se.bouvet.no.anna")
-                    .publisherId("NO00001")
                     .messageType(Constants.DENM)
-                    .causeCode("5")
-                    .subCauseCode("61")
-                    .originatingCountry("NO")
-                    .protocolVersion("DENM:1,2.2")
-                    .quadTreeTiles(",12004")
-                    .timestamp(System.currentTimeMillis())
+                    .quadTreeTiles(",123,")
+                    .publisherId("KYRRE")
+                    .protocolVersion("1.0")
+                    .originatingCountry("SE")
                     .build());
         }
     }

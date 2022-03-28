@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import no.vegvesen.ixn.federation.model.Match;
 import no.vegvesen.ixn.federation.model.MatchStatus;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

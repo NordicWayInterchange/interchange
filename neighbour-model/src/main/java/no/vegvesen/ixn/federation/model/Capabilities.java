@@ -86,12 +86,12 @@ public class Capabilities {
 
 	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilities) {
 		this.status = status;
-		this.capabilities = capabilities;
+		setCapabilities(capabilities);
 	}
 
 	public Capabilities(CapabilitiesStatus status, Set<Capability> capabilties, LocalDateTime lastUpdated) {
 		this.status = status;
-		this.capabilities = capabilties;
+		setCapabilities(capabilties);
 		this.lastUpdated = lastUpdated;
 	}
 

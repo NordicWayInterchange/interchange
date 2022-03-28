@@ -11,7 +11,5 @@ public interface NeighbourFacade {
 
 	Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour);
 
-	Subscription pollSubscriptionLastUpdatedTime(Subscription subscription, Neighbour neighbour);
-
 	void deleteSubscription (Neighbour neighbour, Subscription subscription);
 }

@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.federation.subscription;
 
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +13,9 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SubscriptionCalculatorTest {
+
+    private String myName = "my-interchange";
+
     @Test
     void calculateSelfSubscriptionsTest() {
         LocalSubscription localSubA = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'FI'");
@@ -92,29 +92,6 @@ public class SubscriptionCalculatorTest {
         assertThat(localSubscriptions).hasSize(1);
     }
 
-    //TODO I'm having real problems understanding what this test really means... The filtering is done in the test, not the services/calculators.
-    @Test
-    void addLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameFromServiceProvider() {
-        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
-        LocalSubscription subscription1 = new LocalSubscription(LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'NO'");
-        LocalSubscription subscription2 = new LocalSubscription(LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'SE'");
-
-        serviceProvider.addLocalSubscription(subscription1);
-        serviceProvider.addLocalSubscription(subscription2);
-
-        List<ServiceProvider> SPs = new ArrayList<>(Arrays.asList(serviceProvider));
-
-        /*
-        TODO this no longer makes sense
-        
-        Set<LocalSubscription> serviceProviderSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(SPs)
-                .stream()
-                .filter(s -> s.getConsumerCommonName().equals(serviceProvider.getName()))
-                .collect(Collectors.toSet());
-        assertThat(serviceProviderSubscriptions).hasSize(1);
-*/
-    }
-
     @Test
     void serviceProviderGetsNewSubscriptionCreatedUpdatesSelfLastSubscriptionUpdate() {
         String serviceProviderName = "SelfServiceIT-service-provider";
@@ -145,4 +122,193 @@ public class SubscriptionCalculatorTest {
         LocalDateTime after = SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProvidersBefore);
         assertThat(Optional.of(after)).isNotEmpty().isEqualTo(serviceProviderBefore.getSubscriptionUpdated());
     }
+
+    @Test
+    void calculateEmptyCapabiliitiesAndSubscriptions() {
+        Set<Subscription> calculatedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
+                Collections.emptySet(),
+                Collections.emptySet(),
+                "my-interchange"
+        );
+        assertThat(calculatedSubscriptions).isEmpty();
+    }
+
+    @Test
+    void calculateEmptyCapabilitiesActualSubscription() {
+        Set<Subscription> calculatedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
+                Collections.singleton(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.REQUESTED,
+                                "originatinCountry = 'NO'"
+                        )
+                ),
+                Collections.emptySet(),
+                "my-interchange"
+        );
+        assertThat(calculatedSubscriptions).isEmpty();
+    }
+
+
+    @Test
+    public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
+        Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
+                Collections.emptySet(),
+                capabilities,
+                "my-node"
+        );
+        assertThat(calculatedSubscription).hasSize(0);
+    }
+
+    @Test
+    public void calculateSingleLocalSubscriptionMatchingSingleNeighbourCapability() {
+        Set<Subscription> calculatedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
+                Collections.singleton(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.REQUESTED,
+                                "originatingCountry = 'NO'"
+                        )
+                ),
+                Collections.singleton(
+                        new DatexCapability(
+                                "NO0001",
+                                "NO",
+                                "1.0",
+                                Collections.emptySet(),
+                                Collections.emptySet()
+                        )
+                ), myName
+        );
+        assertThat(calculatedSubscriptions)
+                .hasSize(1)
+                .allMatch(s -> s.getSelector().equals("originatingCountry = 'NO'"));
+    }
+
+    @Test
+    void calculateSingleLocalSubscriptionMatchingTwoNeighbourCapabiltities() {
+        Set<Subscription> calculatedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
+                Collections.singleton(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.REQUESTED,
+                                "originatingCountry = 'NO'"
+                        )
+                ),
+                new HashSet<>(Arrays.asList(
+                        new DatexCapability(
+                                "NO0001",
+                                "NO",
+                                "1.0",
+                                Collections.emptySet(),
+                                Collections.emptySet()
+                        ),
+                        new DenmCapability(
+                                "NO0001",
+                                "NO",
+                                "1.0",
+                                Collections.emptySet(),
+                                Collections.emptySet()
+                        )
+                )), myName
+        );
+        assertThat(calculatedSubscriptions)
+                .hasSize(1)
+                .allMatch(s -> s.getSelector().equals("originatingCountry = 'NO'"));
+    }
+
+    @Test
+    public void calculateTwoLocalSubscriptionsMatchingTheSameCapability() {
+        Set<Subscription> calculatedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
+                new HashSet<>(Arrays.asList(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.REQUESTED,
+                                "originatingCountry = 'NO'"
+                        ),
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.REQUESTED,
+                                "messageType = 'DATEX2'"
+                        )
+                )),
+                Collections.singleton(
+                        new DatexCapability(
+                                "NO0001",
+                                "NO",
+                                "1.0",
+                                Collections.emptySet(),
+                                Collections.emptySet()
+                        )
+                ), myName
+        );
+        assertThat(calculatedSubscriptions)
+                .hasSize(2);
+    }
+
+    @Test
+    public void calculateTowLocalSubscriptionsMatchingSeparateCapabilties() {
+        Set<Subscription> calculatedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
+                new HashSet<>(Arrays.asList(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.REQUESTED,
+                                "originatingCountry = 'NO'"
+                        ),
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.REQUESTED,
+                                "messageType = 'DATEX2'"
+                        )
+                )),
+                new HashSet<>(Arrays.asList(
+                        new DatexCapability(
+                                "NO0001",
+                                "SE",
+                                "1.0",
+                                Collections.emptySet(),
+                                Collections.emptySet()
+                        ),
+                        new DenmCapability(
+                                "NO0001",
+                                "NO",
+                                "1.0",
+                                Collections.emptySet(),
+                                Collections.emptySet()
+                        )
+                )), myName
+        );
+        assertThat(calculatedSubscriptions)
+                .hasSize(2);
+    }
+
+
+    @Test
+    public void calculateCustomSubscriptionForNeighbour_localSubscriptionOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
+        Set<LocalSubscription> localSubscriptions = new HashSet<>();
+        localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'"));
+
+        Set<Capability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
+        Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, myName);
+
+        assertThat(calculatedSubscription).hasSize(1);
+        assertThat(calculatedSubscription.iterator().next().getSelector()).isEqualTo("originatingCountry = 'NO'");
+    }
+
+    @Test
+    public void calculateCustomSubscriptionForNeighbour_localSubscriptionMessageTypeAndOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
+        Set<LocalSubscription> localSubscriptions = new HashSet<>();
+        localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'"));
+
+        Set<Capability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
+        Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
+                localSubscriptions,
+                capabilities, myName
+        );
+
+        assertThat(calculatedSubscription).hasSize(1);
+        assertThat(calculatedSubscription.iterator().next().getSelector())
+                .contains("originatingCountry = 'NO'")
+                .contains(" AND ")
+                .contains("messageType = 'DATEX2'");
+    }
+
+    private Capability getDatexCapability(String country) {
+        return new DatexCapability(null, country, null, null, null);
+    }
+
 }

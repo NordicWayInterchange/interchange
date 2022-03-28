@@ -7,15 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class MatchDiscoveryService {
 
-    private MatchRepository matchRepository;
+    public MatchRepository matchRepository;
 
     private Logger logger = LoggerFactory.getLogger(MatchDiscoveryService.class);
 
@@ -30,15 +28,21 @@ public class MatchDiscoveryService {
             String serviceProviderName = serviceProvider.getName();
             for (LocalSubscription localSubscription : localSubscriptions) {
                 for (Neighbour neighbour : neighbours) {
-                    Set<Subscription> requestedSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions().stream()
-                            .filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED))
-                            .collect(Collectors.toSet());
-                    for (Subscription subscription : requestedSubscriptions) {
-                        if(localSubscription.getSelector().equals(subscription.getSelector())){
-                            if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
-                            Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
-                            matchRepository.save(newMatch);
-                            logger.info("Saved new Match {}", newMatch);
+                    for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
+                        if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
+                            //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
+                            //this ending up with the same selector.
+                            //TODO this really is the most telltale sign that we need to promote Selector to a class
+                            if (localSubscription.getSelector().equals(subscription.getSelector())) {
+                                //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
+                                //this would make a method that is completely independent on the repos.
+                                //TODO AND this will fail if we match more than one Subscription, which is possible!
+                                //Well, in theory. But in effect, it will never happen. Should possibly create a constraint in the db.
+                                if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
+                                    Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
+                                    matchRepository.save(newMatch);
+                                    logger.info("Saved new Match {}", newMatch);
+                                }
                             }
                         }
                     }
@@ -103,7 +107,7 @@ public class MatchDiscoveryService {
         }
     }
 
-    public Match findMatchByLocalSubscriptionId(Integer id) {
+    public List<Match> findMatchByLocalSubscriptionId(Integer id) {
         return matchRepository.findByLocalSubscriptionId(id);
     }
 }

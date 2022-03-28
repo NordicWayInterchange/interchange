@@ -133,4 +133,5 @@ public class NeighbourDiscoverer {
 	public void removeMatchesThatAreDeleted() {
 		matchDiscoveryService.removeMatchesThatAreDeleted();
 	}
+
 }

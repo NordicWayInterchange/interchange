@@ -1,8 +1,7 @@
 package no.vegvesen.ixn.federation.subscription;
 
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,5 +45,21 @@ public class SubscriptionCalculator {
             }
         }
         return result;
+    }
+
+    public static Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<Capability> neighbourCapabilities, String name) {
+        //logger.info("Calculating custom subscription for neighbour: {}", neighbourName);
+        //logger.debug("Neighbour capabilities {}", neighbourCapabilities);
+        //logger.debug("Local subscriptions {}", localSubscriptions);
+        Set<LocalSubscription> matchingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
+        Set<Subscription> calculatedSubscriptions = new HashSet<>();
+        for (LocalSubscription subscription : matchingSubscriptions) {
+            Subscription newSubscription = new Subscription(subscription.getSelector(),
+                    SubscriptionStatus.REQUESTED,
+                    name);
+            calculatedSubscriptions.add(newSubscription);
+        }
+        //logger.info("Calculated custom subscription for neighbour {}: {}", neighbourName, calculatedSubscriptions);
+        return calculatedSubscriptions;
     }
 }
