@@ -158,10 +158,13 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    //TODO this really has to be tested.
     //1. 1 LocalSubscription, matching several neighbour capabilities, thus making a 1-to-n relationship LocalSubscription -> Subscription
+                //There will only be one Subscription for the Neighbour, even though we might match several capabilities on the neighbour.
+                //So, this is really a 1-to-1 relationship.
     //2. N LocalSubscriptions, matching 1 neighbour capability, thus making a n-to-1 relationship LocalSubscription -> Subscription
     //3. N LocalSubscriptions, each matching the same capability, thus making a n-to-n relationship LocalSubscription -> Subscription
+                //There will only be one Subscription for the Neighbour, even though we might match several capabilities on the neighbour.
+                //So, this is really a n-to-1 relationship.
     public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
         String neighbourName = neighbour.getName();
         Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
