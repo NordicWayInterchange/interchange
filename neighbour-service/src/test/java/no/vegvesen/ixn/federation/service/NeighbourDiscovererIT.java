@@ -278,6 +278,115 @@ public class NeighbourDiscovererIT {
 
 	}
 
+
+	@Test
+	public void evaluateAndPostSubscriptionRequestOneNeighbour() {
+		Set<LocalSubscription> localSubscriptions = Collections.singleton(
+				new LocalSubscription(
+						LocalSubscriptionStatus.CREATED,
+						"originatingCountry = 'NO'"
+				)
+		);
+		Neighbour neighbour = new Neighbour(
+				"neighour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						Collections.singleton(
+								new DatexCapability(
+										"NO0001",
+										"NO",
+										"1.0",
+										Collections.emptySet(),
+										Collections.emptySet()
+								)
+						),
+						LocalDateTime.now().minusHours(1)
+				),
+				new SubscriptionRequest(),
+				new SubscriptionRequest()
+		);
+		neighbour.getCapabilities().setLastCapabilityExchange(LocalDateTime.now());
+		repository.save(neighbour);
+		//TODO should return a subscription from the post.
+		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
+				.thenReturn(Collections.singleton(
+						new Subscription(
+								"originatingCountry = 'NO'",
+								SubscriptionStatus.REQUESTED
+
+						)
+				));
+		Optional<LocalDateTime> lastUpdatedTime = Optional.of(LocalDateTime.now());
+		assertThat(neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedTime)).isTrue();
+		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
+				Collections.singletonList(neighbour),
+				lastUpdatedTime,
+				localSubscriptions,
+				mockNeighbourFacade);
+		verify(mockNeighbourFacade,times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString());
+		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+
+	}
+
+	@Test
+	public void evaluateAndPostSubscriptionRequestTwoNeighbours() {
+		Set<LocalSubscription> localSubscriptions = Collections.singleton(
+				new LocalSubscription(
+						LocalSubscriptionStatus.CREATED,
+						"originatingCountry = 'NO'"
+				)
+		);
+		Neighbour neighbourA = new Neighbour(
+				"neighourA",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						Collections.singleton(
+								new DatexCapability(
+										"NO0001",
+										"NO",
+										"1.0",
+										Collections.emptySet(),
+										Collections.emptySet()
+								)
+						),
+						LocalDateTime.now().minusHours(1)
+				),
+				new SubscriptionRequest(),
+				new SubscriptionRequest()
+		);
+		neighbourA.getCapabilities().setLastCapabilityExchange(LocalDateTime.now());
+		Neighbour neighbourB = new Neighbour(
+				"neighourB",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						Collections.singleton(
+								new DatexCapability(
+										"NO0002",
+										"NO",
+										"1.0",
+										Collections.emptySet(),
+										Collections.emptySet()
+								)
+						),
+						LocalDateTime.now().minusHours(1)
+				),
+				new SubscriptionRequest(),
+				new SubscriptionRequest()
+		);
+		neighbourB.getCapabilities().setLastCapabilityExchange(LocalDateTime.now());
+		repository.save(neighbourA);
+		repository.save(neighbourB);
+		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
+				Arrays.asList(neighbourA,neighbourB),
+				Optional.of(LocalDateTime.now()),
+				localSubscriptions,
+				mockNeighbourFacade);
+
+
+	}
+
+
+
 	private void checkForNewNeighbours() {
 		neighbourDiscoveryService.checkForNewNeighbours();
 		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
