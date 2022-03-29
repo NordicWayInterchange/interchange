@@ -65,7 +65,10 @@ public class MessageCollector {
             interchangeListenerEndpoints.add(listenerEndpoint);
             if (!listeners.containsKey(listenerEndpoint)) {
                 Match match = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName());
-                if (match.getStatus().equals(MatchStatus.SETUP_ENDPOINT)) {
+                //TODO somehow got a NullPointer exception here. Don't really know how this happens, but need to handle it
+                if (match == null) {
+                    logger.warn("Could not find a match for listener endpoint with exchange %s",listenerEndpoint.getExchangeName());
+                } else if  (match.getStatus().equals(MatchStatus.SETUP_ENDPOINT)) {
                     setUpConnectionToNeighbour(listenerEndpoint);
                     matchDiscoveryService.updateMatchToUp(match);
                 }
