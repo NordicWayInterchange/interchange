@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -110,7 +108,7 @@ public class RoutingConfigurer {
 					subscriptionsToSetUpRoutingFor.add(subscription);
 					//TODO: Implement redirect using RedirectStatus from matching Capability
 				}
-				//TODO: Are we supposed to set up routing for Neighbour with an empty SubscriptionRequest?
+				//TODO: Are we supposed to set up routing for Neighbour with an empty SubscriptionRequest? No. That should take down all the subscriptions for the neighbour!
 				if(!subscriptionsToSetUpRoutingFor.isEmpty()){
 					createQueue(neighbour.getName());
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbour.getName());
@@ -127,12 +125,12 @@ public class RoutingConfigurer {
 	private void bindSubscriptions(String exchange, String neighbourName, Set<Subscription> acceptedSubscriptions, SubscriptionRequest neighbourRequestedSubscriptions) {
 		unbindOldUnwantedBindings(neighbourName, neighbourRequestedSubscriptions, exchange);
 		for (Subscription subscription : acceptedSubscriptions) {
-			qpidClient.addBinding(subscription.getSelector(), neighbourName, subscription.bindKey(), exchange);
+			qpidClient.bindTopicExchange(subscription.getSelector(), exchange,neighbourName);
 		}
 	}
 
 	private void bindRemoteServiceProvider(String exchange, String commonName, Subscription acceptedSubscription) {
-		qpidClient.addBinding(acceptedSubscription.getSelector(), commonName, acceptedSubscription.bindKey(), exchange);
+		qpidClient.bindTopicExchange(acceptedSubscription.getSelector(),exchange,commonName);
 	}
 
 	private void unbindOldUnwantedBindings(String neighbourName, SubscriptionRequest neighbourRequestedSubscriptions, String exchangeName) {

@@ -88,9 +88,17 @@ public class QpidClient {
 		}
 	}
 
-	public void addBinding(String selector, String queueName, String bindingKey, String exchangeName) {
+	public void bindDirectExchange(String selector, String source, String destination) {
+		addBinding(selector, source, destination,source);
+	}
+
+	public void bindTopicExchange(String selector, String source, String destination) {
+		addBinding(selector,source,destination,Integer.toString(selector.hashCode()));
+	}
+
+	private void addBinding(String selector, String source, String destination, String bindingKey) {
 		JSONObject json = new JSONObject();
-		json.put("destination", queueName);
+		json.put("destination", destination);
 		json.put("bindingKey", bindingKey);
 		json.put("replaceExistingArguments", true);
 
@@ -100,7 +108,7 @@ public class QpidClient {
 		json.put("arguments", innerjson);
 		String jsonString = json.toString();
 
-		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/bind");
+		postQpid(exchangesURL + "/" + source, jsonString, "/bind");
 	}
 
 	public void createQueue(String queueName) {

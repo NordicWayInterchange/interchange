@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.apache.qpid.jms.message.JmsMessage;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -80,10 +80,9 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     @Test
     public void directExchangeToOutputQueuePOC() throws Exception {
-        //qpidClient.getQpidAcl();
         //1. Create an exchange
         String exchangeName = "inputExchange";
-        qpidClient._createDirectExchange(exchangeName);
+        qpidClient.createDirectExchange(exchangeName);
         String queueName = "outputQueue";
         //2. Create a queue
         qpidClient.createQueue(queueName);
@@ -99,7 +98,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String selector = creator.makeSelector(capability);
         System.out.println(selector);
         //3. Create a binding on exchange using the validating selector, pointing at queue
-        qpidClient.addBinding(selector,queueName,"inputExchange",exchangeName );
+        qpidClient.bindDirectExchange(selector, exchangeName, queueName);
         System.out.println(qpidContainer.getHttpUrl());
         //4. Create a Source, sending one good message, and one bad
         AtomicInteger numMessages = new AtomicInteger();
@@ -154,8 +153,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     @Test
     public void testUseOfDeliveryQueueForSendingToOutgoingExchange() throws Exception {
-        String exchangeName = "outgoingExchange";
-        String inQueueName = "delivery-queue";
+        String exchangeName = "intermediate-exchange";
+        String inQueueName = "delivery-exchange";
         String outQueueName = "king_gustaf";
 
         Subscription subscription = new Subscription(
@@ -178,31 +177,41 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         //1. Creating delivery queue and adding write access.
         qpidClient.createDirectExchange(inQueueName);
-        qpidClient.addWriteAccess("routing_configurer", inQueueName);
+        qpidClient.addWriteAccess("king_gustaf", inQueueName);
 
         //2. Creating read queue and adding read access.
         qpidClient.createQueue(outQueueName);
         qpidClient.addReadAccess("king_gustaf", outQueueName);
 
+        //Create intermediate exchange. No ACL needed for this.
+        qpidClient.createTopicExchange(exchangeName);
+
         //3. Making Capability selector and joining with delivery selector.
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String capabilitySelector = creator.makeSelector(capability);
-        System.out.println(capabilitySelector);
 
         String deliverySelector = delivery.getSelector();
-        System.out.println(deliverySelector);
+
+        String subscriptionSelector = subscription.getSelector();
 
         String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, deliverySelector);
         System.out.println(joinedSelector);
 
-        //4. Adding binding on deliveryQueue to outgoingExchange
-        qpidClient.addBinding(deliverySelector, inQueueName, "" + deliverySelector.hashCode(), exchangeName);
+        //4. Adding binding on deliveryQueue to out-queue
+        qpidClient.bindDirectExchange(joinedSelector,inQueueName,exchangeName);
+        qpidClient.bindTopicExchange(subscriptionSelector, exchangeName, outQueueName);
 
         //5. Adding binding on out queue to outgoingExchange
-        String subscriptionSelector = subscription.getSelector();
-        System.out.println(subscriptionSelector);
+        //TODO this is not being done. We need a lot of selectors here:
+            //1. The capability selector, used for validating incoming messages from SP.
+            //2. The delivery selector, further limiting what the SP can produce on the in-queue.
+            //3. The subscription selector, event further limiting what ends up on the out-queue for the Subscription.
+        //TODO the question becomes: Do we just AND the different selectors together?
 
-        qpidClient.addBinding(subscriptionSelector, outQueueName, "" + subscriptionSelector.hashCode(), exchangeName);
+        //String subscriptionSelector = subscription.getSelector();
+        //System.out.println(subscriptionSelector);
+
+        //qpidClient.addBinding(subscriptionSelector, outQueueName, "" + subscriptionSelector.hashCode(), exchangeName);
 
         //6. Allowing inQueue To publish on exchange
         //qpidClient.createPublishAccessOnExchangeForQueue("routing_configurer", inQueueName);
@@ -222,21 +231,20 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
                 source.sendNonPersistentMessage(source.createMessageBuilder()
                         .bytesMessage(bytemessage)
-                        .userId("routing_configurer")
                         .publisherId("NO-123")
                         .messageType(Constants.DENM)
                         .causeCode("6")
-                        .subCauseCode("61")
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
-                        .quadTreeTiles("12003")
+                        .quadTreeTiles(",12003,")
                         .timestamp(System.currentTimeMillis())
                 .build());
+                System.out.println();
             }
             System.out.println();
             Thread.sleep(200);
         }
-        //assertThat(numMessages.get()).isEqualTo(1);
+        assertThat(numMessages.get()).isEqualTo(1);
     }
 
     @Test
@@ -245,13 +253,13 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String output = "output_exchange";
 
         qpidClient.createTopicExchange(input);
-        qpidClient.addWriteAccess("routing_configurer", input);
+        qpidClient.addWriteAccess("king_gustaf", input);
 
         qpidClient.createTopicExchange(output);
 
         String selector = "originatingCountry = 'NO'";
 
-        qpidClient.addBinding(selector, input, output, output);
+        qpidClient.bindTopicExchange(selector,input,output);
 
         AtomicInteger numMessages = new AtomicInteger();
         try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),

@@ -145,10 +145,11 @@ public class ServiceProviderRouter {
         }
     }
 
+    //TODO this should probably be removed
     private void optionallyAddQueueBindings(String queueName, String selector, String bindKey) {
         if (!qpidClient.getQueueBindKeys(queueName).contains(bindKey)) {
             logger.debug("Adding bindings to the queue {}", queueName);
-            qpidClient.addBinding(selector, queueName, bindKey, "outgoingExchange");
+            qpidClient.bindTopicExchange(selector, "outgoingExchange", queueName);
         }
     }
 
@@ -298,7 +299,7 @@ public class ServiceProviderRouter {
                 //optionallyCreateWriteQueue(endpoint.getTarget(), serviceProviderName);
                 //optionallyAddQueueBindings(endpoint.getTarget(), endpoint.getSelector(), endpoint.bindKey());
                 //qpidClient.createPublishAccessOnExchangeForQueue(serviceProviderName, endpoint.getTarget());
-                qpidClient.addBinding(endpoint.getSelector(), endpoint.getTarget(), endpoint.bindKey(), "outgoingExchange");
+                qpidClient.bindTopicExchange(endpoint.getSelector(), "outgoingExchange", endpoint.getTarget());
             }
             outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
         }
@@ -353,6 +354,6 @@ public class ServiceProviderRouter {
 
     private void bindQueueToSubscriptionExchange(String queueName, String exchangeName, LocalSubscription localSubscription) {
         logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
-        qpidClient.addBinding(localSubscription.getSelector(), queueName, localSubscription.bindKey(), exchangeName);
+        qpidClient.bindTopicExchange(localSubscription.getSelector(), exchangeName, queueName);
     }
 }

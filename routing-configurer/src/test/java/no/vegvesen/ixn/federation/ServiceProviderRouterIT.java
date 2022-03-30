@@ -551,7 +551,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalDeliveryEndpoint endpoint = match.getLocalDelivery().getEndpoints().stream().findFirst().get();
 		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
 
-		assertThat(client.queueExists(endpoint.getTarget())).isTrue();
+		assertThat(client.exchangeExists(endpoint.getTarget())).isTrue();
 		assertThat(endpoint.getSelector()).contains("AND (originatingCountry = 'NO')");
 		assertThat(endpoint.getSelector()).contains(capabilitySelector);
 		assertThat(endpoint.getHost()).isEqualTo(nodeProperties.getName());
