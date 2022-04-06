@@ -14,9 +14,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <spring-boot-dependencies.version>2.2.3.RELEASE</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>2.6.6</spring-boot-dependencies.version>
         <picocli-version>4.2.0</picocli-version>
-        <testcontiainers.version>1.15.1</testcontiainers.version>
+        <testcontainers.version>1.16.3</testcontainers.version>
     </properties>
 
     <distributionManagement>
@@ -147,7 +147,7 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
-                <version>${testcontiainers.version}</version>
+                <version>${testcontainers.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.jetbrains</groupId>
@@ -159,12 +159,12 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>${testcontiainers.version}</version>
+                <version>${testcontainers.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>${testcontiainers.version}</version>
+                <version>${testcontainers.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.picocli</groupId>

@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.server;
 
-import io.swagger.annotations.*;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
@@ -23,7 +22,6 @@ import java.util.Set;
 
 import static no.vegvesen.ixn.federation.api.v1_0.RESTEndpointPaths.CAPABILITIES_PATH;
 
-@Api(value = "/", produces = "application/json")
 @RestController("/")
 public class NeighbourRestController {
 
@@ -45,10 +43,6 @@ public class NeighbourRestController {
 		this.serviceProviderService = serviceProviderService;
 	}
 
-	@ApiOperation(value = "Enpoint for requesting a subscription.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({@ApiResponse(code = 202, message = "Successfully requested a subscription", response = SubscriptionResponseApi.class),
-			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)
-	})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@RequestMapping(method = RequestMethod.POST, path = "/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -65,11 +59,6 @@ public class NeighbourRestController {
 		return response;
 	}
 
-
-	@ApiOperation(value = "Endpoint for requesting a lisst of an interchange's subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({@ApiResponse(code = 200, message = "Success", response = SubscriptionResponseApi.class),
-					@ApiResponse(code = 403, message = "Common name in certificate does not match Neighbour name in path", response = ErrorDetails.class),
-					@ApiResponse(code = 404, message = "Invalid path, the requested subscriptions does not exist", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, path = "/{ixnName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -87,11 +76,6 @@ public class NeighbourRestController {
 	}
 
 
-	//TODO change this to new api objects.
-	@ApiOperation(value = "Endpoint for polling a subscription.", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({@ApiResponse(code = 200, message = "Successfully polled the subscription.", response = SubscriptionPollResponseApi.class),
-			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the polling Neighbour does not exist.", response = ErrorDetails.class),
-			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -108,9 +92,6 @@ public class NeighbourRestController {
 	}
 
 
-	@ApiOperation(value = "Endpoint for capability exchange. Receives a capabilities from a neighbour and responds with local capabilities.", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiResponses({@ApiResponse(code = 200, message = "Successfully posted capabilities.", response = CapabilitiesApi.class),
-			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.POST, value = CAPABILITIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
@@ -131,10 +112,6 @@ public class NeighbourRestController {
 		return capabilitiesApiResponse;
 	}
 
-	@ApiOperation(value = "Endpoint for deleting subscriptions")
-	@ApiResponses({@ApiResponse(code = 200, message = "Successfully deleted subscription"),
-			@ApiResponse(code = 404, message = "Invalid path, the subscription does not exist or the Neighbour does not exist.", response = ErrorDetails.class),
-			@ApiResponse(code = 403, message = "Common name in certificate and Neighbour name in path does not match.", response = ErrorDetails.class)})
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{ixnName}/subscriptions/{subscriptionId}")
 	@Secured("ROLE_USER")
