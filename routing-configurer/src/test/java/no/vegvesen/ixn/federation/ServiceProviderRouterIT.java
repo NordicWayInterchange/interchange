@@ -552,8 +552,49 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
 
 		assertThat(client.exchangeExists(endpoint.getTarget())).isTrue();
+		assertThat(delivery.getEndpoints().size()).isEqualTo(1);
 		assertThat(endpoint.getSelector()).contains("AND (originatingCountry = 'NO')");
 		assertThat(endpoint.getSelector()).contains(capabilitySelector);
+		assertThat(endpoint.getHost()).isEqualTo(nodeProperties.getName());
+		assertThat(endpoint.getPort()).isEqualTo(Integer.parseInt(nodeProperties.getMessageChannelPort()));
+	}
+
+	@Test
+	public void createMultipleTargetsAndConnectForServiceProvider() {
+		String serviceProviderName = "my-service-provider";
+		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
+
+		Capability denmCapability = new DenmCapability(
+				"NPRA",
+				"NO",
+				"1.0",
+				Collections.singleton("1234"),
+				Collections.singleton("6")
+		);
+
+		Capability denmCapability2 = new DenmCapability(
+				"NPRA",
+				"NO",
+				"1.0",
+				Collections.singleton("1234"),
+				Collections.singleton("5")
+		);
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+		OutgoingMatch match2 = new OutgoingMatch(delivery, denmCapability2, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+
+		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match, match2));
+		router.setUpDeliveryQueue(serviceProviderName, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+
+		LocalDeliveryEndpoint endpoint = match.getLocalDelivery().getEndpoints().stream().findFirst().get();
+		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
+
+		assertThat(client.exchangeExists(endpoint.getTarget())).isTrue();
+		assertThat(delivery.getEndpoints().size()).isEqualTo(2);
+		assertThat(endpoint.getSelector()).contains("AND (originatingCountry = 'NO')");
+		//assertThat(endpoint.getSelector()).contains(capabilitySelector);
 		assertThat(endpoint.getHost()).isEqualTo(nodeProperties.getName());
 		assertThat(endpoint.getPort()).isEqualTo(Integer.parseInt(nodeProperties.getMessageChannelPort()));
 	}
@@ -585,7 +626,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(outgoingMatchDiscoveryService.findMatchFromDeliveryId(any(Integer.class))).thenReturn(match);
 		router.removeDeliveryQueueByDelivery(1);
 
-		assertThat(client.queueExists(endpoint.getTarget())).isFalse();
+		assertThat(client.exchangeExists(endpoint.getTarget())).isFalse();
 
 	}
 
@@ -617,8 +658,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(outgoingMatchDiscoveryService.findMatchesFromCapabilityId(any(Integer.class))).thenReturn(Arrays.asList(match));
 		router.removeDeliveryQueueByCapability(1);
 
-		assertThat(client.queueExists(endpoint.getTarget())).isFalse();
+		assertThat(client.exchangeExists(endpoint.getTarget())).isFalse();
 		assertThat(delivery.getEndpoints()).isEmpty();
+		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.REQUESTED);
 	}
 
 	public SSLContext setUpTestSslContext(String s) {

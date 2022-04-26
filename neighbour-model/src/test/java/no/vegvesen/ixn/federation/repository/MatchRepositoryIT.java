@@ -367,6 +367,7 @@ public class MatchRepositoryIT {
 
         getNeighbour.getOurRequestedSubscriptions().getSubscriptions().remove(getSubscription);
 
+        //TODO: Have to do something with this test, it fails in database when saved to neighbourRepository
         //neighbourRepository.save(getNeighbour);
 
         Match savedMatch = matchRepository.findAll().get(0);

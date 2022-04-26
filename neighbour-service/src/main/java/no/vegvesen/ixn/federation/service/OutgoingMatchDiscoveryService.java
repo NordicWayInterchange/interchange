@@ -28,20 +28,24 @@ public class OutgoingMatchDiscoveryService {
         for (ServiceProvider serviceProvider: serviceProviders) {
             if (serviceProvider.hasCapabilities() && !serviceProvider.getDeliveries().isEmpty()) {
                 for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                    if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)) {
+                    //TODO: Validate delivery selector before the delivery is matched with a capability
+                    if (!delivery.getStatus().equals(LocalDeliveryStatus.NOT_VALID)) {
                         boolean isValid = false;
                         for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
-                            boolean match = CapabilityMatcher.matchCapabilityToSelector(capability, delivery.getSelector());
-                            if (match) {
+                            if(repository.findByCapability_IdAndLocalDelivery_Id(capability.getId(), delivery.getId()) != null) {
                                 isValid = true;
-                                OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName(), OutgoingMatchStatus.SETUP_ENDPOINT);
-                                repository.save(outgoingMatch);
-                                delivery.setStatus(LocalDeliveryStatus.CREATED);
-                                break;
+                            } else {
+                                boolean match = CapabilityMatcher.matchCapabilityToSelector(capability, delivery.getSelector());
+                                if (match) {
+                                    isValid = true;
+                                    OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName(), OutgoingMatchStatus.SETUP_ENDPOINT);
+                                    repository.save(outgoingMatch);
+                                    delivery.setStatus(LocalDeliveryStatus.CREATED);
+                                }
                             }
                         }
                         if (!isValid) {
-                            delivery.setStatus(LocalDeliveryStatus.ILLEGAL);
+                            delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                             logger.info("Delivery with selector {} does not match any service provider capability", delivery.getSelector());
                         }
                     }
@@ -73,6 +77,18 @@ public class OutgoingMatchDiscoveryService {
     public void removeOutgoingMatch(OutgoingMatch match) {
         logger.info("Removing match {}", match);
         repository.delete(match);
+    }
+
+    public void syncLocalSubscriptionAndSubscriptionsToTearDownOutgoingMatchResources() {
+        List<OutgoingMatch> matches = repository.findAllByStatus(OutgoingMatchStatus.UP);
+        for (OutgoingMatch match : matches) {
+            if(match.getCapability() == null ||
+                match.getLocalDelivery().getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
+                match.setStatus(OutgoingMatchStatus.TEARDOWN_ENDPOINT);
+                repository.save(match);
+                logger.info("Saved match {} with status TEARDOWN_ENDPOINT", match);
+            }
+        }
     }
 
     public void removeListOfOutgoingMatches(List<OutgoingMatch> matches, Integer capabilityId) {

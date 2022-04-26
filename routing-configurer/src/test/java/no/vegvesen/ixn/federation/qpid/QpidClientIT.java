@@ -168,8 +168,9 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	@Test
 	public void testRemovingDirectExchange() {
 		client._createDirectExchange("my-exchange");
-		client.removeDirectExchange("my-exchange");
+		assertThat(client.exchangeExists("my-exchange")).isTrue();
 
+		client.removeDirectExchange("my-exchange");
 		assertThat(client.exchangeExists("my-exchange")).isFalse();
 	}
 }

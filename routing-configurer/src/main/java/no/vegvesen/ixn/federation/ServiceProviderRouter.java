@@ -294,9 +294,11 @@ public class ServiceProviderRouter {
             LocalDelivery delivery = match.getLocalDelivery();
             updateDeliveryWithEndpoint(match.getCapability(), delivery, nodeName, Integer.parseInt(port));
             for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                qpidClient.createDirectExchange(endpoint.getTarget());
-                qpidClient.addWriteAccess(serviceProviderName, endpoint.getTarget());
-                qpidClient.bindDirectExchange(endpoint.getSelector(), endpoint.getTarget(), "outgoingExchange");
+                if (!qpidClient.exchangeExists(endpoint.getTarget())) {
+                    qpidClient.createDirectExchange(endpoint.getTarget());
+                    qpidClient.addWriteAccess(serviceProviderName, endpoint.getTarget());
+                    qpidClient.bindDirectExchange(endpoint.getSelector(), endpoint.getTarget(), "outgoingExchange");
+                }
             }
             outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
         }
@@ -308,6 +310,7 @@ public class ServiceProviderRouter {
             LocalDelivery delivery = match.getLocalDelivery();
             removeDeliveryQueue(match.getServiceProviderName(), delivery);
             delivery.removeAllEndpoints(delivery.getEndpoints());
+            delivery.setStatus(LocalDeliveryStatus.REQUESTED);
         }
         outgoingMatchDiscoveryService.removeListOfOutgoingMatches(matches, capabilityId);
     }
@@ -322,12 +325,12 @@ public class ServiceProviderRouter {
     public void removeDeliveryQueue(String serviceProviderName, LocalDelivery delivery) {
         for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
             String target = endpoint.getTarget();
-            if (qpidClient.queueExists(target)) {
-                if (qpidClient.getQueueBindKeys(target).contains(endpoint.bindKey())) {
+            if (qpidClient.exchangeExists(target)) {
+                //if (qpidClient.getQueueBindKeys(target).contains(endpoint.bindKey())) {
                     qpidClient.unbindBindKey(target, endpoint.bindKey(), "outgoingExchange");
-                }
+                //}
                 qpidClient.removeWriteAccess(serviceProviderName, target);
-                qpidClient.removeQueue(target);
+                qpidClient.removeDirectExchange(target);
             }
         }
     }
@@ -336,7 +339,7 @@ public class ServiceProviderRouter {
         String selector = joinDeliverySelectorWitCapabilitySelector(capability, delivery.getSelector());
         String target = UUID.randomUUID().toString();
         LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(nodeName, port, target, selector);
-        delivery.setEndpoints(new HashSet<>(Arrays.asList(endpoint)));
+        delivery.addEndpoint(new HashSet<>(Arrays.asList(endpoint)));
     }
 
     public String joinDeliverySelectorWitCapabilitySelector(Capability capability, String selector) {

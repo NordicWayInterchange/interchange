@@ -147,6 +147,11 @@ public class NeighbourDiscoverer {
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void updateOutgoingMatchesToTearDown() {
+		outgoingMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToTearDownOutgoingMatchResources();
+	}
+
+	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void removeMatchesThatAreDeleted() {
 		matchDiscoveryService.removeMatchesThatAreDeleted();
 	}

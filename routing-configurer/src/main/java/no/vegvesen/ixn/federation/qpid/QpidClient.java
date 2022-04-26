@@ -173,6 +173,7 @@ public class QpidClient {
 		} catch (HttpClientErrorException.NotFound notFound) {
 			return null;
 		} catch (Throwable e) {
+			logger.error("Caught exception {}", e);
 			throw new RoutingConfigurerException(String.format("Could not query for QPID queue %s", queueName), e);
 		}
 		HttpStatus statusCode = response.getStatusCode();
@@ -192,7 +193,7 @@ public class QpidClient {
 
 	private String lookupExchangeId(String exchangeName) {
 		String exchangeQueryUrl = exchangesURL + "/" + exchangeName;
-		logger.debug("quering for queue {} with url {}", exchangeName, exchangeQueryUrl);
+		logger.info("quering for exchange {} with url {}", exchangeName, exchangeQueryUrl);
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<HashMap> response;
 		try {
@@ -200,6 +201,7 @@ public class QpidClient {
 		} catch (HttpClientErrorException.NotFound notFound) {
 			return null;
 		} catch (Throwable e) {
+			logger.error("Caught exception {}", e);
 			throw new RoutingConfigurerException(String.format("Could not query for QPID exchange %s", exchangeName), e);
 		}
 		HttpStatus statusCode = response.getStatusCode();

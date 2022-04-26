@@ -209,7 +209,8 @@ public class ServiceProvider {
 				.orElseThrow(
 						() -> new NotFoundException("The delivery to delete is not in the Service Provider deliveries. Cannot delete delivery that don't exist.")
 				);
-		deliveries.remove(localDeliveryToDelete);
+		//deliveries.remove(localDeliveryToDelete);
+		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 
 	@Override

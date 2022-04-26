@@ -4,5 +4,7 @@ public enum LocalDeliveryStatus {
     REQUESTED,
     CREATED,
     ILLEGAL,
-    NOT_VALID
+    TEAR_DOWN,
+    NOT_VALID,
+    NO_OVERLAP
 }

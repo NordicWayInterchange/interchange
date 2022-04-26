@@ -144,6 +144,8 @@ public class OnboardRestController {
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		serviceProviderRouter.removeDeliveryQueueByCapability(Integer.parseInt(capabilityId));
+		//TODO: Set OutgoingMatchStatus to TEARDOWN_ENDPOINT using serviceProviderRouter, because Capability has no status to update from...
+
 		// Service provider exists. Remove the incoming capabilities from the Service Provider capabilities.
 		serviceProviderToUpdate.getCapabilities().removeDataType(Integer.parseInt(capabilityId));
 
@@ -399,7 +401,7 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
-		serviceProviderRouter.removeDeliveryQueueByDelivery(Integer.parseInt(deliveryId));
+		//serviceProviderRouter.removeDeliveryQueueByDelivery(Integer.parseInt(deliveryId));
 		serviceProvider.removeLocalDelivery(Integer.parseInt(deliveryId));
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);

@@ -75,6 +75,10 @@ public class LocalDelivery {
         this.endpoints = endpoints;
     }
 
+    public void addEndpoint(Set<LocalDeliveryEndpoint> endpoints) {
+        this.endpoints.addAll(endpoints);
+    }
+
     public String getPath() {
         return path;
     }

@@ -69,6 +69,41 @@ public class OutgoingMatchDiscoveryServiceIT {
     }
 
     @Test
+    public void testThatMultipleMatchesAreCreated() {
+        LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED);
+
+        ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+        serviceProvider.setCapabilities(new Capabilities(
+                Capabilities.CapabilitiesStatus.KNOWN,
+                Sets.newHashSet(Arrays.asList(new DenmCapability(
+                                "NPRA",
+                                "NO",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton("6")
+                        ),
+                        new DenmCapability(
+                                "NPRA",
+                                "SE",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton("5")
+                        )
+                ))));
+
+        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        serviceProviderRepository.save(serviceProvider);
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
+
+        assertThat(repository.findAll()).hasSize(2);
+        assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.CREATED);
+
+        //clean-up
+        repository.deleteAll();
+        serviceProviderRepository.deleteAll();
+    }
+
+    @Test
     public void testThatDeliveryIsIllegal() {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED);
 
@@ -96,7 +131,7 @@ public class OutgoingMatchDiscoveryServiceIT {
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
         assertThat(repository.findAll()).hasSize(0);
-        assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.ILLEGAL);
+        assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
 
         //clean-up
         repository.deleteAll();

@@ -256,7 +256,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient  client = parentCommand.createClient();
-            client.deleteCapability(deliveryId);
+            client.deleteDelivery(deliveryId);
             System.out.println(String.format("Delivery %s has been deleted",deliveryId));
             return 0;
         }
