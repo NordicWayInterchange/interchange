@@ -26,6 +26,8 @@ public abstract class Capability {
 	@Column(name = "quadrant")
 	private final Set<String> quadTree = new HashSet<>();
 
+	private CapabilityStatus status = CapabilityStatus.CREATED;
+
 	private RedirectStatus redirect;
 
 	public Capability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
