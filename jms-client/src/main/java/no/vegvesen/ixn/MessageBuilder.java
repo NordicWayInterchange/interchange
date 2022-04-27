@@ -1,6 +1,8 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.model.IllegalMessageException;
+import no.vegvesen.ixn.model.MessageValidator;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -17,6 +19,10 @@ public class MessageBuilder {
     }
 
     public JmsMessage build() {
+        MessageValidator messageValidator = new MessageValidator();
+        if (! messageValidator.isValid(message)) {
+            throw new IllegalMessageException("Message is not valid");
+        }
         return message;
     }
 

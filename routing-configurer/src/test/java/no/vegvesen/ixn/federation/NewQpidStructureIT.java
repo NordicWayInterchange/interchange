@@ -140,6 +140,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .textMessage("Yo")
                 .userId("localhost")
                 .messageType(Constants.DATEX_2)
+                .publisherId("NO-123")
                 .publicationType("Obstruction")
                 .protocolVersion("DATEX2;2.3")
                 .latitude(60.352374)

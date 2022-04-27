@@ -4,13 +4,11 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import java.util.Set;
 
-@Component
 public class MessageValidator {
 
 	private static Logger logger = LoggerFactory.getLogger(MessageValidator.class);
