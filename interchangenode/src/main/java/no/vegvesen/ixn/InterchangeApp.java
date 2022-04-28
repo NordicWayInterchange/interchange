@@ -32,9 +32,4 @@ public class InterchangeApp {
 			consumer = consumerCreator.setupConsumer();
 		}
 	}
-/*
-	public static void main(String[] args) {
-		SpringApplication.run(InterchangeApp.class, args);
-	}
-	*/
 }

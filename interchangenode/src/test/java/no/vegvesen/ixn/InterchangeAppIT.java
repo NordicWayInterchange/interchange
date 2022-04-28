@@ -1,7 +1,9 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.messaging.IxnMessageConsumerCreator;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.jupiter.api.Test;
@@ -116,14 +118,14 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
             source.start();
             logger.debug("Sending message");
             //JmsTextMessage textMessage = source.createTextMessage("Yo!");
+            System.out.println(MessageProperty.mandatoryDatex2PropertyNames);
             JmsMessage textMessage = source.createMessageBuilder()
                     .textMessage("Yo!")
-                    .messageType("DATEX2")
+                    .messageType(Constants.DATEX_2)
                     .publisherId("SVV")
                     .originatingCountry("NO")
                     .protocolVersion("DATEX2:1.0")
-                    .latitude(10.0)
-                    .longitude(63.0)
+                    .quadTreeTiles(",123,")
                     .publicationType("SituationPublication")
                     .build();
 

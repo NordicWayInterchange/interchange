@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
@@ -11,6 +12,7 @@ import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -203,7 +205,12 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 			JmsMessage message = writeIncomingExchange
 					.createMessageBuilder()
 					.textMessage("Ordinary business at the Nordea office.")
+					.messageType(Constants.DATEX_2)
+					.quadTreeTiles(",123,")
+					.publicationType("Test")
+					.publisherId("NO-123")
 					.originatingCountry("SE")
+					.protocolVersion("1.0")
 					.build();
 			writeIncomingExchange.send(message);
 			fail("Should not allow neighbour nordea to write on (incomingExchange)");
@@ -212,7 +219,15 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		try {
 			Source writeOnramp = new Source(AMQPS_URL, "onramp", nordeaSslContext);
 			writeOnramp.start();
-			JmsMessage message = writeOnramp.createMessageBuilder().textMessage("Make Nordea great again!").build();
+			JmsMessage message = writeOnramp.createMessageBuilder()
+					.textMessage("Make Nordea great again!")
+					.messageType(Constants.DATEX_2)
+					.publisherId("NO-123")
+					.publicationType("Test")
+					.quadTreeTiles(",123,")
+					.originatingCountry("NO")
+					.protocolVersion("1.0")
+					.build();
 			writeOnramp.send(message);
 
 			fail("Should not allow nordea to write on (onramp)");

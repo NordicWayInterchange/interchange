@@ -97,4 +97,8 @@ public class Source implements AutoCloseable {
 	public MessageProducer getProducer() {
 		return producer;
 	}
+
+	public Session getSession() {
+		return session;
+	}
 }

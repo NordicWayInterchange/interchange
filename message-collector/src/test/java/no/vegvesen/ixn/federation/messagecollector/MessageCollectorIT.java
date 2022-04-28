@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
+import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -103,6 +104,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				.messageType(Constants.DATEX_2)
 				.publicationType("Obstruction")
 				.protocolVersion( "DATEX2;2.3")
+				.publisherId("SE-123")
+				.quadTreeTiles(",232,")
 				.latitude(60.352374)
 				.longitude(13.334253)
 				.originatingCountry("SE")
@@ -145,6 +148,8 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				.textMessage("fishy fishy")
 				.userId("localhost")
 				.messageType(Constants.DATEX_2)
+				.publisherId("Test")
+				.quadTreeTiles(",3232,")
 				.publicationType("Obstruction")
 				.protocolVersion("DATEX2;2.3")
 				.latitude(60.352374)

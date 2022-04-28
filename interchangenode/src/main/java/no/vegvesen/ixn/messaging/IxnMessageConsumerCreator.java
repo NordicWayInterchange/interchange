@@ -24,17 +24,15 @@ public class IxnMessageConsumerCreator {
 	private final String amqpUrl;
 	private final String username;
 	private final String password;
-	private final MessageValidator messageValidator;
+	private final MessageValidator messageValidator = new MessageValidator();
 
 	@Autowired
     public IxnMessageConsumerCreator(@Value("${amqphub.amqp10jms.remote-url}") String amqpUrl,
 									 @Value("${amqphub.amqp10jms.username}") String username,
-									 @Value("${amqphub.amqp10jms.password}") String password,
-									 MessageValidator messageValidator) {
+									 @Value("${amqphub.amqp10jms.password}") String password) {
     	this.amqpUrl = amqpUrl;
     	this.username = username;
     	this.password = password;
-		this.messageValidator = messageValidator;
 	}
 
     public IxnMessageConsumer setupConsumer() throws JMSException, NamingException {
