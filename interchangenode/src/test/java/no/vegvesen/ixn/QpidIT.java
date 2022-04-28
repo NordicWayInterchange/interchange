@@ -18,6 +18,7 @@ import org.testcontainers.shaded.org.bouncycastle.asn1.x500.style.RFC4519Style;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
+import javax.jms.TextMessage;
 import javax.naming.NamingException;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -83,6 +84,7 @@ public class QpidIT extends QpidDockerBaseIT {
 		HashMap<String,String> publicationTypeentry = new HashMap<>();
 		publicationTypeentry.put("publicationType", publicationType);
 
+
 		sendMessage("NO00001",
 				country,
 				"DATEX:1.0",
@@ -116,16 +118,12 @@ public class QpidIT extends QpidDockerBaseIT {
 		long systemTime = System.currentTimeMillis();
 		long timeToLive = 3_600_000;
 		long expiration = systemTime + timeToLive;
-
+		TextMessage textMessage = producer.getSession().createTextMessage();
+		textMessage.setText("This is a datex2 message");
+		textMessage.setStringProperty("originatingCountry",country);
+		textMessage.setStringProperty("protocolVersion","DATEX:1.0");
+		producer.sendNonPersistentMessage((JmsMessage) textMessage);
 		// Missing pusblisher gives invalid message.
-		sendMessage(null,
-				country,
-				"DATEX:1.0",
-				"DATEX2",
-				lat,
-				lon,
-				String.format("This is a datex2 message - %s", messageId),
-				expiration,new HashMap<>());
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
@@ -82,9 +83,15 @@ public class AccessControlIT extends QpidDockerBaseIT {
 	public void KingHaraldCanNotSendToOutgoingExchange() throws Exception {
 		Source outgoingExchange = new Source(getQpidURI(), OUTGOING_EXCHANGE, TestKeystoreHelper.sslContext(testKeysPath, JKS_KING_HARALD_P_12, TRUSTSTORE_JKS));
 		outgoingExchange.start();
+		System.out.println(MessageProperty.mandatoryDatex2PropertyNames);
 		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> {
 			JmsMessage message = outgoingExchange.createMessageBuilder()
 					.textMessage("Not Allowed")
+					.messageType(Constants.DATEX_2)
+					.quadTreeTiles(",123,")
+					.protocolVersion("1.0")
+					.publisherId("NO-123")
+					.publicationType("Test")
 					.originatingCountry("SE")
 					.build();
 			outgoingExchange.send(message);
