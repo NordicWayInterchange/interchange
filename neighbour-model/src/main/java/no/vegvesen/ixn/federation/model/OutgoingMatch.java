@@ -23,6 +23,11 @@ public class OutgoingMatch {
 
     private String serviceProviderName;
 
+    private String deliveryQueueName;
+
+    @Column(length = 1024)
+    private String selector;
+
     public OutgoingMatch() {
 
     }
@@ -38,6 +43,18 @@ public class OutgoingMatch {
         this.capability = capability;
         this.serviceProviderName = serviceProviderName;
         this.status = status;
+    }
+
+    public OutgoingMatch(LocalDelivery localDelivery, Capability capability, String serviceProviderName, String deliveryQueueName, OutgoingMatchStatus status) {
+        this.localDelivery = localDelivery;
+        this.capability = capability;
+        this.serviceProviderName = serviceProviderName;
+        this.deliveryQueueName = deliveryQueueName;
+        this.status = status;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public LocalDelivery getLocalDelivery() {
@@ -70,6 +87,26 @@ public class OutgoingMatch {
 
     public void setServiceProviderName(String serviceProviderName) {
         this.serviceProviderName = serviceProviderName;
+    }
+
+    public String getDeliveryQueueName() {
+        return deliveryQueueName;
+    }
+
+    public void setDeliveryQueueName(String deliveryQueueName) {
+        this.deliveryQueueName = deliveryQueueName;
+    }
+
+    public String getSelector() {
+        return selector;
+    }
+
+    public void setSelector(String selector) {
+        this.selector = selector;
+    }
+
+    public String bindKey() {
+        return "" + selector.hashCode();
     }
 
     @Override

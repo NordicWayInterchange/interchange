@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
@@ -43,6 +44,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -108,6 +110,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@MockBean
 	OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+
+	@MockBean
+	OutgoingMatchRepository outgoingMatchRepository;
 
 	@Test
 	public void newServiceProviderCanAddSubscriptionsThatWillBindToTheQueue() {
@@ -397,7 +402,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
 
-		router.setUpSubscriptionExchanges(serviceProviderName);
+		router.setUpSubscriptionExchanges(serviceProvider);
 
 		assertThat(client.exchangeExists(subscription.getExchangeName())).isTrue();
 	}
@@ -531,7 +536,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void createTargetAndConnectForServiceProvider() {
 		String serviceProviderName = "my-service-provider";
-		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
 		Capability denmCapability = new DenmCapability(
 				"NPRA",
@@ -541,28 +546,30 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("6")
 		);
 
+		denmCapability.setStatus(CapabilityStatus.CREATED);
+
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+		match.setDeliveryQueueName("my-queue5");
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match));
-		router.setUpDeliveryQueue(serviceProviderName, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+		when(outgoingMatchDiscoveryService.findByOutgoingMatchId(any(Integer.class))).thenReturn(match);
 
-		LocalDeliveryEndpoint endpoint = match.getLocalDelivery().getEndpoints().stream().findFirst().get();
+		router.setUpDeliveryQueue(serviceProvider);
+
 		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
 
-		assertThat(client.exchangeExists(endpoint.getTarget())).isTrue();
-		assertThat(delivery.getEndpoints().size()).isEqualTo(1);
-		assertThat(endpoint.getSelector()).contains("AND (originatingCountry = 'NO')");
-		assertThat(endpoint.getSelector()).contains(capabilitySelector);
-		assertThat(endpoint.getHost()).isEqualTo(nodeProperties.getName());
-		assertThat(endpoint.getPort()).isEqualTo(Integer.parseInt(nodeProperties.getMessageChannelPort()));
+		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isTrue();
+		assertThat(match.getDeliveryQueueName()).isNotNull();
+		assertThat(match.getSelector()).contains(capabilitySelector);
 	}
 
 	@Test
 	public void createMultipleTargetsAndConnectForServiceProvider() {
 		String serviceProviderName = "my-service-provider";
-		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
 		Capability denmCapability = new DenmCapability(
 				"NPRA",
@@ -583,27 +590,30 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+		match.setDeliveryQueueName("my-queue6");
+
 		OutgoingMatch match2 = new OutgoingMatch(delivery, denmCapability2, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+		match2.setDeliveryQueueName("my-queue7");
+
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match, match2));
-		router.setUpDeliveryQueue(serviceProviderName, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+		router.setUpDeliveryQueue(serviceProvider);
 
-		LocalDeliveryEndpoint endpoint = match.getLocalDelivery().getEndpoints().stream().findFirst().get();
 		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
+		String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(denmCapability2);
 
-		assertThat(client.exchangeExists(endpoint.getTarget())).isTrue();
-		assertThat(delivery.getEndpoints().size()).isEqualTo(2);
-		assertThat(endpoint.getSelector()).contains("AND (originatingCountry = 'NO')");
-		//assertThat(endpoint.getSelector()).contains(capabilitySelector);
-		assertThat(endpoint.getHost()).isEqualTo(nodeProperties.getName());
-		assertThat(endpoint.getPort()).isEqualTo(Integer.parseInt(nodeProperties.getMessageChannelPort()));
+		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isTrue();
+		assertThat(match.getDeliveryQueueName()).isNotNull();
+		assertThat(match2.getDeliveryQueueName()).isNotNull();
+		assertThat(match.getSelector()).contains(capabilitySelector);
+		assertThat(match2.getSelector()).contains(capabilitySelector2);
 	}
 
 
 	@Test
 	public void tearDownTargetForDeliveryByDeletedDelivery() {
 		String serviceProviderName = "my-service-provider";
-		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
 		Capability denmCapability = new DenmCapability(
 				"NPRA",
@@ -612,28 +622,32 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("1234"),
 				Collections.singleton("6")
 		);
+		denmCapability.setStatus(CapabilityStatus.CREATED);
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
+		serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+		match.setDeliveryQueueName("my-queue8");
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match));
-		router.setUpDeliveryQueue(serviceProviderName, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+		router.setUpDeliveryQueue(serviceProvider);
 
-		LocalDeliveryEndpoint endpoint = match.getLocalDelivery().getEndpoints().stream().findFirst().get();
+		delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
+		match.setStatus(OutgoingMatchStatus.TEARDOWN_ENDPOINT);
 
+		when(outgoingMatchDiscoveryService.findMatchesToTearDownEndpointsFor(any(String.class))).thenReturn(Arrays.asList(match));
 		when(outgoingMatchDiscoveryService.findMatchFromDeliveryId(any(Integer.class))).thenReturn(match);
-		router.removeDeliveryQueueByDelivery(1);
+		router.tearDownDeliveryQueues(serviceProvider);
 
-		assertThat(client.exchangeExists(endpoint.getTarget())).isFalse();
-
+		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isFalse();
 	}
 
 	@Test
 	public void tearDownTargetForDeliveryByDeletedCapability() {
 		String serviceProviderName = "my-service-provider";
-		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
 		Capability denmCapability = new DenmCapability(
 				"NPRA",
@@ -642,25 +656,76 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("1234"),
 				Collections.singleton("6")
 		);
+		denmCapability.setStatus(CapabilityStatus.CREATED);
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+		match.setDeliveryQueueName("my-queue9");
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match));
-		router.setUpDeliveryQueue(serviceProviderName, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+		router.setUpDeliveryQueue(serviceProvider);
 
-		assertThat(delivery.getEndpoints()).isNotEmpty();
+		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isTrue();
 
-		LocalDeliveryEndpoint endpoint = match.getLocalDelivery().getEndpoints().stream().findFirst().get();
+		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
+		match.setStatus(OutgoingMatchStatus.TEARDOWN_ENDPOINT);
 
-		when(outgoingMatchDiscoveryService.findMatchesFromCapabilityId(any(Integer.class))).thenReturn(Arrays.asList(match));
-		router.removeDeliveryQueueByCapability(1);
+		when(outgoingMatchDiscoveryService.findMatchesToTearDownEndpointsFor(any(String.class))).thenReturn(Arrays.asList(match));
+		router.tearDownDeliveryQueues(serviceProvider);
 
-		assertThat(client.exchangeExists(endpoint.getTarget())).isFalse();
-		assertThat(delivery.getEndpoints()).isEmpty();
-		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.REQUESTED);
+		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isFalse();
+	}
+
+	@Test
+	public void removeMultipleEndpointsWhenDeliveryIsRemoved() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+
+		Capability denmCapability1 = new DenmCapability(
+				"NPRA",
+				"NO",
+				"1.0",
+				Collections.singleton("1234"),
+				Collections.singleton("6")
+		);
+		denmCapability1.setStatus(CapabilityStatus.CREATED);
+
+		Capability denmCapability2 = new DenmCapability(
+				"NPRA",
+				"NO",
+				"1.0",
+				Collections.singleton("1233"),
+				Collections.singleton("6")
+		);
+		denmCapability2.setStatus(CapabilityStatus.CREATED);
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED);
+		delivery.setId(1);
+
+		OutgoingMatch match1 = new OutgoingMatch(delivery, denmCapability1, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+		match1.setDeliveryQueueName("my-queue10");
+
+		OutgoingMatch match2 = new OutgoingMatch(delivery, denmCapability2, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
+		match2.setDeliveryQueueName("my-queue11");
+
+		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match1, match2));
+		router.setUpDeliveryQueue(serviceProvider);
+
+		assertThat(client.exchangeExists(match1.getDeliveryQueueName())).isTrue();
+		assertThat(client.exchangeExists(match2.getDeliveryQueueName())).isTrue();
+
+
+		delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
+		match1.setStatus(OutgoingMatchStatus.TEARDOWN_ENDPOINT);
+		match2.setStatus(OutgoingMatchStatus.TEARDOWN_ENDPOINT);
+		when(outgoingMatchDiscoveryService.findMatchesToTearDownEndpointsFor(any(String.class))).thenReturn(Arrays.asList(match1, match2));
+
+		router.tearDownDeliveryQueues(serviceProvider);
+
+		assertThat(client.exchangeExists(match1.getDeliveryQueueName())).isFalse();
+		assertThat(client.exchangeExists(match2.getDeliveryQueueName())).isFalse();
 	}
 
 	public SSLContext setUpTestSslContext(String s) {
@@ -668,5 +733,4 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
 				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
-
 }

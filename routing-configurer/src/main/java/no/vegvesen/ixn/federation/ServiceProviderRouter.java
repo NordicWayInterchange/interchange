@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP_NAME;
@@ -50,6 +51,7 @@ public class ServiceProviderRouter {
             logger.debug("Checking service provider {}",name);
             syncPrivateChannels(serviceProvider);
             tearDownSubscriptionExchanges(name);
+            tearDownDeliveryQueues(serviceProvider);
             Set<LocalSubscription> newSubscriptions = new HashSet<>();
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
 
@@ -67,9 +69,8 @@ public class ServiceProviderRouter {
                     removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
                 }
             }
-
-            setUpSubscriptionExchanges(name);
-            setUpDeliveryQueue(name, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+            setUpSubscriptionExchanges(serviceProvider);
+            setUpDeliveryQueue(serviceProvider);
 
 
             //save if it has changed from the initial
@@ -245,8 +246,8 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void setUpSubscriptionExchanges(String serviceProviderName) {
-        List<Match> matches = matchDiscoveryService.findMatchesToSetupExchangesFor(serviceProviderName);
+    public void setUpSubscriptionExchanges(ServiceProvider serviceProvider) {
+        List<Match> matches = matchDiscoveryService.findMatchesToSetupExchangesFor(serviceProvider.getName());
         for (Match match : matches) {
             String exchangeName = match.getSubscription().getExchangeName();
             createSubscriptionExchange(exchangeName);
@@ -288,64 +289,42 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void setUpDeliveryQueue(String serviceProviderName, String nodeName, String port) {
-        List<OutgoingMatch> deliveriesToSetupQueueFor = outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(serviceProviderName);
+    public void setUpDeliveryQueue(ServiceProvider serviceProvider) {
+        List<OutgoingMatch> deliveriesToSetupQueueFor = outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(serviceProvider.getName());
         for (OutgoingMatch match : deliveriesToSetupQueueFor) {
-            LocalDelivery delivery = match.getLocalDelivery();
-            updateDeliveryWithEndpoint(match.getCapability(), delivery, nodeName, Integer.parseInt(port));
-            for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                if (!qpidClient.exchangeExists(endpoint.getTarget())) {
-                    qpidClient.createDirectExchange(endpoint.getTarget());
-                    qpidClient.addWriteAccess(serviceProviderName, endpoint.getTarget());
-                    qpidClient.bindDirectExchange(endpoint.getSelector(), endpoint.getTarget(), "outgoingExchange");
+            if (match.getCapability().getStatus().equals(CapabilityStatus.CREATED)) {
+                LocalDelivery delivery = match.getLocalDelivery();
+                if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
+                    if (!qpidClient.exchangeExists(match.getDeliveryQueueName())) {
+                        String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
+                        match.setSelector(joinedSelector);
+                        qpidClient.createDirectExchange(match.getDeliveryQueueName());
+                        qpidClient.addWriteAccess(serviceProvider.getName(), match.getDeliveryQueueName());
+                        qpidClient.bindDirectExchange(joinedSelector, match.getDeliveryQueueName(), "outgoingExchange");
+                        outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
+                    }
                 }
             }
-            outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
         }
     }
 
-    public void removeDeliveryQueueByCapability(Integer capabilityId) {
-        List<OutgoingMatch> matches = outgoingMatchDiscoveryService.findMatchesFromCapabilityId(capabilityId);
-        for (OutgoingMatch match : matches) {
-            LocalDelivery delivery = match.getLocalDelivery();
-            removeDeliveryQueue(match.getServiceProviderName(), delivery);
-            delivery.removeAllEndpoints(delivery.getEndpoints());
-            delivery.setStatus(LocalDeliveryStatus.REQUESTED);
-        }
-        outgoingMatchDiscoveryService.removeListOfOutgoingMatches(matches, capabilityId);
-    }
-
-    public void removeDeliveryQueueByDelivery(Integer deliveryId) {
-        OutgoingMatch match = outgoingMatchDiscoveryService.findMatchFromDeliveryId(deliveryId);
-        LocalDelivery delivery = match.getLocalDelivery();
-        removeDeliveryQueue(match.getServiceProviderName(), delivery);
-        outgoingMatchDiscoveryService.removeOutgoingMatch(match);
-    }
-
-    public void removeDeliveryQueue(String serviceProviderName, LocalDelivery delivery) {
-        for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-            String target = endpoint.getTarget();
+    public void tearDownDeliveryQueues(ServiceProvider serviceProvider) {
+        List<OutgoingMatch> matchesToTearDownEndpointsFor = outgoingMatchDiscoveryService.findMatchesToTearDownEndpointsFor(serviceProvider.getName());
+        for (OutgoingMatch match : matchesToTearDownEndpointsFor) {
+            String target = match.getDeliveryQueueName();
+            logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
             if (qpidClient.exchangeExists(target)) {
-                //if (qpidClient.getQueueBindKeys(target).contains(endpoint.bindKey())) {
-                    qpidClient.unbindBindKey(target, endpoint.bindKey(), "outgoingExchange");
-                //}
-                qpidClient.removeWriteAccess(serviceProviderName, target);
+                qpidClient.unbindBindKey(target, match.bindKey(), "outgoingExchange");
+                qpidClient.removeWriteAccess(serviceProvider.getName(), target);
                 qpidClient.removeDirectExchange(target);
             }
+            outgoingMatchDiscoveryService.updateOutgoingMatchToDeleted(match);
         }
     }
 
-    public void updateDeliveryWithEndpoint(Capability capability, LocalDelivery delivery, String nodeName, Integer port) {
-        String selector = joinDeliverySelectorWitCapabilitySelector(capability, delivery.getSelector());
-        String target = UUID.randomUUID().toString();
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(nodeName, port, target, selector);
-        delivery.addEndpoint(new HashSet<>(Arrays.asList(endpoint)));
-    }
-
-    public String joinDeliverySelectorWitCapabilitySelector(Capability capability, String selector) {
+    public String joinDeliverySelectorWithCapabilitySelector(Capability capability, String selector) {
         String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
-        String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, selector);
-        return joinedSelector;
+        return String.format("(%s) AND (%s)", capabilitySelector, selector);
     }
 
     private void createSubscriptionExchange(String exchangeName) {

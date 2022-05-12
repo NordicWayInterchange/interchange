@@ -95,6 +95,14 @@ public abstract class Capability {
 		return id;
 	}
 
+	public CapabilityStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(CapabilityStatus status) {
+		this.status = status;
+	}
+
 	public RedirectStatus getRedirect() {
 		return redirect;
 	}

@@ -143,10 +143,7 @@ public class OnboardRestController {
 		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
-		serviceProviderRouter.removeDeliveryQueueByCapability(Integer.parseInt(capabilityId));
-		//TODO: Set OutgoingMatchStatus to TEARDOWN_ENDPOINT using serviceProviderRouter, because Capability has no status to update from...
-
-		// Service provider exists. Remove the incoming capabilities from the Service Provider capabilities.
+		// Service provider exists. Set the incoming capabilities status to TEAR_DOWN from the Service Provider capabilities.
 		serviceProviderToUpdate.getCapabilities().removeDataType(Integer.parseInt(capabilityId));
 
 		// Save the updated Service Provider representation in the database.
@@ -401,7 +398,7 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
-		//serviceProviderRouter.removeDeliveryQueueByDelivery(Integer.parseInt(deliveryId));
+		//Setting the Delivery to TEAR_DOWN
 		serviceProvider.removeLocalDelivery(Integer.parseInt(deliveryId));
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);

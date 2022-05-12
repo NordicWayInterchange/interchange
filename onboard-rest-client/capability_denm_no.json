@@ -1,0 +1,16 @@
+{	"name" : "king_olav",
+  "version" : "1.0",
+  "capabilities" : [
+    {
+      "messageType": "DENM",
+      "publisherId": "NO-123",
+      "originatingCountry": "NO",
+      "protocolVersion": "DENM:1.2.2",
+      "quadTree": [
+        "12003"
+      ],
+      "causeCode": [
+        "6"
+      ]
+    }]
+}

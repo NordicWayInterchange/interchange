@@ -16,9 +16,17 @@ public interface OutgoingMatchRepository extends CrudRepository<OutgoingMatch, I
 
     List<OutgoingMatch> findAllByServiceProviderNameAndStatus(String serviceProviderName, OutgoingMatchStatus status);
 
+    List<OutgoingMatch> findAllByServiceProviderNameAndLocalDelivery_IdAndStatus(String serviceProviderName, Integer id, OutgoingMatchStatus status);
+
+    List<OutgoingMatch> findAllByLocalDelivery_Id(Integer id);
+
+    OutgoingMatch findByDeliveryQueueName(String deliveryQueueName);
+
     OutgoingMatch findByLocalDelivery_Id(Integer id);
 
     List<OutgoingMatch> findAllByCapability_Id(Integer id);
+
+    OutgoingMatch findByCapability_Id(Integer id);
 
     OutgoingMatch findByCapability_IdAndLocalDelivery_Id(Integer capabilityId, Integer localDeliveryId);
 }

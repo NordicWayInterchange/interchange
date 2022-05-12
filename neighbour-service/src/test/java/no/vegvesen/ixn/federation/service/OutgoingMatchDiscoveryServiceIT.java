@@ -38,23 +38,28 @@ public class OutgoingMatchDiscoveryServiceIT {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+        Capability cap1 = new DenmCapability(
+                "NPRA",
+                "NO",
+                "1.0",
+                Collections.singleton("1234"),
+                Collections.singleton("6")
+        );
+        cap1.setStatus(CapabilityStatus.CREATED);
+
+        Capability cap2 = new DenmCapability(
+                "NPRA",
+                "SE",
+                "1.0",
+                Collections.singleton("1234"),
+                Collections.singleton("5")
+        );
+        cap2.setStatus(CapabilityStatus.CREATED);
+
         serviceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Sets.newHashSet(Arrays.asList(new DenmCapability(
-                                "NPRA",
-                                "NO",
-                                "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton("6")
-                        ),
-                        new DenmCapability(
-                                "NPRA",
-                                "SE",
-                                "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton("5")
-                        )
-                ))));
+                Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
         serviceProvider.setDeliveries(Collections.singleton(delivery));
         serviceProviderRepository.save(serviceProvider);
@@ -73,23 +78,28 @@ public class OutgoingMatchDiscoveryServiceIT {
         LocalDelivery delivery = new LocalDelivery("publisherId = 'NPRA'", LocalDeliveryStatus.REQUESTED);
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+        Capability cap1 = new DenmCapability(
+                "NPRA",
+                "NO",
+                "1.0",
+                Collections.singleton("1234"),
+                Collections.singleton("6")
+        );
+        cap1.setStatus(CapabilityStatus.CREATED);
+
+        Capability cap2 = new DenmCapability(
+                "NPRA",
+                "SE",
+                "1.0",
+                Collections.singleton("1234"),
+                Collections.singleton("5")
+        );
+        cap2.setStatus(CapabilityStatus.CREATED);
+
         serviceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Sets.newHashSet(Arrays.asList(new DenmCapability(
-                                "NPRA",
-                                "NO",
-                                "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton("6")
-                        ),
-                        new DenmCapability(
-                                "NPRA",
-                                "SE",
-                                "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton("5")
-                        )
-                ))));
+                Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
         serviceProvider.setDeliveries(Collections.singleton(delivery));
         serviceProviderRepository.save(serviceProvider);
@@ -104,27 +114,32 @@ public class OutgoingMatchDiscoveryServiceIT {
     }
 
     @Test
-    public void testThatDeliveryIsIllegal() {
+    public void testThatDeliveryHasNoOverlap() {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'DE'", LocalDeliveryStatus.REQUESTED);
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+        Capability cap1 = new DenmCapability(
+                "NPRA",
+                "NO",
+                "1.0",
+                Collections.singleton("1234"),
+                Collections.singleton("6")
+        );
+        cap1.setStatus(CapabilityStatus.CREATED);
+
+        Capability cap2 = new DenmCapability(
+                "NPRA",
+                "SE",
+                "1.0",
+                Collections.singleton("1234"),
+                Collections.singleton("5")
+        );
+        cap2.setStatus(CapabilityStatus.CREATED);
+
         serviceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Sets.newHashSet(Arrays.asList(new DenmCapability(
-                                "NPRA",
-                                "NO",
-                                "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton("6")
-                        ),
-                        new DenmCapability(
-                                "NPRA",
-                                "SE",
-                                "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton("5")
-                        )
-                ))));
+                Sets.newHashSet(Arrays.asList(cap1, cap2))));
 
         serviceProvider.setDeliveries(Collections.singleton(delivery));
         serviceProviderRepository.save(serviceProvider);

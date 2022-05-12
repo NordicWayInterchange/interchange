@@ -141,14 +141,6 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void updateSubscriptionWithHostAndPort(LocalSubscription subscription, Set<LocalEndpoint> localEndpoints) {
-		for(LocalSubscription localSubscription : subscriptions) {
-			if (localSubscription.getSelector().equals(subscription.getSelector())){
-				localSubscription.setLocalEndpoints(localEndpoints);
-			}
-		}
-	}
-
 	public boolean hasCapabilitiesOrActiveSubscriptions() {
 		return (capabilities.hasDataTypes() ||
 				!activeSubscriptions().isEmpty());
@@ -156,6 +148,16 @@ public class ServiceProvider {
 
 	public boolean hasCapabilities () {
 		return capabilities.hasDataTypes();
+	}
+
+	public boolean hasDeliveries () {
+		Set<LocalDelivery> validDeliveries = deliveries.stream()
+				.filter(d -> d.getStatus().equals(LocalDeliveryStatus.CREATED)
+						|| d.getStatus().equals(LocalDeliveryStatus.REQUESTED)
+						|| d.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP))
+				.collect(Collectors.toSet());
+
+		return validDeliveries.size() > 0;
 	}
 
 	public Set<LocalSubscription> activeSubscriptions() {
@@ -209,7 +211,6 @@ public class ServiceProvider {
 				.orElseThrow(
 						() -> new NotFoundException("The delivery to delete is not in the Service Provider deliveries. Cannot delete delivery that don't exist.")
 				);
-		//deliveries.remove(localDeliveryToDelete);
 		localDeliveryToDelete.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 	}
 

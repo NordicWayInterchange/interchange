@@ -75,8 +75,12 @@ public class LocalDelivery {
         this.endpoints = endpoints;
     }
 
-    public void addEndpoint(Set<LocalDeliveryEndpoint> endpoints) {
+    public void addEndpoints(Set<LocalDeliveryEndpoint> endpoints) {
         this.endpoints.addAll(endpoints);
+    }
+
+    public void addEndpoint(LocalDeliveryEndpoint endpoint) {
+        this.endpoints.add(endpoint);
     }
 
     public String getPath() {
@@ -112,7 +116,11 @@ public class LocalDelivery {
     }
 
     public void removeAllEndpoints(Set<LocalDeliveryEndpoint> endpointsToRemove) {
-        endpoints.removeAll(endpointsToRemove);
+        this.endpoints.removeAll(endpointsToRemove);
+    }
+
+    public void removeEndpoint(LocalDeliveryEndpoint endpoint) {
+        this.endpoints.remove(endpoint);
     }
 
     @Override

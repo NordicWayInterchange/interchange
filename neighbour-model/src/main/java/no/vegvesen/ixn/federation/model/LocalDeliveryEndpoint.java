@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "local_delivery_endpoints")
+@Table(name = "local_delivery_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"host", "port", "target", "selector"}))
 public class LocalDeliveryEndpoint {
 
     @Id

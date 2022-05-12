@@ -12,6 +12,7 @@ ADD ivi_se_datatype.json /
 ADD denm_no_datatype.json /
 ADD denm_se_datatype.json /
 ADD capability_dat_no.json /
+ADD capability_denm_no.json /
 ADD localSubscription_dat_no.json /
 ADD false_localSubscription_dat_no.json /
 ADD local_private_channel.json /
@@ -20,6 +21,7 @@ ADD ivi_no_localSubscription.json /
 ADD denm_no_delivery.json /
 ADD ivi_no_localSubscription.json /
 ADD denm_no_delivery.json /
+ADD dat_no_delivery.json /
 ADD systemtest_local_subs.json /
 ADD systemtest_remote_cap.json /
 ENTRYPOINT ["/entrypoint.sh"]

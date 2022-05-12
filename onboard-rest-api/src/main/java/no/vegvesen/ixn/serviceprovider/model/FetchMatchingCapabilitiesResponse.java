@@ -9,8 +9,7 @@ import java.util.Set;
 public class FetchMatchingCapabilitiesResponse {
     private String name;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String selector;
+    private String selector = "";
 
     private Set<FetchCapability> capabilities;
 

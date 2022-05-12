@@ -125,6 +125,11 @@ public class NeighbourDiscoverer {
 		serviceProviderService.updateLocalDeliveries(interchangeNodeProperties.getName(), interchangeNodeProperties.getMessageChannelPort());
 	} */
 
+	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void syncServiceProviders() {
+		serviceProviderService.syncServiceProviders(interchangeNodeProperties.getName(), Integer.parseInt(interchangeNodeProperties.getMessageChannelPort()));
+	}
+
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void deleteSubscriptionAtKnownNeighbours() {
 		neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
@@ -132,12 +137,12 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void createMatches() {
-		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderService.findAllServiceProviders(), neighbourService.findAllNeighbours());
+		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderService.getServiceProviders(), neighbourService.findAllNeighbours());
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void createOutgoingMatches() {
-		List<ServiceProvider> serviceProvidersToSave = outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(serviceProviderService.findAllServiceProviders());
+		List<ServiceProvider> serviceProvidersToSave = outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(serviceProviderService.getServiceProviders());
 		serviceProviderService.saveAllServiceProviders(serviceProvidersToSave);
 	}
 
@@ -156,4 +161,8 @@ public class NeighbourDiscoverer {
 		matchDiscoveryService.removeMatchesThatAreDeleted();
 	}
 
+	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void removeOutgoingMatchesThatAreDeleted() {
+		outgoingMatchDiscoveryService.removeMatchesThatAreDeleted();
+	}
 }
