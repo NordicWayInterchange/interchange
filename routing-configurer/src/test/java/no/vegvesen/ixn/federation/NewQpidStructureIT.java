@@ -231,9 +231,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
                 source.sendNonPersistentMessage(source.createMessageBuilder()
                         .bytesMessage(bytemessage)
+                        .userId("")
                         .publisherId("NO-123")
                         .messageType(Constants.DENM)
                         .causeCode("6")
+                        .subCauseCode("61")
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
                         .quadTreeTiles(",12003,")
