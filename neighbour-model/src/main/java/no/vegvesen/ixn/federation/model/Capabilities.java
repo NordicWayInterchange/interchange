@@ -108,6 +108,12 @@ public class Capabilities {
 		return capabilities;
 	}
 
+	public Set<Capability> getCreatedCapabilities() {
+		return capabilities.stream()
+				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
+				.collect(Collectors.toSet());
+	}
+
 	public void setCapabilities(Set<Capability> capabilities) {
 		this.capabilities.clear();
 		if ( capabilities != null ) {

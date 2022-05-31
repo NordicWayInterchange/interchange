@@ -160,6 +160,10 @@ public class ServiceProvider {
 		return validDeliveries.size() > 0;
 	}
 
+	public boolean hasActiveSubscriptions() {
+		return !activeSubscriptions().isEmpty();
+	}
+
 	public Set<LocalSubscription> activeSubscriptions() {
 		return subscriptions.stream()
 		.filter(subscription -> subscription.getStatus() != LocalSubscriptionStatus.TEAR_DOWN)

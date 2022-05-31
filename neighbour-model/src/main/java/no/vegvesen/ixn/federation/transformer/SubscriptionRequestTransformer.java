@@ -77,21 +77,13 @@ public class SubscriptionRequestTransformer {
 		response.setConsumerCommonName(subscription.getConsumerCommonName());
 		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			if (subscription.getConsumerCommonName().equals(neighbourName)) {
-				EndpointApi endpointApi = new EndpointApi(
-						neighbourName,
-						messageChannelHost,
-						Integer.parseInt(messageChannelPort)
-				);
-				response.setEndpoints(Collections.singleton(endpointApi));
-			} else {
-				EndpointApi endpointApi = new EndpointApi(
-						subscription.getConsumerCommonName(),
-						messageChannelHost,
-						Integer.parseInt(messageChannelPort)
-				);
-				response.setEndpoints(Collections.singleton(endpointApi));
-			}
+			EndpointApi endpointApi = new EndpointApi(
+					subscription.getQueueName(),
+					messageChannelHost,
+					Integer.parseInt(messageChannelPort)
+			);
+			response.setEndpoints(Collections.singleton(endpointApi));
+			//TODO: Return redirectQueueName
 		}
 		return response;
 	}

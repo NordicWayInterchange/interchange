@@ -80,8 +80,10 @@ public class ServiceProviderService {
         for (Capability capability : capabilitiesToTearDown) {
             List<OutgoingMatch> possibleMatches = outgoingMatchDiscoveryService.findMatchesFromCapabilityId(capability.getId());
             if (possibleMatches.isEmpty()) {
-                logger.info("Removing capability with id {} and status TEAR_DOWN", capability.getId());
-                serviceProvider.getCapabilities().getCapabilities().remove(capability);
+                if (!capability.exchangeExists()) {
+                    logger.info("Removing capability with id {} and status TEAR_DOWN", capability.getId());
+                    serviceProvider.getCapabilities().getCapabilities().remove(capability);
+                }
             }
         }
     }

@@ -2,6 +2,6 @@
   "name" : "king_olav.bouvetinterchange.eu",
   "version" : "1.0",
   "subscriptions" : [ {
-    "selector" : "originatingCountry = 'SE' and messageType = 'DENM'"
+    "selector" : "originatingCountry = 'NO' and messageType = 'DENM'"
   } ]
 }

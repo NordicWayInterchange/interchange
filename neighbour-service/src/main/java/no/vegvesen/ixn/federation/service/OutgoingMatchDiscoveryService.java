@@ -42,8 +42,9 @@ public class OutgoingMatchDiscoveryService {
                                     boolean match = CapabilityMatcher.matchCapabilityToSelector(capability, delivery.getSelector());
                                     if (match) {
                                         isValid = true;
-                                        String deliveryQueueName = UUID.randomUUID().toString();
+                                        String deliveryQueueName = "del-" + UUID.randomUUID().toString();
                                         OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName(), deliveryQueueName, OutgoingMatchStatus.SETUP_ENDPOINT);
+                                        outgoingMatch.setCapabilityExchangeName(capability.getCapabilityExchangeName());
                                         logger.info("Delivery with id {} saved with status CREATED", delivery.getId());
                                         delivery.setStatus(LocalDeliveryStatus.CREATED);
                                         repository.save(outgoingMatch);

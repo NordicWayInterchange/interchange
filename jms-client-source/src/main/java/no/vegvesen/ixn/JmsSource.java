@@ -38,6 +38,7 @@ public class JmsSource implements CommandLineRunner {
             s.send(s.createMessageBuilder()
                     .textMessage("Dette er en test, hehehehe!")
                     .userId("kong_olav")
+                    .publisherId("NO-123")
                     .messageType(Constants.DENM)
                     .causeCode("6")
                     .subCauseCode("61")

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @ConfigurationPropertiesScan
@@ -174,14 +175,7 @@ public class NeighbourService {
 
 	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		neighbour.getNeighbourRequestedSubscriptions().deleteSubscription(subscriptionId);
-		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.TEAR_DOWN);
-			logger.debug("Saved neighbour {} with subscription request status TEAR_DOWN", neighbour.getName());
-		} else {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.MODIFIED);
-			logger.debug("Saved neighbour {} with subscription request status MODIFIED", neighbour.getName());
-		}
+		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
 		neighbourRepository.save(neighbour);
 	}
 
@@ -197,11 +191,11 @@ public class NeighbourService {
 		return neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
 	}
 
-
-	public List<Neighbour> findNeighboursToTearDownRoutingFor() {
-		List<Neighbour> tearDownRoutingList = neighbourRepository.findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus.TEAR_DOWN);
-		logger.debug("Found {} neighbours to tear down routing for {}", tearDownRoutingList.size(), tearDownRoutingList);
-		return tearDownRoutingList;
+	public Set<Neighbour> findNeighboursToTearDownRoutingFor() {
+		Set<Neighbour> tearDownSet = neighbourRepository.findAll().stream()
+				.filter(n -> n.getNeighbourRequestedSubscriptions().hasTearDownSubscriptions())
+				.collect(Collectors.toSet());
+		return tearDownSet;
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
@@ -214,6 +208,19 @@ public class NeighbourService {
 		neighbour.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
 		neighbourRepository.save(neighbour);
 		logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
+	}
+
+	public void saveDeleteSubscriptions(String ixnName, Set<Subscription> subscriptionsToDelete) {
+		Neighbour neighbour = neighbourRepository.findByName(ixnName);
+		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
+		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
+			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.EMPTY);
+			logger.debug("Saved neighbour {} with subscription request status TEAR_DOWN", neighbour.getName());
+		} else {
+			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.MODIFIED);
+			logger.debug("Saved neighbour {} with subscription request status MODIFIED", neighbour.getName());
+		}
+		neighbourRepository.save(neighbour);
 	}
 
 	public void saveSetupRouting(Neighbour neighbour) {

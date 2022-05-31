@@ -252,7 +252,7 @@ public class QpidClient {
 		restTemplate.delete(queuesURL + "?id=" + queueId);
 	}
 
-	public void removeDirectExchange(String exchangeName) {
+	public void removeExchange(String exchangeName) {
 		String exchangeId = lookupExchangeId(exchangeName);
 		restTemplate.delete(exchangesURL + "?id=" + exchangeId);
 	}

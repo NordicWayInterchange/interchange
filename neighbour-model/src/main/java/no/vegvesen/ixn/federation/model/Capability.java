@@ -26,7 +26,10 @@ public abstract class Capability {
 	@Column(name = "quadrant")
 	private final Set<String> quadTree = new HashSet<>();
 
+	@Enumerated(EnumType.STRING)
 	private CapabilityStatus status = CapabilityStatus.CREATED;
+
+	private String capabilityExchangeName = "";
 
 	private RedirectStatus redirect;
 
@@ -101,6 +104,18 @@ public abstract class Capability {
 
 	public void setStatus(CapabilityStatus status) {
 		this.status = status;
+	}
+
+	public String getCapabilityExchangeName() {
+		return capabilityExchangeName;
+	}
+
+	public void setCapabilityExchangeName(String capabilityExchangeName) {
+		this.capabilityExchangeName = capabilityExchangeName;
+	}
+
+	public boolean exchangeExists() {
+		return !capabilityExchangeName.isEmpty();
 	}
 
 	public RedirectStatus getRedirect() {

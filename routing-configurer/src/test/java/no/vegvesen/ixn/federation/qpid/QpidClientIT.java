@@ -5,6 +5,7 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,7 +171,31 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client._createDirectExchange("my-exchange");
 		assertThat(client.exchangeExists("my-exchange")).isTrue();
 
-		client.removeDirectExchange("my-exchange");
+		client.removeExchange("my-exchange");
 		assertThat(client.exchangeExists("my-exchange")).isFalse();
+	}
+
+	@Test
+	public void removeExchangeBeforeBindings() {
+		client._createTopicExchange("hammershark");
+		client._createQueue("babyshark");
+
+		client.bindTopicExchange("originatingCountry = 'NO'", "hammershark", "babyshark");
+		assertThat(client.getQueueBindKeys("babyshark")).hasSize(1);
+
+		client.removeExchange("hammershark");
+		assertThat(client.getQueueBindKeys("babyshark")).hasSize(0);
+	}
+
+	@Test
+	public void removeQueueBeforeBindings() {
+		client._createTopicExchange("hammershark1");
+		client._createQueue("babyshark1");
+
+		client.bindTopicExchange("originatingCountry = 'NO'", "hammershark1", "babyshark1");
+		assertThat(client.getQueueBindKeys("babyshark1")).hasSize(1);
+
+		client.removeQueue("babyshark1");
+		assertThat(client.queueExists("babyshark1")).isFalse();
 	}
 }

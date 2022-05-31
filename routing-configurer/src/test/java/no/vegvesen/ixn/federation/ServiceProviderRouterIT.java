@@ -44,7 +44,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -547,6 +546,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 
 		denmCapability.setStatus(CapabilityStatus.CREATED);
+		denmCapability.setCapabilityExchangeName("cap-ex1");
+		client.createDirectExchange("cap-ex1");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
@@ -578,6 +579,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("1234"),
 				Collections.singleton("6")
 		);
+		denmCapability.setCapabilityExchangeName("cap-ex2");
+		client.createDirectExchange("cap-ex2");
 
 		Capability denmCapability2 = new DenmCapability(
 				"NPRA",
@@ -586,6 +589,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("1234"),
 				Collections.singleton("5")
 		);
+		denmCapability2.setCapabilityExchangeName("cap-ex3");
+		client.createDirectExchange("cap-ex3");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 
@@ -623,6 +628,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("6")
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
+		denmCapability.setCapabilityExchangeName("cap-ex4");
+		client.createDirectExchange("cap-ex4");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
@@ -657,6 +664,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("6")
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
+		denmCapability.setCapabilityExchangeName("cap-ex5");
+		client.createDirectExchange("cap-ex5");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
@@ -691,6 +700,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("6")
 		);
 		denmCapability1.setStatus(CapabilityStatus.CREATED);
+		denmCapability1.setCapabilityExchangeName("cap-ex6");
+		client.createDirectExchange("cap-ex6");
 
 		Capability denmCapability2 = new DenmCapability(
 				"NPRA",
@@ -700,6 +711,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("6")
 		);
 		denmCapability2.setStatus(CapabilityStatus.CREATED);
+		denmCapability2.setCapabilityExchangeName("cap-ex7");
+		client.createDirectExchange("cap-ex7");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
@@ -726,6 +739,37 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.exchangeExists(match1.getDeliveryQueueName())).isFalse();
 		assertThat(client.exchangeExists(match2.getDeliveryQueueName())).isFalse();
+	}
+
+	@Test
+	public void localSubscriptionConnectsToCapabilityExchange() {
+		ServiceProvider mySP = new ServiceProvider("my-sp");
+		ServiceProvider otherSP = new ServiceProvider("other-sp");
+
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')");
+		LocalEndpoint endpoint = new LocalEndpoint();
+		endpoint.setSource("my-queue12");
+		subscription.setLocalEndpoints(Collections.singleton(endpoint));
+
+		Capability denmCapability = new DenmCapability(
+				"NPRA",
+				"NO",
+				"1.0",
+				Collections.singleton("1234"),
+				Collections.singleton("6")
+		);
+		denmCapability.setStatus(CapabilityStatus.CREATED);
+		denmCapability.setCapabilityExchangeName("cap-ex8");
+		client.createDirectExchange("cap-ex8");
+		client.createQueue("my-queue12");
+
+		mySP.addLocalSubscription(subscription);
+		otherSP.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(denmCapability)));
+
+		router.syncLocalSubscriptionsToServiceProviderCapabilities(mySP, Collections.singleton(otherSP));
+
+		assertThat(client.getQueueBindKeys("my-queue12")).hasSize(1);
+		assertThat(subscription.getConnections()).hasSize(1);
 	}
 
 	public SSLContext setUpTestSslContext(String s) {

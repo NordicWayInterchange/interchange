@@ -32,6 +32,10 @@ public class LocalSubscription {
     @JoinColumn(name = "locend_id", foreignKey = @ForeignKey(name = "fk_locend_sub"))
     private Set<LocalEndpoint> localEndpoints = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "loccon_id", foreignKey = @ForeignKey(name = "fk_loccon_sub"))
+    private Set<LocalConnection> connections = new HashSet<>();
+
     public LocalSubscription() {
 
     }
@@ -93,6 +97,18 @@ public class LocalSubscription {
         if (newLocalEndpoints != null) {
             this.localEndpoints.addAll(newLocalEndpoints);
         }
+    }
+
+    public Set<LocalConnection> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(Set<LocalConnection> connections) {
+        this.connections = connections;
+    }
+
+    public void addConnection(LocalConnection connection) {
+        connections.add(connection);
     }
 
     //TODO lag et objekt av selector??

@@ -25,6 +25,8 @@ public class OutgoingMatch {
 
     private String deliveryQueueName;
 
+    private String capabilityExchangeName = "";
+
     @Column(length = 1024)
     private String selector;
 
@@ -95,6 +97,14 @@ public class OutgoingMatch {
 
     public void setDeliveryQueueName(String deliveryQueueName) {
         this.deliveryQueueName = deliveryQueueName;
+    }
+
+    public String getCapabilityExchangeName() {
+        return capabilityExchangeName;
+    }
+
+    public void setCapabilityExchangeName(String capabilityExchangeName) {
+        this.capabilityExchangeName = capabilityExchangeName;
     }
 
     public String getSelector() {
