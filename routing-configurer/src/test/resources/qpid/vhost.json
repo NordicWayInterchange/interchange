@@ -32,6 +32,14 @@
       "durable": true,
       "holdOnPublishEnabled": false,
       "owner": null
+    },
+    {
+      "name": "bi-queue",
+      "type": "standard",
+      "durable": true,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
     }
   ],
   "virtualhostaccesscontrolproviders": [
@@ -92,12 +100,30 @@
           }
         },
         {
+          "objectType": "VIRTUALHOST",
+          "identity": "ALL",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
+          }
+        },
+        {
           "objectType": "QUEUE",
           "identity": "interchange",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "onramp"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "ALL",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-queue"
           }
         },
         {

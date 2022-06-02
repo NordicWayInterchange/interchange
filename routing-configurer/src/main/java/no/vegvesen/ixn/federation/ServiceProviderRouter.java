@@ -339,6 +339,7 @@ public class ServiceProviderRouter {
                         if (!qpidClient.exchangeExists(exchangeName)) {
                             qpidClient.createTopicExchange(exchangeName);
                             capability.setCapabilityExchangeName(exchangeName);
+                            bindCapabilityExchangeToBiQueue(capability, exchangeName);
                             logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
                         }
                     }
@@ -346,6 +347,11 @@ public class ServiceProviderRouter {
             }
             repository.save(serviceProvider);
         }
+    }
+
+    public void bindCapabilityExchangeToBiQueue(Capability capability, String exchangeName) {
+        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
+        qpidClient.bindTopicExchange(capabilitySelector, exchangeName, "bi-queue");
     }
 
     public void tearDownCapabilityExchanges(ServiceProvider serviceProvider) {

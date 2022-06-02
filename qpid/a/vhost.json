@@ -12,6 +12,14 @@
       "durable": true,
       "holdOnPublishEnabled": false,
       "owner": null
+    },
+    {
+      "name": "bi-queue",
+      "type": "standard",
+      "durable": true,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
     }
   ],
   "virtualhostaccesscontrolproviders": [
@@ -33,6 +41,16 @@
           "operation": "ALL",
           "outcome": "ALLOW_LOG",
           "attributes": {}
+        },
+        {
+          "objectType": "EXCHANGE",
+          "identity": "service-providers",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "ROUTING_KEY": "onramp",
+            "NAME": ""
+          }
         },
         {
           "objectType": "VIRTUALHOST",
@@ -70,7 +88,16 @@
             "NAME": "a.bouvetinterchange.eu"
           }
         },
-       {
+        {
+          "objectType": "QUEUE",
+          "identity": "ALL",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-queue"
+          }
+        },
+        {
           "objectType": "ALL",
           "identity": "ALL",
           "operation": "ALL",
