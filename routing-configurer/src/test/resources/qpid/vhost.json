@@ -18,6 +18,14 @@
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
+    },
+    {
+      "name": "bi-queue",
+      "type": "standard",
+      "durable": true,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
     }
   ],
   "virtualhostaccesscontrolproviders": [
@@ -77,6 +85,15 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "ALL",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-queue"
           }
         },
         {
