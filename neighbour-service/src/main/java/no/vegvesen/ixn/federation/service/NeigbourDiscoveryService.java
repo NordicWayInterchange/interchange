@@ -383,6 +383,8 @@ public class NeigbourDiscoveryService {
                             subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                             logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
+                        } finally {
+                            neighbourRepository.save(neighbour);
                         }
                     }
                 }
@@ -400,7 +402,7 @@ public class NeigbourDiscoveryService {
 
     public void tearDownListenerEndpoints(Neighbour neighbour) {
         List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
-        Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+        Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
 
         Set<String> sourceList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getSource).collect(Collectors.toSet());
         Set<String> hostList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getHost).collect(Collectors.toSet());
