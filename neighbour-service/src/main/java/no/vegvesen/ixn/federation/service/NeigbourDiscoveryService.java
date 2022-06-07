@@ -280,13 +280,14 @@ public class NeigbourDiscoveryService {
                         subscription.setEndpoints(polledSubscription.getEndpoints());
                         subscription.setLastUpdatedTimestamp(polledSubscription.getLastUpdatedTimestamp());
                         neighbour.getControlConnection().okConnection();
-                        if(subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)){
-                            logger.info("Subscription for neighbour {} with path {} is CREATED",neighbour.getName(),subscription.getPath());
+                        if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
+                            logger.info("Subscription for neighbour {} with path {} is CREATED", neighbour.getName(), subscription.getPath());
                             if (polledSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}",neighbour.getName(),subscription.getPath(), subscription.getEndpoints());
+                                logger.info("Creating listener endpoint for neighbour {} with path {} and brokers {}", neighbour.getName(), subscription.getPath(), subscription.getEndpoints());
                                 createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                             }
                         }
+
                         //utvide med ListenerEndpoint lookup + lage ny om det trengs
                         logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
                     } else {
@@ -317,13 +318,16 @@ public class NeigbourDiscoveryService {
                 try {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
+                        if (lastUpdatedSubscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)) {
+                            subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+                        } else {
                             if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
                                 logger.info("Polled updated subscription with id {}", subscription.getId());
                                 EndpointCalculator endpointCalculator = new EndpointCalculator(
                                         subscription.getEndpoints(),
                                         lastUpdatedSubscription.getEndpoints()
                                 );
-                                tearDownListenerEndpointsFromEndpointsList(neighbour,endpointCalculator.getEndpointsToRemove());
+                                tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
                                 createListenerEndpointFromEndpointsList(
                                         neighbour,
                                         endpointCalculator.getNewEndpoints(),
@@ -333,7 +337,7 @@ public class NeigbourDiscoveryService {
                             } else {
                                 logger.info("No subscription change for neighbour {}", neighbour.getName());
                             }
-
+                        }
                     } else {
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");

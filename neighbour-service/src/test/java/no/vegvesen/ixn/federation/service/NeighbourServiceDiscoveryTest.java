@@ -769,6 +769,46 @@ public class NeighbourServiceDiscoveryTest {
 		verify(neighbourFacade,times(2)).pollSubscriptionStatus(any(),any());
 	}
 
+	@Test
+	public void testPollOneNeighbourAndGetStatusResubscribeBack() {
+		Subscription subscription = new Subscription(
+				1,
+				SubscriptionStatus.CREATED,
+				"originatingCountry = 'NO'",
+				"/mynode/subscriptions/1",
+				"kyrre",
+				Collections.emptySet()
+		);
+		Neighbour  neighbour = new Neighbour(
+				"test",
+				new Capabilities(),
+				new SubscriptionRequest(),
+				new SubscriptionRequest(
+						SubscriptionRequestStatus.ESTABLISHED,
+						Collections.singleton(
+								subscription
+						)
+				),
+				new Connection()
+		);
+
+		Subscription returnSubscription = new Subscription();
+		returnSubscription.setSubscriptionStatus(SubscriptionStatus.RESUBSCRIBE);
+		returnSubscription.setSelector(subscription.getSelector());
+		returnSubscription.setPath(subscription.getPath());
+		returnSubscription.setConsumerCommonName(subscription.getConsumerCommonName());
+
+		assertThat(neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()).hasSize(1);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1);
+		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
+
+		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenReturn(returnSubscription);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbourFacade);
+
+		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
+		verify(neighbourFacade,times(1)).pollSubscriptionStatus(any(),any());
+	}
+
 
 
 	@Test
