@@ -380,7 +380,9 @@ public class NeigbourDiscoveryService {
                                 subscriptionsToDelete.add(subscription);
                             }
                         } catch(SubscriptionDeleteException e) {
-                            logger.error("Exception when deleting subscription {} to neighbour {}", subscription.getId(), neighbour.getName(), e);
+                            subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                            neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
+                            logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
                         }
                     }
                 }
