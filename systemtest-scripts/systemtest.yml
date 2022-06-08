@@ -81,7 +81,7 @@ services:
     ports:
       - 8666:8080
       - 443
-      - 63002:5671
+      - 63003:5671
       - 5672
     volumes:
       - "../qpid/local:/config"
