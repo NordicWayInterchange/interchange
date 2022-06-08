@@ -145,7 +145,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         public Integer call() {
             OnboardRESTClient client = parentCommand.createClient();
             client.deleteCapability(capabilityId);
-            System.out.printf("Capability %d deleted successfully%n",capabilityId);
+            System.out.printf("Capability %s deleted successfully%n",capabilityId);
             return 0;
         }
     }
