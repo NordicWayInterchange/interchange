@@ -24,10 +24,12 @@ public class CapabilityMatcher {
 		Set<LocalSubscription> matches = new HashSet<>();
 		for (Capability capability : capabilities) {
 			for (LocalSubscription selector : subscriptionSelectors) {
-				boolean match = matchCapabilityToSelector(capability, selector.getSelector());
-				if (match) {
-					logger.debug("Selector [{}] matches capability {}", selector, capability);
-					matches.add(selector);
+				if (!selector.getSelector().isEmpty()) {
+					boolean match = matchCapabilityToSelector(capability, selector.getSelector());
+					if (match) {
+						logger.debug("Selector [{}] matches capability {}", selector, capability);
+						matches.add(selector);
+					}
 				}
 			}
 		}

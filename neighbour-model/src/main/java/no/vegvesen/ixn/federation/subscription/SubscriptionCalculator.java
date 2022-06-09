@@ -55,12 +55,10 @@ public class SubscriptionCalculator {
         Set<Subscription> calculatedSubscriptions = new HashSet<>();
         for (LocalSubscription subscription : matchingSubscriptions) {
             if (!subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
-                if (!subscription.getSelector().isEmpty()) {
-                    Subscription newSubscription = new Subscription(subscription.getSelector(),
-                            SubscriptionStatus.REQUESTED,
-                            name);
-                    calculatedSubscriptions.add(newSubscription);
-                }
+                Subscription newSubscription = new Subscription(subscription.getSelector(),
+                        SubscriptionStatus.REQUESTED,
+                        name);
+                calculatedSubscriptions.add(newSubscription);
             }
         }
         //logger.info("Calculated custom subscription for neighbour {}: {}", neighbourName, calculatedSubscriptions);
