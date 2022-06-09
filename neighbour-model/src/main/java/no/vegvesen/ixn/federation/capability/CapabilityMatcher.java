@@ -55,34 +55,37 @@ public class CapabilityMatcher {
 		return finalMatch;
 	}
 
+	//TODO: Should it return false if the selector is empty?
 	public static boolean matchCapabilityToSelector(Capability capability, String selector) {
-		logger.debug("Evaluating selector [{}] against capability {}", selector, capability);
-		String whiteSpaceTrimmedSelector = selector.replaceAll(REGEX_ALL_WHITESPACE, " ");
-		String quadTreeEvaluatedSelector = evaluateQuadTreeMatch(whiteSpaceTrimmedSelector, capability.getQuadTree());
-		JMSSelectorFilter selectorFilter = JMSSelectorFilterFactory.get(quadTreeEvaluatedSelector);
-		boolean match = false;
-		if (capability instanceof DatexCapability) {
-			match = matchDatex((DatexCapability) capability, selectorFilter);
-		} else if (capability instanceof DenmCapability) {
-			match = matchDenm((DenmCapability) capability, selectorFilter);
-		} else if (capability instanceof IvimCapability) {
-			match = matchIvi((IvimCapability) capability, selectorFilter);
-		} else if (capability instanceof SpatemCapability) {
-			match = matchSpatem((SpatemCapability) capability, selectorFilter);
-		} else if (capability instanceof MapemCapability) {
-			match = matchMapem((MapemCapability) capability, selectorFilter);
-		} else if (capability instanceof SremCapability) {
-			match = matchSrem((SremCapability) capability, selectorFilter);
-		} else if (capability instanceof SsemCapability) {
-			match = matchSsem((SsemCapability) capability, selectorFilter);
-		} else if (capability instanceof CamCapability) {
-			match = matchCam((CamCapability) capability, selectorFilter);
-		} else {
-			logger.warn("Unknown Capability type {} ", capability.getClass().getName());
-		}
-		if (match) {
-			logger.debug("Selector [{}] matches capability {}", selector, capability);
-			return true;
+		if (!selector.isEmpty()) {
+			logger.debug("Evaluating selector [{}] against capability {}", selector, capability);
+			String whiteSpaceTrimmedSelector = selector.replaceAll(REGEX_ALL_WHITESPACE, " ");
+			String quadTreeEvaluatedSelector = evaluateQuadTreeMatch(whiteSpaceTrimmedSelector, capability.getQuadTree());
+			JMSSelectorFilter selectorFilter = JMSSelectorFilterFactory.get(quadTreeEvaluatedSelector);
+			boolean match = false;
+			if (capability instanceof DatexCapability) {
+				match = matchDatex((DatexCapability) capability, selectorFilter);
+			} else if (capability instanceof DenmCapability) {
+				match = matchDenm((DenmCapability) capability, selectorFilter);
+			} else if (capability instanceof IvimCapability) {
+				match = matchIvi((IvimCapability) capability, selectorFilter);
+			} else if (capability instanceof SpatemCapability) {
+				match = matchSpatem((SpatemCapability) capability, selectorFilter);
+			} else if (capability instanceof MapemCapability) {
+				match = matchMapem((MapemCapability) capability, selectorFilter);
+			} else if (capability instanceof SremCapability) {
+				match = matchSrem((SremCapability) capability, selectorFilter);
+			} else if (capability instanceof SsemCapability) {
+				match = matchSsem((SsemCapability) capability, selectorFilter);
+			} else if (capability instanceof CamCapability) {
+				match = matchCam((CamCapability) capability, selectorFilter);
+			} else {
+				logger.warn("Unknown Capability type {} ", capability.getClass().getName());
+			}
+			if (match) {
+				logger.debug("Selector [{}] matches capability {}", selector, capability);
+				return true;
+			}
 		}
 		return false;
 	}
