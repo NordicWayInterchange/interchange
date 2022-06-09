@@ -72,7 +72,7 @@ public class MatchDiscoveryService {
     }
 
     public void syncLocalSubscriptionAndSubscriptionsToTearDownMatchResources() {
-        List<Match> matches = matchRepository.findAll();
+        List<Match> matches = matchRepository.findAllByStatus(MatchStatus.UP);
         for (Match match : matches) {
             if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
                     match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
