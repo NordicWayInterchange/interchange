@@ -161,12 +161,13 @@ public class Subscription {
 		if (!(o instanceof Subscription)) return false;
 		Subscription that = (Subscription) o;
 		return selector.equals(that.selector) &&
-				consumerCommonName.equals(that.consumerCommonName);
+				consumerCommonName.equals(that.consumerCommonName) &&
+				subscriptionStatus.equals(that.subscriptionStatus);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(selector, consumerCommonName);
+		return Objects.hash(selector, consumerCommonName, subscriptionStatus);
 	}
 
 	@Override
