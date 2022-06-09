@@ -164,7 +164,7 @@ public class TypeTransformer {
         String id = localDelivery.getId().toString();
         return new GetDeliveryResponse(
                 id,
-                transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints()),
+                transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints(), localDelivery.getSelector()),
                 createDeliveryPath(serviceProviderName, id),
                 localDelivery.getSelector(),
                 transformLocalDateTimeToEpochMili(localDelivery.getLastUpdatedTimestamp()),
@@ -184,14 +184,14 @@ public class TypeTransformer {
         return result;
     }
 
-    private Set<DeliveryEndpoint> transformLocalDeliveryEndpointToDeliveryEndpoint(Set<LocalDeliveryEndpoint> endpoints) {
+    private Set<DeliveryEndpoint> transformLocalDeliveryEndpointToDeliveryEndpoint(Set<LocalDeliveryEndpoint> endpoints, String selector) {
         Set<DeliveryEndpoint> result = new HashSet<>();
         for (LocalDeliveryEndpoint endpoint : endpoints) {
             result.add(new DeliveryEndpoint(
                     endpoint.getHost(),
                     endpoint.getPort(),
                     endpoint.getTarget(),
-                    endpoint.getSelector(),
+                    selector,
                     null,
                     null
             ));
