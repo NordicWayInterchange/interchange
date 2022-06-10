@@ -94,7 +94,7 @@ public class OnboardRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
-		allCapabilities.addAll(getAllLocalCapabilities(serviceProvider));
+		allCapabilities.addAll(getAllLocalCapabilities());
 		if (selector != null) {
 			if (!selector.isEmpty()) {
 				allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
@@ -109,10 +109,9 @@ public class OnboardRestController {
 		return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
 	}
 
-	private Set<Capability> getAllLocalCapabilities(ServiceProvider serviceProvider) {
+	private Set<Capability> getAllLocalCapabilities() {
 		Set<Capability> capabilities = new HashSet<>();
 		List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-		serviceProviders.remove(serviceProvider);
 		for (ServiceProvider otherServiceProvider : serviceProviders) {
 			capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
 		}
