@@ -83,6 +83,10 @@ public class MatchDiscoveryService {
         }
     }
 
+    public List<Match> findMatchesToTearDownEndpointsFor() {
+        return matchRepository.findAllByStatus(MatchStatus.TEARDOWN_ENDPOINT);
+    }
+
     public void updateMatchToTearDownExchange(Match match) {
         match.setStatus(MatchStatus.TEARDOWN_EXCHANGE);
         matchRepository.save(match);

@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -143,4 +144,58 @@ public class MessageCollectorTest {
         verify(messageConnectionTwo,times(1)).okConnection();
     }
 
+    @Test
+    public void matchWithNoListenerEndpointIsSetToTearDownExchange() {
+        GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+
+        ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+        when(listenerEndpointRepository.findAll()).thenReturn(Collections.emptyList());
+
+        MatchRepository matchRepository = mock(MatchRepository.class);
+        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
+
+        Match match = new Match(new LocalSubscription(), new Subscription(), MatchStatus.TEARDOWN_ENDPOINT);
+        when(matchDiscoveryService.findMatchesToTearDownEndpointsFor()).thenReturn(Collections.singletonList(match));
+
+        CollectorCreator collectorCreator = mock(CollectorCreator.class);
+
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
+        collector.runSchedule();
+
+        assertThat(collector.getListeners()).size().isEqualTo(0);
+        assertThat(match.getStatus()).isEqualTo(MatchStatus.TEARDOWN_EXCHANGE);
+    }
+
+    @Test
+    public void twoMatchesOneWithListenerEndpointAndOneWithoutTearDownOne() {
+        Connection messageConnectionOne = mock(Connection.class);
+        when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
+
+        ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange1");
+
+        GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
+
+        ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
+        when(listenerEndpointRepository.findAll()).thenReturn(Collections.singletonList(one));
+
+        CollectorCreator collectorCreator = mock(CollectorCreator.class);
+        when(collectorCreator.setupCollection(eq(one))).thenReturn(mock(MessageCollectorListener.class));
+
+        MatchRepository matchRepository = mock(MatchRepository.class);
+        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
+
+        Match match1 = new Match(new LocalSubscription(), new Subscription(), MatchStatus.TEARDOWN_ENDPOINT);
+        Match match2 = new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT);
+        when(matchDiscoveryService.findMatchesToTearDownEndpointsFor()).thenReturn(Collections.singletonList(match1));
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(match2);
+
+
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
+        collector.runSchedule();
+
+        assertThat(collector.getListeners()).size().isEqualTo(1);
+        assertThat(match1.getStatus()).isEqualTo(MatchStatus.TEARDOWN_EXCHANGE);
+        assertThat(match2.getStatus()).isEqualTo(MatchStatus.UP);
+        verify(messageConnectionOne,times(1)).okConnection();
+    }
 }
