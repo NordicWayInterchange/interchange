@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -81,6 +82,14 @@ public class MessageCollector {
         }
 
         List<ListenerEndpoint> listenerKeysToRemove = new ArrayList<>();
+        List<Match> tearDownEndpointMatches = matchDiscoveryService.findMatchesToTearDownEndpointsFor();
+        //Removing matches that has not been properly removed
+        Set<String> listenerEndpointExchanges = listeners.keySet().stream().map(ListenerEndpoint::getExchangeName).collect(Collectors.toSet());
+        for (Match match : tearDownEndpointMatches) {
+            if (!listenerEndpointExchanges.contains(match.getSubscription().getExchangeName())) {
+                matchDiscoveryService.updateMatchToTearDownExchange(match);
+            }
+        }
 
         for (ListenerEndpoint listenerEndpoint : listeners.keySet()) {
             if (!interchangeListenerEndpoints.contains(listenerEndpoint)) {
