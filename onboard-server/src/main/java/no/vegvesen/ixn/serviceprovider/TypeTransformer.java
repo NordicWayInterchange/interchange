@@ -192,8 +192,8 @@ public class TypeTransformer {
                     endpoint.getPort(),
                     endpoint.getTarget(),
                     selector,
-                    null,
-                    null
+                    0,
+                    0
             ));
         }
         return result;
