@@ -283,5 +283,7 @@
         <module>jms-client-image-source</module>
         <module>jms-client-sink-app</module>
         <module>jms-client-source-app</module>
+        <module>admin-rest-api</module>
+        <module>admin-panel-server</module>
     </modules>
 </project>

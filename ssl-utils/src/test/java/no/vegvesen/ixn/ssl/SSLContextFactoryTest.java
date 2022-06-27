@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.ssl;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
@@ -19,6 +20,9 @@ public class SSLContextFactoryTest {
 		SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, truststoreDetails);
 	}
 
+
+
+	@Disabled
 	@Test
 	public void sslContextFromKeyAndTrustStoresWrongKeystoreTypeFails() {
 		String keystoreFile = getFilePath("jks/localhost.p12");
