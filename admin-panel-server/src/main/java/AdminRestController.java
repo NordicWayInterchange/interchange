@@ -59,8 +59,9 @@ public class AdminRestController {
 
 
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListCapabilitiesResponse getCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{neighbourName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ListCapabilitiesResponse listCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
         OnboardMDCUtil.setLogVariables(nodeProperties.getName(), neighbourName);
         certService.checkIfCommonNameMatchesNameInApiObject(neighbourName);
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
@@ -72,6 +73,7 @@ public class AdminRestController {
 
     //Må fikse subscription delen
     //Hva returnerer neighbour.getSubscriptionsForPolling()) ??
+    //
 
 /*
     @RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -94,7 +96,8 @@ public class AdminRestController {
     }
 */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<Subscription> getSubscriptionsFromNeighbour(@PathVariable String neighbourName) {
         OnboardMDCUtil.setLogVariables(nodeProperties.getName(), neighbourName);
         this.certService.checkIfCommonNameMatchesNameInApiObject(neighbourName);
@@ -104,7 +107,7 @@ public class AdminRestController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
     private ServiceProvider getServiceProvider(@PathVariable String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         if (serviceProvider == null) {
@@ -118,7 +121,8 @@ public class AdminRestController {
     Todo: Is the neighbour reachable just because its in the repository?
 
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/", produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{name}/", produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean isNeighbourReachable (@PathVariable String name){
 
         List<Neighbour> tempListOfNeighbours = neighbourRepository.findAll();
@@ -132,7 +136,8 @@ public class AdminRestController {
         return false;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/Capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<Capability> getAllCapabilitiesFromAllServiceProviders(){
         Set<Capability> capabilities = new HashSet<>();
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
@@ -150,14 +155,14 @@ public class AdminRestController {
     Output: A set of the capabilities of the given Service provider
 
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/Capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{name}/capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<Capability> getCapabilitiesFromServiceProvider(@PathVariable String name) {
         Set<Capability> capabilities = new HashSet<>();
         capabilities.addAll(getServiceProvider(name).getCapabilities().getCapabilities());
         return capabilities;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ListSubscriptionsResponse getSubscriptionsFromServiceProvider(@PathVariable String serviceProviderName) {
         OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
         this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -167,7 +172,7 @@ public class AdminRestController {
         return response;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/Deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{name}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<LocalDelivery> getDeliveriesFromServiceProvider(@PathVariable String name){
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(name);
         Set<LocalDelivery> deliveries = new HashSet<>();
@@ -181,7 +186,7 @@ public class AdminRestController {
         return false;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ServiceProvider> getAllServiceProviders() {
 
         Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
