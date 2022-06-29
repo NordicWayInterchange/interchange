@@ -51,6 +51,29 @@ public class AdminRestController {
     }
 
     /*
+    KRAV 3
+
+    Henter ut alle naboene til interchangen
+
+
+
+     */
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/getNeighbours", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ServiceProvider> getAllNeighbours() {
+
+        Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+
+        List<ServiceProvider> returnServiceProviders = new ArrayList<>();
+
+        for (ServiceProvider s : serviceProviders) {
+            returnServiceProviders.add(s);
+        }
+
+        return returnServiceProviders;
+    }
+
+    /*
     KRAV 3.1
 
 
@@ -67,35 +90,17 @@ public class AdminRestController {
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
         ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(neighbourName,neighbour.getCapabilities().getCapabilities());
         OnboardMDCUtil.removeLogVariables();
-        Set<Subscription> tmp = neighbour.getOurRequestedSubscriptions().getSubscriptions();
         return response;
     }
 
-    //Må fikse subscription delen
-    //Hva returnerer neighbour.getSubscriptionsForPolling()) ??
-    //
-
-/*
-    @RequestMapping(method = RequestMethod.GET, path = "/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListSubscriptionsFromNeighbourResponse listSubscriptionsFromNeighbour(@PathVariable String neighbourName) {
-        OnboardMDCUtil.setLogVariables(nodeProperties.getName(), neighbourName);
-        this.certService.checkIfCommonNameMatchesNameInApiObject(neighbourName);
-        Neighbour neighbour = neighbourRepository.findByName(neighbourName);
-
-        Set<LocalSubscription> localSubscriptions;
-        Set<Subscription> subscriptions = neighbour.getSubscriptionsForPolling();
-        for (Subscription s :
-                subscriptions) {
-            localSubscriptions.add(new LocalSubscription(s));
-        }
+ /*
+    KRAV 3.2
 
 
-        ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(neighbourName,neighbour.getSubscriptionsForPolling());
-        OnboardMDCUtil.removeLogVariables();
-        return response;
-    }
-*/
+    Bruker neighbour.getOurRequestedSubscriptions().getSubscriptions() til å få ut alle subscriptions. Er dette riktig?
 
+
+     */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<Subscription> getSubscriptionsFromNeighbour(@PathVariable String neighbourName) {
@@ -105,6 +110,16 @@ public class AdminRestController {
         Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
         return subscriptions;
     }
+
+    /*
+    KRAV 4
+
+
+    Prøver å få ut en service provider basert på navn.
+
+    Hva slags informasjon får man ut her?
+
+     */
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -122,7 +137,15 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{name}/", produces = MediaType.APPLICATION_JSON_VALUE)
+     /*
+    KRAV 3.3
+
+
+    Prøver å sjekke om nabo er oppe ved å sjekke repository
+
+     */
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean isNeighbourReachable (@PathVariable String name){
 
         List<Neighbour> tempListOfNeighbours = neighbourRepository.findAll();
@@ -136,7 +159,7 @@ public class AdminRestController {
         return false;
     }
 
-
+    /*
     @RequestMapping(method = RequestMethod.GET, path = "/admin/capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<Capability> getAllCapabilitiesFromAllServiceProviders(){
         Set<Capability> capabilities = new HashSet<>();
@@ -146,10 +169,11 @@ public class AdminRestController {
         }
         return capabilities;
     }
-
-
+     */
 
     /*
+    Krav 4.1
+
     Input: Name of ServiceProvider
 
     Output: A set of the capabilities of the given Service provider
@@ -162,6 +186,15 @@ public class AdminRestController {
         return capabilities;
     }
 
+    /*
+    Krav 4.2
+
+    Input: Name of ServiceProvider
+
+    Output: A set of the subscriptions of the given Service provider
+
+     */
+
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ListSubscriptionsResponse getSubscriptionsFromServiceProvider(@PathVariable String serviceProviderName) {
         OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
@@ -172,6 +205,15 @@ public class AdminRestController {
         return response;
     }
 
+    /*
+    Krav 4.3
+
+    Input: Name of ServiceProvider
+
+    Output: A set of the deliveries of the given Service provider
+
+     */
+
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{name}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<LocalDelivery> getDeliveriesFromServiceProvider(@PathVariable String name){
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(name);
@@ -181,10 +223,28 @@ public class AdminRestController {
 
     }
 
+    /*
+    Krav 5
+
+    Input: Name of ServiceProvider
+
+    Output: A set of the subscriptions of the given Service provider
+
+     */
+
     //TODO: Signering av Sertifikater
     public boolean signCSRForServiceProvider(){
         return false;
     }
+
+    /*
+    Krav 4
+
+    Input: Name of ServiceProvider
+
+    Output: A set of all the service providers connected to the interchange.
+
+     */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ServiceProvider> getAllServiceProviders() {
