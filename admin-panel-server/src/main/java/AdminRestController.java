@@ -218,10 +218,10 @@ public class AdminRestController {
     Output: A set of the capabilities of the given Service provider
 
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{name}/capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Set<Capability> getCapabilitiesFromServiceProvider(@PathVariable String name) {
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}/capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Set<Capability> getCapabilitiesFromServiceProvider(@PathVariable String serviceProviderName) {
         Set<Capability> capabilities = new HashSet<>();
-        capabilities.addAll(getServiceProvider(name).getCapabilities().getCapabilities());
+        capabilities.addAll(getServiceProvider(serviceProviderName).getCapabilities().getCapabilities());
         return capabilities;
     }
 
@@ -253,9 +253,9 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{name}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Set<LocalDelivery> getDeliveriesFromServiceProvider(@PathVariable String name){
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(name);
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Set<LocalDelivery> getDeliveriesFromServiceProvider(@PathVariable String serviceProviderName){
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalDelivery> deliveries = new HashSet<>();
         deliveries.addAll(serviceProvider.getDeliveries());
         return deliveries;
