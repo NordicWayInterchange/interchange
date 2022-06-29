@@ -119,7 +119,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        no.vegvesen.ixn.serviceprovider.client.AdminRestClientApplication
+                                        no.vegvesen.ixn.serviceprovider.client.OnboardRestClientApplication
                                     </mainClass>
                                 </manifest>
                             </archive>

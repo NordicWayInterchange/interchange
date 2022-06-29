@@ -1,0 +1,14 @@
+{	"name" : "king_olav",
+    "version" : "1.0",
+    "capabilities" : [
+        {
+            "messageType": "IVIM",
+            "publisherId": "NO-12345",
+            "originatingCountry": "NO",
+            "protocolVersion": "IVI:1.0",
+            "quadTree": [
+                "12004"
+            ]
+        }
+    ]
+}

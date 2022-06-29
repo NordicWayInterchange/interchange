@@ -1,0 +1,75 @@
+package no.vegvesen.ixn.serviceprovider.client;
+
+import no.vegvesen.ixn.serviceprovider.model.*;
+import org.apache.http.impl.client.HttpClients;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
+import javax.net.ssl.SSLContext;
+import java.util.HashMap;
+import java.util.Map;
+
+public class AdminRESTClient {
+
+
+    private RestTemplate restTemplate;
+    private final String server;
+    private final String user;
+
+    public AdminRESTClient(SSLContext sslContext, String server) {
+        this.restTemplate = new RestTemplate(
+                new HttpComponentsClientHttpRequestFactory(
+                        HttpClients
+                                .custom()
+                                .setSSLContext(sslContext)
+                                .build()
+                )
+        );
+        this.server = server;
+        this.user = admin;
+    }
+
+    //Hvordan blir det når vi for eksempel skal hente ut alle naboer??
+
+    //Krav 3.1
+    public ListCapabilitiesResponse getNeighbourCapabilities(String neighbourName) {
+        String url = String.format("%s/%s/%s/capabilities/", server, user, neighbourName);
+        return restTemplate.getForEntity(url, ListCapabilitiesResponse.class).getBody();
+    }
+
+    //Krav 3.2
+    public ListSubscriptionsResponse getNeighbourSubscriptions(String neighbourName) {
+        String url = String.format("%s/%s/%s/subscriptions/", server, user, neighbourName);
+        return restTemplate.getForEntity(url, ListCapabilitiesResponse.class).getBody();
+    }
+
+    //mangler krav 3.3
+
+    //Mangler krav 4
+
+    //Krav 4.1
+    //Denne må sees på
+    public ListCapabilitiesResponse getServiceProviderCapabilities(String serviceProvider) {
+        String url = String.format("%s/%s/%s/capabilities/", server, user, serviceProvider);
+        return restTemplate.getForEntity(url, ListCapabilitiesResponse.class).getBody();
+    }
+
+    //Krav 4.2
+    public ListSubscriptionsResponse getServiceProviderSubscriptions(String serviceProvider) {
+		String url = String.format("%s/%s/%s/subscriptions/", server, user, serviceProvider);
+		return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
+    }
+
+    //Krav 4.3
+    //Denne må sees på
+    public ListDeliveriesResponse listServiceProviderDeliveries(String serviceProvider) {
+        String url = String.format("%s/%s/%s/deliveries",server, user, serviceProvider);
+        return restTemplate.getForEntity(url,ListDeliveriesResponse.class).getBody();
+    }
+}
+
+
