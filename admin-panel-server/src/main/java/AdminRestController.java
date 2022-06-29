@@ -42,6 +42,7 @@ public class AdminRestController {
         return logger;
     }
 
+    //Hva gjør denne?
     public ResourceStatus getResourceStatus(){
         return null;
     }
@@ -55,8 +56,9 @@ public class AdminRestController {
 
     Henter ut alle naboene til interchangen
 
+    Input: get request
 
-
+    Output: A list of neighbours connected to the interchange
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/getNeighbours", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,10 +78,12 @@ public class AdminRestController {
     /*
     KRAV 3.1
 
-
     Gjort om listCapabilities fra OnboardRestController til å ta capabilities fra en Service provider, til å ta fra en neighbour
     Antar at neighbor er en annen interchange
 
+    Input: Name of neighbour
+
+    Output: A set of the capabilities of the given neighbour
 
      */
 
@@ -99,6 +103,9 @@ public class AdminRestController {
 
     Bruker neighbour.getOurRequestedSubscriptions().getSubscriptions() til å få ut alle subscriptions. Er dette riktig?
 
+    Input: Name of neighbour
+
+    Output: A set of the subscriptions of the given neighbour
 
      */
 
@@ -111,6 +118,61 @@ public class AdminRestController {
         return subscriptions;
     }
 
+
+    /*
+    Todo: Is the neighbour reachable just because its in the repository?
+
+     */
+
+     /*
+    KRAV 3.3
+
+
+    Prøver å sjekke om nabo er oppe ved å sjekke repository
+
+    Input: Name of neighbour
+
+    Output: A boolean indicating if a neighbour is reachable
+
+    */
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{neighbourName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean isNeighbourReachable (@PathVariable String neighbourName){
+
+        List<Neighbour> tempListOfNeighbours = neighbourRepository.findAll();
+
+        for (Neighbour n :
+                tempListOfNeighbours) {
+            if(n.getName().equals(neighbourName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+     /*
+    Krav 4
+
+    Input: Name of ServiceProvider
+
+    Output: A set of all the service providers connected to the interchange.
+
+     */
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ServiceProvider> getAllServiceProviders() {
+
+        Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+
+        List<ServiceProvider> returnServiceProviders = new ArrayList<>();
+
+        for (ServiceProvider s : serviceProviders) {
+            returnServiceProviders.add(s);
+        }
+
+        return returnServiceProviders;
+    }
+
     /*
     KRAV 4
 
@@ -118,6 +180,10 @@ public class AdminRestController {
     Prøver å få ut en service provider basert på navn.
 
     Hva slags informasjon får man ut her?
+
+    Input: Name of service provider
+
+    Output: A service provider object
 
      */
 
@@ -131,33 +197,6 @@ public class AdminRestController {
         return serviceProvider;
     }
 
-    /*
-
-    Todo: Is the neighbour reachable just because its in the repository?
-
-     */
-
-     /*
-    KRAV 3.3
-
-
-    Prøver å sjekke om nabo er oppe ved å sjekke repository
-
-     */
-
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public boolean isNeighbourReachable (@PathVariable String name){
-
-        List<Neighbour> tempListOfNeighbours = neighbourRepository.findAll();
-
-        for (Neighbour n :
-                tempListOfNeighbours) {
-            if(n.getName().equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /*
     @RequestMapping(method = RequestMethod.GET, path = "/admin/capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -235,28 +274,5 @@ public class AdminRestController {
     //TODO: Signering av Sertifikater
     public boolean signCSRForServiceProvider(){
         return false;
-    }
-
-    /*
-    Krav 4
-
-    Input: Name of ServiceProvider
-
-    Output: A set of all the service providers connected to the interchange.
-
-     */
-
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ServiceProvider> getAllServiceProviders() {
-
-        Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-
-        List<ServiceProvider> returnServiceProviders = new ArrayList<>();
-
-        for (ServiceProvider s : serviceProviders) {
-            returnServiceProviders.add(s);
-        }
-
-        return returnServiceProviders;
     }
 }
