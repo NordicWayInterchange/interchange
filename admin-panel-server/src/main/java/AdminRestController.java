@@ -84,13 +84,13 @@ public class AdminRestController {
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{neighbourName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListCapabilitiesResponse listCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
+    public Set<Capability> getCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
         OnboardMDCUtil.setLogVariables(nodeProperties.getName(), neighbourName);
         certService.checkIfCommonNameMatchesNameInApiObject(neighbourName);
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
-        ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(neighbourName,neighbour.getCapabilities().getCapabilities());
+        Set<Capability> capabilities = neighbour.getCapabilities().getCapabilities();
         OnboardMDCUtil.removeLogVariables();
-        return response;
+        return capabilities;
     }
 
  /*
