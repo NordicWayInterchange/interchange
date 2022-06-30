@@ -37,20 +37,6 @@ public class AdminRestController {
         this.nodeProperties = nodeProperties;
     }
 
-
-    public Logger getLogger() {
-        return logger;
-    }
-
-    //Hva gjør denne?
-    public ResourceStatus getResourceStatus(){
-        return null;
-    }
-
-    public NeighbourRepository getNeighbourRepository() {
-        return neighbourRepository;
-    }
-
     /*
     KRAV 3
 
@@ -61,18 +47,11 @@ public class AdminRestController {
     Output: A list of neighbours connected to the interchange
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/getNeighbours", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ServiceProvider> getAllNeighbours() {
-
-        Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-
-        List<ServiceProvider> returnServiceProviders = new ArrayList<>();
-
-        for (ServiceProvider s : serviceProviders) {
-            returnServiceProviders.add(s);
-        }
-
-        return returnServiceProviders;
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Neighbour> getAllNeighbours() {
+        //TODO: Add certificate check for admin
+        List<Neighbour> neighbours = neighbourRepository.findAll();
+        return neighbours;
     }
 
     /*
@@ -87,13 +66,12 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{neighbourName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<Capability> getCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
-        OnboardMDCUtil.setLogVariables(nodeProperties.getName(), neighbourName);
-        certService.checkIfCommonNameMatchesNameInApiObject(neighbourName);
+        //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
         Set<Capability> capabilities = neighbour.getCapabilities().getCapabilities();
-        OnboardMDCUtil.removeLogVariables();
+        //TODO: Transform to response
         return capabilities;
     }
 
@@ -109,12 +87,12 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<Subscription> getSubscriptionsFromNeighbour(@PathVariable String neighbourName) {
-        OnboardMDCUtil.setLogVariables(nodeProperties.getName(), neighbourName);
-        this.certService.checkIfCommonNameMatchesNameInApiObject(neighbourName);
+        //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
         Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+        //TODO: Transform to response
         return subscriptions;
     }
 
@@ -136,7 +114,7 @@ public class AdminRestController {
 
     */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{neighbourName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/isReachable", produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean isNeighbourReachable (@PathVariable String neighbourName){
 
         List<Neighbour> tempListOfNeighbours = neighbourRepository.findAll();
@@ -159,18 +137,12 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/getServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ServiceProvider> getAllServiceProviders() {
-
-        Iterable<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-
-        List<ServiceProvider> returnServiceProviders = new ArrayList<>();
-
-        for (ServiceProvider s : serviceProviders) {
-            returnServiceProviders.add(s);
-        }
-
-        return returnServiceProviders;
+        //TODO: Add certificate check for admin
+        List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
+        //TODO: Transform to response
+        return serviceProviders;
     }
 
     /*
@@ -188,12 +160,14 @@ public class AdminRestController {
      */
 
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
     private ServiceProvider getServiceProvider(@PathVariable String serviceProviderName) {
+        //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         if (serviceProvider == null) {
             serviceProvider = new ServiceProvider(serviceProviderName);
         }
+        //TODO: Transform to response
         return serviceProvider;
     }
 
@@ -218,10 +192,12 @@ public class AdminRestController {
     Output: A set of the capabilities of the given Service provider
 
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}/capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<Capability> getCapabilitiesFromServiceProvider(@PathVariable String serviceProviderName) {
-        Set<Capability> capabilities = new HashSet<>();
-        capabilities.addAll(getServiceProvider(serviceProviderName).getCapabilities().getCapabilities());
+        //TODO: Add certificate check for admin
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        Set<Capability> capabilities = serviceProvider.getCapabilities().getCapabilities();
+        //TODO: Transform to response
         return capabilities;
     }
 
@@ -234,13 +210,12 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ListSubscriptionsResponse getSubscriptionsFromServiceProvider(@PathVariable String serviceProviderName) {
-        OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-        this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+        //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = getServiceProvider(serviceProviderName);
         ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(serviceProviderName,serviceProvider.getSubscriptions());
-        OnboardMDCUtil.removeLogVariables();
+        //TODO: Transform to response
         return response;
     }
 
@@ -253,11 +228,12 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/serviceProvider/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<LocalDelivery> getDeliveriesFromServiceProvider(@PathVariable String serviceProviderName){
+        //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-        Set<LocalDelivery> deliveries = new HashSet<>();
-        deliveries.addAll(serviceProvider.getDeliveries());
+        Set<LocalDelivery> deliveries = serviceProvider.getDeliveries();
+        //TODO: Transform to response
         return deliveries;
 
     }

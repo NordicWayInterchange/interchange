@@ -1,7 +1,0 @@
-{
-  "name" : "kyrre",
-  "version" : "1.0",
-  "subscriptions" : [ {
-    "selector" : "messageType = 'IVIM'"
-  } ]
-}
