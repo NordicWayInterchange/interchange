@@ -45,6 +45,8 @@ public class AdminRestController {
     Input: get request
 
     Output: A list of neighbours connected to the interchange
+
+    QUESTION:
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -67,12 +69,15 @@ public class AdminRestController {
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Set<Capability> getCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
+    public ListCapabilitiesResponse getCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
         //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
         Set<Capability> capabilities = neighbour.getCapabilities().getCapabilities();
+
+        //Funker dette???
+        ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(neighbourName, capabilities);
         //TODO: Transform to response
-        return capabilities;
+        return response;
     }
 
  /*
@@ -85,6 +90,8 @@ public class AdminRestController {
 
     Output: A set of the subscriptions of the given neighbour
 
+     QUESTION: Skal Subscriptions gjøres om til LocalActorSubscription?
+
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -92,7 +99,9 @@ public class AdminRestController {
         //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
         Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+
         //TODO: Transform to response
+       // ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(neighbourName, subscriptions);
         return subscriptions;
     }
 
@@ -111,6 +120,8 @@ public class AdminRestController {
     Input: Name of neighbour
 
     Output: A boolean indicating if a neighbour is reachable
+
+     QUESTION: Is the neighbour reachable just because its in the repository?
 
     */
 
@@ -135,6 +146,8 @@ public class AdminRestController {
 
     Output: A set of all the service providers connected to the interchange.
 
+     QUESTION: What format should the response containing list of serviceProviders be in?
+
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -157,6 +170,8 @@ public class AdminRestController {
 
     Output: A service provider object
 
+     QUESTION: What format should the ServiceProvider response be in?
+
      */
 
 
@@ -173,34 +188,24 @@ public class AdminRestController {
 
 
     /*
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/capabilities/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Set<Capability> getAllCapabilitiesFromAllServiceProviders(){
-        Set<Capability> capabilities = new HashSet<>();
-        List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-        for (ServiceProvider otherServiceProvider : serviceProviders) {
-            capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
-        }
-        return capabilities;
-    }
-     */
-
-    /*
     Krav 4.1
 
     Input: Name of ServiceProvider
 
     Output: A set of the capabilities of the given Service provider
 
+
+
      */
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Set<Capability> getCapabilitiesFromServiceProvider(@PathVariable String serviceProviderName) {
+    public ListCapabilitiesResponse getCapabilitiesFromServiceProvider(@PathVariable String serviceProviderName) {
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<Capability> capabilities = serviceProvider.getCapabilities().getCapabilities();
+        ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(serviceProviderName, capabilities);
         //TODO: Transform to response
-        return capabilities;
+        return response;
     }
-
     /*
     Krav 4.2
 
@@ -215,7 +220,6 @@ public class AdminRestController {
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = getServiceProvider(serviceProviderName);
         ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(serviceProviderName,serviceProvider.getSubscriptions());
-        //TODO: Transform to response
         return response;
     }
 
@@ -226,6 +230,14 @@ public class AdminRestController {
 
     Output: A set of the deliveries of the given Service provider
 
+    QUESTION: Adding transformToListDeliveriesResponse brings a lot of other method dependencies , specifically these ones:
+    transformLocalDeliveryEndpointToDeliveryEndpoint
+    createDeliveryPath
+    transformLocalDeliveryStatusToDeliveryStatus
+
+    Do we need them all for the response?
+
+
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/serviceProvider/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -233,6 +245,9 @@ public class AdminRestController {
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalDelivery> deliveries = serviceProvider.getDeliveries();
+
+        //ListDeliveriesResponse response = typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
+
         //TODO: Transform to response
         return deliveries;
 
