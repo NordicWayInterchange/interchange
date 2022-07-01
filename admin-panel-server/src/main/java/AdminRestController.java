@@ -4,7 +4,6 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.serviceprovider.OnboardMDCUtil;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +49,9 @@ public class AdminRestController {
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Neighbour> getAllNeighbours() {
+    public getAllNeighboursResponse getAllNeighbours() {
         //TODO: Add certificate check for admin
-        List<Neighbour> neighbours = neighbourRepository.findAll();
-        return neighbours;
+        return new getAllNeighboursResponse(neighbourRepository);
     }
 
     /*
@@ -75,14 +73,15 @@ public class AdminRestController {
         Set<Capability> capabilities = neighbour.getCapabilities().getCapabilities();
 
         //Funker dette???
+        // Har erstattet navnet til Service provider med navnet til Nabo, noe som kan funke siden admin panel ikke skulle vise service provider.
         ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(neighbourName, capabilities);
         //TODO: Transform to response
         return response;
     }
 
+
  /*
     KRAV 3.2
-
 
     Bruker neighbour.getOurRequestedSubscriptions().getSubscriptions() til å få ut alle subscriptions. Er dette riktig?
 
@@ -105,10 +104,8 @@ public class AdminRestController {
         return subscriptions;
     }
 
-
     /*
     Todo: Is the neighbour reachable just because its in the repository?
-
      */
 
      /*
@@ -151,16 +148,14 @@ public class AdminRestController {
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ServiceProvider> getAllServiceProviders() {
+    public getAllServiceProvidersResponse getAllServiceProviders() {
         //TODO: Add certificate check for admin
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-        //TODO: Transform to response
-        return serviceProviders;
+        return new getAllServiceProvidersResponse(serviceProviders);
     }
 
     /*
     KRAV 4
-
 
     Prøver å få ut en service provider basert på navn.
 
@@ -176,14 +171,14 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    private ServiceProvider getServiceProvider(@PathVariable String serviceProviderName) {
+    private getServiceProviderResponse getServiceProvider(@PathVariable String serviceProviderName) {
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         if (serviceProvider == null) {
             serviceProvider = new ServiceProvider(serviceProviderName);
         }
-        //TODO: Transform to response
-        return serviceProvider;
+
+        return new getServiceProviderResponse(serviceProvider);
     }
 
 
@@ -194,8 +189,6 @@ public class AdminRestController {
 
     Output: A set of the capabilities of the given Service provider
 
-
-
      */
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
     public ListCapabilitiesResponse getCapabilitiesFromServiceProvider(@PathVariable String serviceProviderName) {
@@ -203,10 +196,10 @@ public class AdminRestController {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<Capability> capabilities = serviceProvider.getCapabilities().getCapabilities();
         ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(serviceProviderName, capabilities);
-        //TODO: Transform to response
         return response;
     }
     /*
+
     Krav 4.2
 
     Input: Name of ServiceProvider
@@ -218,7 +211,7 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ListSubscriptionsResponse getSubscriptionsFromServiceProvider(@PathVariable String serviceProviderName) {
         //TODO: Add certificate check for admin
-        ServiceProvider serviceProvider = getServiceProvider(serviceProviderName);
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(serviceProviderName,serviceProvider.getSubscriptions());
         return response;
     }
@@ -256,14 +249,14 @@ public class AdminRestController {
     /*
     Krav 5
 
-    Input: Name of ServiceProvider
+    Input:
 
-    Output: A set of the subscriptions of the given Service provider
+    Output:
 
      */
 
     //TODO: Signering av Sertifikater
-    public boolean signCSRForServiceProvider(){
-        return false;
+    public void signCSRForServiceProvider(){
+        return;
     }
 }

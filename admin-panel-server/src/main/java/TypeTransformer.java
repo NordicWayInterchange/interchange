@@ -70,6 +70,7 @@ public class TypeTransformer {
 
 
 
+
     private String createSubscriptionPath(String serviceProviderName, String subscriptionId) {
         return String.format("/%s/subscriptions/%s", serviceProviderName, subscriptionId);
     }
