@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.api.v1_0.NeighbourApi;
 import no.vegvesen.ixn.federation.exceptions.DiscoveryException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -249,6 +250,13 @@ public class Neighbour {
 	public void setNeighbour_id(Integer neighbour_id) {
 		this.neighbour_id = neighbour_id;
 	}
+
+	public Integer getNeighbour_id(){return this.neighbour_id;}
+
+	public NeighbourApi toApi(){
+		return new NeighbourApi(getName(), getNeighbour_id());
+	}
+
 
 	public Connection getControlConnection() { return controlConnection; }
 

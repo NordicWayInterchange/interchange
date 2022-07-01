@@ -2,8 +2,6 @@ import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.serviceprovider.model.ListCapabilitiesResponse;
 import no.vegvesen.ixn.serviceprovider.model.ListDeliveriesResponse;
 import no.vegvesen.ixn.serviceprovider.model.ListSubscriptionsResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.apache.http.impl.client.HttpClients;
@@ -51,9 +49,9 @@ public class AdminRESTClient {
     //mangler krav 3.3
 
     //Krav 4
-    public getAllServiceProvidersResponse getAllServiceProviders(String serviceProvider) {
+    public GetAllServiceProvidersResponse getAllServiceProviders(String serviceProvider) {
         String url = String.format("%s/%s/%s/", server, user, serviceProvider);
-        return restTemplate.getForEntity(url, getAllServiceProvidersResponse.class).getBody();
+        return restTemplate.getForEntity(url, GetAllServiceProvidersResponse.class).getBody();
     }
 
     //Krav 4.1

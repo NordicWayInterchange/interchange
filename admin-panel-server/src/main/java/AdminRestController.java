@@ -49,9 +49,10 @@ public class AdminRestController {
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour", produces = MediaType.APPLICATION_JSON_VALUE)
-    public getAllNeighboursResponse getAllNeighbours() {
+    public GetAllNeighboursResponse getAllNeighbours() {
         //TODO: Add certificate check for admin
-        return new getAllNeighboursResponse(neighbourRepository);
+        GetAllNeighboursResponse response = typeTransformer.getAllNeighboursResponse(neighbourRepository);
+        return response;
     }
 
     /*
@@ -74,7 +75,7 @@ public class AdminRestController {
 
         //Funker dette???
         // Har erstattet navnet til Service provider med navnet til Nabo, noe som kan funke siden admin panel ikke skulle vise service provider.
-        ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(neighbourName, capabilities);
+        ListCapabilitiesResponse response = typeTransformer.listNeighbourCapabilitiesResponse(neighbourName, capabilities);
         //TODO: Transform to response
         return response;
     }
@@ -97,11 +98,12 @@ public class AdminRestController {
     public Set<Subscription> getSubscriptionsFromNeighbour(@PathVariable String neighbourName) {
         //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
-        Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+        Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+        Set<Subscription> theirSubscriptions =neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 
         //TODO: Transform to response
-       // ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(neighbourName, subscriptions);
-        return subscriptions;
+       //ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(neighbourName, subscriptions);
+        return ourSubscriptions;
     }
 
     /*
@@ -149,10 +151,10 @@ public class AdminRestController {
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider", produces = MediaType.APPLICATION_JSON_VALUE)
-    public getAllServiceProvidersResponse getAllServiceProviders() {
+    public GetAllServiceProvidersResponse getAllServiceProviders() {
         //TODO: Add certificate check for admin
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-        return new getAllServiceProvidersResponse(serviceProviders);
+        return new GetAllServiceProvidersResponse(serviceProviders);
     }
 
     /*
@@ -172,14 +174,14 @@ public class AdminRestController {
 
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    private getServiceProviderResponse getServiceProvider(@PathVariable String serviceProviderName) {
+    private GetServiceProviderResponse getServiceProvider(@PathVariable String serviceProviderName) {
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         if (serviceProvider == null) {
             serviceProvider = new ServiceProvider(serviceProviderName);
         }
 
-        return new getServiceProviderResponse(serviceProvider);
+        return new GetServiceProviderResponse(serviceProvider);
     }
 
 

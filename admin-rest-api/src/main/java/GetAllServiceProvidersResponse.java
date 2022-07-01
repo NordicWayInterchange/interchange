@@ -1,13 +1,12 @@
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 
 import java.util.List;
-import java.util.Set;
 
-public class getAllServiceProvidersResponse {
+public class GetAllServiceProvidersResponse {
 
     private List<ServiceProvider> serviceProviders;
 
-    public getAllServiceProvidersResponse(List<ServiceProvider> serviceProviders){
+    public GetAllServiceProvidersResponse(List<ServiceProvider> serviceProviders){
         this.serviceProviders = serviceProviders;
     }
 

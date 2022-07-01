@@ -1,10 +1,8 @@
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.serviceprovider.model.Delivery;
-import no.vegvesen.ixn.serviceprovider.model.LocalActorCapability;
 
 import java.util.Set;
 
-public class getServiceProviderResponse {
+public class GetServiceProviderResponse {
 
     private String name;
 
@@ -18,7 +16,7 @@ public class getServiceProviderResponse {
     private int id;
 
 
-    public getServiceProviderResponse(ServiceProvider serviceProvider){
+    public GetServiceProviderResponse(ServiceProvider serviceProvider){
 
         this.serviceProvider = serviceProvider;
         this.name = serviceProvider.getName();

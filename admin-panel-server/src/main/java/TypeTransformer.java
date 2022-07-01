@@ -1,6 +1,5 @@
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryStatus;
 
@@ -135,6 +134,40 @@ public class TypeTransformer {
                 return DeliveryStatus.ILLEGAL;
         }
     }
+    public GetAllNeighboursResponse getAllNeighboursResponse(NeighbourRepository neighbourRepository){
+        Set<NeighbourWithPathAndApi> neighbours = new HashSet<>();
+        for(Neighbour neighbour : neighbourRepository.findAll()){
+            neighbours.add(
+                    new NeighbourWithPathAndApi(neighbour.getNeighbour_id().toString(), neighbourPath(neighbour.getName()), neighbour.toApi()));
+        }
+        return new GetAllNeighboursResponse(neighbours);
+    }
 
+    private static String neighbourPath(String neighbourName) {
+        return String.format("/neighbour/%s", neighbourName);
+    }
+
+    public ListCapabilitiesResponse listNeighbourCapabilitiesResponse(String neighbourName, Set<Capability> capabilities) {
+        return new ListCapabilitiesResponse(
+                neighbourName,
+                capabilitySetToLocalActorCapabilityNeighbour(neighbourName,capabilities)
+        );
+    }
+
+    private static Set<LocalActorCapability> capabilitySetToLocalActorCapabilityNeighbour(String neighbourName, Set<Capability> capabilities) {
+        Set<LocalActorCapability> result = new HashSet<>();
+        for (Capability capability : capabilities) {
+            String capabilityId = capability.getId().toString();
+            result.add(
+                    new LocalActorCapability(capabilityId,
+                            createNeighbourCapabilityPath(neighbourName, capabilityId),capability.toApi())
+            );
+        }
+        return result;
+    }
+
+    private static String createNeighbourCapabilityPath(String neighbourName, String capibilityId) {
+        return String.format("/neighbour/%s/capabilities/%s", neighbourName, capibilityId);
+    }
 
 }
