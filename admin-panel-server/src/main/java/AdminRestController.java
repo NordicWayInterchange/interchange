@@ -127,6 +127,7 @@ public class AdminRestController {
 
         List<Neighbour> tempListOfNeighbours = neighbourRepository.findAll();
 
+
         for (Neighbour n :
                 tempListOfNeighbours) {
             if(n.getName().equals(neighbourName)) {
@@ -223,26 +224,14 @@ public class AdminRestController {
 
     Output: A set of the deliveries of the given Service provider
 
-    QUESTION: Adding transformToListDeliveriesResponse brings a lot of other method dependencies , specifically these ones:
-    transformLocalDeliveryEndpointToDeliveryEndpoint
-    createDeliveryPath
-    transformLocalDeliveryStatusToDeliveryStatus
-
-    Do we need them all for the response?
-
-
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/serviceProvider/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Set<LocalDelivery> getDeliveriesFromServiceProvider(@PathVariable String serviceProviderName){
+    public ListDeliveriesResponse getDeliveriesFromServiceProvider(@PathVariable String serviceProviderName){
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
-        Set<LocalDelivery> deliveries = serviceProvider.getDeliveries();
-
-        //ListDeliveriesResponse response = typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
-
-        //TODO: Transform to response
-        return deliveries;
+        ListDeliveriesResponse response = typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
+        return response;
 
     }
 

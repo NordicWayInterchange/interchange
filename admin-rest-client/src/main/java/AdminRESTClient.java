@@ -50,7 +50,11 @@ public class AdminRESTClient {
 
     //mangler krav 3.3
 
-    //Mangler krav 4
+    //Krav 4
+    public getAllServiceProvidersResponse getAllServiceProviders(String serviceProvider) {
+        String url = String.format("%s/%s/%s/", server, user, serviceProvider);
+        return restTemplate.getForEntity(url, getAllServiceProvidersResponse.class).getBody();
+    }
 
     //Krav 4.1
     //Denne må sees på

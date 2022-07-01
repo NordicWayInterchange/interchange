@@ -2,6 +2,7 @@ import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import no.vegvesen.ixn.serviceprovider.model.DeliveryStatus;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -94,6 +95,44 @@ public class TypeTransformer {
                 return LocalActorSubscriptionStatusApi.NOT_VALID;
             default:
                 return LocalActorSubscriptionStatusApi.ILLEGAL;
+        }
+    }
+    public ListDeliveriesResponse transformToListDeliveriesResponse(String serviceProviderName, Set<LocalDelivery> localDeliveries) {
+        return new ListDeliveriesResponse(serviceProviderName,
+                transformLocalDeliveryToDelivery(
+                        serviceProviderName,
+                        localDeliveries
+                )
+        );
+    }
+
+    public Set<Delivery> transformLocalDeliveryToDelivery(String serviceProviderName, Set<LocalDelivery> localDeliveries) {
+        Set<Delivery> result = new HashSet<>();
+        for (LocalDelivery delivery : localDeliveries){
+            result.add(new Delivery(
+                            delivery.getId().toString(),
+                            createDeliveryPath(serviceProviderName, delivery.getId().toString()),
+                            delivery.getSelector(),
+                            transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
+                            transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus())
+                    )
+            );
+        }
+        return result;
+    }
+    private static String createDeliveryPath(String serviceProviderName, String deliveryId) {
+        return String.format("/%s/deliveries/%s", serviceProviderName, deliveryId);
+    }
+    private DeliveryStatus transformLocalDeliveryStatusToDeliveryStatus(LocalDeliveryStatus status) {
+        switch (status) {
+            case REQUESTED:
+                return DeliveryStatus.REQUESTED;
+            case CREATED:
+                return DeliveryStatus.CREATED;
+            case NOT_VALID:
+                return DeliveryStatus.NOT_VALID;
+            default:
+                return DeliveryStatus.ILLEGAL;
         }
     }
 
