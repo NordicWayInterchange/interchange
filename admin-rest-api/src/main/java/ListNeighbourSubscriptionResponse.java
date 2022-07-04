@@ -1,21 +1,18 @@
-import no.vegvesen.ixn.serviceprovider.model.ListSubscriptionsResponse;
-import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
-
 import java.util.Objects;
 import java.util.Set;
 
 
-public class ListSubscriptionResponseNeighbour{
+public class ListNeighbourSubscriptionResponse {
         private String name;
         private String version = "1.0";
-        private Set<LocalActorSubscription> subscriptions;
+        private Set<NeighbourSubscriptionApi> subscriptionApis;
 
-        public ListSubscriptionResponseNeighbour() {
+        public ListNeighbourSubscriptionResponse() {
         }
 
-        public ListSubscriptionResponseNeighbour(String name, Set<LocalActorSubscription> subscriptions) {
+        public ListNeighbourSubscriptionResponse(String name, Set<NeighbourSubscriptionApi> neighbourSubscriptionApis) {
             this.name = name;
-            this.subscriptions = subscriptions;
+            this.subscriptionApis = neighbourSubscriptionApis;
         }
 
         public String getName() {
@@ -34,18 +31,18 @@ public class ListSubscriptionResponseNeighbour{
             this.version = version;
         }
 
-        public Set<LocalActorSubscription> getSubscriptions() {
-            return subscriptions;
+        public Set<NeighbourSubscriptionApi> getSubscriptions() {
+            return subscriptionApis;
         }
 
-        public void setSubscriptions(Set<LocalActorSubscription> subscriptions) {
-            this.subscriptions = subscriptions;
+        public void setSubscriptions(Set<NeighbourSubscriptionApi> subscriptions) {
+            this.subscriptionApis = subscriptionApis;
         }
 
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, version, subscriptions);
+            return Objects.hash(name, version, subscriptionApis);
         }
 
         @Override
@@ -53,7 +50,7 @@ public class ListSubscriptionResponseNeighbour{
             return "ListSubscriptionsResponse{" +
                     "name='" + name + '\'' +
                     ", version='" + version + '\'' +
-                    ", subscriptions=" + subscriptions +
+                    ", subscriptions=" + subscriptionApis +
                     '}';
         }
     }

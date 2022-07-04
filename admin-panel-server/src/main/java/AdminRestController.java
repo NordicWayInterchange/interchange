@@ -68,14 +68,13 @@ public class AdminRestController {
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListCapabilitiesResponse getCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
+    public ListNeighbourCapabilitiesResponse getCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
         //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
         Set<Capability> capabilities = neighbour.getCapabilities().getCapabilities();
 
         //Funker dette???
-        // Har erstattet navnet til Service provider med navnet til Nabo, noe som kan funke siden admin panel ikke skulle vise service provider.
-        ListCapabilitiesResponse response = typeTransformer.listNeighbourCapabilitiesResponse(neighbourName, capabilities);
+        ListNeighbourCapabilitiesResponse response = typeTransformer.listNeighbourCapabilitiesResponse(neighbourName, capabilities);
         //TODO: Transform to response
         return response;
     }
@@ -95,15 +94,15 @@ public class AdminRestController {
      */
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Set<Subscription> getSubscriptionsFromNeighbour(@PathVariable String neighbourName) {
+    public ListNeighbourSubscriptionResponse getSubscriptionsFromNeighbour(@PathVariable String neighbourName) {
         //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
         Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
-        Set<Subscription> theirSubscriptions =neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
+        Set<Subscription> theirSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 
         //TODO: Transform to response
-       //ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(neighbourName, subscriptions);
-        return ourSubscriptions;
+       ListNeighbourSubscriptionResponse response = typeTransformer.transformOurAndTheirSubscriptionsToListSubscriptionResponse(neighbourName, ourSubscriptions, theirSubscriptions);
+        return response;
     }
 
     /*
@@ -136,7 +135,7 @@ public class AdminRestController {
                 return true;
             }
         }
-        return false;
+        return true;
     }
 
      /*

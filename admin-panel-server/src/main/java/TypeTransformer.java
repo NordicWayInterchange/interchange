@@ -2,6 +2,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryStatus;
+import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -147,19 +148,19 @@ public class TypeTransformer {
         return String.format("/neighbour/%s", neighbourName);
     }
 
-    public ListCapabilitiesResponse listNeighbourCapabilitiesResponse(String neighbourName, Set<Capability> capabilities) {
-        return new ListCapabilitiesResponse(
+    public ListNeighbourCapabilitiesResponse listNeighbourCapabilitiesResponse(String neighbourName, Set<Capability> capabilities) {
+        return new ListNeighbourCapabilitiesResponse(
                 neighbourName,
-                capabilitySetToLocalActorCapabilityNeighbour(neighbourName,capabilities)
+                capabilitySetToNeighbourCapabilityApi(neighbourName,capabilities)
         );
     }
 
-    private static Set<LocalActorCapability> capabilitySetToLocalActorCapabilityNeighbour(String neighbourName, Set<Capability> capabilities) {
-        Set<LocalActorCapability> result = new HashSet<>();
+    private static Set<NeighbourCapabilityApi> capabilitySetToNeighbourCapabilityApi(String neighbourName, Set<Capability> capabilities) {
+        Set<NeighbourCapabilityApi> result = new HashSet<>();
         for (Capability capability : capabilities) {
             String capabilityId = capability.getId().toString();
             result.add(
-                    new LocalActorCapability(capabilityId,
+                    new NeighbourCapabilityApi(capabilityId,
                             createNeighbourCapabilityPath(neighbourName, capabilityId),capability.toApi())
             );
         }
@@ -169,5 +170,31 @@ public class TypeTransformer {
     private static String createNeighbourCapabilityPath(String neighbourName, String capibilityId) {
         return String.format("/neighbour/%s/capabilities/%s", neighbourName, capibilityId);
     }
+
+   public ListNeighbourSubscriptionResponse transformOurAndTheirSubscriptionsToListSubscriptionResponse(String neighbourName, Set<Subscription> ourSubscriptions, Set<Subscription> theirSubscriptions){
+        Set<NeighbourSubscriptionApi> neighbourSubscriptionApis = new HashSet<>();
+        for(Subscription subscription : ourSubscriptions){
+            String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
+            neighbourSubscriptionApis.add(new NeighbourSubscriptionApi(
+                    sub_id,
+                    subscription.getPath(),
+                    subscription.getPath(),
+                    subscription.getLastUpdatedTimestamp(),
+                    true));
+
+        }
+       for(Subscription subscription : theirSubscriptions){
+           String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
+           neighbourSubscriptionApis.add(new NeighbourSubscriptionApi(
+                   sub_id,
+                   subscription.getPath(),
+                   subscription.getPath(),
+                   subscription.getLastUpdatedTimestamp(),
+                   false));
+
+       }
+       ListNeighbourSubscriptionResponse response = new ListNeighbourSubscriptionResponse(neighbourName, neighbourSubscriptionApis);
+        return response;
+   }
 
 }
