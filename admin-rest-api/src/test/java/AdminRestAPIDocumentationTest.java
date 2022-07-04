@@ -1,7 +1,7 @@
-package java;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.federation.api.v1_0.CamCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -14,10 +14,87 @@ import java.util.Set;
 public class AdminRestAPIDocumentationTest {
 
     //getAllNeighbours()
+    @Test
+    public void GetAllNeighboursResponse() throws JsonProcessingException {
+        Set<NeighbourWithPathAndApi> neighbours = new HashSet<>();
+        neighbours.add(new NeighbourWithPathAndApi("1",
+                "/neighbour1",
+                NeighbourStatusApi.UP));
+        neighbours.add(new NeighbourWithPathAndApi("2",
+                "/neighbour2",
+                NeighbourStatusApi.DOWN
+        ));
+        GetAllNeighboursResponse response = new GetAllNeighboursResponse(
+                neighbours
+
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+
+    }
+
 
     //getCapabilitiesFromNeighbour
+    @Test
+    public void ListNeighbourCapabilitiesResponse() throws JsonProcessingException {
+        Set<NeighbourCapabilityApi> neighbourCapabilities = new HashSet<>();
+        neighbourCapabilities.add(new NeighbourCapabilityApi("1",
+                "/neighbour1/capabilities/1",
+                new DenmCapabilityApi("NPRA",
+                        "NO",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("6")
+                )
+        ));
+        neighbourCapabilities.add(new NeighbourCapabilityApi("2",
+                "/neighbour1/capabilities/2",
+                new DenmCapabilityApi(
+                        "NPRA",
+                        "NO",
+                        "1.0",
+                        Collections.singleton("1234"),
+                        Collections.singleton("7")
+                )
+        ));
+        ListNeighbourCapabilitiesResponse response = new ListNeighbourCapabilitiesResponse(
+                "Norge",
+                neighbourCapabilities
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+
+    }
 
     //getSubscriptionsFromNeighbour
+    @Test
+    public void ListNeighbourSubscriptionsResponse() throws JsonProcessingException {
+        Set<NeighbourSubscriptionApi> neighbourSubscriptions = new HashSet<>();
+        neighbourSubscriptions.add(new NeighbourSubscriptionApi(
+                "1",
+                "/neighbour1/subscriptions/1",
+                "originatingCountry = 'NO' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                true
+        ));
+        neighbourSubscriptions.add(new NeighbourSubscriptionApi(
+                "1",
+                "/neighbour2/subscriptions/1",
+                "originatingCountry = 'SE' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                false
+        ));
+        ListNeighbourSubscriptionResponse response = new ListNeighbourSubscriptionResponse(
+                "Norge",
+                neighbourSubscriptions
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+
+    }
 
     //isNeighbourReachable
 

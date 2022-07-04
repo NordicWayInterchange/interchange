@@ -74,7 +74,7 @@ public class AdminRestController {
         Set<Capability> capabilities = neighbour.getCapabilities().getCapabilities();
 
         //Funker dette???
-        ListNeighbourCapabilitiesResponse response = typeTransformer.listNeighbourCapabilitiesResponse(neighbourName, capabilities);
+        ListNeighbourCapabilitiesResponse response = typeTransformer.listNeighbourCapabilitiesResponse(neighbour, capabilities);
         return response;
     }
 

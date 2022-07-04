@@ -3,6 +3,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryStatus;
 import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -135,11 +136,26 @@ public class TypeTransformer {
                 return DeliveryStatus.ILLEGAL;
         }
     }
+
+    public boolean isNeighbourReachable (NeighbourRepository neighbourRepository, Neighbour neighbourName) {
+
+        List<Neighbour> tempListOfNeighbours = neighbourRepository.findAll();
+
+        for (Neighbour n :
+                tempListOfNeighbours) {
+            if (n.getName().equals(neighbourName)) {
+                return true;
+            }
+        }
+
+        return true;
+    }
+
     public GetAllNeighboursResponse getAllNeighboursResponse(NeighbourRepository neighbourRepository){
         Set<NeighbourWithPathAndApi> neighbours = new HashSet<>();
         for(Neighbour neighbour : neighbourRepository.findAll()){
             neighbours.add(
-                    new NeighbourWithPathAndApi(neighbour.getNeighbour_id().toString(), neighbourPath(neighbour.getName()), neighbour.toApi()));
+                    new NeighbourWithPathAndApi(neighbour.getNeighbour_id().toString(), neighbourPath(neighbour.getName()), transformToNeighbourStatusApi(isNeighbourReachable(neighbourRepository, neighbour))));
         }
         return new GetAllNeighboursResponse(neighbours);
     }
@@ -148,10 +164,9 @@ public class TypeTransformer {
         return String.format("/neighbour/%s", neighbourName);
     }
 
-    public ListNeighbourCapabilitiesResponse listNeighbourCapabilitiesResponse(String neighbourName, Set<Capability> capabilities) {
-        return new ListNeighbourCapabilitiesResponse(
-                neighbourName,
-                capabilitySetToNeighbourCapabilityApi(neighbourName,capabilities)
+    public ListNeighbourCapabilitiesResponse listNeighbourCapabilitiesResponse(Neighbour neighbourName, Set<Capability> capabilities) {
+        return new ListNeighbourCapabilitiesResponse(neighbourName.getName(),
+                capabilitySetToNeighbourCapabilityApi(neighbourName.getName(),capabilities)
         );
     }
 
@@ -196,5 +211,13 @@ public class TypeTransformer {
        ListNeighbourSubscriptionResponse response = new ListNeighbourSubscriptionResponse(neighbourName, neighbourSubscriptionApis);
         return response;
    }
+
+    private NeighbourStatusApi transformToNeighbourStatusApi(boolean status) {
+        if (status == true) {
+            return NeighbourStatusApi.UP;
+        }else{
+            return NeighbourStatusApi.DOWN;
+        }
+    }
 
 }
