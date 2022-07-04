@@ -99,7 +99,6 @@ public class AdminRestController {
         Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
         Set<Subscription> theirSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 
-        //TODO: Transform to response
        ListNeighbourSubscriptionResponse response = typeTransformer.transformOurAndTheirSubscriptionsToListSubscriptionResponse(neighbourName, ourSubscriptions, theirSubscriptions);
         return response;
     }

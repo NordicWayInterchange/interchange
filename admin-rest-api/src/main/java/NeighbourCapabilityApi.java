@@ -40,6 +40,7 @@ public class NeighbourCapabilityApi {
         this.definition = definition;
     }
 
+    /*
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -47,6 +48,7 @@ public class NeighbourCapabilityApi {
         no.vegvesen.ixn.serviceprovider.model.LocalActorCapability that = (no.vegvesen.ixn.serviceprovider.model.LocalActorCapability) o;
         return Objects.equals(id, that.id) && Objects.equals(path, that.path) && Objects.equals(definition, that.definition);
     }
+*/
 
     @Override
     public int hashCode() {
