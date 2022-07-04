@@ -30,9 +30,11 @@ public class AdminRESTClient {
     }
 
     //TODO: Make response objects!
+    //TODO: Check if paths are valid
 
-    public List<Neighbour> getAllNeighbours() {
-        return null;
+    public GetAllNeighboursResponse getAllNeighbours() {
+        String url = String.format("%s/%s/", server, user);
+        return restTemplate.getForEntity(url, GetAllNeighboursResponse.class).getBody();
     }
     //Krav 3.1
     public ListCapabilitiesResponse getNeighbourCapabilities(String neighbourName) {

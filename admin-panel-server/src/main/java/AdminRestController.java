@@ -75,7 +75,6 @@ public class AdminRestController {
 
         //Funker dette???
         ListNeighbourCapabilitiesResponse response = typeTransformer.listNeighbourCapabilitiesResponse(neighbourName, capabilities);
-        //TODO: Transform to response
         return response;
     }
 
