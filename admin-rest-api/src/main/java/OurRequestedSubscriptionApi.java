@@ -59,7 +59,7 @@ public class OurRequestedSubscriptionApi {
 
     @Override
     public String toString() {
-        return "LocalActorSubscription{" +
+        return "OurRequestedSubscriptionApi{" +
                 "id='" + id + '\'' +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +

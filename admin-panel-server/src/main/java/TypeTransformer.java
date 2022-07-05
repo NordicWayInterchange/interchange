@@ -206,7 +206,7 @@ public class TypeTransformer {
                    subscription.getLastUpdatedTimestamp()));
 
        }
-       ListNeighbourSubscriptionResponse response = new ListNeighbourSubscriptionResponse(neighbourName, neighbourRequestedSubscriptionApis);
+       ListNeighbourSubscriptionResponse response = new ListNeighbourSubscriptionResponse(neighbourName, neighbourRequestedSubscriptionApis, ourRequestedSubscriptionApi);
         return response;
    }
 

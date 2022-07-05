@@ -59,7 +59,7 @@ public class NeighbourRequestedSubscriptionApi {
 
     @Override
     public String toString() {
-        return "LocalActorSubscription{" +
+        return "NeighbourRequestedSubscriptionApi{" +
                 "id='" + id + '\'' +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
