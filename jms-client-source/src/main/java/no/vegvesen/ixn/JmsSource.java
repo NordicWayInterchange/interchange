@@ -38,10 +38,12 @@ public class JmsSource implements CommandLineRunner {
             s.send(s.createMessageBuilder()
                     .textMessage("Dette er en test, hehehehe!")
                     .messageType(Constants.DENM)
-                    .quadTreeTiles(",123,")
+                    .quadTreeTiles(",12003,")
                     .publisherId("KYRRE")
                     .protocolVersion("1.0")
-                    .originatingCountry("SE")
+                    .originatingCountry("NO")
+                    .causeCode("6")
+                    .subCauseCode("61")
                     .build());
         }
     }
