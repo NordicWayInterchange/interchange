@@ -1,9 +1,6 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.CamCapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +23,6 @@ public class AdminRestAPIDocumentationTest {
         ));
         GetAllNeighboursResponse response = new GetAllNeighboursResponse(
                 neighbours
-
         );
 
         ObjectMapper mapper = new ObjectMapper();
@@ -71,24 +67,25 @@ public class AdminRestAPIDocumentationTest {
     //getSubscriptionsFromNeighbour
     @Test
     public void ListNeighbourSubscriptionsResponse() throws JsonProcessingException {
-        Set<NeighbourSubscriptionApi> neighbourSubscriptions = new HashSet<>();
-        neighbourSubscriptions.add(new NeighbourSubscriptionApi(
+        Set<NeighbourRequestedSubscriptionApi> neighbourSubscriptions = new HashSet<>();
+        Set<OurRequestedSubscriptionApi> ourRequestedSubscriptionApi = new HashSet<>();
+
+        ourRequestedSubscriptionApi.add(new OurRequestedSubscriptionApi(
                 "1",
                 "/neighbour1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
-                System.currentTimeMillis(),
-                true
+                System.currentTimeMillis()
         ));
-        neighbourSubscriptions.add(new NeighbourSubscriptionApi(
+        neighbourSubscriptions.add(new NeighbourRequestedSubscriptionApi(
                 "1",
                 "/neighbour2/subscriptions/1",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
-                System.currentTimeMillis(),
-                false
+                System.currentTimeMillis()
         ));
         ListNeighbourSubscriptionResponse response = new ListNeighbourSubscriptionResponse(
                 "Norge",
-                neighbourSubscriptions
+                neighbourSubscriptions,
+                ourRequestedSubscriptionApi
         );
 
         ObjectMapper mapper = new ObjectMapper();

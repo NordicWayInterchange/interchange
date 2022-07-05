@@ -1,20 +1,18 @@
 
 import java.util.Objects;
 
-public class NeighbourSubscriptionApi {
+public class OurRequestedSubscriptionApi {
     String id;
     String path;
     String selector;
     long lastUpdatedTimeStamp;
-    boolean our;
 
 
-    public NeighbourSubscriptionApi(String id, String path, String selector, long lastUpdatedTimeStamp, boolean our) {
+    public OurRequestedSubscriptionApi(String id, String path, String selector, long lastUpdatedTimeStamp) {
         this.id = id;
         this.path = path;
         this.selector = selector;
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
-        this.our = our;
     }
 
     public String getId() {

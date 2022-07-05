@@ -3,7 +3,6 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryStatus;
 import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -187,28 +186,27 @@ public class TypeTransformer {
     }
 
    public ListNeighbourSubscriptionResponse transformOurAndTheirSubscriptionsToListSubscriptionResponse(String neighbourName, Set<Subscription> ourSubscriptions, Set<Subscription> theirSubscriptions){
-        Set<NeighbourSubscriptionApi> neighbourSubscriptionApis = new HashSet<>();
+        Set<NeighbourRequestedSubscriptionApi> neighbourRequestedSubscriptionApis = new HashSet<>();
+        Set<OurRequestedSubscriptionApi> ourRequestedSubscriptionApi = new HashSet<>();
         for(Subscription subscription : ourSubscriptions){
             String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
-            neighbourSubscriptionApis.add(new NeighbourSubscriptionApi(
+            ourRequestedSubscriptionApi.add(new OurRequestedSubscriptionApi(
                     sub_id,
                     subscription.getPath(),
                     subscription.getPath(),
-                    subscription.getLastUpdatedTimestamp(),
-                    true));
+                    subscription.getLastUpdatedTimestamp()));
 
         }
        for(Subscription subscription : theirSubscriptions){
            String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
-           neighbourSubscriptionApis.add(new NeighbourSubscriptionApi(
+           neighbourRequestedSubscriptionApis.add(new NeighbourRequestedSubscriptionApi(
                    sub_id,
                    subscription.getPath(),
                    subscription.getPath(),
-                   subscription.getLastUpdatedTimestamp(),
-                   false));
+                   subscription.getLastUpdatedTimestamp()));
 
        }
-       ListNeighbourSubscriptionResponse response = new ListNeighbourSubscriptionResponse(neighbourName, neighbourSubscriptionApis);
+       ListNeighbourSubscriptionResponse response = new ListNeighbourSubscriptionResponse(neighbourName, neighbourRequestedSubscriptionApis);
         return response;
    }
 
