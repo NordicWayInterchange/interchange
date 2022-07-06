@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,6 +18,7 @@ public class AdminRestAPIDocumentationTest {
 
 
     //getAllNeighbours()
+    @Disabled
     @Test
     public void GetAllNeighboursResponse() throws JsonProcessingException {
         Set<NeighbourWithPathAndApi> neighbours = new HashSet<>();
@@ -124,24 +126,57 @@ public class AdminRestAPIDocumentationTest {
 
     }
 
+    //getCapabilitiesFromServiceProvider
     @Test
-    public void getCapabilitiesFromServiceProviderTest() throws JsonProcessingException{
-
-        GetCapabilityResponse getCapabilityResponse = new GetCapabilityResponse("cap-1", "path", new CapabilityApi());
-
+    public void listCapabilitiesResponse() throws JsonProcessingException {
+        ListCapabilitiesResponse response = new ListCapabilitiesResponse(
+                "sp-1",
+                Collections.singleton(
+                        new LocalActorCapability(
+                                "1",
+                                "/spi-1/capabilities/1",
+                                new DenmCapabilityApi(
+                                        "NPRA",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("1234"),
+                                        Collections.singleton("6")
+                                )
+                        )
+                )
+        );
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(getCapabilityResponse));
-
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
 
 
 
-    //getCapabilitiesFromServiceProvider
 
-    //getSubscriptionsFromServiceProvider
+
+
+
 
     //getDeliveriesFromServiceProvider
+    @Test
+    public void listDeliveriesResponse() throws JsonProcessingException {
+        ListDeliveriesResponse response = new ListDeliveriesResponse(
+                "sp-1",
+                Collections.singleton(new Delivery(
+                        "1",
+                        "/sp-1/deliveries/1",
+                        "originatingCountry = 'NO' and messageType = 'DENM'",
+                        System.currentTimeMillis(),
+                        DeliveryStatus.CREATED
+
+                ))
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+    }
+
+
+    //getSubscriptionsFromServiceProvider
     @Test
     public void listSubscriptionsResponse() throws JsonProcessingException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
@@ -191,63 +226,6 @@ public class AdminRestAPIDocumentationTest {
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
-    @Test
-    public void listCapabilitiesResponse() throws JsonProcessingException {
-        ListCapabilitiesResponse response = new ListCapabilitiesResponse(
-                "sp-1",
-                Collections.singleton(
-                        new LocalActorCapability(
-                                "1",
-                                "/spi-1/capabilities/1",
-                                new DenmCapabilityApi(
-                                        "NPRA",
-                                        "NO",
-                                        "1.0",
-                                        Collections.singleton("1234"),
-                                        Collections.singleton("6")
-                                )
-                        )
-                )
-        );
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
-    }
-
-    @Test
-    public void getCapabilityResponse() throws JsonProcessingException {
-        GetCapabilityResponse response = new GetCapabilityResponse(
-                "1",
-                "/sp-1/capabilities/1",
-                new DenmCapabilityApi(
-                        "NPRA",
-                        "NO",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
-                )
-        );
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
-
-    }
-
-
-    @Test
-    public void listDeliveriesResponse() throws JsonProcessingException {
-        ListDeliveriesResponse response = new ListDeliveriesResponse(
-                "sp-1",
-                Collections.singleton(new Delivery(
-                        "1",
-                        "/sp-1/deliveries/1",
-                        "originatingCountry = 'NO' and messageType = 'DENM'",
-                        System.currentTimeMillis(),
-                        DeliveryStatus.CREATED
-
-                ))
-        );
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
-    }
 
     @Test
     public void getDeliveryResponse() throws JsonProcessingException {
