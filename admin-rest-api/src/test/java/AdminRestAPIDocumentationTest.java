@@ -1,14 +1,20 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class AdminRestAPIDocumentationTest {
+
+
+    @Autowired
+    ServiceProvider serviceProvider = generateServiceProvider();
+
 
     //getAllNeighbours()
     @Test
@@ -97,14 +103,45 @@ public class AdminRestAPIDocumentationTest {
 
     //getAllServiceProviders
 
-    //getServiceProvider
+    @Test
+    public void getServiceProviderTest() throws JsonProcessingException{
+        GetServiceProviderResponse getServiceProviderRequest = new GetServiceProviderResponse(serviceProvider);
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(getServiceProviderRequest));
+
+
+    }
+
+    @Test
+    public void getAllServiceProvidersTest()throws JsonProcessingException{
+
+        GetAllServiceProvidersResponse getAllServiceProvidersResponse = new GetAllServiceProvidersResponse(generateMultipleServiceProviders(5));
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(getAllServiceProvidersResponse));
+
+
+    }
+
+    @Test
+    public void getCapabilitiesFromServiceProviderTest() throws JsonProcessingException{
+
+        GetCapabilityResponse getCapabilityResponse = new GetCapabilityResponse("cap-1", "path", new CapabilityApi());
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(getCapabilityResponse));
+
+    }
+
+
+
 
     //getCapabilitiesFromServiceProvider
 
     //getSubscriptionsFromServiceProvider
 
     //getDeliveriesFromServiceProvider
-
     @Test
     public void listSubscriptionsResponse() throws JsonProcessingException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
@@ -239,4 +276,43 @@ public class AdminRestAPIDocumentationTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(selector));
     }
+
+    public ServiceProvider generateServiceProvider (){
+        String name = "sp-1";
+        Capabilities capabilities = new Capabilities();
+
+        Set<LocalSubscription> subscriptions = new HashSet<LocalSubscription>();
+
+
+        ServiceProvider serviceProvider = new ServiceProvider(name);
+        serviceProvider.setId(1);
+        serviceProvider.setCapabilities(capabilities);
+        serviceProvider.setDeliveries(new HashSet<LocalDelivery>());
+        serviceProvider.setSubscriptions(subscriptions);
+
+        return serviceProvider;
+
+   }
+   public List<ServiceProvider> generateMultipleServiceProviders(int howMany){
+        List<ServiceProvider> serviceProviders = new ArrayList<>();
+
+       for (int i = 0; i < howMany; i++) {
+           String name = "sp-" + Integer.toString(i);
+
+           Capabilities capabilities = new Capabilities();
+
+           Set<LocalSubscription> subscriptions = new HashSet<LocalSubscription>();
+
+
+           ServiceProvider serviceProvider = new ServiceProvider(name);
+           serviceProvider.setId(i);
+           serviceProvider.setCapabilities(capabilities);
+           serviceProvider.setDeliveries(new HashSet<LocalDelivery>());
+           serviceProvider.setSubscriptions(subscriptions);
+           serviceProviders.add(serviceProvider);
+
+       }
+       return serviceProviders;
+
+   }
 }
