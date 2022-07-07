@@ -1,4 +1,4 @@
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+package no.vegvesen.ixn.admin;
 
 public class ServiceProviderApi {
     private String name;

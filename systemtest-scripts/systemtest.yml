@@ -57,6 +57,30 @@ services:
       - testing_net
 
 
+  local_admin_server:
+    #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
+    build:
+      context: ../admin-server-app
+    container_name: local_admin_server
+    depends_on:
+      - local_db
+    ports:
+      - 12345:12345
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
+      - SERVER_NAME=local.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - SP_CHNL_PORT=8797
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - testing_net
+
+
   local_interchange_app:
     #image: eu.gcr.io/nordic-way-aad182cc/interchange-node-app:${BRANCH_TAG}
     build:

@@ -1,3 +1,5 @@
+package no.vegvesen.ixn.admin;
+
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 
 import java.util.Objects;

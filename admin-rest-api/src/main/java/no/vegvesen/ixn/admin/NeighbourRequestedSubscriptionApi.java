@@ -1,14 +1,16 @@
+package no.vegvesen.ixn.admin;
+
 
 import java.util.Objects;
 
-public class OurRequestedSubscriptionApi {
+public class NeighbourRequestedSubscriptionApi {
     String id;
     String path;
     String selector;
     long lastUpdatedTimeStamp;
 
 
-    public OurRequestedSubscriptionApi(String id, String path, String selector, long lastUpdatedTimeStamp) {
+    public NeighbourRequestedSubscriptionApi(String id, String path, String selector, long lastUpdatedTimeStamp) {
         this.id = id;
         this.path = path;
         this.selector = selector;
@@ -48,21 +50,13 @@ public class OurRequestedSubscriptionApi {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NeighbourRequestedSubscriptionApi that = (NeighbourRequestedSubscriptionApi) o;
-        return lastUpdatedTimeStamp == that.lastUpdatedTimeStamp && Objects.equals(id, that.id) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector);
-    }
-
-    @Override
     public int hashCode() {
         return Objects.hash(id, path, selector, lastUpdatedTimeStamp);
     }
 
     @Override
     public String toString() {
-        return "OurRequestedSubscriptionApi{" +
+        return "NeighbourRequestedSubscriptionApi{" +
                 "id='" + id + '\'' +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +

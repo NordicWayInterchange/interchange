@@ -1,3 +1,4 @@
+package no.vegvesen.ixn.admin;
 
 import java.util.Objects;
 

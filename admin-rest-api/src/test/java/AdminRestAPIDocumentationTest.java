@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.admin.*;
 import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.serviceprovider.model.*;

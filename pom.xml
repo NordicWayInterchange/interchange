@@ -286,5 +286,6 @@
         <module>admin-rest-api</module>
         <module>admin-panel-server</module>
         <module>admin-rest-client</module>
+        <module>admin-server-app</module>
     </modules>
 </project>

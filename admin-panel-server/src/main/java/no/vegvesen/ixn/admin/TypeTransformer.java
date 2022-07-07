@@ -1,3 +1,5 @@
+package no.vegvesen.ixn.admin;
+
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -150,7 +152,7 @@ public class TypeTransformer {
         return true;
     }
 
-    public GetAllNeighboursResponse getAllNeighboursResponse(String interchangeName,NeighbourRepository neighbourRepository){
+    public GetAllNeighboursResponse getAllNeighboursResponse(String interchangeName, NeighbourRepository neighbourRepository){
         Set<NeighbourApi> neighbours = new HashSet<>();
         for(Neighbour neighbour : neighbourRepository.findAll()){
             neighbours.add(

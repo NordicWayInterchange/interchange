@@ -1,7 +1,5 @@
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+package no.vegvesen.ixn.admin;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class GetAllServiceProvidersResponse {

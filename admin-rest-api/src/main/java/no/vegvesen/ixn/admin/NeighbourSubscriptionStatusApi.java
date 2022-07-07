@@ -1,3 +1,5 @@
+package no.vegvesen.ixn.admin;
+
 public enum NeighbourSubscriptionStatusApi {
     REQUESTED,
     CREATED,

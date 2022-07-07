@@ -1,7 +1,4 @@
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.model.Capability;
-import no.vegvesen.ixn.serviceprovider.model.ListCapabilitiesResponse;
-import no.vegvesen.ixn.serviceprovider.model.LocalActorCapability;
+package no.vegvesen.ixn.admin;
 
 import java.util.Objects;
 import java.util.Set;

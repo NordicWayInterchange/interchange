@@ -1,3 +1,5 @@
+package no.vegvesen.ixn.admin;
+
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@RestController
 public class AdminRestController {
 
     private final ServiceProviderRepository serviceProviderRepository;

@@ -1,3 +1,5 @@
+package no.vegvesen.ixn.admin;
+
 import no.vegvesen.ixn.federation.model.*;
 
 import java.util.Set;

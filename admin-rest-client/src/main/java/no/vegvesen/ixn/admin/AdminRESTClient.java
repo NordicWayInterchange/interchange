@@ -1,4 +1,7 @@
-import no.vegvesen.ixn.federation.model.Neighbour;
+package no.vegvesen.ixn.admin;
+
+
+import no.vegvesen.ixn.admin.GetAllServiceProvidersResponse;
 import no.vegvesen.ixn.serviceprovider.model.ListCapabilitiesResponse;
 import no.vegvesen.ixn.serviceprovider.model.ListDeliveriesResponse;
 import no.vegvesen.ixn.serviceprovider.model.ListSubscriptionsResponse;
@@ -8,7 +11,6 @@ import org.apache.http.impl.client.HttpClients;
 
 
 import javax.net.ssl.SSLContext;
-import java.util.List;
 
 public class AdminRESTClient {
 
