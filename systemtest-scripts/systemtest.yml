@@ -65,18 +65,19 @@ services:
     depends_on:
       - local_db
     ports:
-      - 12345:12345
+      - 58321:8799
     volumes:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://local_db:5432/federation
       - SERVER_NAME=local.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
-      - SP_CHNL_PORT=8797
+      - ADMIN_CHNL_PORT=8799
       - TRUST_STORE=/jks/keys/truststore.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/local.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - KEY_PASSWORD=password
     networks:
       - testing_net
 
