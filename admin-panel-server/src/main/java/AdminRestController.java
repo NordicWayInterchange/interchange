@@ -151,7 +151,7 @@ public class AdminRestController {
     public GetAllServiceProvidersResponse getAllServiceProviders() {
         //TODO: Add certificate check for admin
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-        return new GetAllServiceProvidersResponse(serviceProviders);
+        return new GetAllServiceProvidersResponse(nodeProperties.getName(), serviceProviders);
     }
 
     /*
@@ -178,7 +178,7 @@ public class AdminRestController {
             serviceProvider = new ServiceProvider(serviceProviderName);
         }
 
-        return new GetServiceProviderResponse(serviceProvider);
+        return new GetServiceProviderResponse(nodeProperties.getName(),serviceProvider);
     }
 
 
@@ -225,7 +225,7 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/serviceProvider/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
     public ListDeliveriesResponse getDeliveriesFromServiceProvider(@PathVariable String serviceProviderName){
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);

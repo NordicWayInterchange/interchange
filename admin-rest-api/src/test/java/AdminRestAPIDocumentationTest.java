@@ -107,7 +107,7 @@ public class AdminRestAPIDocumentationTest {
 
     @Test
     public void getServiceProviderTest() throws JsonProcessingException{
-        GetServiceProviderResponse getServiceProviderRequest = new GetServiceProviderResponse(serviceProvider);
+        GetServiceProviderResponse getServiceProviderRequest = new GetServiceProviderResponse("Norge",serviceProvider);
 
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(getServiceProviderRequest));
@@ -118,7 +118,7 @@ public class AdminRestAPIDocumentationTest {
     @Test
     public void getAllServiceProvidersTest()throws JsonProcessingException{
 
-        GetAllServiceProvidersResponse getAllServiceProvidersResponse = new GetAllServiceProvidersResponse(generateMultipleServiceProviders(5));
+        GetAllServiceProvidersResponse getAllServiceProvidersResponse = new GetAllServiceProvidersResponse("Norge", generateMultipleServiceProviders(5));
 
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(getAllServiceProvidersResponse));

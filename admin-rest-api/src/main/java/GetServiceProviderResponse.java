@@ -4,54 +4,31 @@ import java.util.Set;
 
 public class GetServiceProviderResponse {
 
-    private String name;
+    private String nameOfInterchange;
 
     private ServiceProvider serviceProvider;
 
-    private Capabilities capabilities;
-
-    private Set<LocalSubscription> subscriptions;
-
-    private Set<LocalDelivery> deliveries;
-    private int id;
 
 
-    public GetServiceProviderResponse(ServiceProvider serviceProvider){
 
+    public GetServiceProviderResponse(String nameOfInterchange, ServiceProvider serviceProvider){
+
+        this.nameOfInterchange = nameOfInterchange;
         this.serviceProvider = serviceProvider;
-        this.name = serviceProvider.getName();
-        this.capabilities = serviceProvider.getCapabilities();
-        this.id = serviceProvider.getId();
-        this.subscriptions = serviceProvider.getSubscriptions();
-        this.deliveries = serviceProvider.getDeliveries();
+
 
     }
 
 
 
     public String getName() {
-        return name;
-    }
-
-    public Capabilities getCapabilities() {
-        return capabilities;
+        return nameOfInterchange;
     }
 
     public ServiceProvider getServiceProvider() {
         return serviceProvider;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public Set<LocalDelivery> getDeliveries() {
-        return deliveries;
-    }
-
-    public Set<LocalSubscription> getSubscriptions() {
-        return subscriptions;
-    }
 
 
 
