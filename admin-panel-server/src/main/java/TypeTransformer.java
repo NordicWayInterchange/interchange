@@ -151,10 +151,17 @@ public class TypeTransformer {
     }
 
     public GetAllNeighboursResponse getAllNeighboursResponse(String interchangeName,NeighbourRepository neighbourRepository){
-        Set<NeighbourWithPathAndApi> neighbours = new HashSet<>();
+        Set<NeighbourApi> neighbours = new HashSet<>();
         for(Neighbour neighbour : neighbourRepository.findAll()){
             neighbours.add(
-                    new NeighbourWithPathAndApi(neighbour.getNeighbour_id().toString(), neighbourPath(neighbour.getName()), transformToNeighbourStatusApi(isNeighbourReachable(neighbourRepository, neighbour))));
+                    new NeighbourApi(neighbour.getNeighbour_id().toString(),
+                            neighbourPath(neighbour.getName()),
+                            neighbour.getName(),
+                            String.valueOf(neighbour.getCapabilities().getCapabilities().size()),
+                            String.valueOf(neighbour.getOurRequestedSubscriptions().getSubscriptions().size()),
+                            String.valueOf(neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().size()),
+                            transformToNeighbourStatusApi(isNeighbourReachable(neighbourRepository, neighbour))
+            ));
         }
         return new GetAllNeighboursResponse(interchangeName, neighbours);
     }
@@ -218,4 +225,26 @@ public class TypeTransformer {
         }
     }
 
+    public Set<ServiceProviderApi> transformServiceProvidersToServiceProviderApis(List<ServiceProvider> serviceProviders) {
+        Set<ServiceProviderApi> serviceProvidersApi = new HashSet<>();
+        for(ServiceProvider serviceProvider : serviceProviders){
+            serviceProvidersApi.add(new ServiceProviderApi(
+                    serviceProvider.getName(),
+                    serviceProvider.getId().toString(),
+                    String.valueOf(serviceProvider.getCapabilities().getCapabilities().size()),
+                    String.valueOf(serviceProvider.getSubscriptions().size()),
+                    String.valueOf(serviceProvider.getDeliveries().size()),
+                    transformToServiceProviderStatusApi(true)
+            ));
+        }
+        return serviceProvidersApi;
+    }
+
+    private ServiceProviderStatusApi transformToServiceProviderStatusApi(boolean status) {
+        if (status == true) {
+            return ServiceProviderStatusApi.UP;
+        }else{
+            return ServiceProviderStatusApi.DOWN;
+        }
+    }
 }

@@ -1,19 +1,17 @@
 
 import java.util.Objects;
 
-import java.util.List;
-
 import java.util.Set;
 
 public class GetAllNeighboursResponse {
 
     private String interchangeName;
 
-    private Set<NeighbourWithPathAndApi> neighbourWithPathAndApis;
+    private Set<NeighbourApi> neighboursWithPathAndApi;
 
-    public GetAllNeighboursResponse(String interchangeName, Set<NeighbourWithPathAndApi> neighbourWithPathAndApis){
+    public GetAllNeighboursResponse(String interchangeName, Set<NeighbourApi> neighboursWithPathAndApi){
         this.interchangeName = interchangeName;
-        this.neighbourWithPathAndApis = neighbourWithPathAndApis;
+        this.neighboursWithPathAndApi = neighboursWithPathAndApi;
 
     }
 
@@ -25,12 +23,12 @@ public class GetAllNeighboursResponse {
         this.interchangeName = interchangeName;
     }
 
-    public Set<NeighbourWithPathAndApi> getNeighbourWithPathAndApis() {
-        return neighbourWithPathAndApis;
+    public Set<NeighbourApi> getNeighboursWithPathAndApi() {
+        return neighboursWithPathAndApi;
     }
 
-    public void setNeighbourWithPathAndApis(Set<NeighbourWithPathAndApi> neighbourWithPathAndApis) {
-        this.neighbourWithPathAndApis = neighbourWithPathAndApis;
+    public void setNeighboursWithPathAndApi(Set<NeighbourApi> neighboursWithPathAndApi) {
+        this.neighboursWithPathAndApi = neighboursWithPathAndApi;
     }
 
     @Override
@@ -38,18 +36,18 @@ public class GetAllNeighboursResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GetAllNeighboursResponse that = (GetAllNeighboursResponse) o;
-        return Objects.equals(neighbourWithPathAndApis, that.neighbourWithPathAndApis);
+        return Objects.equals(neighboursWithPathAndApi, that.neighboursWithPathAndApi);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(neighbourWithPathAndApis);
+        return Objects.hash(neighboursWithPathAndApi);
     }
 
     @Override
     public String toString() {
         return "GetAllNeighboursResponse{" +
-                "neighbours=" + neighbourWithPathAndApis +
+                "neighbours=" + neighboursWithPathAndApi +
                 '}';
     }
 }

@@ -43,6 +43,9 @@ public class OurRequestedSubscriptionApi {
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
     }
 
+    public long getLastUpdatedTimeStamp() {
+        return lastUpdatedTimeStamp;
+    }
 
     @Override
     public boolean equals(Object o) {

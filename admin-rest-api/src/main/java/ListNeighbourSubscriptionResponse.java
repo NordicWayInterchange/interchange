@@ -5,48 +5,32 @@ import java.util.Set;
 public class ListNeighbourSubscriptionResponse {
     private String name;
     private String version = "1.0";
-    private Set<OurRequestedSubscriptionApi> ourSubscriptionApis;
-    private Set<NeighbourRequestedSubscriptionApi> neighbourSubscriptionApis;
+    private Set<OurRequestedSubscriptionApi> ourSubscriptions;
+    private Set<NeighbourRequestedSubscriptionApi> neighbourSubscriptions;
 
     public ListNeighbourSubscriptionResponse() {
     }
 
-    public ListNeighbourSubscriptionResponse(String name, Set<NeighbourRequestedSubscriptionApi> neighbourSubscriptionApis, Set<OurRequestedSubscriptionApi> ourSubscriptionApis) {
+    public ListNeighbourSubscriptionResponse(String name, Set<NeighbourRequestedSubscriptionApi> neighbourSubscriptions, Set<OurRequestedSubscriptionApi> ourSubscriptions) {
         this.name = name;
-        this.neighbourSubscriptionApis = neighbourSubscriptionApis;
-        this.ourSubscriptionApis = ourSubscriptionApis;
+        this.neighbourSubscriptions = neighbourSubscriptions;
+        this.ourSubscriptions = ourSubscriptions;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public Set<OurRequestedSubscriptionApi> getOurSubscriptions() {
+        return ourSubscriptions;
     }
 
-    public Set<NeighbourRequestedSubscriptionApi> getSubscriptions() {
-        return neighbourSubscriptionApis;
-    }
-
-    public void setSubscriptions(Set<NeighbourRequestedSubscriptionApi> neighbourSubscriptionApis) {
-        this.neighbourSubscriptionApis = neighbourSubscriptionApis;
-    }
-
-    public Set<OurRequestedSubscriptionApi> getOurSubscriptionApis() {
-        return ourSubscriptionApis;
-    }
-
-    public void setOurSubscriptionApis(Set<OurRequestedSubscriptionApi> ourSubscriptionApis) {
-        this.ourSubscriptionApis = ourSubscriptionApis;
+    public Set<NeighbourRequestedSubscriptionApi> getNeighbourSubscriptions() {
+        return neighbourSubscriptions;
     }
 
     @Override
@@ -54,12 +38,12 @@ public class ListNeighbourSubscriptionResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ListNeighbourSubscriptionResponse that = (ListNeighbourSubscriptionResponse) o;
-        return Objects.equals(name, that.name) && Objects.equals(version, that.version) && Objects.equals(ourSubscriptionApis, that.ourSubscriptionApis) && Objects.equals(neighbourSubscriptionApis, that.neighbourSubscriptionApis);
+        return Objects.equals(name, that.name) && Objects.equals(version, that.version) && Objects.equals(ourSubscriptions, that.ourSubscriptions) && Objects.equals(neighbourSubscriptions, that.neighbourSubscriptions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, version, ourSubscriptionApis, neighbourSubscriptionApis);
+        return Objects.hash(name, version, ourSubscriptions, neighbourSubscriptions);
     }
 
     @Override
@@ -67,8 +51,8 @@ public class ListNeighbourSubscriptionResponse {
         return "ListNeighbourSubscriptionResponse{" +
                 "name='" + name + '\'' +
                 ", version='" + version + '\'' +
-                ", ourSubscriptionApis=" + ourSubscriptionApis +
-                ", neighbourSubscriptionApis=" + neighbourSubscriptionApis +
+                ", ourSubscriptionApis=" + ourSubscriptions +
+                ", neighbourSubscriptionApis=" + neighbourSubscriptions +
                 '}';
     }
 }

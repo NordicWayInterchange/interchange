@@ -151,7 +151,8 @@ public class AdminRestController {
     public GetAllServiceProvidersResponse getAllServiceProviders() {
         //TODO: Add certificate check for admin
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-        return new GetAllServiceProvidersResponse(nodeProperties.getName(), serviceProviders);
+        GetAllServiceProvidersResponse response = new GetAllServiceProvidersResponse(nodeProperties.getName(), typeTransformer.transformServiceProvidersToServiceProviderApis(serviceProviders));
+        return response;
     }
 
     /*

@@ -19,19 +19,13 @@ public class GetServiceProviderResponse {
 
     }
 
-
-
-    public String getName() {
+    public String getNameOfInterchange() {
         return nameOfInterchange;
     }
 
     public ServiceProvider getServiceProvider() {
         return serviceProvider;
     }
-
-
-
-
 }
 
 
