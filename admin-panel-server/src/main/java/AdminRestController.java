@@ -51,7 +51,7 @@ public class AdminRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetAllNeighboursResponse getAllNeighbours() {
         //TODO: Add certificate check for admin
-        GetAllNeighboursResponse response = typeTransformer.getAllNeighboursResponse(neighbourRepository);
+        GetAllNeighboursResponse response = typeTransformer.getAllNeighboursResponse(nodeProperties.getName(), neighbourRepository);
         return response;
     }
 

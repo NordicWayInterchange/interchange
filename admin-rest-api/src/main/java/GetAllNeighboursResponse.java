@@ -7,20 +7,30 @@ import java.util.Set;
 
 public class GetAllNeighboursResponse {
 
-    private Set<NeighbourWithPathAndApi> neighbours;
+    private String interchangeName;
 
-    public GetAllNeighboursResponse(Set<NeighbourWithPathAndApi> neighbours){
+    private Set<NeighbourWithPathAndApi> neighbourWithPathAndApis;
 
-        this.neighbours = neighbours;
+    public GetAllNeighboursResponse(String interchangeName, Set<NeighbourWithPathAndApi> neighbourWithPathAndApis){
+        this.interchangeName = interchangeName;
+        this.neighbourWithPathAndApis = neighbourWithPathAndApis;
 
     }
 
-    public Set<NeighbourWithPathAndApi> getNeighbours() {
-        return neighbours;
+    public String getInterchangeName() {
+        return interchangeName;
     }
 
-    public void setNeighbours(Set<NeighbourWithPathAndApi> neighbours) {
-        this.neighbours = neighbours;
+    public void setInterchangeName(String interchangeName) {
+        this.interchangeName = interchangeName;
+    }
+
+    public Set<NeighbourWithPathAndApi> getNeighbourWithPathAndApis() {
+        return neighbourWithPathAndApis;
+    }
+
+    public void setNeighbourWithPathAndApis(Set<NeighbourWithPathAndApi> neighbourWithPathAndApis) {
+        this.neighbourWithPathAndApis = neighbourWithPathAndApis;
     }
 
     @Override
@@ -28,18 +38,18 @@ public class GetAllNeighboursResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GetAllNeighboursResponse that = (GetAllNeighboursResponse) o;
-        return Objects.equals(neighbours, that.neighbours);
+        return Objects.equals(neighbourWithPathAndApis, that.neighbourWithPathAndApis);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(neighbours);
+        return Objects.hash(neighbourWithPathAndApis);
     }
 
     @Override
     public String toString() {
         return "GetAllNeighboursResponse{" +
-                "neighbours=" + neighbours +
+                "neighbours=" + neighbourWithPathAndApis +
                 '}';
     }
 }

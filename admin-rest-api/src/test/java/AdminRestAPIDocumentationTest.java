@@ -18,7 +18,6 @@ public class AdminRestAPIDocumentationTest {
 
 
     //getAllNeighbours()
-    @Disabled
     @Test
     public void GetAllNeighboursResponse() throws JsonProcessingException {
         Set<NeighbourWithPathAndApi> neighbours = new HashSet<>();
@@ -30,6 +29,7 @@ public class AdminRestAPIDocumentationTest {
                 NeighbourStatusApi.DOWN
         ));
         GetAllNeighboursResponse response = new GetAllNeighboursResponse(
+                "Norge",
                 neighbours
         );
 

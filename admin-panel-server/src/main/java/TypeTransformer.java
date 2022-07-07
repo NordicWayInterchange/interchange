@@ -150,13 +150,13 @@ public class TypeTransformer {
         return true;
     }
 
-    public GetAllNeighboursResponse getAllNeighboursResponse(NeighbourRepository neighbourRepository){
+    public GetAllNeighboursResponse getAllNeighboursResponse(String interchangeName,NeighbourRepository neighbourRepository){
         Set<NeighbourWithPathAndApi> neighbours = new HashSet<>();
         for(Neighbour neighbour : neighbourRepository.findAll()){
             neighbours.add(
                     new NeighbourWithPathAndApi(neighbour.getNeighbour_id().toString(), neighbourPath(neighbour.getName()), transformToNeighbourStatusApi(isNeighbourReachable(neighbourRepository, neighbour))));
         }
-        return new GetAllNeighboursResponse(neighbours);
+        return new GetAllNeighboursResponse(interchangeName, neighbours);
     }
 
     private static String neighbourPath(String neighbourName) {
