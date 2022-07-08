@@ -9,7 +9,7 @@ export default class getQpid extends React.Component {
     persons: []
   }
   componentDidMount() {
-    var url = "http://localhost:8666/api/latest/exchange/default/local.bouvetinterchange.eu/outgoingExchange";
+    var url = "http://localhost:8181/qpid/api/latest/exchange/default/local.bouvetinterchange.eu/outgoingExchange";
     var url2= "http://localhost:8555/api/latest/exchange/default/local.bouvetinterchange.eu/outgoingExchange";
     var url3="https://jsonkeeper.com/b/FQF8"
     var user = 'qpid-admin';
@@ -22,16 +22,7 @@ export default class getQpid extends React.Component {
       password: pass
     }
   })
-/*axios.get(url, { headers: {"Authorization" : `Bearer cXBpZC1hZG1pbjpzdXBlcnNlY3JldA==`} })*/
-  /*axios({
-    method: 'get',
-    url: url,
-    responseType: 'json',
-    auth: {
-      username: user,
-      password: pass
-    }
-  })*/
+
   
   
   .then(({ data })=> {

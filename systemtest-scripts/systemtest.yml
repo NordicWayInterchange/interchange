@@ -391,6 +391,17 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
 
+  local_nginx:
+    build:
+      context: ../systemtest_ngnix
+    depends_on:
+      - local_qpid
+    ports:
+      - 8181:8181
+    networks:
+      - testing_net
+
+
 networks:
   testing_net:
     ipam:
