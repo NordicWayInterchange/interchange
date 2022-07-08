@@ -18,7 +18,7 @@ public class AdminRESTClient {
     private final String server;
     private final String user;
 
-    public AdminRESTClient(SSLContext sslContext, String server, String user) {
+    public AdminRESTClient(SSLContext sslContext, String server) {
         this.restTemplate = new RestTemplate(
                 new HttpComponentsClientHttpRequestFactory(
                         HttpClients
@@ -28,53 +28,66 @@ public class AdminRESTClient {
                 )
         );
         this.server = server;
-        this.user = user;
+        this.user = "admin";
     }
 
     //TODO: Make response objects!
     //TODO: Check if paths are valid
 
     public GetAllNeighboursResponse getAllNeighbours() {
-        String url = String.format("%s/%s/", server, user);
+        String url = String.format("%s/%s/neighbour", server, user);
         return restTemplate.getForEntity(url, GetAllNeighboursResponse.class).getBody();
     }
     //Krav 3.1
-    public ListCapabilitiesResponse getNeighbourCapabilities(String neighbourName) {
-        String url = String.format("%s/%s/%s/capabilities/", server, user, neighbourName);
-        return restTemplate.getForEntity(url, ListCapabilitiesResponse.class).getBody();
+    public ListNeighbourCapabilitiesResponse getNeighbourCapabilities(String neighbourName) {
+        String url = String.format("%s/%s/neighbour/%s/capabilities", server, user, neighbourName);
+        return restTemplate.getForEntity(url, ListNeighbourCapabilitiesResponse.class).getBody();
     }
 
     //Krav 3.2
-    public ListSubscriptionsResponse getNeighbourSubscriptions(String neighbourName) {
-        String url = String.format("%s/%s/%s/subscriptions/", server, user, neighbourName);
-        return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
+    public ListNeighbourSubscriptionResponse getNeighbourSubscriptions(String neighbourName) {
+        String url = String.format("%s/%s/neighbour/%s/subscriptions", server, user, neighbourName);
+        return restTemplate.getForEntity(url, ListNeighbourSubscriptionResponse.class).getBody();
     }
 
     //mangler krav 3.3
+    //Krav 3.2
+    /*
+    public boolean isNeighbourReachable(String neighbourName) {
+        String url = String.format("%s/%s/neighbour/%s/isReachable", server, user, neighbourName);
+        return restTemplate.getForEntity(url, isNeighbourReachable.class).getBody();
+    }
+
+     */
 
     //Krav 4
-    public GetAllServiceProvidersResponse getAllServiceProviders(String serviceProvider) {
-        String url = String.format("%s/%s/%s/", server, user, serviceProvider);
+    public GetAllServiceProvidersResponse getAllServiceProviders() {
+        String url = String.format("%s/%s/serviceProvider", server, user);
         return restTemplate.getForEntity(url, GetAllServiceProvidersResponse.class).getBody();
+    }
+
+    public GetServiceProviderResponse getServiceProvider(String serviceProvider) {
+        String url = String.format("%s/%s/serviceProvider/%s", server, user, serviceProvider);
+        return restTemplate.getForEntity(url, GetServiceProviderResponse.class).getBody();
     }
 
     //Krav 4.1
     //Denne må sees på
     public ListCapabilitiesResponse getServiceProviderCapabilities(String serviceProvider) {
-        String url = String.format("%s/%s/%s/capabilities/", server, user, serviceProvider);
+        String url = String.format("%s/%s/serviceProvider/%s/capabilities/", server, user, serviceProvider);
         return restTemplate.getForEntity(url, ListCapabilitiesResponse.class).getBody();
     }
 
     //Krav 4.2
     public ListSubscriptionsResponse getServiceProviderSubscriptions(String serviceProvider) {
-        String url = String.format("%s/%s/%s/subscriptions/", server, user, serviceProvider);
+        String url = String.format("%s/%s/serviceProvider/%s/subscriptions/", server, user, serviceProvider);
         return restTemplate.getForEntity(url, ListSubscriptionsResponse.class).getBody();
     }
 
     //Krav 4.3
     //Denne må sees på
     public ListDeliveriesResponse listServiceProviderDeliveries(String serviceProvider) {
-        String url = String.format("%s/%s/%s/deliveries",server, user, serviceProvider);
+        String url = String.format("%s/%s/serviceProvider/%s/deliveries",server, user, serviceProvider);
         return restTemplate.getForEntity(url,ListDeliveriesResponse.class).getBody();
     }
 }

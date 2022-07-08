@@ -20,16 +20,6 @@
             <artifactId>httpclient</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>neighbour-model</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-model</artifactId>
             <version>1.0.3-SNAPSHOT</version>
@@ -48,14 +38,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>admin-rest-api</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>admin-rest-api</artifactId>
+            <artifactId>ssl-utils</artifactId>
             <version>1.0.3-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
