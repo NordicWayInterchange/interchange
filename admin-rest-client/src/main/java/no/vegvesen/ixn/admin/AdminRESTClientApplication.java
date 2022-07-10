@@ -15,7 +15,7 @@ import java.util.concurrent.Callable;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 
-@Command(name = "onboardclient", description = "Onboard REST client",showAtFileInUsageHelp = true, subcommands = {
+@Command(name = "admindclient", description = "Admin REST client",showAtFileInUsageHelp = true, subcommands = {
         AdminRESTClientApplication.GetAllNeighbours.class,
         AdminRESTClientApplication.GetNeighbourCapabilities.class,
         AdminRESTClientApplication.GetNeighbourSubscriptions.class,
@@ -28,7 +28,7 @@ import static picocli.CommandLine.Option;
 
 public class AdminRESTClientApplication implements Callable<Integer> {
 
-    @Parameters(index = "0",description = "The onboard server address")
+    @Parameters(index = "0",description = "The admin server address")
     private String server;
 
     @Option(names = {"-k","--keystorepath"}, description = "Path to the service provider p12 keystore")

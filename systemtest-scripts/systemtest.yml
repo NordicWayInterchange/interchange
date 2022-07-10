@@ -65,7 +65,7 @@ services:
     depends_on:
       - local_db
     ports:
-      - 58321:8799
+      - 8799
     volumes:
       - "../tmp:/jks"
     environment:

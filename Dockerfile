@@ -19,6 +19,9 @@ COPY neighbour-server/pom.xml neighbour-server/pom.xml
 COPY onboard-server/src onboard-server/src
 COPY onboard-server/pom.xml onboard-server/pom.xml
 
+COPY admin-panel-server/src admin-panel-server/src
+COPY admin-panel-server/pom.xml admin-panel-server/pom.xml
+
 COPY routing-configurer/src routing-configurer/src
 COPY routing-configurer/pom.xml routing-configurer/pom.xml
 
