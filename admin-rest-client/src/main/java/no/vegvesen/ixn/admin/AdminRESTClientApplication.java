@@ -31,6 +31,9 @@ public class AdminRESTClientApplication implements Callable<Integer> {
     @Parameters(index = "0",description = "The admin server address")
     private String server;
 
+    @Parameters(index = "1", description = "The admin user")
+    private String user;
+
     @Option(names = {"-k","--keystorepath"}, description = "Path to the service provider p12 keystore")
     private String keystorePath;
 
@@ -217,6 +220,6 @@ public class AdminRESTClientApplication implements Callable<Integer> {
     }
 
     public AdminRESTClient createClient() {
-        return new AdminRESTClient(createSSLContext(),server);
+        return new AdminRESTClient(createSSLContext(),server, user);
     }
 }

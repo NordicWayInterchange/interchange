@@ -18,7 +18,7 @@ public class AdminRESTClient {
     private final String server;
     private final String user;
 
-    public AdminRESTClient(SSLContext sslContext, String server) {
+    public AdminRESTClient(SSLContext sslContext, String server, String user) {
         this.restTemplate = new RestTemplate(
                 new HttpComponentsClientHttpRequestFactory(
                         HttpClients
@@ -28,7 +28,7 @@ public class AdminRESTClient {
                 )
         );
         this.server = server;
-        this.user = "admin";
+        this.user = user;
     }
 
     //TODO: Make response objects!

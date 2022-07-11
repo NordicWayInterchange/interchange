@@ -51,8 +51,8 @@ public class AdminRestController {
     QUESTION:
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour", produces = MediaType.APPLICATION_JSON_VALUE)
-    public GetAllNeighboursResponse getAllNeighbours() {
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/neighbour", produces = MediaType.APPLICATION_JSON_VALUE)
+    public GetAllNeighboursResponse getAllNeighbours(@PathVariable String adminName) {
         //TODO: Add certificate check for admin
         GetAllNeighboursResponse response = typeTransformer.getAllNeighboursResponse(nodeProperties.getName(), neighbourRepository);
         return response;
@@ -70,8 +70,8 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListNeighbourCapabilitiesResponse getCapabilitiesFromNeighbour(@PathVariable String neighbourName) {
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/neighbour/{neighbourName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ListNeighbourCapabilitiesResponse getCapabilitiesFromNeighbour(@PathVariable String adminName, @PathVariable String neighbourName) {
         //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
         Set<Capability> capabilities = neighbour.getCapabilities().getCapabilities();
@@ -95,8 +95,8 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListNeighbourSubscriptionResponse getSubscriptionsFromNeighbour(@PathVariable String neighbourName) {
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminNAme}/neighbour/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ListNeighbourSubscriptionResponse getSubscriptionsFromNeighbour(@PathVariable String adminName, @PathVariable String neighbourName) {
         //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);
         Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
@@ -124,8 +124,8 @@ public class AdminRestController {
 
     */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/neighbour/{neighbourName}/isReachable", produces = MediaType.APPLICATION_JSON_VALUE)
-    public boolean isNeighbourReachable (@PathVariable String neighbourName){
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/neighbour/{neighbourName}/isReachable", produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean isNeighbourReachable (@PathVariable String adminName, @PathVariable String neighbourName){
 
         List<Neighbour> tempListOfNeighbours = neighbourRepository.findAll();
 
@@ -150,8 +150,8 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider", produces = MediaType.APPLICATION_JSON_VALUE)
-    public GetAllServiceProvidersResponse getAllServiceProviders() {
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/serviceProvider", produces = MediaType.APPLICATION_JSON_VALUE)
+    public GetAllServiceProvidersResponse getAllServiceProviders(@PathVariable String adminName) {
         //TODO: Add certificate check for admin
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         GetAllServiceProvidersResponse response = new GetAllServiceProvidersResponse(nodeProperties.getName(), typeTransformer.transformServiceProvidersToServiceProviderApis(serviceProviders));
@@ -174,8 +174,8 @@ public class AdminRestController {
      */
 
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    private GetServiceProviderResponse getServiceProvider(@PathVariable String serviceProviderName) {
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/serviceProvider/{serviceProviderName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    private GetServiceProviderResponse getServiceProvider(@PathVariable String adminName, @PathVariable String serviceProviderName) {
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         if (serviceProvider == null) {
@@ -194,8 +194,8 @@ public class AdminRestController {
     Output: A set of the capabilities of the given Service provider
 
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListCapabilitiesResponse getCapabilitiesFromServiceProvider(@PathVariable String serviceProviderName) {
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/serviceProvider/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ListCapabilitiesResponse getCapabilitiesFromServiceProvider(@PathVariable String adminName, @PathVariable String serviceProviderName) {
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<Capability> capabilities = serviceProvider.getCapabilities().getCapabilities();
@@ -212,8 +212,8 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListSubscriptionsResponse getSubscriptionsFromServiceProvider(@PathVariable String serviceProviderName) {
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/serviceProvider/{serviceProviderName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ListSubscriptionsResponse getSubscriptionsFromServiceProvider(@PathVariable String adminName, @PathVariable String serviceProviderName) {
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         ListSubscriptionsResponse response = typeTransformer.transformLocalSubscriptionsToListSubscriptionResponse(serviceProviderName,serviceProvider.getSubscriptions());
@@ -229,8 +229,8 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/admin/serviceProvider/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ListDeliveriesResponse getDeliveriesFromServiceProvider(@PathVariable String serviceProviderName){
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/serviceProvider/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ListDeliveriesResponse getDeliveriesFromServiceProvider(@PathVariable String adminName, @PathVariable String serviceProviderName){
         //TODO: Add certificate check for admin
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         ListDeliveriesResponse response = typeTransformer.transformToListDeliveriesResponse(serviceProviderName, serviceProvider.getDeliveries());
