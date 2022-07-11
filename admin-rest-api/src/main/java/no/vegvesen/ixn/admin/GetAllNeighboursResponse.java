@@ -10,6 +10,9 @@ public class GetAllNeighboursResponse {
 
     private Set<NeighbourApi> neighboursWithPathAndApi;
 
+    public GetAllNeighboursResponse(){
+    }
+
     public GetAllNeighboursResponse(String interchangeName, Set<NeighbourApi> neighboursWithPathAndApi){
         this.interchangeName = interchangeName;
         this.neighboursWithPathAndApi = neighboursWithPathAndApi;

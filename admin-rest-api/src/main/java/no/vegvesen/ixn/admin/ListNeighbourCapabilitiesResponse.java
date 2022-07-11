@@ -8,6 +8,9 @@ public class ListNeighbourCapabilitiesResponse {
     private String name;
     private Set<NeighbourCapabilityApi> capabilities;
 
+    public ListNeighbourCapabilitiesResponse() {
+
+    }
     public ListNeighbourCapabilitiesResponse(String name, Set<NeighbourCapabilityApi> capabilities) {
         this.name = name;
         this.capabilities = capabilities;

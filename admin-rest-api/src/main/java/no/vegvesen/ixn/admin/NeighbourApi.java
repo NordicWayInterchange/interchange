@@ -15,6 +15,9 @@ public class NeighbourApi {
     private String numberOfNeighbourRequestedSubscriptions;
     private NeighbourStatusApi status;
 
+    public NeighbourApi() {
+    }
+
     public NeighbourApi(String id, String path, String name, String numberOfCapabilities, String numberOfOurRequestedSubcriptions, String numberOfNeighbourRequestedSubscriptions, NeighbourStatusApi status) {
         this.id = id;
         this.path = path;

@@ -95,7 +95,7 @@ public class AdminRestController {
 
      */
 
-    @RequestMapping(method = RequestMethod.GET, path = "/{adminNAme}/neighbour/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/neighbour/{neighbourName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ListNeighbourSubscriptionResponse getSubscriptionsFromNeighbour(@PathVariable String adminName, @PathVariable String neighbourName) {
         //TODO: Add certificate check for admin
         Neighbour neighbour = neighbourRepository.findByName(neighbourName);

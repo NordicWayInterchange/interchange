@@ -10,6 +10,9 @@ public class OurRequestedSubscriptionApi {
     long lastUpdatedTimeStamp;
 
 
+    public OurRequestedSubscriptionApi() {
+    }
+
     public OurRequestedSubscriptionApi(String id, String path, String selector, long lastUpdatedTimeStamp) {
         this.id = id;
         this.path = path;

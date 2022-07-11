@@ -11,6 +11,11 @@ public class GetServiceProviderResponse {
     private ServiceProvider serviceProvider;
 
 
+    public GetServiceProviderResponse(){
+
+
+
+    }
 
 
     public GetServiceProviderResponse(String nameOfInterchange, ServiceProvider serviceProvider){

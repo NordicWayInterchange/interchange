@@ -13,6 +13,9 @@ public class ServiceProviderApi {
 
     private ServiceProviderStatusApi status;
 
+    public ServiceProviderApi() {
+
+    }
     public ServiceProviderApi(String name, String id, String numberOfCapabilities, String numberOfDeliveries, String numberOfSubcriptions, ServiceProviderStatusApi status) {
         this.name = name;
         this.id = id;

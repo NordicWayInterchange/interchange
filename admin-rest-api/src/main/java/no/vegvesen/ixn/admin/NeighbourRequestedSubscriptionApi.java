@@ -10,6 +10,9 @@ public class NeighbourRequestedSubscriptionApi {
     long lastUpdatedTimeStamp;
 
 
+    public NeighbourRequestedSubscriptionApi() {
+    }
+
     public NeighbourRequestedSubscriptionApi(String id, String path, String selector, long lastUpdatedTimeStamp) {
         this.id = id;
         this.path = path;

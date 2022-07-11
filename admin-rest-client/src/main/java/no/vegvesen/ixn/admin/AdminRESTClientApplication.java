@@ -143,7 +143,7 @@ public class AdminRESTClientApplication implements Callable<Integer> {
     }
 
 
-    @Command(name = "getcapabilities",description = "Get the service provider capabilities")
+    @Command(name = "getServiceProvicerCapabilities",description = "Get the service provider capabilities")
     static class GetServiceProviderCapabilities implements Callable<Integer> {
 
         @ParentCommand
@@ -162,7 +162,7 @@ public class AdminRESTClientApplication implements Callable<Integer> {
         }
     }
 
-    @Command(name = "getsubscriptions", description = "Get the service provider subscriptions")
+    @Command(name = "getServiceProvicerSubscriptions", description = "Get the service provider subscriptions")
     static class GetServiceProviderSubscriptions implements Callable<Integer> {
 
         @ParentCommand
@@ -181,7 +181,7 @@ public class AdminRESTClientApplication implements Callable<Integer> {
         }
     }
 
-    @Command(name = "listdeliveries", description = "List deliveries for service provider")
+    @Command(name = "getServiceProvicerDeliveries", description = "List deliveries for service provider")
     static class GetServiceProviderDeliveries implements Callable<Integer> {
         @ParentCommand
         AdminRESTClientApplication parentCommand;

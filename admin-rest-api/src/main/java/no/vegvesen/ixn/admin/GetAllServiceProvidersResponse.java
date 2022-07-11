@@ -7,6 +7,9 @@ public class GetAllServiceProvidersResponse {
     private String nameOfInterchange;
     private Set<ServiceProviderApi> serviceProviders;
 
+    public GetAllServiceProvidersResponse(){
+    }
+
     public GetAllServiceProvidersResponse(String nameOfInterchange, Set<ServiceProviderApi> serviceProviders){
         this.nameOfInterchange = nameOfInterchange;
         this.serviceProviders = serviceProviders;
