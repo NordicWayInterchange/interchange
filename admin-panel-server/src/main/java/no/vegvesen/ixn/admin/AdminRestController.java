@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.admin;
 
-import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.model.*;
+ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -20,7 +19,7 @@ public class AdminRestController {
 
     private final ServiceProviderRepository serviceProviderRepository;
     private final NeighbourRepository neighbourRepository;
-    private final CertService certService;
+    //private final CertService certService;
     private final InterchangeNodeProperties nodeProperties;
 
     private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
@@ -31,11 +30,10 @@ public class AdminRestController {
     @Autowired
     public AdminRestController(ServiceProviderRepository serviceProviderRepository,
                                NeighbourRepository neighbourRepository,
-                               CertService certService,
                                InterchangeNodeProperties nodeProperties) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.neighbourRepository = neighbourRepository;
-        this.certService = certService;
+        //this.certService = certService;
         this.nodeProperties = nodeProperties;
     }
 

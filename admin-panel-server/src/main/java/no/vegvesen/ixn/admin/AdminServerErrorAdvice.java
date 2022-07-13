@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.admin;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
-import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
