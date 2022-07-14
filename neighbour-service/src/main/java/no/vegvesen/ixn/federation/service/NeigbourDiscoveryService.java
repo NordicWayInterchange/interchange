@@ -3,10 +3,7 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
@@ -383,6 +380,9 @@ public class NeigbourDiscoveryService {
                             subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                             logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
+                        } catch(NeighbourSubscriptionNotFound e) {
+                            logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
+                            subscriptionsToDelete.add(subscription);
                         } finally {
                             neighbourRepository.save(neighbour);
                         }

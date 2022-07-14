@@ -1,8 +1,10 @@
 package no.vegvesen.ixn.federation.discoverer.facade;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
+import no.vegvesen.ixn.federation.exceptions.NeighbourSubscriptionNotFound;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
@@ -266,5 +268,23 @@ public class NeighbourRESTFacadeTest {
 			Subscription response = neighbourRESTFacade.pollSubscriptionStatus(subscription, ericsson);
 		});
 
+	}
+
+	@Test
+	public void deleteSubscriptionTest() throws JsonProcessingException {
+
+		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, "");
+		subscription.setPath("/subscriptions/1");
+
+		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), HttpStatus.NOT_FOUND.toString(), "Error error");
+		String errorDetailsJson = new ObjectMapper().writeValueAsString(errorDetails);
+
+		server.expect(MockRestRequestMatchers.requestTo("https://ericsson.itsinterchange.eu:8080/subscriptions/1"))
+				.andExpect(MockRestRequestMatchers.method(HttpMethod.DELETE))
+				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
+
+		assertThatExceptionOfType(NeighbourSubscriptionNotFound.class).isThrownBy(() -> {
+			neighbourRESTFacade.deleteSubscription(ericsson, subscription);
+		});
 	}
 }
