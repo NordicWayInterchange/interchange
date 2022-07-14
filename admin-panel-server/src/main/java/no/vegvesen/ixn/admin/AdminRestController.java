@@ -13,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-
+@CrossOrigin(origins = "https://localhost:3000")
 @RestController
 public class AdminRestController {
 
@@ -48,7 +48,6 @@ public class AdminRestController {
 
     QUESTION:
      */
-
     @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/neighbour", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetAllNeighboursResponse getAllNeighbours(@PathVariable String adminName) {
         //TODO: Add certificate check for admin
@@ -147,6 +146,7 @@ public class AdminRestController {
      QUESTION: What format should the response containing list of serviceProviders be in?
 
      */
+
 
     @RequestMapping(method = RequestMethod.GET, path = "/{adminName}/serviceProvider", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetAllServiceProvidersResponse getAllServiceProviders(@PathVariable String adminName) {

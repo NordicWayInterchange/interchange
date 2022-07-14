@@ -404,15 +404,15 @@ services:
     networks:
     - testing_net
 
-  local_nginx:
-    build:
-      context: ../nginx
-    depends_on:
-      - local_admin_server
-    ports:
-      - 38799:38799
-    networks:
-      - testing_net
+  #local_nginx:
+    #build:
+     # context: ../nginx
+    #depends_on:
+     # - local_admin_server
+    #ports:
+     # - 38799:38799
+    #networks:
+     # - testing_net
 
 
 networks:
