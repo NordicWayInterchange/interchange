@@ -65,7 +65,7 @@ services:
     depends_on:
       - local_db
     ports:
-      - 8799
+      - 8799:8799
     volumes:
       - "../tmp:/jks"
     environment:
@@ -403,6 +403,17 @@ services:
       - SERVER_NAME=remote.bouvetinterchange.eu
     networks:
     - testing_net
+
+  local_nginx:
+    build:
+      context: ../nginx
+    depends_on:
+      - local_admin_server
+    ports:
+      - 38799:38799
+    networks:
+      - testing_net
+
 
 networks:
   testing_net:
