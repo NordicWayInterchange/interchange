@@ -44,11 +44,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>interchange-spring-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
