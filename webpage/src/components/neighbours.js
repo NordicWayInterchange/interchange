@@ -1,13 +1,12 @@
 import React from 'react';
-
-import TestGet from './get-requests';
+import GetNeighbours from './neighbours/get-neighbours.js';
 
 function Neighbours() {
     return (
         <div>
             <h2>Neighbours</h2>
             <div>
-                < TestGet/>
+                < GetNeighbours/>
             </div>
         </div>
     );

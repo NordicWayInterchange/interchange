@@ -36,7 +36,7 @@ const Users = [
     },
     {
       id: 4,
-      selected: true,
+      selected: false,
       common_name: "Patricia Lebsack",
       email: "Julianne.OConner@kory.org",
       state_ctr_reg: "OSLO",
