@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
-import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
+//import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import org.slf4j.Logger;
@@ -36,10 +36,10 @@ public class OnboardServerErrorAdvice {
 		return error(INTERNAL_SERVER_ERROR, e);
 	}
 
-	@ExceptionHandler({CNAndApiObjectMismatchException.class})
+/*	@ExceptionHandler({CNAndApiObjectMismatchException.class})
 	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e){
 		return error(FORBIDDEN, e);
-	}
+	}*/
 
 	@ExceptionHandler({HttpMessageNotReadableException.class})
 	public ResponseEntity<ErrorDetails> unknownProperty(HttpMessageNotReadableException e){
