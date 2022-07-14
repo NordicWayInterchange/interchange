@@ -171,7 +171,7 @@ public class NeigbourDiscoveryService {
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
         logger.info("Found neighbour for subscription request: {}", neighbourName);
         Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, interchangeNodeProperties.getName());
-        Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions().stream().filter(s -> !s.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)).collect(Collectors.toSet());
+        Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
             for (Subscription subscription : subscriptionPostCalculator.getSubscriptionsToRemove()) {

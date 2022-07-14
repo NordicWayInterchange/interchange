@@ -403,14 +403,26 @@ services:
       - SERVER_NAME=remote.bouvetinterchange.eu
     networks:
     - testing_net
+    
+  sample:
+    container_name: sample
+    build: ../webpage
+    volumes:
+      - '.:/app'
+      - '/app/node_modules'
+    ports:
+      - 3001:3000
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 
   local_nginx:
     build:
-      context: ../nginx
+      context: ../systemtest_ngnix
     depends_on:
+      - local_qpid
       - local_admin_server
     ports:
-      - 38799:38799
+      - 8181:8181
     networks:
       - testing_net
 

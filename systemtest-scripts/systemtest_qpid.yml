@@ -1,0 +1,111 @@
+version: '3'
+services:
+
+  # Note: now all the containers are on the same network - testing_net
+  # An idea for later would be to have two separate networks, one for each node,
+  # where the modules that need to communicate with each other are a part of both networks.
+
+  mock-dns-server:
+    build:
+      context: ../fake-dns-server
+      dockerfile: dns-dockerfile
+    cap_add:
+      - NET_ADMIN
+    container_name: mock-dns-server
+    hostname: mock-dns-server
+    networks:
+      testing_net:
+        ipv4_address: 172.28.1.1
+        aliases:
+          - dns.bouvetinterchange.eu
+
+  local_qpid:
+    build:
+      context: ../qpid
+    container_name: local_qpid
+    ports:
+      - 8666:8080
+      - 443
+      - 63003:5671
+      - 5672
+    volumes:
+      - "../qpid/local:/config"
+      - "../tmp:/jks"
+      - "../qpid/messages/local:/work/local/messages"
+      - "../tmp/dump:/dump"
+    environment:
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/local.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - VHOST_FILE=/work/default/config/default.json
+      - STATIC_VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/work/default/config/groups
+      - STATIC_GROUPS_FILE=/config/groups
+      - PASSWD_FILE=/config/passwd
+      - JAVA_OPTS=-XX:HeapDumpPath=/dump/
+    depends_on:
+      - mock-dns-server
+    networks:
+      - testing_net
+
+  remote_qpid:
+    build:
+      context: ../qpid
+    container_name: remote_qpid
+    ports:
+      - 8555:8080
+      - 443
+      - 63001:5671
+      - 5672
+    volumes:
+      - "../qpid/remote:/config"
+      - "../tmp:/jks"
+      - "../qpid/messages/remote:/work/remote/messages"
+    environment:
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/remote.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - VHOST_FILE=/work/default/config/default.json
+      - STATIC_VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/work/default/config/groups
+      - STATIC_GROUPS_FILE=/config/groups
+      - PASSWD_FILE=/config/passwd
+    depends_on:
+      - mock-dns-server
+    networks:
+      - testing_net
+
+
+  sample:
+    container_name: sample
+    build: ../webpage
+
+    volumes:
+      - '.:/app'
+      - '/app/node_modules'
+    ports:
+      - 3001:3000
+    environment:
+      - WDS_SOCKET_PORT=3001
+
+  local_nginx:
+    build:
+      context: ../systemtest_ngnix
+    depends_on:
+      - local_qpid
+    ports:
+      - 8181:8181
+    networks:
+      - testing_net
+
+
+networks:
+  testing_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.0/16
+
+
