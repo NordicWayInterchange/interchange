@@ -110,7 +110,8 @@ export default class getQpid extends React.Component {
               </TableBody>
             </Table>
           </TableContainer></>
-          : <p>No contact with qpid, have you started a systemtest?</p>
+          : <p>No contact with qpid, have you started a systemtest? Sometimes HTTP Basic Authentication gets disabled. Go
+          to qpid->plugins->httpManagement and enable HTTP Basic Authentication to fix.</p>
         }
 
         {Object.keys(this.state.allQueues).length > 0 && 
