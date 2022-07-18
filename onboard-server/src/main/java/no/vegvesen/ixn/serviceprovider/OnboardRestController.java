@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.DeliveryException;
@@ -21,7 +22,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
+@CrossOrigin(origins = "https;//localhost:3001")
 @RestController
 public class OnboardRestController {
 
@@ -411,4 +412,90 @@ public class OnboardRestController {
 
 		return returnServiceProviders;
 	}
+
+	@RequestMapping(method = RequestMethod.POST, path = "/addServiceProviders", produces = MediaType.APPLICATION_JSON_VALUE)
+	public AddServiceProvidersResponse addServiceProviders(@RequestBody AddServiceProvidersRequest request) {
+		//Create new response
+		AddServiceProvidersResponse response = new AddServiceProvidersResponse();
+		response.setApis(new HashSet<>());
+
+		for(AddServiceProviders serviceProvider : request.getServiceProviders()){
+			//create a new AddServiceProvidersResponseApi
+			AddServiceProvidersApi addServiceProvidersApi = new AddServiceProvidersApi();
+
+			//get or create service provider from name
+			String serviceProviderName = serviceProvider.getName();
+			ServiceProvider serviceProviderToUpdate = new ServiceProvider(serviceProviderName);
+			addServiceProvidersApi.setName(serviceProviderName);
+
+			//Add the capabilities
+			Set<Capability> newCapabilities = typeTransformer.capabilityApiToCapabilities(capabilityApiTransformer,serviceProvider.getCapabilities());
+			Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
+			for (Capability newCapability : newCapabilities) {
+				capabilities.addDataType(newCapability);
+			}
+			logger.info("Service provider to update: {}", serviceProviderToUpdate.toString());
+
+
+			//Add the subscriptions
+			logger.info("Service provider {} Incoming subscription selector {}", serviceProvider.getName(), serviceProvider.getSubscriptions());
+			Set<LocalSubscription> localSubscriptions = new HashSet<>();
+			for (String selector : serviceProvider.getSubscriptions()) {
+				localSubscriptions.add(typeTransformer.transformSelectorToLocalSubscription(selector));
+			}
+			serviceProviderToUpdate.addLocalSubscriptions(localSubscriptions);
+
+			//Add the deliveries
+			logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, serviceProvider.getDeliveries());
+			Set<LocalDelivery> localDeliveries = new HashSet<>();
+			for(String delivery : serviceProvider.getDeliveries()) {
+				localDeliveries.add(typeTransformer.transformSelectorToLocalDelivery(delivery));
+			}
+
+			serviceProviderToUpdate.addDeliveries(localDeliveries);
+
+
+			// Save the Service Provider representation in the database.
+			ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
+
+			//Add cpabilities to the response
+			Set<Capability> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
+			addedCapabilities.retainAll(newCapabilities);
+
+			addServiceProvidersApi.setCapabilities(TypeTransformer.capabilitySetToLocalActorCapability(serviceProviderName,addedCapabilities));
+
+			logger.debug("Updated Service Provider: {}", saved.toString());
+
+			//find the newly saved subscriptions from the database
+			Set<LocalSubscription> savedSubscriptions = saved
+					.getSubscriptions()
+					.stream()
+					.filter(subscription -> localSubscriptions.contains(subscription))
+					.collect(Collectors.toSet());
+
+			//Add the set of local subscriptions to the response
+			addServiceProvidersApi.setSubscriptions(typeTransformer.transformLocalSubscriptionsToLocalActorSubscription(serviceProviderName, savedSubscriptions));
+
+			logger.debug("Updated Service Provider: {}", saved.toString());
+
+			Set<LocalDelivery> savedDeliveries = saved
+					.getDeliveries()
+					.stream()
+					.filter(delivery -> localDeliveries.contains(delivery))
+					.collect(Collectors.toSet());
+
+			//add deliveries to the response
+			addServiceProvidersApi.setDeliveries(typeTransformer.transformLocalDeliveryToDelivery(serviceProviderName, savedDeliveries));
+
+			//add the addServiceProvidersApi to the response object
+			response.addApi(addServiceProvidersApi);
+		}
+
+
+
+
+		//TODO: må kanskje legge til service provideren i serviceproviderrepository
+		return response;
+	}
+
 }

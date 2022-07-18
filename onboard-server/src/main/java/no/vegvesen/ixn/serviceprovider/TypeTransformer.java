@@ -20,7 +20,7 @@ public class TypeTransformer {
         );
     }
 
-    private static Set<LocalActorCapability> capabilitySetToLocalActorCapability(String serviceProviderName, Set<Capability> capabilities) {
+    public static Set<LocalActorCapability> capabilitySetToLocalActorCapability(String serviceProviderName, Set<Capability> capabilities) {
         Set<LocalActorCapability> result = new HashSet<>();
         for (Capability capability : capabilities) {
             result.add(capabilityToLocalCapability(serviceProviderName,capability));
@@ -54,7 +54,7 @@ public class TypeTransformer {
 
     }
 
-    private Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
+    public Set<LocalActorSubscription> transformLocalSubscriptionsToLocalActorSubscription(String name, Set<LocalSubscription> subscriptions) {
         Set<LocalActorSubscription> result = new HashSet<>();
         for (LocalSubscription subscription : subscriptions) {
             String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
@@ -260,5 +260,23 @@ public class TypeTransformer {
             port = 5671;
         }
         return new ArrayList<>(Arrays.asList(host, String.valueOf(port)));
+    }
+
+    public Set<Capability> capabilityApiToCapabilities(CapabilityToCapabilityApiTransformer capabilityApiTransformer, Set<CapabilityApi> capabilityApis) {
+        Set<Capability> capabilities = new HashSet<>();
+        for (CapabilityApi capabilityApi : capabilityApis) {
+            Capability capability = capabilityApiTransformer.capabilityApiToCapability(capabilityApi);
+            capabilities.add(capability);
+        }
+        return capabilities;
+    }
+
+    public LocalSubscription transformSelectorToLocalSubscription(String selector) {
+        return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
+                selector);
+    }
+
+    public LocalDelivery transformSelectorToLocalDelivery(String selector) {
+        return new LocalDelivery(selector, LocalDeliveryStatus.REQUESTED);
     }
 }

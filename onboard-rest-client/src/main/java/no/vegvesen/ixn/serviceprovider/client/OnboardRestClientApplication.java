@@ -35,7 +35,8 @@ import static picocli.CommandLine.Option;
         OnboardRestClientApplication.AddPrivateChannel.class,
         OnboardRestClientApplication.GetPrivateChannels.class,
         OnboardRestClientApplication.DeletePrivateChannel.class,
-        OnboardRestClientApplication.FetchMatchingCapabilities.class
+        OnboardRestClientApplication.FetchMatchingCapabilities.class,
+        OnboardRestClientApplication.AddServiceProviders.class
 })
 public class OnboardRestClientApplication implements Callable<Integer> {
 
@@ -331,6 +332,26 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             ObjectMapper mapper = new ObjectMapper();
             FetchMatchingCapabilitiesResponse result = client.fetchAllMatchingCapabilities(selector);
             System.out.println(mapper.writeValueAsString(result));
+            return 0;
+        }
+    }
+
+    @Command(name = "addserviceproviders", description = "Add service providers from json file")
+    static class AddServiceProviders implements Callable<Integer> {
+
+        @ParentCommand
+        OnboardRestClientApplication parentCommand;
+
+        @Option(names = {"-f","--filename"}, description = "The json file for the service providers")
+        File file;
+
+        @Override
+        public Integer call() throws Exception {
+            OnboardRESTClient client = parentCommand.createClient();
+            ObjectMapper mapper = new ObjectMapper();
+            AddServiceProvidersRequest request = mapper.readValue(file,AddServiceProvidersRequest.class);
+            AddServiceProvidersResponse response = client.addServiceProviders(request);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
             return 0;
         }
     }

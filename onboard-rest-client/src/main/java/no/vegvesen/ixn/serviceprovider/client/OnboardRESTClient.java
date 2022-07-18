@@ -117,6 +117,14 @@ public class OnboardRESTClient {
         String url = String.format("%s/%s/privatechannels/", server, user);
         return restTemplate.getForEntity(url, PrivateChannelListApi.class).getBody();
     }
+
+    public AddServiceProvidersResponse addServiceProviders(AddServiceProvidersRequest serviceProvider) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddServiceProvidersRequest> entity = new HttpEntity<>(serviceProvider,headers);
+        String url = String.format("/addServiceProviders", user) ;
+        return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddServiceProvidersResponse.class).getBody();
+    }
 }
 
 

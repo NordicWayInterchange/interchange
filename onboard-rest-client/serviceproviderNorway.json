@@ -1,0 +1,78 @@
+{
+  "version" : "1.0",
+  "serviceProviders": [
+    {
+      "name": "Statens vegvesen",
+      "capabilities": [
+        {
+          "messageType": "DENM",
+          "publisherId": "NO-123",
+          "originatingCountry": "NO",
+          "protocolVersion": "1.0",
+          "quadTree": [
+            "120021"
+          ],
+          "redirect": "OPTIONAL",
+          "causeCode": [
+            "6"
+          ]
+        },
+        {
+          "messageType": "DATEX2",
+          "publisherId": "NO-12345",
+          "publisherName": "Norwegian Public Roads Administration",
+          "originatingCountry": "NO",
+          "protocolVersion": "DATEX2:2.3",
+          "contentType": "application/xml",
+          "quadTree": [
+            "01230122"
+          ],
+          "publicationType": ["Obstruction"],
+          "publicationSubType": [
+            "WinterDrivingManagement"]
+        }
+      ],
+      "subscriptions": ["originatingCountry = 'SE' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType = ',1,2,3,'", "originatingCountry = 'SE' and messageType = 'DENM' and protocolVersion = '1.0'"],
+      "deliveries": ["originatingCountry = 'NO' and messageType = 'DENM'", "originatingCountry = 'NO' and messageType = 'DATEX'"]
+    },{
+      "name": "FourC",
+      "capabilities": [
+        {
+          "messageType": "DENM",
+          "publisherId": "NO-123",
+          "originatingCountry": "NO",
+          "protocolVersion": "1.0",
+          "quadTree": [
+            "120021"
+          ],
+          "redirect": "OPTIONAL",
+          "causeCode": [
+            "6"
+          ]
+        }
+      ],
+      "subscriptions": ["originatingCountry = 'SE' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType = ',1,2,3,'", "originatingCountry = 'NO' and messageType = 'DENM' and protocolVersion = '1.0'"],
+      "deliveries": ["originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,120021%'"]
+      },
+    {
+      "name": "Aventi",
+      "capabilities": [
+        {
+          "messageType": "DENM",
+          "publisherId": "NO-123",
+          "originatingCountry": "NO",
+          "protocolVersion": "1.0",
+          "quadTree": [
+            "120003"
+          ],
+          "redirect": "OPTIONAL",
+          "causeCode": [
+            "8"
+          ]
+        }
+      ],
+      "subscriptions": ["originatingCountry = 'SE' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType = ',1,2,3,'", "originatingCountry = 'NO' and messageType = 'DENM' and protocolVersion = '1.0'", "originatingCountry = 'NO' and messageType = 'DATEX' and protocolVersion = '1.0'"],
+      "deliveries": ["originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,120003%'"]
+    }
+  ]
+}

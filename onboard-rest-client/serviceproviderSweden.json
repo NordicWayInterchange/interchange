@@ -1,0 +1,59 @@
+{
+  "version" : "1.0",
+  "serviceProviders": [
+    {
+      "name": "Trafikkverket",
+      "capabilities": [
+        {
+          "messageType": "DENM",
+          "publisherId": "SE-123",
+          "originatingCountry": "SE",
+          "protocolVersion": "1.0",
+          "quadTree": [
+            "12003"
+          ],
+          "redirect": "OPTIONAL",
+          "causeCode": [
+            "3"
+          ]
+        },
+        {
+          "messageType": "DATEX2",
+          "publisherId": "SE-12345",
+          "publisherName": "Trafikkverket",
+          "originatingCountry": "SE",
+          "protocolVersion": "DATEX2:2.3",
+          "contentType": "application/xml",
+          "quadTree": [
+            "01230122"
+          ],
+          "publicationType": ["Obstruction"],
+          "publicationSubType": [
+            "WinterDrivingManagement"]
+        }
+      ],
+      "subscriptions": ["originatingCountry = 'NO' and messageType = 'DENM' and protocolVersion = '1.0'"],
+      "deliveries": ["originatingCountry = 'NO' and messageType = 'DENM'", "originatingCountry = 'NO' and messageType = 'DATEX'"]
+    },{
+      "name": "Volvo",
+      "capabilities": [
+        {
+          "messageType": "DATEX2",
+          "publisherId": "SE-12345",
+          "publisherName": "Trafikkverket",
+          "originatingCountry": "SE",
+          "protocolVersion": "DATEX2:2.3",
+          "contentType": "application/xml",
+          "quadTree": [
+            "01230122"
+          ],
+          "publicationType": ["Obstruction"],
+          "publicationSubType": [
+            "WinterDrivingManagement"]
+        }
+      ],
+      "subscriptions": ["originatingCountry = 'NO' and messageType = 'DENM' and protocolVersion = '1.0'"],
+      "deliveries": ["originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,120021%'"]
+    }
+  ]
+}
