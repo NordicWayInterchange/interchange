@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,6 +174,9 @@ public class NeighbourRESTClient {
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             HttpStatus status = e.getStatusCode();
             logger.error("Failed deleting subscription with url {}. Server returned error code {}", url, status.toString());
+            if (HttpStatus.NOT_FOUND.equals(status)) {
+                throw new NeighbourSubscriptionNotFound("Error in deleting subscription to neighbour " + name + " due to exception", e);
+            }
             throw new SubscriptionDeleteException("Error in deleting subscription to neighbour " + name + " due to exception", e);
         }
     }

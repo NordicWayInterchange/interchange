@@ -63,6 +63,10 @@ public class SubscriptionRequest {
 		subscription.remove(subscriptionToRemove);
 	}
 
+	public void deleteSubscriptions (Set<Subscription> subscriptions) {
+		subscription.removeAll(subscriptions);
+	}
+
 	public void addNewSubscriptions (Set<Subscription> newSubscriptions) {
 		subscription.addAll(newSubscriptions);
 	}

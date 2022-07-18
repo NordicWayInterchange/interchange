@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
+import no.vegvesen.ixn.federation.service.NeighbourSubscriptionDeleteService;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
@@ -43,19 +44,24 @@ public class NeighbourDiscoverer {
 	private final NeigbourDiscoveryService neigbourDiscoveryService;
 	private final InterchangeNodeProperties interchangeNodeProperties;
 	private final MatchDiscoveryService matchDiscoveryService;
+	private final NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
 
 
 	@Autowired
 	NeighbourDiscoverer(NeighbourService neighbourService,
 						NeighbourRESTFacade neighbourFacade,
 						ServiceProviderService serviceProviderService,
-						NeigbourDiscoveryService neigbourDiscoveryService, InterchangeNodeProperties interchangeNodeProperties, MatchDiscoveryService matchDiscoveryService) {
+						NeigbourDiscoveryService neigbourDiscoveryService,
+						InterchangeNodeProperties interchangeNodeProperties,
+						MatchDiscoveryService matchDiscoveryService,
+						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService) {
 		this.neighbourService = neighbourService;
 		this.neighbourFacade = neighbourFacade;
 		this.serviceProviderService = serviceProviderService;
 		this.neigbourDiscoveryService = neigbourDiscoveryService;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.matchDiscoveryService = matchDiscoveryService;
+		this.neighbourSubscriptionDeleteService = neighbourSubscriptionDeleteService;
 		NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), null);
 	}
 
@@ -116,7 +122,7 @@ public class NeighbourDiscoverer {
 	}
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void deleteSubscriptionAtKnownNeighbours() {
-		neigbourDiscoveryService.deleteSubscriptions(neighbourFacade);
+		neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
