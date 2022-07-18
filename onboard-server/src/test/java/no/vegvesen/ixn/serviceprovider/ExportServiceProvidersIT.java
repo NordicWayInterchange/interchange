@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.serviceprovider.model.Delivery;
 import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -80,6 +81,8 @@ public class ExportServiceProvidersIT {
             serviceProviderApi.setCapabilities(capabilityApis);
             Set<LocalActorSubscription> localActorSubscriptions = transformer.transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(serviceProvider.getName(), serviceProvider.getSubscriptions());
             serviceProviderApi.setSubscriptions(localActorSubscriptions);
+            Set<Delivery> deliveries = transformer.transformLocalDeliveryToDelivery(serviceProvider.getName(),serviceProvider.getDeliveries());
+            serviceProviderApi.setDeliveries(deliveries);
             serviceProviders.add(serviceProviderApi);
         }
         writer.writeValue(path.toFile(),serviceProviders);
