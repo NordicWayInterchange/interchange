@@ -27,7 +27,7 @@ import static org.mockito.Mockito.doThrow;
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 @Transactional
-public class NeighbourDiscoveryServiceIT {
+public class NeighbourSubscriptionDeleteServiceIT {
 
     @Autowired
     NeighbourRepository neighbourRepository;
