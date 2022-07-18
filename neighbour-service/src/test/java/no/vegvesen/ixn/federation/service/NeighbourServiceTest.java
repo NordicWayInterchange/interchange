@@ -45,17 +45,20 @@ class NeighbourServiceTest {
 
 	NeighbourService neighbourService;
 	NeigbourDiscoveryService neigbourDiscoveryService;
+	NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
 
 	@BeforeEach
 	void setUp() {
 		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
 		neighbourService = new NeighbourService(neighbourRepository, dnsFacade,interchangeNodeProperties);
 		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository,interchangeNodeProperties,backoffProperties,discovererProperties, matchRepository);
+		neighbourSubscriptionDeleteService = new NeighbourSubscriptionDeleteService(neighbourRepository, listenerEndpointRepository, backoffProperties, matchRepository);
 	}
 
 	@Test
 	void isAutowired() {
 		assertThat(neighbourService).isNotNull();
+		assertThat(neighbourSubscriptionDeleteService).isNotNull();
 	}
 
 
@@ -311,7 +314,7 @@ class NeighbourServiceTest {
 
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN)).thenReturn(Arrays.asList(neighbour));
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neigbourDiscoveryService.deleteSubscriptions(neighbourFacade);
+		neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 		assertThat(neighbour.getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.ESTABLISHED);
 	}
@@ -331,7 +334,7 @@ class NeighbourServiceTest {
 
 		when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN)).thenReturn(Arrays.asList(neighbour));
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neigbourDiscoveryService.deleteSubscriptions(neighbourFacade);
+		neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
 		assertThat(neighbour.getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
 	}
@@ -355,7 +358,7 @@ class NeighbourServiceTest {
 		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "source-2", "endpoint-2", 5671, new Connection());
 
 		when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
-		neigbourDiscoveryService.tearDownListenerEndpoints(neighbour);
+		neighbourSubscriptionDeleteService.tearDownListenerEndpoints(neighbour);
 
 		verify(listenerEndpointRepository, times(1)).delete(any(ListenerEndpoint.class));
 	}
@@ -385,7 +388,7 @@ class NeighbourServiceTest {
 		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "source-2", "endpoint-2", 5671, new Connection());
 
 		when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
-		neigbourDiscoveryService.tearDownListenerEndpoints(neighbour);
+		neighbourSubscriptionDeleteService.tearDownListenerEndpoints(neighbour);
 
 		verify(listenerEndpointRepository, times(0)).delete(any(ListenerEndpoint.class));
 	}
