@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
 import static no.vegvesen.ixn.federation.qpid.QpidClient.REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
@@ -78,19 +79,25 @@ public class RoutingConfigurer {
 	void setupNeighbourRouting(Neighbour neighbour) {
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
+			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
+			Set<Capability> capabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
-				Set<Subscription> allAcceptedSubscriptions = new HashSet<>();
-				allAcceptedSubscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
+				Set<Subscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 				for(Subscription subscription : acceptedSubscriptions){
-					setUpRedirectedRouting(subscription);
+					setUpRedirectedRouting(subscription, capabilities);
 					allAcceptedSubscriptions.remove(subscription);
 				}
 				if(!allAcceptedSubscriptions.isEmpty()){
 					Set<Subscription> subscriptionsToSetUpRoutingFor = new HashSet<>();
 					for(Subscription subscription : allAcceptedSubscriptions){
-						subscriptionsToSetUpRoutingFor.add(subscription);
-						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+						Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getRedirect().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
+						if (!matchingCaps.isEmpty()) {
+							subscriptionsToSetUpRoutingFor.add(subscription);
+							subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+						} else{
+							subscription.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
+						}
 						subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 					}
 					if(!subscriptionsToSetUpRoutingFor.isEmpty()){
@@ -105,9 +112,14 @@ public class RoutingConfigurer {
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
 				Set<Subscription> subscriptionsToSetUpRoutingFor = new HashSet<>();
 				for(Subscription subscription : acceptedSubscriptions){
-					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+					Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getRedirect().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
+					if (!matchingCaps.isEmpty()) {
+						subscriptionsToSetUpRoutingFor.add(subscription);
+						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+					} else{
+						subscription.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
+					}
 					subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
-					subscriptionsToSetUpRoutingFor.add(subscription);
 					//TODO: Implement redirect using RedirectStatus from matching Capability
 				}
 				//TODO: Are we supposed to set up routing for Neighbour with an empty SubscriptionRequest?
@@ -121,6 +133,17 @@ public class RoutingConfigurer {
 			}
 		} catch (Throwable e) {
 			logger.error("Could not set up routing for neighbour {}", neighbour.getName(), e);
+		}
+	}
+
+	private void setUpRedirectedRouting(Subscription subscription, Set<Capability> capabilities) {
+		Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getRedirect().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
+		if (!matchingCaps.isEmpty()) {
+			createQueue(subscription.getConsumerCommonName());
+			addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
+			bindRemoteServiceProvider("outgoingExchange", subscription.getConsumerCommonName(), subscription);
+			subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+			logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 		}
 	}
 
@@ -143,13 +166,14 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void setUpRedirectedRouting(Subscription subscription) {
-		createQueue(subscription.getConsumerCommonName());
-		addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
-		bindRemoteServiceProvider("outgoingExchange", subscription.getConsumerCommonName(), subscription);
-		subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
-		subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
-		logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
+	private void removeBindingsForSubscriptionsWithStatusResubscribe(Set<Subscription> subscriptions, String neighbourName, String exchangeName) {
+		for(Subscription sub : subscriptions){
+			qpidClient.unbindBindKey(sub.getConsumerCommonName(), sub.bindKey(), exchangeName);
+			sub.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
+			if(!sub.getConsumerCommonName().equals(neighbourName)){
+				qpidClient.removeQueue(sub.getConsumerCommonName());
+			}
+		}
 	}
 
 	@Scheduled(fixedRateString = "${service-provider-router.interval}")
