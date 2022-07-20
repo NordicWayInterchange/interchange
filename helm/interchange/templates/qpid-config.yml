@@ -177,6 +177,15 @@ data:
                 "NAME": "{{ .Values.external_name }}"
               }
             },
+            {
+              "objectType": "VIRTUALHOST",
+              "identity": "remote-service-providers",
+              "operation": "ACCESS",
+              "outcome": "ALLOW_LOG",
+              "attributes": {
+                "NAME": "{{ .Values.external_name }}"
+              }
+            },
             {{- range $i, $ex := .Values.qpid.users }}
             {
               "objectType": "QUEUE",
