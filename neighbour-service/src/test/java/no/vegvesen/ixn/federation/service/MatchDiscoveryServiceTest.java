@@ -26,7 +26,7 @@ public class MatchDiscoveryServiceTest {
 
     @Test
     public void noServiceProvidersAndNoNeighboursShouldNotCreateMatches() {
-        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.emptyList());
+        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.emptyList(), "");
         verify(matchRepository,never()).findBySubscriptionId(any());
         verify(matchRepository,never()).save(any(Match.class));
 
@@ -38,8 +38,8 @@ public class MatchDiscoveryServiceTest {
                 "test",
                 new Capabilities(),
                 new SubscriptionRequest(),
-                new SubscriptionRequest()
-        )));
+                new SubscriptionRequest())),
+                "");
         verify(matchRepository,never()).findBySubscriptionId(any());
         verify(matchRepository,never()).save(any(Match.class));
     }
@@ -48,7 +48,8 @@ public class MatchDiscoveryServiceTest {
     public void aServiceProviderAndNoNeighboursShouldNotCreateMatch() {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
                 Collections.singletonList(new ServiceProvider("SP")),
-                Collections.emptyList());
+                Collections.emptyList(),
+                "");
         verify(matchRepository,never()).findBySubscriptionId(any());
         verify(matchRepository,never()).save(any(Match.class));
     }
@@ -62,7 +63,8 @@ public class MatchDiscoveryServiceTest {
                         Collections.singleton(
                                 new LocalSubscription(
                                         LocalSubscriptionStatus.REQUESTED,
-                                        "originatingCountry = 'NO'"
+                                        "originatingCountry = 'NO'",
+                                        "our_node"
                                 )),
                         Collections.emptySet(),
                         LocalDateTime.now()
@@ -76,12 +78,14 @@ public class MatchDiscoveryServiceTest {
                                 Collections.singleton(
                                         new Subscription(
                                                 "originatingCountry = 'NO'",
+                                                "our_node",
                                                 SubscriptionStatus.REQUESTED
                                         )
                                 )
                         ),
                         new Connection()
-                ))
+                )),
+                "our_node"
         );
         verify(matchRepository,times(1)).findBySubscriptionId(any()); //TODO should check against the actual subscriptionId
         verify(matchRepository,times(1)).save(any(Match.class));
@@ -96,7 +100,8 @@ public class MatchDiscoveryServiceTest {
                Collections.singleton(
                        new LocalSubscription(
                                LocalSubscriptionStatus.REQUESTED,
-                               "originatingCountry = 'NO'"
+                               "originatingCountry = 'NO'",
+                               "our_node"
                        )),
                Collections.emptySet(),
                LocalDateTime.now()
@@ -110,6 +115,7 @@ public class MatchDiscoveryServiceTest {
                        new HashSet<>(Arrays.asList(
                                new Subscription(
                                        "originatingCountry = 'NO'",
+                                       "our_node",
                                        SubscriptionStatus.REQUESTED
                                )
                        ))
@@ -125,6 +131,7 @@ public class MatchDiscoveryServiceTest {
                         new HashSet<>(Arrays.asList(
                                 new Subscription(
                                         "originatingCountry = 'NO'",
+                                        "our_node",
                                         SubscriptionStatus.REQUESTED
                                 )
                         ))
@@ -133,7 +140,8 @@ public class MatchDiscoveryServiceTest {
         );
        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
                Collections.singletonList(sp),
-               Arrays.asList(neighbour,otherNeighbour)
+               Arrays.asList(neighbour,otherNeighbour),
+               "our_node"
        );
        verify(matchRepository,times(2)).findBySubscriptionId(any());
        verify(matchRepository,times(2)).save(any(Match.class));

@@ -22,7 +22,7 @@ public class MatchDiscoveryService {
         this.matchRepository = matchRepository;
     }
 
-    public void syncLocalSubscriptionAndSubscriptionsToCreateMatch(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours) {
+    public void syncLocalSubscriptionAndSubscriptionsToCreateMatch(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours, String nodeName) {
         for (ServiceProvider serviceProvider : serviceProviders) {
             Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
             String serviceProviderName = serviceProvider.getName();
@@ -30,18 +30,20 @@ public class MatchDiscoveryService {
                 for (Neighbour neighbour : neighbours) {
                     for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                         if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
-                            //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
-                            //this ending up with the same selector.
-                            //TODO this really is the most telltale sign that we need to promote Selector to a class
-                            if (localSubscription.getSelector().equals(subscription.getSelector())) {
-                                //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
-                                //this would make a method that is completely independent on the repos.
-                                //TODO AND this will fail if we match more than one Subscription, which is possible!
-                                //Well, in theory. But in effect, it will never happen. Should possibly create a constraint in the db.
-                                if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
-                                    Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
-                                    matchRepository.save(newMatch);
-                                    logger.info("Saved new Match {}", newMatch);
+                            if (subscription.getConsumerCommonName().equals(nodeName)) {
+                                //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
+                                //this ending up with the same selector.
+                                //TODO this really is the most telltale sign that we need to promote Selector to a class
+                                if (localSubscription.getSelector().equals(subscription.getSelector())) {
+                                    //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
+                                    //this would make a method that is completely independent on the repos.
+                                    //TODO AND this will fail if we match more than one Subscription, which is possible!
+                                    //Well, in theory. But in effect, it will never happen. Should possibly create a constraint in the db.
+                                    if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
+                                        Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
+                                        matchRepository.save(newMatch);
+                                        logger.info("Saved new Match {}", newMatch);
+                                    }
                                 }
                             }
                         }

@@ -32,6 +32,8 @@ public class LocalSubscription {
     @JoinColumn(name = "locend_id", foreignKey = @ForeignKey(name = "fk_locend_sub"))
     private Set<LocalEndpoint> localEndpoints = new HashSet<>();
 
+    private String consumerCommonName;
+
     public LocalSubscription() {
 
     }
@@ -40,6 +42,12 @@ public class LocalSubscription {
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
         this.selector = selector;
+    }
+
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
+        this.status = status;
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
@@ -93,6 +101,14 @@ public class LocalSubscription {
         if (newLocalEndpoints != null) {
             this.localEndpoints.addAll(newLocalEndpoints);
         }
+    }
+
+    public String getConsumerCommonName() {
+        return consumerCommonName;
+    }
+
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     //TODO lag et objekt av selector??

@@ -318,21 +318,23 @@ public class NeigbourDiscoveryService {
                         if (lastUpdatedSubscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)) {
                             subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                         } else {
-                            if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
-                                logger.info("Polled updated subscription with id {}", subscription.getId());
-                                EndpointCalculator endpointCalculator = new EndpointCalculator(
-                                        subscription.getEndpoints(),
-                                        lastUpdatedSubscription.getEndpoints()
-                                );
-                                tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
-                                createListenerEndpointFromEndpointsList(
-                                        neighbour,
-                                        endpointCalculator.getNewEndpoints(),
-                                        subscription.getExchangeName()
-                                );
-                                subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
-                            } else {
-                                logger.info("No subscription change for neighbour {}", neighbour.getName());
+                            if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) { //Checking if the subscription is a redirect or not
+                                if (!lastUpdatedSubscription.getEndpoints().isEmpty() || !subscription.getEndpoints().equals(lastUpdatedSubscription.getEndpoints())) {
+                                    logger.info("Polled updated subscription with id {}", subscription.getId());
+                                    EndpointCalculator endpointCalculator = new EndpointCalculator(
+                                            subscription.getEndpoints(),
+                                            lastUpdatedSubscription.getEndpoints()
+                                    );
+                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
+                                    createListenerEndpointFromEndpointsList(
+                                            neighbour,
+                                            endpointCalculator.getNewEndpoints(),
+                                            subscription.getExchangeName()
+                                    );
+                                    subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
+                                } else {
+                                    logger.info("No subscription change for neighbour {}", neighbour.getName());
+                                }
                             }
                         }
                     } else {
