@@ -15,6 +15,7 @@ data:
     service-providers.users={{ range .Values.qpid.users }}{{ .name }},{{ end }}
     federated-interchanges.users=
     administrators.users={{ .Values.qpid.admin_user }},{{ .Values.external_name }}
+    remote-service-providers.users=
   default.json: |
     {{- $userlen := len .Values.qpid.users }}
     {{- $additionallen := len .Values.qpid.additional_queues }}
