@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.Delivery;
+import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
 import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +28,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
+@ContextConfiguration(initializers = {ImportServiceProvidersIT.LocalhostInitializer.class})
 public class ExportServiceProvidersIT {
 
     @TempDir
@@ -85,7 +87,12 @@ public class ExportServiceProvidersIT {
                 spSubscriptions.add(transformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProvider.getName(),subscription));
             }
             serviceProviderApi.setSubscriptions(spSubscriptions);
-            Set<Delivery> deliveries = transformer.transformLocalDeliveryToDelivery(serviceProvider.getName(),serviceProvider.getDeliveries());
+
+            Set<GetDeliveryResponse> deliveries = new HashSet<>();
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                deliveries.add(transformer.transformLocalDeliveryToGetDeliveryResponse(serviceProvider.getName(),delivery));
+
+            }
             serviceProviderApi.setDeliveries(deliveries);
             serviceProviders.add(serviceProviderApi);
         }
