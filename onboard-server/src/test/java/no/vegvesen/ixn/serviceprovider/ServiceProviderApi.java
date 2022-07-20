@@ -2,22 +2,22 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.Delivery;
-import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
+import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
 
 import java.util.Set;
 
 public class ServiceProviderApi {
     private String name;
-    private Set<LocalActorSubscription> subscriptions;
+    private Set<GetSubscriptionResponse> subscriptions;
     private Set<CapabilityApi> capabilities;
 
     private Set<Delivery> deliveries;
 
-    public Set<LocalActorSubscription> getSubscriptions() {
+    public Set<GetSubscriptionResponse> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(Set<LocalActorSubscription> subscriptions) {
+    public void setSubscriptions(Set<GetSubscriptionResponse> subscriptions) {
         this.subscriptions = subscriptions;
     }
 
