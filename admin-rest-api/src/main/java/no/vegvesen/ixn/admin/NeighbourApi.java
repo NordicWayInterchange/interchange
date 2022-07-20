@@ -10,7 +10,7 @@ public class NeighbourApi {
 
     private String numberOfCapabilities;
 
-    private String numberOfOurRequestedSubcriptions;
+    private String numberOfOurRequestedSubscriptions;
 
     private String numberOfNeighbourRequestedSubscriptions;
     private NeighbourStatusApi status;
@@ -18,12 +18,12 @@ public class NeighbourApi {
     public NeighbourApi() {
     }
 
-    public NeighbourApi(String id, String path, String name, String numberOfCapabilities, String numberOfOurRequestedSubcriptions, String numberOfNeighbourRequestedSubscriptions, NeighbourStatusApi status) {
+    public NeighbourApi(String id, String path, String name, String numberOfCapabilities, String numberOfOurRequestedSubscriptions, String numberOfNeighbourRequestedSubscriptions, NeighbourStatusApi status) {
         this.id = id;
         this.path = path;
         this.name = name;
         this.numberOfCapabilities = numberOfCapabilities;
-        this.numberOfOurRequestedSubcriptions = numberOfOurRequestedSubcriptions;
+        this.numberOfOurRequestedSubscriptions = numberOfOurRequestedSubscriptions;
         this.numberOfNeighbourRequestedSubscriptions = numberOfNeighbourRequestedSubscriptions;
         this.status = status;
     }
@@ -36,8 +36,8 @@ public class NeighbourApi {
         return numberOfCapabilities;
     }
 
-    public String getNumberOfOurRequestedSubcriptions() {
-        return numberOfOurRequestedSubcriptions;
+    public String getNumberOfOurRequestedSubscriptions() {
+        return numberOfOurRequestedSubscriptions;
     }
 
     public String getNumberOfNeighbourRequestedSubscriptions() {

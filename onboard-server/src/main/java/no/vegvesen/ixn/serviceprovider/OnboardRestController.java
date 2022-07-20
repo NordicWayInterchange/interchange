@@ -22,7 +22,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.*;
 import java.util.stream.Collectors;
-@CrossOrigin(origins = "https;//localhost:3001")
+@CrossOrigin(origins = "https://localhost:3001")
 @RestController
 public class OnboardRestController {
 
@@ -490,6 +490,8 @@ public class OnboardRestController {
 			//add the addServiceProvidersApi to the response object
 			response.addApi(addServiceProvidersApi);
 		}
+
+
 
 
 

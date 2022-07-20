@@ -9,19 +9,19 @@ public class ServiceProviderApi {
 
     private String numberOfDeliveries;
 
-    private String numberOfSubcriptions;
+    private String numberOfSubscriptions;
 
     private ServiceProviderStatusApi status;
 
     public ServiceProviderApi() {
 
     }
-    public ServiceProviderApi(String name, String id, String numberOfCapabilities, String numberOfDeliveries, String numberOfSubcriptions, ServiceProviderStatusApi status) {
+    public ServiceProviderApi(String name, String id, String numberOfCapabilities, String numberOfDeliveries, String numberOfSubscriptions, ServiceProviderStatusApi status) {
         this.name = name;
         this.id = id;
         this.numberOfCapabilities = numberOfCapabilities;
         this.numberOfDeliveries = numberOfDeliveries;
-        this.numberOfSubcriptions = numberOfSubcriptions;
+        this.numberOfSubscriptions = numberOfSubscriptions;
         this.status = status;
     }
 
@@ -41,8 +41,8 @@ public class ServiceProviderApi {
         return numberOfDeliveries;
     }
 
-    public String getNumberOfSubcriptions() {
-        return numberOfSubcriptions;
+    public String getNumberOfSubscriptions() {
+        return numberOfSubscriptions;
     }
 
     public ServiceProviderStatusApi getStatus() {

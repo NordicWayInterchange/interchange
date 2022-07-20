@@ -32,7 +32,7 @@
             "WinterDrivingManagement"]
         }
       ],
-      "subscriptions": ["originatingCountry = 'SE' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType = ',1,2,3,'", "originatingCountry = 'SE' and messageType = 'DENM' and protocolVersion = '1.0'"],
+      "subscriptions": ["originatingCountry = 'SE' and messageType = 'DATEX2' and quadTree like '%,01230122%'", "originatingCountry = 'SE' and messageType = 'DENM' and protocolVersion = '1.0'"],
       "deliveries": ["originatingCountry = 'NO' and messageType = 'DENM'", "originatingCountry = 'NO' and messageType = 'DATEX'"]
     },{
       "name": "FourC",
@@ -52,7 +52,7 @@
         }
       ],
       "subscriptions": ["originatingCountry = 'SE' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType = ',1,2,3,'", "originatingCountry = 'NO' and messageType = 'DENM' and protocolVersion = '1.0'"],
-      "deliveries": ["originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,120021%'"]
+      "deliveries": ["originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"]
       },
     {
       "name": "Aventi",
@@ -71,7 +71,7 @@
           ]
         }
       ],
-      "subscriptions": ["originatingCountry = 'SE' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType = ',1,2,3,'", "originatingCountry = 'NO' and messageType = 'DENM' and protocolVersion = '1.0'", "originatingCountry = 'NO' and messageType = 'DATEX' and protocolVersion = '1.0'"],
+      "subscriptions": ["originatingCountry = 'SE' and messageType = 'DATEX2' and quadTree like '%,12004%'", "originatingCountry = 'NO' and messageType = 'DENM' and protocolVersion = '1.0'", "originatingCountry = 'NO' and messageType = 'DATEX' and protocolVersion = '1.0'"],
       "deliveries": ["originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,120003%'"]
     }
   ]
