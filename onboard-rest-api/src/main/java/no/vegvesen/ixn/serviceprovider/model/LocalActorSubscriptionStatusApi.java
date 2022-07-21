@@ -5,5 +5,6 @@ public enum LocalActorSubscriptionStatusApi {
     CREATED,
     ILLEGAL,
     NOT_VALID,
+    NO_OVERLAP, //Only for Monotch
     RESUBSCRIBE
 }

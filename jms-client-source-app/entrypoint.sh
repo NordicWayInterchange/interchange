@@ -7,4 +7,4 @@ java -jar jms-client-source-app.jar \
   -t $TRUST_STORE_PATH \
   -w $TRUST_STORE_PASS \
   $URL \
-  $QUEUE "$@"
+  $QUEUE

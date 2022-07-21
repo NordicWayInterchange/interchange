@@ -208,6 +208,8 @@ public class TypeTransformer {
                 return LocalActorSubscriptionStatusApi.CREATED;
             case TEAR_DOWN:
                 return LocalActorSubscriptionStatusApi.NOT_VALID;
+            case NO_OVERLAP:
+                return LocalActorSubscriptionStatusApi.NO_OVERLAP;
             default:
                 return LocalActorSubscriptionStatusApi.ILLEGAL;
         }
