@@ -49,7 +49,8 @@ public class SubscriptionTransformer {
 					s.getSelector(),
 					s.getPath(),
 					subscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()),
-					s.getConsumerCommonName());
+					s.getConsumerCommonName(),
+					s.getLastUpdatedTimestamp());
 			subscriptionResponses.add(responseApi);
 		}
 		return new HashSet<>(subscriptionResponses);

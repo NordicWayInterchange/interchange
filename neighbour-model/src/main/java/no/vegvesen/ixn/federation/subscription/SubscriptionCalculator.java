@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -58,6 +59,7 @@ public class SubscriptionCalculator {
                 Subscription newSubscription = new Subscription(subscription.getSelector(),
                         SubscriptionStatus.REQUESTED,
                         name);
+                newSubscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
                 calculatedSubscriptions.add(newSubscription);
             }
         }
