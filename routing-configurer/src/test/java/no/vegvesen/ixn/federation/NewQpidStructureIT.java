@@ -158,7 +158,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         String outQueueName = "king_gustaf";
 
         Subscription subscription = new Subscription(
-                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'",
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'",
                 SubscriptionStatus.CREATED
         );
 
@@ -166,12 +166,12 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 "NO-123",
                 "NO",
                 "DENM:1.2.2",
-                new HashSet<>(Arrays.asList("12003")),
+                new HashSet<>(Arrays.asList("12004")),
                 new HashSet<>(Arrays.asList("6"))
         );
 
         LocalDelivery delivery = new LocalDelivery(
-                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'",
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'",
                 LocalDeliveryStatus.CREATED
         );
 
@@ -231,21 +231,22 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
                 source.sendNonPersistentMessage(source.createMessageBuilder()
                         .bytesMessage(bytemessage)
-                        .userId("")
+                        .userId("kong_olav")
                         .publisherId("NO-123")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
-                        .quadTreeTiles(",12003,")
+                        .quadTreeTiles(",12004,")
                         .timestamp(System.currentTimeMillis())
-                .build());
+                        .build());
                 System.out.println();
             }
             System.out.println();
             Thread.sleep(200);
         }
+        System.out.println(qpidClient.getQpidAcl().aclAsString());
         assertThat(numMessages.get()).isEqualTo(1);
     }
 
@@ -259,7 +260,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createTopicExchange(output);
 
-        String selector = "originatingCountry = 'NO'";
+        String selector = "((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = '6') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6')";
 
         qpidClient.bindTopicExchange(selector,input,output);
 
@@ -275,14 +276,14 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
                 source.sendNonPersistentMessage(source.createMessageBuilder()
                         .bytesMessage(bytemessage)
-                        .userId("anna")
+                        .userId("king_gustaf")
                         .publisherId("NO-123")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")
                         .originatingCountry("NO")
                         .protocolVersion("DENM:1.2.2")
-                        .quadTreeTiles(",12003,")
+                        .quadTreeTiles(",12004,")
                         .timestamp(System.currentTimeMillis())
                         .build());
             }

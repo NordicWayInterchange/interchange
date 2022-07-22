@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
+import no.vegvesen.ixn.docker.KeysContainer;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
@@ -34,8 +36,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.*;
@@ -52,11 +56,14 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	private static Path testKeysPath = getFolderPath("target/test-keys" + RoutingConfigurerIT.class.getSimpleName());
 
 	@Container
-	public static final GenericContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
+	public static final KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
 
 	@Container
-	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
             .dependsOn(keyContainer);
+
+	@Autowired
+	SSLContext sslContext;
 
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
 
@@ -612,6 +619,80 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists("remote-sp")).isTrue();
 		assertThat(client.queueExists(sub2.getQueueName())).isTrue();
 	}
+
+	@Test
+	public void setupRoutingWithCapabilityExchanges() throws Exception {
+		LocalDelivery delivery = new LocalDelivery(
+				"originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'",
+				LocalDeliveryStatus.CREATED
+		);
+		String deliveryExchangeName = "del-ex10";
+
+		DenmCapability cap = new DenmCapability(
+				"NO-123",
+				"NO",
+				"DENM:1.2.2",
+				new HashSet<>(Arrays.asList("12004")),
+				new HashSet<>(Arrays.asList("6"))
+		);
+
+		cap.setCapabilityExchangeName("cap-ex10");
+		client.createTopicExchange("cap-ex10");
+
+		ServiceProvider sp = new ServiceProvider("sp");
+		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
+
+		MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
+		String capabilitySelector = creator.makeSelector(cap);
+
+		String joinedSelector = String.format("(%s) AND (%s)", delivery.getSelector(), capabilitySelector);
+
+		client.createDirectExchange(deliveryExchangeName);
+		client.addWriteAccess(sp.getName(), deliveryExchangeName);
+		client.bindDirectExchange(joinedSelector, deliveryExchangeName, cap.getCapabilityExchangeName());
+
+		Subscription sub = new Subscription("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'", SubscriptionStatus.ACCEPTED, "neigh10");
+
+		HashSet<Subscription> subs = new HashSet<>();
+		subs.add(sub);
+
+		Neighbour neigh = new Neighbour("neigh10", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+
+		when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singleton(sp));
+		routingConfigurer.setupNeighbourRouting(neigh);
+		assertThat(client.queueExists(sub.getQueueName())).isTrue();
+
+		AtomicInteger numMessages = new AtomicInteger();
+		try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
+				sub.getQueueName(),
+				sslContext,
+				message -> numMessages.incrementAndGet())) {
+			sink.start();
+			try (Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchangeName,sslContext)) {
+				source.start();
+				String messageText = "This is my DENM message :) ";
+				byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+				source.sendNonPersistentMessage(source.createMessageBuilder()
+						.bytesMessage(bytemessage)
+						.userId("kong_olav")
+						.publisherId("NO-123")
+						.messageType(Constants.DENM)
+						.causeCode("6")
+						.subCauseCode("61")
+						.originatingCountry("NO")
+						.protocolVersion("DENM:1.2.2")
+						.quadTreeTiles(",12004,")
+						.timestamp(System.currentTimeMillis())
+						.build());
+				System.out.println();
+			}
+			System.out.println();
+			Thread.sleep(200);
+		}
+		System.out.println(client.getQpidAcl().aclAsString());
+		assertThat(numMessages.get()).isEqualTo(1);
+	}
+
 
 	public void theNodeItselfCanReadFromAnyNeighbourQueue(String neighbourQueue) throws NamingException, JMSException {
 		SSLContext localhostSslContext = setUpTestSslContext("localhost.p12");
