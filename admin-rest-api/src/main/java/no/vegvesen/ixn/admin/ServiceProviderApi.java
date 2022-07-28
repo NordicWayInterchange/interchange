@@ -16,7 +16,7 @@ public class ServiceProviderApi {
     public ServiceProviderApi() {
 
     }
-    public ServiceProviderApi(String name, String id, String numberOfCapabilities, String numberOfDeliveries, String numberOfSubscriptions, ServiceProviderStatusApi status) {
+    public ServiceProviderApi(String name, String id, String numberOfCapabilities, String numberOfSubscriptions, String numberOfDeliveries, ServiceProviderStatusApi status) {
         this.name = name;
         this.id = id;
         this.numberOfCapabilities = numberOfCapabilities;
