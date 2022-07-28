@@ -157,9 +157,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				.collect(Collectors.toSet());
 		assertThat(createdSubscriptions).hasSize(1);
 
-		//Showing that the timestamps have been changed
+		//Showing that the timestamp have been changed for the ACCEPTED subscription, but not for the REJECTED one
 		assertThat(s1.getLastUpdatedTimestamp()).isGreaterThan(0);
-		assertThat(s2.getLastUpdatedTimestamp()).isGreaterThan(0);
+		assertThat(s2.getLastUpdatedTimestamp()).isEqualTo(0);
 	}
 
 	@Test
