@@ -105,16 +105,18 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithOneBindingIsCreated() {
-		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
+		Subscription subscription = new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND publicationType = 'Road Block' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "flounder"));
+				"AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "flounder");
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(subscription);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupNeighbourRouting(flounder);
 		assertThat(client.queueExists(flounder.getName())).isTrue();
+		assertThat(subscription.getLastUpdatedTimestamp()).isGreaterThan(0);
 	}
 
 	@Test
@@ -127,12 +129,18 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 		routingConfigurer.setupNeighbourRouting(halibut);
 		assertThat(client.queueExists(halibut.getName())).isTrue();
+		assertThat(s1.getLastUpdatedTimestamp()).isGreaterThan(0);
+		assertThat(s2.getLastUpdatedTimestamp()).isGreaterThan(0);
 	}
 
 	@Test
 	public void neighbourWithTwoBindingsAndOnlyOneIsAcceptedIsCreated() {
 		Subscription s1 = new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') AND publicationType = 'Road Block' AND messageType = 'DATEX2' AND originatingCountry = 'NO' AND protocolVersion = '1.0' AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "salmon");
 		Subscription s2 = new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') AND publicationType = 'Road Block' AND messageType = 'DATEX2' AND originatingCountry = 'SE' AND protocolVersion = '1.0' AND publisherId = 'NO-1234'", SubscriptionStatus.REJECTED, "salmon");
+
+		//Just to ensure the timestamp is updated by RoutingConfigurer
+		assertThat(s1.getLastUpdatedTimestamp()).isEqualTo(0);
+		assertThat(s2.getLastUpdatedTimestamp()).isEqualTo(0);
 
 		Set<Subscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
@@ -148,18 +156,29 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED))
 				.collect(Collectors.toSet());
 		assertThat(createdSubscriptions).hasSize(1);
+
+		//Showing that the timestamps have been changed
+		assertThat(s1.getLastUpdatedTimestamp()).isGreaterThan(0);
+		assertThat(s2.getLastUpdatedTimestamp()).isGreaterThan(0);
 	}
 
 	@Test
 	public void neighbourIsBothCreatedAndUpdated() {
-		Set<Subscription> subscriptions = Sets.newLinkedHashSet(new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') AND publicationType = 'Road Block' AND messageType = 'DATEX2' AND originatingCountry = 'NO' AND protocolVersion = '1.0' AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "seabass"));
+		Subscription subscription = new Subscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') AND publicationType = 'Road Block' AND messageType = 'DATEX2' AND originatingCountry = 'NO' AND protocolVersion = '1.0' AND publisherId = 'NO-1234'", SubscriptionStatus.ACCEPTED, "seabass");
+		Set<Subscription> subscriptions = Sets.newLinkedHashSet(subscription);
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour seabass = new Neighbour("seabass", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		routingConfigurer.setupNeighbourRouting(seabass);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
+		long timestamp = subscription.getLastUpdatedTimestamp();
+		assertThat(timestamp).isGreaterThan(0);
+
 		routingConfigurer.setupNeighbourRouting(seabass);
 		assertThat(client.queueExists(seabass.getName())).isTrue();
+
+		//no change, no change in timestamp
+		assertThat(subscription.getLastUpdatedTimestamp()).isEqualTo(timestamp);
 	}
 
 	@Test

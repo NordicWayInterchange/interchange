@@ -59,7 +59,6 @@ public class SubscriptionCalculator {
                 Subscription newSubscription = new Subscription(subscription.getSelector(),
                         SubscriptionStatus.REQUESTED,
                         name);
-                newSubscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
                 calculatedSubscriptions.add(newSubscription);
             }
         }

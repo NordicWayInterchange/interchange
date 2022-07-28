@@ -58,7 +58,7 @@ public class NeighbourServiceIT {
     }
 
     @Test
-    public void incomingSubscriptionRequestReturnsPathForSubscription() {
+    public void incomingSubscriptionRequestReturnsPathForSubscriptionAndTimestamp() {
         Neighbour neighbour = new Neighbour("myNeighbour",
                 new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, Collections.emptySet()),
@@ -74,6 +74,7 @@ public class NeighbourServiceIT {
         assertThat(subscriptions.size()).isEqualTo(1);
         RequestedSubscriptionResponseApi subscriptionApi = subscriptions.stream().findFirst().get();
         assertThat(subscriptionApi.getPath()).isNotNull();
+        assertThat(subscriptionApi.getLastUpdatedTimestamp()).isGreaterThan(0);
     }
 
     @Test
