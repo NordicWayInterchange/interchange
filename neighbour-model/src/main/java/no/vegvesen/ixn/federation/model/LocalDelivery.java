@@ -31,6 +31,8 @@ public class LocalDelivery {
     @UpdateTimestamp
     private LocalDateTime lastUpdatedTimestamp;
 
+    private String exchangeName = "";
+
     @Enumerated(EnumType.STRING)
     private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
 
@@ -107,6 +109,14 @@ public class LocalDelivery {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
+    public String getExchangeName() {
+        return exchangeName;
+    }
+
+    public void setExchangeName(String exchangeName) {
+        this.exchangeName = exchangeName;
+    }
+
     public LocalDeliveryStatus getStatus() {
         return status;
     }
@@ -121,6 +131,10 @@ public class LocalDelivery {
 
     public void removeEndpoint(LocalDeliveryEndpoint endpoint) {
         this.endpoints.remove(endpoint);
+    }
+
+    public boolean exchangeExists() {
+        return !exchangeName.isEmpty();
     }
 
     @Override
@@ -139,11 +153,12 @@ public class LocalDelivery {
     @Override
     public String toString() {
         return "LocalDelivery{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", endpoints=" + endpoints +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", exchangeName='" + exchangeName + '\'' +
                 ", status=" + status +
                 '}';
     }

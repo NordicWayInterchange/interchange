@@ -292,4 +292,98 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         }
         //assertThat(numMessages.get()).isEqualTo(1);
     }
+
+    @Test
+    public void testDuplicateMessagesUsingOneDeliveryEndpoint() throws Exception {
+        String capabilityExchange1 = "capability-exchange1";
+        String capabilityExchange2 = "capability-exchange2";
+        String deliveryExchange = "delivery-exchange";
+        String subscriptionQueue = "king_gustaf";
+
+        Subscription subscription = new Subscription(
+                "originatingCountry = 'NO'",
+                SubscriptionStatus.CREATED
+        );
+
+        DenmCapability capability1 = new DenmCapability(
+                "NO-123",
+                "NO",
+                "DENM:1.2.2",
+                new HashSet<>(Arrays.asList("12002", "12003")),
+                new HashSet<>(Arrays.asList("6"))
+        );
+
+        DenmCapability capability2 = new DenmCapability(
+                "NO-123",
+                "NO",
+                "DENM:1.2.2",
+                new HashSet<>(Arrays.asList("12003")),
+                new HashSet<>(Arrays.asList("6"))
+        );
+
+        LocalDelivery delivery = new LocalDelivery(
+                "originatingCountry = 'NO'",
+                LocalDeliveryStatus.CREATED
+        );
+
+        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
+
+        qpidClient.createQueue(subscriptionQueue);
+        qpidClient.addReadAccess("king_gustaf", subscriptionQueue);
+
+        qpidClient.createTopicExchange(capabilityExchange1);
+
+        qpidClient.createTopicExchange(capabilityExchange2);
+
+        String deliverySelector = delivery.getSelector();
+
+        String subscriptionSelector = subscription.getSelector();
+
+        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
+        String capabilitySelector1 = creator.makeSelector(capability1);
+        String capabilitySelector2 = creator.makeSelector(capability2);
+
+        String joinedSelector1 = String.format("(%s) AND (%s)", capabilitySelector1, deliverySelector);
+        System.out.println(joinedSelector1);
+
+        String joinedSelector2 = String.format("(%s) AND (%s)", capabilitySelector2, deliverySelector);
+        System.out.println(joinedSelector2);
+
+        qpidClient.bindDirectExchange(joinedSelector1,deliveryExchange,capabilityExchange1);
+        qpidClient.bindDirectExchange(joinedSelector2,deliveryExchange,capabilityExchange2);
+        qpidClient.bindTopicExchange(subscriptionSelector, capabilityExchange1, subscriptionQueue);
+        qpidClient.bindTopicExchange(subscriptionSelector, capabilityExchange2, subscriptionQueue);
+
+        AtomicInteger numMessages = new AtomicInteger();
+
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
+                subscriptionQueue,
+                sslContext,
+                message -> numMessages.incrementAndGet())) {
+            sink.start();
+            try (Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchange,sslContext)) {
+                source.start();
+                String messageText = "This is my DENM message :) ";
+                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                        .bytesMessage(bytemessage)
+                        .userId("kong_olav")
+                        .publisherId("NO-123")
+                        .messageType(Constants.DENM)
+                        .causeCode("6")
+                        .subCauseCode("61")
+                        .originatingCountry("NO")
+                        .protocolVersion("DENM:1.2.2")
+                        .quadTreeTiles(",12003,12002,")
+                        .timestamp(System.currentTimeMillis())
+                        .build());
+                System.out.println();
+            }
+            System.out.println();
+            Thread.sleep(200);
+        }
+        System.out.println(numMessages.get());
+        assertThat(numMessages.get()).isEqualTo(1);
+    }
 }

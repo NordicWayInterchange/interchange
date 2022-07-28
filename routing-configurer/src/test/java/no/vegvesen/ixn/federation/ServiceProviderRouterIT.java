@@ -547,13 +547,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex1");
-		client.createDirectExchange("cap-ex1");
+		client.createTopicExchange("cap-ex1");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
+		delivery.setExchangeName("my-exchange5");
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
-		match.setDeliveryQueueName("my-queue5");
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match));
 		when(outgoingMatchDiscoveryService.findByOutgoingMatchId(any(Integer.class))).thenReturn(match);
@@ -562,8 +562,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
 
-		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isTrue();
-		assertThat(match.getDeliveryQueueName()).isNotNull();
+		verify(outgoingMatchDiscoveryService, times(1)).updateOutgoingMatchToUp(any(OutgoingMatch.class));
+
+		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
+		assertThat(delivery.getExchangeName()).isNotNull();
 		assertThat(match.getSelector()).contains(capabilitySelector);
 	}
 
@@ -580,7 +582,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("6")
 		);
 		denmCapability.setCapabilityExchangeName("cap-ex2");
-		client.createDirectExchange("cap-ex2");
+		client.createTopicExchange("cap-ex2");
 
 		Capability denmCapability2 = new DenmCapability(
 				"NPRA",
@@ -590,16 +592,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton("5")
 		);
 		denmCapability2.setCapabilityExchangeName("cap-ex3");
-		client.createDirectExchange("cap-ex3");
+		client.createTopicExchange("cap-ex3");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
+		delivery.setExchangeName("my-exchange6");
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
-		match.setDeliveryQueueName("my-queue6");
 
 		OutgoingMatch match2 = new OutgoingMatch(delivery, denmCapability2, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
-		match2.setDeliveryQueueName("my-queue7");
-
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match, match2));
 		router.setUpDeliveryQueue(serviceProvider);
@@ -607,18 +607,19 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
 		String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(denmCapability2);
 
-		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isTrue();
-		assertThat(match.getDeliveryQueueName()).isNotNull();
-		assertThat(match2.getDeliveryQueueName()).isNotNull();
+		verify(outgoingMatchDiscoveryService, times(2)).updateOutgoingMatchToUp(any(OutgoingMatch.class));
+
+		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
+		assertThat(delivery.getExchangeName()).isNotNull();
 		assertThat(match.getSelector()).contains(capabilitySelector);
 		assertThat(match2.getSelector()).contains(capabilitySelector2);
 	}
-
 
 	@Test
 	public void tearDownTargetForDeliveryByDeletedDelivery() {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		String exchangeName = "my-exchange8";
 
 		Capability denmCapability = new DenmCapability(
 				"NPRA",
@@ -629,14 +630,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex4");
-		client.createDirectExchange("cap-ex4");
+		client.createTopicExchange("cap-ex4");
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
 		serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
+		delivery.setExchangeName(exchangeName);
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
-		match.setDeliveryQueueName("my-queue8");
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match));
 		router.setUpDeliveryQueue(serviceProvider);
@@ -648,11 +649,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(outgoingMatchDiscoveryService.findMatchFromDeliveryId(any(Integer.class))).thenReturn(match);
 		router.tearDownDeliveryQueues(serviceProvider);
 
-		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isFalse();
+		verify(outgoingMatchDiscoveryService, times(1)).updateOutgoingMatchToDeleted(any(OutgoingMatch.class));
+
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
+		assertThat(delivery.exchangeExists()).isFalse();
 	}
 
 	@Test
-	public void tearDownTargetForDeliveryByDeletedCapability() {
+	public void tearDownTargetForDeliveryByDeletedCapabilityWhenThereIsNoOtherMatches() {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
@@ -669,14 +673,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
+		delivery.setExchangeName("my-exchange9");
 
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
-		match.setDeliveryQueueName("my-queue9");
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match));
 		router.setUpDeliveryQueue(serviceProvider);
 
-		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isTrue();
+		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 
 		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
 		match.setStatus(OutgoingMatchStatus.TEARDOWN_ENDPOINT);
@@ -684,11 +688,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(outgoingMatchDiscoveryService.findMatchesToTearDownEndpointsFor(any(String.class))).thenReturn(Arrays.asList(match));
 		router.tearDownDeliveryQueues(serviceProvider);
 
-		assertThat(client.exchangeExists(match.getDeliveryQueueName())).isFalse();
+		verify(outgoingMatchDiscoveryService, times(1)).updateOutgoingMatchToDeleted(any(OutgoingMatch.class));
+
+		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
+		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.CREATED);
 	}
 
 	@Test
-	public void removeMultipleEndpointsWhenDeliveryIsRemoved() {
+	public void removeOneEndpointsWhenOneOfTwoMatchesIsRemoved() {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
@@ -716,29 +723,29 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED);
 		delivery.setId(1);
+		delivery.setExchangeName("my-exchange10");
 
 		OutgoingMatch match1 = new OutgoingMatch(delivery, denmCapability1, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
-		match1.setDeliveryQueueName("my-queue10");
 
 		OutgoingMatch match2 = new OutgoingMatch(delivery, denmCapability2, serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
-		match2.setDeliveryQueueName("my-queue11");
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match1, match2));
 		router.setUpDeliveryQueue(serviceProvider);
 
-		assertThat(client.exchangeExists(match1.getDeliveryQueueName())).isTrue();
-		assertThat(client.exchangeExists(match2.getDeliveryQueueName())).isTrue();
+		verify(outgoingMatchDiscoveryService, times(2)).updateOutgoingMatchToUp(any(OutgoingMatch.class));
 
+		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 
-		delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
-		match1.setStatus(OutgoingMatchStatus.TEARDOWN_ENDPOINT);
+		match1.setStatus(OutgoingMatchStatus.UP);
 		match2.setStatus(OutgoingMatchStatus.TEARDOWN_ENDPOINT);
-		when(outgoingMatchDiscoveryService.findMatchesToTearDownEndpointsFor(any(String.class))).thenReturn(Arrays.asList(match1, match2));
+		when(outgoingMatchDiscoveryService.findMatchesToTearDownEndpointsFor(any(String.class))).thenReturn(Arrays.asList(match2));
 
 		router.tearDownDeliveryQueues(serviceProvider);
 
-		assertThat(client.exchangeExists(match1.getDeliveryQueueName())).isFalse();
-		assertThat(client.exchangeExists(match2.getDeliveryQueueName())).isFalse();
+		verify(outgoingMatchDiscoveryService, times(1)).updateOutgoingMatchToDeleted(any(OutgoingMatch.class));
+
+		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
+		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.CREATED);
 	}
 
 	@Test

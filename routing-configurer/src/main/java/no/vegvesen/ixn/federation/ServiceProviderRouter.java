@@ -333,12 +333,17 @@ public class ServiceProviderRouter {
             if (match.getCapability().getStatus().equals(CapabilityStatus.CREATED)) {
                 LocalDelivery delivery = match.getLocalDelivery();
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
-                    if (!qpidClient.exchangeExists(match.getDeliveryQueueName())) {
+                    if (!qpidClient.exchangeExists(delivery.getExchangeName())) {
                         String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
                         match.setSelector(joinedSelector);
-                        qpidClient.createDirectExchange(match.getDeliveryQueueName());
-                        qpidClient.addWriteAccess(serviceProvider.getName(), match.getDeliveryQueueName());
-                        qpidClient.bindDirectExchange(joinedSelector, match.getDeliveryQueueName(), match.getCapability().getCapabilityExchangeName());
+                        qpidClient.createDirectExchange(delivery.getExchangeName());
+                        qpidClient.addWriteAccess(serviceProvider.getName(), delivery.getExchangeName());
+                        qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
+                        outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
+                    } else {
+                        String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
+                        match.setSelector(joinedSelector);
+                        qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
                         outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
                     }
                 }
@@ -349,14 +354,35 @@ public class ServiceProviderRouter {
     public void tearDownDeliveryQueues(ServiceProvider serviceProvider) {
         List<OutgoingMatch> matchesToTearDownEndpointsFor = outgoingMatchDiscoveryService.findMatchesToTearDownEndpointsFor(serviceProvider.getName());
         for (OutgoingMatch match : matchesToTearDownEndpointsFor) {
-            String target = match.getDeliveryQueueName();
-            logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
-            if (qpidClient.exchangeExists(target)) {
-                qpidClient.unbindBindKey(target, match.bindKey(), "outgoingExchange");
-                qpidClient.removeWriteAccess(serviceProvider.getName(), target);
-                qpidClient.removeExchange(target);
+            if (match.getLocalDelivery().getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
+                if (match.getLocalDelivery().exchangeExists()) {
+                    String target = match.getLocalDelivery().getExchangeName();
+                    if (qpidClient.exchangeExists(target)) {
+                        logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
+                        qpidClient.removeWriteAccess(serviceProvider.getName(), target);
+                        qpidClient.removeExchange(target);
+                    }
+                    match.getLocalDelivery().setExchangeName("");
+                }
             }
             outgoingMatchDiscoveryService.updateOutgoingMatchToDeleted(match);
+        }
+
+        Set<LocalDelivery> deliveries = serviceProvider.getDeliveries();
+        for (LocalDelivery delivery : deliveries) {
+            List<OutgoingMatch> matches = outgoingMatchDiscoveryService.findMatchesFromDeliveryId(delivery.getId());
+            if (matches.isEmpty()) {
+                if (delivery.exchangeExists()) {
+                    String target = delivery.getExchangeName();
+                    if (qpidClient.exchangeExists(target)) {
+                        logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
+                        qpidClient.removeWriteAccess(serviceProvider.getName(), target);
+                        qpidClient.removeExchange(target);
+                    }
+                    delivery.setExchangeName("");
+                }
+                delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
+            }
         }
     }
 

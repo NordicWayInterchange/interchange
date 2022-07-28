@@ -60,13 +60,6 @@ public class Capabilities {
 				.findFirst();
 		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
-
-		if (currentServiceProviderCapabilities.size() == 0) {
-			setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-		} else {
-			setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		}
-		setLastUpdated(LocalDateTime.now());
 	}
 
 	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}

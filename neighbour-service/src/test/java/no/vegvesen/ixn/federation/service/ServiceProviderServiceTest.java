@@ -42,6 +42,7 @@ public class ServiceProviderServiceTest {
                 LocalDateTime.now(),
                 LocalDeliveryStatus.CREATED
         );
+        localDelivery.setExchangeName("my-exchange");
         sp.addDeliveries(Collections.singleton(localDelivery));
 
         DenmCapability capability = new DenmCapability(
@@ -54,18 +55,13 @@ public class ServiceProviderServiceTest {
         capability.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability);
 
-        OutgoingMatch match = new OutgoingMatch(localDelivery, capability, sp.getName(), "my-queue", OutgoingMatchStatus.UP);
-
-        when(outgoingMatchDiscoveryService.findMatchesWithNewEndpoints(anyString(), anyInt())).thenReturn(Arrays.asList(match));
-
         service.updateNewLocalDeliveryEndpoints(sp, "host", 5671);
 
         assertThat(localDelivery.getEndpoints()).hasSize(1);
-        verify(outgoingMatchDiscoveryService, times(1)).findMatchesWithNewEndpoints(anyString(), anyInt());
     }
 
     @Test
-    public void updateMultipleDeliveryEndpointsAddsNewEndpoints() {
+    public void onlyOneEndpointWhenThereIsMoreMatchesWithCapabilities() {
         ServiceProvider sp = new ServiceProvider("sp");
         String selector = "originatingCountry = 'NO'";
 
@@ -76,6 +72,7 @@ public class ServiceProviderServiceTest {
                 LocalDateTime.now(),
                 LocalDeliveryStatus.CREATED
         );
+        localDelivery.setExchangeName("my-exchange");
         sp.addDeliveries(Collections.singleton(localDelivery));
 
         DenmCapability capability = new DenmCapability(
@@ -98,33 +95,27 @@ public class ServiceProviderServiceTest {
         capability1.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability1);
 
-        OutgoingMatch match = new OutgoingMatch(localDelivery, capability, sp.getName(), "my-queue", OutgoingMatchStatus.UP);
-        OutgoingMatch match1 = new OutgoingMatch(localDelivery, capability1, sp.getName(), "my-queue1", OutgoingMatchStatus.UP);
-
-        when(outgoingMatchDiscoveryService.findMatchesWithNewEndpoints(anyString(), anyInt())).thenReturn(Arrays.asList(match, match1));
-
         service.updateNewLocalDeliveryEndpoints(sp, "host", 5671);
 
-        assertThat(localDelivery.getEndpoints()).hasSize(2);
-        verify(outgoingMatchDiscoveryService, times(1)).findMatchesWithNewEndpoints(anyString(), anyInt());
+        assertThat(localDelivery.getEndpoints()).hasSize(1);
     }
 
     @Test
-    public void doNotUpdateDeliveryEndpointsWhenThereAreNoDeliveries() {
+    public void noEndpointAddedWhenThereIsNoExchangePresentAfterMatchWithCapability() {
         ServiceProvider sp = new ServiceProvider("sp");
+        String selector = "originatingCountry = 'NO'";
 
-        DenmCapability capability = new DenmCapability(
-                "publisher-1",
-                "NO",
-                "DENM:1.1.0",
-                Collections.singleton("123"),
-                Collections.singleton("1")
+        LocalDelivery localDelivery = new LocalDelivery(
+                1,
+                "",
+                selector,
+                LocalDateTime.now(),
+                LocalDeliveryStatus.CREATED
         );
-        capability.setStatus(CapabilityStatus.CREATED);
-        sp.getCapabilities().addDataType(capability);
+        sp.addDeliveries(Collections.singleton(localDelivery));
 
         service.updateNewLocalDeliveryEndpoints(sp, "host", 5671);
 
-        verify(outgoingMatchDiscoveryService, times(0)).findMatchesWithNewEndpoints(anyString(), anyInt());
+        assertThat(localDelivery.getEndpoints()).hasSize(0);
     }
 }

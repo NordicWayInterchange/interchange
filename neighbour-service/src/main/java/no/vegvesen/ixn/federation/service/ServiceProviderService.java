@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,12 +44,9 @@ public class ServiceProviderService {
                 Set<String> targets = delivery.getEndpoints().stream()
                         .map(LocalDeliveryEndpoint::getTarget)
                         .collect(Collectors.toSet());
-
-                List<OutgoingMatch> matches = outgoingMatchDiscoveryService.findMatchesWithNewEndpoints(serviceProvider.getName(), delivery.getId());
-
-                for (OutgoingMatch match : matches) {
-                    if (!targets.contains(match.getDeliveryQueueName())) {
-                        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(host, port, match.getDeliveryQueueName(), match.getSelector());
+                if (delivery.exchangeExists()) {
+                    if (!targets.contains(delivery.getExchangeName())) {
+                        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(host, port, delivery.getExchangeName(), delivery.getSelector());
                         delivery.addEndpoint(endpoint);
                     }
                 }
@@ -60,10 +58,9 @@ public class ServiceProviderService {
         if (serviceProvider.hasDeliveries()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 Set<LocalDeliveryEndpoint> endpointsToRemove = new HashSet<>();
-
                 for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                    OutgoingMatch match = outgoingMatchDiscoveryService.findByDeliveryQueueName(endpoint.getTarget());
-                    if (match == null) {
+                    List<OutgoingMatch> matches = outgoingMatchDiscoveryService.findByDeliveryQueueName(endpoint.getTarget());
+                    if (matches.isEmpty()) {
                         endpointsToRemove.add(endpoint);
                     }
                 }
@@ -86,6 +83,14 @@ public class ServiceProviderService {
                 }
             }
         }
+
+        Capabilities currentServiceProviderCapabilities = serviceProvider.getCapabilities();
+        if (currentServiceProviderCapabilities.getCapabilities().size() == 0) {
+            currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
+        } else {
+            currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+        }
+        currentServiceProviderCapabilities.setLastUpdated(LocalDateTime.now());
     }
 
     public void removeTearDownDeliveries(ServiceProvider serviceProvider) {

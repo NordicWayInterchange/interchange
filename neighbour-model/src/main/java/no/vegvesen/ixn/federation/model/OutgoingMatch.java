@@ -23,10 +23,6 @@ public class OutgoingMatch {
 
     private String serviceProviderName;
 
-    private String deliveryQueueName;
-
-    private String capabilityExchangeName = "";
-
     @Column(length = 1024)
     private String selector;
 
@@ -34,24 +30,10 @@ public class OutgoingMatch {
 
     }
 
-    public OutgoingMatch(LocalDelivery localDelivery, Capability capability, OutgoingMatchStatus status) {
-        this.localDelivery = localDelivery;
-        this.capability = capability;
-        this.status = status;
-    }
-
     public OutgoingMatch(LocalDelivery localDelivery, Capability capability, String serviceProviderName, OutgoingMatchStatus status) {
         this.localDelivery = localDelivery;
         this.capability = capability;
         this.serviceProviderName = serviceProviderName;
-        this.status = status;
-    }
-
-    public OutgoingMatch(LocalDelivery localDelivery, Capability capability, String serviceProviderName, String deliveryQueueName, OutgoingMatchStatus status) {
-        this.localDelivery = localDelivery;
-        this.capability = capability;
-        this.serviceProviderName = serviceProviderName;
-        this.deliveryQueueName = deliveryQueueName;
         this.status = status;
     }
 
@@ -89,22 +71,6 @@ public class OutgoingMatch {
 
     public void setServiceProviderName(String serviceProviderName) {
         this.serviceProviderName = serviceProviderName;
-    }
-
-    public String getDeliveryQueueName() {
-        return deliveryQueueName;
-    }
-
-    public void setDeliveryQueueName(String deliveryQueueName) {
-        this.deliveryQueueName = deliveryQueueName;
-    }
-
-    public String getCapabilityExchangeName() {
-        return capabilityExchangeName;
-    }
-
-    public void setCapabilityExchangeName(String capabilityExchangeName) {
-        this.capabilityExchangeName = capabilityExchangeName;
     }
 
     public String getSelector() {
