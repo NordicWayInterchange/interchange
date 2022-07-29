@@ -25,12 +25,6 @@ data:
         mode tcp
         default_backend neighbour-server
 
-    frontend qpid-api-frontend
-        log global
-        bind *:8080
-        mode http
-        default_backend qpid-api
-
     frontend qpid-messaging-frontend
         mode tcp
         log global
@@ -47,12 +41,6 @@ data:
     backend neighbour-server
         mode tcp
         server {{ .Release.Name }}-neighbour-server {{ .Release.Name }}-neighbour-server:{{ .Values.self.control_channel_port }} maxconn 32
-
-    backend qpid-api
-        balance roundrobin
-        option httpclose
-        option forwardfor
-        server {{ .Release.Name }}-qpid-secure {{ .Release.Name }}-qpid-secure:8080 maxconn 32
 
     backend qpid-messaging
         mode tcp
