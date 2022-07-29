@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -100,6 +101,7 @@ public class NeighbourService {
 				logger.warn("Setting status of subscription to NOT_VALID");
 				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.NOT_VALID);
 			}
+			neighbourSubscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		}
 		return neighbourSubscriptionRequest;
 	}

@@ -75,6 +75,7 @@ public class SubscriptionRequestTransformer {
 		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
 		response.setConsumerCommonName(subscription.getConsumerCommonName());
+		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			if (subscription.getConsumerCommonName().equals(neighbourName)) {
 				EndpointApi endpointApi = new EndpointApi(

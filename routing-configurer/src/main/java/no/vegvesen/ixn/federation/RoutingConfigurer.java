@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.*;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.FEDERATED_GROUP_NAME;
@@ -90,6 +91,7 @@ public class RoutingConfigurer {
 					for(Subscription subscription : allAcceptedSubscriptions){
 						subscriptionsToSetUpRoutingFor.add(subscription);
 						subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+						subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 					}
 					if(!subscriptionsToSetUpRoutingFor.isEmpty()){
 						createQueue(neighbour.getName());
@@ -103,8 +105,9 @@ public class RoutingConfigurer {
 				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
 				Set<Subscription> subscriptionsToSetUpRoutingFor = new HashSet<>();
 				for(Subscription subscription : acceptedSubscriptions){
-					subscriptionsToSetUpRoutingFor.add(subscription);
 					subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+					subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
+					subscriptionsToSetUpRoutingFor.add(subscription);
 					//TODO: Implement redirect using RedirectStatus from matching Capability
 				}
 				//TODO: Are we supposed to set up routing for Neighbour with an empty SubscriptionRequest?
@@ -140,21 +143,12 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void removeBindingsForSubscriptionsWithStatusResubscribe(Set<Subscription> subscriptions, String neighbourName, String exchangeName) {
-		for(Subscription sub : subscriptions){
-			qpidClient.unbindBindKey(sub.getConsumerCommonName(), sub.bindKey(), exchangeName);
-			sub.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
-			if(!sub.getConsumerCommonName().equals(neighbourName)){
-				qpidClient.removeQueue(sub.getConsumerCommonName());
-			}
-		}
-	}
-
 	private void setUpRedirectedRouting(Subscription subscription) {
 		createQueue(subscription.getConsumerCommonName());
 		addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
 		bindRemoteServiceProvider("outgoingExchange", subscription.getConsumerCommonName(), subscription);
 		subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+		subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 	}
 
