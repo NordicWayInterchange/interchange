@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.serviceprovider.model.Delivery;
 import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
 import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
 import org.junit.jupiter.api.Disabled;
@@ -19,7 +18,6 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +26,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {ImportServiceProvidersIT.LocalhostInitializer.class})
+@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
 public class ExportServiceProvidersIT {
 
     @TempDir
