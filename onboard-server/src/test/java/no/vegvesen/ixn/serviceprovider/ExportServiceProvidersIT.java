@@ -5,7 +5,8 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
+import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
+import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -78,8 +79,19 @@ public class ExportServiceProvidersIT {
             serviceProviderApi.setName(serviceProvider.getName());
             Set<CapabilityApi> capabilityApis = capabilityApiTransformer.capabilitiesToCapabilityApis(serviceProvider.getCapabilities().getCapabilities());
             serviceProviderApi.setCapabilities(capabilityApis);
-            Set<LocalActorSubscription> localActorSubscriptions = transformer.transformLocalSubscriptionsToSubscriptionsPostResponseSubscriptionApi(serviceProvider.getName(), serviceProvider.getSubscriptions());
-            serviceProviderApi.setSubscriptions(localActorSubscriptions);
+
+            Set<GetSubscriptionResponse> spSubscriptions = new HashSet<>();
+            for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+                spSubscriptions.add(transformer.transformLocalSubscriptionToGetSubscriptionResponse(serviceProvider.getName(),subscription));
+            }
+            serviceProviderApi.setSubscriptions(spSubscriptions);
+
+            Set<GetDeliveryResponse> deliveries = new HashSet<>();
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                deliveries.add(transformer.transformLocalDeliveryToGetDeliveryResponse(serviceProvider.getName(),delivery));
+
+            }
+            serviceProviderApi.setDeliveries(deliveries);
             serviceProviders.add(serviceProviderApi);
         }
         writer.writeValue(path.toFile(),serviceProviders);
