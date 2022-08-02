@@ -123,10 +123,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(nordea));
 		Set<LocalEndpoint> endpoints = nordea.getSubscriptions().stream().flatMap(s -> s.getLocalEndpoints().stream()).collect(Collectors.toSet());
 		assertThat(endpoints).hasSize(1);
-		LocalEndpoint endpoint = endpoints.stream().findFirst().get();
-
-		Set<String> nordeaBindKeys1 = client.getQueueBindKeys(endpoint.getSource());
-		assertThat(nordeaBindKeys1).hasSize(1);
 
 		nordea.addLocalSubscription(createSubscription("DATEX2", "FI"));
 		router.syncServiceProviders(Arrays.asList(nordea));
@@ -135,9 +131,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				.flatMap(s -> s.getLocalEndpoints().stream())
 				.collect(Collectors.toSet());
 		assertThat(endpoints2).hasSize(1);
-		LocalEndpoint endpoint2 = endpoints2.stream().findFirst().get();
-		Set<String> nordeaBindKeys2 = client.getQueueBindKeys(endpoint2.getSource());
-		assertThat(nordeaBindKeys2).hasSize(1);
 	}
 
 	private LocalSubscription createSubscription(String messageType, String originatingCountry) {

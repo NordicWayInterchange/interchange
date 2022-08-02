@@ -13,6 +13,10 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
+/*
+TODO this app does not work as is. It should have a command per message type, taking positional parameters after.
+
+ */
 @Command(name = "jmsclientsource", description = "JMS Client Source Application")
 public class JmsClientSourceApplication implements Callable<Integer> {
 

@@ -3,29 +3,9 @@
   "name": "remote.bouvetinterchange.eu",
   "modelVersion": "7.0",
   "exchanges": [
-    {
-      "name": "outgoingExchange",
-      "type": "headers",
-      "durable": true,
-      "durableBindings": [
-      ]
-    },
-    {
-      "name": "incomingExchange",
-      "type": "headers",
-      "durable": true,
-      "durableBindings": [
-      ]
-    }
+
   ],
   "queues": [
-    {
-      "name": "onramp",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
     {
       "name": "dlqueue",
       "type": "standard",
@@ -55,16 +35,6 @@
           "attributes": {}
         },
         {
-          "objectType": "EXCHANGE",
-          "identity": "service-providers",
-          "operation": "PUBLISH",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "ROUTING_KEY": "onramp",
-            "NAME": ""
-          }
-        },
-        {
           "objectType": "VIRTUALHOST",
           "identity": "service-providers",
           "operation": "ACCESS",
@@ -80,24 +50,6 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
            "NAME": "remote.bouvetinterchange.eu"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "king_gustaf.bouvetinterchange.eu",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "king_gustaf.bouvetinterchange.eu"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "interchange",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "onramp"
           }
         },
         {

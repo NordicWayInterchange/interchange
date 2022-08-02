@@ -3,41 +3,6 @@
   "name": "qpid.test.io",
   "modelVersion": "7.0",
   "exchanges": [
-    {
-      "name": "outgoingExchange",
-      "type": "headers",
-      "durable": true,
-      "durableBindings": [
-        {
-          "arguments": {
-            "x-filter-jms-selector": "originatingCountry='NO'"
-          },
-          "bindingKey": "originatingCountry",
-          "destination": "NO-out"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "originatingCountry='NO'"
-          },
-          "bindingKey": "originatingCountry",
-          "destination": "king_harald"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "originatingCountry='SE'"
-          },
-          "bindingKey": "originatingCountry ",
-          "destination": "king_gustaf"
-        },
-        {
-          "arguments": {
-            "x-filter-jms-selector": "originatingCountry LIKE '%'"
-          },
-          "bindingKey": "where",
-          "destination": "test-out"
-        }
-      ]
-    }
   ],
   "queues": [
     {
@@ -65,17 +30,6 @@
     {
       "id": "ada38ba3-a880-4abd-8ecb-d5fb517523db",
       "name": "king_harald",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "messageDurability": "ALWAYS",
-      "owner": null,
-      "lastUpdatedBy": "interchange",
-      "createdBy": "interchange"
-    },
-    {
-      "id": "502bde7b-a4e9-47cb-912d-d960647746b9",
-      "name": "onramp",
       "type": "standard",
       "durable": true,
       "holdOnPublishEnabled": false,

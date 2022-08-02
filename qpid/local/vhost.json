@@ -3,29 +3,9 @@
   "name": "local.bouvetinterchange.eu",
   "modelVersion": "7.0",
   "exchanges": [
-    {
-      "name": "outgoingExchange",
-      "type": "headers",
-      "durable": true,
-      "durableBindings": [
-      ]
-    },
-    {
-      "name": "incomingExchange",
-      "type": "headers",
-      "durable": true,
-      "durableBindings": [
-      ]
-    }
+
   ],
   "queues": [
-    {
-      "name": "onramp",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
     {
       "name": "dlqueue",
       "type": "standard",
@@ -53,16 +33,6 @@
           "operation": "ALL",
           "outcome": "ALLOW_LOG",
           "attributes": {}
-        },
-        {
-          "objectType": "EXCHANGE",
-          "identity": "service-providers",
-          "operation": "PUBLISH",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "ROUTING_KEY": "onramp",
-            "NAME": ""
-          }
         },
         {
           "objectType": "VIRTUALHOST",
@@ -100,16 +70,7 @@
             "NAME": "local.bouvetinterchange.eu"
           }
         },
-        {
-          "objectType": "QUEUE",
-          "identity": "interchange",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "onramp"
-          }
-        },
-        {
+       {
           "objectType": "ALL",
           "identity": "ALL",
           "operation": "ALL",

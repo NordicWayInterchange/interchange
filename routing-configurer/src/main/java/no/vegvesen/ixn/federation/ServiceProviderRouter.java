@@ -138,7 +138,6 @@ public class ServiceProviderRouter {
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
             optionallyCreateQueue(source, serviceProviderName);
-            optionallyAddQueueBindings(source, subscription.getSelector(), subscription.bindKey());
         }
         return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
     }
@@ -148,14 +147,6 @@ public class ServiceProviderRouter {
             if (qpidClient.getQueueBindKeys(queueName).contains(subscription.bindKey())) {
                 qpidClient.unbindBindKey(queueName, subscription.bindKey(), "outgoingExchange");
             }
-        }
-    }
-
-    //TODO this should probably be removed
-    private void optionallyAddQueueBindings(String queueName, String selector, String bindKey) {
-        if (!qpidClient.getQueueBindKeys(queueName).contains(bindKey)) {
-            logger.debug("Adding bindings to the queue {}", queueName);
-            qpidClient.bindTopicExchange(selector, "outgoingExchange", queueName);
         }
     }
 
