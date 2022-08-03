@@ -264,7 +264,6 @@
         <module>neighbour-discoverer</module>
         <module>routing-configurer</module>
         <module>federation-st</module>
-        <module>interchangenode</module>
         <module>debugclient</module>
         <module>message-collector</module>
         <module>quadtree-tool</module>
@@ -272,7 +271,6 @@
         <module>onboard-server</module>
         <module>onboard-server-app</module>
         <module>onboard-rest-client</module>
-        <module>interchange-node-app</module>
         <module>message-collector-app</module>
         <module>neighbour-discoverer-app</module>
         <module>neighbour-server-app</module>
