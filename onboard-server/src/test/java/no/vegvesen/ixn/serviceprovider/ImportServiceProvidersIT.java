@@ -1,9 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -27,17 +25,35 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {ImportServiceProvidersIT.LocalhostInitializer.class})
+@ContextConfiguration(initializers = {ImportServiceProvidersIT.LocalInitializer.class})
 public class ImportServiceProvidersIT {
 
 
-    public static class LocalhostInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    /*
+    Used to import data to systemtest, this one for the local instance
+     */
+    public static class LocalInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 
             TestPropertyValues.of(
                     "spring.datasource.url: jdbc:postgresql://localhost:15432/federation",
+                    "spring.datasource.username: federation",
+                    "spring.datasource.password: federation",
+                    "spring.datasource.driver-class-name: org.postgresql.Driver"
+            ).applyTo(configurableApplicationContext.getEnvironment());        }
+    }
+    /*
+    Used to import data to systemtest, this one for the remote instance
+     */
+    public static class RemoteInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+
+            TestPropertyValues.of(
+                    "spring.datasource.url: jdbc:postgresql://localhost:25432/federation",
                     "spring.datasource.username: federation",
                     "spring.datasource.password: federation",
                     "spring.datasource.driver-class-name: org.postgresql.Driver"
@@ -79,9 +95,6 @@ public class ImportServiceProvidersIT {
         Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
         OldServiceProviderApi[] serviceProviders = ServiceProviderImport.getOldServiceProviderApis(path);
         for (OldServiceProviderApi serviceProviderApi : serviceProviders) {
-            //System.out.println(serviceProvider.getDeliveries().stream().map(getDeliveryResponse -> getDeliveryResponse.getEndpoints()).collect(Collectors.toSet()));
-            System.out.println(serviceProviderApi);
-            // repository.save(transformServiceProviderApiToServiceProvider(serviceProviderApi));
             Set<Capability> capabilitySet = new CapabilityToCapabilityApiTransformer().capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
             Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,capabilitySet);
             Set<LocalSubscription> subscriptions = new HashSet<>();
@@ -112,16 +125,4 @@ public class ImportServiceProvidersIT {
 
     }
 
-    /*
-    private ServiceProvider transformServiceProviderApiToServiceProvider(OldServiceProviderApi serviceProviderApi) {
-        CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
-        return new ServiceProvider(
-                serviceProviderApi.getName(),
-                capabilityApiTransformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities()),
-
-        );
-    }
-
-
-     */
 }
