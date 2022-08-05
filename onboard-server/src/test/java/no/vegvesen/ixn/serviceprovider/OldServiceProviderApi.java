@@ -9,6 +9,8 @@ public class OldServiceProviderApi {
     private Set<OldLocalActorSubscription> subscriptions;
     private Set<CapabilityApi> capabilities;
 
+    private Set<DeliveryApi> deliveries;
+
     public String getName() {
         return name;
     }
@@ -31,5 +33,23 @@ public class OldServiceProviderApi {
 
     public void setCapabilities(Set<CapabilityApi> capabilities) {
         this.capabilities = capabilities;
+    }
+
+    public Set<DeliveryApi> getDeliveries() {
+        return deliveries;
+    }
+
+    public void setDeliveries(Set<DeliveryApi> deliveries) {
+        this.deliveries = deliveries;
+    }
+
+    @Override
+    public String toString() {
+        return "OldServiceProviderApi{" +
+                "name='" + name + '\'' +
+                ", subscriptions=" + subscriptions +
+                ", capabilities=" + capabilities +
+                ", deliveries=" + deliveries +
+                '}';
     }
 }
