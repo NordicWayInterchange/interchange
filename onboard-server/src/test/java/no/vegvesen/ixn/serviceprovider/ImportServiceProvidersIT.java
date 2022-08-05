@@ -74,8 +74,9 @@ public class ImportServiceProvidersIT {
     }
 
     @Test
-    public void importServiceProvidersWithDeliveryEndpoints() throws IOException {
-        Path path = Paths.get("C:\\interchange_dumps\\changed_dump","capability_with_delivery.json");
+    @Disabled
+    public void importServiceProvidersWithDeliveryEndpoints() throws IOException, URISyntaxException {
+        Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
         OldServiceProviderApi[] serviceProviders = ServiceProviderImport.getOldServiceProviderApis(path);
         for (OldServiceProviderApi serviceProviderApi : serviceProviders) {
             //System.out.println(serviceProvider.getDeliveries().stream().map(getDeliveryResponse -> getDeliveryResponse.getEndpoints()).collect(Collectors.toSet()));
