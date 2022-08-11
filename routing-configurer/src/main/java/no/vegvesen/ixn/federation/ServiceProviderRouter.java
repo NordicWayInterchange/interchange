@@ -326,14 +326,14 @@ public class ServiceProviderRouter {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
                     if (!qpidClient.exchangeExists(delivery.getExchangeName())) {
                         String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                        match.setSelector(joinedSelector);
+                        //match.setSelector(joinedSelector);
                         qpidClient.createDirectExchange(delivery.getExchangeName());
                         qpidClient.addWriteAccess(serviceProvider.getName(), delivery.getExchangeName());
                         qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
                         outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
                     } else {
                         String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                        match.setSelector(joinedSelector);
+                        //match.setSelector(joinedSelector);
                         qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
                         outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
                     }
@@ -378,8 +378,7 @@ public class ServiceProviderRouter {
     }
 
     public String joinDeliverySelectorWithCapabilitySelector(Capability capability, String selector) {
-        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
-        return String.format("(%s) AND (%s)", capabilitySelector, selector);
+        return MessageValidatingSelectorCreator.makeSelectorJoinedWithCapabilitySelector(selector,capability);
     }
 
     private void createSubscriptionExchange(String exchangeName) {
@@ -396,26 +395,29 @@ public class ServiceProviderRouter {
             Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
             for (LocalSubscription subscription : serviceProviderSubscriptions) {
-                removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
-                if (!allCapabilities.isEmpty()) {
-                    if (!subscription.getLocalEndpoints().isEmpty()) {
-                        Set<String> existingConnections = subscription.getConnections().stream()
-                                .map(LocalConnection::getSource)
-                                .collect(Collectors.toSet());
+                //TODO the subscription should be set to ILLEGAL if it's empty.
+                if (! subscription.getSelector().isEmpty()) {
+                    removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
+                    if (!allCapabilities.isEmpty()) {
+                        if (!subscription.getLocalEndpoints().isEmpty()) {
+                            Set<String> existingConnections = subscription.getConnections().stream()
+                                    .map(LocalConnection::getSource)
+                                    .collect(Collectors.toSet());
 
-                        Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
+                            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
 
-                        for (Capability capability : matchingCapabilities) {
-                            if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
-                                LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
-                                LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
-                                subscription.addConnection(connection);
+                            for (Capability capability : matchingCapabilities) {
+                                if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
+                                    LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
+                                    qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
+                                    LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
+                                    subscription.addConnection(connection);
+                                }
                             }
                         }
                     }
+                    repository.save(serviceProvider);
                 }
-                repository.save(serviceProvider);
             }
         }
     }

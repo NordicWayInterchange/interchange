@@ -23,8 +23,9 @@ public class OutgoingMatch {
 
     private String serviceProviderName;
 
-    @Column(length = 1024)
-    private String selector;
+    //@Column(length = 1024)
+    //@Column(columnDefinition = "TEXT")
+    //private String selector;
 
     public OutgoingMatch() {
 
@@ -73,17 +74,17 @@ public class OutgoingMatch {
         this.serviceProviderName = serviceProviderName;
     }
 
-    public String getSelector() {
-        return selector;
-    }
+    //public String getSelector() {
+    //    return selector;
+    //}
 
-    public void setSelector(String selector) {
-        this.selector = selector;
-    }
+    //public void setSelector(String selector) {
+     //   this.selector = selector;
+    //}
 
-    public String bindKey() {
-        return "" + selector.hashCode();
-    }
+    //public String bindKey() {
+    //    return "" + selector.hashCode();
+    //}
 
     @Override
     public boolean equals(Object o) {
