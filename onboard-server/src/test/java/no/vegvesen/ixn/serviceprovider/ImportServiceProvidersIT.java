@@ -7,58 +7,21 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {ImportServiceProvidersIT.LocalInitializer.class})
+@ContextConfiguration(initializers = {ServiceProviderImport.LocalInitializer.class})
 public class ImportServiceProvidersIT {
 
-
-    /*
-    Used to import data to systemtest, this one for the local instance
-     */
-    public static class LocalInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-
-            TestPropertyValues.of(
-                    "spring.datasource.url: jdbc:postgresql://localhost:15432/federation",
-                    "spring.datasource.username: federation",
-                    "spring.datasource.password: federation",
-                    "spring.datasource.driver-class-name: org.postgresql.Driver"
-            ).applyTo(configurableApplicationContext.getEnvironment());        }
-    }
-    /*
-    Used to import data to systemtest, this one for the remote instance
-     */
-    public static class RemoteInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-
-            TestPropertyValues.of(
-                    "spring.datasource.url: jdbc:postgresql://localhost:25432/federation",
-                    "spring.datasource.username: federation",
-                    "spring.datasource.password: federation",
-                    "spring.datasource.driver-class-name: org.postgresql.Driver"
-            ).applyTo(configurableApplicationContext.getEnvironment());        }
-    }
 
     @Autowired
     ServiceProviderRepository repository;
@@ -69,7 +32,7 @@ public class ImportServiceProvidersIT {
     public void importServiceProviders() throws IOException, URISyntaxException {
         Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
-        OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(path);
+        OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
         for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
             ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName());
             Set<Capability> capabilities = transformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
@@ -93,36 +56,13 @@ public class ImportServiceProvidersIT {
     @Disabled
     public void importServiceProvidersWithDeliveryEndpoints() throws IOException, URISyntaxException {
         Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
-        OldServiceProviderApi[] serviceProviders = ServiceProviderImport.getOldServiceProviderApis(path);
+        OldServiceProviderApi[] serviceProviders = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
         for (OldServiceProviderApi serviceProviderApi : serviceProviders) {
-            Set<Capability> capabilitySet = new CapabilityToCapabilityApiTransformer().capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
-            Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,capabilitySet);
-            Set<LocalSubscription> subscriptions = new HashSet<>();
-            for (OldLocalActorSubscription subscriptionApi : serviceProviderApi.getSubscriptions()) {
-                LocalSubscription subscription = new LocalSubscription(
-                        LocalSubscriptionStatus.valueOf(subscriptionApi.getStatus().toString()),
-                        subscriptionApi.getSelector()
-                );
-                subscriptions.add(subscription);
-            }
-            Set<LocalDelivery> deliveries = new HashSet<>();
-            for (DeliveryApi deliveryApi : serviceProviderApi.getDeliveries()) {
-                LocalDelivery delivery = new LocalDelivery(
-                        deliveryApi.getSelector(),
-                        LocalDeliveryStatus.valueOf(deliveryApi.getStatus().name())
-                );
-                deliveries.add(delivery);
-            }
-            ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),
-                    capabilities,
-                    subscriptions,
-                    Collections.emptySet(),
-                    LocalDateTime.now()
-            );
-            serviceProvider.addDeliveries(deliveries);
+            ServiceProvider serviceProvider = ServiceProviderImport.mapOldServiceProviderApiToServiceProvider(serviceProviderApi);
             repository.save(serviceProvider);
         }
 
     }
+
 
 }
