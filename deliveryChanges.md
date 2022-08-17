@@ -6,6 +6,12 @@ concept of Deliveries in order for a Service Provider (SP) to have more fine-gra
 Previously, an SP could register a Capability, and just publish on the special publishing queue, onramp. The onramp
 endpoint is now gone, replaced by separate endpoints for a concept called Delivery.
 
+We have had the concept of Deliveries for a couple of releases, but they have been hardcoded to the onramp endpoint. This 
+hardcoding is now about to be removed, giving random UUID-named endpoints.
+
+If you have registered Deliveries already, all you have to do is to look up your deliveries (see below for API details), 
+and find your updated publish endpoint.
+
 ## Delivery
 
 Deliveries are loosely connected to Capabilities, with a selector representing the mapping.
@@ -44,7 +50,7 @@ to get the full info, including endpoint details.
   "endpoints" : [ {
     "host" : "myinterchange",
     "port" : 5671,
-    "target" : "sp1-1",
+    "target" : "del-123-3452345",
     "selector" : "messageType = 'DENM'",
     "maxBandwidth" : 0,
     "maxMessageRate" : 0
@@ -55,6 +61,6 @@ to get the full info, including endpoint details.
   "status" : "CREATED"
 }
 ```
-This specifies that the endpoint to publish data on, is `amqps://myinterchange:5671` with endpoint name `sp1-1`
+This specifies that the endpoint to publish data on, is `amqps://myinterchange:5671` with endpoint name `del-123-3452345`
 Messages arriving on the endpoint is validated to match both the headers of the Capability it is matched with, and 
-the selector of the Delivery.
+the selector of the Delivery. Non-valid messages will currently be dropped.
