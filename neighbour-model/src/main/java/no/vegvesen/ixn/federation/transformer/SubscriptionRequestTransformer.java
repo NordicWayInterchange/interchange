@@ -68,7 +68,7 @@ public class SubscriptionRequestTransformer {
 
 	}
 
-	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelHost, String messageChannelPort) {
+	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription) {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());
@@ -77,12 +77,16 @@ public class SubscriptionRequestTransformer {
 		response.setConsumerCommonName(subscription.getConsumerCommonName());
 		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			EndpointApi endpointApi = new EndpointApi(
-					subscription.getQueueName(),
-					messageChannelHost,
-					Integer.parseInt(messageChannelPort)
-			);
-			response.setEndpoints(Collections.singleton(endpointApi));
+			Set<EndpointApi> newEndpoints = new HashSet<>();
+			for(Endpoint endpoint : subscription.getEndpoints()) {
+				EndpointApi endpointApi = new EndpointApi(
+						endpoint.getSource(),
+						endpoint.getHost(),
+						endpoint.getPort()
+				);
+				newEndpoints.add(endpointApi);
+			}
+			response.setEndpoints(newEndpoints);
 			//TODO: Return redirectQueueName
 		}
 		return response;

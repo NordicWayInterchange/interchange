@@ -127,6 +127,8 @@ public class RoutingConfigurer {
 				for (Capability cap : matchingCaps) {
 					bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
 				}
+				Endpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
+				subscription.setEndpoints(Collections.singleton(endpoint));
 				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
@@ -165,6 +167,8 @@ public class RoutingConfigurer {
 		createQueue(subscription.getConsumerCommonName(), subscription.getConsumerCommonName());
 		addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
 		bindRemoteServiceProvider(capability.getCapabilityExchangeName(), subscription.getConsumerCommonName(), subscription);
+		Endpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), subscription.getConsumerCommonName());
+		subscription.setEndpoints(Collections.singleton(endpoint));
 		subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
 		subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
@@ -207,4 +211,7 @@ public class RoutingConfigurer {
 		}
 	}
 
+	private Endpoint createEndpoint(String host, String port, String source) {
+		return new Endpoint(source, host, Integer.parseInt(port));
+	}
 }

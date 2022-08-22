@@ -161,10 +161,7 @@ public class NeighbourService {
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			String messageChannelHost = interchangeNodeProperties.getName();
-			String messageChannelPort = interchangeNodeProperties.getMessageChannelPort();
-
-			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),messageChannelHost, messageChannelPort);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
@@ -234,5 +231,13 @@ public class NeighbourService {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		Set<Subscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),subscriptions);
+	}
+
+	public String getNodeName() {
+		return interchangeNodeProperties.getName();
+	}
+
+	public String getMessagePort() {
+		return interchangeNodeProperties.getMessageChannelPort();
 	}
 }
