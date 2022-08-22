@@ -24,6 +24,7 @@ public class Subscription {
 
 	private int numberOfPolls = 0;
 
+	@Column(columnDefinition="TEXT")
 	private String consumerCommonName;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

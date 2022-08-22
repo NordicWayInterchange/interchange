@@ -9,10 +9,17 @@ public class AddSubscription {
 
     String selector;
 
+    String consumerCommonName;
+
     public AddSubscription(){}
 
     public AddSubscription(String selector){
         this.selector = selector;
+    }
+
+    public AddSubscription(String selector, String consumerCommonName){
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public String getSelector() {
@@ -21,6 +28,14 @@ public class AddSubscription {
 
     public void setSelector(String selector) {
         this.selector = selector;
+    }
+
+    public String getConsumerCommonName() {
+        return consumerCommonName;
+    }
+
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     @Override

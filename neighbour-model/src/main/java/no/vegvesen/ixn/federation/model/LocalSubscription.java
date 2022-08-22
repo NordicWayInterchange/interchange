@@ -27,6 +27,8 @@ public class LocalSubscription {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
+    @Column(columnDefinition="TEXT")
+    private String consumerCommonName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locend_id", foreignKey = @ForeignKey(name = "fk_locend_sub"))
@@ -44,6 +46,12 @@ public class LocalSubscription {
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
         this.selector = selector;
+    }
+
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
+        this.status = status;
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
@@ -109,6 +117,14 @@ public class LocalSubscription {
 
     public void addConnection(LocalConnection connection) {
         connections.add(connection);
+    }
+
+    public String getConsumerCommonName() {
+        return consumerCommonName;
+    }
+
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     //TODO lag et objekt av selector??
