@@ -14,9 +14,9 @@ to the broker in the form of AMQP messages. These messages are distributed to su
 Messages are produced and exchanged over AMQP 1.0. Message content is not examined, but all messages must provide 
 header attributes as specified in the client specification. 
 
-Traffic message formats supported are DATEX, DENM and IVI.  
+Traffic message formats supported are DATEX2, DENM, IVI, SPATEM, MAPEM, SREM, SSEM, and CAM.  
 
-![Interchange architecture](/diagrams/interchange_architecture.png)
+![Interchange architecture](/diagrams/updated_federated_node.png)
 
 Neighbour nodes registered in the DNS (domain name server) will be discovered via a control channel.
 
@@ -34,7 +34,6 @@ Additional information about the Nordic Way Interchange Node can be found [here]
 ### Contact
 For any questions please contact
 * Christian Berg Skjetne: christian.berg.skjetne@vegvesen.no
-* Roger Martinsen : roger.martinsen@bouvet.no
 
 ## Getting Started
 
@@ -51,7 +50,7 @@ To build the project without integration test, use `mvn build`, and to run the i
  
 ### Federation docker images
 All the docker images specified in the github https://github.com/NordicWayInterchange/interchange/ 
-is automatically built by CircleCI and published to the container registry eu.gcr.io/nordic-way-aad182cc/ on 
+is automatically built by GitHub and published to the container registry eu.gcr.io/nw-shared-w3ml/ on 
 each commit. Each component in the system has its own registry.
 
 All the images are tagged with git commit hash, and branch name. Branch "federation-master" is considered to be the stable branch.
