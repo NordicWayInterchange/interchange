@@ -127,8 +127,7 @@ public class SubscriptionCalculatorTest {
     void calculateEmptyCapabiliitiesAndSubscriptions() {
         Set<Subscription> calculatedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 Collections.emptySet(),
-                Collections.emptySet(),
-                "my-interchange"
+                Collections.emptySet()
         );
         assertThat(calculatedSubscriptions).isEmpty();
     }
@@ -142,8 +141,7 @@ public class SubscriptionCalculatorTest {
                                 "originatinCountry = 'NO'"
                         )
                 ),
-                Collections.emptySet(),
-                "my-interchange"
+                Collections.emptySet()
         );
         assertThat(calculatedSubscriptions).isEmpty();
     }
@@ -154,8 +152,7 @@ public class SubscriptionCalculatorTest {
         Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 Collections.emptySet(),
-                capabilities,
-                "my-node"
+                capabilities
         );
         assertThat(calculatedSubscription).hasSize(0);
     }
@@ -177,7 +174,7 @@ public class SubscriptionCalculatorTest {
                                 Collections.emptySet(),
                                 Collections.emptySet()
                         )
-                ), myName
+                )
         );
         assertThat(calculatedSubscriptions)
                 .hasSize(1)
@@ -208,7 +205,7 @@ public class SubscriptionCalculatorTest {
                                 Collections.emptySet(),
                                 Collections.emptySet()
                         )
-                )), myName
+                ))
         );
         assertThat(calculatedSubscriptions)
                 .hasSize(1)
@@ -236,7 +233,7 @@ public class SubscriptionCalculatorTest {
                                 Collections.emptySet(),
                                 Collections.emptySet()
                         )
-                ), myName
+                )
         );
         assertThat(calculatedSubscriptions)
                 .hasSize(2);
@@ -270,7 +267,7 @@ public class SubscriptionCalculatorTest {
                                 Collections.emptySet(),
                                 Collections.emptySet()
                         )
-                )), myName
+                ))
         );
         assertThat(calculatedSubscriptions)
                 .hasSize(2);
@@ -283,7 +280,7 @@ public class SubscriptionCalculatorTest {
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'"));
 
         Set<Capability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
-        Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, myName);
+        Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities);
 
         assertThat(calculatedSubscription).hasSize(1);
         assertThat(calculatedSubscription.iterator().next().getSelector()).isEqualTo("originatingCountry = 'NO'");
@@ -297,8 +294,7 @@ public class SubscriptionCalculatorTest {
         Set<Capability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 localSubscriptions,
-                capabilities, myName
-        );
+                capabilities);
 
         assertThat(calculatedSubscription).hasSize(1);
         assertThat(calculatedSubscription.iterator().next().getSelector())

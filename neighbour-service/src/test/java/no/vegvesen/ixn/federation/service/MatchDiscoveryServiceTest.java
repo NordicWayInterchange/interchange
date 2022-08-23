@@ -62,7 +62,8 @@ public class MatchDiscoveryServiceTest {
                         Collections.singleton(
                                 new LocalSubscription(
                                         LocalSubscriptionStatus.REQUESTED,
-                                        "originatingCountry = 'NO'"
+                                        "originatingCountry = 'NO'",
+                                        "my-node"
                                 )),
                         Collections.emptySet(),
                         LocalDateTime.now()
@@ -76,7 +77,8 @@ public class MatchDiscoveryServiceTest {
                                 Collections.singleton(
                                         new Subscription(
                                                 "originatingCountry = 'NO'",
-                                                SubscriptionStatus.REQUESTED
+                                                SubscriptionStatus.REQUESTED,
+                                                "my-node"
                                         )
                                 )
                         ),
@@ -96,7 +98,8 @@ public class MatchDiscoveryServiceTest {
                Collections.singleton(
                        new LocalSubscription(
                                LocalSubscriptionStatus.REQUESTED,
-                               "originatingCountry = 'NO'"
+                               "originatingCountry = 'NO'",
+                               "my-node"
                        )),
                Collections.emptySet(),
                LocalDateTime.now()
@@ -110,7 +113,8 @@ public class MatchDiscoveryServiceTest {
                        new HashSet<>(Arrays.asList(
                                new Subscription(
                                        "originatingCountry = 'NO'",
-                                       SubscriptionStatus.REQUESTED
+                                       SubscriptionStatus.REQUESTED,
+                                       "my-node"
                                )
                        ))
                ),
@@ -125,7 +129,8 @@ public class MatchDiscoveryServiceTest {
                         new HashSet<>(Arrays.asList(
                                 new Subscription(
                                         "originatingCountry = 'NO'",
-                                        SubscriptionStatus.REQUESTED
+                                        SubscriptionStatus.REQUESTED,
+                                        "my-node"
                                 )
                         ))
                 ),

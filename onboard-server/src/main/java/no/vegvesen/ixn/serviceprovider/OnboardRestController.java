@@ -189,7 +189,11 @@ public class OnboardRestController {
 
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
-			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription));
+			if (subscription.getConsumerCommonName() != null && subscription.getConsumerCommonName().equals(serviceProviderName)) {
+				localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName));
+			} else {
+				localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, nodeProperties.getName()));
+			}
 		}
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);

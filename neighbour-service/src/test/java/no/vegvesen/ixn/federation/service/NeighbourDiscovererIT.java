@@ -147,7 +147,8 @@ public class NeighbourDiscovererIT {
 		Set<LocalSubscription> localSubscriptions = Collections.singleton(
 				new LocalSubscription(
 						LocalSubscriptionStatus.CREATED,
-						"originatingCountry = 'NO'"
+						"originatingCountry = 'NO'",
+						"bouvet.itsinterchange.eu"
 				)
 		);
 		Neighbour neighbour = new Neighbour(

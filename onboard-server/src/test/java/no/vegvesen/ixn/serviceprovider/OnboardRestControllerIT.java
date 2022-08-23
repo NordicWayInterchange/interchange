@@ -119,7 +119,7 @@ public class OnboardRestControllerIT {
 		        serviceProviderName,
                 Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'"))
         );
-        restController.addSubscriptions(serviceProviderName, requestApi);
+         restController.addSubscriptions(serviceProviderName, requestApi);
 
 		ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
 		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);

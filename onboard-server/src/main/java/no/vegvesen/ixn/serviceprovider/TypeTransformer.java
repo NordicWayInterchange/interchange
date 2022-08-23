@@ -69,9 +69,10 @@ public class TypeTransformer {
     }
 
 
-    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription) {
+    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription, String consumerCommonName) {
         return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                addSubscription.getSelector());
+                addSubscription.getSelector(),
+                consumerCommonName);
     }
 
     public LocalDelivery transformDeliveryToLocalDelivery(SelectorApi delivery) {
