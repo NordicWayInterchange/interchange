@@ -31,6 +31,8 @@ public class LocalDelivery {
     @UpdateTimestamp
     private LocalDateTime lastUpdatedTimestamp;
 
+    private String exchangeName = "";
+
     @Enumerated(EnumType.STRING)
     private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
 
@@ -75,6 +77,14 @@ public class LocalDelivery {
         this.endpoints = endpoints;
     }
 
+    public void addEndpoints(Set<LocalDeliveryEndpoint> endpoints) {
+        this.endpoints.addAll(endpoints);
+    }
+
+    public void addEndpoint(LocalDeliveryEndpoint endpoint) {
+        this.endpoints.add(endpoint);
+    }
+
     public String getPath() {
         return path;
     }
@@ -99,12 +109,32 @@ public class LocalDelivery {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
+    public String getExchangeName() {
+        return exchangeName;
+    }
+
+    public void setExchangeName(String exchangeName) {
+        this.exchangeName = exchangeName;
+    }
+
     public LocalDeliveryStatus getStatus() {
         return status;
     }
 
     public void setStatus(LocalDeliveryStatus status) {
         this.status = status;
+    }
+
+    public void removeAllEndpoints(Set<LocalDeliveryEndpoint> endpointsToRemove) {
+        this.endpoints.removeAll(endpointsToRemove);
+    }
+
+    public void removeEndpoint(LocalDeliveryEndpoint endpoint) {
+        this.endpoints.remove(endpoint);
+    }
+
+    public boolean exchangeExists() {
+        return !exchangeName.isEmpty();
     }
 
     @Override
@@ -123,11 +153,12 @@ public class LocalDelivery {
     @Override
     public String toString() {
         return "LocalDelivery{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", endpoints=" + endpoints +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
+                ", exchangeName='" + exchangeName + '\'' +
                 ", status=" + status +
                 '}';
     }

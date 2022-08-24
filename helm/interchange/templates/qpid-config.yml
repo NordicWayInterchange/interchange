@@ -25,101 +25,11 @@ data:
       "type": "BDB",
       "name": "{{ .Values.external_name }}",
       "modelVersion": "7.0",
-      "exchanges": [
-        {
-          "name" : "incomingExchange",
-          "type" : "headers",
-          "durable" : true,
-          "durableBindings": [
-            {{- range $i, $ex := .Values.qpid.users }}
-            {
-              "arguments": {
-                "x-filter-jms-selector": "{{ .binding }}"
-              },
-              "bindingKey": "binding_key",
-              "destination": "{{ .name }}"
-            }{{ if gt $totallen $i }},{{ end}}
-            {{- end }}
-            {{- range $i, $el := .Values.qpid.additional_queues }}
-            {
-              "arguments": {
-                "x-filter-jms-selector": "{{ $el.binding }}"
-              }
-              "bindingKey": "binding_key",
-              "destination": "{{ $el.name }}"
-            }{{if lt $i $additionallen_i }},{{end}}
-            {{- end }}
-          ]
-        },
-        {
-          "name": "outgoingExchange",
-          "type": "headers",
-          "durable": true,
-          "durableBindings": [
-            {{- range $i, $ex := .Values.qpid.users }}
-            {
-              "arguments": {
-                "x-filter-jms-selector": "{{ $ex.binding }}"
-              },
-              "bindingKey": "binding_key",
-              "destination": "{{ $ex.name }}"
-            }{{ if gt $totallen $i }},{{ end}}
-            {{- end }}
-            {{- range $i, $ex := .Values.qpid.additional_queues }}
-            {
-              "arguments": {
-                "x-filter-jms-selector": "{{ $ex.binding }}"
-              },
-              "bindingKey": "binding_key",
-              "destination": "{{ $ex.name }}"
-            }{{if lt $i $additionallen_i }},{{end}}
-            {{- end }}
-          ]
-        }
-      ],
+      "exchanges": [ ],
       "queues": [
         {
           "id": "0EF5AA55-E3A8-4DD6-A394-46E1F6AED77A",
           "name": "dlqueue",
-          "type": "standard",
-          "durable": true,
-          "holdOnPublishEnabled": false,
-          "messageDurability": "ALWAYS",
-          "owner": null,
-          "lastUpdatedBy": "interchange",
-          "createdBy": "interchange"
-        },
-        {{- range $i, $ex := .Values.qpid.users }}
-        {
-          {{- if $ex.uuid }}
-          "id": "{{ $ex.uuid}}",
-          {{- end }}
-          "name": "{{ $ex.name }}",
-          "type": "standard",
-          "durable": true,
-          "holdOnPublishEnabled": false,
-          "messageDurability": "ALWAYS",
-          "owner": null,
-          "lastUpdatedBy": "interchange",
-          "createdBy": "interchange"
-        }{{ if gt $totallen $i }},{{ end}}
-        {{- end }}
-        {{- range .Values.qpid.additional_queues }}
-        {
-          "id": "{{ .uuid}}",
-          "name": "{{ .name }}",
-          "type": "standard",
-          "durable": true,
-          "holdOnPublishEnabled": false,
-          "messageDurability": "ALWAYS",
-          "owner": null,
-          "lastUpdatedBy": "interchange",
-          "createdBy": "interchange"
-        },
-        {{- end }}
-        {
-          "id": "01A46DBE-B8A3-408D-BF32-AD8DCEF5F569",
-          "name": "onramp",
           "type": "standard",
           "durable": true,
           "holdOnPublishEnabled": false,
@@ -148,16 +58,6 @@ data:
               "operation": "ALL",
               "outcome": "ALLOW_LOG",
               "attributes": {}
-            },
-            {
-              "objectType": "EXCHANGE",
-              "identity": "service-providers",
-              "operation": "PUBLISH",
-              "outcome": "ALLOW_LOG",
-              "attributes": {
-                "ROUTING_KEY": "onramp",
-                "NAME": ""
-              }
             },
             {
               "objectType": "VIRTUALHOST",

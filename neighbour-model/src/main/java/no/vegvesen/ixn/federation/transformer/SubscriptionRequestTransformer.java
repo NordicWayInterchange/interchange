@@ -68,7 +68,7 @@ public class SubscriptionRequestTransformer {
 
 	}
 
-	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription, String neighbourName, String messageChannelHost, String messageChannelPort) {
+	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription) {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());
@@ -77,21 +77,17 @@ public class SubscriptionRequestTransformer {
 		response.setConsumerCommonName(subscription.getConsumerCommonName());
 		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			if (subscription.getConsumerCommonName().equals(neighbourName)) {
+			Set<EndpointApi> newEndpoints = new HashSet<>();
+			for(Endpoint endpoint : subscription.getEndpoints()) {
 				EndpointApi endpointApi = new EndpointApi(
-						neighbourName,
-						messageChannelHost,
-						Integer.parseInt(messageChannelPort)
+						endpoint.getSource(),
+						endpoint.getHost(),
+						endpoint.getPort()
 				);
-				response.setEndpoints(Collections.singleton(endpointApi));
-			} else {
-				EndpointApi endpointApi = new EndpointApi(
-						subscription.getConsumerCommonName(),
-						messageChannelHost,
-						Integer.parseInt(messageChannelPort)
-				);
-				response.setEndpoints(Collections.singleton(endpointApi));
+				newEndpoints.add(endpointApi);
 			}
+			response.setEndpoints(newEndpoints);
+			//TODO: Return redirectQueueName
 		}
 		return response;
 	}

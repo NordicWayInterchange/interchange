@@ -3,43 +3,25 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
-import no.vegvesen.ixn.serviceprovider.model.LocalActorSubscription;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
+@ContextConfiguration(initializers = {ServiceProviderImport.LocalInitializer.class})
 public class ImportServiceProvidersIT {
 
-
-    public static class LocalhostInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-
-            TestPropertyValues.of(
-                    "spring.datasource.url: jdbc:postgresql://localhost:5432/federation",
-                    "spring.datasource.username: federation",
-                    "spring.datasource.password: federation",
-                    "spring.datasource.driver-class-name: org.postgresql.Driver"
-            ).applyTo(configurableApplicationContext.getEnvironment());        }
-    }
 
     @Autowired
     ServiceProviderRepository repository;
@@ -50,7 +32,7 @@ public class ImportServiceProvidersIT {
     public void importServiceProviders() throws IOException, URISyntaxException {
         Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
         CapabilityToCapabilityApiTransformer transformer = new CapabilityToCapabilityApiTransformer();
-        OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(path);
+        OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
         for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
             ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName());
             Set<Capability> capabilities = transformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
@@ -69,4 +51,18 @@ public class ImportServiceProvidersIT {
         assertThat(serviceProviderApis.length).isEqualTo(savedServiceProviders.size());
 
     }
+
+    @Test
+    @Disabled
+    public void importServiceProvidersWithDeliveryEndpoints() throws IOException, URISyntaxException {
+        Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
+        OldServiceProviderApi[] serviceProviders = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
+        for (OldServiceProviderApi serviceProviderApi : serviceProviders) {
+            ServiceProvider serviceProvider = ServiceProviderImport.mapOldServiceProviderApiToServiceProvider(serviceProviderApi);
+            repository.save(serviceProvider);
+        }
+
+    }
+
+
 }

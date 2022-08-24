@@ -127,7 +127,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String dataTypeSelector = datexNoAbcdef.toSelector();
 		String kingGustaf = "king_gustaf";
 		String messageQuadTreeTiles = ",abcdefghijklmno,cdefghijklmnop";
-		Message receivedMessage = sendMessageServiceProvider(kingGustaf, dataTypeSelector, messageQuadTreeTiles, "" + dataTypeSelector.hashCode());
+		Message receivedMessage = sendMessageServiceProvider(kingGustaf, dataTypeSelector, messageQuadTreeTiles);
 		assertThat(receivedMessage).isNotNull();
 	}
 
@@ -140,14 +140,14 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String selector = datexNoAbcdef.toSelector();
 		String kingGustaf = "king_gustaf";
 		String messageQuadTreeTiles = ",abcdefghijklmnopqrs,cdefghijklmnop";
-		Message receivedMessage = sendMessageServiceProvider(kingGustaf, selector, messageQuadTreeTiles, Integer.toString(selector.hashCode()));
+		Message receivedMessage = sendMessageServiceProvider(kingGustaf, selector, messageQuadTreeTiles);
 		assertThat(receivedMessage).isNotNull();
 	}
 
-	private Message sendMessageServiceProvider(String serviceProviderName, String selector, String messageQuadTreeTiles, String bindKey) throws Exception {
+	private Message sendMessageServiceProvider(String serviceProviderName, String selector, String messageQuadTreeTiles) throws Exception {
 		qpidClient.createQueue(serviceProviderName);
 		qpidClient.addReadAccess(serviceProviderName, serviceProviderName);
-		qpidClient.addBinding(selector, serviceProviderName, bindKey, "outgoingExchange");
+		qpidClient.bindTopicExchange(selector, "outgoingExchange", serviceProviderName);
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 
@@ -175,14 +175,14 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		return receivedMessage;
 	}
 
-	private Message sendNeighbourMessage(String messageQuadTreeTiles, String selector, String kingGustaf) throws Exception {
-		qpidClient.createQueue(kingGustaf);
-		qpidClient.addReadAccess(kingGustaf, kingGustaf);
-		qpidClient.addBinding(selector, kingGustaf, Integer.toString(selector.hashCode()), "outgoingExchange");
+	private Message sendNeighbourMessage(String messageQuadTreeTiles, String selector, String spName) throws Exception {
+		qpidClient.createQueue(spName);
+		qpidClient.addReadAccess(spName, spName);
+		qpidClient.bindTopicExchange(selector, "outgoingExchange", spName);
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 
-		Sink sink = new Sink(AMQPS_URL, kingGustaf, sslContext);
+		Sink sink = new Sink(AMQPS_URL, spName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
 
 		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);

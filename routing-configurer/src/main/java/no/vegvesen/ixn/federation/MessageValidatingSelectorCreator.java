@@ -29,4 +29,8 @@ public class MessageValidatingSelectorCreator {
         }
         return builder.toSelector();
     }
+
+    public static String makeSelectorJoinedWithCapabilitySelector(String selector, Capability capability) {
+        return String.format("(%s) AND (%s)", makeSelector(capability), selector);
+    }
 }

@@ -21,6 +21,15 @@ public class CapabilityCalculator {
         return localCapabilities;
     }
 
+    public static Set<Capability> allCreatedServiceProviderCapabilities(Iterable<ServiceProvider> serviceProviders) {
+        Set<Capability> localCapabilities = new HashSet<>();
+        for (ServiceProvider serviceProvider : serviceProviders) {
+            Set<Capability> serviceProviderCapabilities = serviceProvider.getCapabilities().getCreatedCapabilities();
+            localCapabilities.addAll(serviceProviderCapabilities);
+        }
+        return localCapabilities;
+    }
+
     public static LocalDateTime calculateLastUpdatedCapabilities(List<ServiceProvider> serviceProviders) {
         LocalDateTime result = null;
         for (ServiceProvider serviceProvider : serviceProviders) {

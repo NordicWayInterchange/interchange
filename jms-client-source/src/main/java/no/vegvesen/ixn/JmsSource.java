@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.net.ssl.SSLContext;
+import java.nio.charset.StandardCharsets;
 
 /* TODO this class looks like it might be cruft. Find out where, if anywhere, this is used! */
 @SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
@@ -35,13 +36,19 @@ public class JmsSource implements CommandLineRunner {
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
         try(Source s = new Source(properties.getUrl(),properties.getSendQueue(),sslContext)) {
             s.start();
-            s.send(s.createMessageBuilder()
-                    .textMessage("Dette er en test, hehehehe!")
+            String messageText = "This is my DENM message :) ";
+            byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+            s.sendNonPersistentMessage(s.createMessageBuilder()
+                    .bytesMessage(bytemessage)
+                    .userId("kong_olav")
+                    .publisherId("NO-123")
                     .messageType(Constants.DENM)
-                    .quadTreeTiles(",123,")
-                    .publisherId("KYRRE")
-                    .protocolVersion("1.0")
-                    .originatingCountry("SE")
+                    .causeCode("6")
+                    .subCauseCode("61")
+                    .originatingCountry("NO")
+                    .protocolVersion("DENM:1.2.2")
+                    .quadTreeTiles(",12004,")
+                    .timestamp(System.currentTimeMillis())
                     .build());
         }
     }

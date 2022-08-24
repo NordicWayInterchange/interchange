@@ -98,19 +98,18 @@ class CapabilityMatcherTest {
 	@Test
 	public void testDenmCapability() {
 		Set<String> quadTreeTiles = new HashSet<>();
-		quadTreeTiles.add("12001");
-		quadTreeTiles.add("12003");
+		quadTreeTiles.add("12004");
 		DenmCapability capability = new DenmCapability(
-				"SE-00001",
-				"SE",
-				"DENM:1.3.1",
+				"NO-123",
+				"NO",
+				"DENM:1.2.2",
 				quadTreeTiles,
-				Collections.singleton("42")
+				Collections.singleton("6")
 		);
 		LocalSubscription subscription = new LocalSubscription(
 				52,
 				LocalSubscriptionStatus.CREATED,
-				"originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"
+				"((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = '6') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6')"
 		);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(capability),
@@ -121,9 +120,9 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void matchIviSelectorWithQuadTree() {
-		IvimCapability capability = new IvimCapability("NO-12345", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")), Sets.newHashSet(Collections.emptySet()));
+		IvimCapability capability = new IvimCapability("NO-12345", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")), Sets.newHashSet(Arrays.asList("6")));
 		LocalSubscription localSubscription = new LocalSubscription();
-		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%'");
+		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType like '%,6,%'");
 		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)));
 	}
 

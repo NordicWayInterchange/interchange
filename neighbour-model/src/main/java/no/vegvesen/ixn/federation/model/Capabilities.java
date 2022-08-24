@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Entity
@@ -58,14 +59,7 @@ public class Capabilities {
 				.filter(dataType -> dataType.getId().equals(capabilityId))
 				.findFirst();
 		Capability toDelete = subscriptionToDelete.orElseThrow(() -> new NotFoundException("The capability to delete is not in the Service Provider capabilities. Cannot delete subscription that don't exist."));
-		currentServiceProviderCapabilities.remove(toDelete);
-
-		if (currentServiceProviderCapabilities.size() == 0) {
-			setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
-		} else {
-			setStatus(Capabilities.CapabilitiesStatus.KNOWN);
-		}
-		setLastUpdated(LocalDateTime.now());
+		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
 	}
 
 	public enum CapabilitiesStatus{UNKNOWN, KNOWN, FAILED}
@@ -107,6 +101,12 @@ public class Capabilities {
 		return capabilities;
 	}
 
+	public Set<Capability> getCreatedCapabilities() {
+		return capabilities.stream()
+				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
+				.collect(Collectors.toSet());
+	}
+
 	public void setCapabilities(Set<Capability> capabilities) {
 		this.capabilities.clear();
 		if ( capabilities != null ) {
@@ -115,7 +115,11 @@ public class Capabilities {
 	}
 
 	public boolean hasDataTypes() {
-		return capabilities.size() > 0;
+		Set<Capability> createdCapabilities = capabilities.stream()
+				.filter(c -> c.getStatus().equals(CapabilityStatus.CREATED))
+				.collect(Collectors.toSet());
+
+		return createdCapabilities.size() > 0;
 	}
 
 	@Override

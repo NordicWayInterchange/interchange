@@ -27,10 +27,16 @@ public class LocalSubscription {
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
+    @Column(columnDefinition="TEXT")
+    private String consumerCommonName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "locend_id", foreignKey = @ForeignKey(name = "fk_locend_sub"))
     private Set<LocalEndpoint> localEndpoints = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "loccon_id", foreignKey = @ForeignKey(name = "fk_loccon_sub"))
+    private Set<LocalConnection> connections = new HashSet<>();
 
     public LocalSubscription() {
 
@@ -40,6 +46,12 @@ public class LocalSubscription {
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
         this.selector = selector;
+    }
+
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
+        this.status = status;
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
@@ -93,6 +105,26 @@ public class LocalSubscription {
         if (newLocalEndpoints != null) {
             this.localEndpoints.addAll(newLocalEndpoints);
         }
+    }
+
+    public Set<LocalConnection> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(Set<LocalConnection> connections) {
+        this.connections = connections;
+    }
+
+    public void addConnection(LocalConnection connection) {
+        connections.add(connection);
+    }
+
+    public String getConsumerCommonName() {
+        return consumerCommonName;
+    }
+
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     //TODO lag et objekt av selector??

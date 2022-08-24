@@ -24,6 +24,7 @@ public class Subscription {
 
 	private int numberOfPolls = 0;
 
+	@Column(columnDefinition="TEXT")
 	private String consumerCommonName;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -33,6 +34,8 @@ public class Subscription {
 	private long lastUpdatedTimestamp;
 
 	private String exchangeName;
+
+	private String queueName;
 
 	public Subscription() {
 	}
@@ -151,6 +154,14 @@ public class Subscription {
 
 	public void setExchangeName(String exchangeName) {
 		this.exchangeName = exchangeName;
+	}
+
+	public String getQueueName() {
+		return queueName;
+	}
+
+	public void setQueueName(String queueName) {
+		this.queueName = queueName;
 	}
 
 	//TODO this is really quite unusual, and really shows that the Subscription needs to be changed

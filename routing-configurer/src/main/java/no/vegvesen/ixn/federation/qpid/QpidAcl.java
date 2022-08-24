@@ -37,6 +37,14 @@ public class QpidAcl {
         return aclRules.remove(createQueueWriteAccessRule(memberOrGroupName,queue));
     }
 
+    public void createPublishAccessOnExchangeForQueue(String memberName, String queue) {
+        addNextToLast(createQueuePublishToExchangeRule(memberName, queue));
+    }
+
+    public void createConsumeAccessOnQueueForExchange(String queue) {
+        addNextToLast(createExchangeConsumeOnQueueRule(queue));
+    }
+
     /**
      * NOTE this acl is a bit strange, as we are allowing to publish to an exchange, not queue, with routingKey = queue name.
      * This is a qpid workaround since it has not been possible to write to queues in AMQP 0.X
@@ -54,6 +62,19 @@ public class QpidAcl {
         Map<String, String> props = new HashMap<>();
         props.put("name",queue);
         return new AclRule("ALLOW-LOG",memberOrGroupName,"CONSUME","QUEUE",props);
+    }
+
+    static AclRule createQueuePublishToExchangeRule(String memberName, String queue) {
+        Map<String, String> props = new HashMap<>();
+        props.put("routingkey", queue);
+        props.put("name", "");
+        return new AclRule("ALLOW-LOG", memberName, "PUBLISH", "EXCHANGE", props);
+    }
+
+    static AclRule createExchangeConsumeOnQueueRule(String queue) {
+        Map<String, String> props = new HashMap<>();
+        props.put("name", queue);
+        return new AclRule("ALLOW-LOG", "interchange", "CONSUME", "QUEUE", props);
     }
 
     public static QpidAcl parseRules(String aclRules) {

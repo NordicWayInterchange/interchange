@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "local_delivery_endpoints")
+@Table(name = "local_delivery_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"host", "port", "target", "selector"}))
 public class LocalDeliveryEndpoint {
 
     @Id
@@ -15,7 +15,10 @@ public class LocalDeliveryEndpoint {
     private String host;
     private int port;
     private String target;
+
+    @Column(length = 1024)
     private String selector;
+
     private Integer maxBandwidth;
     private Integer maxMessageRate;
 
@@ -84,6 +87,10 @@ public class LocalDeliveryEndpoint {
 
     public void setMaxMessageRate(Integer maxMessageRate) {
         this.maxMessageRate = maxMessageRate;
+    }
+
+    public String bindKey() {
+        return "" + selector.hashCode();
     }
 
     @Override

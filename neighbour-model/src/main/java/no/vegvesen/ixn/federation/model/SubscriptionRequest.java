@@ -63,8 +63,13 @@ public class SubscriptionRequest {
 		subscription.remove(subscriptionToRemove);
 	}
 
-	public void deleteSubscriptions (Set<Subscription> subscriptions) {
-		subscription.removeAll(subscriptions);
+	public void deleteSubscriptions(Set<Subscription> subscriptionsToDelete) {
+		subscription.removeAll(subscriptionsToDelete);
+	}
+
+	public void setTearDownSubscription(Integer subscriptionId) {
+		Subscription subscriptionToTearDown = getSubscriptionById(subscriptionId);
+		subscriptionToTearDown.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
 	}
 
 	public void addNewSubscriptions (Set<Subscription> newSubscriptions) {
@@ -107,6 +112,16 @@ public class SubscriptionRequest {
 		return getSubscriptions().stream()
 				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE))
 				.collect(Collectors.toSet());
+	}
+
+	public Set<Subscription> getTearDownSubscriptions() {
+		return getSubscriptions().stream()
+				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN))
+				.collect(Collectors.toSet());
+	}
+
+	public boolean hasTearDownSubscriptions() {
+		return !getTearDownSubscriptions().isEmpty();
 	}
 
 	public Optional<LocalDateTime> getSuccessfulRequest() {

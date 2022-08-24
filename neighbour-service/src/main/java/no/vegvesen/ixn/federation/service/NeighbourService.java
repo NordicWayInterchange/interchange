@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @ConfigurationPropertiesScan
@@ -160,10 +161,7 @@ public class NeighbourService {
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			String messageChannelHost = interchangeNodeProperties.getName();
-			String messageChannelPort = interchangeNodeProperties.getMessageChannelPort();
-
-			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription,neighbour.getName(),messageChannelHost, messageChannelPort);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
@@ -174,14 +172,7 @@ public class NeighbourService {
 
 	public void incomingSubscriptionDelete (String ixnName, Integer subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		neighbour.getNeighbourRequestedSubscriptions().deleteSubscription(subscriptionId);
-		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.TEAR_DOWN);
-			logger.debug("Saved neighbour {} with subscription request status TEAR_DOWN", neighbour.getName());
-		} else {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.MODIFIED);
-			logger.debug("Saved neighbour {} with subscription request status MODIFIED", neighbour.getName());
-		}
+		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
 		neighbourRepository.save(neighbour);
 	}
 
@@ -197,11 +188,11 @@ public class NeighbourService {
 		return neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.CREATED);
 	}
 
-
-	public List<Neighbour> findNeighboursToTearDownRoutingFor() {
-		List<Neighbour> tearDownRoutingList = neighbourRepository.findByNeighbourRequestedSubscriptions_Status(SubscriptionRequestStatus.TEAR_DOWN);
-		logger.debug("Found {} neighbours to tear down routing for {}", tearDownRoutingList.size(), tearDownRoutingList);
-		return tearDownRoutingList;
+	public Set<Neighbour> findNeighboursToTearDownRoutingFor() {
+		Set<Neighbour> tearDownSet = neighbourRepository.findAll().stream()
+				.filter(n -> n.getNeighbourRequestedSubscriptions().hasTearDownSubscriptions())
+				.collect(Collectors.toSet());
+		return tearDownSet;
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
@@ -216,6 +207,19 @@ public class NeighbourService {
 		logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
 	}
 
+	public void saveDeleteSubscriptions(String ixnName, Set<Subscription> subscriptionsToDelete) {
+		Neighbour neighbour = neighbourRepository.findByName(ixnName);
+		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
+		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
+			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.EMPTY);
+			logger.debug("Saved neighbour {} with subscription request status TEAR_DOWN", neighbour.getName());
+		} else {
+			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.MODIFIED);
+			logger.debug("Saved neighbour {} with subscription request status MODIFIED", neighbour.getName());
+		}
+		neighbourRepository.save(neighbour);
+	}
+
 	public void saveSetupRouting(Neighbour neighbour) {
 		neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.ESTABLISHED);
 
@@ -227,5 +231,13 @@ public class NeighbourService {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		Set<Subscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),subscriptions);
+	}
+
+	public String getNodeName() {
+		return interchangeNodeProperties.getName();
+	}
+
+	public String getMessagePort() {
+		return interchangeNodeProperties.getMessageChannelPort();
 	}
 }

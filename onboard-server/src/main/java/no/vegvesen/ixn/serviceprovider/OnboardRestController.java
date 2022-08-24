@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.federation.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
@@ -30,6 +31,7 @@ public class OnboardRestController {
 	private final NeighbourRepository neighbourRepository;
 	private final CertService certService;
 	private final InterchangeNodeProperties nodeProperties;
+	private final ServiceProviderRouter serviceProviderRouter;
 	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
@@ -38,11 +40,13 @@ public class OnboardRestController {
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
 								 NeighbourRepository neighbourRepository,
 								 CertService certService,
-								 InterchangeNodeProperties nodeProperties) {
+								 InterchangeNodeProperties nodeProperties,
+								 ServiceProviderRouter serviceProviderRouter) {
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.neighbourRepository = neighbourRepository;
 		this.certService = certService;
 		this.nodeProperties = nodeProperties;
+		this.serviceProviderRouter = serviceProviderRouter;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -138,7 +142,8 @@ public class OnboardRestController {
 
 		// Updating the Service Provider capabilities based on the incoming capabilities that will be deleted.
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
-		// Service provider exists. Remove the incoming capabilities from the Service Provider capabilities.
+
+		// Service provider exists. Set the incoming capabilities status to TEAR_DOWN from the Service Provider capabilities.
 		serviceProviderToUpdate.getCapabilities().removeDataType(Integer.parseInt(capabilityId));
 
 		// Save the updated Service Provider representation in the database.
@@ -393,6 +398,7 @@ public class OnboardRestController {
 
 		logger.info("Service Provider {}, DELETE delivery {}", serviceProviderName, deliveryId);
 
+		//Setting the Delivery to TEAR_DOWN
 		serviceProvider.removeLocalDelivery(Integer.parseInt(deliveryId));
 
 		ServiceProvider saved = serviceProviderRepository.save(serviceProvider);

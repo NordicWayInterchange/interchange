@@ -56,24 +56,6 @@ services:
     networks:
       - testing_net
 
-
-  local_interchange_app:
-    #image: eu.gcr.io/nordic-way-aad182cc/interchange-node-app:${BRANCH_TAG}
-    build:
-      context: ../interchange-node-app
-    container_name: local_interchange_app
-    hostname: local_interchange_app
-    links:
-    - "local_qpid:local.bouvetinterchange.eu"
-    environment:
-      AMQP_URI: amqp://local.bouvetinterchange.eu
-      AMQP_USER: interchange
-      AMQP_PASSWORD: "12345678"
-    depends_on:
-      - local_qpid
-    networks:
-    - testing_net
-
   local_qpid:
     build:
       context: ../qpid
@@ -234,23 +216,6 @@ services:
     - TRUST_STORE_PASSWORD=password
     - KEY_STORE=/jks/keys/remote.bouvetinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
-    networks:
-    - testing_net
-
-  remote_interchange_app:
-    #image: eu.gcr.io/nordic-way-aad182cc/interchange-node-app:${BRANCH_TAG}
-    build:
-      context: ../interchange-node-app
-    container_name: remote_interchange_app
-    hostname: remote_interchange_app
-    links:
-    - "remote_qpid:remote.bouvetinterchange.eu"
-    environment:
-      AMQP_URI: amqp://remote.bouvetinterchange.eu
-      AMQP_USER: interchange
-      AMQP_PASSWORD: "12345678"
-    depends_on:
-    - remote_qpid
     networks:
     - testing_net
 

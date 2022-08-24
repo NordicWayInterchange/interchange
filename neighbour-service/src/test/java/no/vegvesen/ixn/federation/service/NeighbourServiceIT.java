@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
@@ -124,8 +125,11 @@ public class NeighbourServiceIT {
 
         assertThat(service.findNeighboursToSetupRoutingFor().contains(neighbour));
         service.saveSetupRouting(neighbour);
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.ESTABLISHED);
 
-        service.incomingSubscriptionDelete("my-neighbour3", Integer.parseInt(no.getId()));
+        Subscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
+
+        service.saveDeleteSubscriptions("my-neighbour3", Collections.singleton(sub));
 
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.MODIFIED);
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(1);
@@ -146,10 +150,13 @@ public class NeighbourServiceIT {
 
         assertThat(service.findNeighboursToSetupRoutingFor().contains(neighbour));
         service.saveSetupRouting(neighbour);
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.ESTABLISHED);
 
-        service.incomingSubscriptionDelete("my-neighbour4", Integer.parseInt(no.getId()));
+        Subscription sub = repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptionById(Integer.parseInt(no.getId()));
 
-        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.TEAR_DOWN);
+        service.saveDeleteSubscriptions("my-neighbour4", Collections.singleton(sub));
+
+        assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
         assertThat(repository.findByName(neighbour.getName()).getNeighbourRequestedSubscriptions().getSubscriptions().size()).isEqualTo(0);
     }
 

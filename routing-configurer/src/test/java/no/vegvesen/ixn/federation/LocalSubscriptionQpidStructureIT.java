@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -88,6 +89,9 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     @MockBean
     MatchDiscoveryService matchDiscoveryService;
+
+    @MockBean
+    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
     @Autowired
     ServiceProviderRouter router;

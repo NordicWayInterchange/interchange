@@ -5,11 +5,10 @@
         "messageType": "DENM",
         "publisherId": "NO-123",
         "originatingCountry": "NO",
-        "protocolVersion": "1.0",
+        "protocolVersion": "DENM:1.2.2",
         "quadTree": [
-          "12003"
+          "12004"
         ],
-        "redirect": "OPTIONAL",
         "causeCode": [
           "6"
         ]

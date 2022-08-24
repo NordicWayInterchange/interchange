@@ -88,9 +88,17 @@ public class QpidClient {
 		}
 	}
 
-	public void addBinding(String selector, String queueName, String bindingKey, String exchangeName) {
+	public void bindDirectExchange(String selector, String source, String destination) {
+		addBinding(selector, source, destination,source);
+	}
+
+	public void bindTopicExchange(String selector, String source, String destination) {
+		addBinding(selector,source,destination,Integer.toString(selector.hashCode()));
+	}
+
+	private void addBinding(String selector, String source, String destination, String bindingKey) {
 		JSONObject json = new JSONObject();
-		json.put("destination", queueName);
+		json.put("destination", destination);
 		json.put("bindingKey", bindingKey);
 		json.put("replaceExistingArguments", true);
 
@@ -100,7 +108,7 @@ public class QpidClient {
 		json.put("arguments", innerjson);
 		String jsonString = json.toString();
 
-		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/bind");
+		postQpid(exchangesURL + "/" + source, jsonString, "/bind");
 	}
 
 	public void createQueue(String queueName) {
@@ -112,6 +120,13 @@ public class QpidClient {
 	public void createTopicExchange(String exchangeName) {
 		if (!exchangeExists(exchangeName)){
 			_createTopicExchange(exchangeName);
+			logger.info("Created exchange with name {}", exchangeName);
+		}
+	}
+
+	public void createDirectExchange(String exchangeName) {
+		if (!exchangeExists(exchangeName)){
+			_createDirectExchange(exchangeName);
 			logger.info("Created exchange with name {}", exchangeName);
 		}
 	}
@@ -158,6 +173,7 @@ public class QpidClient {
 		} catch (HttpClientErrorException.NotFound notFound) {
 			return null;
 		} catch (Throwable e) {
+			logger.error("Caught exception {}", e);
 			throw new RoutingConfigurerException(String.format("Could not query for QPID queue %s", queueName), e);
 		}
 		HttpStatus statusCode = response.getStatusCode();
@@ -177,7 +193,7 @@ public class QpidClient {
 
 	private String lookupExchangeId(String exchangeName) {
 		String exchangeQueryUrl = exchangesURL + "/" + exchangeName;
-		logger.debug("quering for queue {} with url {}", exchangeName, exchangeQueryUrl);
+		logger.info("quering for exchange {} with url {}", exchangeName, exchangeQueryUrl);
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<HashMap> response;
 		try {
@@ -185,6 +201,7 @@ public class QpidClient {
 		} catch (HttpClientErrorException.NotFound notFound) {
 			return null;
 		} catch (Throwable e) {
+			logger.error("Caught exception {}", e);
 			throw new RoutingConfigurerException(String.format("Could not query for QPID exchange %s", exchangeName), e);
 		}
 		HttpStatus statusCode = response.getStatusCode();
@@ -235,7 +252,7 @@ public class QpidClient {
 		restTemplate.delete(queuesURL + "?id=" + queueId);
 	}
 
-	public void removeDirectExchange(String exchangeName) {
+	public void removeExchange(String exchangeName) {
 		String exchangeId = lookupExchangeId(exchangeName);
 		restTemplate.delete(exchangesURL + "?id=" + exchangeId);
 	}
@@ -295,6 +312,18 @@ public class QpidClient {
 		qpidAcl.removeQueueWriteAccess(subscriberName, queue);
 		postQpidAcl(qpidAcl);
 
+	}
+
+	public void createPublishAccessOnExchangeForQueue(String subscriberName, String queue) {
+		QpidAcl qpidAcl = getQpidAcl();
+		qpidAcl.createPublishAccessOnExchangeForQueue(subscriberName, queue);
+		postQpidAcl(qpidAcl);
+	}
+
+	public void createConsumeAccessOnQueueForExchange(String queue) {
+		QpidAcl qpidAcl = getQpidAcl();
+		qpidAcl.createConsumeAccessOnQueueForExchange(queue);
+		postQpidAcl(qpidAcl);
 	}
 
 	public QpidAcl getQpidAcl() {
