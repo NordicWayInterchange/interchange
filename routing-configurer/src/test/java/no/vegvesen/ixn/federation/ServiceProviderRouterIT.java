@@ -747,7 +747,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider mySP = new ServiceProvider("my-sp");
 		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
-		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')");
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint();
 		endpoint.setSource("my-queue12");
 		subscription.setLocalEndpoints(Collections.singleton(endpoint));

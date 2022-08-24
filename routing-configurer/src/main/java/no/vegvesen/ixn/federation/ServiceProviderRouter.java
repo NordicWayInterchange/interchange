@@ -379,26 +379,28 @@ public class ServiceProviderRouter {
             Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
             for (LocalSubscription subscription : serviceProviderSubscriptions) {
-                removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
-                if (!allCapabilities.isEmpty()) {
-                    if (!subscription.getLocalEndpoints().isEmpty()) {
-                        Set<String> existingConnections = subscription.getConnections().stream()
-                                .map(LocalConnection::getSource)
-                                .collect(Collectors.toSet());
+                if (!subscription.getConsumerCommonName().equals(serviceProvider.getName())) {
+                    removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
+                    if (!allCapabilities.isEmpty()) {
+                        if (!subscription.getLocalEndpoints().isEmpty()) {
+                            Set<String> existingConnections = subscription.getConnections().stream()
+                                    .map(LocalConnection::getSource)
+                                    .collect(Collectors.toSet());
 
-                        Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
+                            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
 
-                        for (Capability capability : matchingCapabilities) {
-                            if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
-                                LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
-                                LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
-                                subscription.addConnection(connection);
+                            for (Capability capability : matchingCapabilities) {
+                                if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
+                                    LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
+                                    qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
+                                    LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
+                                    subscription.addConnection(connection);
+                                }
                             }
                         }
                     }
+                    repository.save(serviceProvider);
                 }
-                repository.save(serviceProvider);
             }
         }
     }
