@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -36,10 +37,24 @@ public class ServiceProviderImport {
             //TODO should we not import ILLEGAL local subscriptions?
             String selector = subscriptionApi.getSelector();
             if (!selector.trim().isEmpty()) {
-                subscriptions.add(new LocalSubscription(
+                LocalSubscription localSubscription = new LocalSubscription(
                         LocalSubscriptionStatus.REQUESTED,
                         selector
-                ));
+                );
+                if (! subscriptionApi.getEndpoints().isEmpty()) {
+                    Set<LocalEndpoint> endpoints = new HashSet<>();
+                    for (EndpointApi endpointApi : subscriptionApi.getEndpoints()) {
+                        endpoints.add(new LocalEndpoint(
+                                endpointApi.getSource(),
+                                endpointApi.getHost(),
+                                endpointApi.getPort(),
+                                endpointApi.getMaxBandwidth(),
+                                endpointApi.getMaxMessageRate()
+                        ));
+                    }
+                    localSubscription.setLocalEndpoints(endpoints);
+                }
+                subscriptions.add(localSubscription);
             }
         }
         Set<LocalDelivery> deliveries = new HashSet<>();
