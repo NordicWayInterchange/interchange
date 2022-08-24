@@ -37,35 +37,7 @@ data:
           "owner": null,
           "lastUpdatedBy": "interchange",
           "createdBy": "interchange"
-        },
-        {{- range $i, $ex := .Values.qpid.users }}
-        {
-          {{- if $ex.uuid }}
-          "id": "{{ $ex.uuid}}",
-          {{- end }}
-          "name": "{{ $ex.name }}",
-          "type": "standard",
-          "durable": true,
-          "holdOnPublishEnabled": false,
-          "messageDurability": "ALWAYS",
-          "owner": null,
-          "lastUpdatedBy": "interchange",
-          "createdBy": "interchange"
-        }{{ if gt $totallen $i }},{{ end}}
-        {{- end }}
-        {{- range .Values.qpid.additional_queues }}
-        {
-          "id": "{{ .uuid}}",
-          "name": "{{ .name }}",
-          "type": "standard",
-          "durable": true,
-          "holdOnPublishEnabled": false,
-          "messageDurability": "ALWAYS",
-          "owner": null,
-          "lastUpdatedBy": "interchange",
-          "createdBy": "interchange"
-        },
-        {{- end }}
+        }
       ],
       "virtualhostaccesscontrolproviders": [
         {
