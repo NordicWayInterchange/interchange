@@ -2,30 +2,8 @@
   "type": "Memory",
   "name": "localhost",
   "modelVersion": "7.0",
-  "exchanges": [
-    {
-      "name": "outgoingExchange",
-      "type": "headers",
-      "durable": true,
-      "durableBindings": [
-      ]
-    },
-    {
-      "name": "incomingExchange",
-      "type": "headers",
-      "durable": true,
-      "durableBindings": [
-      ]
-    }
-  ],
+  "exchanges": [ ],
   "queues": [
-    {
-      "name": "onramp",
-      "type": "standard",
-      "durable": true,
-      "holdOnPublishEnabled": false,
-      "owner": null
-    },
     {
       "name": "dlqueue",
       "type": "standard",
@@ -48,13 +26,6 @@
       "type": "RuleBased",
       "defaultResult": "DENIED",
       "rules": [
-        {
-          "objectType": "ALL",
-          "identity": "interchange",
-          "operation": "ALL",
-          "outcome": "ALLOW_LOG",
-          "attributes": {}
-        },
         {
           "objectType": "ALL",
           "identity": "administrators",
@@ -106,15 +77,6 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
             "NAME": "localhost"
-          }
-        },
-        {
-          "objectType": "QUEUE",
-          "identity": "interchange",
-          "operation": "CONSUME",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "onramp"
           }
         },
         {

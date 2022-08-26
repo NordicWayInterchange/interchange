@@ -30,27 +30,10 @@
       "rules": [
         {
           "objectType": "ALL",
-          "identity": "interchange",
-          "operation": "ALL",
-          "outcome": "ALLOW_LOG",
-          "attributes": {}
-        },
-        {
-          "objectType": "ALL",
           "identity": "administrators",
           "operation": "ALL",
           "outcome": "ALLOW_LOG",
           "attributes": {}
-        },
-        {
-          "objectType": "EXCHANGE",
-          "identity": "service-providers",
-          "operation": "PUBLISH",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "ROUTING_KEY": "onramp",
-            "NAME": ""
-          }
         },
         {
           "objectType": "VIRTUALHOST",

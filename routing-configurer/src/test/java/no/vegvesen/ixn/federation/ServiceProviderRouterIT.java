@@ -72,14 +72,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-		    //need to set the logg follower somewhere, this seems like a "good" place to do it for now
 			qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-			String httpsUrl = qpidContainer.getHttpsUrl();
-			String httpUrl = qpidContainer.getHttpUrl();
-			logger.info("server url: " + httpsUrl);
-			logger.info("server url: " + httpUrl);
 			TestPropertyValues.of(
-					"routing-configurer.baseUrl=" + httpsUrl,
+					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
 					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
 					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12"),
@@ -144,7 +139,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		king_gustaf.addLocalSubscription(new LocalSubscription(
 				1,
 				LocalSubscriptionStatus.REQUESTED,
-				"",
+				"messageType = 'DATEX2'",
 				LocalDateTime.now(),
 				"my-node",
 				Collections.emptySet(),
@@ -155,6 +150,46 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						)
 				)
 		));
+		DatexCapability capability = new DatexCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				Collections.emptySet(),
+				Collections.emptySet()
+		);
+		Capabilities capabilities = new Capabilities(
+				Capabilities.CapabilitiesStatus.KNOWN,
+				Collections.singleton(capability
+				)
+		);
+		king_gustaf.setCapabilities(capabilities);
+		String deliverySelector = "messageType = 'DATEX2'";
+		LocalDelivery localDelivery = new LocalDelivery(
+				1,
+				"/deliveries/1",
+				deliverySelector,
+				LocalDateTime.now(),
+				LocalDeliveryStatus.CREATED
+		);
+		String exchangeName = "myexchange";
+		localDelivery.setExchangeName(exchangeName);
+		localDelivery.addEndpoint(new LocalDeliveryEndpoint(
+				qpidContainer.getHost(),
+				qpidContainer.getAmqpsPort(),
+				exchangeName,
+				deliverySelector
+		));
+		king_gustaf.addDeliveries(Collections.singleton(localDelivery));
+
+		OutgoingMatch outgoingMatch = new OutgoingMatch(
+				localDelivery,
+				capability,
+				king_gustaf.getName(),
+				OutgoingMatchStatus.SETUP_ENDPOINT
+		);
+		when(outgoingMatchDiscoveryService.findMatchesFromDeliveryId(1)).thenReturn(Arrays.asList(outgoingMatch));
+		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(king_gustaf.getName())).thenReturn(Arrays.asList(outgoingMatch));
+
 		router.syncServiceProviders(Arrays.asList(king_gustaf));
 
 		SSLContext kingGustafSslContext = setUpTestSslContext("king_gustaf.p12");
@@ -165,10 +200,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalEndpoint endpoint = sinkEndpoints.stream().findFirst().get();
 		Sink readKingGustafQueue = new Sink(amqpsUrl, endpoint.getSource(), kingGustafSslContext);
 		readKingGustafQueue.start();
-		Source writeOnrampQueue = new Source(amqpsUrl, "onramp", kingGustafSslContext);
+
+		Set<LocalDeliveryEndpoint> deliveryEndpoints = king_gustaf.getDeliveries().stream().flatMap(d -> d.getEndpoints().stream()).collect(Collectors.toSet());
+		assertThat(deliveryEndpoints).hasSize(1);
+		LocalDeliveryEndpoint deliveryEndpoint = deliveryEndpoints.stream().findFirst().get();
+
+		Source writeOnrampQueue = new Source(amqpsUrl, deliveryEndpoint.getTarget(), kingGustafSslContext);
 		writeOnrampQueue.start();
 		try {
-			Sink readDlqueue = new Sink(amqpsUrl, "onramp", kingGustafSslContext);
+			Sink readDlqueue = new Sink(amqpsUrl, deliveryEndpoint.getTarget(), kingGustafSslContext);
 			readDlqueue.start();
 			fail("Should not allow king_gustaf to read from queue not granted access on (onramp)");
 		} catch (Exception ignore) {

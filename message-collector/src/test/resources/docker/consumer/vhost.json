@@ -35,13 +35,6 @@
       "rules": [
         {
           "objectType": "ALL",
-          "identity": "interchange",
-          "operation": "ALL",
-          "outcome": "ALLOW_LOG",
-          "attributes": {}
-        },
-        {
-          "objectType": "ALL",
           "identity": "administrators",
           "operation": "ALL",
           "outcome": "ALLOW_LOG",

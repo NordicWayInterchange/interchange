@@ -41,17 +41,10 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	@Container
 	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
 
-	private static String AMQPS_URL;
-
 	static class Initializer  implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			String httpsUrl = qpidContainer.getHttpsUrl();
-			String httpUrl = qpidContainer.getHttpUrl();
-			logger.info("server url: " + httpsUrl);
-			logger.info("server url: " + httpUrl);
-			AMQPS_URL = qpidContainer.getAmqpsUrl();
 			TestPropertyValues.of(
-					"routing-configurer.baseUrl=" + httpsUrl,
+					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
 					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
 					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
@@ -150,10 +143,10 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 
-		Sink sink = new Sink(AMQPS_URL, serviceProviderName, sslContext);
+		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), serviceProviderName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
 
-		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
+		Source source = new Source(qpidContainer.getAmqpsUrl(), "outgoingExchange", sslContext);
 		source.start();
 		source.sendNonPersistentMessage(source.createMessageBuilder()
 				.textMessage("fisk")
@@ -177,14 +170,15 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	private Message sendNeighbourMessage(String messageQuadTreeTiles, String selector, String spName) throws Exception {
 		qpidClient.createQueue(spName);
 		qpidClient.addReadAccess(spName, spName);
+		qpidClient.createTopicExchange("outgoingExchange");
 		qpidClient.bindTopicExchange(selector, "outgoingExchange", spName);
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 
-		Sink sink = new Sink(AMQPS_URL, spName, sslContext);
+		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), spName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
 
-		Source source = new Source(AMQPS_URL, "outgoingExchange", sslContext);
+		Source source = new Source(qpidContainer.getAmqpsUrl(), "outgoingExchange", sslContext);
 		source.start();
 		if (messageQuadTreeTiles != null && !messageQuadTreeTiles.startsWith(",")) {
 			throw new IllegalArgumentException("when quad tree is specified it must start with comma \",\"");
