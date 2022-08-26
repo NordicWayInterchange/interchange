@@ -120,12 +120,6 @@ public class NeighbourDiscoverer {
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
 	}
 
-	//TODO: Removed now that we have OutgoingMatch
-	/* @Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void updateLocalDeliveries() {
-		serviceProviderService.updateLocalDeliveries(interchangeNodeProperties.getName(), interchangeNodeProperties.getMessageChannelPort());
-	} */
-
 	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void syncServiceProviders() {
 		serviceProviderService.syncServiceProviders(interchangeNodeProperties.getName(), Integer.parseInt(interchangeNodeProperties.getMessageChannelPort()));
@@ -150,6 +144,11 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void updateMatchesToTearDown() {
 		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToTearDownMatchResources();
+	}
+
+	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void updateMatchesWithRedirectToDeleted() {
+		matchDiscoveryService.synLocalSubscriptionAndSubscriptionsToTearDownMatchWithRedirect();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")

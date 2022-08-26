@@ -324,12 +324,14 @@ public class NeigbourDiscoveryService {
                                         subscription.getEndpoints(),
                                         lastUpdatedSubscription.getEndpoints()
                                 );
-                                tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
-                                createListenerEndpointFromEndpointsList(
-                                        neighbour,
-                                        endpointCalculator.getNewEndpoints(),
-                                        subscription.getExchangeName()
-                                );
+                                if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
+                                    createListenerEndpointFromEndpointsList(
+                                            neighbour,
+                                            endpointCalculator.getNewEndpoints(),
+                                            subscription.getExchangeName()
+                                    );
+                                }
                                 subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
                             } else {
                                 logger.info("No subscription change for neighbour {}", neighbour.getName());

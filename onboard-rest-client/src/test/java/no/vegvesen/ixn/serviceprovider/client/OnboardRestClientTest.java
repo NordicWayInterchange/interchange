@@ -18,7 +18,13 @@ public class OnboardRestClientTest {
         File file = new File("localSubscription_dat_no.json");
 
         ObjectMapper mapper = new ObjectMapper();
-        AddSubscriptionsRequest subscription = mapper.readValue(file,AddSubscriptionsRequest.class);
+        AddSubscriptionsRequest subscriptions = mapper.readValue(file,AddSubscriptionsRequest.class);
+
+        for (AddSubscription subscription : subscriptions.getSubscriptions()) {
+            System.out.println(subscription.toString());
+        }
+
+        System.out.println();
 
     }
 }

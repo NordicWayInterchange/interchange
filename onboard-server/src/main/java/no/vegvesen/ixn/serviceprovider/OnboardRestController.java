@@ -189,11 +189,7 @@ public class OnboardRestController {
 
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
-			if (subscription.getConsumerCommonName() != null && subscription.getConsumerCommonName().equals(serviceProviderName)) {
-				localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName));
-			} else {
-				localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, nodeProperties.getName()));
-			}
+			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName()));
 		}
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
@@ -222,8 +218,6 @@ public class OnboardRestController {
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Service Provider {}, DELETE subscription {}", serviceProviderName, dataTypeId);
-
-
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 		serviceProviderToUpdate.removeLocalSubscription(Integer.parseInt(dataTypeId));

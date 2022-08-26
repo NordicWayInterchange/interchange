@@ -61,6 +61,10 @@ public class ServiceProviderRouter {
                     Optional<LocalSubscription> newSubscription = processSubscription(name, subscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
                     newSubscription.ifPresent(newSubscriptions::add);
                 }
+                else {
+                    Optional<LocalSubscription> newSubscription = processRedirectSubscription(subscription);
+                    newSubscription.ifPresent(newSubscriptions::add);
+                }
             }
 
 
@@ -141,6 +145,31 @@ public class ServiceProviderRouter {
         }
         return Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
     }
+
+    public Optional<LocalSubscription> processRedirectSubscription(LocalSubscription subscription) {
+        Optional<LocalSubscription> newSubscription;
+        if (subscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED)) {
+            newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
+        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
+            newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
+        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
+            newSubscription = redirectTearDown(subscription);
+        } else {
+            throw new IllegalStateException("Unknown subscription status encountered");
+        }
+        return newSubscription;
+    }
+
+    public Optional<LocalSubscription> redirectTearDown(LocalSubscription subscription) {
+        List<Match> match = matchDiscoveryService.findMatchByLocalSubscriptionId(subscription.getId());
+        subscription.getLocalEndpoints().clear();
+        if (match.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(subscription);
+        }
+    }
+
 
     private void optionallyCreateQueue(String queueName, String serviceProviderName) {
         if (!qpidClient.queueExists(queueName)) {

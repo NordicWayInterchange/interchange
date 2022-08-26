@@ -27,7 +27,7 @@ public class MatchDiscoveryService {
             Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
             String serviceProviderName = serviceProvider.getName();
             for (LocalSubscription localSubscription : localSubscriptions) {
-                if (localSubscription.getConsumerCommonName().equals(serviceProviderName)) {
+                if (!localSubscription.getConsumerCommonName().equals(serviceProviderName)) {
                     for (Neighbour neighbour : neighbours) {
                         for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                             if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
@@ -97,6 +97,18 @@ public class MatchDiscoveryService {
                 match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
                 matchRepository.save(match);
                 logger.info("Saved match {} with status TEARDOWN_ENDPOINT", match);
+            }
+        }
+    }
+
+    public void synLocalSubscriptionAndSubscriptionsToTearDownMatchWithRedirect() {
+        List<Match> matches = matchRepository.findAllByStatus(MatchStatus.REDIRECT);
+        for (Match match : matches) {
+            if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
+                    match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                match.setStatus(MatchStatus.DELETED);
+                matchRepository.save(match);
+                logger.info("Saved match {} with status DELETED", match);
             }
         }
     }

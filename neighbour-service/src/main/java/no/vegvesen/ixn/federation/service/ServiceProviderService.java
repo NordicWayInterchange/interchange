@@ -20,21 +20,40 @@ public class ServiceProviderService {
 
     private ServiceProviderRepository serviceProviderRepository;
     private OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+    private MatchDiscoveryService matchDiscoveryService;
 
     @Autowired
-    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService) {
+    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService, MatchDiscoveryService matchDiscoveryService) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
+        this.matchDiscoveryService = matchDiscoveryService;
     }
 
     public void syncServiceProviders(String host, Integer port) {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         for (ServiceProvider serviceProvider : serviceProviders) {
+            updateLocalSubscriptionWithRedirectEndpoints(serviceProvider);
             updateNewLocalDeliveryEndpoints(serviceProvider, host, port);
             updateTearDownLocalDeliveryEndpoints(serviceProvider);
             removeTearDownCapabilities(serviceProvider);
             removeTearDownDeliveries(serviceProvider);
             serviceProviderRepository.save(serviceProvider);
+        }
+    }
+
+    public void updateLocalSubscriptionWithRedirectEndpoints(ServiceProvider serviceProvider) {
+        Set<LocalSubscription> redirectSubscriptions = serviceProvider.getSubscriptions().stream()
+                .filter(s -> s.getConsumerCommonName().equals(serviceProvider.getName()))
+                .collect(Collectors.toSet());
+        for (LocalSubscription localSubscription : redirectSubscriptions) {
+            Set<LocalEndpoint> newEndpoints = new HashSet<>();
+            if (localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
+                List<Match> matches = matchDiscoveryService.findMatchByLocalSubscriptionId(localSubscription.getId());
+                for (Match match : matches) {
+                    newEndpoints.addAll(transformEndpointsToLocalEndpoints(match.getSubscription().getEndpoints()));
+                }
+            }
+            localSubscription.setLocalEndpoints(newEndpoints);
         }
     }
 
@@ -113,6 +132,20 @@ public class ServiceProviderService {
 
     public void saveAllServiceProviders(List<ServiceProvider> serviceProviders) {
         serviceProviderRepository.saveAll(serviceProviders);
+    }
+
+    public Set<LocalEndpoint> transformEndpointsToLocalEndpoints(Set<Endpoint> endpoints) {
+        Set<LocalEndpoint> localEndpoints = new HashSet<>();
+        for (Endpoint endpoint : endpoints) {
+            LocalEndpoint localEndpoint = new LocalEndpoint(
+                    endpoint.getSource(),
+                    endpoint.getHost(),
+                    endpoint.getPort(),
+                    endpoint.getMaxBandwidth(),
+                    endpoint.getMaxMessageRate());
+            localEndpoints.add(localEndpoint);
+        }
+        return localEndpoints;
     }
 
 }

@@ -167,7 +167,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		String selector = "messageType = 'DATEX2' and originatingCountry = 'SE'";
-		AddSubscription subscription1 = new AddSubscription(selector);
+		AddSubscription subscription1 = new AddSubscription(selector, firstServiceProvider);
 		AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 				firstServiceProvider,
 				Collections.singleton(subscription1)
