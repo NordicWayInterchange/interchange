@@ -144,6 +144,85 @@ public class MatchDiscoveryServiceTest {
        verify(matchRepository,times(2)).save(any(Match.class));
     }
 
+    @Test
+    public void redirectSubscriptionCreatesMatchWithStatusRedirect() {
+        ServiceProvider sp = new ServiceProvider(
+                "SP",
+                new Capabilities(),
+                Collections.singleton(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.REQUESTED,
+                                "originatingCountry = 'NO'",
+                                "SP"
+                        )),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+
+        Neighbour neighbour = new Neighbour(
+                "neighbour",
+                new Capabilities(),
+                new SubscriptionRequest(),
+                new SubscriptionRequest(
+                        SubscriptionRequestStatus.REQUESTED,
+                        new HashSet<>(Arrays.asList(
+                                new Subscription(
+                                        "originatingCountry = 'NO'",
+                                        SubscriptionStatus.REQUESTED,
+                                        "SP"
+                                )
+                        ))
+                ),
+                new Connection()
+        );
+        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
+                Collections.singletonList(sp),
+                Collections.singletonList(neighbour)
+        );
+
+        verify(matchRepository,times(1)).findBySubscriptionId(any());
+        verify(matchRepository,times(1)).save(any(Match.class));
+    }
+
+    @Test
+    public void matchIsNotCreatedWhenConsumerCommonNameIsNotTheSameOnLocalSubscriptionAndSubscription() {
+        ServiceProvider sp = new ServiceProvider(
+                "SP",
+                new Capabilities(),
+                Collections.singleton(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.REQUESTED,
+                                "originatingCountry = 'NO'",
+                                "my-node"
+                        )),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+
+        Neighbour neighbour = new Neighbour(
+                "neighbour",
+                new Capabilities(),
+                new SubscriptionRequest(),
+                new SubscriptionRequest(
+                        SubscriptionRequestStatus.REQUESTED,
+                        new HashSet<>(Arrays.asList(
+                                new Subscription(
+                                        "originatingCountry = 'NO'",
+                                        SubscriptionStatus.REQUESTED,
+                                        "SP"
+                                )
+                        ))
+                ),
+                new Connection()
+        );
+        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
+                Collections.singletonList(sp),
+                Collections.singletonList(neighbour)
+        );
+
+        verify(matchRepository,times(0)).findBySubscriptionId(any());
+        verify(matchRepository,times(0)).save(any(Match.class));
+    }
 
 
 
