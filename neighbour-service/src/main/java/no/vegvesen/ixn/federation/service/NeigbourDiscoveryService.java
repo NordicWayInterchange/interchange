@@ -184,9 +184,12 @@ public class NeigbourDiscoveryService {
                     if (!additionalSubscriptions.isEmpty()) {
                         Set<Subscription> responseSubscriptions = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
                         for(Subscription subscription : responseSubscriptions) {
-                            String exchangeName = UUID.randomUUID().toString();
-                            subscription.setExchangeName(exchangeName);
+                            if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                                String exchangeName = UUID.randomUUID().toString();
+                                subscription.setExchangeName(exchangeName);
+                            }
                         }
+                        //TODO: Should we save subscriptions that haa status NO_OVERLAP or ILLEGAL??
                         ourRequestedSubscriptionsFromNeighbour.addNewSubscriptions(responseSubscriptions);
                         ourRequestedSubscriptionsFromNeighbour.setSuccessfulRequest(LocalDateTime.now());
                         //TODO we never changed the subscription status. We don't now either. Is that OK?

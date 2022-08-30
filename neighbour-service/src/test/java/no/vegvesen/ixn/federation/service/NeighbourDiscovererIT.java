@@ -189,7 +189,8 @@ public class NeighbourDiscovererIT {
 		Set<LocalSubscription> localSubscriptions = Collections.singleton(
 				new LocalSubscription(
 						LocalSubscriptionStatus.CREATED,
-						"originatingCountry = 'NO'"
+						"originatingCountry = 'NO'",
+						nodeProperties.getName()
 				)
 		);
 		Neighbour neighbour = new Neighbour(
@@ -215,7 +216,8 @@ public class NeighbourDiscovererIT {
 				.thenReturn(Collections.singleton(
 						new Subscription(
 								"originatingCountry = 'NO'",
-								SubscriptionStatus.REQUESTED
+								SubscriptionStatus.REQUESTED,
+								nodeProperties.getName()
 						)
 				)
 
@@ -285,7 +287,8 @@ public class NeighbourDiscovererIT {
 		Set<LocalSubscription> localSubscriptions = Collections.singleton(
 				new LocalSubscription(
 						LocalSubscriptionStatus.CREATED,
-						"originatingCountry = 'NO'"
+						"originatingCountry = 'NO'",
+						nodeProperties.getName()
 				)
 		);
 		Neighbour neighbour = new Neighbour(
@@ -313,7 +316,8 @@ public class NeighbourDiscovererIT {
 				.thenReturn(Collections.singleton(
 						new Subscription(
 								"originatingCountry = 'NO'",
-								SubscriptionStatus.REQUESTED
+								SubscriptionStatus.REQUESTED,
+								nodeProperties.getName()
 
 						)
 				));
