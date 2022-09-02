@@ -30,6 +30,7 @@ public class MatchDiscoveryService {
                 if (!localSubscription.getConsumerCommonName().equals(serviceProviderName)) {
                     for (Neighbour neighbour : neighbours) {
                         for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
+                            //NOTE should we change this to CREATED?
                             if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
                                 //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
                                 //this ending up with the same selector.
@@ -40,7 +41,7 @@ public class MatchDiscoveryService {
                                     //this would make a method that is completely independent on the repos.
                                     //TODO AND this will fail if we match more than one Subscription, which is possible!
                                     //Well, in theory. But in effect, it will never happen. Should possibly create a constraint in the db.
-                                    if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
+                                    if (matchRepository.findBySubscriptionId(subscription.getId()) == null) { //TODO: We have to change this one somehow, no way of connecting to more Subscriptions
                                         Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
                                         matchRepository.save(newMatch);
                                         logger.info("Saved new Match {}", newMatch);

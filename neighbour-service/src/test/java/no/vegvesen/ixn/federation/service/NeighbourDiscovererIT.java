@@ -6,17 +6,7 @@ import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.Capability;
-import no.vegvesen.ixn.federation.model.DatexCapability;
-import no.vegvesen.ixn.federation.model.DenmCapability;
-import no.vegvesen.ixn.federation.model.LocalSubscription;
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
-import no.vegvesen.ixn.federation.model.SubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -390,7 +380,65 @@ public class NeighbourDiscovererIT {
 
 	}
 
+	//TODO: We need to address this problem somehow, it may not be that much of a problem actually becuase om Match object.
+	// It will in theory leave a match while there's still a localSubscription matching with the subscription.
+	// New tests in MatchDiscoveryServiceIT!
+	@Test
+	public void postSubscriptionRequestWithTheSameLocalSubscriptionFromTwoServiceProviders() {
+		String selector = "originatingCountry = 'NO' AND messageType = 'DENM'";
+		String consumerCommonName = nodeProperties.getName();
 
+		Set<LocalSubscription> localSubscriptions = new HashSet<>();
+
+		LocalSubscription subscription1 = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+		localSubscriptions.add(subscription1);
+		LocalSubscription subscription2 = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+		localSubscriptions.add(subscription2);
+
+		ServiceProvider serviceProvider1 = new ServiceProvider("serviceprovider-1");
+		serviceProvider1.addLocalSubscription(subscription1);
+
+		ServiceProvider serviceProvider2 = new ServiceProvider("serviceprovider-2");
+		serviceProvider2.addLocalSubscription(subscription2);
+
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new Capabilities(
+						Capabilities.CapabilitiesStatus.KNOWN,
+						new HashSet<>(Collections.singletonList(
+								new DenmCapability(
+										"NO0001",
+										"NO",
+										"1.0",
+										Collections.emptySet(),
+										Collections.emptySet()
+								)
+						)),
+						LocalDateTime.now()
+				),
+				new SubscriptionRequest(),
+				new SubscriptionRequest()
+		);
+
+		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
+				.thenReturn(new HashSet<>( Arrays.asList(
+						new Subscription(
+								selector,
+								SubscriptionStatus.REQUESTED,
+								nodeProperties.getName()
+						),
+						new Subscription(
+								selector,
+								SubscriptionStatus.REQUESTED,
+								nodeProperties.getName())
+						))
+
+				);
+
+		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
+		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), anySet(), any(String.class));
+		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
+	}
 
 	private void checkForNewNeighbours() {
 		neighbourDiscoveryService.checkForNewNeighbours();
