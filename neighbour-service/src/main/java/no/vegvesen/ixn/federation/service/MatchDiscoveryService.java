@@ -27,7 +27,7 @@ public class MatchDiscoveryService {
             Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
             String serviceProviderName = serviceProvider.getName();
             for (LocalSubscription localSubscription : localSubscriptions) {
-                if (!localSubscription.getConsumerCommonName().equals(serviceProviderName)) {
+                if (!serviceProviderName.equals(localSubscription.getConsumerCommonName())) {
                     for (Neighbour neighbour : neighbours) {
                         for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                             //NOTE should we change this to CREATED?

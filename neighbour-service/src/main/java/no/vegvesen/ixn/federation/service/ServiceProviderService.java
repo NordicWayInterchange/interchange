@@ -42,9 +42,13 @@ public class ServiceProviderService {
     }
 
     public void updateLocalSubscriptionWithRedirectEndpoints(ServiceProvider serviceProvider) {
-        Set<LocalSubscription> redirectSubscriptions = serviceProvider.getSubscriptions().stream()
-                .filter(s -> s.getConsumerCommonName().equals(serviceProvider.getName()))
-                .collect(Collectors.toSet());
+        Set<LocalSubscription> redirectSubscriptions = new HashSet<>();
+        for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+            if (serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
+                redirectSubscriptions.add(subscription);
+
+            }
+        }
         for (LocalSubscription localSubscription : redirectSubscriptions) {
             Set<LocalEndpoint> newEndpoints = new HashSet<>();
             if (localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
