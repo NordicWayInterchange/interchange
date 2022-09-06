@@ -57,7 +57,7 @@ public class ServiceProviderRouter {
             tearDownCapabilityExchanges(serviceProvider);
             Set<LocalSubscription> newSubscriptions = new HashSet<>();
             for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-                if (!subscription.getConsumerCommonName().equals(serviceProvider.getName())) {
+                if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
                     Optional<LocalSubscription> newSubscription = processSubscription(name, subscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
                     newSubscription.ifPresent(newSubscriptions::add);
                 }
