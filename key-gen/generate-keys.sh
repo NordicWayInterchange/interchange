@@ -36,10 +36,11 @@ generateCertificate() {
 
 rm -rf ${KEYS_DIR}/*
 pushd ${KEYS_DIR}
-chmod o+w ${KEYS_DIR}
+chmod ugo+rw ${KEYS_DIR}
 
 genCaCert ${CA_CN}
 for commonName in ${KEY_CNS}; do
     generateCertificate ${commonName}
 done
+chmod ugo+rw ${KEYS_DIR}/*
 echo "CERT GENERATION DONE"

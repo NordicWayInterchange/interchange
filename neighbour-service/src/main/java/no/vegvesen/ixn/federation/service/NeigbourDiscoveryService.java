@@ -167,7 +167,7 @@ public class NeigbourDiscoveryService {
         Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
         logger.info("Found neighbour for subscription request: {}", neighbourName);
-        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, interchangeNodeProperties.getName());
+        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities);
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
@@ -184,9 +184,12 @@ public class NeigbourDiscoveryService {
                     if (!additionalSubscriptions.isEmpty()) {
                         Set<Subscription> responseSubscriptions = neighbourFacade.postSubscriptionRequest(neighbour, additionalSubscriptions, interchangeNodeProperties.getName());
                         for(Subscription subscription : responseSubscriptions) {
-                            String exchangeName = UUID.randomUUID().toString();
-                            subscription.setExchangeName(exchangeName);
+                            if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                                String exchangeName = UUID.randomUUID().toString();
+                                subscription.setExchangeName(exchangeName);
+                            }
                         }
+                        //TODO: Should we save subscriptions that haa status NO_OVERLAP or ILLEGAL??
                         ourRequestedSubscriptionsFromNeighbour.addNewSubscriptions(responseSubscriptions);
                         ourRequestedSubscriptionsFromNeighbour.setSuccessfulRequest(LocalDateTime.now());
                         //TODO we never changed the subscription status. We don't now either. Is that OK?
@@ -324,12 +327,14 @@ public class NeigbourDiscoveryService {
                                         subscription.getEndpoints(),
                                         lastUpdatedSubscription.getEndpoints()
                                 );
-                                tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
-                                createListenerEndpointFromEndpointsList(
-                                        neighbour,
-                                        endpointCalculator.getNewEndpoints(),
-                                        subscription.getExchangeName()
-                                );
+                                if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
+                                    createListenerEndpointFromEndpointsList(
+                                            neighbour,
+                                            endpointCalculator.getNewEndpoints(),
+                                            subscription.getExchangeName()
+                                    );
+                                }
                                 subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
                             } else {
                                 logger.info("No subscription change for neighbour {}", neighbour.getName());

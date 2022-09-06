@@ -62,6 +62,7 @@ public class TypeTransformer {
                     sub_id,
                     createSubscriptionPath(name,sub_id),
                     subscription.getSelector(),
+                    subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
                     transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())));
         }
@@ -69,9 +70,18 @@ public class TypeTransformer {
     }
 
 
-    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription) {
-        return new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                addSubscription.getSelector());
+    public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription, String serviceProviderName, String nodeName) {
+        LocalSubscription newSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, addSubscription.getSelector());
+        if (addSubscription.getConsumerCommonName() == null) {
+            newSubscription.setConsumerCommonName(nodeName);
+        } else {
+            if (!addSubscription.getConsumerCommonName().equals(serviceProviderName)) {
+                newSubscription.setConsumerCommonName(nodeName);
+            } else {
+                newSubscription.setConsumerCommonName(serviceProviderName);
+            }
+        }
+        return newSubscription;
     }
 
     public LocalDelivery transformDeliveryToLocalDelivery(SelectorApi delivery) {
@@ -125,6 +135,7 @@ public class TypeTransformer {
                     subscriptionId,
                     createSubscriptionPath(serviceProviderName, subscriptionId),
                     subscription.getSelector(),
+                    subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
                     transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(subscription.getStatus())
                     )
@@ -154,6 +165,7 @@ public class TypeTransformer {
                 localSubscription.getId().toString(),
                 createSubscriptionPath(serviceProviderName,localSubscription.getId().toString()),
                 localSubscription.getSelector(),
+                localSubscription.getConsumerCommonName(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
                 transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(localSubscription.getStatus()),
                 transformLocalEndpointsToLocalEndpointApis(localSubscription.getLocalEndpoints())

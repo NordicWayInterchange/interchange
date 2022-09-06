@@ -27,21 +27,40 @@ public class MatchDiscoveryService {
             Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
             String serviceProviderName = serviceProvider.getName();
             for (LocalSubscription localSubscription : localSubscriptions) {
-                for (Neighbour neighbour : neighbours) {
-                    for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
-                        if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
-                            //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
-                            //this ending up with the same selector.
-                            //TODO this really is the most telltale sign that we need to promote Selector to a class
-                            if (localSubscription.getSelector().equals(subscription.getSelector())) {
-                                //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
-                                //this would make a method that is completely independent on the repos.
-                                //TODO AND this will fail if we match more than one Subscription, which is possible!
-                                //Well, in theory. But in effect, it will never happen. Should possibly create a constraint in the db.
-                                if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
-                                    Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
-                                    matchRepository.save(newMatch);
-                                    logger.info("Saved new Match {}", newMatch);
+                if (!localSubscription.getConsumerCommonName().equals(serviceProviderName)) {
+                    for (Neighbour neighbour : neighbours) {
+                        for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
+                            //NOTE should we change this to CREATED?
+                            if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
+                                //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
+                                //this ending up with the same selector.
+                                //TODO this really is the most telltale sign that we need to promote Selector to a class
+                                if (localSubscription.getSelector().equals(subscription.getSelector()) &&
+                                        localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
+                                    //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
+                                    //this would make a method that is completely independent on the repos.
+                                    //TODO AND this will fail if we match more than one Subscription, which is possible!
+                                    //Well, in theory. But in effect, it will never happen. Should possibly create a constraint in the db.
+                                    if (matchRepository.findBySubscriptionId(subscription.getId()) == null) { //TODO: We have to change this one somehow, no way of connecting to more Subscriptions
+                                        Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
+                                        matchRepository.save(newMatch);
+                                        logger.info("Saved new Match {}", newMatch);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    for (Neighbour neighbour : neighbours) {
+                        for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
+                            if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
+                                if (localSubscription.getSelector().equals(subscription.getSelector()) &&
+                                        localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
+                                    if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
+                                        Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REDIRECT);
+                                        matchRepository.save(newMatch);
+                                        logger.info("Saved new Match {}", newMatch);
+                                    }
                                 }
                             }
                         }
@@ -79,6 +98,18 @@ public class MatchDiscoveryService {
                 match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
                 matchRepository.save(match);
                 logger.info("Saved match {} with status TEARDOWN_ENDPOINT", match);
+            }
+        }
+    }
+
+    public void synLocalSubscriptionAndSubscriptionsToTearDownMatchWithRedirect() {
+        List<Match> matches = matchRepository.findAllByStatus(MatchStatus.REDIRECT);
+        for (Match match : matches) {
+            if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
+                    match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                match.setStatus(MatchStatus.DELETED);
+                matchRepository.save(match);
+                logger.info("Saved match {} with status DELETED", match);
             }
         }
     }

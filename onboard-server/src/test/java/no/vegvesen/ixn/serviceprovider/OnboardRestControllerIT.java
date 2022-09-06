@@ -117,9 +117,9 @@ public class OnboardRestControllerIT {
 		String serviceProviderName = "serviceprovider-non-existing-subscription-delete";
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(
 		        serviceProviderName,
-                Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'"))
+                Collections.singleton(new AddSubscription("messageType = 'DATEX2' AND originatingCountry = 'NO'", "my-node"))
         );
-        restController.addSubscriptions(serviceProviderName, requestApi);
+         restController.addSubscriptions(serviceProviderName, requestApi);
 
 		ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
 		assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -140,7 +140,7 @@ public class OnboardRestControllerIT {
     @Test
     public void testGetSingleSubscription() {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'"));
+        addSubscriptions.add(new AddSubscription("countryCode = 'SE' and messageType = 'DENM'", "king_olav.bouvetinterchange.eu"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "king_olav.bouvetinterchange.eu",
                 addSubscriptions
@@ -152,6 +152,7 @@ public class OnboardRestControllerIT {
         GetSubscriptionResponse getSubscriptionResponse = restController.getServiceProviderSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
         assertThat(getSubscriptionResponse).isNotNull();
         verify(certService,times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        assertThat(subscription.getConsumerCommonName()).isEqualTo("king_olav.bouvetinterchange.eu");
     }
 
 
@@ -159,7 +160,7 @@ public class OnboardRestControllerIT {
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderName() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector= "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(selector))));
+        restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(selector, serviceProviderName))));
 
         ListSubscriptionsResponse serviceProviderSubscriptions = restController.listSubscriptions(serviceProviderName);
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
@@ -168,12 +169,8 @@ public class OnboardRestControllerIT {
         Set<LocalSubscription> localSubscriptions = savedSP.getSubscriptions();
         assertThat(localSubscriptions).hasSize(1);
         LocalSubscription subscription = localSubscriptions.stream().findFirst().get();
-        /*
-        TODO this no longer makes sense
 
         assertThat(subscription.getConsumerCommonName()).isEqualTo(serviceProviderName);
-
-         */
 
         ListSubscriptionsResponse subscriptions = restController.listSubscriptions(serviceProviderName);
         Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();
@@ -185,8 +182,9 @@ public class OnboardRestControllerIT {
     void testAddingLocalSubscriptionWithConsumerCommonNameSameAsServiceProviderNameAndGetApiObject() {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(selector))));
+        AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName,Collections.singleton(new AddSubscription(selector, serviceProviderName))));
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
     }
 
     @Test

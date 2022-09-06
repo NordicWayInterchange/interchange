@@ -7,6 +7,7 @@ public class GetSubscriptionResponse {
     private String id;
     private String path;
     private String selector;
+    private String consumerCommonName;
     private long lastUpdatedTimestamp;
     private LocalActorSubscriptionStatusApi status;
     private Set<LocalEndpointApi> localEndpointApis;
@@ -17,12 +18,14 @@ public class GetSubscriptionResponse {
     public GetSubscriptionResponse(String id,
                                    String path,
                                    String selector,
+                                   String consumerCommonName,
                                    long lastUpdatedTimestamp,
                                    LocalActorSubscriptionStatusApi status,
                                    Set<LocalEndpointApi> localEndpointApis) {
         this.id = id;
         this.path = path;
         this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
         this.status = status;
         this.localEndpointApis = localEndpointApis;
@@ -50,6 +53,14 @@ public class GetSubscriptionResponse {
 
     public void setSelector(String selector) {
         this.selector = selector;
+    }
+
+    public String getConsumerCommonName() {
+        return consumerCommonName;
+    }
+
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     public long getLastUpdatedTimestamp() {

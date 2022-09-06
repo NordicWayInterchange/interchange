@@ -23,11 +23,14 @@ public class ServiceProviderServiceTest {
     @Mock
     OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
+    @Mock
+    MatchDiscoveryService matchDiscoveryService;
+
     ServiceProviderService service;
 
     @BeforeEach
     void setUp() {
-        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchDiscoveryService);
+        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchDiscoveryService, matchDiscoveryService);
     }
 
     @Test

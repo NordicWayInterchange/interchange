@@ -1,6 +1,7 @@
 package no.vegvesen.ixn;
 
 
+import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -25,27 +26,6 @@ public class JmsClientSourceApplication implements Callable<Integer> {
 
     @Parameters(index = "1", description = "The queueName for the Service Provider")
     private String queueName;
-
-    @Parameters(index = "2", description = "The user id of the sender")
-    String userid;
-
-    @Parameters(index = "3", description = "The publisher id of the sender")
-    String publisherId;
-
-    @Parameters(index = "4", description = "The type of the message to be sent")
-    String messageType;
-
-    @Parameters(index = "5", description = "The originating country of the message")
-    String originatingCountry;
-
-    @Parameters(index = "6", description = "The protocol version of the message")
-    String protocolVersion;
-
-    @Parameters(index = "7", description = "The quadtree tiles of the message")
-    String quadTreeTiles;
-
-    @Parameters(index = "8", description = "The message to be sent")
-    String message;
 
     @Option(names = {"-k","--keystorepath"}, description = "Path to the service provider p12 keystore")
     private String keystorePath;
@@ -72,18 +52,21 @@ public class JmsClientSourceApplication implements Callable<Integer> {
     public Integer call() throws Exception {
         try(Source source = new Source(url, queueName, createSSLContext())){
             source.start();
-            String messageText = message;
+            String messageText = "This is a test!";
             byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
 
             source.send(source.createMessageBuilder()
                     .bytesMessage(bytemessage)
-                    .userId(userid)
-                    .messageType(messageType)
-                    .publisherId(publisherId)
-                    .originatingCountry(originatingCountry)
-                    .protocolVersion(protocolVersion)
-                    .quadTreeTiles(quadTreeTiles)
+                    .userId("anna")
+                    .messageType(Constants.DENM)
+                    .publisherId("NO00001")
+                    .originatingCountry("NO")
+                    .protocolVersion("DENM:1.2.2")
+                    .quadTreeTiles(",12003,")
+                    .causeCode("6")
+                    .subCauseCode("61")
                     .build());
+            System.out.println(messageText);
         }
         return 0;
     }

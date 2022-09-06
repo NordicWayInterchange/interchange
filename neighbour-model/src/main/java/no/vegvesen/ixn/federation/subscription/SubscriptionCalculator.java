@@ -48,7 +48,7 @@ public class SubscriptionCalculator {
         return result;
     }
 
-    public static Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<Capability> neighbourCapabilities, String name) {
+    public static Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<Capability> neighbourCapabilities) {
         //logger.info("Calculating custom subscription for neighbour: {}", neighbourName);
         //logger.debug("Neighbour capabilities {}", neighbourCapabilities);
         //logger.debug("Local subscriptions {}", localSubscriptions);
@@ -58,7 +58,7 @@ public class SubscriptionCalculator {
             if (!subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
                 Subscription newSubscription = new Subscription(subscription.getSelector(),
                         SubscriptionStatus.REQUESTED,
-                        name);
+                        subscription.getConsumerCommonName());
                 calculatedSubscriptions.add(newSubscription);
             }
         }

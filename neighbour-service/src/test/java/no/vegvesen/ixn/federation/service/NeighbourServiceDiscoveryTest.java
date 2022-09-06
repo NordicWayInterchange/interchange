@@ -536,7 +536,7 @@ public class NeighbourServiceDiscoveryTest {
 	@Test
 	public void calculatedSubscriptionRequestSameAsNeighbourSubscriptionsAllowsNextNeighbourToBeSaved() {
 		Set<LocalSubscription> selfLocalSubscriptions = new HashSet<>();
-		selfLocalSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'"));
+		selfLocalSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", interchangeNodeProperties.getName()));
 		LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
@@ -551,7 +551,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(null,neighbourFedInSubscription));
 
 		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
-		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet, interchangeNodeProperties.getName());
+		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet);
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in

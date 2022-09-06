@@ -42,7 +42,6 @@ public class LocalSubscription {
 
     }
 
-
     public LocalSubscription(LocalSubscriptionStatus status, String selector) {
         this.status = status;
         this.selector = selector;
@@ -72,6 +71,16 @@ public class LocalSubscription {
         this.status = status;
         this.selector = selector;
         this.lastUpdated = lastUpdated;
+        this.localEndpoints.addAll(localEndpoints);
+    }
+
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
+        this.id = id;
+        this.status = status;
+        this.selector = selector;
+        this.lastUpdated = lastUpdated;
+        this.consumerCommonName = consumerCommonName;
+        this.connections.addAll(connections);
         this.localEndpoints.addAll(localEndpoints);
     }
 
@@ -138,12 +147,13 @@ public class LocalSubscription {
         if (o == null || getClass() != o.getClass()) return false;
         LocalSubscription that = (LocalSubscription) o;
         return status == that.status &&
-                Objects.equals(selector, that.selector);
+                Objects.equals(selector, that.selector) &&
+                Objects.equals(consumerCommonName, that.consumerCommonName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status, selector);
+        return Objects.hash(status, selector, consumerCommonName);
     }
 
     public Integer getId() {
@@ -156,6 +166,7 @@ public class LocalSubscription {
                 "id=" + id +
                 ", status=" + status +
                 ", selector=" + selector +
+                ", consumerCommonName=" + consumerCommonName +
                 '}';
     }
 
@@ -163,7 +174,7 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(id,newStatus,selector,lastUpdated,localEndpoints);
+            return new LocalSubscription(id,newStatus,selector,lastUpdated,consumerCommonName,connections,localEndpoints);
         }
     }
 

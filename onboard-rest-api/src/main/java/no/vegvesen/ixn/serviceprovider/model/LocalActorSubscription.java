@@ -6,16 +6,18 @@ public class LocalActorSubscription {
     String id;
     String path;
     String selector;
+    String consumerCommonName;
     long lastUpdatedTimeStamp;
     LocalActorSubscriptionStatusApi status;
 
     public LocalActorSubscription() {
     }
 
-    public LocalActorSubscription(String id, String path, String selector, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status) {
+    public LocalActorSubscription(String id, String path, String selector, String consumerCommonName, long lastUpdatedTimeStamp, LocalActorSubscriptionStatusApi status) {
         this.id = id;
         this.path = path;
         this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
         this.status = status;
     }
@@ -42,6 +44,14 @@ public class LocalActorSubscription {
 
     public void setSelector(String selector) {
         this.selector = selector;
+    }
+
+    public String getConsumerCommonName() {
+        return consumerCommonName;
+    }
+
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 
     public void setLastUpdatedTimeStamp(long lastUpdatedTimeStamp) {
@@ -75,6 +85,7 @@ public class LocalActorSubscription {
                 "id='" + id + '\'' +
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
+                ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", lastUpdatedTimeStamp=" + lastUpdatedTimeStamp +
                 ", status=" + status +
                 '}';

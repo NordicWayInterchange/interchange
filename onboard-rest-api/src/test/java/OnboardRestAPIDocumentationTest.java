@@ -16,7 +16,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSingleSubscriptionTest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'"));
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'", "kyrre"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "kyrre",
                 addSubscriptions
@@ -58,11 +58,13 @@ public class OnboardRestAPIDocumentationTest {
         subscriptions.add(new LocalActorSubscription("1",
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
+                "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.REQUESTED));
         subscriptions.add(new LocalActorSubscription("2",
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
+                "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.REQUESTED
                 ));
@@ -83,11 +85,13 @@ public class OnboardRestAPIDocumentationTest {
         subscriptions.add(new LocalActorSubscription("1",
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
+                "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED));
         subscriptions.add(new LocalActorSubscription("2",
                 "/serviceprovider1/subscriptions/2",
                 "originatingCountry = 'SE' and messageType = 'DENM'",
+                "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED
         ));
@@ -116,6 +120,7 @@ public class OnboardRestAPIDocumentationTest {
                 "1",
                 "/serviceprovider1/subscriptions/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",
+                "serviceprovider1",
                 System.currentTimeMillis(),
                 LocalActorSubscriptionStatusApi.CREATED,
                 localEndpointApis

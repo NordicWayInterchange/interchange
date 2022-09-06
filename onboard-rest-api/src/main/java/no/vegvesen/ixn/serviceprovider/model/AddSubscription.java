@@ -9,6 +9,7 @@ public class AddSubscription {
 
     String selector;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String consumerCommonName;
 
     public AddSubscription(){}
@@ -43,18 +44,20 @@ public class AddSubscription {
         if (this == o) return true;
         if (!(o instanceof AddSubscription)) return false;
         AddSubscription that = (AddSubscription) o;
-        return selector.equals(that.selector);
+        return selector.equals(that.selector) &&
+                Objects.equals(consumerCommonName, that.consumerCommonName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selector);
+        return Objects.hash(selector, consumerCommonName);
     }
 
     @Override
     public String toString() {
         return "AddSubscription{" +
-                ", selector=" + selector +
+                "selector=" + selector +
+                ", consumerCommonName=" + consumerCommonName +
                 '}';
     }
 }

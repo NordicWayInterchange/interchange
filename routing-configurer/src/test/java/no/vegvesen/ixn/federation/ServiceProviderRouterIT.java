@@ -135,7 +135,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	private LocalSubscription createSubscription(String messageType, String originatingCountry) {
 		String selector = "messageType = '" + messageType + "' and originatingCountry = '" + originatingCountry +"'";
-		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
+		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, "my-node");
 	}
 
 	@Test
@@ -147,6 +147,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.REQUESTED,
 				"",
 				LocalDateTime.now(),
+				"my-node",
+				Collections.emptySet(),
 				Collections.singleton(new LocalEndpoint(
 								source,
 								qpidContainer.getHost(),
@@ -181,7 +183,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
 
 		ServiceProvider toreDownServiceProvider = new ServiceProvider("tore-down-service-provider");
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b");
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
 		toreDownServiceProvider.addLocalSubscription(localSubscription);
 
 		Match match = new Match(localSubscription, subscription, "tore-down-service-provider", MatchStatus.SETUP_EXCHANGE);
@@ -274,11 +276,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'NO'");
+						"AND originatingCountry = 'NO'",
+				"my-node");
 		LocalSubscription sub2 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
 						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'SE'");
+						"AND originatingCountry = 'SE'",
+				"my-service-provider");
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 		serviceProvider.addLocalSubscription(sub1);
@@ -290,10 +294,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		LocalEndpoint endpoint1 = sub1.getLocalEndpoints().stream().findFirst().get();
 		assertThat(client.queueExists(endpoint1.getSource())).isTrue();
 
-		assertThat(sub2.getLocalEndpoints()).hasSize(1);
-		LocalEndpoint endpoint2 = sub2.getLocalEndpoints().stream().findFirst().get();
-
-		assertThat(client.queueExists(endpoint2.getSource())).isTrue();
+		assertThat(sub2.getLocalEndpoints()).hasSize(0);
 	}
 
 	@Test
@@ -422,10 +423,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void setupAndDeleteSubscriptionExchangeAndQueue() {
 		String serviceProviderName = "my-service-provider";
 		String selector = "a=b";
-		String queueName = "my-queue";
 		String exchangeName = "my-exchange";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector);
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, "my-node");
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED, "my-node");
 		subscription.setExchangeName(exchangeName);
 
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
@@ -439,7 +439,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
 
 		assertThat(client.exchangeExists(exchangeName)).isTrue();
-		assertThat(client.queueExists(queueName)).isTrue();
+		assertThat(localSubscription.getLocalEndpoints()).hasSize(1);
 
 		Match match1 = new Match(localSubscription, subscription, MatchStatus.TEARDOWN_EXCHANGE);
 
@@ -449,7 +449,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
 
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
-		assertThat(client.queueExists(queueName)).isTrue();
 	}
 
 	@Test
@@ -463,6 +462,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.CREATED,
 				selector,
 				LocalDateTime.now(),
+				"my-node",
+				Collections.emptySet(),
 				Collections.singleton(new LocalEndpoint(
 						queueName,
 						qpidContainer.getHost(),
@@ -505,7 +506,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String selector = "a=b";
 		String queueName = "my-queue";
 		InterchangeNodeProperties nodeProperties = new InterchangeNodeProperties("my-host","1234");
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "my-node");
 		localSubscription.setLocalEndpoints(Collections.singleton(
 				new LocalEndpoint(queueName,
 						nodeProperties.getName(),
@@ -746,7 +747,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider mySP = new ServiceProvider("my-sp");
 		ServiceProvider otherSP = new ServiceProvider("other-sp");
 
-		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')");
+		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
 		LocalEndpoint endpoint = new LocalEndpoint();
 		endpoint.setSource("my-queue12");
 		subscription.setLocalEndpoints(Collections.singleton(endpoint));

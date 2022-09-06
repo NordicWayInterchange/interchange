@@ -24,4 +24,5 @@ ADD denm_no_delivery.json /
 ADD dat_no_delivery.json /
 ADD systemtest_local_subs.json /
 ADD systemtest_remote_cap.json /
+ADD redirect_localSubscription_dat_no.json /
 ENTRYPOINT ["/entrypoint.sh"]
