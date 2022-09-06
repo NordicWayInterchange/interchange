@@ -36,6 +36,7 @@ public class MatchDiscoveryService {
                                 //this ending up with the same selector.
                                 //TODO this really is the most telltale sign that we need to promote Selector to a class
                                 if (localSubscription.getSelector().equals(subscription.getSelector()) &&
+                                        localSubscription.getConsumerCommonName() != null &&
                                         localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
                                     //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
                                     //this would make a method that is completely independent on the repos.
@@ -55,6 +56,7 @@ public class MatchDiscoveryService {
                         for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                             if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
                                 if (localSubscription.getSelector().equals(subscription.getSelector()) &&
+                                        localSubscription.getConsumerCommonName() != null &&
                                         localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
                                     if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
                                         Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REDIRECT);

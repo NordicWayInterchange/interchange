@@ -408,7 +408,7 @@ public class ServiceProviderRouter {
             Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
             for (LocalSubscription subscription : serviceProviderSubscriptions) {
-                if (!subscription.getConsumerCommonName().equals(serviceProvider.getName())) {
+                if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
                     removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCapabilities);
                     if (!allCapabilities.isEmpty()) {
                         if (!subscription.getLocalEndpoints().isEmpty()) {
