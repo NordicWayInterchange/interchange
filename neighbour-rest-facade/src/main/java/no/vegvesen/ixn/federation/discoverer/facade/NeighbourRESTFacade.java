@@ -39,6 +39,7 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 	}
 
 
+	/* TODO this should return a set of Capability instead. The Nighbour's original Capabilities should be used. */
 	@Override
 	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
