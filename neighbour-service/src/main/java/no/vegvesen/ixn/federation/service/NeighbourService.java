@@ -84,9 +84,9 @@ public class NeighbourService {
 
 	// Method that checks if the requested subscriptions are legal and can be covered by local capabilities.
 	// Sets the status of all the subscriptions in the subscription request accordingly.
-	private Set<Subscription> processSubscriptionRequest(Set<Subscription> neighbourSubscriptionRequest) {
+	private Set<NeighbourSubscription> processSubscriptionRequest(Set<NeighbourSubscription> neighbourSubscriptionRequest) {
 		// Process the subscription request
-		for (Subscription neighbourSubscription : neighbourSubscriptionRequest) {
+		for (NeighbourSubscription neighbourSubscription : neighbourSubscriptionRequest) {
 			try {
 				JMSSelectorFilterFactory.get(neighbourSubscription.getSelector());
 				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
@@ -108,7 +108,7 @@ public class NeighbourService {
 	}
 
 	public SubscriptionResponseApi incomingSubscriptionRequest(SubscriptionRequestApi neighbourSubscriptionRequest) {
-		SubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
+		NeighbourSubscriptionRequest incomingRequest = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(neighbourSubscriptionRequest);
 		logger.info("Converted incoming subscription request api to SubscriptionRequest {}.", incomingRequest);
 
 		logger.info("Looking up neighbour in database.");
@@ -121,11 +121,11 @@ public class NeighbourService {
 			throw new SubscriptionRequestException("Neighbours can not request an empty set of subscriptions.");
 		}
 
-		SubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
+		NeighbourSubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
 
 		logger.info("Received non-empty subscription request.");
 		logger.info("Processing subscription request...");
-		Set<Subscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
+		Set<NeighbourSubscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
 		persistentRequest.addNewSubscriptions(processedSubscriptionRequest);
 		persistentRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
 
@@ -138,7 +138,7 @@ public class NeighbourService {
 
 		logger.info("Paths for requested subscriptions created.");
 		// Create a path for each subscription
-		for (Subscription subscription : persistentRequest.getSubscriptions()) {
+		for (NeighbourSubscription subscription : persistentRequest.getSubscriptions()) {
 			String path = "/" + neighbour.getName() + "/subscriptions/" + subscription.getId();
 			subscription.setPath(path);
 			logger.info("    selector: \"{}\" path: {}", subscription.getSelector(), subscription.getPath());
@@ -157,11 +157,11 @@ public class NeighbourService {
 
 		if (neighbour != null) {
 
-			Subscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(subscriptionId);
+			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionById(subscriptionId);
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		} else {
@@ -207,7 +207,7 @@ public class NeighbourService {
 		logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
 	}
 
-	public void saveDeleteSubscriptions(String ixnName, Set<Subscription> subscriptionsToDelete) {
+	public void saveDeleteSubscriptions(String ixnName, Set<NeighbourSubscription> subscriptionsToDelete) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
 		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
@@ -229,7 +229,7 @@ public class NeighbourService {
 
 	public SubscriptionResponseApi findSubscriptions(String ixnName) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		Set<Subscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
+		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),subscriptions);
 	}
 

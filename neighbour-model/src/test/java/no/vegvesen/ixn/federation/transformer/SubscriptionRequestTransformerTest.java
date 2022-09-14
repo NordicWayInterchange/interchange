@@ -2,10 +2,7 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
-import no.vegvesen.ixn.federation.model.Endpoint;
-import no.vegvesen.ixn.federation.model.SubscriptionStatus;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
+import no.vegvesen.ixn.federation.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -26,7 +23,7 @@ public class SubscriptionRequestTransformerTest {
 		SubscriptionRequestApi requestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(name, Collections.emptySet());
 		assertThat(requestApi.getName()).isEqualTo(name);
 		assertThat(requestApi.getSubscriptions()).isEmpty();
-		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi);
+		NeighbourSubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi);
 		assertThat(result.getSubscriptions()).isEmpty();
 	}
 
@@ -43,9 +40,9 @@ public class SubscriptionRequestTransformerTest {
 		RequestedSubscriptionApi onlySubscription = requestApi.getSubscriptions().iterator().next();
 		assertThat(onlySubscription.getSelector()).isEqualTo(selector);
 
-		SubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi);
+		NeighbourSubscriptionRequest result = subscriptionRequestTransformer.subscriptionRequestApiToSubscriptionRequest(requestApi);
 		assertThat(result.getSubscriptions()).hasSize(1);
-		Subscription subscription = result.getSubscriptions().iterator().next();
+		NeighbourSubscription subscription = result.getSubscriptions().iterator().next();
 		assertThat(subscription.getSelector()).isEqualTo(selector);
 	}
 
@@ -64,8 +61,8 @@ public class SubscriptionRequestTransformerTest {
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
 		String consumerCommonName = "myName";
-		Subscription subscription = new Subscription(1,SubscriptionStatus.REQUESTED,selector,path,consumerCommonName);
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription);
+		NeighbourSubscription subscription = new NeighbourSubscription(1,SubscriptionStatus.REQUESTED,selector,path,consumerCommonName);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
 		assertThat(responseApi.getPath()).isEqualTo(path);
 		assertThat(responseApi.getSelector()).isEqualTo(selector);
 		assertThat(responseApi.getStatus()).isEqualTo(SubscriptionStatusApi.REQUESTED);
@@ -97,9 +94,9 @@ public class SubscriptionRequestTransformerTest {
 		String port = "5671";
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
-		Subscription subscription = new Subscription(1,SubscriptionStatus.CREATED,selector,path, "myNeighbour");
+		NeighbourSubscription subscription = new NeighbourSubscription(1,SubscriptionStatus.CREATED,selector,path, "myNeighbour");
 		subscription.setEndpoints(new HashSet<>(Collections.singleton(new Endpoint("my-queue", hostName, Integer.parseInt(port)))));
-		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.subscriptionToSubscriptionPollResponseApi(subscription);
+		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
 		assertThat(responseApi.getEndpoints().size()).isEqualTo(1);
 		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getHost()).isEqualTo(hostName);
 		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getPort().toString()).isEqualTo(port);
@@ -107,7 +104,7 @@ public class SubscriptionRequestTransformerTest {
 
 	@Test
 	public void canTransformSubscriptionsToSubscriptionResponseApi() {
-		Subscription subscription = new Subscription();
+		NeighbourSubscription subscription = new NeighbourSubscription();
 		subscription.setId(1);
 		String path = "bouvet/subscriptions/1";
 		subscription.setPath(path);

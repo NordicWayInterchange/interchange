@@ -156,14 +156,15 @@ public class NeighbourDiscovererIT {
 						),
 						LocalDateTime.now()
 				),
-				new SubscriptionRequest(),
+				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
 						SubscriptionRequestStatus.ESTABLISHED,
 						Collections.singleton(
 								new Subscription(
 										"originatingCountry = 'NO'",
-										"bouvet.itsinterchange.eu",
-										SubscriptionStatus.CREATED
+										SubscriptionStatus.CREATED,
+										"bouvet.itsinterchange.eu"
+
 
 								)
 						)
@@ -198,7 +199,7 @@ public class NeighbourDiscovererIT {
 						),
 						LocalDateTime.now()
 				),
-				new SubscriptionRequest(),
+				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
 		);
 		repository.save(neighbour);
@@ -247,7 +248,7 @@ public class NeighbourDiscovererIT {
 						)),
 						LocalDateTime.now()
 				),
-				new SubscriptionRequest(),
+				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
 		);
 		repository.save(neighbour);
@@ -296,7 +297,7 @@ public class NeighbourDiscovererIT {
 						),
 						LocalDateTime.now().minusHours(1)
 				),
-				new SubscriptionRequest(),
+				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
 		);
 		neighbour.getCapabilities().setLastCapabilityExchange(LocalDateTime.now());
@@ -346,7 +347,7 @@ public class NeighbourDiscovererIT {
 						),
 						LocalDateTime.now().minusHours(1)
 				),
-				new SubscriptionRequest(),
+				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
 		);
 		neighbourA.getCapabilities().setLastCapabilityExchange(LocalDateTime.now());
@@ -365,7 +366,7 @@ public class NeighbourDiscovererIT {
 						),
 						LocalDateTime.now().minusHours(1)
 				),
-				new SubscriptionRequest(),
+				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
 		);
 		neighbourB.getCapabilities().setLastCapabilityExchange(LocalDateTime.now());
@@ -416,7 +417,7 @@ public class NeighbourDiscovererIT {
 						)),
 						LocalDateTime.now()
 				),
-				new SubscriptionRequest(),
+				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
 		);
 

@@ -1,11 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.Neighbour;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
-import no.vegvesen.ixn.federation.model.SubscriptionStatus;
+import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
@@ -33,7 +28,7 @@ public class NeighbourRepositorySelectorIT {
 	private Neighbour createNeighbourObject(String name, Capabilities.CapabilitiesStatus capStatus, SubscriptionRequestStatus subscriptionRequestStatus, SubscriptionRequestStatus fedInStatus){
 		Neighbour neighbour = new Neighbour(name,
 				new Capabilities(capStatus, Collections.emptySet()),
-				new SubscriptionRequest(subscriptionRequestStatus, new HashSet<>()),
+				new NeighbourSubscriptionRequest(subscriptionRequestStatus, new HashSet<>()),
 				new SubscriptionRequest(fedInStatus, new HashSet<>()));
 		neighbour.setControlChannelPort("8080");
 		return neighbour;

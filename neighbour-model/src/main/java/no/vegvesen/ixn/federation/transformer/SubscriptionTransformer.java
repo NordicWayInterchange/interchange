@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.model.NeighbourSubscription;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import org.springframework.stereotype.Component;
@@ -13,14 +14,14 @@ import java.util.Set;
 @Component
 public class SubscriptionTransformer {
 
-	public Set<Subscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request, String ixnName) {
-		ArrayList<Subscription> subscriptions = new ArrayList<>();
+	public Set<NeighbourSubscription> requestedSubscriptionApiToSubscriptions(Set<RequestedSubscriptionApi> request, String ixnName) {
+		ArrayList<NeighbourSubscription> subscriptions = new ArrayList<>();
 		for (RequestedSubscriptionApi subscriptionRequestApi : request) {
 			String consumerCommonName = subscriptionRequestApi.getConsumerCommonName();
 			if (consumerCommonName == null) {
 				consumerCommonName = ixnName;
 			}
-			Subscription subscription = new Subscription(
+			NeighbourSubscription subscription = new NeighbourSubscription(
 					subscriptionRequestApi.getSelector(),
 					SubscriptionStatus.REQUESTED,
 					consumerCommonName);
@@ -41,9 +42,9 @@ public class SubscriptionTransformer {
 		return new HashSet<>(subscriptionRequestApis);
 	}
 
-	public Set<RequestedSubscriptionResponseApi> subscriptionToRequestedSubscriptionResponseApi(Set<Subscription> subscriptions) {
+	public Set<RequestedSubscriptionResponseApi> subscriptionToRequestedSubscriptionResponseApi(Set<NeighbourSubscription> subscriptions) {
 		List<RequestedSubscriptionResponseApi> subscriptionResponses = new ArrayList<>();
-		for (Subscription s : subscriptions) {
+		for (NeighbourSubscription s : subscriptions) {
 			RequestedSubscriptionResponseApi responseApi = new RequestedSubscriptionResponseApi(
 					s.getId().toString(),
 					s.getSelector(),

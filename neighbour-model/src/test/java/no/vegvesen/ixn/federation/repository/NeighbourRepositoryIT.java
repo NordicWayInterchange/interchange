@@ -33,7 +33,7 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void storedInterchangeIsPossibleToFindByName() {
-		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(), new Connection());
+		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), new Connection());
 		repository.save(firstInterchange);
 		Neighbour foundInterchange = repository.findByName("another-interchange");
 		assertThat(foundInterchange).isNotNull();
@@ -42,9 +42,9 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void storedSubscriptionsInAndOutAreSeparated() {
-		Set<Subscription> outbound = new HashSet<>();
-		outbound.add(new Subscription("outbound is true", SubscriptionStatus.CREATED, ""));
-		SubscriptionRequest outSubReq = new SubscriptionRequest();
+		Set<NeighbourSubscription> outbound = new HashSet<>();
+		outbound.add(new NeighbourSubscription("outbound is true", SubscriptionStatus.CREATED, ""));
+		NeighbourSubscriptionRequest outSubReq = new NeighbourSubscriptionRequest();
 		outSubReq.setSubscriptions(outbound);
 
 		Set<Subscription> inbound = new HashSet<>();
@@ -63,14 +63,14 @@ public class NeighbourRepositoryIT {
 		Subscription inSub = foundInOut.getOurRequestedSubscriptions().getSubscriptions().iterator().next();
 		assertThat(inSub.getSelector()).isEqualTo("inbound is true");
 		assertThat(foundInOut.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
-		Subscription outSub = foundInOut.getNeighbourRequestedSubscriptions().getSubscriptions().iterator().next();
+		NeighbourSubscription outSub = foundInOut.getNeighbourRequestedSubscriptions().getSubscriptions().iterator().next();
 		assertThat(outSub.getSelector()).isEqualTo("outbound is true");
 	}
 
 
 	@Test
 	public void savedInterchangesCanBeUpdatedAndSavedAgain() {
-		Neighbour thirdInterchange = new Neighbour("Third Neighbour", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()), new SubscriptionRequest(), new SubscriptionRequest());
+		Neighbour thirdInterchange = new Neighbour("Third Neighbour", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 		repository.save(thirdInterchange);
 
 		Neighbour update = repository.findByName("Third Neighbour");
@@ -87,10 +87,10 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void interchangeReadyToSetupRouting() {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
-		Set<Subscription> requestedSubscriptions = new HashSet<>();
-		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED, ""));
-		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.ACCEPTED, ""));
-		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
+		Set<NeighbourSubscription> requestedSubscriptions = new HashSet<>();
+		requestedSubscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED, ""));
+		requestedSubscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.ACCEPTED, ""));
+		NeighbourSubscriptionRequest requestedSubscriptionRequest = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour readyToSetup = new Neighbour("freddy", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(readyToSetup);
@@ -104,7 +104,7 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void interchangeReadyToTearDownRouting() {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
-		SubscriptionRequest tearDownSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.TEAR_DOWN, Collections.emptySet());
+		NeighbourSubscriptionRequest tearDownSubscriptionRequest = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.TEAR_DOWN, Collections.emptySet());
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour tearDownIxn = new Neighbour("torry", caps, tearDownSubscriptionRequest, noIncomingSubscriptions);
 		repository.save(tearDownIxn);
@@ -118,15 +118,15 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void interchangeCanUpdateSubscriptionsSet() {
 		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
-		Set<Subscription> requestedSubscriptions = new HashSet<>();
-		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED, ""));
-		requestedSubscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.REQUESTED, ""));
-		SubscriptionRequest requestedSubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
+		Set<NeighbourSubscription> requestedSubscriptions = new HashSet<>();
+		requestedSubscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.ACCEPTED, ""));
+		requestedSubscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'bird'", SubscriptionStatus.REQUESTED, ""));
+		NeighbourSubscriptionRequest requestedSubscriptionRequest = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, requestedSubscriptions);
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour ixnForUpdate = new Neighbour("4update", caps, requestedSubscriptionRequest, noIncomingSubscriptions);
 		Neighbour savedForUpdate = repository.save(ixnForUpdate);
 
-		Set<Subscription> subscriptionsForUpdating = new HashSet<>();
+		Set<NeighbourSubscription> subscriptionsForUpdating = new HashSet<>();
 
 		savedForUpdate.getNeighbourRequestedSubscriptions().setSubscriptions(subscriptionsForUpdating);
 		Neighbour updated = repository.save(savedForUpdate);
@@ -137,15 +137,15 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void interchangeReadyForForwarding() {
-		Set<Subscription> subscriptions = new HashSet<>();
-		subscriptions.add(new Subscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.CREATED, ""));
-		SubscriptionRequest outgoing = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions);
+		Set<NeighbourSubscription> subscriptions = new HashSet<>();
+		subscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'fish'", SubscriptionStatus.CREATED, ""));
+		NeighbourSubscriptionRequest outgoing = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions);
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
 		Neighbour ixnForwards = new Neighbour("norwegian-fish", capabilities, outgoing, null);
 		repository.save(ixnForwards);
 
 		Capabilities capabilitiesSe = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
-		SubscriptionRequest noOverlap = new SubscriptionRequest(SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
+		NeighbourSubscriptionRequest noOverlap = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
 		SubscriptionRequest noOverlapIn = new SubscriptionRequest(SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
 		Neighbour noForwards = new Neighbour("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
 		repository.save(noForwards);
@@ -160,7 +160,7 @@ public class NeighbourRepositoryIT {
 		HashSet<Capability> capabilities = new HashSet<>();
 		capabilities.add(new DatexCapability(null, "NO", null, Collections.emptySet(), Sets.newLinkedHashSet("SituationPublication", "MeasuredDataPublication")));
 		capabilities.add(new DatexCapability(null, "SE", null, Collections.emptySet(), Sets.newLinkedHashSet("SituationPublication", "MeasuredDataPublication")));
-		Neighbour anyNeighbour = new Neighbour("any", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities), new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()), new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()));
+		Neighbour anyNeighbour = new Neighbour("any", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities), new NeighbourSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()), new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()));
 
 		Neighbour savedNeighbour = repository.save(anyNeighbour);
 		assertThat(savedNeighbour.getName()).isEqualTo("any");
@@ -188,7 +188,7 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void subscriptionRequestSuccessfulDateTimeCanBeStored() {
 		SubscriptionRequest fedIn = new SubscriptionRequest();
-		SubscriptionRequest subscriptions = new SubscriptionRequest();
+		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest();
 		subscriptions.setSuccessfulRequest(LocalDateTime.now());
 		Neighbour neighbour = new Neighbour("nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
 		Neighbour saved = repository.save(neighbour);
@@ -199,7 +199,7 @@ public class NeighbourRepositoryIT {
 	@Test
 	public void subscriptionRequestWithNoSuccessfulDateTimeCanBeStored() {
 		SubscriptionRequest fedIn = new SubscriptionRequest();
-		SubscriptionRequest subscriptions = new SubscriptionRequest();
+		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest();
 		Neighbour neighbour = new Neighbour("another-nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
 		Neighbour saved = repository.save(neighbour);
 		assertThat(saved).isNotNull();
@@ -241,8 +241,8 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void addSubscriptionWhereConsumerCommonNameIsSameAsServiceProviderName() {
-		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "sp-true")));
-		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
+		Set<NeighbourSubscription> subs = new HashSet<>(Collections.singleton(new NeighbourSubscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "sp-true")));
+		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
 		Neighbour neighbour = new Neighbour("neighbour-for-queue-true", new Capabilities(), subscriptions, new SubscriptionRequest());
 
 		repository.save(neighbour);
@@ -253,8 +253,8 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void addSubscriptionWhereconsumerCommonNameIsSameAsIxnName() {
-		Set<Subscription> subs = new HashSet<>(Collections.singleton(new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "neighbour-for-queue-false")));
-		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
+		Set<NeighbourSubscription> subs = new HashSet<>(Collections.singleton(new NeighbourSubscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "neighbour-for-queue-false")));
+		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
 		Neighbour neighbour = new Neighbour("neighbour-for-queue-false", new Capabilities(), subscriptions, new SubscriptionRequest());
 
 		repository.save(neighbour);
@@ -265,11 +265,11 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void addSubscriptionWhereConsumerCommonNameAsBothIxnNameAndServiceProviderName() {
-		Subscription sub1 = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "sp-queue-true");
-		Subscription sub2 = new Subscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "neighbour-for-queue-true-and-false");
-		Set<Subscription> subs = Sets.newLinkedHashSet(sub1, sub2);
+		NeighbourSubscription sub1 = new NeighbourSubscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "sp-queue-true");
+		NeighbourSubscription sub2 = new NeighbourSubscription("originatingCountry = 'SE'", SubscriptionStatus.ACCEPTED, "neighbour-for-queue-true-and-false");
+		Set<NeighbourSubscription> subs = Sets.newLinkedHashSet(sub1, sub2);
 
-		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
+		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.MODIFIED, subs);
 		Neighbour neighbour = new Neighbour("neighbour-for-queue-true-and-false", new Capabilities(), subscriptions, new SubscriptionRequest());
 
 		repository.save(neighbour);
@@ -283,17 +283,17 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void addSubscriptionWithEndpointsList() {
-		Subscription sub = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "");
+		Subscription sub = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.ACCEPTED, "my-neighbour-1");
 		Endpoint endpoint = new Endpoint("my-queue","my-host", 5671);
 		sub.setEndpoints(Sets.newLinkedHashSet(endpoint));
 
 		Set<Subscription> subs = Sets.newLinkedHashSet(sub);
 		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subs);
-		Neighbour neighbour = new Neighbour("my-neighbour", new Capabilities(), new SubscriptionRequest(), subscriptions);
+		Neighbour neighbour = new Neighbour("my-neighbour-1", new Capabilities(), new NeighbourSubscriptionRequest(), subscriptions);
 
 		repository.save(neighbour);
 
-		Neighbour savedNeighbour = repository.findByName("my-neighbour");
+		Neighbour savedNeighbour = repository.findByName("my-neighbour-1");
 
 		Subscription savedSub = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 

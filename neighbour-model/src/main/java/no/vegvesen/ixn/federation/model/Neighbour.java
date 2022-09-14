@@ -38,7 +38,7 @@ public class Neighbour {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "neighbour_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_neigh_requested"))
-	private SubscriptionRequest neighbourRequestedSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	private NeighbourSubscriptionRequest neighbourRequestedSubscriptions = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "our_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_our_requested"))
@@ -55,14 +55,14 @@ public class Neighbour {
 	public Neighbour() {
 	}
 
-	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions) {
+	public Neighbour(String name, Capabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.neighbourRequestedSubscriptions = subscriptions;
 		this.ourRequestedSubscriptions = ourRequestedSubscriptions;
 	}
 
-	public Neighbour(String name, Capabilities capabilities, SubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection controlConnection) {
+	public Neighbour(String name, Capabilities capabilities, NeighbourSubscriptionRequest subscriptions, SubscriptionRequest ourRequestedSubscriptions, Connection controlConnection) {
 		this.setName(name);
 		this.capabilities = capabilities;
 		this.neighbourRequestedSubscriptions = subscriptions;
@@ -89,11 +89,11 @@ public class Neighbour {
 		this.capabilities = capabilities;
 	}
 
-	public SubscriptionRequest getNeighbourRequestedSubscriptions() {
+	public NeighbourSubscriptionRequest getNeighbourRequestedSubscriptions() {
 		return neighbourRequestedSubscriptions;
 	}
 
-	public void setNeighbourRequestedSubscriptions(SubscriptionRequest subscriptionRequest) {
+	public void setNeighbourRequestedSubscriptions(NeighbourSubscriptionRequest subscriptionRequest) {
 		this.neighbourRequestedSubscriptions = subscriptionRequest;
 	}
 
