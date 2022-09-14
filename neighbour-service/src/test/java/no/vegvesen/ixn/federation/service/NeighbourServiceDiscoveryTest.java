@@ -133,7 +133,7 @@ public class NeighbourServiceDiscoveryTest {
 		Capabilities capabilities = new Capabilities();
 		assertThat(capabilities.getCapabilities()).isEmpty();
 
-		doReturn(capabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
+		doReturn(capabilities.getCapabilities()).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 
 
@@ -236,9 +236,9 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour ericsson = createNeighbour();
 
 		Capability firstDataType = getDatexCapability("NO");
-		Capabilities ericssonCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(firstDataType));
+		Set<Capability> capabilities = Collections.singleton(firstDataType);
 
-		doReturn(ericssonCapabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
+		doReturn(capabilities).when(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 
 		LocalDateTime pastTime = LocalDateTime.now().minusMinutes(10);
 		ericsson.getControlConnection().setBackoffStart(pastTime);
@@ -584,7 +584,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 		when(neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).thenReturn(Lists.list(n1, n2));
-		when(neighbourFacade.postCapabilitiesToCapabilities(any(), any(), any())).thenReturn(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>()));
+		when(neighbourFacade.postCapabilitiesToCapabilities(any(), any(), any())).thenReturn(new HashSet<>());
 
 		neigbourDiscoveryService.retryUnreachable(neighbourFacade, getSelfCapabilities());
 

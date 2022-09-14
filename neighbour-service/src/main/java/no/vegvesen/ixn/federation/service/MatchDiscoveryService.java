@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -35,9 +36,8 @@ public class MatchDiscoveryService {
                                 //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
                                 //this ending up with the same selector.
                                 //TODO this really is the most telltale sign that we need to promote Selector to a class
-                                if (localSubscription.getSelector().equals(subscription.getSelector()) &&
-                                        localSubscription.getConsumerCommonName() != null &&
-                                        localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
+                                if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
+                                        Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
                                     //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
                                     //this would make a method that is completely independent on the repos.
                                     //TODO AND this will fail if we match more than one Subscription, which is possible!
@@ -55,9 +55,8 @@ public class MatchDiscoveryService {
                     for (Neighbour neighbour : neighbours) {
                         for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                             if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
-                                if (localSubscription.getSelector().equals(subscription.getSelector()) &&
-                                        localSubscription.getConsumerCommonName() != null &&
-                                        localSubscription.getConsumerCommonName().equals(subscription.getConsumerCommonName())) {
+                                if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
+                                        Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
                                     if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
                                         Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REDIRECT);
                                         matchRepository.save(newMatch);

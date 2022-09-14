@@ -116,9 +116,11 @@ public class NeigbourDiscoveryService {
 
     private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<Capability> localCapabilities) {
         try {
-            Capabilities capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
-            capabilities.setLastCapabilityExchange(LocalDateTime.now());
-            neighbour.setCapabilities(capabilities);
+            Set<Capability> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
+            Capabilities neighbourCapabilities = neighbour.getCapabilities();
+            neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+            neighbourCapabilities.setCapabilities(capabilities);
+            neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.getControlConnection().okConnection();
             logger.info("Successfully completed capability exchange.");
             logger.debug("Updated neighbour: {}", neighbour.toString());

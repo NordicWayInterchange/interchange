@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
+import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.slf4j.Logger;
@@ -25,28 +26,33 @@ public class NeighbourRESTFacade implements NeighbourFacade {
     private NeighbourRESTClient neighbourRESTClient;
     private Logger logger = LoggerFactory.getLogger(NeighbourRESTFacade.class);
     private CapabilitiesTransformer capabilitiesTransformer;
+
+	private CapabilityToCapabilityApiTransformer capabilityTransformer;
 	private SubscriptionTransformer subscriptionTransformer;
 	private SubscriptionRequestTransformer subscriptionRequestTransformer;
 
     @Autowired
-	public NeighbourRESTFacade(NeighbourRESTClient neighbourRESTClient, CapabilitiesTransformer capabilitiesTransformer,
+	public NeighbourRESTFacade(NeighbourRESTClient neighbourRESTClient,
+							   CapabilitiesTransformer capabilitiesTransformer,
+							   CapabilityToCapabilityApiTransformer capabilityTransformer,
 							   SubscriptionTransformer subscriptionTransformer,
 							   SubscriptionRequestTransformer subscriptionRequestTransformer) {
 		this.neighbourRESTClient = neighbourRESTClient;
 		this.capabilitiesTransformer = capabilitiesTransformer;
+		this.capabilityTransformer = capabilityTransformer;
 		this.subscriptionTransformer = subscriptionTransformer;
 		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
 	}
 
 
 	@Override
-	public Capabilities postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities) {
+	public Set<Capability> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.info("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
 		CapabilitiesApi selfCapability = capabilitiesTransformer.selfToCapabilityApi(selfName, localCapabilities);
 		CapabilitiesApi result = neighbourRESTClient.doPostCapabilities(controlChannelUrl, name, selfCapability);
-		return capabilitiesTransformer.capabilitiesApiToCapabilities(result);
+		return capabilityTransformer.capabilitiesApiToCapabilities(result.getCapabilities());
 	}
 
 	@Override

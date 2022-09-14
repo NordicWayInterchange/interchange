@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
+import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,8 +43,10 @@ public class NeighbourRESTFacadeTest {
 	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
+	private final CapabilityToCapabilityApiTransformer capabilityTransformer = new CapabilityToCapabilityApiTransformer();
 	private NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(new NeighbourRESTClient(restTemplate,mapper),
 			capabilitiesTransformer,
+			capabilityTransformer,
 			subscriptionTransformer,
 			subscriptionRequestTransformer);
 
@@ -80,11 +83,11 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", Collections.emptySet());
+		Set<Capability> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", Collections.emptySet());
 
-		assertThat(res.getCapabilities()).hasSize(1);
+		assertThat(res).hasSize(1);
 
-		Iterator<Capability> dataTypes = res.getCapabilities().iterator();
+		Iterator<Capability> dataTypes = res.iterator();
 		Capability capability = dataTypes.next();
 
 		assertThat(capability).isInstanceOf(DatexCapability.class);
@@ -104,11 +107,11 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
 		Set<Capability> localCapabilities = Collections.emptySet();
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
+		Set<Capability> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 
-		assertThat(res.getCapabilities()).hasSize(1);
+		assertThat(res).hasSize(1);
 
-		Iterator<Capability> dataTypes = res.getCapabilities().iterator();
+		Iterator<Capability> dataTypes = res.iterator();
 		Capability capability = dataTypes.next();
 
 		assertThat(capability).isInstanceOf(DenmCapability.class);
@@ -128,11 +131,11 @@ public class NeighbourRESTFacadeTest {
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK).body(remoteServerJson).contentType(MediaType.APPLICATION_JSON));
 
 		Set<Capability> localCapabilities = Collections.emptySet();
-		Capabilities res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
+		Set<Capability> res = neighbourRESTFacade.postCapabilitiesToCapabilities(ericsson, "localserver", localCapabilities);
 
-		assertThat(res.getCapabilities()).hasSize(1);
+		assertThat(res).hasSize(1);
 
-		Iterator<Capability> dataTypes = res.getCapabilities().iterator();
+		Iterator<Capability> dataTypes = res.iterator();
 		Capability remoteServerResponse = dataTypes.next();
 
 		assertThat(remoteServerResponse).isInstanceOf(IvimCapability.class);
