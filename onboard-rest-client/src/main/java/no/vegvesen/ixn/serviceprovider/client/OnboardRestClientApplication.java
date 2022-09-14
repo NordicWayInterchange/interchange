@@ -107,7 +107,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
             OnboardRESTClient client = parentCommand.createClient();
             ListSubscriptionsResponse subscriptions = client.getServiceProviderSubscriptions();
             ObjectMapper mapper = new ObjectMapper();
-            System.out.println(mapper.writeValueAsString(subscriptions));
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscriptions));
             return 0;
         }
     }
@@ -328,9 +328,10 @@ public class OnboardRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             OnboardRESTClient client = parentCommand.createClient();
+            System.out.println(String.format("using selector: %s", selector));
             ObjectMapper mapper = new ObjectMapper();
             FetchMatchingCapabilitiesResponse result = client.fetchAllMatchingCapabilities(selector);
-            System.out.println(mapper.writeValueAsString(result));
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
     }
