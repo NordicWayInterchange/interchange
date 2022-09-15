@@ -55,7 +55,7 @@ public class SubscriptionCalculator {
         Set<LocalSubscription> matchingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
         Set<Subscription> calculatedSubscriptions = new HashSet<>();
         for (LocalSubscription subscription : matchingSubscriptions) {
-            if (!subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
+            if (LocalSubscriptionStatus.isAlive(subscription.getStatus())) {
                 Subscription newSubscription = new Subscription(subscription.getSelector(),
                         SubscriptionStatus.REQUESTED,
                         subscription.getConsumerCommonName());

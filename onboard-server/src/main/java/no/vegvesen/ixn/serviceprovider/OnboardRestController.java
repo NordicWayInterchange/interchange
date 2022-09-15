@@ -1,12 +1,9 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.DeliveryException;
-import no.vegvesen.ixn.federation.exceptions.PrivateChannelException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -31,7 +28,6 @@ public class OnboardRestController {
 	private final NeighbourRepository neighbourRepository;
 	private final CertService certService;
 	private final InterchangeNodeProperties nodeProperties;
-	private final ServiceProviderRouter serviceProviderRouter;
 	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
@@ -40,19 +36,17 @@ public class OnboardRestController {
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
 								 NeighbourRepository neighbourRepository,
 								 CertService certService,
-								 InterchangeNodeProperties nodeProperties,
-								 ServiceProviderRouter serviceProviderRouter) {
+								 InterchangeNodeProperties nodeProperties) {
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.neighbourRepository = neighbourRepository;
 		this.certService = certService;
 		this.nodeProperties = nodeProperties;
-		this.serviceProviderRouter = serviceProviderRouter;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	public AddCapabilitiesResponse addCapabilities(@PathVariable String serviceProviderName, @RequestBody AddCapabilitiesRequest capabilityApi) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Capabilities - Received POST from Service Provider: {}", serviceProviderName);
 
@@ -96,7 +90,6 @@ public class OnboardRestController {
 	public FetchMatchingCapabilitiesResponse fetchMatchingCapabilities(@PathVariable String serviceProviderName, @RequestParam(required = false) String selector) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
 		allCapabilities.addAll(getAllLocalCapabilities());
 		if (selector != null) {
@@ -135,7 +128,7 @@ public class OnboardRestController {
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	public void deleteCapability(@PathVariable String serviceProviderName, @PathVariable String capabilityId ) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		logger.info("Capabilities - Received DELETE from Service Provider: {}", serviceProviderName);
 
@@ -170,7 +163,7 @@ public class OnboardRestController {
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/subscriptions")
 	public AddSubscriptionsResponse addSubscriptions(@PathVariable String serviceProviderName, @RequestBody AddSubscriptionsRequest requestApi) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		//check the name of hte request
 		//check the version of the request
 
@@ -179,17 +172,28 @@ public class OnboardRestController {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. No selectors.");
 
 		}
+		/*
 		for (AddSubscription addSubscription : requestApi.getSubscriptions()) {
 			if (addSubscription.getSelector() == null) {
 				throw new SubscriptionRequestException("Bad api object for Subscription Request. The Selector object was null.");
 			}
 		}
+		 */
+		//for (AddSubscription addSubscription : )
 
 		logger.info("Service provider {} Incoming subscription selector {}", serviceProviderName, requestApi.getSubscriptions());
 
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
-			localSubscriptions.add(typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName()));
+			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName());
+			try {
+				JMSSelectorFilterFactory.get(localSubscription.getSelector());
+				localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
+			} catch (SelectorAlwaysTrueException | InvalidSelectorException e) {
+				logger.error("Subscription had illegal selector ",e);
+				localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+			}
+			localSubscriptions.add(localSubscription);
 		}
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);

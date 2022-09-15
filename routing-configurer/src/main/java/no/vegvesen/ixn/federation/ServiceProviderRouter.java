@@ -110,6 +110,8 @@ public class ServiceProviderRouter {
                 //	Check that the binding exist, if so, delete it
                 newSubscription = onTearDown(serviceProviderName, subscription);
                 break;
+                //TODO ILLEGAL, just return optional.empty. Or the subscription itself?
+                //needs testing.
             default:
                 throw new IllegalStateException("Unknown subscription status encountered");
         }
@@ -156,6 +158,7 @@ public class ServiceProviderRouter {
             newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
             newSubscription = redirectTearDown(subscription);
+            //TODO ILLEGAL, just return
         } else {
             throw new IllegalStateException("Unknown subscription status encountered");
         }

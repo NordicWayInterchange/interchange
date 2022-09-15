@@ -98,7 +98,7 @@ public class MatchDiscoveryService {
     public void syncLocalSubscriptionAndSubscriptionsToTearDownMatchResources() {
         List<Match> matches = matchRepository.findAllByStatus(MatchStatus.UP);
         for (Match match : matches) {
-            if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
+            if(!LocalSubscriptionStatus.isAlive(match.getLocalSubscription().getStatus()) ||
                     match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
                 match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
                 matchRepository.save(match);
@@ -110,7 +110,7 @@ public class MatchDiscoveryService {
     public void synLocalSubscriptionAndSubscriptionsToTearDownMatchWithRedirect() {
         List<Match> matches = matchRepository.findAllByStatus(MatchStatus.REDIRECT);
         for (Match match : matches) {
-            if(match.getLocalSubscription().getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN) ||
+            if(! LocalSubscriptionStatus.isAlive(match.getLocalSubscription().getStatus()) ||
                     match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
                 match.setStatus(MatchStatus.DELETED);
                 matchRepository.save(match);
