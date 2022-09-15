@@ -3,7 +3,7 @@
 if [ "$#" -gt 0 ]; then
   SERVICE_PROVIDER=$1
 else
-  SERVICE_PROVIDER=king_gustaf.bouvetinterchange.eu
+  SERVICE_PROVIDER="king_gustaf.bouvetinterchange.eu"
 fi
 
 docker run \
