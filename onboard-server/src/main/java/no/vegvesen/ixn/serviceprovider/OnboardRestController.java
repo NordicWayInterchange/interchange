@@ -186,11 +186,9 @@ public class OnboardRestController {
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
 			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName());
-			try {
-				JMSSelectorFilterFactory.get(localSubscription.getSelector());
+			if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
 				localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
-			} catch (SelectorAlwaysTrueException | InvalidSelectorException e) {
-				logger.error("Subscription had illegal selector ",e);
+			} else {
 				localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
 			}
 			localSubscriptions.add(localSubscription);
