@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.model.NeighbourSubscription;
+import no.vegvesen.ixn.federation.model.NeighbourSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class SubscriptionTransformer {
 			}
 			NeighbourSubscription subscription = new NeighbourSubscription(
 					subscriptionRequestApi.getSelector(),
-					SubscriptionStatus.REQUESTED,
+					NeighbourSubscriptionStatus.REQUESTED,
 					consumerCommonName);
 			subscriptions.add(subscription);
 		}
@@ -49,7 +50,7 @@ public class SubscriptionTransformer {
 					s.getId().toString(),
 					s.getSelector(),
 					s.getPath(),
-					subscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()),
+					neighbourSubscriptionStatusToSubscriptionStatusApi(s.getSubscriptionStatus()),
 					s.getConsumerCommonName(),
 					s.getLastUpdatedTimestamp());
 			subscriptionResponses.add(responseApi);
@@ -61,6 +62,13 @@ public class SubscriptionTransformer {
 	//TODO what about statuses that are not valid in the api?
 	public SubscriptionStatusApi subscriptionStatusToSubscriptionStatusApi(SubscriptionStatus subscriptionStatus) {
 		if (subscriptionStatus.equals(SubscriptionStatus.ACCEPTED)) {
+			return SubscriptionStatusApi.REQUESTED;
+		}
+		return SubscriptionStatusApi.valueOf(subscriptionStatus.name());
+	}
+
+	public SubscriptionStatusApi neighbourSubscriptionStatusToSubscriptionStatusApi(NeighbourSubscriptionStatus subscriptionStatus) {
+		if (subscriptionStatus.equals(NeighbourSubscriptionStatus.ACCEPTED)) {
 			return SubscriptionStatusApi.REQUESTED;
 		}
 		return SubscriptionStatusApi.valueOf(subscriptionStatus.name());

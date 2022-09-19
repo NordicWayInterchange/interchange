@@ -23,7 +23,7 @@ public class NeighbourSubscriptionRequest {
     private Integer subreq_id;
 
     @Enumerated(EnumType.STRING)
-    private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
+    private NeighbourSubscriptionRequestStatus status = NeighbourSubscriptionRequestStatus.EMPTY;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "subreq_id", foreignKey = @ForeignKey(name = "fk_neigh_sub_subreq"))
@@ -34,16 +34,16 @@ public class NeighbourSubscriptionRequest {
     public NeighbourSubscriptionRequest() {
     }
 
-    public NeighbourSubscriptionRequest(SubscriptionRequestStatus status, Set<NeighbourSubscription> subscription) {
+    public NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus status, Set<NeighbourSubscription> subscription) {
         this.status = status;
         this.subscription = subscription;
     }
 
-    public SubscriptionRequestStatus getStatus() {
+    public NeighbourSubscriptionRequestStatus getStatus() {
         return status;
     }
 
-    public void setStatus(SubscriptionRequestStatus status) {
+    public void setStatus(NeighbourSubscriptionRequestStatus status) {
         this.status = status;
     }
 
@@ -69,7 +69,7 @@ public class NeighbourSubscriptionRequest {
 
     public void setTearDownSubscription(Integer subscriptionId) {
         NeighbourSubscription subscriptionToTearDown = getSubscriptionById(subscriptionId);
-        subscriptionToTearDown.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+        subscriptionToTearDown.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
     }
 
     public void addNewSubscriptions (Set<NeighbourSubscription> newSubscriptions) {
@@ -98,25 +98,25 @@ public class NeighbourSubscriptionRequest {
 
     public Set<NeighbourSubscription> getAcceptedSubscriptions() {
         return getSubscriptions().stream()
-                .filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED))
+                .filter(s -> s.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.ACCEPTED))
                 .collect(Collectors.toSet());
     }
 
     public Set<NeighbourSubscription> getCreatedSubscriptions() {
         return getSubscriptions().stream()
-                .filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED))
+                .filter(s -> s.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED))
                 .collect(Collectors.toSet());
     }
 
     public Set<NeighbourSubscription> getResubscribeSubscriptions() {
         return getSubscriptions().stream()
-                .filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE))
+                .filter(s -> s.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.RESUBSCRIBE))
                 .collect(Collectors.toSet());
     }
 
     public Set<NeighbourSubscription> getTearDownSubscriptions() {
         return getSubscriptions().stream()
-                .filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN))
+                .filter(s -> s.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
     }
 

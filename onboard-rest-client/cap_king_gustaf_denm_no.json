@@ -1,0 +1,16 @@
+{	"name" : "king_gustaf.bouvetinterchange.eu",
+  "version" : "1.0",
+  "capabilities" : [
+    {
+      "messageType": "DENM",
+      "publisherId": "NO-123",
+      "originatingCountry": "NO",
+      "protocolVersion": "DENM:1.2.2",
+      "quadTree": [
+        "12003, 12004"
+      ],
+      "causeCode": [
+        "6"
+      ]
+    }]
+}

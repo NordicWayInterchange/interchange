@@ -528,7 +528,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	private NeighbourSubscriptionRequest getEmptyNeighSR() {
 		Set<NeighbourSubscription> subscription = new HashSet<>();
-		return new NeighbourSubscriptionRequest(SubscriptionRequestStatus.EMPTY, subscription);
+		return new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.EMPTY, subscription);
 	}
 
 	private Set<Subscription> getReturnedSubscriptionRequest() {
@@ -544,7 +544,7 @@ public class NeighbourServiceDiscoveryTest {
 		selfLocalSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", interchangeNodeProperties.getName()));
 		LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
 		Capability neighbourCapability = getDatexCapability("NO");
 		Set<Capability> capabilitySet = new HashSet<>();
 		capabilitySet.add(neighbourCapability);
@@ -565,7 +565,7 @@ public class NeighbourServiceDiscoveryTest {
 		otherNeighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
 				otherNeighbourCapabilities,
-				new NeighbourSubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
+				new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
 				new SubscriptionRequest());
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(Collections.emptySet());

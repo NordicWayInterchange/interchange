@@ -61,7 +61,7 @@ public class SubscriptionRequestTransformerTest {
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
 		String consumerCommonName = "myName";
-		NeighbourSubscription subscription = new NeighbourSubscription(1,SubscriptionStatus.REQUESTED,selector,path,consumerCommonName);
+		NeighbourSubscription subscription = new NeighbourSubscription(1,NeighbourSubscriptionStatus.REQUESTED,selector,path,consumerCommonName);
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
 		assertThat(responseApi.getPath()).isEqualTo(path);
 		assertThat(responseApi.getSelector()).isEqualTo(selector);
@@ -94,8 +94,8 @@ public class SubscriptionRequestTransformerTest {
 		String port = "5671";
 		String selector = "originatingCountry = 'NO'";
 		String path = "myName/subscriptions/1";
-		NeighbourSubscription subscription = new NeighbourSubscription(1,SubscriptionStatus.CREATED,selector,path, "myNeighbour");
-		subscription.setEndpoints(new HashSet<>(Collections.singleton(new Endpoint("my-queue", hostName, Integer.parseInt(port)))));
+		NeighbourSubscription subscription = new NeighbourSubscription(1,NeighbourSubscriptionStatus.CREATED,selector,path, "myNeighbour");
+		subscription.setEndpoints(new HashSet<>(Collections.singleton(new NeighbourEndpoint("my-queue", hostName, Integer.parseInt(port)))));
 		SubscriptionPollResponseApi responseApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
 		assertThat(responseApi.getEndpoints().size()).isEqualTo(1);
 		assertThat(new ArrayList<>(responseApi.getEndpoints()).get(0).getHost()).isEqualTo(hostName);
@@ -110,7 +110,7 @@ public class SubscriptionRequestTransformerTest {
 		subscription.setPath(path);
 		String selector = "originatingCountry = 'NO'";
 		subscription.setSelector(selector);
-		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
+		subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.REQUESTED);
 
 		SubscriptionResponseApi response = subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi("bouvet", Collections.singleton(subscription));
 		assertThat(response.getVersion()).isEqualTo("1.3NW3");

@@ -14,7 +14,7 @@ public class NeighbourSubscription {
     private Integer id;
 
     @Enumerated(EnumType.STRING)
-    private SubscriptionStatus subscriptionStatus;
+    private NeighbourSubscriptionStatus subscriptionStatus;
 
     @Column(columnDefinition="TEXT")
     private String selector;
@@ -24,9 +24,9 @@ public class NeighbourSubscription {
     @Column(columnDefinition="TEXT")
     private String consumerCommonName;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "end_id", foreignKey = @ForeignKey(name = "fk_end_neigh_sub"))
-    private Set<Endpoint> endpoints = new HashSet<>();
+    private Set<NeighbourEndpoint> endpoints = new HashSet<>();
 
     private long lastUpdatedTimestamp;
 
@@ -36,18 +36,18 @@ public class NeighbourSubscription {
 
     }
 
-    public NeighbourSubscription(String selector, SubscriptionStatus subscriptionStatus) {
+    public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus) {
         this.selector = selector;
         this.subscriptionStatus = subscriptionStatus;
     }
 
-    public NeighbourSubscription(String selector, SubscriptionStatus subscriptionStatus, String consumerCommonName) {
+    public NeighbourSubscription(String selector, NeighbourSubscriptionStatus subscriptionStatus, String consumerCommonName) {
         this.selector = selector;
         this.subscriptionStatus = subscriptionStatus;
         this.consumerCommonName = consumerCommonName;
     }
 
-    public NeighbourSubscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
+    public NeighbourSubscription(int id, NeighbourSubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
         this.id = id;
         this.subscriptionStatus = subscriptionStatus;
         this.selector = selector;
@@ -63,11 +63,11 @@ public class NeighbourSubscription {
         this.id = id;
     }
 
-    public SubscriptionStatus getSubscriptionStatus() {
+    public NeighbourSubscriptionStatus getSubscriptionStatus() {
         return subscriptionStatus;
     }
 
-    public void setSubscriptionStatus(SubscriptionStatus subscriptionStatus) {
+    public void setSubscriptionStatus(NeighbourSubscriptionStatus subscriptionStatus) {
         this.subscriptionStatus = subscriptionStatus;
     }
 
@@ -95,11 +95,11 @@ public class NeighbourSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public Set<Endpoint> getEndpoints() {
+    public Set<NeighbourEndpoint> getEndpoints() {
         return endpoints;
     }
 
-    public void setEndpoints(Set<Endpoint> newEndpoints) {
+    public void setEndpoints(Set<NeighbourEndpoint> newEndpoints) {
         this.endpoints.clear();
         if (newEndpoints != null) {
             this.endpoints.addAll(newEndpoints);
@@ -128,13 +128,12 @@ public class NeighbourSubscription {
         if (!(o instanceof NeighbourSubscription)) return false;
         NeighbourSubscription that = (NeighbourSubscription) o;
         return selector.equals(that.selector) &&
-                path.equals(that.path) &&
                 consumerCommonName.equals(that.consumerCommonName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(selector, path, consumerCommonName);
+        return Objects.hash(selector, consumerCommonName);
     }
 
     @Override

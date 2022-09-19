@@ -64,7 +64,7 @@ public class RoutingConfigurer {
 			}
 			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
 
-			if (neighbour.getNeighbourRequestedSubscriptions().getStatus().equals(SubscriptionRequestStatus.EMPTY)) {
+			if (neighbour.getNeighbourRequestedSubscriptions().getStatus().equals(NeighbourSubscriptionRequestStatus.EMPTY)) {
 				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
 				logger.info("Removed routing for neighbour {}", name);
 				//neighbourService.saveTearDownRouting(neighbour, name);
@@ -122,12 +122,12 @@ public class RoutingConfigurer {
 						bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
 					}
 				}
-				Endpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
+				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
 				subscription.setEndpoints(Collections.singleton(endpoint));
-				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
-				subscription.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		}
@@ -147,13 +147,13 @@ public class RoutingConfigurer {
 						bindRemoteServiceProvider(cap.getCapabilityExchangeName(), redirectQueue, subscription);
 					}
 				}
-				Endpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
+				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
 				subscription.setEndpoints(Collections.singleton(endpoint));
-				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 				logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
-				subscription.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		}
@@ -203,7 +203,7 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private Endpoint createEndpoint(String host, String port, String source) {
-		return new Endpoint(source, host, Integer.parseInt(port));
+	private NeighbourEndpoint createEndpoint(String host, String port, String source) {
+		return new NeighbourEndpoint(source, host, Integer.parseInt(port));
 	}
 }

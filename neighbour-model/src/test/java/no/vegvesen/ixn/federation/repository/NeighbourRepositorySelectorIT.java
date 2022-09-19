@@ -25,7 +25,7 @@ public class NeighbourRepositorySelectorIT {
 	@Autowired
 	private NeighbourRepository neighbourRepository;
 
-	private Neighbour createNeighbourObject(String name, Capabilities.CapabilitiesStatus capStatus, SubscriptionRequestStatus subscriptionRequestStatus, SubscriptionRequestStatus fedInStatus){
+	private Neighbour createNeighbourObject(String name, Capabilities.CapabilitiesStatus capStatus, NeighbourSubscriptionRequestStatus subscriptionRequestStatus, SubscriptionRequestStatus fedInStatus){
 		Neighbour neighbour = new Neighbour(name,
 				new Capabilities(capStatus, Collections.emptySet()),
 				new NeighbourSubscriptionRequest(subscriptionRequestStatus, new HashSet<>()),
@@ -66,7 +66,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithKnownCapabilitiesAndEmptySubscriptionIsSelectedForSubscriptionRequest(){
-		Neighbour ericsson = createNeighbourObject("ericsson-1", Capabilities.CapabilitiesStatus.KNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
+		Neighbour ericsson = createNeighbourObject("ericsson-1", Capabilities.CapabilitiesStatus.KNOWN, NeighbourSubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
 
 		neighbourRepository.save(ericsson);
 
@@ -77,7 +77,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithUnknownCapabilitiesIsSelectedForCapabilityExchange(){
-		Neighbour ericsson = createNeighbourObject("ericsson-2", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
+		Neighbour ericsson = createNeighbourObject("ericsson-2", Capabilities.CapabilitiesStatus.UNKNOWN, NeighbourSubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
 		neighbourRepository.save(ericsson);
 
 		List<Neighbour> getInterchangesForCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
@@ -87,7 +87,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithFailedInIsSelectedForGracefulBackoff(){
-		Neighbour ericsson = createNeighbourObject("ericsson-3", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.FAILED);
+		Neighbour ericsson = createNeighbourObject("ericsson-3", Capabilities.CapabilitiesStatus.UNKNOWN, NeighbourSubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.FAILED);
 		neighbourRepository.save(ericsson);
 
 		List<Neighbour> getInterchangesWithFailedFedIn = neighbourRepository.findByOurRequestedSubscriptions_StatusIn(SubscriptionRequestStatus.FAILED);
@@ -97,7 +97,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithFailedCapabilityExchangeIsSelectedForGracefulBackoff(){
-		Neighbour ericsson = createNeighbourObject("ericsson-4", Capabilities.CapabilitiesStatus.FAILED, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
+		Neighbour ericsson = createNeighbourObject("ericsson-4", Capabilities.CapabilitiesStatus.FAILED, NeighbourSubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
 		neighbourRepository.save(ericsson);
 
 		List<Neighbour> getInterchangesWithFailedCapabilityExchange = neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.FAILED);
@@ -108,7 +108,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithRequestedSubscriptionsInFedInIsSelectedForPolling(){
-		Neighbour ericsson = createNeighbourObject("ericsson-5-R", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.REQUESTED, SubscriptionRequestStatus.REQUESTED);
+		Neighbour ericsson = createNeighbourObject("ericsson-5-R", Capabilities.CapabilitiesStatus.UNKNOWN, NeighbourSubscriptionRequestStatus.REQUESTED, SubscriptionRequestStatus.REQUESTED);
 
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
@@ -133,7 +133,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void interchangeWithFailedSubscriptionInFedInIsSelectedForBackoff(){
-		Neighbour ericsson = createNeighbourObject("ericsson-6", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.FAILED);
+		Neighbour ericsson = createNeighbourObject("ericsson-6", Capabilities.CapabilitiesStatus.UNKNOWN, NeighbourSubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.FAILED);
 
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
@@ -150,7 +150,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void neighbourWithFedInRequestedIsSelectedForGroups(){
-		Neighbour ericsson = createNeighbourObject("ericsson-7", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.REQUESTED);
+		Neighbour ericsson = createNeighbourObject("ericsson-7", Capabilities.CapabilitiesStatus.UNKNOWN, NeighbourSubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.REQUESTED);
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
@@ -167,7 +167,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void neigbourWithFedInEstablishedIsSelectedForGroups(){
-		Neighbour ericsson = createNeighbourObject("ericsson-8", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.ESTABLISHED);
+		Neighbour ericsson = createNeighbourObject("ericsson-8", Capabilities.CapabilitiesStatus.UNKNOWN, NeighbourSubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.ESTABLISHED);
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
@@ -184,7 +184,7 @@ public class NeighbourRepositorySelectorIT {
 
 	@Test
 	public void neighbourWithFedInRejectedIsSelectedForRemovalFromGroups(){
-		Neighbour ericsson = createNeighbourObject("ericsson-9", Capabilities.CapabilitiesStatus.UNKNOWN, SubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
+		Neighbour ericsson = createNeighbourObject("ericsson-9", Capabilities.CapabilitiesStatus.UNKNOWN, NeighbourSubscriptionRequestStatus.EMPTY, SubscriptionRequestStatus.EMPTY);
 		Subscription subscription = new Subscription();
 		subscription.setSelector("originatingCountry = 'NO'");
 		SubscriptionRequest subscriptionRequest = new SubscriptionRequest();

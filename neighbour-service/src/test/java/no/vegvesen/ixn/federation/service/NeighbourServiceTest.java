@@ -143,11 +143,11 @@ class NeighbourServiceTest {
 
 		// Mock saving Neighbour to Neighbour repository
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet());
-		NeighbourSubscription firstSubscription = new NeighbourSubscription("originatingCountry = 'FI'", SubscriptionStatus.REQUESTED, "ericsson");
+		NeighbourSubscription firstSubscription = new NeighbourSubscription("originatingCountry = 'FI'", NeighbourSubscriptionStatus.REQUESTED, "ericsson");
 		firstSubscription.setId(1);
 		firstSubscription.setPath("/ericsson/");
 		Set<NeighbourSubscription> subscriptions = Sets.newSet(firstSubscription);
-		NeighbourSubscriptionRequest returnedSubscriptionRequest = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptions);
+		NeighbourSubscriptionRequest returnedSubscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions);
 		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
 
 		when(neighbourRepository.save(updatedNeighbour)).thenAnswer(
@@ -196,7 +196,7 @@ class NeighbourServiceTest {
 		NeighbourSubscription subscription = new NeighbourSubscription();
 		subscription.setId(id);
 		subscription.setPath("/" + neighbourName + "/subscriptions/" + id);
-		subscription.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
+		subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.REQUESTED);
 		subscription.setSelector("originatingCountry = 'NO'");
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest();
 		subscriptionRequest.setSubscriptions(Collections.singleton(subscription));

@@ -27,7 +27,7 @@ public class Subscription {
 	@Column(columnDefinition="TEXT")
 	private String consumerCommonName;
 
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "end_id", foreignKey = @ForeignKey(name = "fk_end_sub"))
 	private Set<Endpoint> endpoints = new HashSet<>();
 

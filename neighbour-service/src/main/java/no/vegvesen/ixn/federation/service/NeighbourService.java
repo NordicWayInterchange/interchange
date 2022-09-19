@@ -89,18 +89,18 @@ public class NeighbourService {
 		for (NeighbourSubscription neighbourSubscription : neighbourSubscriptionRequest) {
 			try {
 				JMSSelectorFilterFactory.get(neighbourSubscription.getSelector());
-				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ACCEPTED);
+				neighbourSubscription.setSubscriptionStatus(NeighbourSubscriptionStatus.ACCEPTED);
 			} catch (SelectorAlwaysTrueException e) {
 				// The subscription has an illegal selector - selector always true
 				logger.error("Subscription had illegal selectors.", e);
 				logger.warn("Setting status of subscription to ILLEGAL");
-				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.ILLEGAL);
+				neighbourSubscription.setSubscriptionStatus(NeighbourSubscriptionStatus.ILLEGAL);
 
 			} catch (InvalidSelectorException e) {
 				// The subscription has an invalid selector
 				logger.error("Subscription has invalid selector.", e);
 				logger.warn("Setting status of subscription to NOT_VALID");
-				neighbourSubscription.setSubscriptionStatus(SubscriptionStatus.NOT_VALID);
+				neighbourSubscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NOT_VALID);
 			}
 			neighbourSubscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		}
@@ -127,7 +127,7 @@ public class NeighbourService {
 		logger.info("Processing subscription request...");
 		Set<NeighbourSubscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
 		persistentRequest.addNewSubscriptions(processedSubscriptionRequest);
-		persistentRequest.setStatus(SubscriptionRequestStatus.REQUESTED);
+		persistentRequest.setStatus(NeighbourSubscriptionRequestStatus.REQUESTED);
 
 		logger.info("Processed subscription request: {}", persistentRequest.toString());
 
@@ -196,13 +196,13 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursToSetupRoutingFor() {
-		List<Neighbour> readyToUpdateRouting = neighbourRepository.findByNeighbourRequestedSubscriptions_StatusIn(SubscriptionRequestStatus.REQUESTED, SubscriptionRequestStatus.MODIFIED);
+		List<Neighbour> readyToUpdateRouting = neighbourRepository.findByNeighbourRequestedSubscriptions_StatusIn(NeighbourSubscriptionRequestStatus.REQUESTED, NeighbourSubscriptionRequestStatus.MODIFIED);
 		logger.debug("Found {} neighbours to set up routing for {}", readyToUpdateRouting.size(), readyToUpdateRouting);
 		return readyToUpdateRouting;
 	}
 
 	public void saveTearDownRouting(Neighbour neighbour, String name) {
-		neighbour.setSubscriptionRequestStatus(SubscriptionRequestStatus.EMPTY);
+		neighbour.setSubscriptionRequestStatus(NeighbourSubscriptionRequestStatus.EMPTY);
 		neighbourRepository.save(neighbour);
 		logger.debug("Saved neighbour {} with subscription request status EMPTY", name);
 	}
@@ -211,17 +211,17 @@ public class NeighbourService {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
 		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.EMPTY);
+			neighbour.getNeighbourRequestedSubscriptions().setStatus(NeighbourSubscriptionRequestStatus.EMPTY);
 			logger.debug("Saved neighbour {} with subscription request status TEAR_DOWN", neighbour.getName());
 		} else {
-			neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.MODIFIED);
+			neighbour.getNeighbourRequestedSubscriptions().setStatus(NeighbourSubscriptionRequestStatus.MODIFIED);
 			logger.debug("Saved neighbour {} with subscription request status MODIFIED", neighbour.getName());
 		}
 		neighbourRepository.save(neighbour);
 	}
 
 	public void saveSetupRouting(Neighbour neighbour) {
-		neighbour.getNeighbourRequestedSubscriptions().setStatus(SubscriptionRequestStatus.ESTABLISHED);
+		neighbour.getNeighbourRequestedSubscriptions().setStatus(NeighbourSubscriptionRequestStatus.ESTABLISHED);
 
 		neighbourRepository.save(neighbour);
 		logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());

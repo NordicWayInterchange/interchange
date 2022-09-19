@@ -38,7 +38,7 @@ public class Neighbour {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "neighbour_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_neigh_requested"))
-	private NeighbourSubscriptionRequest neighbourRequestedSubscriptions = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>());
+	private NeighbourSubscriptionRequest neighbourRequestedSubscriptions = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.EMPTY, new HashSet<>());
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "our_requested_subs", foreignKey = @ForeignKey(name = "fk_neighbour_subreq_our_requested"))
@@ -97,7 +97,7 @@ public class Neighbour {
 		this.neighbourRequestedSubscriptions = subscriptionRequest;
 	}
 
-	public void setSubscriptionRequestStatus(SubscriptionRequestStatus subscriptionRequestStatus) {
+	public void setSubscriptionRequestStatus(NeighbourSubscriptionRequestStatus subscriptionRequestStatus) {
 		this.neighbourRequestedSubscriptions.setStatus(subscriptionRequestStatus);
 	}
 
@@ -155,7 +155,7 @@ public class Neighbour {
 	}
 
 	public boolean hasEstablishedSubscriptions() {
-		return getNeighbourRequestedSubscriptions() != null && getNeighbourRequestedSubscriptions().getStatus() == SubscriptionRequestStatus.ESTABLISHED;
+		return getNeighbourRequestedSubscriptions() != null && getNeighbourRequestedSubscriptions().getStatus() == NeighbourSubscriptionRequestStatus.ESTABLISHED;
 	}
 
 	public boolean hasCapabilities() {

@@ -36,7 +36,7 @@ public class SubscriptionRequestTransformer {
 
 
 	public  NeighbourSubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 		return subscriptionRequest;
 	}
 
@@ -69,13 +69,13 @@ public class SubscriptionRequestTransformer {
 		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
 		response.setSelector(subscription.getSelector());
 		response.setPath(subscription.getPath());
-		SubscriptionStatusApi status = subscriptionTransformer.subscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
+		SubscriptionStatusApi status = subscriptionTransformer.neighbourSubscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
 		response.setStatus(status);
 		response.setConsumerCommonName(subscription.getConsumerCommonName());
 		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
 		if (status.equals(SubscriptionStatusApi.CREATED)) {
 			Set<EndpointApi> newEndpoints = new HashSet<>();
-			for(Endpoint endpoint : subscription.getEndpoints()) {
+			for(NeighbourEndpoint endpoint : subscription.getEndpoints()) {
 				EndpointApi endpointApi = new EndpointApi(
 						endpoint.getSource(),
 						endpoint.getHost(),
