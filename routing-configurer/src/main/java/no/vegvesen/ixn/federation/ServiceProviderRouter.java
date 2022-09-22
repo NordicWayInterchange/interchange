@@ -110,6 +110,9 @@ public class ServiceProviderRouter {
                 //	Check that the binding exist, if so, delete it
                 newSubscription = onTearDown(serviceProviderName, subscription);
                 break;
+            case ILLEGAL:
+                newSubscription = Optional.empty();
+                break;
                 //TODO ILLEGAL, just return optional.empty. Or the subscription itself?
                 //needs testing.
             default:
