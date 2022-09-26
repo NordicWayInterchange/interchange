@@ -269,7 +269,18 @@ class NeighbourServiceTest {
 		//TODO should actually post a subscription request with only one subscription here????
 		//verify(neighbourFacade, times(0)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
 		//So here, the neighbour should have 2 subscriptions, one TEAR_DOWN and one in another state
-		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionById(2).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
+		Set<Subscription> ourRequestedSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+		Subscription actual = getSubscriptionById(ourRequestedSubscriptions, 2);
+		assertThat(actual.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
+	}
+
+	private static Subscription getSubscriptionById(Set<Subscription> ourRequestedSubscriptions, int b) {
+		for (Subscription s : ourRequestedSubscriptions) {
+			if (Objects.equals(s.getId(), b)) {
+				return s;
+			}
+		}
+		return null;
 	}
 
 	@Test
@@ -292,8 +303,9 @@ class NeighbourServiceTest {
 		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
 		neigbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
 		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
-		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionById(2).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
-		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionById(3).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ACCEPTED);
+		Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
+		assertThat(getSubscriptionById(subscriptions, 2).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
+		assertThat(getSubscriptionById(subscriptions,3).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.ACCEPTED);
 	}
 
 	@Test
