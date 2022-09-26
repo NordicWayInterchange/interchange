@@ -12,7 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -155,15 +157,17 @@ public class OutgoingMatchDiscoveryServiceIT {
 
     @Test
     public void deliveryStatusIsNotChangedWhenStatusIsIllegal() {
-        LocalDelivery delivery = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL);
+        LocalDelivery delivery1 = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL);
+        LocalDelivery delivery2 = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED);
 
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 
-        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        serviceProvider.setDeliveries(new HashSet<>(Arrays.asList(delivery1, delivery2)));
         serviceProviderRepository.save(serviceProvider);
 
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Collections.singletonList(serviceProvider));
         assertThat(repository.findAll()).hasSize(0);
-        assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.ILLEGAL);
+        assertThat(delivery1.getStatus()).isEqualTo(LocalDeliveryStatus.ILLEGAL);
+        assertThat(delivery2.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
     }
 }

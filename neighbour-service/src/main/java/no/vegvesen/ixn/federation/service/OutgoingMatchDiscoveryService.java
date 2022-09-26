@@ -30,34 +30,40 @@ public class OutgoingMatchDiscoveryService {
             if (serviceProvider.hasDeliveries()) {
                 for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                     if (serviceProvider.hasCapabilities()) {
-                        boolean isValid = false;
-                        for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
-                            if (repository.findByCapability_IdAndLocalDelivery_Id(capability.getId(), delivery.getId()) != null) {
-                                isValid = true;
-                            } else {
-                                if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
-                                    boolean match = CapabilityMatcher.matchCapabilityToSelector(capability, delivery.getSelector());
-                                    if (match) {
-                                        isValid = true;
-                                        if (!delivery.exchangeExists()) {
-                                            String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
-                                            delivery.setExchangeName(deliveryExchangeName);
+                        if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
+                                || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
+                                || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
+                            boolean isValid = false;
+                            for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
+                                if (repository.findByCapability_IdAndLocalDelivery_Id(capability.getId(), delivery.getId()) != null) {
+                                    isValid = true;
+                                } else {
+                                    if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
+                                        boolean match = CapabilityMatcher.matchCapabilityToSelector(capability, delivery.getSelector());
+                                        if (match) {
+                                            isValid = true;
+                                            if (!delivery.exchangeExists()) {
+                                                String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
+                                                delivery.setExchangeName(deliveryExchangeName);
+                                            }
+                                            OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName(), OutgoingMatchStatus.SETUP_ENDPOINT);
+                                            logger.info("Delivery with id {} saved with status CREATED", delivery.getId());
+                                            delivery.setStatus(LocalDeliveryStatus.CREATED);
+                                            repository.save(outgoingMatch);
                                         }
-                                        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName(), OutgoingMatchStatus.SETUP_ENDPOINT);
-                                        logger.info("Delivery with id {} saved with status CREATED", delivery.getId());
-                                        delivery.setStatus(LocalDeliveryStatus.CREATED);
-                                        repository.save(outgoingMatch);
                                     }
                                 }
                             }
+                            if (!isValid) {
+                                delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
+                                logger.info("Delivery with selector {} does not match any service provider capability", delivery.getSelector());
+                            }
                         }
-                        if (!isValid) {
+                    } else {
+                        if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)) {
                             delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                             logger.info("Delivery with selector {} does not match any service provider capability", delivery.getSelector());
                         }
-                    } else {
-                        delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
-                        logger.info("Delivery with selector {} does not match any service provider capability", delivery.getSelector());
                     }
                 }
             }
