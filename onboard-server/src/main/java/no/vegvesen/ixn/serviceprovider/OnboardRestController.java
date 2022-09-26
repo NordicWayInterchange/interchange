@@ -343,7 +343,13 @@ public class OnboardRestController {
 
 		Set<LocalDelivery> localDeliveries = new HashSet<>();
 		for(SelectorApi delivery : request.getDeliveries()) {
-			localDeliveries.add(typeTransformer.transformDeliveryToLocalDelivery(delivery));
+			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
+			if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())) {
+				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
+			} else {
+				localDelivery.setStatus(LocalDeliveryStatus.ILLEGAL);
+			}
+			localDeliveries.add(localDelivery);
 		}
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);

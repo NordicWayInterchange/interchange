@@ -89,6 +89,24 @@ public class OnboardRestControllerIT {
     }
 
     @Test
+    public void testAddingIllegalSubscription() {
+        String serviceProviderName = "my-service-provider";
+        String selector = "";
+
+        AddSubscription addSubscription = new AddSubscription(selector);
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
+
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
+
+        LocalActorSubscription addedSubscription = response.getSubscriptions().stream()
+                .findFirst()
+                .get();
+
+        assertThat(response.getSubscriptions()).hasSize(1);
+        assertThat(addedSubscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
+    }
+
+    @Test
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
@@ -358,5 +376,23 @@ public class OnboardRestControllerIT {
         assertThat(response.getCapabilities()).hasSize(3);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+    }
+
+    @Test
+    public void testAddingIllegalDelivery() {
+        String serviceProviderName = "my-service-provider";
+        String selector = "";
+
+        SelectorApi delivery = new SelectorApi(selector);
+        AddDeliveriesRequest requestApi = new AddDeliveriesRequest(serviceProviderName, Collections.singleton(delivery));
+
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, requestApi);
+
+        Delivery addedDelivery = response.getDeliveries().stream()
+                .findFirst()
+                .get();
+
+        assertThat(response.getDeliveries()).hasSize(1);
+        assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
     }
 }

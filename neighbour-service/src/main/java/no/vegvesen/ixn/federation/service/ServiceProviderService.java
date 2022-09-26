@@ -36,7 +36,7 @@ public class ServiceProviderService {
             updateNewLocalDeliveryEndpoints(serviceProvider, host, port);
             updateTearDownLocalDeliveryEndpoints(serviceProvider);
             removeTearDownCapabilities(serviceProvider);
-            removeTearDownDeliveries(serviceProvider);
+            removeTearDownAndIllegalDeliveries(serviceProvider);
             serviceProviderRepository.save(serviceProvider);
         }
     }
@@ -124,15 +124,16 @@ public class ServiceProviderService {
         currentServiceProviderCapabilities.setLastUpdated(LocalDateTime.now());
     }
 
-    public void removeTearDownDeliveries(ServiceProvider serviceProvider) {
+    public void removeTearDownAndIllegalDeliveries(ServiceProvider serviceProvider) {
         Set<LocalDelivery> deliveriesToTearDown = serviceProvider.getDeliveries().stream()
-                .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN))
+                .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)
+                || d.getStatus().equals(LocalDeliveryStatus.ILLEGAL))
                 .collect(Collectors.toSet());
 
         for (LocalDelivery delivery : deliveriesToTearDown) {
             List<OutgoingMatch> possibleMatches = outgoingMatchDiscoveryService.findMatchesFromDeliveryId(delivery.getId());
             if (possibleMatches.isEmpty()) {
-                logger.info("Removing delivery with id {} and status TEAR_DOWN", delivery.getId());
+                logger.info("Removing delivery with id {}", delivery.getId());
                 serviceProvider.getDeliveries().remove(delivery);
             }
         }

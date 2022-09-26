@@ -152,4 +152,18 @@ public class OutgoingMatchDiscoveryServiceIT {
         repository.deleteAll();
         serviceProviderRepository.deleteAll();
     }
+
+    @Test
+    public void deliveryStatusIsNotChangedWhenStatusIsIllegal() {
+        LocalDelivery delivery = new LocalDelivery("", LocalDeliveryStatus.ILLEGAL);
+
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+
+        serviceProvider.setDeliveries(Collections.singleton(delivery));
+        serviceProviderRepository.save(serviceProvider);
+
+        service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Collections.singletonList(serviceProvider));
+        assertThat(repository.findAll()).hasSize(0);
+        assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.ILLEGAL);
+    }
 }

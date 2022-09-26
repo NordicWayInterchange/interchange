@@ -233,6 +233,8 @@ public class TypeTransformer {
                 return DeliveryStatus.CREATED;
             case NOT_VALID:
                 return DeliveryStatus.NOT_VALID;
+            case NO_OVERLAP:
+                return DeliveryStatus.NO_OVERLAP;
             default:
                 return DeliveryStatus.ILLEGAL;
         }
