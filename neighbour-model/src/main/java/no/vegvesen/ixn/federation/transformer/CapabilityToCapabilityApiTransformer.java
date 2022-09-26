@@ -4,10 +4,12 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Component
 public class CapabilityToCapabilityApiTransformer {
 	private static Logger logger = LoggerFactory.getLogger(CapabilityToCapabilityApiTransformer.class);
 
