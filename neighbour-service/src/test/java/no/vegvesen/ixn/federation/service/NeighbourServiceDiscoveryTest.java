@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
@@ -814,7 +815,64 @@ public class NeighbourServiceDiscoveryTest {
 		verify(neighbourFacade,times(1)).pollSubscriptionStatus(any(),any());
 	}
 
+	@Test
+	public void testPollingCreatedSubscriptionThatIsGone() {
+		Subscription subscription = new Subscription(
+				1,
+				SubscriptionStatus.CREATED,
+				"originatingCountry = 'NO'",
+				"/mynode/subscriptions/1",
+				"kyrre",
+				Collections.emptySet()
+		);
+		Neighbour  neighbour = new Neighbour(
+				"test",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						SubscriptionRequestStatus.ESTABLISHED,
+						Collections.singleton(
+								subscription
+						)
+				),
+				new Connection()
+		);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1);
+		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
+		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(SubscriptionNotFoundException.class);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbourFacade);
+		assertThat(subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN));
+	}
 
+	@Test
+	public void testPollSubscriptionGoneFromNeighbour() {
+
+		Subscription subscription = new Subscription(
+				1,
+				SubscriptionStatus.CREATED,
+				"originatingCountry = 'NO'",
+				"/mynode/subscriptions/1",
+				"kyrre",
+				Collections.emptySet()
+		);
+		Neighbour  neighbour = new Neighbour(
+				"test",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						SubscriptionRequestStatus.ESTABLISHED,
+						Collections.singleton(
+								subscription
+						)
+				),
+				new Connection()
+		);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1);
+		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
+		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(SubscriptionNotFoundException.class);
+		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbourFacade);
+		assertThat(subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN));
+	}
 
 	@Test
 	public void testPostSubscriptonRequest() {

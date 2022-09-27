@@ -99,7 +99,7 @@ public class MatchDiscoveryService {
         List<Match> matches = matchRepository.findAllByStatus(MatchStatus.UP);
         for (Match match : matches) {
             if(!LocalSubscriptionStatus.isAlive(match.getLocalSubscription().getStatus()) ||
-                    match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                    SubscriptionStatus.shouldTearDown(match.getSubscription().getSubscriptionStatus())) {
                 match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
                 matchRepository.save(match);
                 logger.info("Saved match {} with status TEARDOWN_ENDPOINT", match);
@@ -111,7 +111,7 @@ public class MatchDiscoveryService {
         List<Match> matches = matchRepository.findAllByStatus(MatchStatus.REDIRECT);
         for (Match match : matches) {
             if(! LocalSubscriptionStatus.isAlive(match.getLocalSubscription().getStatus()) ||
-                    match.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                    SubscriptionStatus.shouldTearDown(match.getSubscription().getSubscriptionStatus())) {
                 match.setStatus(MatchStatus.DELETED);
                 matchRepository.save(match);
                 logger.info("Saved match {} with status DELETED", match);

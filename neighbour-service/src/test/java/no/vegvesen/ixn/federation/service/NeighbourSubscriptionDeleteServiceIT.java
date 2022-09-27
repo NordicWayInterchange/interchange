@@ -1,8 +1,8 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
-import no.vegvesen.ixn.federation.exceptions.NeighbourSubscriptionNotFound;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
@@ -91,7 +91,7 @@ public class NeighbourSubscriptionDeleteServiceIT {
         ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new Connection());
         listenerEndpointRepository.save(listenerEndpoint);
 
-        doThrow(new NeighbourSubscriptionNotFound("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
+        doThrow(new SubscriptionNotFoundException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
         service.deleteSubscriptions(mockNeighbourFacade);
 
         assertThat(listenerEndpointRepository.findAll()).isEmpty();

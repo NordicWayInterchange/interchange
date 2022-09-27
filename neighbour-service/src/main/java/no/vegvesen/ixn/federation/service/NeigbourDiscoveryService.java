@@ -159,6 +159,7 @@ public class NeigbourDiscoveryService {
 
     //1. 1 LocalSubscription, matching several neighbour capabilities, thus making a 1-to-n relationship LocalSubscription -> Subscription
                 //There will only be one Subscription for the Neighbour, even though we might match several capabilities on the neighbour.
+                //TODO will it only be one Subscription for the Neighbour?
                 //So, this is really a 1-to-1 relationship.
     //2. N LocalSubscriptions, matching 1 neighbour capability, thus making a n-to-1 relationship LocalSubscription -> Subscription
     //3. N LocalSubscriptions, each matching the same capability, thus making a n-to-n relationship LocalSubscription -> Subscription
@@ -275,6 +276,7 @@ public class NeigbourDiscoveryService {
                         logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
 
                         // Throws SubscriptionPollException if unsuccessful
+                        //Or SubscriptionNotFoundException if not found at neighbour
                         Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
                         subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
                         subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
@@ -302,6 +304,9 @@ public class NeigbourDiscoveryService {
                     subscription.incrementNumberOfPolls();
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
+                } catch (SubscriptionNotFoundException e) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+                    logger.error("Subscription {} is gone from neighbour", subscription,e);
                 }
             }
         } finally {
@@ -311,8 +316,6 @@ public class NeigbourDiscoveryService {
     }
 
     //TODO have to have a look at this again. The problem is that we might have non-updated subscriptions on the neighbour side, but for some reason not set it up on our side. The lastUpdated prevents us from setting it up again.
-    //need to somehow check is the listenerEndpoint is already there before checking the updated timestamp.
-    //It's already done in createListenerEndpointOneNeighbour, but should probably be done earlier. This
     public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, NeighbourFacade neighbourFacade) {
         try {
             Set<Subscription> createdSubscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
@@ -351,6 +354,9 @@ public class NeigbourDiscoveryService {
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
+                } catch (SubscriptionNotFoundException e) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+                    logger.error("Subscription {} is gone from neighbour {}", subscription,neighbour.getName());
                 }
             }
         }

@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
@@ -89,6 +90,27 @@ public class NeighbourSubscriptionDeleteServiceTest {
         neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
         assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
         assertThat(neighbour.getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
+    }
+
+    @Test
+    public void deleteReturns404FromNeighbour() {
+
+        Neighbour neighbour = new Neighbour();
+
+        Subscription subscription1 = new Subscription(1, SubscriptionStatus.ACCEPTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "");
+        subscription1.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+
+        SubscriptionRequest existingSubscriptions = new SubscriptionRequest();
+        existingSubscriptions.setStatus(SubscriptionRequestStatus.ESTABLISHED);
+        existingSubscriptions.setSubscriptions(Collections.singleton(subscription1));
+
+        neighbour.setOurRequestedSubscriptions(existingSubscriptions);
+
+        when(neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN)).thenReturn(Arrays.asList(neighbour));
+        when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
+        doThrow(SubscriptionNotFoundException.class).when(neighbourFacade).deleteSubscription(neighbour,subscription1);
+        neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
+        assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEmpty();
     }
 
     @Test

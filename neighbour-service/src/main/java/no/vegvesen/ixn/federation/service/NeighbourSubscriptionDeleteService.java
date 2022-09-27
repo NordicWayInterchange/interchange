@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.NeighbourSubscriptionNotFound;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
@@ -41,7 +42,7 @@ public class NeighbourSubscriptionDeleteService {
             if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
                 Set<Subscription> subscriptionsToDelete = new HashSet<>();
                 for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
-                    if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
+                    if (SubscriptionStatus.shouldTearDown(subscription.getSubscriptionStatus())) {
                         try{
                             List<Match> match = matchRepository.findAllBySubscriptionId(subscription.getId());
                             if (match.isEmpty()) {
@@ -52,7 +53,7 @@ public class NeighbourSubscriptionDeleteService {
                             subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                             logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
-                        } catch(NeighbourSubscriptionNotFound e) {
+                        } catch(SubscriptionNotFoundException e) {
                             logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
                             subscriptionsToDelete.add(subscription);
                         }

@@ -137,6 +137,7 @@ public class NeighbourRESTClient {
         return responseApi;
     }
 
+    //TODO need a class that indicates that the Subscription is not fount on neighbour node.
     SubscriptionPollResponseApi doPollSubscriptionStatus(String url, String name) {
         SubscriptionPollResponseApi subscriptionApi;
         try {
@@ -148,19 +149,24 @@ public class NeighbourRESTClient {
         } catch (HttpClientErrorException | HttpServerErrorException e) {
 
             HttpStatus status = e.getStatusCode();
-            logger.error("Failed polling subscription with url {}. Server returned error code: {}", url, status.toString());
+            logger.error("Failed polling subscription with url {}. Server returned error code: {}", url, status);
+
 
             byte[] errorResponse = e.getResponseBodyAsByteArray();
+            logger.debug(String.format("Response has length %d",errorResponse.length));
+            if (errorResponse.length > 0 ) {
+                try {
+                    ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
 
-            try {
-                ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
-
-                logger.error("Received error object from server: {}", errorDetails.toString());
-                throw new SubscriptionPollException("Error in polling " + url + " for subscription status. Received error response from server: " + status.toString());
-            } catch (IOException ioe) {
-                logger.error("Unable to cast response as ErrorDetails object.", ioe);
-                throw new SubscriptionPollException("Received response with status code :" + status.toString() + ". Error in parsing server response as Error Details object. ");
+                    logger.error("Received error object from server: {}", errorDetails.toString());
+                } catch (IOException ioe) {
+                    logger.error("Unable to cast response as ErrorDetails object.", ioe);
+                }
             }
+            if (e.getStatusCode().is4xxClientError()) {
+                throw new SubscriptionNotFoundException(String.format("Subscription not found when polling URL %s", url));
+            }
+            throw new SubscriptionPollException("Error in polling " + url + " for subscription status. Received error response from server: " + status.toString());
         } catch (RestClientException e) {
             logger.error("Received network layer error", e);
             throw new SubscriptionPollException("Error in posting capabilities to neighbour " + name + " due to exception", e);
@@ -175,7 +181,7 @@ public class NeighbourRESTClient {
             HttpStatus status = e.getStatusCode();
             logger.error("Failed deleting subscription with url {}. Server returned error code {}", url, status.toString());
             if (HttpStatus.NOT_FOUND.equals(status)) {
-                throw new NeighbourSubscriptionNotFound("Error in deleting subscription to neighbour " + name + " due to exception", e);
+                throw new SubscriptionNotFoundException("Error in deleting subscription to neighbour " + name + " due to exception", e);
             }
             throw new SubscriptionDeleteException("Error in deleting subscription to neighbour " + name + " due to exception", e);
         }

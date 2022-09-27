@@ -42,11 +42,6 @@ public class NeighbourServiceErrorAdvice {
 		return error(NOT_FOUND, e);
 	}
 
-	@ExceptionHandler({SubscriptionNotAcceptedException.class})
-	public ResponseEntity<ErrorDetails> subscriptionNotAccepted(SubscriptionNotAcceptedException e){
-		return error(NOT_ACCEPTABLE, e);
-	}
-
 	@ExceptionHandler({CNAndApiObjectMismatchException.class})
 	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e){
 		return error(FORBIDDEN, e);
