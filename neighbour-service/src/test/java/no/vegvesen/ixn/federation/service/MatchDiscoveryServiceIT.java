@@ -75,7 +75,6 @@ public class MatchDiscoveryServiceIT {
 
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Arrays.asList(serviceProvider1, serviceProvider2), Collections.singletonList(neighbour));
         assertThat(matchRepository.findAll()).hasSize(2);
-
     }
 
     @Test
@@ -174,4 +173,5 @@ public class MatchDiscoveryServiceIT {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
         assertThat(matchRepository.findAll()).hasSize(0);
     }
+
 }

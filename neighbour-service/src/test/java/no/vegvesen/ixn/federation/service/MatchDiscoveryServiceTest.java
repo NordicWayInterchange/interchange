@@ -85,7 +85,7 @@ public class MatchDiscoveryServiceTest {
                         new Connection()
                 ))
         );
-        verify(matchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
+        verify(matchRepository,times(1)).findBySubscriptionIdAndLocalSubscriptionId(any(), any()); //TODO should check against the actual subscriptionId
         verify(matchRepository,times(1)).save(any(Match.class));
     }
 
@@ -140,7 +140,7 @@ public class MatchDiscoveryServiceTest {
                Collections.singletonList(sp),
                Arrays.asList(neighbour,otherNeighbour)
        );
-       verify(matchRepository,times(2)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
+       verify(matchRepository,times(2)).findBySubscriptionIdAndLocalSubscriptionId(any(), any());
        verify(matchRepository,times(2)).save(any(Match.class));
     }
 
@@ -180,7 +180,7 @@ public class MatchDiscoveryServiceTest {
                 Collections.singletonList(neighbour)
         );
 
-        verify(matchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
+        verify(matchRepository,times(1)).findBySubscriptionIdAndLocalSubscriptionId(any(), any());
         verify(matchRepository,times(1)).save(any(Match.class));
     }
 
