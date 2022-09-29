@@ -93,8 +93,8 @@ public class MatchRepositoryIT {
 
     @Test
     public void findOnUnsavedMatch() {
-        Match noMatch = matchRepository.findBySubscriptionId(1);
-        assertThat(noMatch).isNull();
+        List<Match> noMatch = matchRepository.findAllBySubscriptionId(1);
+        assertThat(noMatch).isEmpty();
     }
 
     @Test
@@ -155,7 +155,7 @@ public class MatchRepositoryIT {
 
 
         //TODO test that we can use this method with more than one matches with a local subscription.
-        List<Match> byLocalSubscriptionId = matchRepository.findByLocalSubscriptionId(locSub.getId());
+        List<Match> byLocalSubscriptionId = matchRepository.findAllByLocalSubscriptionId(locSub.getId());
     }
 
     @Test

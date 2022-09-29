@@ -117,7 +117,7 @@ public class ServiceProviderRouter {
     }
 
     private Optional<LocalSubscription> onTearDown(String serviceProviderName, LocalSubscription subscription) {
-        List<Match> match = matchDiscoveryService.findMatchByLocalSubscriptionId(subscription.getId());
+        List<Match> match = matchDiscoveryService.findMatchesByLocalSubscriptionId(subscription.getId());
         Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
@@ -161,7 +161,7 @@ public class ServiceProviderRouter {
     }
 
     public Optional<LocalSubscription> redirectTearDown(LocalSubscription subscription) {
-        List<Match> match = matchDiscoveryService.findMatchByLocalSubscriptionId(subscription.getId());
+        List<Match> match = matchDiscoveryService.findMatchesByLocalSubscriptionId(subscription.getId());
         subscription.getLocalEndpoints().clear();
         if (match.isEmpty()) {
             return Optional.empty();

@@ -27,7 +27,7 @@ public class MatchDiscoveryServiceTest {
     @Test
     public void noServiceProvidersAndNoNeighboursShouldNotCreateMatches() {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.emptyList());
-        verify(matchRepository,never()).findBySubscriptionId(any());
+        verify(matchRepository,never()).findAllBySubscriptionId(any());
         verify(matchRepository,never()).save(any(Match.class));
 
     }
@@ -40,7 +40,7 @@ public class MatchDiscoveryServiceTest {
                 new SubscriptionRequest(),
                 new SubscriptionRequest()
         )));
-        verify(matchRepository,never()).findBySubscriptionId(any());
+        verify(matchRepository,never()).findAllBySubscriptionId(any());
         verify(matchRepository,never()).save(any(Match.class));
     }
 
@@ -49,7 +49,7 @@ public class MatchDiscoveryServiceTest {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
                 Collections.singletonList(new ServiceProvider("SP")),
                 Collections.emptyList());
-        verify(matchRepository,never()).findBySubscriptionId(any());
+        verify(matchRepository,never()).findAllBySubscriptionId(any());
         verify(matchRepository,never()).save(any(Match.class));
     }
 
@@ -85,7 +85,7 @@ public class MatchDiscoveryServiceTest {
                         new Connection()
                 ))
         );
-        verify(matchRepository,times(1)).findBySubscriptionId(any()); //TODO should check against the actual subscriptionId
+        verify(matchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
         verify(matchRepository,times(1)).save(any(Match.class));
     }
 
@@ -140,7 +140,7 @@ public class MatchDiscoveryServiceTest {
                Collections.singletonList(sp),
                Arrays.asList(neighbour,otherNeighbour)
        );
-       verify(matchRepository,times(2)).findBySubscriptionId(any());
+       verify(matchRepository,times(2)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
        verify(matchRepository,times(2)).save(any(Match.class));
     }
 
@@ -180,7 +180,7 @@ public class MatchDiscoveryServiceTest {
                 Collections.singletonList(neighbour)
         );
 
-        verify(matchRepository,times(1)).findBySubscriptionId(any());
+        verify(matchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
         verify(matchRepository,times(1)).save(any(Match.class));
     }
 
@@ -220,7 +220,7 @@ public class MatchDiscoveryServiceTest {
                 Collections.singletonList(neighbour)
         );
 
-        verify(matchRepository,times(0)).findBySubscriptionId(any());
+        verify(matchRepository,times(0)).findAllBySubscriptionId(any());
         verify(matchRepository,times(0)).save(any(Match.class));
     }
 

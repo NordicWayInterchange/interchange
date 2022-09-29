@@ -74,9 +74,7 @@ public class MatchDiscoveryServiceIT {
         neighbourRepository.save(neighbour);
 
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Arrays.asList(serviceProvider1, serviceProvider2), Collections.singletonList(neighbour));
-
-        //TODO: This should not fail... We need a more clear connection between LocalSubscription and Subscription to make more accurate Matches
-        //assertThat(matchRepository.findAll()).hasSize(2);
+        assertThat(matchRepository.findAll()).hasSize(2);
 
     }
 
@@ -106,4 +104,74 @@ public class MatchDiscoveryServiceIT {
         assertThat(matchRepository.findAllByStatus(MatchStatus.REDIRECT)).hasSize(1);
     }
 
+    @Test
+    public void twoLocalSubscriptionsCanHaveMatchToTheSameSubscriptionWhenOneIsAlreadySetUp() {
+        String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
+        String consumerCommonName = "my-node";
+
+        LocalSubscription localSubscription1 = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+
+        ServiceProvider serviceProvider1 = new ServiceProvider("service-provider1");
+        serviceProvider1.addLocalSubscription(localSubscription1);
+        serviceProviderRepository.save(serviceProvider1);
+
+        Subscription subscription = new Subscription(SubscriptionStatus.REQUESTED, selector, "", consumerCommonName);
+        Neighbour neighbour = new Neighbour("neighbour",
+                new Capabilities(),
+                new SubscriptionRequest(),
+                new SubscriptionRequest(
+                        SubscriptionRequestStatus.REQUESTED,
+                        Collections.singleton(subscription)
+                )
+        );
+        neighbourRepository.save(neighbour);
+
+        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider1), Collections.singletonList(neighbour));
+        assertThat(matchRepository.findAll()).hasSize(1);
+
+        Neighbour savedNeighbour = neighbourRepository.findByName(neighbour.getName());
+
+        Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream()
+                .findFirst()
+                .get();
+
+        assertThat(matchRepository.findAllBySubscriptionId(savedSubscription.getId())).hasSize(1);
+
+        LocalSubscription localSubscription2 = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+
+        ServiceProvider serviceProvider2 = new ServiceProvider("service-provider2");
+        serviceProvider2.addLocalSubscription(localSubscription2);
+        serviceProviderRepository.save(serviceProvider2);
+
+        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Arrays.asList(serviceProvider1, serviceProvider2), Collections.singletonList(neighbour));
+
+        assertThat(matchRepository.findAll()).hasSize(2);
+        assertThat(matchRepository.findAllBySubscriptionId(savedSubscription.getId())).hasSize(2);
+    }
+
+    @Test
+    public void matchIsNotSetUpWhenSubscriptionIsInTearDown() {
+        String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
+        String consumerCommonName = "my-node";
+
+        LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+        serviceProvider.addLocalSubscription(localSubscription);
+        serviceProviderRepository.save(serviceProvider);
+
+        Subscription subscription = new Subscription(SubscriptionStatus.TEAR_DOWN, selector, "", consumerCommonName);
+        Neighbour neighbour = new Neighbour("neighbour",
+                new Capabilities(),
+                new SubscriptionRequest(),
+                new SubscriptionRequest(
+                        SubscriptionRequestStatus.ESTABLISHED,
+                        Collections.singleton(subscription)
+                )
+        );
+        neighbourRepository.save(neighbour);
+
+        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
+        assertThat(matchRepository.findAll()).hasSize(0);
+    }
 }

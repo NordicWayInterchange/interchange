@@ -43,8 +43,8 @@ public class NeighbourSubscriptionDeleteService {
                 for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                     if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
                         try{
-                            Match match = matchRepository.findBySubscriptionId(subscription.getId());
-                            if (match == null) {
+                            List<Match> match = matchRepository.findAllBySubscriptionId(subscription.getId());
+                            if (match.isEmpty()) {
                                 neighbourFacade.deleteSubscription(neighbour, subscription);
                                 subscriptionsToDelete.add(subscription);
                             }

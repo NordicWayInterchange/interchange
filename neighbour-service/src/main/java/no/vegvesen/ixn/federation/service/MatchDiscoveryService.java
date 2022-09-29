@@ -32,7 +32,9 @@ public class MatchDiscoveryService {
                     for (Neighbour neighbour : neighbours) {
                         for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                             //NOTE should we change this to CREATED?
-                            if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
+                            if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED) ||
+                                    subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED) ||
+                                    subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
                                 //NOTE we use equals on the selectors here, as we expect the subscription to be made based on the local one,
                                 //this ending up with the same selector.
                                 //TODO this really is the most telltale sign that we need to promote Selector to a class
@@ -42,7 +44,7 @@ public class MatchDiscoveryService {
                                     //this would make a method that is completely independent on the repos.
                                     //TODO AND this will fail if we match more than one Subscription, which is possible!
                                     //Well, in theory. But in effect, it will never happen. Should possibly create a constraint in the db.
-                                    if (matchRepository.findBySubscriptionId(subscription.getId()) == null) { //TODO: We have to change this one somehow, no way of connecting to more Subscriptions
+                                    if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) { //TODO: We have to change this one somehow, no way of connecting to more Subscriptions
                                         Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
                                         matchRepository.save(newMatch);
                                         logger.info("Saved new Match {}", newMatch);
@@ -54,10 +56,12 @@ public class MatchDiscoveryService {
                 } else {
                     for (Neighbour neighbour : neighbours) {
                         for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
-                            if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED)) {
+                            if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.REQUESTED) ||
+                                    subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED) ||
+                                    subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
                                 if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
                                         Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
-                                    if (matchRepository.findBySubscriptionId(subscription.getId()) == null) {
+                                    if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {
                                         Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REDIRECT);
                                         matchRepository.save(newMatch);
                                         logger.info("Saved new Match {}", newMatch);
@@ -143,7 +147,7 @@ public class MatchDiscoveryService {
         }
     }
 
-    public List<Match> findMatchByLocalSubscriptionId(Integer id) {
-        return matchRepository.findByLocalSubscriptionId(id);
+    public List<Match> findMatchesByLocalSubscriptionId(Integer id) {
+        return matchRepository.findAllByLocalSubscriptionId(id);
     }
 }

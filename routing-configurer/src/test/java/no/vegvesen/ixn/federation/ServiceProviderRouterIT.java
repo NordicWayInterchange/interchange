@@ -518,7 +518,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		client.createQueue(queueName);
 
-		when(matchDiscoveryService.findMatchByLocalSubscriptionId(any(Integer.class))).thenReturn(null);
+		when(matchDiscoveryService.findMatchesByLocalSubscriptionId(any(Integer.class))).thenReturn(null);
 
 		router.processSubscription(serviceProviderName, localSubscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
 

@@ -16,9 +16,11 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     List<Match> findAllByStatus(MatchStatus status);
 
-    Match findBySubscriptionId(Integer subscriptionId);
+    List<Match> findAllBySubscriptionId(Integer subscriptionId);
 
-    List<Match> findByLocalSubscriptionId(Integer subscriptionId);
+    List<Match> findAllByLocalSubscriptionId(Integer subscriptionId);
+
+    Match findBySubscriptionIdAndAndLocalSubscriptionId(Integer subscriptionId, Integer localSubscriptionId);
 
     List<Match> findAllByLocalSubscription_Selector(String selector);
 
