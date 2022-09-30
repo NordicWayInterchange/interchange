@@ -65,10 +65,12 @@ public class MessageCollector {
             String neighbourName = listenerEndpoint.getNeighbourName();
             interchangeListenerEndpoints.add(listenerEndpoint);
             if (!listeners.containsKey(listenerEndpoint)) {
-                Match match = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName());
-                if (match.getStatus().equals(MatchStatus.SETUP_ENDPOINT)) {
-                    setUpConnectionToNeighbour(listenerEndpoint);
-                    matchDiscoveryService.updateMatchToUp(match);
+                List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName());
+                for (Match match : matches) {
+                    if (match.getStatus().equals(MatchStatus.SETUP_ENDPOINT)) {
+                        setUpConnectionToNeighbour(listenerEndpoint);
+                        matchDiscoveryService.updateMatchToUp(match);
+                    }
                 }
             }
             else {
@@ -93,15 +95,17 @@ public class MessageCollector {
 
         for (ListenerEndpoint listenerEndpoint : listeners.keySet()) {
             if (!interchangeListenerEndpoints.contains(listenerEndpoint)) {
-                Match match = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName());
-                if (match.getStatus().equals(MatchStatus.TEARDOWN_ENDPOINT)) {
-                    String neighbourName = listenerEndpoint.getNeighbourName();
-                    logger.info("Listener for {} with host {} and port {} is now being removed", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
-                    MessageCollectorListener toRemove = listeners.get(listenerEndpoint);
-                    logger.debug("Tearing down listener for {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
-                    toRemove.teardown();
-                    listenerKeysToRemove.add(listenerEndpoint);
-                    matchDiscoveryService.updateMatchToTearDownExchange(match);
+                List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName());
+                for (Match match : matches) {
+                    if (match.getStatus().equals(MatchStatus.TEARDOWN_ENDPOINT)) {
+                        String neighbourName = listenerEndpoint.getNeighbourName();
+                        logger.info("Listener for {} with host {} and port {} is now being removed", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
+                        MessageCollectorListener toRemove = listeners.get(listenerEndpoint);
+                        logger.debug("Tearing down listener for {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
+                        toRemove.teardown();
+                        listenerKeysToRemove.add(listenerEndpoint);
+                        matchDiscoveryService.updateMatchToTearDownExchange(match);
+                    }
                 }
             }
         }

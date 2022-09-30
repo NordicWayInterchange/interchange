@@ -85,7 +85,7 @@ public class MatchDiscoveryService {
         logger.info("Saved match {} with status SETUP_ENDPOINT", match);
     }
 
-    public Match findMatchesByExchangeName(String exchangeName) {
+    public List<Match> findMatchesByExchangeName(String exchangeName) {
         return matchRepository.findBySubscription_ExchangeName(exchangeName);
     }
 
