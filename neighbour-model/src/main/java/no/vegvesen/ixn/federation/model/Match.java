@@ -78,12 +78,13 @@ public class Match {
         if (!(o instanceof Match)) return false;
         Match match = (Match) o;
         return localSubscription.equals(match.localSubscription) &&
-                subscription.equals(match.subscription);
+                subscription.equals(match.subscription) &&
+                serviceProviderName.equals(match.serviceProviderName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(localSubscription, subscription);
+        return Objects.hash(localSubscription, subscription, serviceProviderName);
     }
 
     @Override

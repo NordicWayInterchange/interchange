@@ -43,10 +43,19 @@ public class NeighbourSubscriptionDeleteService {
                 for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                     if (SubscriptionStatus.shouldTearDown(subscription.getSubscriptionStatus())) {
                         try{
-                            List<Match> match = matchRepository.findAllBySubscriptionId(subscription.getId());
-                            if (match.isEmpty()) {
+                            List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                            if (matches.isEmpty()) {
                                 neighbourFacade.deleteSubscription(neighbour, subscription);
                                 subscriptionsToDelete.add(subscription);
+                            } else {
+                                Set<Match> matchesToSave = new HashSet<>();
+                                for (Match match : matches) {
+                                    if (match.getStatus().equals(MatchStatus.UP)) {
+                                        match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
+                                        matchesToSave.add(match);
+                                    }
+                                }
+                                matchRepository.saveAll(matchesToSave);
                             }
                         } catch(SubscriptionDeleteException e) {
                             subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);

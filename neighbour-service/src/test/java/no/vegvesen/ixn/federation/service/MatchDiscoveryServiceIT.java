@@ -14,6 +14,9 @@ import javax.transaction.Transactional;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -174,4 +177,44 @@ public class MatchDiscoveryServiceIT {
         assertThat(matchRepository.findAll()).hasSize(0);
     }
 
+    @Test
+    public void matchInListVsSet() {
+        String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
+        String consumerCommonName = "my-node";
+
+        LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+
+        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+        serviceProvider.addLocalSubscription(localSubscription);
+        serviceProviderRepository.save(serviceProvider);
+
+        Subscription subscription1 = new Subscription(SubscriptionStatus.REQUESTED, selector, "", consumerCommonName);
+        Neighbour neighbour1 = new Neighbour("neighbour1",
+                new Capabilities(),
+                new NeighbourSubscriptionRequest(),
+                new SubscriptionRequest(
+                        SubscriptionRequestStatus.REQUESTED,
+                        Collections.singleton(subscription1)
+                )
+        );
+        neighbourRepository.save(neighbour1);
+
+        Subscription subscription2 = new Subscription(SubscriptionStatus.REQUESTED, selector, "", consumerCommonName);
+        Neighbour neighbour2 = new Neighbour("neighbour2",
+                new Capabilities(),
+                new NeighbourSubscriptionRequest(),
+                new SubscriptionRequest(
+                        SubscriptionRequestStatus.REQUESTED,
+                        Collections.singleton(subscription2)
+                )
+        );
+        neighbourRepository.save(neighbour2);
+
+        matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Arrays.asList(neighbour1, neighbour2));
+        List<Match> matchesList = matchRepository.findAllByLocalSubscription_Selector(selector);
+        assertThat(matchesList).hasSize(2);
+
+        Set<Match> matchesSet = matchesList.stream().collect(Collectors.toSet());
+        assertThat(matchesSet).hasSize(1);
+    }
 }
