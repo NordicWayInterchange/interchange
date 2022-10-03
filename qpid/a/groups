@@ -3,3 +3,4 @@ administrators.users=qpid-admin,a.bouvetinterchange.eu
 service-providers.users=
 remote-service-providers.users=
 clients-private-channels.users=
+bi-consumers.users=

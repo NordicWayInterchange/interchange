@@ -46,6 +46,15 @@
         },
         {
           "objectType": "VIRTUALHOST",
+          "identity": "bi-consumers",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "local.bouvetinterchange.eu"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
           "identity": "federated-interchanges",
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
