@@ -1,4 +1,4 @@
 federated-interchanges.users=
-administrators.users=qpid-admin,remote.bouvetinterchange.eu
+administrators.users=qpid-admin,c.bouvetinterchange.eu
 service-providers.users=
 remote-service-providers.users=

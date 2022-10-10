@@ -1,16 +1,16 @@
 version: '3'
 services:
 
-# Note: now all the containers are on the same network - testing_net
-# An idea for later would be to have two separate networks, one for each node,
-# where the modules that need to communicate with each other are a part of both networks.
+  # Note: now all the containers are on the same network - testing_net
+  # An idea for later would be to have two separate networks, one for each node,
+  # where the modules that need to communicate with each other are a part of both networks.
 
   mock-dns-server:
     build:
       context: ../fake-dns-server
-      dockerfile: dns-dockerfile
+      dockerfile: new-dns-dockerfile
     cap_add:
-    - NET_ADMIN
+      - NET_ADMIN
     container_name: mock-dns-server
     hostname: mock-dns-server
     networks:
@@ -31,7 +31,7 @@ services:
       - POSTGRES_PASSWORD=federation
       - POSTGRES_DB=federation
     networks:
-    - testing_net
+      - testing_net
 
   a_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
@@ -43,7 +43,7 @@ services:
     ports:
       - 32666:8797
     volumes:
-    - "../tmp:/jks"
+      - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - SERVER_NAME=a.bouvetinterchange.eu
@@ -82,9 +82,9 @@ services:
       - PASSWD_FILE=/config/passwd
       - JAVA_OPTS=-XX:HeapDumpPath=/dump/
     depends_on:
-    - mock-dns-server
+      - mock-dns-server
     networks:
-    - testing_net
+      - testing_net
 
   a_neighbour_server:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
@@ -107,7 +107,7 @@ services:
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
-    - testing_net
+      - testing_net
     dns: 172.28.1.1
 
   a_routing_configurer:
@@ -131,7 +131,7 @@ services:
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
     networks:
-    - testing_net
+      - testing_net
 
   a_neighbour_discoverer:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
@@ -141,7 +141,8 @@ services:
     depends_on:
       - a_db
     links:
-     - "b_neighbour_server:b.bouvetinterchange.eu"
+      - "b_neighbour_server:b.bouvetinterchange.eu"
+      - "c_neighbour_server:c.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
@@ -156,7 +157,7 @@ services:
       - KEY_PASSWORD=password
     dns: 172.28.1.1
     networks:
-    - testing_net
+      - testing_net
 
   a_message_collector_app:
     #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
@@ -164,29 +165,30 @@ services:
       context: ../message-collector-app
     container_name: a_message_collector_app
     depends_on:
-    - a_db
+      - a_db
     links:
-    - "a_qpid:a.bouvetinterchange.eu"
-    - "b_qpid:b.bouvetinterchange.eu"
+      - "a_qpid:a.bouvetinterchange.eu"
+      - "b_qpid:b.bouvetinterchange.eu"
+      - "c_qpid:c.bouvetinterchange.eu"
     volumes:
-    - "../tmp:/jks"
+      - "../tmp:/jks"
     environment:
-    - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
-    - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
-    - KEY_STORE_PASSWORD=password
-    - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE=/jks/keys/truststore.jks
-    - TRUST_STORE_PASSWORD=password
-    - TRUST_STORE_TYPE=JKS
-    - SERVER_NAME=a.bouvetinterchange.eu
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_TYPE=PKCS12
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE_TYPE=JKS
+      - SERVER_NAME=a.bouvetinterchange.eu
     networks:
-    - testing_net
+      - testing_net
 
   b_db:
     image: postgres:9.6
     container_name: b_db
     depends_on:
-    - mock-dns-server
+      - mock-dns-server
     ports:
       - 25432:5432
     environment:
@@ -194,7 +196,7 @@ services:
       - POSTGRES_PASSWORD=federation
       - POSTGRES_DB=federation
     networks:
-    - testing_net
+      - testing_net
 
   b_onboard_server:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
@@ -202,22 +204,22 @@ services:
       context: ../onboard-server-app
     container_name: b_onboard_server
     depends_on:
-    - b_db
+      - b_db
     ports:
-    - 32555:8696
+      - 32555:8696
     volumes:
-    - "../tmp:/jks"
+      - "../tmp:/jks"
     environment:
-    - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
-    - SERVER_NAME=b.bouvetinterchange.eu
-    - DOMAIN_NAME=bouvetinterchange.eu
-    - SP_CHNL_PORT=8696
-    - TRUST_STORE=/jks/keys/truststore.jks
-    - TRUST_STORE_PASSWORD=password
-    - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
-    - KEY_STORE_PASSWORD=password
+      - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - SERVER_NAME=b.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - SP_CHNL_PORT=8696
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
     networks:
-    - testing_net
+      - testing_net
 
   b_neighbour_server:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
@@ -252,6 +254,7 @@ services:
       - b_db
     links:
       - "a_neighbour_server:a.bouvetinterchange.eu"
+      - "c_neighbour_server:c.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
@@ -266,7 +269,7 @@ services:
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
     networks:
-    - testing_net
+      - testing_net
     dns: 172.28.1.1
 
   b_qpid:
@@ -293,9 +296,9 @@ services:
       - STATIC_GROUPS_FILE=/config/groups
       - PASSWD_FILE=/config/passwd
     depends_on:
-    - mock-dns-server
+      - mock-dns-server
     networks:
-    - testing_net
+      - testing_net
 
   b_routing_configurer:
     #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
@@ -318,7 +321,7 @@ services:
       - KEY_STORE_PASSWORD=password
       - KEY_PASSWORD=password
     networks:
-    - testing_net
+      - testing_net
 
   b_message_collector_app:
     #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
@@ -330,6 +333,7 @@ services:
     links:
       - "a_qpid:a.bouvetinterchange.eu"
       - "b_qpid:b.bouvetinterchange.eu"
+      - "c_qpid:c.bouvetinterchange.eu"
     volumes:
       - "../tmp:/jks"
     environment:
@@ -342,13 +346,177 @@ services:
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=b.bouvetinterchange.eu
     networks:
-    - testing_net
+      - testing_net
+
+  c_db:
+    image: postgres:9.6
+    container_name: c_db
+    depends_on:
+      - mock-dns-server
+    ports:
+      - 35432:5432
+    environment:
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation
+    networks:
+      - testing_net
+
+  c_onboard_server:
+    #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
+    build:
+      context: ../onboard-server-app
+    container_name: c_onboard_server
+    depends_on:
+      - c_db
+    ports:
+      - 32444:8595
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://c_db:5432/federation
+      - SERVER_NAME=c.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - SP_CHNL_PORT=8595
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/c.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - testing_net
+
+  c_neighbour_server:
+    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
+    build:
+      context: ../neighbour-server-app
+    container_name: c_neighbour_server
+    depends_on:
+      - c_db
+    ports:
+      - 8090
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://c_db:5432/federation
+      - SERVER_NAME=c.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/c.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - testing_net
+    dns: 172.28.1.1
+
+  c_neighbour_discoverer:
+    #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
+    build:
+      context: ../neighbour-discoverer-app
+    container_name: c_neighbour_discoverer
+    depends_on:
+      - c_db
+    links:
+      - "a_neighbour_server:a.bouvetinterchange.eu"
+      - "b_neighbour_server:b.bouvetinterchange.eu"
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://c_db:5432/federation
+      - SERVER_NAME=c.bouvetinterchange.eu
+      #- NODE_PROVIDER_NAME=b.bouvetinterchange.eu # "my name"
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/c.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_PASSWORD=password
+    networks:
+      - testing_net
+    dns: 172.28.1.1
+
+  c_qpid:
+    build:
+      context: ../qpid
+    container_name: c_qpid
+    ports:
+      - 8444:8080
+      - 443
+      - 63002:5671
+      - 5672
+    volumes:
+      - "../qpid/c:/config"
+      - "../tmp:/jks"
+      - "../qpid/messages/c:/work/c/messages"
+    environment:
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/c.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - VHOST_FILE=/work/default/config/default.json
+      - STATIC_VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/work/default/config/groups
+      - STATIC_GROUPS_FILE=/config/groups
+      - PASSWD_FILE=/config/passwd
+    depends_on:
+      - mock-dns-server
+    networks:
+      - testing_net
+
+  c_routing_configurer:
+    #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
+    build:
+      context: ../routing-configurer-app
+    container_name: c_routing_configurer
+    depends_on:
+      - c_db
+    links:
+      - "c_qpid:c.bouvetinterchange.eu"
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://c_db:5432/federation
+      - BASE_URL=https://c.bouvetinterchange.eu
+      - SERVER_NAME=c.bouvetinterchange.eu
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/c.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_PASSWORD=password
+    networks:
+      - testing_net
+
+  c_message_collector_app:
+    #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
+    build:
+      context: ../message-collector-app
+    container_name: c_message_collector_app
+    depends_on:
+      - c_db
+    links:
+      - "a_qpid:a.bouvetinterchange.eu"
+      - "b_qpid:b.bouvetinterchange.eu"
+      - "c_qpid:c.bouvetinterchange.eu"
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://c_db:5432/federation
+      - KEY_STORE=/jks/keys/c.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_TYPE=PKCS12
+      - TRUST_STORE=/jks/keys/truststore.jks
+      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE_TYPE=JKS
+      - SERVER_NAME=c.bouvetinterchange.eu
+    networks:
+      - testing_net
 
 networks:
   testing_net:
     ipam:
       driver: default
       config:
-      - subnet: 172.28.1.0/16
+        - subnet: 172.28.1.0/16
 
 

@@ -3,13 +3,13 @@
 if [ "$#" -gt 0 ]; then
   SERVICE_PROVIDER=$1
 else
-  SERVICE_PROVIDER=king_olav.bouvetinterchange.eu
+  SERVICE_PROVIDER=king_charles.bouvetinterchange.eu
 fi
 
 docker run \
   -it \
   --rm \
-  --name local_onboard_client \
+  --name c_onboard_client \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
   -v $PWD/../tmp/keys:/keys \
@@ -18,7 +18,7 @@ docker run \
   -e KEY_PASSWORD=password \
   -e TRUST_STORE_PATH=/keys/truststore.jks \
   -e TRUST_STORE_PASSWORD=password \
-  -e ONBOARD_SERVER=https://local.bouvetinterchange.eu:8797/ \
+  -e ONBOARD_SERVER=https://c.bouvetinterchange.eu:8595/ \
   -e USER=${SERVICE_PROVIDER} \
-  --link local_onboard_server:local.bouvetinterchange.eu \
+  --link c_onboard_server:c.bouvetinterchange.eu \
   --entrypoint bash onboard_rest_client
