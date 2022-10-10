@@ -13,6 +13,8 @@ public class OldLocalActorSubscription {
     private String path;
     private String selector;
 
+    private String consumerCommonName;
+
     private long lastUpdatedTimestamp;
 
     private LocalActorSubscriptionStatusApi status;
@@ -65,5 +67,13 @@ public class OldLocalActorSubscription {
 
     public void setStatus(LocalActorSubscriptionStatusApi status) {
         this.status = status;
+    }
+
+    public String getConsumerCommonName() {
+        return consumerCommonName;
+    }
+
+    public void setConsumerCommonName(String consumerCommonName) {
+        this.consumerCommonName = consumerCommonName;
     }
 }

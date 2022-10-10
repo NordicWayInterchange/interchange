@@ -39,7 +39,8 @@ public class ServiceProviderImport {
             if (!selector.trim().isEmpty()) {
                 LocalSubscription localSubscription = new LocalSubscription(
                         LocalSubscriptionStatus.REQUESTED,
-                        selector
+                        selector,
+                        subscriptionApi.getConsumerCommonName()
                 );
                 if (! subscriptionApi.getEndpoints().isEmpty()) {
                     Set<LocalEndpoint> endpoints = new HashSet<>();
@@ -106,4 +107,20 @@ public class ServiceProviderImport {
                     "spring.datasource.driver-class-name: org.postgresql.Driver"
             ).applyTo(configurableApplicationContext.getEnvironment());        }
     }
+        /*
+        Used to import/export from a locally runnning database
+         */
+    public static class LocalhostInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+
+            TestPropertyValues.of(
+                    "spring.datasource.url: jdbc:postgresql://localhost:5432/federation",
+                    "spring.datasource.username: federation",
+                    "spring.datasource.password: federation",
+                    "spring.datasource.driver-class-name: org.postgresql.Driver"
+            ).applyTo(configurableApplicationContext.getEnvironment());        }
+    }
+
 }
