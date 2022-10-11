@@ -279,8 +279,10 @@ public class ServiceProviderRouter {
                 for (Match exMatch : exchangeMatches) {
                     if (exMatch.getStatus().equals(MatchStatus.TEARDOWN_EXCHANGE)) {
                         for (LocalEndpoint endpoint : exMatch.getLocalSubscription().getLocalEndpoints()) {
-                            if (qpidClient.getQueueBindKeys(endpoint.getSource()).contains(bindKey)) {
-                                qpidClient.unbindBindKey(endpoint.getSource(), bindKey, exchangeName);
+                            if (qpidClient.queueExists(endpoint.getSource())) {
+                                if (qpidClient.getQueueBindKeys(endpoint.getSource()).contains(bindKey)) {
+                                    qpidClient.unbindBindKey(endpoint.getSource(), bindKey, exchangeName);
+                                }
                             }
                         }
                         removeLocalSubscriptionQueue(exMatch.getLocalSubscription(), serviceProviderName);
@@ -295,8 +297,10 @@ public class ServiceProviderRouter {
             } else {
                 if (qpidClient.exchangeExists(exchangeName)) {
                     for (LocalEndpoint endpoint : match.getLocalSubscription().getLocalEndpoints()) {
-                        if (qpidClient.getQueueBindKeys(endpoint.getSource()).contains(bindKey)) {
-                            qpidClient.unbindBindKey(endpoint.getSource(), bindKey, exchangeName);
+                        if (qpidClient.queueExists(endpoint.getSource())) {
+                            if (qpidClient.getQueueBindKeys(endpoint.getSource()).contains(bindKey)) {
+                                qpidClient.unbindBindKey(endpoint.getSource(), bindKey, exchangeName);
+                            }
                         }
                     }
                     qpidClient.removeExchange(exchangeName);
