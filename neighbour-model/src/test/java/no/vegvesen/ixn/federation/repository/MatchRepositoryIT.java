@@ -393,7 +393,7 @@ public class MatchRepositoryIT {
 
         Subscription sub = new Subscription(selector, SubscriptionStatus.REQUESTED, "my-interchange");
         sub.setExchangeName("my-exchange");
-        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
 
         neighbourRepository.save(neighbour);
 
