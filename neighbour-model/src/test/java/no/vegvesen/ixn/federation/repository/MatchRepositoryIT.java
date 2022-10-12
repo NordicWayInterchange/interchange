@@ -93,8 +93,8 @@ public class MatchRepositoryIT {
 
     @Test
     public void findOnUnsavedMatch() {
-        Match noMatch = matchRepository.findBySubscriptionId(1);
-        assertThat(noMatch).isNull();
+        List<Match> noMatch = matchRepository.findAllBySubscriptionId(1);
+        assertThat(noMatch).isEmpty();
     }
 
     @Test
@@ -155,7 +155,7 @@ public class MatchRepositoryIT {
 
 
         //TODO test that we can use this method with more than one matches with a local subscription.
-        List<Match> byLocalSubscriptionId = matchRepository.findByLocalSubscriptionId(locSub.getId());
+        List<Match> byLocalSubscriptionId = matchRepository.findAllByLocalSubscriptionId(locSub.getId());
     }
 
     @Test
@@ -374,4 +374,37 @@ public class MatchRepositoryIT {
 
         assertThat(savedMatch).isNotNull();
     }
+
+    @Test
+    public void testMultipleMatchesWithSameExchangeName() {
+        String selector = "originatingCountry = 'NO' AND messageType = 'DENM'";
+        String serviceProviderName1 = "sp-1";
+        String serviceProviderName2 = "sp-2";
+
+        LocalSubscription locSub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
+        ServiceProvider sp1 = new ServiceProvider(serviceProviderName1, new Capabilities(), Collections.singleton(locSub1), Collections.emptySet(), LocalDateTime.now());
+
+        serviceProviderRepository.save(sp1);
+
+        LocalSubscription locSub2 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector);
+        ServiceProvider sp2 = new ServiceProvider(serviceProviderName2, new Capabilities(), Collections.singleton(locSub2), Collections.emptySet(), LocalDateTime.now());
+
+        serviceProviderRepository.save(sp2);
+
+        Subscription sub = new Subscription(selector, SubscriptionStatus.REQUESTED, "my-interchange");
+        sub.setExchangeName("my-exchange");
+        Neighbour neighbour = new Neighbour("neighbour", new Capabilities(), new SubscriptionRequest(), new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, Collections.singleton(sub)));
+
+        neighbourRepository.save(neighbour);
+
+        Match match1 = new Match(locSub1, sub, serviceProviderName1, MatchStatus.UP);
+        Match match2 = new Match(locSub2, sub, serviceProviderName2, MatchStatus.UP);
+
+        matchRepository.save(match1);
+        matchRepository.save(match2);
+
+        List<Match> savedMatches = matchRepository.findBySubscription_ExchangeName("my-exchange");
+        assertThat(savedMatches).hasSize(2);
+    }
+
 }

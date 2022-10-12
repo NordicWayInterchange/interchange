@@ -1,4 +1,4 @@
-{	"name" : "king_olav",
+{	"name" : "king_charles",
   "version" : "1.0",
   "capabilities" : [
     {
@@ -7,7 +7,7 @@
       "originatingCountry": "NO",
       "protocolVersion": "DENM:1.2.2",
       "quadTree": [
-        "12003, 12004"
+        "12004"
       ],
       "causeCode": [
         "6"

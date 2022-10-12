@@ -25,4 +25,6 @@ ADD dat_no_delivery.json /
 ADD systemtest_local_subs.json /
 ADD systemtest_remote_cap.json /
 ADD redirect_localSubscription_dat_no.json /
+ADD cap_king_charles_denm_no.json /
+ADD sub_king_charles_denm_no.json /
 ENTRYPOINT ["/entrypoint.sh"]

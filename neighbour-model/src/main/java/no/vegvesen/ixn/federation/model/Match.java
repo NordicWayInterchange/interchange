@@ -10,11 +10,11 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "matches_seq")
     private Integer id;
 
-    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "loc_sub", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_match_local_subscription"))
     private LocalSubscription localSubscription;
 
-    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "sub", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_match_subscription"))
     private Subscription subscription;
 

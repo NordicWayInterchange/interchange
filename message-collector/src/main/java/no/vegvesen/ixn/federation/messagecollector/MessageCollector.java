@@ -65,14 +65,24 @@ public class MessageCollector {
             String neighbourName = listenerEndpoint.getNeighbourName();
             interchangeListenerEndpoints.add(listenerEndpoint);
             if (!listeners.containsKey(listenerEndpoint)) {
-                Match match = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName());
-                if (match.getStatus().equals(MatchStatus.SETUP_ENDPOINT)) {
+                List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName()).stream()
+                        .filter(m -> m.getStatus().equals(MatchStatus.SETUP_ENDPOINT))
+                        .collect(Collectors.toList());
+                if (!matches.isEmpty()) {
                     setUpConnectionToNeighbour(listenerEndpoint);
+                }
+                for (Match match : matches) {
                     matchDiscoveryService.updateMatchToUp(match);
                 }
             }
             else {
                 if (listeners.get(listenerEndpoint).isRunning()) {
+                    List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName()).stream()
+                            .filter(m -> m.getStatus().equals(MatchStatus.SETUP_ENDPOINT))
+                            .collect(Collectors.toList());
+                    for (Match match : matches) {
+                        matchDiscoveryService.updateMatchToUp(match);
+                    }
                     logger.debug("Listener for {} with host {} and port {} is still running with no changes", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 } else {
                     logger.debug("Non-running listener detected, name {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
@@ -93,14 +103,25 @@ public class MessageCollector {
 
         for (ListenerEndpoint listenerEndpoint : listeners.keySet()) {
             if (!interchangeListenerEndpoints.contains(listenerEndpoint)) {
-                Match match = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName());
-                if (match.getStatus().equals(MatchStatus.TEARDOWN_ENDPOINT)) {
-                    String neighbourName = listenerEndpoint.getNeighbourName();
-                    logger.info("Listener for {} with host {} and port {} is now being removed", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
-                    MessageCollectorListener toRemove = listeners.get(listenerEndpoint);
-                    logger.debug("Tearing down listener for {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
-                    toRemove.teardown();
-                    listenerKeysToRemove.add(listenerEndpoint);
+                List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName()).stream()
+                        .filter(m -> m.getStatus().equals(MatchStatus.TEARDOWN_ENDPOINT))
+                        .collect(Collectors.toList());
+
+                String neighbourName = listenerEndpoint.getNeighbourName();
+                logger.info("Listener for {} with host {} and port {} is now being removed", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
+                MessageCollectorListener toRemove = listeners.get(listenerEndpoint);
+                logger.debug("Tearing down listener for {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
+                toRemove.teardown();
+                listenerKeysToRemove.add(listenerEndpoint);
+
+                for (Match match : matches) {
+                    matchDiscoveryService.updateMatchToTearDownExchange(match);
+                }
+            } else {
+                List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName()).stream()
+                        .filter(m -> m.getStatus().equals(MatchStatus.TEARDOWN_ENDPOINT))
+                        .collect(Collectors.toList());
+                for (Match match : matches) {
                     matchDiscoveryService.updateMatchToTearDownExchange(match);
                 }
             }

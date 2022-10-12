@@ -42,17 +42,14 @@ public class ServiceProviderService {
     }
 
     public void updateLocalSubscriptionWithRedirectEndpoints(ServiceProvider serviceProvider) {
-        Set<LocalSubscription> redirectSubscriptions = new HashSet<>();
-        for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-            if (serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                redirectSubscriptions.add(subscription);
+        Set<LocalSubscription> redirectSubscriptions = serviceProvider.getSubscriptions().stream()
+                .filter(l -> l.getConsumerCommonName().equals(serviceProvider.getName()))
+                .collect(Collectors.toSet());
 
-            }
-        }
         for (LocalSubscription localSubscription : redirectSubscriptions) {
             Set<LocalEndpoint> newEndpoints = new HashSet<>();
             if (localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
-                List<Match> matches = matchDiscoveryService.findMatchByLocalSubscriptionId(localSubscription.getId());
+                List<Match> matches = matchDiscoveryService.findMatchesByLocalSubscriptionId(localSubscription.getId());
                 for (Match match : matches) {
                     newEndpoints.addAll(transformEndpointsToLocalEndpoints(match.getSubscription().getEndpoints()));
                 }
