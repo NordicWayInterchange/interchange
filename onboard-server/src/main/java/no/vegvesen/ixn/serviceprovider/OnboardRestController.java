@@ -172,14 +172,6 @@ public class OnboardRestController {
 			throw new SubscriptionRequestException("Bad api object for Subscription Request. No selectors.");
 
 		}
-		/*
-		for (AddSubscription addSubscription : requestApi.getSubscriptions()) {
-			if (addSubscription.getSelector() == null) {
-				throw new SubscriptionRequestException("Bad api object for Subscription Request. The Selector object was null.");
-			}
-		}
-		 */
-		//for (AddSubscription addSubscription : )
 
 		logger.info("Service provider {} Incoming subscription selector {}", serviceProviderName, requestApi.getSubscriptions());
 
@@ -323,7 +315,6 @@ public class OnboardRestController {
 		return new PrivateChannelListApi(privateChannelsApis);
 	}
 
-	//TODO implement!
 	@RequestMapping(method = RequestMethod.POST, path = "/{serviceProviderName}/deliveries", produces = MediaType.APPLICATION_JSON_VALUE)
 	public AddDeliveriesResponse addDeliveries(@PathVariable String serviceProviderName, @RequestBody AddDeliveriesRequest request) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
