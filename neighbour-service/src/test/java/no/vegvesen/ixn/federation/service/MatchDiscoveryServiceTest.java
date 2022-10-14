@@ -37,7 +37,7 @@ public class MatchDiscoveryServiceTest {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.singletonList(new Neighbour(
                 "test",
                 new Capabilities(),
-                new SubscriptionRequest(),
+                new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest()
         )));
         verify(matchRepository,never()).findAllBySubscriptionId(any());
@@ -71,7 +71,7 @@ public class MatchDiscoveryServiceTest {
                 Collections.singletonList(new Neighbour(
                         "neighbour",
                         new Capabilities(),
-                        new SubscriptionRequest(),
+                        new NeighbourSubscriptionRequest(),
                         new SubscriptionRequest(
                                 SubscriptionRequestStatus.REQUESTED,
                                 Collections.singleton(
@@ -107,7 +107,7 @@ public class MatchDiscoveryServiceTest {
        Neighbour neighbour = new Neighbour(
                "neighbour",
                new Capabilities(),
-               new SubscriptionRequest(),
+               new NeighbourSubscriptionRequest(),
                new SubscriptionRequest(
                        SubscriptionRequestStatus.REQUESTED,
                        new HashSet<>(Arrays.asList(
@@ -123,7 +123,7 @@ public class MatchDiscoveryServiceTest {
         Neighbour otherNeighbour = new Neighbour(
                 "neighbour",
                 new Capabilities(),
-                new SubscriptionRequest(),
+                new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.REQUESTED,
                         new HashSet<>(Arrays.asList(
@@ -162,7 +162,7 @@ public class MatchDiscoveryServiceTest {
         Neighbour neighbour = new Neighbour(
                 "neighbour",
                 new Capabilities(),
-                new SubscriptionRequest(),
+                new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.REQUESTED,
                         new HashSet<>(Arrays.asList(
@@ -202,7 +202,7 @@ public class MatchDiscoveryServiceTest {
         Neighbour neighbour = new Neighbour(
                 "neighbour",
                 new Capabilities(),
-                new SubscriptionRequest(),
+                new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.REQUESTED,
                         new HashSet<>(Arrays.asList(

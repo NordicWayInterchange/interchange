@@ -35,8 +35,6 @@ public class Subscription {
 
 	private String exchangeName;
 
-	private String queueName;
-
 	public Subscription() {
 	}
 
@@ -45,10 +43,10 @@ public class Subscription {
 		this.subscriptionStatus = subscriptionStatus;
 	}
 
-	public Subscription(String selector, String consumerCommonName,SubscriptionStatus subscriptionStatus) {
+	public Subscription(String selector, SubscriptionStatus subscriptionStatus, String consumerCommonName) {
 		this.selector = selector;
-		this.consumerCommonName = consumerCommonName;
 		this.subscriptionStatus = subscriptionStatus;
+		this.consumerCommonName = consumerCommonName;
 	}
 
 	public Subscription(int id, SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
@@ -72,12 +70,6 @@ public class Subscription {
 		this.subscriptionStatus = subscriptionStatus;
 		this.selector = selector;
 		this.path = path;
-		this.consumerCommonName = consumerCommonName;
-	}
-
-	public Subscription(String selector, SubscriptionStatus subscriptionStatus, String consumerCommonName) {
-		this.selector = selector;
-		this.subscriptionStatus = subscriptionStatus;
 		this.consumerCommonName = consumerCommonName;
 	}
 
@@ -154,14 +146,6 @@ public class Subscription {
 
 	public void setExchangeName(String exchangeName) {
 		this.exchangeName = exchangeName;
-	}
-
-	public String getQueueName() {
-		return queueName;
-	}
-
-	public void setQueueName(String queueName) {
-		this.queueName = queueName;
 	}
 
 	//TODO this is really quite unusual, and really shows that the Subscription needs to be changed

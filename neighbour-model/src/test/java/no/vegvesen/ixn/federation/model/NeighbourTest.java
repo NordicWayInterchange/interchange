@@ -145,7 +145,7 @@ public class NeighbourTest {
 	@Test
 	public void hasEstablishedSubscriptionsEmpty() {
 		Neighbour neighbour = new Neighbour();
-		neighbour.setNeighbourRequestedSubscriptions(new SubscriptionRequest());
+		neighbour.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest());
 		assertThat(neighbour.hasEstablishedSubscriptions()).isFalse();
 	}
 
@@ -153,7 +153,7 @@ public class NeighbourTest {
 	public void hasEstablishedSubscriptionsStatusEnabled() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setNeighbourRequestedSubscriptions(
-				new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED,
+				new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED,
 						Collections.emptySet()));
 		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
 	}

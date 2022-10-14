@@ -55,16 +55,16 @@ public class RoutingConfigurer {
 
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
-		Set<Subscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getTearDownSubscriptions();
+		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getTearDownSubscriptions();
 		try {
-			for (Subscription sub : subscriptions) {
+			for (NeighbourSubscription sub : subscriptions) {
 				if (qpidClient.queueExists(sub.getQueueName())) {
 					qpidClient.removeQueue(sub.getQueueName());
 				}
 			}
 			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
 
-			if (neighbour.getNeighbourRequestedSubscriptions().getStatus().equals(SubscriptionRequestStatus.EMPTY)) {
+			if (neighbour.getNeighbourRequestedSubscriptions().getStatus().equals(NeighbourSubscriptionRequestStatus.EMPTY)) {
 				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
 				logger.info("Removed routing for neighbour {}", name);
 				//neighbourService.saveTearDownRouting(neighbour, name);
@@ -89,8 +89,8 @@ public class RoutingConfigurer {
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 			Set<Capability> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
-				Set<Subscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
-				Set<Subscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
+				Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
+				Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
 				setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities);
 				allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
@@ -100,7 +100,7 @@ public class RoutingConfigurer {
 				}
 				neighbourService.saveSetupRouting(neighbour);
 			} else {
-				Set<Subscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
+				Set<NeighbourSubscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
 				setUpRegularRouting(acceptedSubscriptions, capabilities, neighbour.getName());
 				neighbourService.saveSetupRouting(neighbour);
 			}
@@ -109,8 +109,8 @@ public class RoutingConfigurer {
 		}
 	}
 
-	public void setUpRegularRouting(Set<Subscription> allAcceptedSubscriptions, Set<Capability> capabilities, String neighbourName) {
-		for(Subscription subscription : allAcceptedSubscriptions){
+	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<Capability> capabilities, String neighbourName) {
+		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
 			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getRedirect().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				String queueName = "sub-" + UUID.randomUUID();
@@ -122,20 +122,20 @@ public class RoutingConfigurer {
 						bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
 					}
 				}
-				Endpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
+				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
 				subscription.setEndpoints(Collections.singleton(endpoint));
-				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
-				subscription.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		}
 		logger.info("Set up routing for neighbour {}", neighbourName);
 	}
 
-	private void setUpRedirectedRouting(Set<Subscription> redirectSubscriptions, Set<Capability> capabilities) {
-		for(Subscription subscription : redirectSubscriptions){
+	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<Capability> capabilities) {
+		for(NeighbourSubscription subscription : redirectSubscriptions){
 			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getRedirect().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				String redirectQueue = "re-" + UUID.randomUUID();
@@ -147,23 +147,23 @@ public class RoutingConfigurer {
 						bindRemoteServiceProvider(cap.getCapabilityExchangeName(), redirectQueue, subscription);
 					}
 				}
-				Endpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
+				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
 				subscription.setEndpoints(Collections.singleton(endpoint));
-				subscription.setSubscriptionStatus(SubscriptionStatus.CREATED);
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
 				logger.info("Set up routing for service provider {}", subscription.getConsumerCommonName());
 			} else {
 				logger.info("Subscription {} does not match any Service Provider Capability", subscription);
-				subscription.setSubscriptionStatus(SubscriptionStatus.NO_OVERLAP);
+				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
 		}
 	}
 
-	private void bindSubscriptionQueue(String exchange, Subscription subscription) {
+	private void bindSubscriptionQueue(String exchange, NeighbourSubscription subscription) {
 		qpidClient.bindDirectExchange(subscription.getSelector(), exchange, subscription.getQueueName());
 	}
 
-	private void bindRemoteServiceProvider(String exchange, String commonName, Subscription acceptedSubscription) {
+	private void bindRemoteServiceProvider(String exchange, String commonName, NeighbourSubscription acceptedSubscription) {
 		qpidClient.bindTopicExchange(acceptedSubscription.getSelector(),exchange,commonName);
 	}
 
@@ -203,7 +203,7 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private Endpoint createEndpoint(String host, String port, String source) {
-		return new Endpoint(source, host, Integer.parseInt(port));
+	private NeighbourEndpoint createEndpoint(String host, String port, String source) {
+		return new NeighbourEndpoint(source, host, Integer.parseInt(port));
 	}
 }

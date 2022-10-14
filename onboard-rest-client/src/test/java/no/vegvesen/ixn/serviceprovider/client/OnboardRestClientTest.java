@@ -15,7 +15,7 @@ public class OnboardRestClientTest {
 
     @Test
     void testObjectMapperReturnsRightApiObject() throws IOException {
-        File file = new File("localSubscription_dat_no.json");
+        File file = new File("sub_king_gustaf_denm_no.json");
 
         ObjectMapper mapper = new ObjectMapper();
         AddSubscriptionsRequest subscriptions = mapper.readValue(file,AddSubscriptionsRequest.class);

@@ -2,10 +2,7 @@ package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
-import no.vegvesen.ixn.federation.model.Endpoint;
-import no.vegvesen.ixn.federation.model.Subscription;
-import no.vegvesen.ixn.federation.model.SubscriptionRequest;
-import no.vegvesen.ixn.federation.model.SubscriptionRequestStatus;
+import no.vegvesen.ixn.federation.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,14 +29,14 @@ public class SubscriptionRequestTransformer {
 	    return requestApi;
 	}
 
-	public SubscriptionResponseApi subscriptionsToSubscriptionResponseApi(String name, Set<Subscription> subscriptions) {
+	public SubscriptionResponseApi subscriptionsToSubscriptionResponseApi(String name, Set<NeighbourSubscription> subscriptions) {
 	    Set<RequestedSubscriptionResponseApi> subscriptionResponseApis = subscriptionTransformer.subscriptionToRequestedSubscriptionResponseApi(subscriptions);
 	    return new SubscriptionResponseApi(name,subscriptionResponseApis);
 	}
 
 
-	public SubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
+	public  NeighbourSubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 		return subscriptionRequest;
 	}
 
@@ -66,6 +63,30 @@ public class SubscriptionRequestTransformer {
 		}
 		return subscription;
 
+	}
+
+	public SubscriptionPollResponseApi neighbourSubscriptionToSubscriptionPollResponseApi(NeighbourSubscription subscription) {
+		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
+		response.setSelector(subscription.getSelector());
+		response.setPath(subscription.getPath());
+		SubscriptionStatusApi status = subscriptionTransformer.neighbourSubscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
+		response.setStatus(status);
+		response.setConsumerCommonName(subscription.getConsumerCommonName());
+		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
+		if (status.equals(SubscriptionStatusApi.CREATED)) {
+			Set<EndpointApi> newEndpoints = new HashSet<>();
+			for(NeighbourEndpoint endpoint : subscription.getEndpoints()) {
+				EndpointApi endpointApi = new EndpointApi(
+						endpoint.getSource(),
+						endpoint.getHost(),
+						endpoint.getPort()
+				);
+				newEndpoints.add(endpointApi);
+			}
+			response.setEndpoints(newEndpoints);
+			//TODO: Return redirectQueueName
+		}
+		return response;
 	}
 
 	public SubscriptionPollResponseApi subscriptionToSubscriptionPollResponseApi(Subscription subscription) {
