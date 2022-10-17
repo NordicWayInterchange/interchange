@@ -48,17 +48,12 @@ public class NeighbourSubscriptionDeleteService {
                                 neighbourFacade.deleteSubscription(neighbour, subscription);
                                 subscriptionsToDelete.add(subscription);
                             } else {
-                                Set<Match> matchesToSave = new HashSet<>();
-                                for (Match match : matches) {
-                                    if (match.getStatus().equals(MatchStatus.UP)) {
-                                        match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
-                                        matchesToSave.add(match);
-                                    }
-                                }
-                                matchRepository.saveAll(matchesToSave);
+                                setMatchesToTearDownEndpoint(matches);
                             }
                         } catch(SubscriptionDeleteException e) {
                             subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                            List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                            setMatchesToTearDownEndpoint(matches);
                             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                             logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
                         } catch(SubscriptionNotFoundException e) {
@@ -77,6 +72,17 @@ public class NeighbourSubscriptionDeleteService {
                 logger.debug("Saving updated neighbour: {}", neighbour.toString());
             }
         }
+    }
+
+    public void setMatchesToTearDownEndpoint(List<Match> matches) {
+        Set<Match> matchesToSave = new HashSet<>();
+        for (Match match : matches) {
+            if (match.getStatus().equals(MatchStatus.UP)) {
+                match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
+                matchesToSave.add(match);
+            }
+        }
+        matchRepository.saveAll(matchesToSave);
     }
 
     public void tearDownListenerEndpoints(Neighbour neighbour) {

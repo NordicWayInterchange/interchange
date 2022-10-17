@@ -77,7 +77,7 @@ public class MatchDiscoveryServiceTest {
                                 Collections.singleton(
                                         new Subscription(
                                                 "originatingCountry = 'NO'",
-                                                SubscriptionStatus.REQUESTED,
+                                                SubscriptionStatus.CREATED,
                                                 "my-node"
                                         )
                                 )
@@ -113,7 +113,7 @@ public class MatchDiscoveryServiceTest {
                        new HashSet<>(Arrays.asList(
                                new Subscription(
                                        "originatingCountry = 'NO'",
-                                       SubscriptionStatus.REQUESTED,
+                                       SubscriptionStatus.CREATED,
                                        "my-node"
                                )
                        ))
@@ -129,7 +129,7 @@ public class MatchDiscoveryServiceTest {
                         new HashSet<>(Arrays.asList(
                                 new Subscription(
                                         "originatingCountry = 'NO'",
-                                        SubscriptionStatus.REQUESTED,
+                                        SubscriptionStatus.CREATED,
                                         "my-node"
                                 )
                         ))
@@ -168,7 +168,7 @@ public class MatchDiscoveryServiceTest {
                         new HashSet<>(Arrays.asList(
                                 new Subscription(
                                         "originatingCountry = 'NO'",
-                                        SubscriptionStatus.REQUESTED,
+                                        SubscriptionStatus.CREATED,
                                         "SP"
                                 )
                         ))
@@ -208,7 +208,7 @@ public class MatchDiscoveryServiceTest {
                         new HashSet<>(Arrays.asList(
                                 new Subscription(
                                         "originatingCountry = 'NO'",
-                                        SubscriptionStatus.REQUESTED,
+                                        SubscriptionStatus.CREATED,
                                         "SP"
                                 )
                         ))

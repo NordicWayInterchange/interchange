@@ -141,11 +141,6 @@ public class NeighbourDiscoverer {
 		serviceProviderService.saveAllServiceProviders(serviceProvidersToSave);
 	}
 
-/*	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void updateMatchesToTearDown() {
-		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToTearDownMatchResources();
-	}*/
-
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void updateMatchesWithRedirectToDeleted() {
 		matchDiscoveryService.synLocalSubscriptionAndSubscriptionsToTearDownMatchWithRedirect();

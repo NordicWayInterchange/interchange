@@ -65,7 +65,7 @@ public class MatchDiscoveryServiceIT {
         serviceProvider2.addLocalSubscription(localSubscription2);
         serviceProviderRepository.save(serviceProvider2);
 
-        Subscription subscription = new Subscription(SubscriptionStatus.REQUESTED, selector, "", consumerCommonName);
+        Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
@@ -90,7 +90,7 @@ public class MatchDiscoveryServiceIT {
         serviceProvider.addLocalSubscription(localSubscription);
         serviceProviderRepository.save(serviceProvider);
 
-        Subscription subscription = new Subscription(SubscriptionStatus.REQUESTED, selector, "", consumerCommonName);
+        Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
@@ -117,7 +117,7 @@ public class MatchDiscoveryServiceIT {
         serviceProvider1.addLocalSubscription(localSubscription1);
         serviceProviderRepository.save(serviceProvider1);
 
-        Subscription subscription = new Subscription(SubscriptionStatus.REQUESTED, selector, "", consumerCommonName);
+        Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),

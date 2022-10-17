@@ -333,7 +333,7 @@ class NeighbourServiceTest {
 	}
 
 	@Test
-	public void listenerEndpointsAreRemoverFromEndpointsList() {
+	public void listenerEndpointsAreRemovedFromEndpointsList() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("my-neighbour");
 
@@ -342,15 +342,19 @@ class NeighbourServiceTest {
 
 		Set<Endpoint> endpoints = new HashSet<>(Sets.newSet(endpoint1, endpoint2));
 
+		Subscription subscription = new Subscription();
+		subscription.setEndpoints(endpoints);
+
 		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "my-endpoint-1", 5671, new Connection());
 		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "my-endpoint-1", 5671,  new Connection());
 
 		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "my-endpoint-1", 5671, "my-source-1")).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "my-endpoint-2", 5671, "my-source-2")).thenReturn(listenerEndpoint2);
 
-		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbour, endpoints);
+		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, endpoints);
 
 		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
+		assertThat(subscription.getEndpoints()).isEmpty();
 	}
 
 	private Capability getDatexCapability(String country) {

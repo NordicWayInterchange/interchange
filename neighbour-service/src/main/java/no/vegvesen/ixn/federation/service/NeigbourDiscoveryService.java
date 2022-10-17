@@ -176,7 +176,7 @@ public class NeigbourDiscoveryService {
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
             for (Subscription subscription : subscriptionPostCalculator.getSubscriptionsToRemove()) {
                 if (!subscription.getEndpoints().isEmpty()) {
-                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, subscription.getEndpoints());
                 }
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
             }
@@ -297,6 +297,8 @@ public class NeigbourDiscoveryService {
                     } else {
                         // Number of poll attempts exceeds allowed number of poll attempts.
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                        List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                        setMatchesToTearDownEndpoint(matches);
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                     }
                 } catch (SubscriptionPollException e) {
@@ -333,7 +335,7 @@ public class NeigbourDiscoveryService {
                                         lastUpdatedSubscription.getEndpoints()
                                 );
                                 if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
+                                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, endpointCalculator.getEndpointsToRemove());
                                     createListenerEndpointFromEndpointsList(
                                             neighbour,
                                             endpointCalculator.getNewEndpoints(),
@@ -346,6 +348,8 @@ public class NeigbourDiscoveryService {
                             }
                         }
                     } else {
+                        List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                        setMatchesToTearDownEndpoint(matches);
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                         //TODO we should not do anything here, other than setting
@@ -366,13 +370,27 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+    public void setMatchesToTearDownEndpoint(List<Match> matches) {
+        Set<Match> matchesToSave = new HashSet<>();
+        for (Match match : matches) {
+            if (match.getStatus().equals(MatchStatus.UP)) {
+                match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
+                matchesToSave.add(match);
+            }
+        }
+        matchRepository.saveAll(matchesToSave);
+    }
+
+    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Subscription subscription, Set<Endpoint> endpoints) {
+        Set<Endpoint> endpointsToRemove = new HashSet<>();
         for(Endpoint endpoint : endpoints) {
             ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource());
             if (listenerEndpoint != null) {
                 listenerEndpointRepository.delete(listenerEndpoint);
             }
             logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", neighbour.getName(), endpoint.getHost(), endpoint.getSource());
+            endpointsToRemove.add(endpoint);
         }
+        subscription.getEndpoints().removeAll(endpointsToRemove);
     }
 }

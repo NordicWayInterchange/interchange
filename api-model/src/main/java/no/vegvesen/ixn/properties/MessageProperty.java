@@ -13,6 +13,8 @@ public class MessageProperty {
 	/* Is this to be removed? */
 	public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true, true, MessagePropertyType.STRING);
 
+	//TODO: publicationId --> String
+
 	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true, true, MessagePropertyType.STRING);
 	public static final MessageProperty PUBLISHER_ID = new MessageProperty("publisherId", true, true, MessagePropertyType.STRING);
 	public static final MessageProperty LATITUDE = new MessageProperty("latitude", false, false, MessagePropertyType.DOUBLE);
@@ -20,6 +22,7 @@ public class MessageProperty {
 	public static final MessageProperty PROTOCOL_VERSION = new MessageProperty("protocolVersion", true, true, MessagePropertyType.STRING);
 	//public static final MessageProperty CONTENT_TYPE = new MessageProperty("contentType", false, true, MessagePropertyType.STRING);
 	public static final MessageProperty TIMESTAMP = new MessageProperty("timestamp", false, false, MessagePropertyType.STRING);
+	//TODO: serviceType is a comma separated list of Strings
 	public static final MessageProperty SERVICE_TYPE = new MessageProperty("serviceType", false, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
 			MESSAGE_TYPE,
@@ -44,6 +47,7 @@ public class MessageProperty {
 			SERVICE_TYPE
 	);
 
+	//TODO: causeCode and subCauseCode is changed to Integer
 	public static final MessageProperty CAUSE_CODE = new MessageProperty("causeCode", true, true, MessagePropertyType.STRING);
 	public static final MessageProperty SUB_CAUSE_CODE = new MessageProperty("subCauseCode", true, true, MessagePropertyType.STRING);
 	public static final List<MessageProperty> denmApplicationProperties = Arrays.asList(
