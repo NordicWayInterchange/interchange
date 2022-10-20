@@ -297,6 +297,7 @@ public class NeigbourDiscoveryService {
                     } else {
                         // Number of poll attempts exceeds allowed number of poll attempts.
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, subscription.getEndpoints());
                         List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                         setMatchesToTearDownEndpoint(matches);
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
@@ -348,9 +349,10 @@ public class NeigbourDiscoveryService {
                             }
                         }
                     } else {
+                        subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, subscription.getEndpoints());
                         List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                         setMatchesToTearDownEndpoint(matches);
-                        subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                         //TODO we should not do anything here, other than setting
                     }

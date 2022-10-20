@@ -57,6 +57,9 @@ public class NeighbourSubscriptionDeleteServiceIT {
         neighbour.setName(neighbourName);
 
         Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
+        Set<Endpoint> endpoints = new HashSet<>();
+        endpoints.add(new Endpoint("my-source", "my-host", 5671));
+        ourSubscription.setEndpoints(endpoints);
 
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
@@ -81,6 +84,9 @@ public class NeighbourSubscriptionDeleteServiceIT {
         neighbour.setName(neighbourName);
 
         Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
+        Set<Endpoint> endpoints = new HashSet<>();
+        endpoints.add(new Endpoint("my-source", "my-host", 5671));
+        ourSubscription.setEndpoints(endpoints);
 
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
@@ -107,6 +113,9 @@ public class NeighbourSubscriptionDeleteServiceIT {
         neighbour.setName(neighbourName);
 
         Subscription ourSubscription = new Subscription("messageType = 'DENM' and originatingCountry = 'NO'", SubscriptionStatus.TEAR_DOWN);
+        Set<Endpoint> endpoints = new HashSet<>();
+        endpoints.add(new Endpoint("my-source", "my-host", 5671));
+        ourSubscription.setEndpoints(endpoints);
 
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
