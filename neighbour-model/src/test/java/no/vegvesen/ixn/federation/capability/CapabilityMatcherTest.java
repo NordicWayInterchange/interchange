@@ -16,82 +16,82 @@ class CapabilityMatcherTest {
 
 	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
-		DenmCapability denm_a_b_causeCode_1_2 = new DenmCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DenmCapability denm_a_b_causeCode_1_2 = new DenmCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(denm_a_b_causeCode_1_2),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'", "")), "");
 		assertThat(commonInterest).isEmpty();
 	}
 
 	@Test
 	void datexCapabilitiesMatchDatexSelector() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'", "")), "");
 		assertThat(commonInterest).isNotEmpty();
 	}
 
 	@Test
 	void datexCapabilitiesDoesNotMatchDatexSelectorOutsideQuadTree() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,12234%'")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,12234%'", "")), "");
 		assertThat(commonInterest).isEmpty();
 	}
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTree() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012233%'")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012233%'", "")), "");
 		assertThat(commonInterest).isNotEmpty();
 	}
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeLongerInFilter() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012100%'")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012100%'", "")), "");
 		assertThat(commonInterest).isNotEmpty();
 	}
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndPublicationType() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012100%' and publicationType = 'MeasuredDataPublication'")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012100%' and publicationType = 'MeasuredDataPublication'", "")), "");
 		assertThat(commonInterest).isNotEmpty();
 	}
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndOtherPublicationTypeDoesNotMatch() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012100%' and publicationType = 'Obstruction'")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012100%' and publicationType = 'Obstruction'", "")), "");
 		assertThat(commonInterest).isEmpty();
 	}
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,121000%'")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,121000%'", "")), "");
 		assertThat(commonInterest).isEmpty();
 	}
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeWithExtraWhitespace() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED," \n\t\n\n messageType = 'DATEX2' and \tquadTree \r\n\t\n\n like \t\t '%,01210%'\r\n")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED," \n\t\n\n messageType = 'DATEX2' and \tquadTree \r\n\t\n\n like \t\t '%,01210%'\r\n", "")), "");
 		assertThat(commonInterest).isNotEmpty();
 	}
 
@@ -104,6 +104,7 @@ class CapabilityMatcherTest {
 				"NO",
 				"DENM:1.2.2",
 				quadTreeTiles,
+				RedirectStatus.OPTIONAL,
 				Collections.singleton("6")
 		);
 		LocalSubscription subscription = new LocalSubscription(
@@ -111,19 +112,21 @@ class CapabilityMatcherTest {
 				LocalSubscriptionStatus.CREATED,
 				"((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = '6') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6')"
 		);
+		subscription.setConsumerCommonName("");
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(capability),
-				Sets.newLinkedHashSet(subscription)
+				Sets.newLinkedHashSet(subscription), ""
 		);
 		assertThat(commonInterest).hasSize(1);
 	}
 
 	@Test
 	public void matchIviSelectorWithQuadTree() {
-		IvimCapability capability = new IvimCapability("NO-12345", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")), Sets.newHashSet(Arrays.asList("6")));
+		IvimCapability capability = new IvimCapability("NO-12345", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")), RedirectStatus.OPTIONAL, Sets.newHashSet(Arrays.asList("6")));
 		LocalSubscription localSubscription = new LocalSubscription();
 		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType like '%,6,%'");
-		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)));
+		localSubscription.setConsumerCommonName("");
+		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)), "");
 	}
 
 	@Test
@@ -133,22 +136,24 @@ class CapabilityMatcherTest {
 				"NO",
 				"SPATEM:1.0",
 				Sets.newHashSet(Collections.singleton("12003")),
+				RedirectStatus.OPTIONAL,
 				Sets.newHashSet(Arrays.asList("1", "2"))
 		);
 		LocalSubscription localSubscription = new LocalSubscription();
 		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id like '%,2,%' or id like '%,3,%'");
+		localSubscription.setConsumerCommonName("");
 		System.out.println(localSubscription.getSelector());
-		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription));
+		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), "");
 		assertThat(localSubscriptions).isNotEmpty();
 	}
 
 	@Test
 	void camCapabilitiesMatchCamSelectorInsideQuadTreeAndStationType() {
 		Set<String> statTypes = Sets.newLinkedHashSet("pedestrian", "cyclist", "moped");
-		CamCapability camCapability = new CamCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, statTypes);
+		CamCapability camCapability = new CamCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, statTypes);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(camCapability),
-				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'CAM' and quadTree like '%,012100%' and stationType = 'cyclist'")));
+				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'CAM' and quadTree like '%,012100%' and stationType = 'cyclist'", "")), "");
 		assertThat(commonInterest).isNotEmpty();
 	}
 
@@ -160,12 +165,14 @@ class CapabilityMatcherTest {
 				"NO",
 				"SPATEM:1.0",
 				Sets.newHashSet(Collections.singleton("12003")),
+				RedirectStatus.OPTIONAL,
 				Sets.newHashSet(Arrays.asList("1", "2"))
 		);
 		LocalSubscription localSubscription = new LocalSubscription();
 		localSubscription.setSelector("name = 'fish'");
+		localSubscription.setConsumerCommonName("");
 		System.out.println(localSubscription.getSelector());
-		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription));
+		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), "");
 		assertThat(localSubscriptions).isNotEmpty();
 	}
 

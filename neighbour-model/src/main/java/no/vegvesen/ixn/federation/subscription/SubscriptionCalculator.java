@@ -48,11 +48,11 @@ public class SubscriptionCalculator {
         return result;
     }
 
-    public static Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<Capability> neighbourCapabilities) {
+    public static Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<Capability> neighbourCapabilities, String ixnName) {
         //logger.info("Calculating custom subscription for neighbour: {}", neighbourName);
         //logger.debug("Neighbour capabilities {}", neighbourCapabilities);
         //logger.debug("Local subscriptions {}", localSubscriptions);
-        Set<LocalSubscription> matchingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions);
+        Set<LocalSubscription> matchingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions, ixnName);
         Set<Subscription> calculatedSubscriptions = new HashSet<>();
         for (LocalSubscription subscription : matchingSubscriptions) {
             if (LocalSubscriptionStatus.isAlive(subscription.getStatus())) {

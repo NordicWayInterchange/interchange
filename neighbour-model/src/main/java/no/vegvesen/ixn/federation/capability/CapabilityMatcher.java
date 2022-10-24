@@ -20,20 +20,30 @@ public class CapabilityMatcher {
 	private static final String QUAD_TREE_MATCH_PATTERN_END = "%'";
 	private static final Logger logger = LoggerFactory.getLogger(CapabilityMatcher.class);
 
-	public static Set<LocalSubscription> calculateNeighbourSubscriptionsFromSelectors(Set<Capability> capabilities, Set<LocalSubscription> subscriptionSelectors) {
+	public static Set<LocalSubscription> calculateNeighbourSubscriptionsFromSelectors(Set<Capability> capabilities, Set<LocalSubscription> subscriptionSelectors, String ixnName) {
 		Set<LocalSubscription> matches = new HashSet<>();
 		for (Capability capability : capabilities) {
 			for (LocalSubscription selector : subscriptionSelectors) {
 				if (!selector.getSelector().isEmpty()) {
-					boolean match = matchCapabilityToSelector(capability, selector.getSelector());
-					if (match) {
-						logger.debug("Selector [{}] matches capability {}", selector, capability);
-						matches.add(selector);
+					if (matchConsumerCommonNameToRedirectPolicy(selector.getConsumerCommonName(), capability.getRedirect(), ixnName)) {
+						boolean match = matchCapabilityToSelector(capability, selector.getSelector());
+						if (match) {
+							logger.debug("Selector [{}] matches capability {}", selector, capability);
+							matches.add(selector);
+						}
 					}
 				}
 			}
 		}
 		return matches;
+	}
+
+	private static boolean matchConsumerCommonNameToRedirectPolicy(String consumerCommonName, RedirectStatus redirectStatus, String ixnName) {
+		if (consumerCommonName.equals(ixnName)) {
+			return !redirectStatus.equals(RedirectStatus.MANDATORY);
+		} else {
+			return !redirectStatus.equals(RedirectStatus.NOT_AVAILABLE);
+		}
 	}
 
 	public static Set<Capability> matchCapabilitiesToSelector(Set<Capability> capabilities, String selector) {

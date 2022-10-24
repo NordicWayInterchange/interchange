@@ -65,7 +65,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
 		assertThat(repository.findAll()).withFailMessage("The test shall start with no neighbours stored. Use @Transactional.").hasSize(0);
 		localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'"));
+		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", nodeProperties.getName()));
 
 		Neighbour neighbour1 = new Neighbour();
 		neighbour1.setName("neighbour-one");
@@ -103,7 +103,7 @@ public class NeighbourDiscovererIT {
 	}
 
 	private Capability getDatexCapability(String originatingCountry) {
-		return new DatexCapability(null, originatingCountry, null, null, null);
+		return new DatexCapability(null, originatingCountry, null, null, RedirectStatus.OPTIONAL,null);
 	}
 
 	@Test
@@ -151,6 +151,7 @@ public class NeighbourDiscovererIT {
 										"NO",
 										"1.0",
 										Collections.emptySet(),
+										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
 						),
@@ -194,6 +195,7 @@ public class NeighbourDiscovererIT {
 										"NO",
 										"1.0",
 										Collections.emptySet(),
+										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
 						),
@@ -223,7 +225,8 @@ public class NeighbourDiscovererIT {
 		Set<LocalSubscription> localSubscriptions = new HashSet<>(Arrays.asList(
 				new LocalSubscription(
 						LocalSubscriptionStatus.CREATED,
-						"originatingCountry = 'NO'"
+						"originatingCountry = 'NO'",
+						""
 				)
 		));
 		Neighbour neighbour = new Neighbour(
@@ -236,6 +239,7 @@ public class NeighbourDiscovererIT {
 										"NO",
 										"1.0",
 										Collections.emptySet(),
+										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								),
 								new DenmCapability(
@@ -243,6 +247,7 @@ public class NeighbourDiscovererIT {
 										"NO",
 										"1.0",
 										Collections.emptySet(),
+										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
 						)),
@@ -292,6 +297,7 @@ public class NeighbourDiscovererIT {
 										"NO",
 										"1.0",
 										Collections.emptySet(),
+										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
 						),
@@ -342,6 +348,7 @@ public class NeighbourDiscovererIT {
 										"NO",
 										"1.0",
 										Collections.emptySet(),
+										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
 						),
@@ -361,6 +368,7 @@ public class NeighbourDiscovererIT {
 										"NO",
 										"1.0",
 										Collections.emptySet(),
+										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
 						),
@@ -412,6 +420,7 @@ public class NeighbourDiscovererIT {
 										"NO",
 										"1.0",
 										Collections.emptySet(),
+										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
 						)),

@@ -59,7 +59,7 @@ public class NeighbourServiceDiscoveryTest {
 	private LocalDateTime now = LocalDateTime.now();
 
 	private Capability getDatexCapability(String originatingCountry) {
-		return new DatexCapability(null, originatingCountry, null, null, null);
+		return new DatexCapability(null, originatingCountry, null, null, RedirectStatus.OPTIONAL,null);
 	}
 
 	@BeforeEach
@@ -75,7 +75,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	private Set<LocalSubscription> getLocalSubscriptions() {
 		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
-		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'"));
+		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", interchangeNodeProperties.getName()));
 		return selfSubscriptions;
 	}
 
@@ -515,7 +515,7 @@ public class NeighbourServiceDiscoveryTest {
 		selfCapabilities.add(getDatexCapability("NO"));
 
 		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
-		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'"));
+		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", interchangeNodeProperties.getName()));
 
 		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighbours,Optional.of(LocalDateTime.now()), selfSubscriptions, neighbourFacade);
 
@@ -557,7 +557,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(null,neighbourFedInSubscription));
 
 		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
-		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet);
+		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet, interchangeNodeProperties.getName());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in

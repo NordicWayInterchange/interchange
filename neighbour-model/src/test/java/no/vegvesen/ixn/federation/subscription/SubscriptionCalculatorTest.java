@@ -127,7 +127,7 @@ public class SubscriptionCalculatorTest {
     void calculateEmptyCapabiliitiesAndSubscriptions() {
         Set<Subscription> calculatedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 Collections.emptySet(),
-                Collections.emptySet()
+                Collections.emptySet(), ""
         );
         assertThat(calculatedSubscriptions).isEmpty();
     }
@@ -141,7 +141,7 @@ public class SubscriptionCalculatorTest {
                                 "originatinCountry = 'NO'"
                         )
                 ),
-                Collections.emptySet()
+                Collections.emptySet(), ""
         );
         assertThat(calculatedSubscriptions).isEmpty();
     }
@@ -152,7 +152,7 @@ public class SubscriptionCalculatorTest {
         Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 Collections.emptySet(),
-                capabilities
+                capabilities, ""
         );
         assertThat(calculatedSubscription).hasSize(0);
     }
@@ -163,7 +163,8 @@ public class SubscriptionCalculatorTest {
                 Collections.singleton(
                         new LocalSubscription(
                                 LocalSubscriptionStatus.REQUESTED,
-                                "originatingCountry = 'NO'"
+                                "originatingCountry = 'NO'",
+                                ""
                         )
                 ),
                 Collections.singleton(
@@ -172,9 +173,10 @@ public class SubscriptionCalculatorTest {
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
+                                RedirectStatus.OPTIONAL,
                                 Collections.emptySet()
                         )
-                )
+                ), ""
         );
         assertThat(calculatedSubscriptions)
                 .hasSize(1)
@@ -187,7 +189,8 @@ public class SubscriptionCalculatorTest {
                 Collections.singleton(
                         new LocalSubscription(
                                 LocalSubscriptionStatus.REQUESTED,
-                                "originatingCountry = 'NO'"
+                                "originatingCountry = 'NO'",
+                                ""
                         )
                 ),
                 new HashSet<>(Arrays.asList(
@@ -196,6 +199,7 @@ public class SubscriptionCalculatorTest {
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
+                                RedirectStatus.OPTIONAL,
                                 Collections.emptySet()
                         ),
                         new DenmCapability(
@@ -203,9 +207,10 @@ public class SubscriptionCalculatorTest {
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
+                                RedirectStatus.OPTIONAL,
                                 Collections.emptySet()
                         )
-                ))
+                )), ""
         );
         assertThat(calculatedSubscriptions)
                 .hasSize(1)
@@ -218,11 +223,13 @@ public class SubscriptionCalculatorTest {
                 new HashSet<>(Arrays.asList(
                         new LocalSubscription(
                                 LocalSubscriptionStatus.REQUESTED,
-                                "originatingCountry = 'NO'"
+                                "originatingCountry = 'NO'",
+                                ""
                         ),
                         new LocalSubscription(
                                 LocalSubscriptionStatus.REQUESTED,
-                                "messageType = 'DATEX2'"
+                                "messageType = 'DATEX2'",
+                                ""
                         )
                 )),
                 Collections.singleton(
@@ -231,9 +238,10 @@ public class SubscriptionCalculatorTest {
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
+                                RedirectStatus.OPTIONAL,
                                 Collections.emptySet()
                         )
-                )
+                ), ""
         );
         assertThat(calculatedSubscriptions)
                 .hasSize(2);
@@ -245,11 +253,13 @@ public class SubscriptionCalculatorTest {
                 new HashSet<>(Arrays.asList(
                         new LocalSubscription(
                                 LocalSubscriptionStatus.REQUESTED,
-                                "originatingCountry = 'NO'"
+                                "originatingCountry = 'NO'",
+                                ""
                         ),
                         new LocalSubscription(
                                 LocalSubscriptionStatus.REQUESTED,
-                                "messageType = 'DATEX2'"
+                                "messageType = 'DATEX2'",
+                                ""
                         )
                 )),
                 new HashSet<>(Arrays.asList(
@@ -258,6 +268,7 @@ public class SubscriptionCalculatorTest {
                                 "SE",
                                 "1.0",
                                 Collections.emptySet(),
+                                RedirectStatus.OPTIONAL,
                                 Collections.emptySet()
                         ),
                         new DenmCapability(
@@ -265,9 +276,10 @@ public class SubscriptionCalculatorTest {
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
+                                RedirectStatus.OPTIONAL,
                                 Collections.emptySet()
                         )
-                ))
+                )), ""
         );
         assertThat(calculatedSubscriptions)
                 .hasSize(2);
@@ -277,10 +289,10 @@ public class SubscriptionCalculatorTest {
     @Test
     public void calculateCustomSubscriptionForNeighbour_localSubscriptionOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
-        localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'"));
+        localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", ""));
 
         Set<Capability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
-        Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities);
+        Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, "");
 
         assertThat(calculatedSubscription).hasSize(1);
         assertThat(calculatedSubscription.iterator().next().getSelector()).isEqualTo("originatingCountry = 'NO'");
@@ -289,12 +301,12 @@ public class SubscriptionCalculatorTest {
     @Test
     public void calculateCustomSubscriptionForNeighbour_localSubscriptionMessageTypeAndOriginatingCountryMatchesCapabilityOfNeighbourGivesLocalSubscription() {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
-        localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'"));
+        localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", ""));
 
         Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 localSubscriptions,
-                capabilities);
+                capabilities, "");
 
         assertThat(calculatedSubscription).hasSize(1);
         assertThat(calculatedSubscription.iterator().next().getSelector())
@@ -304,7 +316,7 @@ public class SubscriptionCalculatorTest {
     }
 
     private Capability getDatexCapability(String country) {
-        return new DatexCapability(null, country, null, null, null);
+        return new DatexCapability(null, country, null, null, RedirectStatus.OPTIONAL, null);
     }
 
 }
