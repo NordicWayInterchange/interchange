@@ -85,7 +85,7 @@ public class MatchDiscoveryServiceTest {
                         new Connection()
                 ))
         );
-        verify(matchRepository,times(1)).findBySubscriptionIdAndLocalSubscriptionId(any(), any()); //TODO should check against the actual subscriptionId
+        verify(matchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any()); //TODO should check against the actual subscriptionId
         verify(matchRepository,times(1)).save(any(Match.class));
     }
 
