@@ -28,7 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Persist to workspace
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: interchange
           path: ./
@@ -41,7 +41,7 @@ jobs:
         shell: bash
     steps:
       - name: Download persisted wokspace
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: interchange
       - id: auth
