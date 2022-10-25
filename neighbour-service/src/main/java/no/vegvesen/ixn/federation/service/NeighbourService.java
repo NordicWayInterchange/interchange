@@ -62,7 +62,10 @@ public class NeighbourService {
 			neighbourToUpdate = findNeighbour(neighbourCapabilities.getName());
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
-		neighbourToUpdate.setCapabilities(incomingCapabilities);
+		Capabilities capabilities = neighbourToUpdate.getCapabilities();
+		for (Capability newCapability : incomingCapabilities.getCapabilities()) {
+			capabilities.addDataType(newCapability);
+		}
 
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
