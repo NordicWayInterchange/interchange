@@ -136,8 +136,7 @@ public class ServiceProviderRouter {
             endpointsToRemove.add(endpoint);
         }
         subscription.getLocalEndpoints().removeAll(endpointsToRemove);
-        //TODO: Look at LocalConnections, there may be som dangling ones left if the LocalSubscription is tore down...
-        //TODO: Or are they removed when LocalSubscription is removed?
+        subscription.getConnections().clear();
         if (match.isEmpty()) {
             return Optional.empty();
         } else {
