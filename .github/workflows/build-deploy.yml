@@ -65,7 +65,7 @@ jobs:
       - name: Where am I?
         run: pwd
       - name: Where do I live?
-        run: echo $HOME
+        run: echo "$HOME" >> $GITHUB_PATH
       - name: Package charts
         run: |
           helm package helm/interchange -d target/helm
