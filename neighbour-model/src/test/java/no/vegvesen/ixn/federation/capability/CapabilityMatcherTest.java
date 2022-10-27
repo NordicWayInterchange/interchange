@@ -406,6 +406,7 @@ class CapabilityMatcherTest {
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isFalse();
 	}
+
 	@Test
 	public void publisherNameInCapability(){
 		Capability capability = new Capability(
@@ -417,5 +418,45 @@ class CapabilityMatcherTest {
 
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector1)).isTrue();
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability, selector2)).isTrue();
+	}
+
+	@Test
+	public void quadTreeOnCapabilityIsLongerThanSelector() {
+		DenmCapability capability = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				Collections.singleton("123"),
+				Collections.emptySet()
+		);
+		String selector = "messageType = 'DENM' and quadTree like '%,12%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+	}
+
+	@Test
+	public void quadTreeOnSelectorIsLongerThanOnCapability() {
+		DenmCapability capability = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				Collections.singleton("123"),
+				Collections.emptySet()
+		);
+		String selector = "messageType = 'DENM' and quadTree like '%,12300%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+	}
+
+	@Test
+	@Disabled("This does not work at the moment, throwing SelectorAlwaysTrueException")
+	public void selectorWithOnlyQuadTree() {
+		DenmCapability capability = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				Collections.singleton("123"),
+				Collections.emptySet()
+		);
+		String selector = "quadTree like '%,123%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
 	}
 }
