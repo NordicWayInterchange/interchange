@@ -1,8 +1,9 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.MapemCapabilityApi;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.MapemCapability;
+import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -23,6 +24,17 @@ public class TypeTransformerTest {
         CapabilityApi mapemCapabilityApi = capability.toApi();
         assertThat(mapemCapabilityApi.getMessageType()).isEqualTo("MAPEM");
 
+    }
+
+    @Test
+    public void testAddSubscriptionWithEmptyConsumerCommonName() {
+        AddSubscription subscription = new AddSubscription("originatingCountry = 'NO'");
+
+        TypeTransformer transformer = new TypeTransformer();
+
+        LocalSubscription localSubscription = transformer.transformAddSubscriptionToLocalSubscription(subscription, "service-provider", "my-node");
+
+        System.out.println(localSubscription.toString());
     }
 
 }

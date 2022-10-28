@@ -177,6 +177,11 @@ public class OnboardRestController {
 
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
+			if (subscription.getConsumerCommonName() != null) {
+				if (!subscription.getConsumerCommonName().equals(nodeProperties.getName())) {
+					certService.checkIfConsumerCommonNameMatchesInApiObject(subscription.getConsumerCommonName());
+				}
+			}
 			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName());
 			if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
 				localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);

@@ -22,5 +22,16 @@ public class CertService{
 			throw new CNAndApiObjectMismatchException(String.format(errorMessage, apiName, commonName));
 		}
 	}
+
+	public void checkIfConsumerCommonNameMatchesInApiObject(String consumerCommonName) {
+		Authentication principal = SecurityContextHolder.getContext().getAuthentication();
+		String commonName = principal.getName();
+
+		if (!commonName.equals(consumerCommonName)) {
+			logger.error("Received consumerCommonName {}, but it does not match CN certificate {}. Rejecting...", consumerCommonName, commonName);
+			String errorMessage = "Received consumerCommonName %s, but CN on certificate was %s. Rejecting...";
+			throw new CNAndConsumerCommonNameMismatchException(errorMessage);
+		}
+	}
 }
 

@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
+import no.vegvesen.ixn.federation.auth.CNAndConsumerCommonNameMismatchException;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -22,8 +23,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -90,10 +90,10 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testAddingIllegalSubscription() {
-        String serviceProviderName = "my-service-provider";
+        String serviceProviderName = "serviceprovider";
         String selector = "";
 
-        AddSubscription addSubscription = new AddSubscription(selector);
+        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName);
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
 
         AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
@@ -111,7 +111,7 @@ public class OnboardRestControllerIT {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscription addSubscription = new AddSubscription(selector);
+        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName);
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         restController.addSubscriptions(serviceProviderName, requestApi);
@@ -129,6 +129,31 @@ public class OnboardRestControllerIT {
 		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
         verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
+
+	@Test
+    public void testAddingSubscriptionWithEmptyConsumerCommonName() {
+        String serviceProviderName = "serviceprovider";
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscription addSubscription = new AddSubscription(selector);
+
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
+        restController.addSubscriptions(serviceProviderName, requestApi);
+
+        verify(certService, times(1)).checkIfConsumerCommonNameMatchesInApiObject(anyString());
+
+    }
+
+    @Test
+    public void testAddingSubscriptionWithWrongConsumerCommonName() {
+        String serviceProviderName = "serviceprovider";
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscription addSubscription = new AddSubscription(selector, "anna");
+
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
+        restController.addSubscriptions(serviceProviderName, requestApi);
+
+        verify(certService, times(1)).checkIfConsumerCommonNameMatchesInApiObject(anyString());
+    }
 
 	@Test
 	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
