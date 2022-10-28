@@ -60,7 +60,7 @@ public class TypeTransformer {
             String sub_id = subscription.getId() == null ? null : subscription.getId().toString();
             result.add(new LocalActorSubscription(
                     sub_id,
-                    createSubscriptionPath(name,sub_id),
+                    createSubscriptionPath(name,sub_id, subscription.getStatus()),
                     subscription.getSelector(),
                     subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
@@ -100,7 +100,7 @@ public class TypeTransformer {
         for (LocalDelivery delivery : localDeliveries){
             result.add(new Delivery(
                     delivery.getId().toString(),
-                    createDeliveryPath(serviceProviderName, delivery.getId().toString()),
+                    createDeliveryPath(serviceProviderName, delivery.getId().toString(), delivery.getStatus()),
                     delivery.getSelector(),
                     transformLocalDateTimeToEpochMili(delivery.getLastUpdatedTimestamp()),
                     transformLocalDeliveryStatusToDeliveryStatus(delivery.getStatus())
@@ -133,7 +133,7 @@ public class TypeTransformer {
             String subscriptionId = subscription.getId().toString();
             result.add(new LocalActorSubscription(
                     subscriptionId,
-                    createSubscriptionPath(serviceProviderName, subscriptionId),
+                    createSubscriptionPath(serviceProviderName, subscriptionId, subscription.getStatus()),
                     subscription.getSelector(),
                     subscription.getConsumerCommonName(),
                     transformLocalDateTimeToEpochMili(subscription.getLastUpdated()),
@@ -144,16 +144,24 @@ public class TypeTransformer {
         return result;
     }
 
-    private String createSubscriptionPath(String serviceProviderName, String subscriptionId) {
-        return String.format("/%s/subscriptions/%s", serviceProviderName, subscriptionId);
+    private String createSubscriptionPath(String serviceProviderName, String subscriptionId, LocalSubscriptionStatus status) {
+        if (!status.equals(LocalSubscriptionStatus.ILLEGAL)) {
+            return String.format("/%s/subscriptions/%s", serviceProviderName, subscriptionId);
+        } else {
+            return "";
+        }
     }
 
     private static String createCapabilitiesPath(String serviceProviderName, String capabilityId) {
         return String.format("/%s/capabilities/%s", serviceProviderName, capabilityId);
     }
 
-    private static String createDeliveryPath(String serviceProviderName, String deliveryId) {
-        return String.format("/%s/deliveries/%s", serviceProviderName, deliveryId);
+    private static String createDeliveryPath(String serviceProviderName, String deliveryId, LocalDeliveryStatus status) {
+        if (!status.equals(LocalDeliveryStatus.ILLEGAL)) {
+            return String.format("/%s/deliveries/%s", serviceProviderName, deliveryId);
+        } else {
+            return "";
+        }
     }
 
     private long transformLocalDateTimeToEpochMili(LocalDateTime lastUpdated) {
@@ -163,7 +171,7 @@ public class TypeTransformer {
     public GetSubscriptionResponse transformLocalSubscriptionToGetSubscriptionResponse(String serviceProviderName, LocalSubscription localSubscription) {
         return new GetSubscriptionResponse(
                 localSubscription.getId().toString(),
-                createSubscriptionPath(serviceProviderName,localSubscription.getId().toString()),
+                createSubscriptionPath(serviceProviderName,localSubscription.getId().toString(), localSubscription.getStatus()),
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName(),
                 transformLocalDateTimeToEpochMili(localSubscription.getLastUpdated()),
@@ -177,7 +185,7 @@ public class TypeTransformer {
         return new GetDeliveryResponse(
                 id,
                 transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints(), localDelivery.getSelector()),
-                createDeliveryPath(serviceProviderName, id),
+                createDeliveryPath(serviceProviderName, id, localDelivery.getStatus()),
                 localDelivery.getSelector(),
                 transformLocalDateTimeToEpochMili(localDelivery.getLastUpdatedTimestamp()),
                 transformLocalDeliveryStatusToDeliveryStatus(localDelivery.getStatus())
