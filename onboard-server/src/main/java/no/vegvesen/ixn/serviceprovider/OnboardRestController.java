@@ -177,14 +177,13 @@ public class OnboardRestController {
 
 		Set<LocalSubscription> localSubscriptions = new HashSet<>();
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
-			if (subscription.getConsumerCommonName() != null) {
-				if (!subscription.getConsumerCommonName().equals(nodeProperties.getName())) {
-					certService.checkIfConsumerCommonNameMatchesInApiObject(subscription.getConsumerCommonName());
-				}
-			}
 			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName());
 			if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
-				localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
+				if (checkConsumerCommonName(subscription.getConsumerCommonName(), serviceProviderName)) {
+					localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
+				} else {
+					localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
+				}
 			} else {
 				localSubscription.setStatus(LocalSubscriptionStatus.ILLEGAL);
 			}
@@ -207,6 +206,14 @@ public class OnboardRestController {
 				.collect(Collectors.toSet());
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformLocalSubscriptionsToSubscriptionPostResponseApi(serviceProviderName,savedSubscriptions);
+	}
+
+	private boolean checkConsumerCommonName(String consumerCommonName, String serviceProviderName) {
+		if (consumerCommonName != null) {
+			return consumerCommonName.equals(serviceProviderName) || consumerCommonName.equals(nodeProperties.getName());
+		} else {
+			return true;
+		}
 	}
 
 

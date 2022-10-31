@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
-import no.vegvesen.ixn.federation.auth.CNAndConsumerCommonNameMismatchException;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -137,10 +136,10 @@ public class OnboardRestControllerIT {
         AddSubscription addSubscription = new AddSubscription(selector);
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
-        restController.addSubscriptions(serviceProviderName, requestApi);
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
 
-        verify(certService, times(1)).checkIfConsumerCommonNameMatchesInApiObject(anyString());
-
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
     }
 
     @Test
@@ -150,9 +149,10 @@ public class OnboardRestControllerIT {
         AddSubscription addSubscription = new AddSubscription(selector, "anna");
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
-        restController.addSubscriptions(serviceProviderName, requestApi);
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
 
-        verify(certService, times(1)).checkIfConsumerCommonNameMatchesInApiObject(anyString());
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
     }
 
 	@Test

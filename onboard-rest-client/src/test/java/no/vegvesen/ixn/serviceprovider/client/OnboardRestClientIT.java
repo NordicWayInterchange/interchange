@@ -159,7 +159,9 @@ public class OnboardRestClientIT extends DockerBaseIT {
                 new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector, USER)))
         );
 
+        LocalActorSubscription subscription = addedSubscription.getSubscriptions().stream().findFirst().get();
         assertThat(addedSubscription.getSubscriptions()).hasSize(1);
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
     }
 
     @Test
@@ -169,7 +171,33 @@ public class OnboardRestClientIT extends DockerBaseIT {
                 new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector, IXN)))
         );
 
+        LocalActorSubscription subscription = addedSubscription.getSubscriptions().stream().findFirst().get();
         assertThat(addedSubscription.getSubscriptions()).hasSize(1);
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+    }
+
+    @Test
+    public void addSubscriptionWithEmptyConsumerCommonName() {
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscriptionsResponse addedSubscription = client.addSubscription(
+                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector)))
+        );
+
+        LocalActorSubscription subscription = addedSubscription.getSubscriptions().stream().findFirst().get();
+        assertThat(addedSubscription.getSubscriptions()).hasSize(1);
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+    }
+
+    @Test
+    public void addSubscriptionWithIllegalConsumerCommonName() {
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscriptionsResponse addedSubscription = client.addSubscription(
+                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector, "anna")))
+        );
+
+        LocalActorSubscription subscription = addedSubscription.getSubscriptions().stream().findFirst().get();
+        assertThat(addedSubscription.getSubscriptions()).hasSize(1);
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
     }
 
     @Test
