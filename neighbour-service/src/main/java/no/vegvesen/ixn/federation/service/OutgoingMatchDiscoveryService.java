@@ -30,7 +30,6 @@ public class OutgoingMatchDiscoveryService {
             if (serviceProvider.hasDeliveries()) {
                 for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                     if (serviceProvider.hasCapabilities()) {
-                        //TODO: Validate delivery selector before the delivery is matched with a capability
                         if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
                                 || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
                                 || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
@@ -61,8 +60,10 @@ public class OutgoingMatchDiscoveryService {
                             }
                         }
                     } else {
-                        delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
-                        logger.info("Delivery with selector {} does not match any service provider capability", delivery.getSelector());
+                        if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)) {
+                            delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
+                            logger.info("Delivery with selector {} does not match any service provider capability", delivery.getSelector());
+                        }
                     }
                 }
             }

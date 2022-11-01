@@ -159,6 +159,7 @@ public class NeigbourDiscoveryService {
 
     //1. 1 LocalSubscription, matching several neighbour capabilities, thus making a 1-to-n relationship LocalSubscription -> Subscription
                 //There will only be one Subscription for the Neighbour, even though we might match several capabilities on the neighbour.
+                //TODO will it only be one Subscription for the Neighbour?
                 //So, this is really a 1-to-1 relationship.
     //2. N LocalSubscriptions, matching 1 neighbour capability, thus making a n-to-1 relationship LocalSubscription -> Subscription
     //3. N LocalSubscriptions, each matching the same capability, thus making a n-to-n relationship LocalSubscription -> Subscription
@@ -169,13 +170,13 @@ public class NeigbourDiscoveryService {
         Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
         logger.info("Found neighbour for subscription request: {}", neighbourName);
-        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities);
+        Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, interchangeNodeProperties.getName());
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
         SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
             for (Subscription subscription : subscriptionPostCalculator.getSubscriptionsToRemove()) {
                 if (!subscription.getEndpoints().isEmpty()) {
-                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, subscription.getEndpoints());
                 }
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
             }
@@ -275,6 +276,7 @@ public class NeigbourDiscoveryService {
                         logger.info("Polling neighbour {} for status on subscription with path {}", neighbour.getName(), subscription.getPath());
 
                         // Throws SubscriptionPollException if unsuccessful
+                        //Or SubscriptionNotFoundException if not found at neighbour
                         Subscription polledSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
                         subscription.setSubscriptionStatus(polledSubscription.getSubscriptionStatus());
                         subscription.setNumberOfPolls(subscription.getNumberOfPolls() + 1);
@@ -295,6 +297,9 @@ public class NeigbourDiscoveryService {
                     } else {
                         // Number of poll attempts exceeds allowed number of poll attempts.
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, subscription.getEndpoints());
+                        List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                        setMatchesToTearDownEndpoint(matches);
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                     }
                 } catch (SubscriptionPollException e) {
@@ -302,6 +307,9 @@ public class NeigbourDiscoveryService {
                     subscription.incrementNumberOfPolls();
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
+                } catch (SubscriptionNotFoundException e) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+                    logger.error("Subscription {} is gone from neighbour", subscription,e);
                 }
             }
         } finally {
@@ -311,8 +319,6 @@ public class NeigbourDiscoveryService {
     }
 
     //TODO have to have a look at this again. The problem is that we might have non-updated subscriptions on the neighbour side, but for some reason not set it up on our side. The lastUpdated prevents us from setting it up again.
-    //need to somehow check is the listenerEndpoint is already there before checking the updated timestamp.
-    //It's already done in createListenerEndpointOneNeighbour, but should probably be done earlier. This
     public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, NeighbourFacade neighbourFacade) {
         try {
             Set<Subscription> createdSubscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
@@ -330,7 +336,7 @@ public class NeigbourDiscoveryService {
                                         lastUpdatedSubscription.getEndpoints()
                                 );
                                 if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
+                                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, endpointCalculator.getEndpointsToRemove());
                                     createListenerEndpointFromEndpointsList(
                                             neighbour,
                                             endpointCalculator.getNewEndpoints(),
@@ -344,6 +350,9 @@ public class NeigbourDiscoveryService {
                         }
                     } else {
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, subscription.getEndpoints());
+                        List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                        setMatchesToTearDownEndpoint(matches);
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                         //TODO we should not do anything here, other than setting
                     }
@@ -351,6 +360,9 @@ public class NeigbourDiscoveryService {
                     subscription.setSubscriptionStatus(SubscriptionStatus.FAILED);
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
+                } catch (SubscriptionNotFoundException e) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+                    logger.error("Subscription {} is gone from neighbour {}", subscription,neighbour.getName());
                 }
             }
         }
@@ -360,13 +372,27 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+    public void setMatchesToTearDownEndpoint(List<Match> matches) {
+        Set<Match> matchesToSave = new HashSet<>();
+        for (Match match : matches) {
+            if (match.getStatus().equals(MatchStatus.UP)) {
+                match.setStatus(MatchStatus.TEARDOWN_ENDPOINT);
+                matchesToSave.add(match);
+            }
+        }
+        matchRepository.saveAll(matchesToSave);
+    }
+
+    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Subscription subscription, Set<Endpoint> endpoints) {
+        Set<Endpoint> endpointsToRemove = new HashSet<>();
         for(Endpoint endpoint : endpoints) {
             ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource());
             if (listenerEndpoint != null) {
                 listenerEndpointRepository.delete(listenerEndpoint);
             }
             logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", neighbour.getName(), endpoint.getHost(), endpoint.getSource());
+            endpointsToRemove.add(endpoint);
         }
+        subscription.getEndpoints().removeAll(endpointsToRemove);
     }
 }

@@ -37,14 +37,9 @@ public class NeighbourServiceErrorAdvice {
 		return error(BAD_REQUEST, e);
 	}
 
-	@ExceptionHandler({SubscriptionNotFoundException.class})
-	public ResponseEntity<ErrorDetails> subscriptionNotFoundException(SubscriptionNotFoundException e){
+	@ExceptionHandler({NeighbourSubscriptionNotFound.class})
+	public ResponseEntity<ErrorDetails> subscriptionNotFoundException(NeighbourSubscriptionNotFound e){
 		return error(NOT_FOUND, e);
-	}
-
-	@ExceptionHandler({SubscriptionNotAcceptedException.class})
-	public ResponseEntity<ErrorDetails> subscriptionNotAccepted(SubscriptionNotAcceptedException e){
-		return error(NOT_ACCEPTABLE, e);
 	}
 
 	@ExceptionHandler({CNAndApiObjectMismatchException.class})

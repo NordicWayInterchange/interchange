@@ -36,7 +36,7 @@ public class ServiceProviderService {
             updateNewLocalDeliveryEndpoints(serviceProvider, host, port);
             updateTearDownLocalDeliveryEndpoints(serviceProvider);
             removeTearDownCapabilities(serviceProvider);
-            removeTearDownDeliveries(serviceProvider);
+            removeTearDownAndIllegalDeliveries(serviceProvider);
             serviceProviderRepository.save(serviceProvider);
         }
     }
@@ -61,24 +61,22 @@ public class ServiceProviderService {
     public void updateNewLocalDeliveryEndpoints(ServiceProvider serviceProvider, String host, Integer port) {
         if (serviceProvider.hasDeliveries()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
-                Set<String> targets = new HashSet<>();
-                //= delivery.getEndpoints().stream()
-                //        .map(LocalDeliveryEndpoint::getTarget)
-                //        .collect(Collectors.toSet());
-                for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                    String target = endpoint.getTarget();
-                    if (target != null) {
-                        targets.add(target);
-                    } else {
-                        logger.debug("Delivery '{}' does not have a target", delivery);
+                if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)) {
+                    Set<String> targets = new HashSet<>();
+                    for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
+                        String target = endpoint.getTarget();
+                        if (target != null) {
+                            targets.add(target);
+                        } else {
+                            logger.debug("Delivery '{}' does not have a target", delivery);
+                        }
                     }
 
-                }
-
-                if (delivery.exchangeExists()) {
-                    if (!targets.contains(delivery.getExchangeName())) {
-                        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(host, port, delivery.getExchangeName(), delivery.getSelector());
-                        delivery.addEndpoint(endpoint);
+                    if (delivery.exchangeExists()) {
+                        if (!targets.contains(delivery.getExchangeName())) {
+                            LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(host, port, delivery.getExchangeName(), delivery.getSelector());
+                            delivery.addEndpoint(endpoint);
+                        }
                     }
                 }
             }
@@ -124,15 +122,16 @@ public class ServiceProviderService {
         currentServiceProviderCapabilities.setLastUpdated(LocalDateTime.now());
     }
 
-    public void removeTearDownDeliveries(ServiceProvider serviceProvider) {
+    public void removeTearDownAndIllegalDeliveries(ServiceProvider serviceProvider) {
         Set<LocalDelivery> deliveriesToTearDown = serviceProvider.getDeliveries().stream()
-                .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN))
+                .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)
+                || d.getStatus().equals(LocalDeliveryStatus.ILLEGAL))
                 .collect(Collectors.toSet());
 
         for (LocalDelivery delivery : deliveriesToTearDown) {
             List<OutgoingMatch> possibleMatches = outgoingMatchDiscoveryService.findMatchesFromDeliveryId(delivery.getId());
             if (possibleMatches.isEmpty()) {
-                logger.info("Removing delivery with id {} and status TEAR_DOWN", delivery.getId());
+                logger.info("Removing delivery with id {}", delivery.getId());
                 serviceProvider.getDeliveries().remove(delivery);
             }
         }

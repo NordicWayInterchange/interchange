@@ -110,6 +110,11 @@ public class ServiceProviderRouter {
                 //	Check that the binding exist, if so, delete it
                 newSubscription = onTearDown(serviceProviderName, subscription);
                 break;
+            case ILLEGAL:
+                newSubscription = Optional.empty();
+                break;
+                //TODO ILLEGAL, just return optional.empty. Or the subscription itself?
+                //needs testing.
             default:
                 throw new IllegalStateException("Unknown subscription status encountered");
         }
@@ -131,8 +136,7 @@ public class ServiceProviderRouter {
             endpointsToRemove.add(endpoint);
         }
         subscription.getLocalEndpoints().removeAll(endpointsToRemove);
-        //TODO: Look at LocalConnections, there may be som dangling ones left if the LocalSubscription is tore down...
-        //TODO: Or are they removed when LocalSubscription is removed?
+        subscription.getConnections().clear();
         if (match.isEmpty()) {
             return Optional.empty();
         } else {
@@ -156,6 +160,8 @@ public class ServiceProviderRouter {
             newSubscription = Optional.of(subscription.withStatus(LocalSubscriptionStatus.CREATED));
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
             newSubscription = redirectTearDown(subscription);
+        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
+            newSubscription = Optional.empty();
         } else {
             throw new IllegalStateException("Unknown subscription status encountered");
         }
@@ -400,18 +406,20 @@ public class ServiceProviderRouter {
 
         Set<LocalDelivery> deliveries = serviceProvider.getDeliveries();
         for (LocalDelivery delivery : deliveries) {
-            List<OutgoingMatch> matches = outgoingMatchDiscoveryService.findMatchesFromDeliveryId(delivery.getId());
-            if (matches.isEmpty()) {
-                if (delivery.exchangeExists()) {
-                    String target = delivery.getExchangeName();
-                    if (qpidClient.exchangeExists(target)) {
-                        logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
-                        qpidClient.removeWriteAccess(serviceProvider.getName(), target);
-                        qpidClient.removeExchange(target);
+            if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)) {
+                List<OutgoingMatch> matches = outgoingMatchDiscoveryService.findMatchesFromDeliveryId(delivery.getId());
+                if (matches.isEmpty()) {
+                    if (delivery.exchangeExists()) {
+                        String target = delivery.getExchangeName();
+                        if (qpidClient.exchangeExists(target)) {
+                            logger.info("Removing endpoint with name {} for service provider {}", target, serviceProvider.getName());
+                            qpidClient.removeWriteAccess(serviceProvider.getName(), target);
+                            qpidClient.removeExchange(target);
+                        }
+                        delivery.setExchangeName("");
                     }
-                    delivery.setExchangeName("");
+                    delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                 }
-                delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
             }
         }
     }

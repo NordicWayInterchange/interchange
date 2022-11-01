@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
@@ -58,7 +59,7 @@ public class NeighbourServiceDiscoveryTest {
 	private LocalDateTime now = LocalDateTime.now();
 
 	private Capability getDatexCapability(String originatingCountry) {
-		return new DatexCapability(null, originatingCountry, null, null, null);
+		return new DatexCapability(null, originatingCountry, null, null, RedirectStatus.OPTIONAL,null);
 	}
 
 	@BeforeEach
@@ -74,7 +75,7 @@ public class NeighbourServiceDiscoveryTest {
 
 	private Set<LocalSubscription> getLocalSubscriptions() {
 		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
-		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'"));
+		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and originatingCountry = 'NO'", interchangeNodeProperties.getName()));
 		return selfSubscriptions;
 	}
 
@@ -514,7 +515,7 @@ public class NeighbourServiceDiscoveryTest {
 		selfCapabilities.add(getDatexCapability("NO"));
 
 		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
-		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'"));
+		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", interchangeNodeProperties.getName()));
 
 		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighbours,Optional.of(LocalDateTime.now()), selfSubscriptions, neighbourFacade);
 
@@ -556,7 +557,7 @@ public class NeighbourServiceDiscoveryTest {
 		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(null,neighbourFedInSubscription));
 
 		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
-		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet);
+		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet, interchangeNodeProperties.getName());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
@@ -814,7 +815,64 @@ public class NeighbourServiceDiscoveryTest {
 		verify(neighbourFacade,times(1)).pollSubscriptionStatus(any(),any());
 	}
 
+	@Test
+	public void testPollingCreatedSubscriptionThatIsGone() {
+		Subscription subscription = new Subscription(
+				1,
+				SubscriptionStatus.CREATED,
+				"originatingCountry = 'NO'",
+				"/mynode/subscriptions/1",
+				"kyrre",
+				Collections.emptySet()
+		);
+		Neighbour  neighbour = new Neighbour(
+				"test",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						SubscriptionRequestStatus.ESTABLISHED,
+						Collections.singleton(
+								subscription
+						)
+				),
+				new Connection()
+		);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1);
+		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
+		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(SubscriptionNotFoundException.class);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbourFacade);
+		assertThat(subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN));
+	}
 
+	@Test
+	public void testPollSubscriptionGoneFromNeighbour() {
+
+		Subscription subscription = new Subscription(
+				1,
+				SubscriptionStatus.CREATED,
+				"originatingCountry = 'NO'",
+				"/mynode/subscriptions/1",
+				"kyrre",
+				Collections.emptySet()
+		);
+		Neighbour  neighbour = new Neighbour(
+				"test",
+				new Capabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(
+						SubscriptionRequestStatus.ESTABLISHED,
+						Collections.singleton(
+								subscription
+						)
+				),
+				new Connection()
+		);
+		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1);
+		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
+		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(SubscriptionNotFoundException.class);
+		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbourFacade);
+		assertThat(subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN));
+	}
 
 	@Test
 	public void testPostSubscriptonRequest() {

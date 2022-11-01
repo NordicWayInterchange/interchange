@@ -1,15 +1,15 @@
 package no.vegvesen.ixn.federation.model;
 
-        import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
-        import org.slf4j.Logger;
-        import org.slf4j.LoggerFactory;
+import no.vegvesen.ixn.federation.exceptions.NeighbourSubscriptionNotFound;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-        import javax.persistence.*;
-        import java.time.LocalDateTime;
-        import java.util.HashSet;
-        import java.util.Optional;
-        import java.util.Set;
-        import java.util.stream.Collectors;
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "neighbour_subscription_request")
@@ -76,7 +76,7 @@ public class NeighbourSubscriptionRequest {
         subscription.addAll(newSubscriptions);
     }
 
-    public NeighbourSubscription getSubscriptionById(Integer id) throws SubscriptionNotFoundException {
+    public NeighbourSubscription getSubscriptionById(Integer id) throws NeighbourSubscriptionNotFound {
 
         for (NeighbourSubscription subscription : subscription) {
             if (subscription.getId().equals(id)) {
@@ -84,7 +84,7 @@ public class NeighbourSubscriptionRequest {
             }
         }
 
-        throw new SubscriptionNotFoundException("Could not find subscription with id " + id);
+        throw new NeighbourSubscriptionNotFound("Could not find subscription with id " + id);
     }
 
     @Override

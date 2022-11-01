@@ -10,9 +10,9 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK 8
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '8'
           distribution: 'adopt'
@@ -21,14 +21,14 @@ jobs:
         # Step that does cache save and restore
       - name: Save and restore cache
         id: maven-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Persist to workspace
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: interchange
           path: ./
@@ -41,7 +41,7 @@ jobs:
         shell: bash
     steps:
       - name: Download persisted wokspace
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: interchange
       - id: auth
@@ -59,13 +59,9 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup helm
-        uses: azure/setup-helm@v1
-      - name: Where am I?
-        run: pwd
-      - name: Where do I live?
-        run: echo $HOME
+        uses: azure/setup-helm@v2
       - name: Package charts
         run: |
           helm package helm/interchange -d target/helm

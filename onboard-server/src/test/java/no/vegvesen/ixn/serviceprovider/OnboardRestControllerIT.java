@@ -22,8 +22,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {PostgresTestcontainerInitializer.Initializer.class})
@@ -89,11 +88,29 @@ public class OnboardRestControllerIT {
     }
 
     @Test
+    public void testAddingIllegalSubscription() {
+        String serviceProviderName = "serviceprovider";
+        String selector = "";
+
+        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName);
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
+
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
+
+        LocalActorSubscription addedSubscription = response.getSubscriptions().stream()
+                .findFirst()
+                .get();
+
+        assertThat(response.getSubscriptions()).hasSize(1);
+        assertThat(addedSubscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
+    }
+
+    @Test
     public void testDeletingSubscription() {
 		LocalDateTime beforeDeleteTime = LocalDateTime.now();
         String serviceProviderName = "serviceprovider";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        AddSubscription addSubscription = new AddSubscription(selector);
+        AddSubscription addSubscription = new AddSubscription(selector, serviceProviderName);
 
         AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
         restController.addSubscriptions(serviceProviderName, requestApi);
@@ -111,6 +128,32 @@ public class OnboardRestControllerIT {
 		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
         verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
+
+	@Test
+    public void testAddingSubscriptionWithEmptyConsumerCommonName() {
+        String serviceProviderName = "serviceprovider";
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscription addSubscription = new AddSubscription(selector);
+
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
+
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+    }
+
+    @Test
+    public void testAddingSubscriptionWithWrongConsumerCommonName() {
+        String serviceProviderName = "serviceprovider";
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscription addSubscription = new AddSubscription(selector, "anna");
+
+        AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(serviceProviderName, Collections.singleton(addSubscription));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProviderName, requestApi);
+
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
+    }
 
 	@Test
 	void testDeletingNonExistingSubscriptionDoesNotModifyLastUpdatedSubscription() {
@@ -358,5 +401,23 @@ public class OnboardRestControllerIT {
         assertThat(response.getCapabilities()).hasSize(3);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+    }
+
+    @Test
+    public void testAddingIllegalDelivery() {
+        String serviceProviderName = "my-service-provider";
+        String selector = "";
+
+        SelectorApi delivery = new SelectorApi(selector);
+        AddDeliveriesRequest requestApi = new AddDeliveriesRequest(serviceProviderName, Collections.singleton(delivery));
+
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, requestApi);
+
+        Delivery addedDelivery = response.getDeliveries().stream()
+                .findFirst()
+                .get();
+
+        assertThat(response.getDeliveries()).hasSize(1);
+        assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
     }
 }

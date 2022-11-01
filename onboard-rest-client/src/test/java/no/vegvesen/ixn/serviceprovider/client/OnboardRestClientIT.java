@@ -41,6 +41,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
 
     public static GenericContainer onboardServer;
     public static final String USER = "onboard";
+    public static final String IXN = "localhost";
 
     @BeforeAll
     public static void startUp() {
@@ -113,7 +114,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
     public void addSubscriptionCheckAndDelete() throws JsonProcessingException {
 
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
-        client.addSubscription(new AddSubscriptionsRequest(USER, Collections.singleton(new AddSubscription(selector, "my-node"))));
+        client.addSubscription(new AddSubscriptionsRequest(USER, Collections.singleton(new AddSubscription(selector, USER))));
 
         ListSubscriptionsResponse localSubscriptions = client.getServiceProviderSubscriptions();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -135,7 +136,7 @@ public class OnboardRestClientIT extends DockerBaseIT {
         ObjectMapper objectMapper = new ObjectMapper();
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscriptionsResponse addedSubscription = client.addSubscription(
-                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector, "my-node")))
+                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector, USER)))
         );
         System.out.println(objectMapper.writeValueAsString(addedSubscription));
 
@@ -149,6 +150,54 @@ public class OnboardRestClientIT extends DockerBaseIT {
         }
         ListSubscriptionsResponse afterDelete = client.getServiceProviderSubscriptions();
         assertThat(filterOutTearDownSubscriptions(afterDelete.getSubscriptions())).hasSize(0);
+    }
+
+    @Test
+    public void addSubscriptionWithConsumerCommonNameAsServiceProviderName() {
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscriptionsResponse addedSubscription = client.addSubscription(
+                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector, USER)))
+        );
+
+        LocalActorSubscription subscription = addedSubscription.getSubscriptions().stream().findFirst().get();
+        assertThat(addedSubscription.getSubscriptions()).hasSize(1);
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+    }
+
+    @Test
+    public void addSubscriptionWithConsumerCommonNameAsIxnName() {
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscriptionsResponse addedSubscription = client.addSubscription(
+                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector, IXN)))
+        );
+
+        LocalActorSubscription subscription = addedSubscription.getSubscriptions().stream().findFirst().get();
+        assertThat(addedSubscription.getSubscriptions()).hasSize(1);
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+    }
+
+    @Test
+    public void addSubscriptionWithEmptyConsumerCommonName() {
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscriptionsResponse addedSubscription = client.addSubscription(
+                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector)))
+        );
+
+        LocalActorSubscription subscription = addedSubscription.getSubscriptions().stream().findFirst().get();
+        assertThat(addedSubscription.getSubscriptions()).hasSize(1);
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+    }
+
+    @Test
+    public void addSubscriptionWithIllegalConsumerCommonName() {
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        AddSubscriptionsResponse addedSubscription = client.addSubscription(
+                new AddSubscriptionsRequest(USER,Collections.singleton(new AddSubscription(selector, "anna")))
+        );
+
+        LocalActorSubscription subscription = addedSubscription.getSubscriptions().stream().findFirst().get();
+        assertThat(addedSubscription.getSubscriptions()).hasSize(1);
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
     }
 
     @Test

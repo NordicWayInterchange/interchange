@@ -14,6 +14,9 @@ import javax.transaction.Transactional;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,7 +65,7 @@ public class MatchDiscoveryServiceIT {
         serviceProvider2.addLocalSubscription(localSubscription2);
         serviceProviderRepository.save(serviceProvider2);
 
-        Subscription subscription = new Subscription(SubscriptionStatus.REQUESTED, selector, "", consumerCommonName);
+        Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
@@ -75,7 +78,6 @@ public class MatchDiscoveryServiceIT {
 
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Arrays.asList(serviceProvider1, serviceProvider2), Collections.singletonList(neighbour));
         assertThat(matchRepository.findAll()).hasSize(2);
-
     }
 
     @Test
@@ -88,7 +90,7 @@ public class MatchDiscoveryServiceIT {
         serviceProvider.addLocalSubscription(localSubscription);
         serviceProviderRepository.save(serviceProvider);
 
-        Subscription subscription = new Subscription(SubscriptionStatus.REQUESTED, selector, "", consumerCommonName);
+        Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
@@ -115,7 +117,7 @@ public class MatchDiscoveryServiceIT {
         serviceProvider1.addLocalSubscription(localSubscription1);
         serviceProviderRepository.save(serviceProvider1);
 
-        Subscription subscription = new Subscription(SubscriptionStatus.REQUESTED, selector, "", consumerCommonName);
+        Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
@@ -174,4 +176,5 @@ public class MatchDiscoveryServiceIT {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
         assertThat(matchRepository.findAll()).hasSize(0);
     }
+
 }

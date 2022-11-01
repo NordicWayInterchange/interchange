@@ -3,10 +3,7 @@ package no.vegvesen.ixn.federation.discoverer.facade;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
-import no.vegvesen.ixn.federation.exceptions.NeighbourSubscriptionNotFound;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
-import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
+import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
@@ -286,7 +283,7 @@ public class NeighbourRESTFacadeTest {
 				.andExpect(MockRestRequestMatchers.method(HttpMethod.DELETE))
 				.andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND).body(errorDetailsJson).contentType(MediaType.APPLICATION_JSON));
 
-		assertThatExceptionOfType(NeighbourSubscriptionNotFound.class).isThrownBy(() -> {
+		assertThatExceptionOfType(SubscriptionNotFoundException.class).isThrownBy(() -> {
 			neighbourRESTFacade.deleteSubscription(ericsson, subscription);
 		});
 	}
