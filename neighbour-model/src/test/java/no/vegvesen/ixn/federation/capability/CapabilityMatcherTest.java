@@ -459,4 +459,58 @@ class CapabilityMatcherTest {
 		String selector = "quadTree like '%,123%'";
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
 	}
+
+	@Test
+	@Disabled("quadTree not like does not work at the moment")
+	public void selectorWithNegatedQuadTreeOtherThanTheOneFromCapability() {
+		DenmCapability capability = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				Collections.singleton("123"),
+				Collections.emptySet()
+		);
+		String selector = "messageType = 'DENM' and quadTree not like '%,124%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+	}
+
+	@Test
+	public void selectorWithOutsideAnd() {
+		DenmCapability capability = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				Collections.singleton("123"),
+				Collections.emptySet()
+		);
+		String selector = "messageType = 'DENM' and not (quadTree like '%,123%')";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
+	}
+
+	@Test
+	public void selectorWithOutsideAndNotMatching() {
+		DenmCapability capability = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				Collections.singleton("123"),
+				Collections.emptySet()
+		);
+		String selector = "messageType = 'DENM' and not (quadTree like '%,124%')";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+	}
+
+	@Test
+	@Disabled("This test passes, but due to other reasons. Should we explicitly remove selectors with not like?")
+	public void selectorWithNegatedQuadTreeSameAsCapabilityShouldNotMatch() {
+		DenmCapability capability = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				Collections.singleton("123"),
+				Collections.emptySet()
+		);
+		String selector = "messageType = 'DENM' and quadTree not like '%,123%'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
+	}
 }
