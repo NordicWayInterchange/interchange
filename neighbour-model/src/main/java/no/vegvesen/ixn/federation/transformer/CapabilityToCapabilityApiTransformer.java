@@ -31,12 +31,12 @@ public class CapabilityToCapabilityApiTransformer {
 		Set<Capability> capabilities = new HashSet<>();
 		for (CapabilityApi capability : capabilityApis) {
 			logger.debug("Converting message type {}", capability.getMessageType());
+			//TODO: verify capability before adding...
 			capabilities.add(capabilityApiToCapability(capability));
 		}
 		return capabilities;
 	}
 
-	//TODO: Re-evaluate, put in null-checks on RedirectStatus but that should not be there now?
 	public Capability capabilityApiToCapability(CapabilityApi capabilityApi) {
 		if (capabilityApi instanceof DatexCapabilityApi){
 			if(capabilityApi.getRedirect() != null){

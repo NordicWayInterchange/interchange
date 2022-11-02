@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -133,6 +134,16 @@ public class CapabilityApi {
 				", shardCount=" + shardCount +
 				", infoUrl='" + infoUrl + '\'' +
 				'}';
+	}
+
+	public HashMap<String, String> getCommonProperties() {
+		HashMap<String, String> properties = new HashMap<>();
+		properties.put("publisherId", publisherId);
+		//TODO: Add publicationId from new version of spec
+		properties.put("originatingCountry", originatingCountry);
+		properties.put("protocolVersion", protocolVersion);
+		properties.put("", quadTree.toString());
+		return properties;
 	}
 
 	public Integer getShardCount() {
