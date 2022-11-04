@@ -513,4 +513,40 @@ class CapabilityMatcherTest {
 		String selector = "messageType = 'DENM' and quadTree not like '%,123%'";
 		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isFalse();
 	}
+
+	@Test
+	public void twoQuadTreesInCapability() {
+		DenmCapability capability1 = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				new HashSet<>(Arrays.asList("123")),
+				Collections.emptySet()
+		);
+		DenmCapability capability2 = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				new HashSet<>(Arrays.asList("124")),
+				Collections.emptySet()
+		);
+		String selector = "messageType = 'DENM' and not (quadTree like '%,123%') and not (quadTree like '%,124%')";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability1,selector) || CapabilityMatcher.matchCapabilityToSelector(capability2,selector)).isFalse();
+	}
+
+	@Test
+	@Disabled("Cannot match against a subset at the moment")
+	public void foo() {
+		DenmCapability capability1 = new DenmCapability(
+				"NO-123",
+				"NO",
+				"1.0",
+				new HashSet<>(Arrays.asList("123")),
+				Collections.emptySet()
+		);
+
+		String selector = "messageType = 'DENM' and not (quadTree like '%,1234%')";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability1,selector)).isTrue();
+	}
+
 }
