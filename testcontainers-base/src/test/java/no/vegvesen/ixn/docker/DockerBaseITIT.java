@@ -4,9 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.File;
-import java.nio.file.Path;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers

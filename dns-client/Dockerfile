@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk8:alpine
+FROM eclipse-temurin:11-alpine
 RUN apk add --no-cache bash
 
 COPY target/dns-client-1.0.3-SNAPSHOT.jar dns-client.jar

@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk8:alpine
+FROM eclipse-temurin:11
 
 RUN apk add --no-cache bash openssl jq
 
