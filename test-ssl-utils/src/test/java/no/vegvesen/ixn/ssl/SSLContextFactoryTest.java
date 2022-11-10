@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-@Disabled
 public class SSLContextFactoryTest {
 
 	@Test
