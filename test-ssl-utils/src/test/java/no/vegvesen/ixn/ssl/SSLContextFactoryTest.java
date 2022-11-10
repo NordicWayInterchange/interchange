@@ -29,7 +29,6 @@ public class SSLContextFactoryTest {
 	}
 
 	@Test
-	//@Disabled("This does not throw an exception in java 11 for some reason.")
 	public void sslContextFromKeyAndTrustStoresNonExistingFileFails() {
 		String keystoreFile = "/non/existing/file/foobar.p12";
 		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFile, "password", KeystoreType.PKCS12, "password");
