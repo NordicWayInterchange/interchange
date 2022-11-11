@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import org.junit.jupiter.api.Test;
@@ -23,9 +24,8 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(MessageCollectorLocalListenerIT.class);
 	static Path testKeysPath = generateKeys(MessageCollectorLocalListenerIT.class,"my_ca", "localhost");
 
-	@SuppressWarnings("rawtypes")
 	@Container
-	public GenericContainer localContainer = getQpidTestContainer("docker/consumer",
+	public QpidContainer localContainer = getQpidTestContainer("docker/consumer",
 			testKeysPath,
 			"localhost.p12",
 			"password",
@@ -34,9 +34,8 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 			"localhost");
 
 
-	@SuppressWarnings("rawtypes")
 	@Container
-	public GenericContainer remoteContainer = getQpidTestContainer("docker/producer",
+	public QpidContainer remoteContainer = getQpidTestContainer("docker/producer",
 			testKeysPath,
 			"localhost.p12",
 			"password",
@@ -47,11 +46,11 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 	@Test
 	public void stoppingLocalContainerStopsListener() {
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "localhost.p12", "truststore.jks");
-		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getMappedPort(AMQPS_PORT).toString(), "subscriptionExchange");
+		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getAmqpsPort().toString(), "subscriptionExchange");
 		ListenerEndpoint remote = mock(ListenerEndpoint.class);
 		when(remote.getExchangeName()).thenReturn("subscriptionExchange");
 		when(remote.getHost()).thenReturn("localhost");
-		when(remote.getPort()).thenReturn(remoteContainer.getMappedPort(AMQPS_PORT));
+		when(remote.getPort()).thenReturn(remoteContainer.getAmqpsPort());
 		when(remote.getSource()).thenReturn("localhost");
 		MessageCollectorListener remoteForwardListener = collectorCreator.setupCollection(remote);
 

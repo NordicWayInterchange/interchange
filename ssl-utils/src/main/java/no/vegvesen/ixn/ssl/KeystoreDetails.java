@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.ssl;
 
-@SuppressWarnings("WeakerAccess")
 public class KeystoreDetails {
 	private final String fileName;
 	private final String password;

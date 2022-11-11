@@ -63,7 +63,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Container
 	private static KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
-	@SuppressWarnings("rawtypes")
 	@Container
     public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
 			.dependsOn(keyContainer);
