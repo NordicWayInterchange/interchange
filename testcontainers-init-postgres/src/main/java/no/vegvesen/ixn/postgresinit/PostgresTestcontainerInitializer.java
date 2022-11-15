@@ -9,7 +9,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class PostgresTestcontainerInitializer {
 	private static final String FEDERATION = "federation";
 	@ClassRule
-	public static PostgreSQLContainer postgresContainer = new PostgreSQLContainer<>("postgres:15.1")
+	public static PostgreSQLContainer postgresContainer = new PostgreSQLContainer<>("postgres:9")
 			.withDatabaseName(FEDERATION)
 			.withUsername(FEDERATION)
 			.withPassword(FEDERATION);
