@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@SuppressWarnings("rawtypes")
 public class DockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(DockerBaseIT.class);
 	private static final String CI_WORKDIR = "CIRCLE_WORKING_DIRECTORY";

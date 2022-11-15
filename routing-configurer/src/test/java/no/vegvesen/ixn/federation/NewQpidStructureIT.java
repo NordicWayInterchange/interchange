@@ -53,7 +53,6 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     @Autowired
     QpidClient qpidClient;
 
-    @SuppressWarnings("rawtypes")
     @Container
     public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
             .dependsOn(keyContainer);

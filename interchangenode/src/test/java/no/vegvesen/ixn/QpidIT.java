@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -51,9 +52,8 @@ public class QpidIT extends QpidDockerBaseIT {
 
 	private static Source producer;
 
-	@SuppressWarnings("rawtypes")
 	@Container
-	public static final GenericContainer qpidContainer = getQpidTestContainer("qpid",
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid",
 			testKeysPath,
 			"localhost.p12",
 			"password",
@@ -64,7 +64,7 @@ public class QpidIT extends QpidDockerBaseIT {
 	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			AMQP_URL = "amqp://localhost:" + qpidContainer.getMappedPort(AMQP_PORT);
+			AMQP_URL = qpidContainer.getAmqpsUrl();
 			TestPropertyValues.of(
 					"amqphub.amqp10jms.remote-url=" + AMQP_URL,
 					"amqphub.amqp10jms.username=" + USERNAME,

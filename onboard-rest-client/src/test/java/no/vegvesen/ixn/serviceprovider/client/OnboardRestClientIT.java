@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("rawtypes")
 public class OnboardRestClientIT extends DockerBaseIT {
 
     private static Logger log = LoggerFactory.getLogger(OnboardRestClientIT.class);

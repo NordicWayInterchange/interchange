@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.messaging.IxnMessageConsumerCreator;
@@ -42,7 +43,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             TestPropertyValues.of(
-                    String.format("amqphub.amqp10jms.remote-url=amqp://localhost:%d",qpidContainer.getMappedPort(AMQP_PORT)),
+                    String.format("amqphub.amqp10jms.remote-url=%s",qpidContainer.getAmqpsUrl()),
                     "amqphub.amqp10jms.username=interchange",
                     "amqphub.amqp10jms.password=12345678"
             ).applyTo(configurableApplicationContext.getEnvironment());
@@ -52,9 +53,8 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
     @Autowired
 	private IxnMessageConsumerCreator consumerCreator;
 
-	@SuppressWarnings("rawtypes")
 	@Container
-    public static final GenericContainer qpidContainer = getQpidTestContainer(
+    public static final QpidContainer qpidContainer = getQpidTestContainer(
             "qpid",
             testKeysPath,
             "localhost.p12",
@@ -64,7 +64,7 @@ public class InterchangeAppIT extends QpidDockerBaseIT {
             "localhost");
 
 	private String getQpidURI() {
-		String url = "amqps://localhost:" + qpidContainer.getMappedPort(AMQPS_PORT);
+		String url = qpidContainer.getAmqpsUrl();
 		logger.info("connection string to local message broker {}", url);
 		return url;
 	}

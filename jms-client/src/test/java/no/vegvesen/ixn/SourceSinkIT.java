@@ -30,7 +30,6 @@ public class SourceSinkIT extends QpidDockerBaseIT {
 	@Container
 	static KeysContainer keysContainer = getKeyContainer(SourceSinkIT.class,"my_ca","localhost","king_harald");
 
-	@SuppressWarnings("rawtypes")
 	@Container
 	public final QpidContainer qpidContainer = getQpidTestContainer("qpid",
 			keysContainer.getKeyFolderOnHost(),

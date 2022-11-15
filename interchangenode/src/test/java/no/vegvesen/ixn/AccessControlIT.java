@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
@@ -45,9 +46,8 @@ public class AccessControlIT extends QpidDockerBaseIT {
 	private static final String OUTGOING_EXCHANGE = "outgoingExchange";
 	private static final String TEST_OUT = "test-out";
 
-	@SuppressWarnings("rawtypes")
 	@Container
-	public static final GenericContainer localContainer = getQpidTestContainer("qpid",
+	public static final QpidContainer localContainer = getQpidTestContainer("qpid",
 			testKeysPath,
 			"localhost.p12",
 			"password",
@@ -56,7 +56,7 @@ public class AccessControlIT extends QpidDockerBaseIT {
 			"localhost");
 
 	private String getQpidURI() {
-		String url = "amqps://localhost:" + localContainer.getMappedPort(AMQPS_PORT);
+		String url = localContainer.getAmqpsUrl();
 		logger.info("connection string to local message broker {}", url);
 		return url;
 	}
