@@ -37,6 +37,15 @@ data:
           "owner": null,
           "lastUpdatedBy": "interchange",
           "createdBy": "interchange"
+        },
+        {
+          "name": "bi-queue",
+          "type": "standard",
+          "durable": true,
+          "maximumMessageTtl": 900000,
+          "ensureNondestructiveConsumers": true,
+          "holdOnPublishEnabled": false,
+          "owner": null
         }
       ],
       "virtualhostaccesscontrolproviders": [
