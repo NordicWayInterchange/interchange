@@ -136,13 +136,13 @@ public class CapabilityApi {
 				'}';
 	}
 
-	public HashMap<String, String> getCommonProperties() {
+	public HashMap<String, String> getProperties() {
 		HashMap<String, String> properties = new HashMap<>();
+		properties.put("messageType", messageType);
 		properties.put("publisherId", publisherId);
-		//TODO: Add publicationId from new version of spec
 		properties.put("originatingCountry", originatingCountry);
 		properties.put("protocolVersion", protocolVersion);
-		properties.put("", quadTree.toString());
+		properties.put("quadTree", quadTree.toString());
 		return properties;
 	}
 

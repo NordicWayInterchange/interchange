@@ -5,42 +5,26 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SremCapabilityApi extends CapabilityApi {
-    private Set<String> ids = new HashSet<>();
 
     public SremCapabilityApi() {
 
     }
 
-    public SremCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> ids) {
+    public SremCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Integer shardCount, String infoUrl) {
         super(Constants.SREM, publisherId, originatingCountry, protocolVersion, redirect, shardCount, infoUrl, quadTree);
-        if(ids != null) {
-            this.ids.addAll(ids);
-        }
     }
 
-    public SremCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> ids) {
-        this(publisherId, originatingCountry, protocolVersion, quadTree, null, null, null, ids);
+    public SremCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
+        this(publisherId, originatingCountry, protocolVersion, quadTree, null, null, null);
     }
 
-    public SremCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Set<String> ids) {
-        this(publisherId, originatingCountry, protocolVersion, quadTree, redirect, null, null, ids);
-    }
-
-    public Set<String> getIds() {
-        return ids;
-    }
-
-    public void setIds(Collection<String> ids) {
-        this.ids.clear();
-        if(ids != null) {
-            this.ids.addAll(ids);
-        }
+    public SremCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect) {
+        this(publisherId, originatingCountry, protocolVersion, quadTree, redirect, null, null);
     }
 
     @Override
     public String toString() {
         return "SremCapabilityApi{" +
-                "ids=" + ids +
                 '}' + super.toString();
     }
 }

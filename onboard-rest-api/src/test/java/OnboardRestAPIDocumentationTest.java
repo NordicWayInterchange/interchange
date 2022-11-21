@@ -28,7 +28,7 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void addSubscriptionRequest() throws JsonProcessingException {
         Set<AddSubscription> addSubscriptions = new HashSet<>();
-        addSubscriptions.add(new AddSubscription("originatingCountry = 'NO' and messageType = 'DENM'"));
+        addSubscriptions.add(new AddSubscription("originatingCountry = 'NO' and messageType = 'DENM'", "serviceprovider1"));
         addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
                 "serviceprovider1",

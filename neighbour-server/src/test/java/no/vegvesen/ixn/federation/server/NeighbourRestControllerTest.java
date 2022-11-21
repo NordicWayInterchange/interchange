@@ -125,7 +125,6 @@ class NeighbourRestControllerTest {
 		CapabilitiesApi ericsson = new CapabilitiesApi();
 		ericsson.setName("ericsson");
 		IvimCapabilityApi ericssonDataType = new IvimCapabilityApi();
-		ericssonDataType.setIviType(Sets.newLinkedHashSet("3993"));
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Create JSON string of capability api object to send to the server

@@ -17,10 +17,7 @@ public class MessageValidatingSelectorCreator {
                 .protocolVersion(capability.getProtocolVersion())
                 .quadTree(capability.getQuadTree())
                 .messageType(messageType);
-        if (messageType.equals(Constants.IVIM)) {
-            IvimCapability ivimCapability = (IvimCapability) capability;
-            builder.iviTypes(ivimCapability.getIviTypes());
-        } else if (messageType.equals(Constants.DENM)) {
+        if (messageType.equals(Constants.DENM)) {
             DenmCapability denmCapability = (DenmCapability) capability;
             builder.causeCodes(denmCapability.getCauseCodes());
         } else if (messageType.equals(Constants.DATEX_2)) {

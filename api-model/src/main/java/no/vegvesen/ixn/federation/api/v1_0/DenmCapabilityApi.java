@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,6 +38,17 @@ public class DenmCapabilityApi extends CapabilityApi {
 		}
 	}
 
+	@Override
+	public HashMap<String, String> getProperties() {
+		HashMap<String, String> properties = new HashMap<>();
+		properties.put("messageType", super.getMessageType());
+		properties.put("publisherId", super.getPublisherId());
+		properties.put("originatingCountry", super.getOriginatingCountry());
+		properties.put("protocolVersion", super.getProtocolVersion());
+		properties.put("quadTree", super.getQuadTree().toString());
+		properties.put("causeCode", causeCode.toString());
+		return properties;
+	}
 
 	@Override
 	public String toString() {

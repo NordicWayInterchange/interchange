@@ -13,26 +13,16 @@ import java.util.Set;
 @Entity
 @DiscriminatorValue(Constants.IVIM)
 public class IvimCapability extends Capability {
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "capability_ivitypes", joinColumns = @JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_capivi_cap")))
-	@Column(name = "ivi_type")
-	private final Set<String> iviTypes = new HashSet<>();
 
-	public IvimCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> iviTypes) {
+	public IvimCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
 		super(publisherId, originatingCountry, protocolVersion, quadTree);
-		this.iviTypes.addAll(iviTypes);
 	}
 
-	public IvimCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect, Set<String> iviTypes) {
+	public IvimCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect) {
 		super(publisherId, originatingCountry, protocolVersion, quadTree, redirect);
-		this.iviTypes.addAll(iviTypes);
 	}
 
 	public IvimCapability() {
-	}
-
-	public Set<String> getIviTypes() {
-		return iviTypes;
 	}
 
 	@Override
@@ -42,7 +32,7 @@ public class IvimCapability extends Capability {
 
 	@Override
 	public CapabilityApi toApi() {
-		return new IvimCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getIviTypes());
+		return new IvimCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()));
 	}
 
 	@Override
@@ -53,7 +43,6 @@ public class IvimCapability extends Capability {
 	@Override
 	public String toString() {
 		return "IvimCapability{" +
-				"iviTypes=" + iviTypes +
 				"} " + super.toString();
 	}
 }

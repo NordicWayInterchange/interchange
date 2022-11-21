@@ -36,8 +36,7 @@ public class MessageValidatingSelectorCreatorTest {
                 "NO-123",
                 "NO",
                 "1.0",
-                new HashSet<>(Arrays.asList("122,123")),
-               new HashSet<>(Arrays.asList("5","6"))
+                new HashSet<>(Arrays.asList("122,123"))
         ));
         assertThat(selector).contains("messageType = 'IVIM'");
         assertThat(selector).contains("publisherId = 'NO-123'");

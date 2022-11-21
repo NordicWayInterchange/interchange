@@ -10,27 +10,17 @@ import java.util.Set;
 @Entity
 @DiscriminatorValue(Constants.MAPEM)
 public class MapemCapability extends Capability{
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "capability_map_ids", joinColumns = @JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_cap_mapids_cap")))
-    @Column(name = "ids")
-    private final Set<String> ids = new HashSet<>();
 
     public MapemCapability() {
 
     }
 
-    public MapemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> ids) {
+    public MapemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
         super(publisherId, originatingCountry, protocolVersion, quadTree);
-        if(ids != null) {
-            this.ids.addAll(ids);
-        }
     }
 
-    public MapemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect, Set<String> ids) {
+    public MapemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect) {
         super(publisherId, originatingCountry, protocolVersion, quadTree, redirect);
-        if(ids != null) {
-            this.ids.addAll(ids);
-        }
     }
 
     @Override
@@ -40,7 +30,7 @@ public class MapemCapability extends Capability{
 
     @Override
     public CapabilityApi toApi() {
-        return new MapemCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getIds());
+        return new MapemCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()));
     }
 
     @Override
@@ -48,14 +38,9 @@ public class MapemCapability extends Capability{
         return Constants.MAPEM;
     }
 
-    public Set<String> getIds(){
-        return ids;
-    }
-
     @Override
     public String toString() {
         return "MapemCapability{" +
-                "ids=" + ids +
                 "} " + super.toString();
     }
 }

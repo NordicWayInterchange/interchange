@@ -1,42 +1,51 @@
 package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.properties.CapabilityProperty;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Component
 public class CapabilityVerifier {
 
-    public boolean verifyCapability(CapabilityApi capability) {
-        boolean capabilityIsVerified = false;
-        if (capability instanceof DatexCapabilityApi) {
+    public static boolean isValid(CapabilityApi capability) {
+        String messageType = capability.getMessageType();
+        Set<String> mandatoryPropertyNames;
 
+        switch(messageType) {
+            case Constants.DATEX_2:
+                mandatoryPropertyNames = CapabilityProperty.mandatoryDatex2PropertyNames;
+                break;
+            case Constants.DENM:
+                mandatoryPropertyNames = CapabilityProperty.mandatoryDenmPropertyNames;
+                break;
+            case Constants.IVIM:
+                mandatoryPropertyNames = CapabilityProperty.mandatoryIvimPropertyNames;
+                break;
+            case Constants.SPATEM:
+                mandatoryPropertyNames = CapabilityProperty.mandatorySpatemMapemPropertyNames;
+                break;
+            case Constants.MAPEM:
+                mandatoryPropertyNames = CapabilityProperty.mandatorySpatemMapemPropertyNames;
+                break;
+            case Constants.SREM:
+                mandatoryPropertyNames = CapabilityProperty.mandatorySremSsemPropertyNames;
+                break;
+            case Constants.SSEM:
+                mandatoryPropertyNames = CapabilityProperty.mandatorySremSsemPropertyNames;
+                break;
+            case Constants.CAM:
+                mandatoryPropertyNames = CapabilityProperty.mandatoryCamPropertyNames;
+                break;
+            default:
+                return false;
         }
-        else if (capability instanceof DenmCapabilityApi) {
-
-        }
-        else if (capability instanceof IvimCapabilityApi) {
-
-        }
-        else if (capability instanceof SpatemCapabilityApi) {
-
-        }
-        else if (capability instanceof MapemCapabilityApi) {
-
-        }
-        else if (capability instanceof SremCapabilityApi) {
-
-        }
-        else if (capability instanceof SsemCapabilityApi) {
-
-        }
-        else if (capability instanceof CamCapabilityApi) {
-
-        }
-        return capabilityIsVerified;
+        return validateProperties(capability, mandatoryPropertyNames);
     }
 
-    public boolean checkCommonProperties(CapabilityApi capability) {
-        for (String property : capability.getCommonProperties().values()) {
-            if (property == null) {
+    private static boolean validateProperties(CapabilityApi capability, Set<String> properties) {
+        for (String property : properties) {
+            if (capability.getProperties().get(property) == null) {
                 return false;
             }
         }

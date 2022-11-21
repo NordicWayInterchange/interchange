@@ -1,8 +1,11 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.properties.CapabilityProperty;
+import no.vegvesen.ixn.properties.MessageProperty;
 
 import javax.persistence.*;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -10,37 +13,33 @@ import java.util.Set;
 @Entity
 @DiscriminatorValue(Constants.SPATEM)
 public class SpatemCapability extends Capability{
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "capability_spat_ids", joinColumns = @JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_cap_mapids_cap")))
-    @Column(name = "ids")
-    private final Set<String> ids = new HashSet<>();
 
     public SpatemCapability() {
 
     }
 
-    public SpatemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> ids) {
+    public SpatemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
         super(publisherId, originatingCountry, protocolVersion, quadTree);
-        if(ids != null) {
-            this.ids.addAll(ids);
-        }
     }
 
-    public SpatemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect, Set<String> ids) {
+    public SpatemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect) {
         super(publisherId, originatingCountry, protocolVersion, quadTree, redirect);
-        if(ids != null) {
-            this.ids.addAll(ids);
-        }
     }
 
     @Override
     public Map<String, String> getSingleValues() {
         return getSingleValuesBase(Constants.SPATEM);
     }
+/*
+    static void putValue(Map<String, String> values, CapabilityProperty property, String value) {
+        if (value != null && value.length() > 0) {
+            values.put(property.getName(), value);
+        }
+    }*/
 
     @Override
     public CapabilityApi toApi() {
-        return new SpatemCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getIds());
+        return new SpatemCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()));
     }
 
     @Override
@@ -48,14 +47,9 @@ public class SpatemCapability extends Capability{
         return Constants.SPATEM;
     }
 
-    public Set<String> getIds(){
-        return ids;
-    }
-
     @Override
     public String toString() {
         return "SpatemCapability{" +
-                "ids=" + ids +
                 "} " + super.toString();
     }
 }

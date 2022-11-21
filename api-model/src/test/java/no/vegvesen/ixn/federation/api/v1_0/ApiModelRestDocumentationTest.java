@@ -57,8 +57,7 @@ public class ApiModelRestDocumentationTest {
                 Collections.singleton("1234"),
                 RedirectStatusApi.OPTIONAL,
                 1,
-                "https://my.capabilities-info.site/ivim/6",
-                Collections.singleton("6")
+                "https://my.capabilities-info.site/ivim/6"
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capability));

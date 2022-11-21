@@ -17,7 +17,6 @@ public class TypeTransformerTest {
                 "NO-123",
                 "NO",
                 "1.0",
-                Collections.emptySet(),
                 Collections.emptySet()
         );
 

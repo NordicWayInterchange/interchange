@@ -27,8 +27,7 @@ public class CapabilitiesApiTest {
 				Sets.newLinkedHashSet("SituationPublication"));
 		IvimCapabilityApi iviType128Pictograms557_559_612 = new IvimCapabilityApi(
 				"NO-12345",
-				"NO", "IVI:1.2", quadTree,
-				Sets.newLinkedHashSet("128"));
+				"NO", "IVI:1.2", quadTree);
 
 
         capSet.add(datexSituationReroutingWinterDriving);

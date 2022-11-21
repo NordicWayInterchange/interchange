@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.capability;
 import no.vegvesen.ixn.federation.exceptions.HeaderNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
+import no.vegvesen.ixn.properties.CapabilityProperty;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.server.filter.JMSSelectorFilter;
 import org.apache.qpid.server.filter.SelectorParsingException;
@@ -41,7 +42,7 @@ public class JMSSelectorFilterFactory {
 	}
 
 	private static void notAlwaysTrue(JMSSelectorFilter filter) {
-		CapabilityFilter neverTrue = new CapabilityFilter(Collections.singletonMap(MessageProperty.ORIGINATING_COUNTRY.getName(), "-1"));
+		CapabilityFilter neverTrue = new CapabilityFilter(Collections.singletonMap(CapabilityProperty.ORIGINATING_COUNTRY.getName(), "-1"));
 		if (filter.matches(neverTrue)){
 			throw new SelectorAlwaysTrueException("Cannot subscribe to a filter that is always true: " + filter.getSelector());
 		}

@@ -117,7 +117,7 @@ public class NeighbourRESTFacadeTest {
 
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithIviCapabilities() throws Exception {
-		IvimCapabilityApi dataType = new IvimCapabilityApi("NO-123123", "NO", "P1", Sets.newSet("aaa"), Sets.newSet("12321"));
+		IvimCapabilityApi dataType = new IvimCapabilityApi("NO-123123", "NO", "P1", Sets.newSet("aaa"));
 		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("remote server", Collections.singleton(dataType));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);

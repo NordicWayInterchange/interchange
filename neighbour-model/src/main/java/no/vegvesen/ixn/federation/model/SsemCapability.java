@@ -10,27 +10,17 @@ import java.util.Set;
 @Entity
 @DiscriminatorValue(Constants.SSEM)
 public class SsemCapability extends Capability{
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "capability_ssem_ids", joinColumns = @JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_cap_sremids_cap")))
-    @Column(name = "ids")
-    private final Set<String> ids = new HashSet<>();
 
     public SsemCapability() {
 
     }
 
-    public SsemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> ids) {
+    public SsemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree) {
         super(publisherId, originatingCountry, protocolVersion, quadTree);
-        if(ids != null) {
-            this.ids.addAll(ids);
-        }
     }
 
-    public SsemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect, Set<String> ids) {
+    public SsemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect) {
         super(publisherId, originatingCountry, protocolVersion, quadTree, redirect);
-        if(ids != null) {
-            this.ids.addAll(ids);
-        }
     }
 
     @Override
@@ -40,7 +30,7 @@ public class SsemCapability extends Capability{
 
     @Override
     public CapabilityApi toApi() {
-        return new SsemCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getIds());
+        return new SsemCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()));
     }
 
     @Override
@@ -48,14 +38,9 @@ public class SsemCapability extends Capability{
         return Constants.SSEM;
     }
 
-    public Set<String> getIds(){
-        return ids;
-    }
-
     @Override
     public String toString() {
         return "SsemCapability{" +
-                "ids=" + ids +
                 "} " + super.toString();
     }
 }
