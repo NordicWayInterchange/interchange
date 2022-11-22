@@ -61,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup helm
-        uses: azure/setup-helm@v2
+        uses: azure/setup-helm@v3
       - name: Package charts
         run: |
           helm package helm/interchange -d target/helm
