@@ -103,23 +103,23 @@ public class ServiceProviderService {
                 .filter(c -> c.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
 
+        Capabilities currentServiceProviderCapabilities = serviceProvider.getCapabilities();
         for (Capability capability : capabilitiesToTearDown) {
             List<OutgoingMatch> possibleMatches = outgoingMatchDiscoveryService.findMatchesFromCapabilityId(capability.getId());
             if (possibleMatches.isEmpty()) {
                 if (!capability.exchangeExists()) {
                     logger.info("Removing capability with id {} and status TEAR_DOWN", capability.getId());
                     serviceProvider.getCapabilities().getCapabilities().remove(capability);
+                    currentServiceProviderCapabilities.setLastUpdated(LocalDateTime.now());
                 }
             }
         }
 
-        Capabilities currentServiceProviderCapabilities = serviceProvider.getCapabilities();
         if (currentServiceProviderCapabilities.getCapabilities().size() == 0) {
             currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
         } else {
             currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
         }
-        currentServiceProviderCapabilities.setLastUpdated(LocalDateTime.now());
     }
 
     public void removeTearDownAndIllegalDeliveries(ServiceProvider serviceProvider) {
