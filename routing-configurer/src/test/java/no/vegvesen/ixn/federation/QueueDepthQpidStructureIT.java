@@ -11,6 +11,9 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.ssl.KeystoreDetails;
+import no.vegvesen.ixn.ssl.KeystoreType;
+import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -37,22 +40,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurerProperties.class})
-//@ContextConfiguration(initializers = {QueueDepthQpidStructureIT.Initializer.class})
 @Testcontainers
-@Disabled
 public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(QueueDepthQpidStructureIT.class);
 
     private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
 
+    @Container
     private static KeysContainer keyContainer = getKeyContainer(testKeysPath, "my_ca", "localhost", "routing_configurer", "king_gustaf");
 
-    //@Autowired
     SSLContext sslContext;
 
-    //@Autowired
     QpidClient qpidClient;
 
     @Container
@@ -60,27 +59,23 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
             .dependsOn(keyContainer);
 
 
-    /*static class Initializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-            String httpsUrl = qpidContainer.getHttpsUrl();
-            String httpUrl = qpidContainer.getHttpUrl();
-            logger.info("server url: " + httpsUrl);
-            logger.info("server url: " + httpUrl);
-            TestPropertyValues.of(
-                    "routing-configurer.baseUrl=" + httpsUrl,
-                    "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-                    "test.ssl.key-store=" + testKeysPath.resolve("routing_configurer.p12")
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
-    }*/
 
     @BeforeEach
     public void setUp() {
-
+        KeystoreDetails trust = new KeystoreDetails(
+                keyContainer.getKeyFolderOnHost().resolve("truststore.jks").toString(),
+                "password",
+                KeystoreType.JKS
+        );
+        KeystoreDetails keys = new KeystoreDetails(
+                keyContainer.getKeyFolderOnHost().resolve("routing_configurer.p12").toString(),
+                "password",
+                KeystoreType.PKCS12,
+                "password"
+        );
+        sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keys,trust);
+        QpidClientConfig config = new QpidClientConfig(sslContext);
+        qpidClient = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),config.qpidRestTemplate());
     }
 
     @Test
@@ -161,7 +156,6 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
             source.sendNonPersistentMessage(createDenmMessage(source, bytemessage2, "6"));
         }
 
-        //assertThat(numMessages.get()).isEqualTo(2);
 
         String logsAfter = qpidContainer.getLogs();
         assertThat(logsAfter).contains("EXH-1003");
