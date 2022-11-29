@@ -17,6 +17,7 @@
       "name": "bi-queue",
       "type": "standard",
       "durable": true,
+      "maximumMessageTtl": 900000,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -59,7 +60,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "remote.bouvetinterchange.eu"
+            "NAME": "b.bouvetinterchange.eu"
           }
         },
         {
@@ -68,7 +69,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "remote.bouvetinterchange.eu"
+            "NAME": "b.bouvetinterchange.eu"
           }
         },
         {
