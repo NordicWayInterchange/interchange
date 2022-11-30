@@ -78,6 +78,7 @@ public class ServiceProviderRouter {
                 }
             }
             setUpCapabilityExchanges(serviceProvider);
+            bindCapabilityExchangesToBiQueue(serviceProvider);
             syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, StreamSupport.stream(serviceProviders.spliterator(), false)
                     .collect(Collectors.toSet()));
             setUpSubscriptionExchanges(serviceProvider);
@@ -339,7 +340,6 @@ public class ServiceProviderRouter {
                         if (!qpidClient.exchangeExists(exchangeName)) {
                             qpidClient.createTopicExchange(exchangeName);
                             capability.setCapabilityExchangeName(exchangeName);
-                            bindCapabilityExchangeToBiQueue(capability, exchangeName);
                             logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
                         }
                     }
@@ -349,9 +349,15 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void bindCapabilityExchangeToBiQueue(Capability capability, String exchangeName) {
-        String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
-        qpidClient.bindTopicExchange(capabilitySelector, exchangeName, "bi-queue");
+    public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider) {
+        for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
+            if (capability.exchangeExists()) {
+                if (!qpidClient.getQueueBindKeys("bi-queue").contains(capability.getCapabilityExchangeName())) {
+                    String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
+                    qpidClient.bindToBiQueue(capabilitySelector, capability.getCapabilityExchangeName());
+                }
+            }
+        }
     }
 
     public void tearDownCapabilityExchanges(ServiceProvider serviceProvider) {

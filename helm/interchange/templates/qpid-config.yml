@@ -16,6 +16,7 @@ data:
     federated-interchanges.users=
     administrators.users={{ .Values.qpid.admin_user }},{{ .Values.external_name }}
     remote-service-providers.users=
+    bi-consumers.users=
   default.json: |
     {{- $userlen := len .Values.qpid.users }}
     {{- $additionallen := len .Values.qpid.additional_queues }}
@@ -79,6 +80,15 @@ data:
             },
             {
               "objectType": "VIRTUALHOST",
+              "identity": "bi-consumers",
+              "operation": "ACCESS",
+              "outcome": "ALLOW_LOG",
+              "attributes": {
+                "NAME": "{{ .Values.external_name }}"
+              }
+            },
+            {
+              "objectType": "VIRTUALHOST",
               "identity": "federated-interchanges",
               "operation": "ACCESS",
               "outcome": "ALLOW_LOG",
@@ -93,6 +103,15 @@ data:
               "outcome": "ALLOW_LOG",
               "attributes": {
                 "NAME": "{{ .Values.external_name }}"
+              }
+            },
+            {
+              "objectType": "QUEUE",
+              "identity": "ALL",
+              "operation": "CONSUME",
+              "outcome": "ALLOW_LOG",
+              "attributes": {
+                "NAME": "bi-queue"
               }
             },
             {{- range $i, $ex := .Values.qpid.users }}
