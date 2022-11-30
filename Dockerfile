@@ -1,8 +1,6 @@
 FROM maven:3.6.0-jdk-8 as build
 
 COPY pom.xml pom.xml
-COPY debugclient/pom.xml debugclient/pom.xml
-COPY debugclient/src debugclient/src
 
 COPY interchangenode/src interchangenode/src
 COPY interchangenode/pom.xml interchangenode/pom.xml
