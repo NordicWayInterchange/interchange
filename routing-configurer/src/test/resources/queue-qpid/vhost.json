@@ -1,10 +1,8 @@
 {
-  "type": "BDB",
-  "name": "a.bouvetinterchange.eu",
+  "type": "Memory",
+  "name": "localhost",
   "modelVersion": "7.0",
-  "exchanges": [
-
-  ],
+  "exchanges": [ ],
   "queues": [
     {
       "name": "dlqueue",
@@ -18,6 +16,29 @@
       "type": "standard",
       "durable": true,
       "maximumMessageTtl": 900000,
+      "overflowPolicy": "REJECT",
+      "maximumQueueDepthMessages": 1,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "queue-one",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "overflowPolicy": "REJECT",
+      "maximumQueueDepthMessages": 1,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "queue-two",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "overflowPolicy": "REJECT",
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -42,16 +63,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
-          }
-        },
-        {
-          "objectType": "VIRTUALHOST",
-          "identity": "bi-consumers",
-          "operation": "ACCESS",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "localhost"
           }
         },
         {
@@ -60,16 +72,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
-          }
-        },
-        {
-          "objectType": "VIRTUALHOST",
-          "identity": "remote-service-providers",
-          "operation": "ACCESS",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "localhost"
           }
         },
         {
@@ -78,7 +81,25 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "ALL",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "ALL",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-queue"
           }
         },
         {

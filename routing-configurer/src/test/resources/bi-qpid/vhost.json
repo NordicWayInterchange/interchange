@@ -1,10 +1,8 @@
 {
-  "type": "BDB",
-  "name": "a.bouvetinterchange.eu",
+  "type": "Memory",
+  "name": "localhost",
   "modelVersion": "7.0",
-  "exchanges": [
-
-  ],
+  "exchanges": [ ],
   "queues": [
     {
       "name": "dlqueue",
@@ -17,7 +15,7 @@
       "name": "bi-queue",
       "type": "standard",
       "durable": true,
-      "maximumMessageTtl": 900000,
+      "maximumMessageTtl": 5000,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -37,21 +35,22 @@
           "attributes": {}
         },
         {
+          "objectType": "EXCHANGE",
+          "identity": "service-providers",
+          "operation": "PUBLISH",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "ROUTING_KEY": "onramp",
+            "NAME": ""
+          }
+        },
+        {
           "objectType": "VIRTUALHOST",
           "identity": "service-providers",
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
-          }
-        },
-        {
-          "objectType": "VIRTUALHOST",
-          "identity": "bi-consumers",
-          "operation": "ACCESS",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "localhost"
           }
         },
         {
@@ -60,16 +59,7 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
-          }
-        },
-        {
-          "objectType": "VIRTUALHOST",
-          "identity": "remote-service-providers",
-          "operation": "ACCESS",
-          "outcome": "ALLOW_LOG",
-          "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "localhost"
           }
         },
         {
@@ -78,7 +68,25 @@
           "operation": "ACCESS",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "a.bouvetinterchange.eu"
+            "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "ALL",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "localhost"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "ALL",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-queue"
           }
         },
         {

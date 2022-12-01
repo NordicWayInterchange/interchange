@@ -12,6 +12,15 @@
       "durable": true,
       "holdOnPublishEnabled": false,
       "owner": null
+    },
+    {
+      "name": "bi-queue",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
     }
   ],
   "virtualhostaccesscontrolproviders": [
@@ -20,13 +29,6 @@
       "type": "RuleBased",
       "defaultResult": "DENIED",
       "rules": [
-        {
-          "objectType": "ALL",
-          "identity": "interchange",
-          "operation": "ALL",
-          "outcome": "ALLOW_LOG",
-          "attributes": {}
-        },
         {
           "objectType": "ALL",
           "identity": "administrators",
@@ -50,6 +52,33 @@
           "outcome": "ALLOW_LOG",
           "attributes": {
            "NAME": "b.bouvetinterchange.eu"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "remote-service-providers",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "b.bouvetinterchange.eu"
+          }
+        },
+        {
+          "objectType": "VIRTUALHOST",
+          "identity": "clients-private-channels",
+          "operation": "ACCESS",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "b.bouvetinterchange.eu"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "ALL",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-queue"
           }
         },
         {

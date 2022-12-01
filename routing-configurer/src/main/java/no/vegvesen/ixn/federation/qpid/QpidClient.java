@@ -96,6 +96,10 @@ public class QpidClient {
 		addBinding(selector,source,destination,Integer.toString(selector.hashCode()));
 	}
 
+	public void bindToBiQueue(String selector, String source) {
+		addBinding(selector,source,"bi-queue",source);
+	}
+
 	private void addBinding(String selector, String source, String destination, String bindingKey) {
 		JSONObject json = new JSONObject();
 		json.put("destination", destination);

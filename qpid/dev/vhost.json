@@ -57,13 +57,6 @@
       "defaultResult": "DENIED",
       "rules": [
         {
-          "objectType": "ALL",
-          "identity": "interchange",
-          "operation": "ALL",
-          "outcome": "ALLOW_LOG",
-          "attributes": {}
-        },
-        {
           "objectType": "EXCHANGE",
           "identity": "messaging-users",
           "operation": "PUBLISH",

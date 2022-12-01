@@ -6,6 +6,7 @@ import no.vegvesen.ixn.model.MessageValidator;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsBytesMessage;
 import org.apache.qpid.jms.message.JmsMessage;
+import org.apache.qpid.jms.provider.amqp.message.AmqpMessageSupport;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -140,6 +141,11 @@ public class MessageBuilder {
 
     public MessageBuilder vehicleRole(String vehicleRole) throws JMSException {
         message.setStringProperty(MessageProperty.VEHICLE_ROLE.getName(), vehicleRole);
+        return this;
+    }
+
+    public MessageBuilder ttl(long ttl) throws JMSException {
+        message.setLongProperty(AmqpMessageSupport.JMS_AMQP_TTL,ttl);
         return this;
     }
 }

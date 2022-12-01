@@ -385,4 +385,77 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         System.out.println(numMessages.get());
         assertThat(numMessages.get()).isEqualTo(1);
     }
+
+    @Test
+    public void consumeFromQueueWithNonDestructiveConsumers() throws Exception{
+        String consumeQueue = "bi-queue";
+        String deliveryExchange = "del-123456789";
+        String capabilityExchange = "cap-123456789";
+
+        DenmCapability capability = new DenmCapability(
+                "NO-123",
+                "NO",
+                "DENM:1.2.2",
+                new HashSet<>(Arrays.asList("12003")),
+                new HashSet<>(Arrays.asList("6"))
+        );
+
+        LocalDelivery delivery = new LocalDelivery(
+                "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = '6'",
+                LocalDeliveryStatus.CREATED
+        );
+
+        //1. Creating delivery queue and adding write access.
+        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
+
+        //Create intermediate exchange. No ACL needed for this.
+        qpidClient.createTopicExchange(capabilityExchange);
+
+        //3. Making Capability selector and joining with delivery selector.
+        MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
+        String capabilitySelector = creator.makeSelector(capability);
+
+        String deliverySelector = delivery.getSelector();
+
+        String joinedSelector = String.format("(%s) AND (%s)", capabilitySelector, deliverySelector);
+        System.out.println(joinedSelector);
+
+        //4. Adding binding on deliveryQueue to out-queue
+        qpidClient.bindDirectExchange(joinedSelector,deliveryExchange,capabilityExchange);
+        qpidClient.bindTopicExchange(capabilitySelector, capabilityExchange, consumeQueue);
+
+        AtomicInteger numMessages = new AtomicInteger();
+
+        try (Sink sink = new Sink(qpidContainer.getAmqpsUrl(),
+                consumeQueue,
+                sslContext,
+                message -> numMessages.incrementAndGet())) {
+            sink.start();
+            try (Source source = new Source(qpidContainer.getAmqpsUrl(),deliveryExchange,sslContext)) {
+                source.start();
+                String messageText = "This is my DENM message :) ";
+                byte[] bytemessage = messageText.getBytes(StandardCharsets.UTF_8);
+                source.sendNonPersistentMessage(source.createMessageBuilder()
+                        .bytesMessage(bytemessage)
+                        .userId("")
+                        .publisherId("NO-123")
+                        .messageType(Constants.DENM)
+                        .causeCode("6")
+                        .subCauseCode("61")
+                        .originatingCountry("NO")
+                        .protocolVersion("DENM:1.2.2")
+                        .quadTreeTiles(",12003,")
+                        .timestamp(System.currentTimeMillis())
+                        .build());
+                System.out.println();
+            }
+            System.out.println();
+            sink.close();
+            sink.start();
+            Thread.sleep(200);
+        }
+        assertThat(numMessages.get()).isEqualTo(2);
+
+    }
 }

@@ -78,6 +78,7 @@ public class ServiceProviderRouter {
                 }
             }
             setUpCapabilityExchanges(serviceProvider);
+            bindCapabilityExchangesToBiQueue(serviceProvider);
             syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, StreamSupport.stream(serviceProviders.spliterator(), false)
                     .collect(Collectors.toSet()));
             setUpSubscriptionExchanges(serviceProvider);
@@ -345,6 +346,17 @@ public class ServiceProviderRouter {
                 }
             }
             repository.save(serviceProvider);
+        }
+    }
+
+    public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider) {
+        for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
+            if (capability.exchangeExists()) {
+                if (!qpidClient.getQueueBindKeys("bi-queue").contains(capability.getCapabilityExchangeName())) {
+                    String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
+                    qpidClient.bindToBiQueue(capabilitySelector, capability.getCapabilityExchangeName());
+                }
+            }
         }
     }
 
