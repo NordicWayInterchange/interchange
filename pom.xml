@@ -229,7 +229,6 @@
         <module>neighbour-discoverer</module>
         <module>routing-configurer</module>
         <module>federation-st</module>
-        <module>debugclient</module>
         <module>message-collector</module>
         <module>quadtree-tool</module>
         <module>onboard-rest-api</module>

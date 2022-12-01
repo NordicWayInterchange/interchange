@@ -74,16 +74,7 @@ Helm uses Charts to pack all the Kubernetes components for an application to dep
 the configuration of the application can be updated and maintained.
 
 The helm templates is provided under helm/interchange/templates. 
-See the example values file helm/interchange/example_values.yml
-
-### Connect to the server
-We provide two clients to demonstrate how to publish messages to the interchange node.
-
-1) no.vegvesen.interchange.DebugClient
-2) no.vegvesen.ixn.Sink and Source
-
-DebugClient must be run with -D parameters to point to keystore and truststore.
-Source and Sink reads keystore and truststore instructions from property files.  
+See the example values file helm/interchange/example_values.yml 
 
 ### Resources
 [Trello](https://trello.com/b/MXlcCmye/interchange)
