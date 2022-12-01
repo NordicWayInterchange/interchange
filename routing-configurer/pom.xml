@@ -76,7 +76,7 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>jms-client</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
