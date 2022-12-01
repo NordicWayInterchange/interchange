@@ -41,6 +41,18 @@ public class KeyGenerationBuilderIT {
     public void generate() {
         Cluster cluster = createClusterModel();
         Path imageBaseFolder = DockerBaseIT.getFolderPath("keymaster");
+        generateKeys(cluster, imageBaseFolder);
+
+    }
+
+    @Test
+    public void generateModelForRedirectSP() {
+
+        Cluster cluster = createClusterForSPRedirect();
+        generateKeys(cluster,DockerBaseIT.getFolderPath("keymaster"));
+    }
+
+    private void generateKeys(Cluster cluster, Path imageBaseFolder) {
         TopDomain topDomain = cluster.getTopDomain();
         RootCAKeyGenerator caGenerator = new RootCAKeyGenerator(
                 imageBaseFolder.resolve("rootca/newca"),
@@ -101,13 +113,23 @@ public class KeyGenerationBuilderIT {
                         keysPath
                 );
                 spCert.start();
-
-
-
             }
 
         }
+    }
 
+    private Cluster createClusterForSPRedirect() {
+        return Cluster.builder()
+                .topDomain().domainName("redirect-cluster.eu").ownerCountry("NO").done()
+                .interchange()
+                    .intermediateDomain().domainName("node-a.no").ownerCountry("NO").done()
+                    .serviceProvider().name("service-provider-a").country("NO").done()
+                .done()
+                .interchange()
+                    .intermediateDomain().domainName("node-b.no").ownerCountry("NO").done()
+                    .serviceProvider().name("service-provider-b").country("NO").done()
+                .done()
+                .done();
     }
 
     private Cluster createClusterModel() {
