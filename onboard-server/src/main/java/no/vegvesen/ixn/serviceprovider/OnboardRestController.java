@@ -2,6 +2,7 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
+import no.vegvesen.ixn.federation.capability.CapabilityValidator;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
@@ -54,8 +55,9 @@ public class OnboardRestController {
 			throw new CapabilityPostException("Bad api object. The posted DataTypeApi object had no capabilities. Nothing to add.");
 		}
 
+		AddCapabilitiesRequest validatedCapabilities = CapabilityValidator.validateServiceProviderCapabilities(capabilityApi);
 
-		Set<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
+		Set<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,validatedCapabilities);
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();

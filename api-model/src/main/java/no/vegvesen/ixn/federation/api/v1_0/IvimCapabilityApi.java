@@ -37,7 +37,6 @@ public class IvimCapabilityApi extends CapabilityApi {
 		}
 	}
 
-
 	@Override
 	public String toString() {
 		return "IvimCapabilityApi{" +

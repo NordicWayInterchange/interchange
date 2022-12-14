@@ -8,7 +8,7 @@ public class SsemCapabilityApi extends CapabilityApi{
     private Set<String> ids = new HashSet<>();
 
     public SsemCapabilityApi() {
-
+        super(Constants.SSEM);
     }
 
     public SsemCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> ids) {

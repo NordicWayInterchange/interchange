@@ -70,7 +70,7 @@ public class NeighbourRESTFacadeTest {
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
-		CapabilityApi capabilityApi = new DatexCapabilityApi("NO");
+		CapabilityApi capabilityApi = new DatexCapabilityApi("NO-1234", "NO", "1.0", Collections.singleton("0123"), Collections.singleton("Roadworks"));
 		CapabilitiesApi capabilitiesApi = new CapabilitiesApi("ericsson.itsinterchange.eu", Collections.singleton(capabilityApi));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);

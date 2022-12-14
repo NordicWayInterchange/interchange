@@ -15,10 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -44,10 +41,9 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testDeletingCapability() {
-        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        DatexCapabilityApi datexNO = new DatexCapabilityApi("publisher-1", "NO", "1.0", Collections.singleton("1230"), Collections.singleton("Roadworks"));
         String serviceProviderName = "serviceprovider";
 
-        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
                 serviceProviderName,
                 Collections.singleton(datexNO)
@@ -61,7 +57,6 @@ public class OnboardRestControllerIT {
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(0);
 
         LocalActorCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
-        //LocalCapability saved = serviceProviderCapabilities.getCapabilities().iterator().next();
         restController.deleteCapability(serviceProviderName, saved.getId());
 
         //We did four calls to the controller, thus we should have checked the cert 4 times
@@ -70,10 +65,9 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testGettingCapability() {
-        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        DatexCapabilityApi datexNO = new DatexCapabilityApi("publisher-1", "NO", "1.0", Collections.singleton("1230"), Collections.singleton("Roadworks"));
         String serviceProviderName = "serviceprovider";
 
-        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
                 serviceProviderName,
                 Collections.singleton(datexNO)
@@ -419,5 +413,36 @@ public class OnboardRestControllerIT {
 
         assertThat(response.getDeliveries()).hasSize(1);
         assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
+    }
+
+    @Test
+    public void testAddingIllegalCapability() {
+        DatexCapabilityApi capabilityApi = new DatexCapabilityApi("NO");
+
+        String serviceProviderName = "my-service-provider";
+
+        AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
+                serviceProviderName,
+                Collections.singleton(capabilityApi)
+        ));
+
+        assertThat(addedCapability).isNotNull();
+        assertThat(addedCapability.getCapabilities()).isEmpty();
+    }
+
+    @Test
+    public void testAddingIllegalAndLegalCapability() {
+        DatexCapabilityApi capabilityApi1 = new DatexCapabilityApi("NO");
+        DatexCapabilityApi capabilityApi2 = new DatexCapabilityApi("publisher-1", "NO", "1.0", Collections.singleton("1230"), Collections.singleton("Roadworks"));
+
+        String serviceProviderName = "my-service-provider";
+
+        AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
+                serviceProviderName,
+                new HashSet<>(Arrays.asList(capabilityApi1, capabilityApi2))
+        ));
+
+        assertThat(addedCapability).isNotNull();
+        assertThat(addedCapability.getCapabilities()).hasSize(1);
     }
 }

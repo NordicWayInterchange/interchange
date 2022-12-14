@@ -37,7 +37,6 @@ public class DenmCapabilityApi extends CapabilityApi {
 		}
 	}
 
-
 	@Override
 	public String toString() {
 		return "DenmCapabilityApi{" +

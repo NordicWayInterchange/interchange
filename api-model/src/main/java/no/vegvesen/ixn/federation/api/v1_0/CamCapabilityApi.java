@@ -8,7 +8,7 @@ public class CamCapabilityApi extends CapabilityApi {
     private Set<String> stationTypes;
 
     public CamCapabilityApi() {
-
+        super(Constants.CAM);
     }
 
     public CamCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> stationTypes) {

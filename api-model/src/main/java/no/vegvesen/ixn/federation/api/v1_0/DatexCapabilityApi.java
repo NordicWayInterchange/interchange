@@ -1,14 +1,12 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class DatexCapabilityApi extends CapabilityApi {
 	private Set<String> publicationType = new HashSet<>();
 
 	public DatexCapabilityApi(){
+		super(Constants.DATEX_2);
 	}
 
 	public DatexCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree,RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> publicationType) {
@@ -39,7 +37,6 @@ public class DatexCapabilityApi extends CapabilityApi {
 			this.publicationType.addAll(publicationType);
 		}
 	}
-
 
 	@Override
 	public String toString() {

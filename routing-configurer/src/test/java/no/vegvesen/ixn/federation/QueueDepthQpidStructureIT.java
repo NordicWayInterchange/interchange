@@ -135,7 +135,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         }
 
         String logsBefore = qpidContainer.getLogs();
-        assertThat(logsBefore).doesNotContain("EXH-1003");
+        assertThat(logsBefore).doesNotContain("QUE-1005");
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();
@@ -146,7 +146,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
 
         String logsAfter = qpidContainer.getLogs();
-        assertThat(logsAfter).contains("EXH-1003");
+        assertThat(logsAfter).contains("QUE-1005");
 
     }
 

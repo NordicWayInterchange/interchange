@@ -8,7 +8,7 @@ public class SremCapabilityApi extends CapabilityApi {
     private Set<String> ids = new HashSet<>();
 
     public SremCapabilityApi() {
-
+        super(Constants.SREM);
     }
 
     public SremCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> ids) {

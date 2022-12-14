@@ -89,7 +89,8 @@ public class OnboardRestClientIT extends DockerBaseIT {
     @Test
     public void addCapabilityCheckAndDelete() throws JsonProcessingException {
 
-        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        DatexCapabilityApi datexNO = new DatexCapabilityApi("publisher.1", "NO", "1.0", Collections.singleton("1230"), Collections.singleton("Roadworks"));
+
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 USER,
                 Collections.singleton(datexNO)

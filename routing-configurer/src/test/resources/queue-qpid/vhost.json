@@ -23,22 +23,21 @@
       "owner": null
     },
     {
-      "name": "queue-one",
+      "name": "queue-two",
       "type": "standard",
       "durable": true,
       "maximumMessageTtl": 900000,
-      "overflowPolicy": "REJECT",
-      "maximumQueueDepthMessages": 1,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
     },
     {
-      "name": "queue-two",
+      "name": "queue-one",
       "type": "standard",
       "durable": true,
       "maximumMessageTtl": 900000,
-      "overflowPolicy": "REJECT",
+      "overflowPolicy": "RING",
+      "maximumQueueDepthMessages": 1,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null

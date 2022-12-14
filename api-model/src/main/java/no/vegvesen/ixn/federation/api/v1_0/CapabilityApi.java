@@ -4,12 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import no.vegvesen.ixn.properties.CapabilityProperty;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import static no.vegvesen.ixn.federation.api.v1_0.CapabilityApi.*;
+import java.util.*;
 
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.NAME,
@@ -28,7 +25,7 @@ import static no.vegvesen.ixn.federation.api.v1_0.CapabilityApi.*;
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CapabilityApi {
+public abstract class CapabilityApi {
 
 	private String messageType;
 	private String publisherId;
@@ -39,14 +36,15 @@ public class CapabilityApi {
 	private Integer shardCount = 1;
 	private String infoUrl;
 
-	public CapabilityApi() {
-	}
-
-	public CapabilityApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, RedirectStatusApi redirect, Integer shardCount, String infoUrl,Set<String> quadTree) {
+	public CapabilityApi(String messageType) {
 		if (messageType == null) {
 			throw new IllegalArgumentException("messageType can not be null");
 		}
 		this.messageType = messageType;
+	}
+
+	public CapabilityApi(String messageType, String publisherId, String originatingCountry, String protocolVersion, RedirectStatusApi redirect, Integer shardCount, String infoUrl,Set<String> quadTree) {
+		this(messageType);
 		this.publisherId = publisherId;
 		this.originatingCountry = originatingCountry;
 		this.protocolVersion = protocolVersion;
@@ -150,4 +148,33 @@ public class CapabilityApi {
 	public void setInfoUrl(String infoUrl) {
 		this.infoUrl = infoUrl;
 	}
+
+	public Map<String, Object> getCommonProperties(String messageType) {
+		Map<String, Object> values = new HashMap<>();
+		putValue(values, CapabilityProperty.MESSAGE_TYPE, messageType);
+		putValue(values, CapabilityProperty.PUBLISHER_ID, this.getPublisherId());
+		putValue(values, CapabilityProperty.ORIGINATING_COUNTRY, this.getOriginatingCountry());
+		putValue(values, CapabilityProperty.PROTOCOL_VERSION, this.getProtocolVersion());
+		putMultiValue(values, CapabilityProperty.QUAD_TREE, this.getQuadTree());
+		return values;
+	}
+
+	static void putValue(Map<String, Object> values, CapabilityProperty property, String value) {
+		if (value != null && value.length() > 0) {
+			values.put(property.getName(), value);
+		}
+	}
+
+	static void putMultiValue(Map<String, Object> values, CapabilityProperty property, Set<String> multiValue) {
+		if (multiValue.isEmpty()) {
+			values.put(property.getName(), null);
+		} else {
+			StringBuilder builder = new StringBuilder();
+			for (String value : multiValue) {
+				builder.append(value).append(",");
+			}
+			values.put(property.getName(), builder.toString());
+		}
+	}
+
 }

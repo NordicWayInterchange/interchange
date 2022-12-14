@@ -8,7 +8,7 @@ public class MapemCapabilityApi extends CapabilityApi {
     private Set<String> ids = new HashSet<>();
 
     public MapemCapabilityApi() {
-
+        super(Constants.MAPEM);
     }
 
     public MapemCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> ids) {

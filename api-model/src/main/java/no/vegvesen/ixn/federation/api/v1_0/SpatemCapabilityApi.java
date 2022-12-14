@@ -8,7 +8,7 @@ public class SpatemCapabilityApi extends CapabilityApi {
     private Set<String> ids = new HashSet<>();
 
     public SpatemCapabilityApi() {
-
+        super(Constants.SPATEM);
     }
 
     public SpatemCapabilityApi(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatusApi redirect, Integer shardCount, String infoUrl, Set<String> ids) {

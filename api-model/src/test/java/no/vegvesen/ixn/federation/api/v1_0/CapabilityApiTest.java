@@ -11,8 +11,7 @@ public class CapabilityApiTest {
 
     @Test
     public void testCapabilityWithUnknownField() throws JsonProcessingException {
-        CapabilityApi capability = new CapabilityApi();
-        capability.setMessageType("TEST");
+        CapabilityApi capability = new DatexCapabilityApi();
         capability.setOriginatingCountry("NO");
         capability.setProtocolVersion("1.0");
         capability.setPublisherId("12345");
