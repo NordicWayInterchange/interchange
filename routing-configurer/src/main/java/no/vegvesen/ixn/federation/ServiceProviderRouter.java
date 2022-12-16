@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -22,6 +23,7 @@ import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP
 import static no.vegvesen.ixn.federation.qpid.QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME;
 
 @Component
+@ConfigurationPropertiesScan("no.vegvesen.ixn")
 public class ServiceProviderRouter {
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
@@ -383,14 +385,12 @@ public class ServiceProviderRouter {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
                     if (!qpidClient.exchangeExists(delivery.getExchangeName())) {
                         String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                        //match.setSelector(joinedSelector);
                         qpidClient.createDirectExchange(delivery.getExchangeName());
                         qpidClient.addWriteAccess(serviceProvider.getName(), delivery.getExchangeName());
                         qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
                         outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
                     } else {
                         String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                        //match.setSelector(joinedSelector);
                         qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
                         outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
                     }
@@ -416,6 +416,7 @@ public class ServiceProviderRouter {
             outgoingMatchDiscoveryService.updateOutgoingMatchToDeleted(match);
         }
 
+        //Have to do something here, think that the delivery exchange name will change in restart
         Set<LocalDelivery> deliveries = serviceProvider.getDeliveries();
         for (LocalDelivery delivery : deliveries) {
             if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)) {
