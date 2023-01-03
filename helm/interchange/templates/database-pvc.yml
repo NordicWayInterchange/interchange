@@ -15,4 +15,7 @@ spec:
     requests:
       storage: {{ .Values.database.persistence.size | quote }}
   storageClassName: {{ .Values.database.persistence.storageClassName }}
+  {{- if .Values.database.persistence.volumeName }}
+  volumeName: {{ .Values.database.persistence.volumeName }}
+  {{- end }}
 {{- end -}}
