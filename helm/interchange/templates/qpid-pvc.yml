@@ -15,5 +15,7 @@ spec:
     requests:
       storage: {{ .Values.qpid.persistence.size | quote }}
   storageClassName: {{ .Values.qpid.persistence.storageClassName }}
-  volumeName: {{ .Release.Name }}-qpid
+  {{- if .Values.qpid.persistence.volumeName}}
+  volumeName: {{ .Values.qpid.persistence.volumeName }}
+  {{- end }}
 {{- end -}}
