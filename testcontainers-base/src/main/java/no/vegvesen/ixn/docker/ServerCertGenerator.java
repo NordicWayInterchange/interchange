@@ -51,7 +51,7 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
         this.withFileSystemBind(caKeyOnHost,caKeyInContainer,BindMode.READ_ONLY);
         this.withFileSystemBind(chainOnHost,chainInContainer,BindMode.READ_ONLY);
         this.withFileSystemBind(targetPath.toString(),KEYS_OUT_FOLDER,BindMode.READ_WRITE);
-        this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
+        this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
         this.withCommand(domainName,caKeyInContainer,caCertInContainer,chainInContainer,countryCode);
     }
 }

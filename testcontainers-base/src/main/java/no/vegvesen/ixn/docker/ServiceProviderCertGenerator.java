@@ -56,7 +56,7 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
         this.withFileSystemBind(intermediateCaCertChainPath.toString(),containerCertChainPath,BindMode.READ_ONLY);
         this.withFileSystemBind(hostOutputPath,containerOutputPath,BindMode.READ_WRITE);
         this.withCommand(containerCsrPath,clientName,containerCaCertPath,containerCaKeyPath,containerCertChainPath);
-        this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
+        this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
 
     }
 

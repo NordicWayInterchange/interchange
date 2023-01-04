@@ -26,7 +26,7 @@ public class ServiceProviderCSRGenerator extends GenericContainer<ServiceProvide
     protected void configure() {
         this.withFileSystemBind(keysPath.toString(),KEYS_INTERNAL_FOLDER);
         this.withCommand(username,countryCode);
-        this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
+        this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 
 }
