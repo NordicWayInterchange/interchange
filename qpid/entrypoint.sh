@@ -57,7 +57,7 @@ else
     echo "vhost file already exists in ${VHOST_FILE}"
 fi
 
-verifyExternalName
+#verifyExternalName
 
 echo "${VHOST_FILE} ${KEY_STORE} ${KEY_STORE_PASSWORD} ${TRUST_STORE} ${PASSWD_FILE} ${GROUPS_FILE}" > /dev/null
 
