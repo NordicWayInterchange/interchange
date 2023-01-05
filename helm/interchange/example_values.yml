@@ -52,6 +52,10 @@ database:                                                           # Database o
     storageClassName: standard
     size: 3Gi
   pgdata: /var/lib/postgresql/data/pgdata
+message_collector:
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/message-collector
+    tag: "074e6bd"
 message_forwarder:                                                  # Java application that forwards local messages to neighbours.
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/message-forwarder
@@ -82,3 +86,5 @@ onboard_server:                                                     # Java appli
   logging:
   - logger_name: .root
     level: info
+secret_dev_no:
+  key_store: "test"

@@ -12,6 +12,33 @@ on:
   pull_request:
 
 jobs:
+  validate-helm-chart:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout (Latest)
+        uses: actions/checkout@v3
+        if: github.event.inputs.git-ref == ''
+      - name: Checkout (Custom commit or branch)
+        uses: actions/checkout@v3
+        if: github.event.inputs.git-ref != ''
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      - name: Setup helm
+        uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Templating Interchange helm chart
+        working-directory: ./helm/interchange
+        run: |
+          helm template -f example_values.yml .   
+
   build:
     runs-on: ubuntu-latest
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
