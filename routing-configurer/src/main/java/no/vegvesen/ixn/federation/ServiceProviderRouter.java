@@ -339,15 +339,15 @@ public class ServiceProviderRouter {
                 if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
                     if (!capability.exchangeExists()) {
                         String exchangeName = "cap-" + UUID.randomUUID();
-                        if (!qpidClient.exchangeExists(exchangeName)) {
-                            qpidClient.createTopicExchange(exchangeName);
-                            capability.setCapabilityExchangeName(exchangeName);
-                            logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
-                        }
+                        capability.setCapabilityExchangeName(exchangeName);
+                        repository.save(serviceProvider);
+                    }
+                    if (!qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
+                        qpidClient.createTopicExchange(capability.getCapabilityExchangeName());
+                        logger.info("Created exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
                     }
                 }
             }
-            repository.save(serviceProvider);
         }
     }
 
@@ -369,9 +369,11 @@ public class ServiceProviderRouter {
 
         for (Capability capability : tearDownCapabilities) {
             if (capability.exchangeExists()) {
-                qpidClient.removeExchange(capability.getCapabilityExchangeName());
+                if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
+                    qpidClient.removeExchange(capability.getCapabilityExchangeName());
+                    logger.info("Removed exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
+                }
                 capability.setCapabilityExchangeName(""); //empty name to signal that there is no exchange present for this capability anymore
-                logger.info("Removed exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
             }
         }
         repository.save(serviceProvider);
@@ -466,11 +468,13 @@ public class ServiceProviderRouter {
                             Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
 
                             for (Capability capability : matchingCapabilities) {
-                                if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
-                                    LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                    qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
-                                    LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
-                                    subscription.addConnection(connection);
+                                if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
+                                    if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
+                                        LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
+                                        qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
+                                        LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
+                                        subscription.addConnection(connection);
+                                    }
                                 }
                             }
                         }

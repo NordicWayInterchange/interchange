@@ -13,7 +13,6 @@ import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +37,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.*;
 
 
 
@@ -106,7 +105,7 @@ public class QpidRestartIT extends QpidDockerBaseIT {
     InterchangeNodeProperties properties;
 
     @Test
-    public void testLocalSubscriptionQueuesAreAutomaticallyAddedToQpidAfterRestart() {
+    public void testLocalSubscriptionQueueIsAutomaticallyAddedToQpidAfterRestart() {
         String queueName = "loc-" + UUID.randomUUID().toString();
 
         LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
@@ -128,10 +127,123 @@ public class QpidRestartIT extends QpidDockerBaseIT {
     }
 
     @Test
-    @Disabled
-    //Capability is not set up after restart, problems with connecting to bi-queue(and everything else)
+    public void testLocalSubscriptionQueueIsNotAutomaticallyAddedToQpidAfterRestartWhenRedirect() {
+        String queueName = "neighbour-queue";
+
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, "neighbour", 5671);
+
+        String selector = "originatingCountry = 'NO'";
+
+        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "my-service-provider");
+        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(),
+                new HashSet(Collections.singleton(subscription)),
+                Collections.emptySet(),
+                LocalDateTime.now());
+
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        assertThat(client.queueExists(queueName)).isFalse();
+        assertThat(serviceProvider.getSubscriptions()).hasSize(1);
+    }
+
+    @Test
+    public void testLocalSubscriptionQueueIsNotAutomaticallyAddedToQpidAfterRestartWhenRedirectAndTearDown() {
+        String queueName = "neighbour-queue";
+
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, "neighbour", 5671);
+
+        String selector = "originatingCountry = 'NO'";
+
+        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "my-service-provider");
+        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(),
+                new HashSet(Collections.singleton(subscription)),
+                Collections.emptySet(),
+                LocalDateTime.now());
+
+        when(matchDiscoveryService.findMatchesByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        assertThat(client.queueExists(queueName)).isFalse();
+        assertThat(serviceProvider.getSubscriptions()).hasSize(0);
+    }
+
+    @Test
+    public void testLocalSubscriptionQueueIsAddedAutomaticallyToQpidWhenInRequestedAfterRestart() {
+        String queueName = "loc-" + UUID.randomUUID().toString();
+
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
+
+        String selector = "originatingCountry = 'NO'";
+
+        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, "");
+        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(),
+                new HashSet(Collections.singleton(subscription)),
+                Collections.emptySet(),
+                LocalDateTime.now());
+
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        assertThat(client.queueExists(queueName)).isTrue();
+    }
+
+    @Test
+    public void testLocalSubscriptionQueuesAreNotAutomaticallyAddedToQpidAfterRestartWhenInTearDown() {
+        String queueName = "loc-" + UUID.randomUUID().toString();
+
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
+
+        String selector = "originatingCountry = 'NO'";
+
+        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.TEAR_DOWN, selector, "");
+        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(),
+                new HashSet(Collections.singleton(subscription)),
+                Collections.emptySet(),
+                LocalDateTime.now());
+
+        when(matchDiscoveryService.findMatchesByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        assertThat(client.queueExists(queueName)).isFalse();
+    }
+
+    @Test
+    public void testLocalSubscriptionQueueIsNotAddedAutomaticallyToQpidWhenInIllegalAfterRestart() {
+        String queueName = "loc-" + UUID.randomUUID().toString();
+
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
+
+        String selector = "originatingCountry = 'NO'";
+
+        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector, "");
+        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(),
+                new HashSet(Collections.singleton(subscription)),
+                Collections.emptySet(),
+                LocalDateTime.now());
+
+        when(matchDiscoveryService.findMatchesByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        assertThat(client.queueExists(queueName)).isFalse();
+    }
+
+    @Test
     public void testCapabilityExchangesAreAutomaticallyAddedToQpidAfterRestart() {
-        String exchangeName = "cap" + UUID.randomUUID().toString();
+        String exchangeName = "cap-" + UUID.randomUUID().toString();
 
         Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
         capability.setCapabilityExchangeName(exchangeName);
@@ -145,14 +257,74 @@ public class QpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
-        assertThat(client.exchangeExists(exchangeName));
+        assertThat(client.exchangeExists(exchangeName)).isTrue();
+        assertThat(client.getQueueBindKeys("bi-queue")).hasSize(1);
+    }
+
+    @Test
+    public void testCapabilityExchangesAreNotAutomaticallyAddedToQpidAfterRestartWhenStatusIsTearDown() {
+        String exchangeName = "cap-" + UUID.randomUUID().toString();
+
+        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        capability.setCapabilityExchangeName(exchangeName);
+        capability.setRedirect(RedirectStatus.OPTIONAL);
+        capability.setStatus(CapabilityStatus.TEAR_DOWN);
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                LocalDateTime.now());
+
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        assertThat(client.exchangeExists(exchangeName)).isFalse();
+    }
+
+    @Test
+    public void testConnectionBetweenLocalSubscriptionAndCapabilityIsAutomaticallyAddedAfterRestart() {
+        String exchangeName = "cap-" + UUID.randomUUID().toString();
+
+        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        capability.setCapabilityExchangeName(exchangeName);
+        capability.setRedirect(RedirectStatus.OPTIONAL);
+
+        ServiceProvider serviceProvider1 = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                LocalDateTime.now());
+
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider1));
+
+        assertThat(client.exchangeExists(exchangeName)).isTrue();
+
+        String queueName = "loc-" + UUID.randomUUID().toString();
+
+        LocalEndpoint endpoint = new LocalEndpoint(queueName, "localhost", 5671);
+
+        String selector = "originatingCountry = 'NO'";
+
+        LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "");
+        subscription.setLocalEndpoints(new HashSet<>(Collections.singleton(endpoint)));
+
+        ServiceProvider serviceProvider2 = new ServiceProvider(
+                "my-service-provider-2",
+                new Capabilities(),
+                new HashSet(Collections.singleton(subscription)),
+                Collections.emptySet(),
+                LocalDateTime.now());
+
+        serviceProviderRouter.syncServiceProviders(new HashSet<>(Arrays.asList(serviceProvider1, serviceProvider2)));
+
+        assertThat(client.queueExists(queueName)).isTrue();
+        assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
     }
 
     @Test
     public void testDeliveryExchangesAreAutomaticallyAddedToQpidAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
-
-        client.createTopicExchange(exchangeName);
 
         Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
         capability.setCapabilityExchangeName(exchangeName);
@@ -187,5 +359,43 @@ public class QpidRestartIT extends QpidDockerBaseIT {
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
 
         assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
+    }
+
+    @Test
+    public void testDeliveryExchangeIsNotAutomaticallyAddedToQpidAfterRestart() {
+        String exchangeName = "cap-" + UUID.randomUUID().toString();
+
+        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        capability.setCapabilityExchangeName(exchangeName);
+        capability.setRedirect(RedirectStatus.OPTIONAL);
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "my-service-provider",
+                new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Collections.singletonList(capability))),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                LocalDateTime.now());
+
+        String deliverySelector = "originatingCountry = 'SE'";
+
+        String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("localhost", 5671, deliveryExchangeName, deliverySelector);
+        LocalDelivery delivery = new LocalDelivery(
+                1,
+                new HashSet<>(Collections.singletonList(endpoint)),
+                "/delivery/1",
+                deliverySelector,
+                LocalDateTime.now(),
+                LocalDeliveryStatus.NO_OVERLAP);
+
+        delivery.setExchangeName(deliveryExchangeName);
+
+        serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
+
+        when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Collections.emptyList());
+        when(outgoingMatchDiscoveryService.findMatchesFromDeliveryId(any())).thenReturn(Collections.emptyList());
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+
+        assertThat(client.exchangeExists(deliveryExchangeName)).isFalse();
     }
 }
