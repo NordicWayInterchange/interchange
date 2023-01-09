@@ -43,11 +43,11 @@ import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, ServiceProviderRouter.class})
-@ContextConfiguration(initializers = {QpidRestartIT.Initializer.class})
+@ContextConfiguration(initializers = {SPRouterQpidRestartIT.Initializer.class})
 @Testcontainers
-public class QpidRestartIT extends QpidDockerBaseIT {
+public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
-    private static Path testKeysPath = getFolderPath("target/test-keys" + QpidRestartIT.class.getSimpleName());
+    private static Path testKeysPath = getFolderPath("target/test-keys" + SPRouterQpidRestartIT.class.getSimpleName());
 
     @Container
     public static final KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf", "nordea");
@@ -59,7 +59,7 @@ public class QpidRestartIT extends QpidDockerBaseIT {
     @Autowired
     SSLContext sslContext;
 
-    private static Logger logger = LoggerFactory.getLogger(QpidRestartIT.class);
+    private static Logger logger = LoggerFactory.getLogger(SPRouterQpidRestartIT.class);
 
     private static String AMQPS_URL;
 

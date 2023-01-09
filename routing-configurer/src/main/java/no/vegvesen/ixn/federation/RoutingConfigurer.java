@@ -119,7 +119,9 @@ public class RoutingConfigurer {
 				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
 				for (Capability cap : matchingCaps) {
 					if (cap.exchangeExists()) {
-						bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
+						if (qpidClient.exchangeExists(cap.getCapabilityExchangeName())) {
+							bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
+						}
 					}
 				}
 				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), queueName);
