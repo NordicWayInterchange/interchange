@@ -468,8 +468,8 @@ public class ServiceProviderRouter {
                             Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
 
                             for (Capability capability : matchingCapabilities) {
-                                if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
-                                    if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
+                                if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
+                                    if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
                                         LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
                                         qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
                                         LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
