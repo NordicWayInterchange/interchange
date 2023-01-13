@@ -37,7 +37,7 @@ jobs:
       - name: Templating Interchange helm chart
         working-directory: ./helm/interchange
         run: |
-          helm template -f example_values.yml .   
+          helm template -f example_values.yml .
 
   build:
     runs-on: ubuntu-latest

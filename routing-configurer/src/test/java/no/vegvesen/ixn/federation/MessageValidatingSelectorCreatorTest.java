@@ -64,7 +64,7 @@ public class MessageValidatingSelectorCreatorTest {
         assertThat(selector).contains("originatingCountry = 'NO'");
         assertThat(selector).contains("protocolVersion = '1.0'");
         assertThat(selector).contains("quadTree like");
-        assertThat(selector).contains("publicationType like");
+        assertThat(selector).contains("publicationType =");
         System.out.println(selector);
     }
 }

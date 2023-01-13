@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -22,6 +23,7 @@ import static no.vegvesen.ixn.federation.qpid.QpidClient.SERVICE_PROVIDERS_GROUP
 import static no.vegvesen.ixn.federation.qpid.QpidClient.CLIENTS_PRIVATE_CHANNELS_GROUP_NAME;
 
 @Component
+@ConfigurationPropertiesScan("no.vegvesen.ixn")
 public class ServiceProviderRouter {
 
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
@@ -337,15 +339,15 @@ public class ServiceProviderRouter {
                 if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
                     if (!capability.exchangeExists()) {
                         String exchangeName = "cap-" + UUID.randomUUID();
-                        if (!qpidClient.exchangeExists(exchangeName)) {
-                            qpidClient.createTopicExchange(exchangeName);
-                            capability.setCapabilityExchangeName(exchangeName);
-                            logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
-                        }
+                        capability.setCapabilityExchangeName(exchangeName);
+                        repository.save(serviceProvider);
+                    }
+                    if (!qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
+                        qpidClient.createTopicExchange(capability.getCapabilityExchangeName());
+                        logger.info("Created exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
                     }
                 }
             }
-            repository.save(serviceProvider);
         }
     }
 
@@ -367,9 +369,11 @@ public class ServiceProviderRouter {
 
         for (Capability capability : tearDownCapabilities) {
             if (capability.exchangeExists()) {
-                qpidClient.removeExchange(capability.getCapabilityExchangeName());
+                if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
+                    qpidClient.removeExchange(capability.getCapabilityExchangeName());
+                    logger.info("Removed exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
+                }
                 capability.setCapabilityExchangeName(""); //empty name to signal that there is no exchange present for this capability anymore
-                logger.info("Removed exchange {} for Capability with id {}", capability.getCapabilityExchangeName(), capability.getId());
             }
         }
         repository.save(serviceProvider);
@@ -383,14 +387,12 @@ public class ServiceProviderRouter {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
                     if (!qpidClient.exchangeExists(delivery.getExchangeName())) {
                         String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                        //match.setSelector(joinedSelector);
                         qpidClient.createDirectExchange(delivery.getExchangeName());
                         qpidClient.addWriteAccess(serviceProvider.getName(), delivery.getExchangeName());
                         qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
                         outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
                     } else {
                         String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                        //match.setSelector(joinedSelector);
                         qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
                         outgoingMatchDiscoveryService.updateOutgoingMatchToUp(match);
                     }
@@ -416,6 +418,7 @@ public class ServiceProviderRouter {
             outgoingMatchDiscoveryService.updateOutgoingMatchToDeleted(match);
         }
 
+        //Have to do something here, think that the delivery exchange name will change in restart
         Set<LocalDelivery> deliveries = serviceProvider.getDeliveries();
         for (LocalDelivery delivery : deliveries) {
             if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)) {
@@ -465,11 +468,13 @@ public class ServiceProviderRouter {
                             Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
 
                             for (Capability capability : matchingCapabilities) {
-                                if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
-                                    LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
-                                    qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
-                                    LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
-                                    subscription.addConnection(connection);
+                                if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
+                                    if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
+                                        LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
+                                        qpidClient.bindTopicExchange(subscription.getSelector(), capability.getCapabilityExchangeName(), endpoint.getSource());
+                                        LocalConnection connection = new LocalConnection(capability.getCapabilityExchangeName(), endpoint.getSource());
+                                        subscription.addConnection(connection);
+                                    }
                                 }
                             }
                         }
