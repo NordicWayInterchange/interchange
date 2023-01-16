@@ -64,6 +64,14 @@ public class ServiceProviderImport {
                     deliveryApi.getSelector(),
                     LocalDeliveryStatus.valueOf(deliveryApi.getStatus().name())
             );
+            String exchangeName = null;
+            for (EndpointApi endpointApi : deliveryApi.getEndpoints()) {
+                exchangeName = endpointApi.getSource();
+            }
+            if (exchangeName != null) {
+                delivery.setExchangeName(exchangeName);
+            }
+
             deliveries.add(delivery);
         }
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),
