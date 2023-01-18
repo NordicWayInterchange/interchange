@@ -33,7 +33,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(QueueDepthQpidStructureIT.class);
 
-    private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
+    private static Path testKeysPath = getTestPrefixedOutputPath(QueueDepthQpidStructureIT.class);
 
     @Container
     private static KeysContainer keyContainer = getKeyContainer(testKeysPath, "my_ca", "localhost", "routing_configurer", "king_gustaf");
