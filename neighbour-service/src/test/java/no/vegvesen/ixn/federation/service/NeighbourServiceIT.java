@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.RequestedSubscriptionApi;
-import no.vegvesen.ixn.federation.api.v1_0.RequestedSubscriptionResponseApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
@@ -208,6 +205,33 @@ public class NeighbourServiceIT {
         assertThat(persistedNeighbour.getNeighbourRequestedSubscriptions().getSubscriptions()).hasSize(1);
         NeighbourSubscription subscription = persistedNeighbour.getNeighbourRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getConsumerCommonName().equals("service-provider")).isTrue();
+    }
+
+
+    @Test
+    public void incomingCapabilitiesSeveralTimesWithSameDataShouldResultInTheSameSet() {
+        Neighbour neighbour = new Neighbour();
+        String name = "neighbour-with-incoming-capabilities-twice";
+        neighbour.setName(name);
+        repository.save(neighbour);
+        CapabilitiesApi capabilitiesApi = new CapabilitiesApi(
+                name,
+                Collections.singleton(
+                        new DenmCapabilityApi(
+                                "NO-123",
+                                "NO",
+                                "1.0",
+                                Collections.emptySet(),
+                                Collections.singleton("1")
+                        )
+                )
+        );
+        Set<Capability> localCapabilities = Collections.emptySet();
+        service.incomingCapabilities(capabilitiesApi, localCapabilities);
+        assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
+        //Now, try again, with the same capabilties, to simulate double post.
+        service.incomingCapabilities(capabilitiesApi,localCapabilities);
+        assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
     }
 
 }
