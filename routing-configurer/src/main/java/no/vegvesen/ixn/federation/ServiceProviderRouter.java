@@ -421,7 +421,9 @@ public class ServiceProviderRouter {
         //Have to do something here, think that the delivery exchange name will change in restart
         Set<LocalDelivery> deliveries = serviceProvider.getDeliveries();
         for (LocalDelivery delivery : deliveries) {
-            if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)) {
+            if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)
+                    && !delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
+                    && !delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
                 List<OutgoingMatch> matches = outgoingMatchDiscoveryService.findMatchesFromDeliveryId(delivery.getId());
                 if (matches.isEmpty()) {
                     if (delivery.exchangeExists()) {

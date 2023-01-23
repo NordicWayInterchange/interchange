@@ -68,7 +68,11 @@ public class ServiceProviderImport {
             );
             String exchangeName = null;
             for (DeliveryEndpoint endpoint : deliveryApi.getEndpoints()) {
-                System.out.println(endpoint.getTarget());
+                exchangeName = endpoint.getTarget();
+            }
+
+            if (exchangeName != null) {
+                delivery.setExchangeName(exchangeName);
             }
 
             deliveries.add(delivery);

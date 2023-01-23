@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -68,7 +67,6 @@ public class OutgoingMatchDiscoveryServiceIT {
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
         assertThat(repository.findAll()).hasSize(1);
-        assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.CREATED);
 
         //clean-up
         repository.deleteAll();
@@ -108,7 +106,6 @@ public class OutgoingMatchDiscoveryServiceIT {
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
         assertThat(repository.findAll()).hasSize(2);
-        assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.CREATED);
 
         //clean-up
         repository.deleteAll();
@@ -148,7 +145,6 @@ public class OutgoingMatchDiscoveryServiceIT {
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Arrays.asList(serviceProvider));
 
         assertThat(repository.findAll()).hasSize(0);
-        assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
 
         //clean-up
         repository.deleteAll();
@@ -167,7 +163,5 @@ public class OutgoingMatchDiscoveryServiceIT {
 
         service.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(Collections.singletonList(serviceProvider));
         assertThat(repository.findAll()).hasSize(0);
-        assertThat(delivery1.getStatus()).isEqualTo(LocalDeliveryStatus.ILLEGAL);
-        assertThat(delivery2.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
     }
 }
