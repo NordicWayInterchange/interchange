@@ -2,14 +2,11 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches:
-      - federation-master
   workflow_dispatch:
     inputs:
       git-ref:
         required: false
         description: 'Specified commit hash or branch name (Optional)'
-  pull_request:
 
 jobs:
   validate-helm-chart:
