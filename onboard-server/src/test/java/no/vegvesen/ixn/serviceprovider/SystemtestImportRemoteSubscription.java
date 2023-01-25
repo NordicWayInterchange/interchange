@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {ServiceProviderImport.RemoteInitializer.class})
@@ -45,7 +46,7 @@ public class SystemtestImportRemoteSubscription {
     public void importSubscriptonToRemote() throws IOException {
         OldServiceProviderApi[] serviceProviders = ServiceProviderImport.getOldServiceProviderApis(new ByteArrayInputStream(KING_GUSTAF_SUBSCRIPTION.getBytes()));
         for (OldServiceProviderApi oldServiceProviderApi : serviceProviders) {
-            ServiceProvider serviceProvider = ServiceProviderImport.mapOldServiceProviderApiToServiceProvider(oldServiceProviderApi);
+            ServiceProvider serviceProvider = ServiceProviderImport.mapOldServiceProviderApiToServiceProvider(oldServiceProviderApi, LocalDateTime.now());
             repository.save(serviceProvider);
         }
 

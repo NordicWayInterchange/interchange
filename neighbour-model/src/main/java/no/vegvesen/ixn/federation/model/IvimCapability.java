@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -55,5 +56,19 @@ public class IvimCapability extends Capability {
 		return "IvimCapability{" +
 				"iviTypes=" + iviTypes +
 				"} " + super.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+		IvimCapability that = (IvimCapability) o;
+		return Objects.equals(iviTypes, that.iviTypes);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), iviTypes);
 	}
 }

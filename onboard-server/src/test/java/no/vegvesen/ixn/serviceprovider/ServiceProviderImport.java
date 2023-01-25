@@ -3,6 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
+import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -29,9 +30,10 @@ public class ServiceProviderImport {
         return serviceProviders;
     }
 
-    public static ServiceProvider mapOldServiceProviderApiToServiceProvider(OldServiceProviderApi serviceProviderApi) {
+    public static ServiceProvider mapOldServiceProviderApiToServiceProvider(OldServiceProviderApi serviceProviderApi, LocalDateTime savedTimestamp) {
         Set<Capability> capabilitySet = new CapabilityToCapabilityApiTransformer().capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
         Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,capabilitySet);
+        capabilities.setLastUpdated(LocalDateTime.now());
         Set<LocalSubscription> subscriptions = new HashSet<>();
         for (OldLocalActorSubscription subscriptionApi : serviceProviderApi.getSubscriptions()) {
             //TODO should we not import ILLEGAL local subscriptions?
@@ -62,15 +64,24 @@ public class ServiceProviderImport {
         for (DeliveryApi deliveryApi : serviceProviderApi.getDeliveries()) {
             LocalDelivery delivery = new LocalDelivery(
                     deliveryApi.getSelector(),
-                    LocalDeliveryStatus.valueOf(deliveryApi.getStatus().name())
+                    LocalDeliveryStatus.REQUESTED
             );
+            String exchangeName = null;
+            for (DeliveryEndpoint endpoint : deliveryApi.getEndpoints()) {
+                exchangeName = endpoint.getTarget();
+            }
+
+            if (exchangeName != null) {
+                delivery.setExchangeName(exchangeName);
+            }
+
             deliveries.add(delivery);
         }
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),
                 capabilities,
                 subscriptions,
                 Collections.emptySet(),
-                LocalDateTime.now()
+                savedTimestamp
         );
         serviceProvider.addDeliveries(deliveries);
         return serviceProvider;

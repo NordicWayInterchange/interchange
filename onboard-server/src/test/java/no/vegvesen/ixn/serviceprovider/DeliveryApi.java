@@ -1,14 +1,13 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
-import no.vegvesen.ixn.serviceprovider.model.DeliveryStatus;
+import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
 
 import java.util.Set;
 
 public class DeliveryApi {
     private String id;
 
-    private Set<EndpointApi> endpoints;
+    private Set<DeliveryEndpoint> endpoints;
 
     private String path;
 
@@ -26,11 +25,11 @@ public class DeliveryApi {
         this.id = id;
     }
 
-    public Set<EndpointApi> getEndpoints() {
+    public Set<DeliveryEndpoint> getEndpoints() {
         return endpoints;
     }
 
-    public void setEndpoints(Set<EndpointApi> endpoints) {
+    public void setEndpoints(Set<DeliveryEndpoint> endpoints) {
         this.endpoints = endpoints;
     }
 

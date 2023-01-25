@@ -274,13 +274,4 @@ public class TypeTransformer {
         );
     }
 
-    public static List<String> makeHostAndPortOfUrl(String url){
-        URI uri = URI.create(url);
-        String host = uri.getHost();
-        int port = uri.getPort();
-        if (port == -1){
-            port = 5671;
-        }
-        return new ArrayList<>(Arrays.asList(host, String.valueOf(port)));
-    }
 }
