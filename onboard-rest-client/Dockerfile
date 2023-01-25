@@ -1,5 +1,6 @@
 FROM eclipse-temurin:11-alpine
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash alpine-conf
+RUN setup-timezone -z Europe/Oslo
 
 COPY target/onboard-rest-client-1.0.3-SNAPSHOT.jar onboard-rest-client.jar
 ADD entrypoint.sh /

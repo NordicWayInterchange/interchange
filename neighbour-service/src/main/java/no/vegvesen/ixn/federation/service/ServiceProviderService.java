@@ -35,6 +35,7 @@ public class ServiceProviderService {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         for (ServiceProvider serviceProvider : serviceProviders) {
             updateLocalSubscriptionWithRedirectEndpoints(serviceProvider);
+            updateDeliveryStatus(serviceProvider);
             updateNewLocalDeliveryEndpoints(serviceProvider, host, port);
             updateTearDownLocalDeliveryEndpoints(serviceProvider);
             removeTearDownCapabilities(serviceProvider);
@@ -79,6 +80,27 @@ public class ServiceProviderService {
                             LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(host, port, delivery.getExchangeName(), delivery.getSelector());
                             delivery.addEndpoint(endpoint);
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    public void updateDeliveryStatus(ServiceProvider serviceProvider) {
+        if (serviceProvider.hasDeliveries()) {
+            for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
+                if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
+                        || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
+                        || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
+                    if (outgoingMatchDiscoveryService.findMatchesFromDeliveryId(delivery.getId()).isEmpty()) {
+                        delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
+                    } else {
+                        if (!delivery.exchangeExists()) {
+                            String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
+                            delivery.setExchangeName(deliveryExchangeName);
+                        }
+                        delivery.setStatus(LocalDeliveryStatus.CREATED);
+                        logger.info("Delivery with id {} is set to status CREATED", delivery.getId());
                     }
                 }
             }

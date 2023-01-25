@@ -39,16 +39,21 @@ public class Capabilities {
 	}
 
 	public void addDataType(Capability newCapability) {
-		// Add the incoming capabilities to the capabilities
-		if (capabilities.contains(newCapability)) {
-			throw new CapabilityPostException("The posted capability already exist as capabilities. Nothing to add.");
-		}
 		capabilities.add(newCapability);
 
 		if (hasDataTypes()) {
 			setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		}
 		setLastUpdated(LocalDateTime.now());
+	}
+
+	public void addAllDatatypes(Set<Capability> newCapabilities) {
+		capabilities.addAll(newCapabilities);
+		if (hasDataTypes()) {
+			setStatus(CapabilitiesStatus.KNOWN);
+		}
+		setLastUpdated(LocalDateTime.now());
+
 	}
 
 	public void removeDataType(Integer capabilityId) {

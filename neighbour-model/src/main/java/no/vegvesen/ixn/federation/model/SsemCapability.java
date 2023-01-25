@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -17,13 +18,6 @@ public class SsemCapability extends Capability{
 
     public SsemCapability() {
 
-    }
-
-    public SsemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, Set<String> ids) {
-        super(publisherId, originatingCountry, protocolVersion, quadTree);
-        if(ids != null) {
-            this.ids.addAll(ids);
-        }
     }
 
     public SsemCapability(String publisherId, String originatingCountry, String protocolVersion, Set<String> quadTree, RedirectStatus redirect, Set<String> ids) {
@@ -57,5 +51,19 @@ public class SsemCapability extends Capability{
         return "SsemCapability{" +
                 "ids=" + ids +
                 "} " + super.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SsemCapability that = (SsemCapability) o;
+        return Objects.equals(ids, that.ids);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), ids);
     }
 }

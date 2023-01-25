@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -57,5 +58,19 @@ public class SpatemCapability extends Capability{
         return "SpatemCapability{" +
                 "ids=" + ids +
                 "} " + super.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SpatemCapability that = (SpatemCapability) o;
+        return Objects.equals(ids, that.ids);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), ids);
     }
 }

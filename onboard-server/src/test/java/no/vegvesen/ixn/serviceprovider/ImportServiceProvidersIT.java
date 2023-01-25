@@ -14,6 +14,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,10 +58,13 @@ public class ImportServiceProvidersIT {
     public void importServiceProvidersWithDeliveryEndpoints() throws IOException, URISyntaxException {
         Path path = Paths.get(this.getClass().getClassLoader().getResource("jsonDump.txt").toURI());
         OldServiceProviderApi[] serviceProviders = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
+        List<ServiceProvider> serviceProvidersToSave = new ArrayList<>();
+        LocalDateTime saveTime = LocalDateTime.now();
         for (OldServiceProviderApi serviceProviderApi : serviceProviders) {
-            ServiceProvider serviceProvider = ServiceProviderImport.mapOldServiceProviderApiToServiceProvider(serviceProviderApi);
-            repository.save(serviceProvider);
+            ServiceProvider serviceProvider = ServiceProviderImport.mapOldServiceProviderApiToServiceProvider(serviceProviderApi, saveTime);
+            serviceProvidersToSave.add(serviceProvider);
         }
+        repository.saveAll(serviceProvidersToSave);
 
     }
 

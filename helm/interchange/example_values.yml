@@ -44,7 +44,7 @@ neighbour_discoverer:                                               # Java appli
 database:                                                           # Database of neighbouring interchanges
   image:
     repository: postgres
-    tag: 9.6
+    tag: 15.1
   postgres_user: federation                                         # Database user
   postgres_password: federation                                     # Database password
   postgres_db: federation                                           # Database name

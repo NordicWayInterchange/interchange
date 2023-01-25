@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -66,5 +67,19 @@ public class DatexCapability extends Capability{
 		return "DatexCapability{" +
 				"publicationTypes=" + publicationTypes +
 				"} " + super.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+		DatexCapability that = (DatexCapability) o;
+		return Objects.equals(publicationTypes, that.publicationTypes);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), publicationTypes);
 	}
 }
