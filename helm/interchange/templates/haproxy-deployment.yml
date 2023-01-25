@@ -8,7 +8,7 @@ metadata:
     component: haproxy
     release: {{ .Release.Name }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.haproxy.replicas }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}

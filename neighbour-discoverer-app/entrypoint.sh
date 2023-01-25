@@ -5,6 +5,8 @@ echo "ENTRYPOINT - connecting to PGSQL server ${POSTGRES_URI}"
 LOG_LEVELS=${LOG_LEVELS:-" "}
 
 java -Dspring.datasource.url=${POSTGRES_URI} \
+     -Dspring.datasource.username=${POSTGRES_USER} \
+     -Dspring.datasource.password=${POSTGRES_PASSWORD} \
      -Ddns.domain-name=${DOMAIN_NAME}\
      -Djdk.tls.client.protocols="TLSv1.3" \
      -Djavax.net.ssl.trustStore=${TRUST_STORE} \

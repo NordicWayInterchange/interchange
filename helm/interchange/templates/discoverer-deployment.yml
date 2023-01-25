@@ -8,7 +8,7 @@ metadata:
     component: neighbour-discoverer
     release: {{ .Release.Name }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.neighbour_discoverer.replicas }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
@@ -26,7 +26,11 @@ spec:
         image: "{{ .Values.neighbour_discoverer.image.repository }}:{{ .Values.neighbour_discoverer.image.tag }}"
         env:
         - name: POSTGRES_URI
-          value: jdbc:postgresql://{{ .Release.Name }}-database:5432/federation
+          value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
+        - name: POSTGRES_PASSWORD
+          value: {{ .Values.database.postgres_password }}
+        - name: POSTGRES_USER
+          value: {{ .Values.database.postgres_user }}
         - name: SERVER_NAME
           value: {{ .Values.external_name | quote }}
         - name: DOMAIN_NAME
@@ -38,7 +42,7 @@ spec:
         - name: TRUST_STORE_PASSWORD
           value: {{ .Values.self.trust_store_password | quote }}
         - name: KEY_STORE
-          value: {{ .Values.self.secret_mount_path }}{{ .Values.self.key_store }}
+          value: {{ .Values.self.secret_mount_path }}key_store.p12
         - name: KEY_STORE_PASSWORD
           value: {{ .Values.self.key_store_password | quote }}
         - name: KEY_PASSWORD

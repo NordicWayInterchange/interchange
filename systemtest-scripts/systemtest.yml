@@ -46,6 +46,8 @@ services:
     - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - SP_CHNL_PORT=8797
@@ -99,6 +101,8 @@ services:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
@@ -123,6 +127,8 @@ services:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
       - BASE_URL=https://a.bouvetinterchange.eu
       - SERVER_NAME=a.bouvetinterchange.eu
       - TRUST_STORE=/jks/keys/truststore.jks
@@ -146,6 +152,8 @@ services:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
@@ -172,6 +180,8 @@ services:
     - "../tmp:/jks"
     environment:
     - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+    - POSTGRES_USER=federation
+    - POSTGRES_PASSWORD=federation
     - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
@@ -209,6 +219,8 @@ services:
     - "../tmp:/jks"
     environment:
     - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+    - POSTGRES_USER=federation
+    - POSTGRES_PASSWORD=federation
     - SERVER_NAME=b.bouvetinterchange.eu
     - DOMAIN_NAME=bouvetinterchange.eu
     - SP_CHNL_PORT=8696
@@ -232,6 +244,8 @@ services:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
       - SERVER_NAME=b.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
@@ -256,6 +270,8 @@ services:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
       - SERVER_NAME=b.bouvetinterchange.eu
       #- NODE_PROVIDER_NAME=b.bouvetinterchange.eu # "my name"
       - DOMAIN_NAME=bouvetinterchange.eu
@@ -310,6 +326,8 @@ services:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
       - BASE_URL=https://b.bouvetinterchange.eu
       - SERVER_NAME=b.bouvetinterchange.eu
       - TRUST_STORE=/jks/keys/truststore.jks
@@ -334,6 +352,8 @@ services:
       - "../tmp:/jks"
     environment:
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_STORE_TYPE=PKCS12
