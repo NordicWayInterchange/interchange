@@ -6,6 +6,8 @@ LOG_LEVELS=${LOG_LEVELS:-" "}
 
 
 java -Dspring.datasource.url=${POSTGRES_URI} \
+     -Dspring.datasource.username=${POSTGRES_USER} \
+     -Dspring.datasource.password=${POSTGRES_PASSWORD} \
      -Ddns.domain-name=${DOMAIN_NAME}\
      -Ddns.control-channel-port=${CTRL_CHNL_PORT} \
      -Dserver.ssl.key-store=${KEY_STORE}\

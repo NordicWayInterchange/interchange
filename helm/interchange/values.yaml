@@ -13,6 +13,7 @@ interchange:
     tag: latest
 
 qpid:
+  replicas: 1
   persistence:
     enabled: false
     storageClassName: standard
@@ -45,5 +46,22 @@ qpid:
   # - name: odin
   #   binding: "originatingCountry='valhalla'"
   #   user: king_harald
+
 haproxy:
   image_version: haproxy:2.3
+  replicas: 1
+
+message_collector:
+  replicas: 1
+
+neighbour_discoverer:
+  replicas: 1
+
+neighbour_server:
+  replicas: 1
+
+onboard_server:
+  replicas: 1
+
+routing_configurer:
+  replicas: 1

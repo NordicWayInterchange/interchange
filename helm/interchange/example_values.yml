@@ -34,6 +34,7 @@ interchange:                                                        # Java appli
   - logger_name: .root
     level: info
 neighbour_discoverer:                                               # Java application that posts capabilities and subscriptions to discovered neighbouring interchanges.
+  replicas: 1
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer
     tag: "074e6bd"
@@ -53,6 +54,7 @@ database:                                                           # Database o
     size: 3Gi
   pgdata: /var/lib/postgresql/data/pgdata
 message_collector:
+  replicas: 1
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/message-collector
     tag: "074e6bd"
@@ -66,6 +68,7 @@ message_forwarder:                                                  # Java appli
   key_store_type: PKCS12
   trust_store_type: JKS
 neighbour_server:                                                   # Java application running a REST endpoints that other neighbours contact us through
+  replicas: 1
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/neighbour-server
     tag: "074e6bd"
@@ -73,6 +76,7 @@ neighbour_server:                                                   # Java appli
   - logger_name: .root
     level: info
 routing_configurer:                                                 # Java application that uses the Qpid API to configure routing of messages
+  replicas: 1
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/routing-configurer
     tag: "074e6bd"
@@ -80,6 +84,7 @@ routing_configurer:                                                 # Java appli
   - logger_name: .no.vegvesen
     level: debug
 onboard_server:                                                     # Java application running a REST endpoint for managing Service Providers(create, read, update, delete)
+  replicas: 1
   image:
     repository: eu.gcr.io/nordic-way-aad182cc/onboard-server
     tag: "074e6bd"

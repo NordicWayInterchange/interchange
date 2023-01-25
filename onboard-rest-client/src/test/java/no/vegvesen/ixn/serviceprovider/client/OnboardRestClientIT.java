@@ -64,6 +64,8 @@ public class OnboardRestClientIT extends DockerBaseIT {
                 .withEnv("SERVER_NAME", "localhost")
                 .withEnv("SP_CHNL_PORT", "8899")
                 .withEnv("POSTGRES_URI", "jdbc:postgresql://database/federation")
+                .withEnv("POSTGRES_USER","federation")
+                .withEnv("POSTGRES_PASSWORD","federation")
                 .withExposedPorts(8899);
         onboardServer
                 .start();
