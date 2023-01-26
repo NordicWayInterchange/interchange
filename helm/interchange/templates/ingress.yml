@@ -28,13 +28,6 @@ spec:
               service:
                 name: {{ .Release.Name }}-qpid-secure
                 port:
-                  number: {{ .Values.qpid.http_qpid_gui.port }}
-            pathType: Prefix
-            path: /
-          - backend:
-              service:
-                name: {{ .Release.Name }}-qpid-secure
-                port:
                   number: {{ .Values.qpid.https_qpid_rest.port }}
             pathType: Prefix
             path: /
