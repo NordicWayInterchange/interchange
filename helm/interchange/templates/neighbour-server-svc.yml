@@ -15,4 +15,3 @@ spec:
   ports:
   - name: https-control
     port: {{ .Values.self.control_channel_port }}
-    targetPort: https-control

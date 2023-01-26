@@ -23,9 +23,12 @@ qpid:
   memorydump:
     enabled: false
 
-  ## whether or not to expose amqps (5671) on public internet
-  ## creates a public loadbalancer for the qpid-secure service
-  expose_amqps: false
+  amqps:
+    port: 5671
+  http_qpid_gui:
+    port: 8080
+  https_qpid_rest:
+    port: 443
 
   ## credentials used by the interchange server(s)
   interchange_user: interchange
