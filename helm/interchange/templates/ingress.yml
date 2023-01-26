@@ -1,0 +1,58 @@
+# TODO move ingress paths into separate files for each k8s service/deployment
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: ingress
+    release: {{ .Release.Name }}
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: {{ .Values.static_external_ip_name }}
+spec:
+  rules:
+    - host: {{ .Values.domain_name }}
+      http:
+        paths:
+
+          # QPID ingress paths
+          - backend:
+              service:
+                name: {{ .Release.Name }}-qpid-secure
+                port:
+                  number: {{ .Values.qpid.amqps.port }}
+            pathType: Prefix
+            path: /
+          - backend:
+              service:
+                name: {{ .Release.Name }}-qpid-secure
+                port:
+                  number: {{ .Values.qpid.http_qpid_gui.port }}
+            pathType: Prefix
+            path: /
+          - backend:
+              service:
+                name: {{ .Release.Name }}-qpid-secure
+                port:
+                  number: {{ .Values.qpid.https_qpid_rest.port }}
+            pathType: Prefix
+            path: /
+
+          # Onboard server paths
+          - backend:
+              service:
+                name: onboard-server
+                port:
+                  number: {{ .Values.self.service_provider_port }}
+            pathType: Prefix
+            path: /
+
+          # Neighbour server paths
+          - backend:
+              service:
+                name: neighbour-server
+                port:
+                  number: {{ .Values.self.control_channel_port }}
+            pathType: Prefix
+            path: /
