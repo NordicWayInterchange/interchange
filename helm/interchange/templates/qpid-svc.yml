@@ -1,25 +1,3 @@
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: {{ .Release.Name }}-qpid
-  labels:
-    app: {{ .Chart.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    component: qpid
-    release: {{ .Release.Name }}
-spec:
-  selector:
-    app: {{ .Chart.Name }}
-    component: qpid
-    release: {{ .Release.Name }}
-  type: ClusterIP
-  ports:
-  - name: amqp
-    port: 5672
-    targetPort: amqp
-
----
 kind: Service
 apiVersion: v1
 metadata:
@@ -36,11 +14,8 @@ spec:
     release: {{ .Release.Name }}
   ports:
   - name: amqps
-    port: 5671
-    targetPort: amqps
+    port: {{ .Values.qpid.amqps.port }}
   - name: http-qpid-gui
-    port: 8080
-    targetPort: http-qpid-gui
+    port: {{ .Values.qpid.http_qpid_gui.port }}
   - name: https-qpid-rest
-    port: 443
-    targetPort: https-qpid-rest
+    port: {{ .Values.qpid.https_qpid_rest.port }}
