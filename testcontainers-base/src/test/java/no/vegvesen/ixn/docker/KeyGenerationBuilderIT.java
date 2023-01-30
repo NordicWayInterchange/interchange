@@ -15,29 +15,6 @@ public class KeyGenerationBuilderIT {
     Path keysPath = DockerBaseIT.getTestPrefixedOutputPath(KeyGenerationBuilderIT.class);
 
     @Test
-    public void foo() {
-        //First, describe the cluster, and everything we need.
-        Cluster myCluster = createClusterModel();
-        //Then, spin through the model, creating keys breadth-first for each level. (So that we might be able to create several keys on the
-        //same level using one container call.
-
-        //now, write out what we need to generate for now.
-        TopDomain topDomain = myCluster.getTopDomain();
-        System.out.println(String.format("Generate CA key: %s, %s", topDomain.getDomainName(),topDomain.getOwnerCountry()));
-        for (Interchange interchange : myCluster.getInterchanges()) {
-            IntermediateDomain domain = interchange.getDomain();
-            System.out.println(String.format("\tGenerate intermediate CA: %s, %s", domain.getDomainName(),domain.getOwningCountry()));
-            for (AdditionalHost additionalHost : interchange.getAdditionalHosts()) {
-                System.out.println(String.format("\t\tGenerate additional host %s , %s",additionalHost.getHostname(),additionalHost.getOwningCountry()));
-            }
-            for (ServicProviderDescription sp : interchange.getServiceProviders()) {
-                System.out.println(String.format("\t\tGenerate Service provider %s, %s", sp.getName(),sp.getCountry()));
-            }
-
-        }
-    }
-
-    @Test
     public void generate() {
         Cluster cluster = createClusterModel();
         Path imageBaseFolder = DockerBaseIT.getFolderPath("keymaster");
@@ -146,6 +123,26 @@ public class KeyGenerationBuilderIT {
                 .done()
                 .done();
         return myCluster;
+    }
+
+    private Cluster createSTMClusterModel() {
+        Cluster cluster = Cluster.builder()
+                .topDomain().domainName("stminterchange.com").ownerCountry("NO").done()
+                .interchange()
+                    .intermediateDomain().domainName("belle.stminterchange.com").ownerCountry("NO").done()
+                .serviceProvider().name("mary@belle.stminterchange.com").country("NO").done()
+                .done()
+                .interchange()
+                    .intermediateDomain().domainName("blomst.stminterchange.com").ownerCountry("NO").done()
+                .serviceProvider().name("victoria@blomst.stminterchange.com").country("NO").done()
+                .done()
+                .interchange()
+                    .intermediateDomain().domainName("boble.stminterchange.com").ownerCountry("NO").done()
+                .serviceProvider().name("mette@boble.stminterchange.com").country("NO").done()
+                .done().done();
+        return cluster;
+
+
     }
 
 
