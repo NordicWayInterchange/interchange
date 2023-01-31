@@ -10,11 +10,9 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
-import no.vegvesen.ixn.properties.MessageProperty;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -75,7 +73,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	public void testMessagesCollected() throws NamingException, JMSException {
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", producerContainer.getAmqpsPort(), new Connection(), "subscriptionExchange");
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", producerContainer.getAmqpsPort(), new MessageConnection(), "subscriptionExchange");
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));
@@ -124,7 +122,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 	public void testExpiredMessagesNotCollected() throws NamingException, JMSException, InterruptedException {
 
 		GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new Connection(), "subscriptionExchange");
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint("localhost", "localhost", "localhost", 5671, new MessageConnection(), "subscriptionExchange");
 
 		ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
 		when(listenerEndpointRepository.findAll()).thenReturn(Arrays.asList(listenerEndpoint));

@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.model.Connection;
-import no.vegvesen.ixn.federation.model.ConnectionStatus;
+import no.vegvesen.ixn.federation.model.MessageConnection;
+import no.vegvesen.ixn.federation.model.MessageConnectionStatus;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ public class ListenerEndpointIT {
 
     @Test
     public void findListenerEndpointByNeighbourName() {
-        ListenerEndpoint end = new ListenerEndpoint("neigh", "neigh_source", "host", 5671, new Connection());
+        ListenerEndpoint end = new ListenerEndpoint("neigh", "neigh_source", "host", 5671, new MessageConnection());
         repository.save(end);
         List<ListenerEndpoint> neighbourList = repository.findAllByNeighbourName("neigh");
         assertThat(neighbourList).isNotNull();
@@ -33,8 +33,8 @@ public class ListenerEndpointIT {
 
     @Test
     public void findListenerEndpointByHostAndPortAndSourceAndNeighbourName() {
-        ListenerEndpoint end1 = new ListenerEndpoint("neigh1", "neigh_source1", "host-1", 5671, new Connection());
-        ListenerEndpoint end2 = new ListenerEndpoint("neigh2", "neigh_source2", "host-2", 5671, new Connection());
+        ListenerEndpoint end1 = new ListenerEndpoint("neigh1", "neigh_source1", "host-1", 5671, new MessageConnection());
+        ListenerEndpoint end2 = new ListenerEndpoint("neigh2", "neigh_source2", "host-2", 5671, new MessageConnection());
         repository.save(end1);
         repository.save(end2);
 
@@ -47,8 +47,8 @@ public class ListenerEndpointIT {
 
     @Test
     public void noMatchListenerEndpointFoundByHostAndPortAndSourceAndNeighbourName() {
-        ListenerEndpoint end3 = new ListenerEndpoint("neigh4", "neigh_source3", "host-3", 5671, new Connection());
-        ListenerEndpoint end4 = new ListenerEndpoint("neigh4", "neigh_source4", "host-4", 5671, new Connection());
+        ListenerEndpoint end3 = new ListenerEndpoint("neigh4", "neigh_source3", "host-3", 5671, new MessageConnection());
+        ListenerEndpoint end4 = new ListenerEndpoint("neigh4", "neigh_source4", "host-4", 5671, new MessageConnection());
         repository.save(end3);
         repository.save(end4);
 
@@ -58,8 +58,8 @@ public class ListenerEndpointIT {
 
     @Test
     public void failWhenListenerEndpointsHasTheSameUniqueConstraints() {
-        ListenerEndpoint end5 = new ListenerEndpoint("neigh5", "neigh_source5", "host-5", 5671, new Connection());
-        ListenerEndpoint end6 = new ListenerEndpoint("neigh5", "neigh_source5", "host-5", 5671, new Connection());
+        ListenerEndpoint end5 = new ListenerEndpoint("neigh5", "neigh_source5", "host-5", 5671, new MessageConnection());
+        ListenerEndpoint end6 = new ListenerEndpoint("neigh5", "neigh_source5", "host-5", 5671, new MessageConnection());
         repository.save(end5);
         assertThatExceptionOfType(DataIntegrityViolationException.class).isThrownBy(() ->
                 repository.save(end6));
@@ -67,18 +67,18 @@ public class ListenerEndpointIT {
 
     @Test
     public void messageConnectionStatusCanBeQueried() {
-        ListenerEndpoint listenerEndpoint = new ListenerEndpoint("neighbourName","source", "host", 5671, new Connection());
-        listenerEndpoint.getMessageConnection().setConnectionStatus(ConnectionStatus.UNREACHABLE);
+        ListenerEndpoint listenerEndpoint = new ListenerEndpoint("neighbourName","source", "host", 5671, new MessageConnection());
+        listenerEndpoint.getMessageConnection().setMessageConnectionStatus(MessageConnectionStatus.UNREACHABLE);
         repository.save(listenerEndpoint);
 
-        assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE)).contains(listenerEndpoint);
-        assertThat(repository.findByMessageConnection_ConnectionStatus(ConnectionStatus.CONNECTED)).doesNotContain(listenerEndpoint);
+        assertThat(repository.findByMessageConnection_MessageConnectionStatus(MessageConnectionStatus.UNREACHABLE)).contains(listenerEndpoint);
+        assertThat(repository.findByMessageConnection_MessageConnectionStatus(MessageConnectionStatus.CONNECTED)).doesNotContain(listenerEndpoint);
     }
 
     @Test
     public void saveMultipleListenerEndpointsFromSameNeighbour(){
-        ListenerEndpoint lisend1 = new ListenerEndpoint("neighbourName", "source-1", "host-1", 5671, new Connection());
-        ListenerEndpoint lisend2 = new ListenerEndpoint("neighbourName", "source-2", "host-2", 5671, new Connection());
+        ListenerEndpoint lisend1 = new ListenerEndpoint("neighbourName", "source-1", "host-1", 5671, new MessageConnection());
+        ListenerEndpoint lisend2 = new ListenerEndpoint("neighbourName", "source-2", "host-2", 5671, new MessageConnection());
 
         repository.save(lisend1);
         repository.save(lisend2);

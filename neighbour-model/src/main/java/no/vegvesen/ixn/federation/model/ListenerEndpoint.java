@@ -19,7 +19,7 @@ public class ListenerEndpoint {
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "mes_con", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_listener_endpoints_message_connection"))
-    private Connection messageConnection;
+    private MessageConnection messageConnection;
 
     private int maxBandwidth;
     private int maxMessageRate;
@@ -29,7 +29,7 @@ public class ListenerEndpoint {
 
     public ListenerEndpoint() { }
 
-    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection) {
+    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, MessageConnection messageConnection) {
         this.neighbourName = neighbourName;
         this.source = source;
         this.host = host;
@@ -37,7 +37,7 @@ public class ListenerEndpoint {
         this.messageConnection = messageConnection;
     }
 
-    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, String exchangeName) {
+    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, MessageConnection messageConnection, String exchangeName) {
         this.neighbourName = neighbourName;
         this.source = source;
         this.host = host;
@@ -46,7 +46,7 @@ public class ListenerEndpoint {
         this.exchangeName = exchangeName;
     }
 
-    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
+    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, MessageConnection messageConnection, int maxBandwidth, int maxMessageRate) {
         this.neighbourName = neighbourName;
         this.source = source;
         this.host = host;
@@ -80,9 +80,9 @@ public class ListenerEndpoint {
         this.port = port;
     }
 
-    public Connection getMessageConnection () { return messageConnection; }
+    public MessageConnection getMessageConnection () { return messageConnection; }
 
-    public void setMessageConnection (Connection messageConnection) { this.messageConnection = messageConnection; }
+    public void setMessageConnection (MessageConnection messageConnection) { this.messageConnection = messageConnection; }
 
     public int getMaxBandwidth() {
         return maxBandwidth;

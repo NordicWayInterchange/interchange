@@ -18,8 +18,8 @@ public class MessageCollectorTest {
 
     @Test
     public void testExceptionThrownOnSettingUpConnectionAllowsNextToBeCreated() {
-        ListenerEndpoint one = new ListenerEndpoint("one", "", "", 5671,  new Connection(), "subscriptionExchange1");
-        ListenerEndpoint two = new ListenerEndpoint("two", "", "", 5671,  new Connection(), "subscriptionExchange2");
+        ListenerEndpoint one = new ListenerEndpoint("one", "", "", 5671,  new MessageConnection(), "subscriptionExchange1");
+        ListenerEndpoint two = new ListenerEndpoint("two", "", "", 5671,  new MessageConnection(), "subscriptionExchange2");
 
         GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
         ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
@@ -52,10 +52,10 @@ public class MessageCollectorTest {
 
     @Test
     public void testConnectionsToNeighbourBacksOffWhenNotPossibleToContact(){
-        Connection messageConnectionOne = mock(Connection.class);
+        MessageConnection messageConnectionOne = mock(MessageConnection.class);
         when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
 
-        Connection messageConnectionTwo = mock(Connection.class);
+        MessageConnection messageConnectionTwo = mock(MessageConnection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
         ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671,  messageConnectionOne, "subscriptionExchange1");
@@ -78,16 +78,16 @@ public class MessageCollectorTest {
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
         collector.runSchedule();
 
-        verify(messageConnectionOne,times(1)).failedConnection(anyInt());
-        verify(messageConnectionTwo,times(1)).okConnection();
+        verify(messageConnectionOne,times(1)).failedMessageConnection(anyInt());
+        verify(messageConnectionTwo,times(1)).okMessageConnection();
     }
 
     @Test
     public void testTwoListenersAreCreatedForOneNeighbourWithTwoEndpoints() {
-        Connection messageConnectionOne = mock(Connection.class);
+        MessageConnection messageConnectionOne = mock(MessageConnection.class);
         when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
 
-        Connection messageConnectionTwo = mock(Connection.class);
+        MessageConnection messageConnectionTwo = mock(MessageConnection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
         ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange1");
@@ -110,16 +110,16 @@ public class MessageCollectorTest {
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(2);
-        verify(messageConnectionOne,times(1)).okConnection();
-        verify(messageConnectionTwo,times(1)).okConnection();
+        verify(messageConnectionOne,times(1)).okMessageConnection();
+        verify(messageConnectionTwo,times(1)).okMessageConnection();
     }
 
     @Test
     public void testOneListenerIsCreatedForOneNeighbourWithTwoEndpointsOneFailing() {
-        Connection messageConnectionOne = mock(Connection.class);
+        MessageConnection messageConnectionOne = mock(MessageConnection.class);
         when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
 
-        Connection messageConnectionTwo = mock(Connection.class);
+        MessageConnection messageConnectionTwo = mock(MessageConnection.class);
         when(messageConnectionTwo.canBeContacted(any())).thenReturn(true);
 
         ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange1");
@@ -142,8 +142,8 @@ public class MessageCollectorTest {
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(1);
-        verify(messageConnectionOne,times(1)).failedConnection(anyInt());
-        verify(messageConnectionTwo,times(1)).okConnection();
+        verify(messageConnectionOne,times(1)).failedMessageConnection(anyInt());
+        verify(messageConnectionTwo,times(1)).okMessageConnection();
     }
 
     @Test
@@ -170,7 +170,7 @@ public class MessageCollectorTest {
 
     @Test
     public void twoMatchesOneWithListenerEndpointAndOneWithoutTearDownOne() {
-        Connection messageConnectionOne = mock(Connection.class);
+        MessageConnection messageConnectionOne = mock(MessageConnection.class);
         when(messageConnectionOne.canBeContacted(any())).thenReturn(true);
 
         ListenerEndpoint one = new ListenerEndpoint("one", "source-one", "endpoint-one", 5671, messageConnectionOne, "subscriptionExchange1");
@@ -198,6 +198,6 @@ public class MessageCollectorTest {
         assertThat(collector.getListeners()).size().isEqualTo(1);
         assertThat(match1.getStatus()).isEqualTo(MatchStatus.TEARDOWN_EXCHANGE);
         assertThat(match2.getStatus()).isEqualTo(MatchStatus.UP);
-        verify(messageConnectionOne,times(1)).okConnection();
+        verify(messageConnectionOne,times(1)).okMessageConnection();
     }
 }

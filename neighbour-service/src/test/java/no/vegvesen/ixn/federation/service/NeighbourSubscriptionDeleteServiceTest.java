@@ -130,8 +130,8 @@ public class NeighbourSubscriptionDeleteServiceTest {
         subscriptionRequest.setSubscriptions(Collections.singleton(sub1));
         neighbour.setOurRequestedSubscriptions(subscriptionRequest);
 
-        ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "source-1", "endpoint-1", 5671, new Connection());
-        ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "source-2", "endpoint-2", 5671, new Connection());
+        ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "source-1", "endpoint-1", 5671, new MessageConnection());
+        ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "source-2", "endpoint-2", 5671, new MessageConnection());
 
         when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
         neighbourSubscriptionDeleteService.tearDownListenerEndpoints(neighbour);
@@ -161,8 +161,8 @@ public class NeighbourSubscriptionDeleteServiceTest {
         subscriptionRequest.setSubscriptions(Sets.newSet(sub1, sub2));
         neighbour.setOurRequestedSubscriptions(subscriptionRequest);
 
-        ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "source-1", "endpoint-1", 5671, new Connection());
-        ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "source-2", "endpoint-2", 5671, new Connection());
+        ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "source-1", "endpoint-1", 5671, new MessageConnection());
+        ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "source-2", "endpoint-2", 5671, new MessageConnection());
 
         when(listenerEndpointRepository.findAllByNeighbourName("neighbour")).thenReturn(Arrays.asList(listenerEndpoint1, listenerEndpoint2));
         neighbourSubscriptionDeleteService.tearDownListenerEndpoints(neighbour);

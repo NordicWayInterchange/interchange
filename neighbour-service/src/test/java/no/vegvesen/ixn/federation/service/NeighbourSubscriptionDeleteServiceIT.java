@@ -67,7 +67,7 @@ public class NeighbourSubscriptionDeleteServiceIT {
         neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
         neighbourRepository.save(neighbour);
 
-        ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new Connection());
+        ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new MessageConnection());
         listenerEndpointRepository.save(listenerEndpoint);
         service.deleteSubscriptions(mockNeighbourFacade);
 
@@ -94,7 +94,7 @@ public class NeighbourSubscriptionDeleteServiceIT {
         neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
         neighbourRepository.save(neighbour);
 
-        ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new Connection());
+        ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new MessageConnection());
         listenerEndpointRepository.save(listenerEndpoint);
 
         doThrow(new SubscriptionNotFoundException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
@@ -123,7 +123,7 @@ public class NeighbourSubscriptionDeleteServiceIT {
         neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
         neighbourRepository.save(neighbour);
 
-        ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new Connection());
+        ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new MessageConnection());
         listenerEndpointRepository.save(listenerEndpoint);
 
         doThrow(new SubscriptionDeleteException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());

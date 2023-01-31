@@ -137,10 +137,10 @@ public class MessageCollector {
                 logger.info("Setting up connection to ixn with name {}, host {} and port {}", name, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 MessageCollectorListener messageListener = collectorCreator.setupCollection(listenerEndpoint);
                 listeners.put(listenerEndpoint, messageListener);
-                listenerEndpoint.getMessageConnection().okConnection();
+                listenerEndpoint.getMessageConnection().okMessageConnection();
             } catch (MessageCollectorException e) {
                 logger.warn("Tried to create connection to {} with host {} and port {}, but failed with exception.", name, listenerEndpoint.getHost(), listenerEndpoint.getPort(), e);
-                listenerEndpoint.getMessageConnection().failedConnection(backoffProperties.getNumberOfAttempts());
+                listenerEndpoint.getMessageConnection().failedMessageConnection(backoffProperties.getNumberOfAttempts());
             }
         }
         else {
