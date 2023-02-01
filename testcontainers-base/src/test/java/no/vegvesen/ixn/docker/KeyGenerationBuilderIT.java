@@ -85,7 +85,7 @@ public class KeyGenerationBuilderIT {
                         spCsr.getCsrOnHost(),
                         description.getName(),
                         certGenerator.getSingleCertOnHost(),
-                        spCsr.getKeyOnHost(),
+                        certGenerator.getIntermediateKeyOnHost(),
                         certGenerator.getChainCertOnHost(),
                         keysPath
                 );
@@ -93,6 +93,19 @@ public class KeyGenerationBuilderIT {
             }
 
         }
+    }
+
+    private Cluster createClusterForSystemtest() {
+        Cluster cluster = Cluster.builder()
+                .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO").done()
+                .interchange().intermediateDomain().domainName("a.bouvetinterchange.eu").ownerCountry("NO").done()
+                .serviceProvider().name("king_olav.bouvetinterchange.eu").country("NO").done()
+                .done()
+                .interchange().intermediateDomain().domainName("b.bouvetinterchange.eu").ownerCountry("NO").done()
+                .serviceProvider().name("king_gustaf.bouvetinterchange.eu").country("SE").done()
+                .done().done();
+
+        return cluster;
     }
 
     private Cluster createClusterForSPRedirect() {
