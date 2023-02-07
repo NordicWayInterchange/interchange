@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -eu
+set -x
 
 #Fully Qualified Domain Name
 if [ "$#" -ne 5 ]; then
@@ -35,7 +36,7 @@ fi
 if [ ! -d "ca/intermediate" ]; then
 	mkdir -p ca/intermediate/{certs,newcerts,crl,private}
   touch ca/intermediate/index.txt
-	touch ca/intermediate/index.txt.attr
+	echo 'unique_subject = no' >> ca/index.txt.attr
 	echo '1000'  > ca/intermediate/serial
 fi
 

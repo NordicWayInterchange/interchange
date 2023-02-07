@@ -29,6 +29,12 @@ public class KeyGenerationBuilderIT {
         generateKeys(cluster,DockerBaseIT.getFolderPath("keymaster"));
     }
 
+    @Test
+    public void generateModelForDockerComposeRedirect() {
+        Cluster cluster = createClusterForSystemtest();
+        generateKeys(cluster,DockerBaseIT.getFolderPath("keymaster"));
+    }
+
     private void generateKeys(Cluster cluster, Path imageBaseFolder) {
         TopDomain topDomain = cluster.getTopDomain();
         RootCAKeyGenerator caGenerator = new RootCAKeyGenerator(
@@ -108,6 +114,18 @@ public class KeyGenerationBuilderIT {
         return cluster;
     }
 
+    private Cluster createClusterForSystemtestWithHosts() {
+        Cluster cluster = Cluster.builder()
+                .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO").done()
+                .interchange().intermediateDomain().domainName("a.bouvetinterchange.eu").ownerCountry("NO").done()
+                .serviceProvider().name("king_olav.bouvetinterchange.eu").country("NO").done()
+                .done()
+                .interchange().intermediateDomain().domainName("b.bouvetinterchange.eu").ownerCountry("NO").done()
+                .serviceProvider().name("king_gustaf.bouvetinterchange.eu").country("SE").done()
+                .done().done();
+
+        return cluster;
+    }
     private Cluster createClusterForSPRedirect() {
         return Cluster.builder()
                 .topDomain().domainName("redirect-cluster.eu").ownerCountry("NO").done()

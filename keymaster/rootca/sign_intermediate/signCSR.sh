@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -eu
+set -x
 
 if [ "$#" -ne 5 ]; then
 	echo "Usage: $0 <path/to/csrFile.csr> <intermediateCA domain name> <path/to/ca_cert> <path_to_ca_key> <country code>"
@@ -37,6 +38,7 @@ fi
 if [ ! -f "ca/index.txt" ]; then
 	touch ca/index.txt
 	touch ca/index.txt.attr
+	echo 'unique_subject = no' >> ca/index.txt.attr
 	echo '1000'  > ca/serial
 fi
 CERT_OUT_FILE=ca/intermediate/certs/int.$DOMAINNAME.crt.pem

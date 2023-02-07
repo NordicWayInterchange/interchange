@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -eu
+set -x
 
 if [ "$#" -ne 5 ]; then
     echo "USAGE: $0 <server FQDN> <ca-key> <ca-cert> <ca-cart-chain> <country-code>"
@@ -60,6 +61,7 @@ fi
 if [ ! -d ca ]; then
   mkdir -p ca/intermediate/{private,newcerts,certs,csr}
   touch ca/intermediate/index.txt
+	echo 'unique_subject = no' >> ca/intermediate/index.txt.attr
   echo 1000 > ca/intermediate/serial
 fi
 

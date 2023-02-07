@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.docker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -9,6 +12,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 
 public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
+
+    private static Logger logger = LoggerFactory.getLogger(ServerCertGenerator.class);
 
     private static final String CA_IN_FOLDER = "/ca_in/";
     private static final String KEYS_OUT_FOLDER = "/keys_out/";
@@ -53,6 +58,7 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
         this.withFileSystemBind(targetPath.toString(),KEYS_OUT_FOLDER,BindMode.READ_WRITE);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
         this.withCommand(domainName,caKeyInContainer,caCertInContainer,chainInContainer,countryCode);
+        this.withLogConsumer(new Slf4jLogConsumer(logger));
     }
 
     public Path getKeyOnHost() {

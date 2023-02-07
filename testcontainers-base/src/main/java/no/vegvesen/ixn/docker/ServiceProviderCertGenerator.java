@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.docker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -9,6 +12,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 
 public class ServiceProviderCertGenerator extends GenericContainer<ServiceProviderCertGenerator> {
+
+    private static Logger logger = LoggerFactory.getLogger(ServiceProviderCertGenerator.class);
 
     private static String INTERMEDIATE_CA_IN_FOLDER = "/int_ca_in/";
     private static String CSR_IN_PATH = "/csr_in/";
@@ -59,6 +64,7 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
         this.withFileSystemBind(hostOutputPath,containerOutputPath,BindMode.READ_WRITE);
         this.withCommand(containerCsrPath,clientName,containerCaCertPath,containerCaKeyPath,containerCertChainPath);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
+        this.withLogConsumer(new Slf4jLogConsumer(logger));
 
     }
 

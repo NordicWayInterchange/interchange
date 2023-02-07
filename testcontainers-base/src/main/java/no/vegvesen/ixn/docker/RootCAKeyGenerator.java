@@ -1,6 +1,9 @@
 package no.vegvesen.ixn.docker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -9,6 +12,7 @@ import java.time.Duration;
 
 public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
 
+    private static Logger logger = LoggerFactory.getLogger(RootCAKeyGenerator.class);
 
     private Path keysFolder;
     private String caDomain;
@@ -26,6 +30,7 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
     protected void configure() {
         this.withFileSystemBind(keysFolder.toString(),"/ca_keys");
         this.withCommand(caDomain,countryCode);
+        this.withLogConsumer(new Slf4jLogConsumer(logger));
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 

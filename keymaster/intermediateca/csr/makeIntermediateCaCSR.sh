@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -eu
+set -x
 
 if [ "$#" -ne 2 ]; then
     echo "USAGE: $0 <intermediateCA domain name> <country code (upper case)>"
@@ -20,7 +21,6 @@ touch ca/intermediate/index.txt.attr
 echo 1000 > ca/intermediate/crlnumber
 echo '1234' > ca/intermediate/serial
 
-echo Enter domain name for the intermediateCA:
 DOMAINNAME=$1
 COUNTRY=$2
 
