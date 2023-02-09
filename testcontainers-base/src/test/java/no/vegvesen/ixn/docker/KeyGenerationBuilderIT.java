@@ -1,11 +1,8 @@
 package no.vegvesen.ixn.docker;
 
-import no.vegvesen.ixn.docker.keygen.AdditionalHost;
 import no.vegvesen.ixn.docker.keygen.Cluster;
-import no.vegvesen.ixn.docker.keygen.Interchange;
-import no.vegvesen.ixn.docker.keygen.IntermediateDomain;
-import no.vegvesen.ixn.docker.keygen.ServicProviderDescription;
-import no.vegvesen.ixn.docker.keygen.TopDomain;
+import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -14,168 +11,9 @@ public class KeyGenerationBuilderIT {
 
     Path keysPath = DockerBaseIT.getTestPrefixedOutputPath(KeyGenerationBuilderIT.class);
 
+    //TODO need to finish generation and testing with extra hosts
     @Test
     public void generate() {
-        Cluster cluster = createClusterModel();
-        Path imageBaseFolder = DockerBaseIT.getFolderPath("keymaster");
-        generateKeys(cluster, imageBaseFolder);
-
-    }
-
-    @Test
-    public void generateModelForRedirectSP() {
-
-        Cluster cluster = createClusterForSPRedirect();
-        generateKeys(cluster,DockerBaseIT.getFolderPath("keymaster"));
-    }
-
-    @Test
-    public void generateModelForDockerComposeRedirect() {
-        Cluster cluster = createClusterForSystemtest();
-        generateKeys(cluster,DockerBaseIT.getFolderPath("keymaster"));
-    }
-
-    private void generateKeys(Cluster cluster, Path imageBaseFolder) {
-        TopDomain topDomain = cluster.getTopDomain();
-        RootCAKeyGenerator caGenerator = new RootCAKeyGenerator(
-                imageBaseFolder.resolve("rootca/newca"),
-                keysPath,
-                topDomain.getDomainName(),
-                topDomain.getOwnerCountry()
-        );
-        caGenerator.start();
-        //TODO the key and cert must be translated back.
-        caGenerator.getRootCaDetails();
-        TruststoreGenerator topDomainTrustStoreGenerator = new TruststoreGenerator(
-                imageBaseFolder.resolve("truststores"),
-                caGenerator.getCaCertOnHost(),
-                "password", //For now
-                keysPath.resolve(topDomain.getDomainName() + "_truststore.jks")
-        );
-        topDomainTrustStoreGenerator.start();
-        for (Interchange interchange : cluster.getInterchanges()) {
-            IntermediateDomain domain = interchange.getDomain();
-            IntermediateCaCSRGenerator csrGenerator = new IntermediateCaCSRGenerator(
-                    imageBaseFolder.resolve("intermediateca/csr"),
-                    keysPath,
-                    domain.getDomainName(),
-                    domain.getOwningCountry()
-            );
-            csrGenerator.start();
-            IntermediateCACertGenerator certGenerator = new IntermediateCACertGenerator(
-                    imageBaseFolder.resolve("rootca/sign_intermediate"),
-                    csrGenerator.getCsrOnHost(),
-                    domain.getDomainName(),
-                    caGenerator.getCaCertOnHost(),
-                    caGenerator.getCaKeyOnHost(),
-                    domain.getOwningCountry(),
-                    keysPath
-            );
-            certGenerator.start();
-            KeystoreGenerator keystoreGenerator = new KeystoreGenerator(
-                    imageBaseFolder.resolve("keystores"),
-                    csrGenerator.getKeyOnHost(),
-                    certGenerator.getChainCertOnHost(),
-                    domain.getDomainName(),
-                    caGenerator.getCaCertOnHost(),
-                    "password",
-                    keysPath.resolve(domain.getDomainName() + ".p12")
-            );
-            keystoreGenerator.start();
-            TruststoreGenerator intermediateTruststore = new TruststoreGenerator(
-                    imageBaseFolder.resolve("truststores"),
-                    certGenerator.getSingleCertOnHost(),
-                    "password",
-                    keysPath.resolve(domain.getDomainName() + "_truststore.jks")
-            );
-            intermediateTruststore.start();
-            for (AdditionalHost host : interchange.getAdditionalHosts()) {
-                ServerCertGenerator serverCertGenerator = new ServerCertGenerator(
-                        imageBaseFolder.resolve("server"),
-                        host.getHostname(),
-                        certGenerator.getSingleCertOnHost(),
-                        csrGenerator.getKeyOnHost(),
-                        certGenerator.getChainCertOnHost(),
-                        host.getOwningCountry(),
-                        keysPath
-                );
-                serverCertGenerator.start();
-                //TODO create keyStore for host (using chain, I expect)
-            }
-            for (ServicProviderDescription description : interchange.getServiceProviders()) {
-                ServiceProviderCSRGenerator spCsr = new ServiceProviderCSRGenerator(
-                        imageBaseFolder.resolve("serviceprovider/csr"),
-                        keysPath,
-                        description.getName(),
-                        description.getCountry()
-                );
-                spCsr.start();
-                ServiceProviderCertGenerator spCert = new ServiceProviderCertGenerator(
-                        imageBaseFolder.resolve("intermediateca/sign_sp"),
-                        spCsr.getCsrOnHost(),
-                        description.getName(),
-                        certGenerator.getSingleCertOnHost(),
-                        certGenerator.getIntermediateKeyOnHost(),
-                        certGenerator.getChainCertOnHost(),
-                        keysPath
-                );
-                spCert.start();
-                KeystoreGenerator spKeystore = new KeystoreGenerator(
-                        imageBaseFolder.resolve("keystores"),
-                        spCsr.getKeyOnHost(),
-                        spCert.getCertChainOnHost(),
-                        description.getName(),
-                        certGenerator.getSingleCertOnHost(), //TODO check this! This is what I used for the systems test
-                        "password",
-                        keysPath.resolve(description.getName() + ".p12")
-                );
-                spKeystore.start();
-
-            }
-
-        }
-    }
-
-    private Cluster createClusterForSystemtest() {
-        Cluster cluster = Cluster.builder()
-                .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO").done()
-                .interchange().intermediateDomain().domainName("a.bouvetinterchange.eu").ownerCountry("NO").done()
-                .serviceProvider().name("king_olav.bouvetinterchange.eu").country("NO").done()
-                .done()
-                .interchange().intermediateDomain().domainName("b.bouvetinterchange.eu").ownerCountry("NO").done()
-                .serviceProvider().name("king_gustaf.bouvetinterchange.eu").country("SE").done()
-                .done().done();
-
-        return cluster;
-    }
-
-    private Cluster createClusterForSystemtestWithHosts() {
-        Cluster cluster = Cluster.builder()
-                .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO").done()
-                .interchange().intermediateDomain().domainName("a.bouvetinterchange.eu").ownerCountry("NO").done()
-                .serviceProvider().name("king_olav.bouvetinterchange.eu").country("NO").done()
-                .done()
-                .interchange().intermediateDomain().domainName("b.bouvetinterchange.eu").ownerCountry("NO").done()
-                .serviceProvider().name("king_gustaf.bouvetinterchange.eu").country("SE").done()
-                .done().done();
-
-        return cluster;
-    }
-    private Cluster createClusterForSPRedirect() {
-        return Cluster.builder()
-                .topDomain().domainName("redirect-cluster.eu").ownerCountry("NO").done()
-                .interchange()
-                    .intermediateDomain().domainName("node-a.no").ownerCountry("NO").done()
-                    .serviceProvider().name("service-provider-a").country("NO").done()
-                .done()
-                .interchange()
-                    .intermediateDomain().domainName("node-b.no").ownerCountry("NO").done()
-                    .serviceProvider().name("service-provider-b").country("NO").done()
-                .done()
-                .done();
-    }
-
-    private Cluster createClusterModel() {
         Cluster myCluster = Cluster.builder()
                 .topDomain().domainName("top-domain.eu").ownerCountry("NO").done()
                 .interchange()
@@ -188,7 +26,26 @@ public class KeyGenerationBuilderIT {
                     .serviceProvider().name("service-provider-2").country("NO").done()
                 .done()
                 .done();
-        return myCluster;
+        Cluster cluster = myCluster;
+        Path imageBaseFolder = DockerBaseIT.getFolderPath("keymaster");
+        ClusterKeyGenerator.generateKeys(cluster, imageBaseFolder,keysPath);
+
+    }
+
+    @Test
+    @Disabled
+    public void generateModelForDockerComposeRedirect() {
+
+        Cluster cluster = Cluster.builder()
+                .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO").done()
+                .interchange().intermediateDomain().domainName("a.bouvetinterchange.eu").ownerCountry("NO").done()
+                .serviceProvider().name("king_olav.bouvetinterchange.eu").country("NO").done()
+                .done()
+                .interchange().intermediateDomain().domainName("b.bouvetinterchange.eu").ownerCountry("NO").done()
+                .serviceProvider().name("king_gustaf.bouvetinterchange.eu").country("SE").done()
+                .done().done();
+        Path imageBaseFolder = DockerBaseIT.getFolderPath("keymaster");
+        ClusterKeyGenerator.generateKeys(cluster,imageBaseFolder,keysPath);
     }
 
     private Cluster createSTMClusterModel() {

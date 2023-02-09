@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.docker;
 
 
+import no.vegvesen.ixn.docker.keygen.generator.IntermediateCaCSRGenerator;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;

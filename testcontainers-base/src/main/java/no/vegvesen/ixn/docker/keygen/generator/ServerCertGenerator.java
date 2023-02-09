@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.docker;
+package no.vegvesen.ixn.docker.keygen.generator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +73,4 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
         return targetPath.resolve(String.format("chain.%s.crt.pem",domainName));
     }
 
-    public ServerCertDetails getServiceCertDetails() {
-        return new ServerCertDetails(getKeyOnHost(),getCertOnHost(),getCertChainOnHost());
-    }
 }

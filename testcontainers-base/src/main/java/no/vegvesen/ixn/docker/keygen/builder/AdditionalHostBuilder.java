@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.docker.keygen.builder;
 
-import no.vegvesen.ixn.docker.KeyGenerationBuilderIT;
 import no.vegvesen.ixn.docker.keygen.AdditionalHost;
 
 public class AdditionalHostBuilder {

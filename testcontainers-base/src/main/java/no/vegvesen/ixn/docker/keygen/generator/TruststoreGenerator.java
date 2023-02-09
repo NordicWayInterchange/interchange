@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.docker;
+package no.vegvesen.ixn.docker.keygen.generator;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;

@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.docker;
+package no.vegvesen.ixn.docker.keygen.generator;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
@@ -23,7 +23,7 @@ public class KeystoreGenerator extends GenericContainer<KeystoreGenerator> {
                              String password,
                              Path outputFile) {
         super(new ImageFromDockerfile("keystore-generator")
-                .withFileFromPath(".",dockerFilePath));
+                .withFileFromPath(".", dockerFilePath));
         this.keyOnHost = keyOnHost;
         this.chainCertOnHost = chainCertOnHost;
         this.domainName = domainName;
@@ -34,12 +34,12 @@ public class KeystoreGenerator extends GenericContainer<KeystoreGenerator> {
 
     @Override
     protected void configure() {
-        this.withFileSystemBind(keyOnHost.toString(),"/keys/in-key");
-        this.withFileSystemBind(chainCertOnHost.toString(),"/chain/cert");
-        this.withFileSystemBind(caCertOnHost.toString(),"/ca/cert");
-        this.withFileSystemBind(outputFile.getParent().toString(),"/out/");
+        this.withFileSystemBind(keyOnHost.toString(), "/keys/in-key");
+        this.withFileSystemBind(chainCertOnHost.toString(), "/chain/cert");
+        this.withFileSystemBind(caCertOnHost.toString(), "/ca/cert");
+        this.withFileSystemBind(outputFile.getParent().toString(), "/out/");
         String outputFileInContainer = "/out/" + outputFile.getFileName();
-        this.withCommand("/keys/in-key","/chain/cert",domainName,"/ca/cert",password, outputFileInContainer);
+        this.withCommand("/keys/in-key", "/chain/cert", domainName, "/ca/cert", password, outputFileInContainer);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 }

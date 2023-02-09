@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.docker;
+package no.vegvesen.ixn.docker.keygen.generator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,4 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
         return targetPath.resolve(String.format("chain.%s.crt.pem",domainName));
     }
 
-    public IntermedateCaDetails getIntermediateCaDetails() {
-        return new IntermedateCaDetails(getSingleCertOnHost(),getChainCertOnHost());
-    }
 }

@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.docker;
+package no.vegvesen.ixn.docker.keygen.generator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,4 @@ public class IntermediateCaCSRGenerator extends GenericContainer<IntermediateCaC
         return keysFolder.resolve(String.format("int.%s.key.pem",intermediateDomain));
     }
 
-    public HostCsrDetail getHostCsrDetails() {
-        return new HostCsrDetail(getCsrOnHost(),getKeyOnHost());
-    }
 }

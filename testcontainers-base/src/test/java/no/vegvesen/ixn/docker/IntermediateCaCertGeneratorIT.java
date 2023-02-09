@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.docker;
 
-import org.junit.jupiter.api.BeforeAll;
+import no.vegvesen.ixn.docker.keygen.generator.IntermediateCACertGenerator;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 

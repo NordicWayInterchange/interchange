@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.docker;
+package no.vegvesen.ixn.docker.keygen.generator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,4 @@ public class ServiceProviderCSRGenerator extends GenericContainer<ServiceProvide
         return keysPath.resolve(String.format("%s.csr.pem",username));
     }
 
-    public ServiceProviderCsrDetails getServiceProviderCsrDetails() {
-        return new ServiceProviderCsrDetails(getCsrOnHost(),getKeyOnHost());
-    }
 }
