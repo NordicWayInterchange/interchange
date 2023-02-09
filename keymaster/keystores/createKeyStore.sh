@@ -11,5 +11,5 @@ CA_CERT=$4
 PASSWORD=$5
 OUT_KEYSTORE=$6
 openssl pkcs12 -export -out $OUT_KEYSTORE -inkey $IN_KEY -in $IN_CERT -name $ENTRY_NAME -CAfile $CA_CERT -password pass:$PASSWORD
-chmod +rwx $OUT_KEYSTORE
+chmod +rw $OUT_KEYSTORE
 echo "Keystore $OUT_KEYSTORE generated"
