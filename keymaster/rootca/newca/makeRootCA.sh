@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -eu
+set -x
 
 if [ "$#" -ne 2 ]; then
     echo no domainname for the root ca
