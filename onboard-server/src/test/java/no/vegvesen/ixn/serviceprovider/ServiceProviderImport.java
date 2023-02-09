@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.EndpointApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.DeliveryEndpoint;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -77,10 +78,15 @@ public class ServiceProviderImport {
 
             deliveries.add(delivery);
         }
+
+        Set<PrivateChannel> privateChannels = new HashSet<>();
+        for (PrivateChannelApi privateChannelApi : serviceProviderApi.getPrivateChannels()) {
+            privateChannels.add(new PrivateChannel(privateChannelApi.getPeerName(), privateChannelApi.getQueueName(), PrivateChannelStatus.REQUESTED));
+        }
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName(),
                 capabilities,
                 subscriptions,
-                Collections.emptySet(),
+                privateChannels,
                 savedTimestamp
         );
         serviceProvider.addDeliveries(deliveries);

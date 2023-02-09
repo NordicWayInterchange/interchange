@@ -92,6 +92,12 @@ public class ExportServiceProvidersIT {
 
             }
             serviceProviderApi.setDeliveries(deliveries);
+
+            Set<PrivateChannelApi> privateChannels = new HashSet<>();
+            for (PrivateChannel privateChannel : serviceProvider.getPrivateChannels()) {
+                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
+            }
+            serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);
         }
         writer.writeValue(path.toFile(),serviceProviders);

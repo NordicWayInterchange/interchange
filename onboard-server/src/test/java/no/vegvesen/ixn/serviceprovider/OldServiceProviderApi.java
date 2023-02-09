@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
 
 import java.util.Set;
 
@@ -8,8 +9,8 @@ public class OldServiceProviderApi {
     private String name;
     private Set<OldLocalActorSubscription> subscriptions;
     private Set<CapabilityApi> capabilities;
-
     private Set<DeliveryApi> deliveries;
+    private Set<PrivateChannelApi> privateChannels;
 
     public String getName() {
         return name;
@@ -43,6 +44,14 @@ public class OldServiceProviderApi {
         this.deliveries = deliveries;
     }
 
+    public Set<PrivateChannelApi> getPrivateChannels() {
+        return privateChannels;
+    }
+
+    public void setPrivateChannels(Set<PrivateChannelApi> privateChannels) {
+        this.privateChannels = privateChannels;
+    }
+
     @Override
     public String toString() {
         return "OldServiceProviderApi{" +
@@ -50,6 +59,7 @@ public class OldServiceProviderApi {
                 ", subscriptions=" + subscriptions +
                 ", capabilities=" + capabilities +
                 ", deliveries=" + deliveries +
+                ", privateChannels=" + privateChannels +
                 '}';
     }
 }

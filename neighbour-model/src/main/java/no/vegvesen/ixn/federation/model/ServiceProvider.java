@@ -195,6 +195,10 @@ public class ServiceProvider {
 		return privateChannels;
 	}
 
+	public void setPrivateChannels(Set<PrivateChannel> newPrivateChannels) {
+		this.privateChannels = newPrivateChannels;
+	}
+
 	public void setDeliveries(Set<LocalDelivery> deliveries) {
 		this.deliveries = deliveries;
 	}
