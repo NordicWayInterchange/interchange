@@ -203,7 +203,8 @@ public class ServiceProviderRouter {
     }
 
     public void syncPrivateChannels(ServiceProvider serviceProvider) {
-        Set<PrivateChannel> privateChannels = serviceProvider.getPrivateChannels();
+        Set<PrivateChannel> privateChannels = new HashSet<>();
+        privateChannels.addAll(serviceProvider.getPrivateChannels());
         String name = serviceProvider.getName();
         if(!privateChannels.isEmpty()) {
             syncPrivateChannelsWithQpid(privateChannels, name);
@@ -213,6 +214,7 @@ public class ServiceProviderRouter {
                     .collect(Collectors.toSet());
 
             privateChannels.removeAll(privateChannelsToRemove);
+            serviceProvider.setPrivateChannels(privateChannels);
             repository.save(serviceProvider);
         }
     }
@@ -230,9 +232,11 @@ public class ServiceProviderRouter {
         }
 
         for(PrivateChannel privateChannel : privateChannels) {
+            if (privateChannel.getQueueName() == null) {
+                privateChannel.setQueueName(UUID.randomUUID().toString());
+            }
             String peerName = privateChannel.getPeerName();
             String queueName = privateChannel.getQueueName();
-
             if(privateChannel.getStatus().equals(PrivateChannelStatus.REQUESTED)) {
                 qpidClient.addMemberToGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);

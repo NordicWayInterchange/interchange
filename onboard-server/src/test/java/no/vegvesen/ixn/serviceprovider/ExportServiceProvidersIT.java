@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.serviceprovider.model.GetDeliveryResponse;
 import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelApi;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -18,6 +19,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -92,6 +94,12 @@ public class ExportServiceProvidersIT {
 
             }
             serviceProviderApi.setDeliveries(deliveries);
+
+            Set<PrivateChannelApi> privateChannels = new HashSet<>();
+            for (PrivateChannel privateChannel : serviceProvider.getPrivateChannels()) {
+                privateChannels.add(new PrivateChannelApi(privateChannel.getPeerName(), privateChannel.getQueueName(), privateChannel.getId()));
+            }
+            serviceProviderApi.setPrivateChannels(privateChannels);
             serviceProviders.add(serviceProviderApi);
         }
         writer.writeValue(path.toFile(),serviceProviders);
