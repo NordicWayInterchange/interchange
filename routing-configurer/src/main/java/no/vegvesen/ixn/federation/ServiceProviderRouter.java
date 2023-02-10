@@ -286,18 +286,10 @@ public class ServiceProviderRouter {
         List<Match> matches = matchDiscoveryService.findMatchesToTearDownExchangesFor(serviceProviderName);
         for (Match match : matches) {
             String exchangeName = match.getSubscription().getExchangeName();
-            String bindKey = match.getLocalSubscription().bindKey();
             List<Match> exchangeMatches = matchDiscoveryService.findMatchesByExchangeName(exchangeName);
             if (exchangeMatches.size() > 1) {
                 for (Match exMatch : exchangeMatches) {
                     if (exMatch.getStatus().equals(MatchStatus.TEARDOWN_EXCHANGE)) {
-                        for (LocalEndpoint endpoint : exMatch.getLocalSubscription().getLocalEndpoints()) {
-                            if (qpidClient.queueExists(endpoint.getSource())) {
-                                if (qpidClient.getQueueBindKeys(endpoint.getSource()).contains(bindKey)) {
-                                    qpidClient.unbindBindKey(endpoint.getSource(), bindKey, exchangeName);
-                                }
-                            }
-                        }
                         removeLocalSubscriptionQueue(exMatch.getLocalSubscription(), serviceProviderName);
                         if (exMatch.getSubscription().getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN)) {
                             if (qpidClient.exchangeExists(exchangeName)) {
@@ -309,13 +301,6 @@ public class ServiceProviderRouter {
                 }
             } else {
                 if (qpidClient.exchangeExists(exchangeName)) {
-                    for (LocalEndpoint endpoint : match.getLocalSubscription().getLocalEndpoints()) {
-                        if (qpidClient.queueExists(endpoint.getSource())) {
-                            if (qpidClient.getQueueBindKeys(endpoint.getSource()).contains(bindKey)) {
-                                qpidClient.unbindBindKey(endpoint.getSource(), bindKey, exchangeName);
-                            }
-                        }
-                    }
                     qpidClient.removeExchange(exchangeName);
                 }
                 removeLocalSubscriptionQueue(match.getLocalSubscription(), serviceProviderName);

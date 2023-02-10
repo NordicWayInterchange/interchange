@@ -593,13 +593,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		router.setUpDeliveryQueue(serviceProvider);
 
-		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
-
 		verify(outgoingMatchDiscoveryService, times(1)).updateOutgoingMatchToUp(any(OutgoingMatch.class));
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 		assertThat(delivery.getExchangeName()).isNotNull();
-		//assertThat(match.getSelector()).contains(capabilitySelector);
 	}
 
 	@Test
@@ -637,15 +634,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match, match2));
 		router.setUpDeliveryQueue(serviceProvider);
 
-		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
-		String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(denmCapability2);
-
 		verify(outgoingMatchDiscoveryService, times(2)).updateOutgoingMatchToUp(any(OutgoingMatch.class));
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 		assertThat(delivery.getExchangeName()).isNotNull();
-		//assertThat(match.getSelector()).contains(capabilitySelector);
-		//assertThat(match2.getSelector()).contains(capabilitySelector2);
 	}
 
 	@Test
@@ -810,6 +802,23 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.getQueueBindKeys("my-queue12")).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(1);
+	}
+
+	@Test
+	public void queueBindingsAreRemovedWhenExchangeIsRemoved() {
+		String exchangeName = "exchange-one";
+		String queueName = "queue-one";
+
+		client.createTopicExchange(exchangeName);
+		client.createQueue(queueName);
+
+		client.bindTopicExchange("originatingCountry = 'NO'", exchangeName, queueName);
+
+		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
+
+		client.removeExchange(exchangeName);
+
+		assertThat(client.getQueueBindKeys(queueName)).hasSize(0);
 	}
 
 	public SSLContext setUpTestSslContext(String s) {
