@@ -13,8 +13,6 @@ import java.time.Duration;
 
 public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
 
-    private static Logger logger = LoggerFactory.getLogger(ServerCertGenerator.class);
-
     private static final String CA_IN_FOLDER = "/ca_in/";
     private static final String KEYS_OUT_FOLDER = "/keys_out/";
     private final String caCertOnHost;
@@ -28,15 +26,14 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
 
     private String domainName;
 
-    public ServerCertGenerator(Path dockerFilePath,
+    public ServerCertGenerator(ImageFromDockerfile image,
                                String domainName,
                                Path intermediateCACert,
                                Path intermediateCAKey,
                                Path intermedateCAChain,
                                String countryCode,
                                Path targetPath) {
-        super(new ImageFromDockerfile("server-cert-generator")
-                .withFileFromPath(".",dockerFilePath));
+        super(image);
         this.domainName = domainName;
         caCertOnHost =  intermediateCACert.toString();
         caCertInContainer = CA_IN_FOLDER + intermediateCACert.getFileName().toString();
@@ -48,8 +45,25 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
         this.targetPath = targetPath;
     }
 
+    public ServerCertGenerator(String domainName,
+                               Path intermediateCACert,
+                               Path intermediateCAKey,
+                               Path intermedateCAChain,
+                               String countryCode,
+                               Path targetPath) {
+        this(new ImageFromDockerfile("server-cert-generator")
+                .withFileFromClasspath(".", "server"),
+                domainName,
+                intermediateCACert,
+                intermediateCAKey,
+                intermedateCAChain,
+                countryCode,
+                targetPath);
 
-    @Override
+    }
+
+
+        @Override
     public void configure() {
 
         this.withFileSystemBind(caCertOnHost,caCertInContainer, BindMode.READ_ONLY);
@@ -58,7 +72,6 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
         this.withFileSystemBind(targetPath.toString(),KEYS_OUT_FOLDER,BindMode.READ_WRITE);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
         this.withCommand(domainName,caKeyInContainer,caCertInContainer,chainInContainer,countryCode);
-        this.withLogConsumer(new Slf4jLogConsumer(logger));
     }
 
     public Path getKeyOnHost() {

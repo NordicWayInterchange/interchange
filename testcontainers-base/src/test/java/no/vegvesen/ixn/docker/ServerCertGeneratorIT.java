@@ -2,6 +2,7 @@ package no.vegvesen.ixn.docker;
 
 import no.vegvesen.ixn.docker.keygen.generator.ServerCertGenerator;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -19,7 +20,6 @@ public class ServerCertGeneratorIT {
 
     @Container
     private static ServerCertGenerator generator = new ServerCertGenerator(
-            DockerBaseIT.getFolderPath("keymaster").resolve("server"),
             "testserver.test2.no",
             intermediateCaKeysPath.resolve("int.test2.no.crt.pem"),
             intermediateCaKeysPath.resolve("int.test2.no.key.pem"),

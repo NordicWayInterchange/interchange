@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
+import no.vegvesen.ixn.docker.DockerBaseIT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -12,7 +13,6 @@ import java.time.Duration;
 
 public class ServiceProviderCSRGenerator extends GenericContainer<ServiceProviderCSRGenerator> {
 
-    private static Logger logger = LoggerFactory.getLogger(ServiceProviderCSRGenerator.class);
 
     private static final String KEYS_INTERNAL_FOLDER = "/int_keys";
 
@@ -20,19 +20,24 @@ public class ServiceProviderCSRGenerator extends GenericContainer<ServiceProvide
     private String username;
     private String countryCode;
 
-    public ServiceProviderCSRGenerator(Path dockerfilePath, Path keysPath, String username, String countryCode) {
-       super(new ImageFromDockerfile("sp-csr-generator").withFileFromPath(".",dockerfilePath));
+    public ServiceProviderCSRGenerator(ImageFromDockerfile image, Path keysPath, String username, String countryCode) {
+        super(image);
         this.keysPath = keysPath;
         this.username = username;
         this.countryCode = countryCode;
     }
 
+    public ServiceProviderCSRGenerator(Path keysPath, String username, String countryCode) {
+        this(new ImageFromDockerfile("sp-csr-generator").withFileFromClasspath(".", "serviceprovider/csr"),
+                keysPath,
+                username,
+                countryCode);
+    }
     @Override
     protected void configure() {
         this.withFileSystemBind(keysPath.toString(),KEYS_INTERNAL_FOLDER);
         this.withCommand(username,countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
-        this.withLogConsumer(new Slf4jLogConsumer(logger));
     }
 
     public Path getKeyOnHost() {

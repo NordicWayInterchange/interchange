@@ -15,15 +15,14 @@ public class KeystoreGenerator extends GenericContainer<KeystoreGenerator> {
     private String password;
     private Path outputFile;
 
-    public KeystoreGenerator(Path dockerFilePath,
+    public KeystoreGenerator(ImageFromDockerfile image,
                              Path keyOnHost,
                              Path chainCertOnHost,
                              String domainName,
                              Path caCertOnHost,
                              String password,
                              Path outputFile) {
-        super(new ImageFromDockerfile("keystore-generator")
-                .withFileFromPath(".", dockerFilePath));
+        super(image);
         this.keyOnHost = keyOnHost;
         this.chainCertOnHost = chainCertOnHost;
         this.domainName = domainName;
@@ -32,7 +31,24 @@ public class KeystoreGenerator extends GenericContainer<KeystoreGenerator> {
         this.outputFile = outputFile;
     }
 
-    @Override
+    public KeystoreGenerator(Path keyOnHost,
+                             Path chainCertOnHost,
+                             String domainName,
+                             Path caCertOnHost,
+                             String password,
+                             Path outputFile) {
+
+        this(new ImageFromDockerfile("keystore-generator")
+                .withFileFromClasspath(".", "keystores"),
+                keyOnHost,
+                chainCertOnHost,
+                domainName,
+                caCertOnHost,
+                password,
+                outputFile);
+    }
+
+        @Override
     protected void configure() {
         this.withFileSystemBind(keyOnHost.toString(), "/keys/in-key");
         this.withFileSystemBind(chainCertOnHost.toString(), "/chain/cert");

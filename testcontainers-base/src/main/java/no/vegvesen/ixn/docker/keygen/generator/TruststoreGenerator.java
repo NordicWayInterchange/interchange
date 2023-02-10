@@ -12,14 +12,20 @@ public class TruststoreGenerator extends GenericContainer<TruststoreGenerator> {
     private String password;
     private Path targetPath;
 
-    public TruststoreGenerator(Path dockerFilePath, Path caCertPath, String password, Path outputFile) {
-        super(new ImageFromDockerfile("truststore-generator")
-                .withFileFromPath(".",dockerFilePath));
+    public TruststoreGenerator(ImageFromDockerfile image, Path caCertPath, String password, Path outputFile) {
+        super(image);
         this.caCertPath = caCertPath;
         this.password = password;
         this.targetPath = outputFile;
     }
 
+    public TruststoreGenerator(Path caCertPath, String password, Path outputFile) {
+        this(new ImageFromDockerfile("truststore-generator")
+                .withFileFromClasspath(".", "truststores"),
+                caCertPath,
+                password,
+                outputFile);
+    }
     @Override
     protected void configure() {
         this.withFileSystemBind(caCertPath.getParent().toString(),"/ca-certs");

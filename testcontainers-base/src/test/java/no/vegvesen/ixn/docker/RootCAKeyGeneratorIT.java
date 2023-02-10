@@ -18,7 +18,6 @@ public class RootCAKeyGeneratorIT {
 
     @Container
     private RootCAKeyGenerator keysGenerator = new RootCAKeyGenerator(
-            DockerBaseIT.getFolderPath("keymaster").resolve("rootca/newca"),
             targetPath,
             "test.no",
             "NO");
@@ -29,7 +28,6 @@ public class RootCAKeyGeneratorIT {
         assertThat(certPath).exists();
         assertThat(Files.size(certPath)).isGreaterThan(0);
         assertThat(targetPath.resolve("ca.test.no.key.pem")).exists();
-
     }
 
 

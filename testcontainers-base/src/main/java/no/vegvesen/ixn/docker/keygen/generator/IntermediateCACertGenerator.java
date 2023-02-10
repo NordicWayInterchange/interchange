@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -13,7 +10,6 @@ import java.time.Duration;
 
 public class IntermediateCACertGenerator extends GenericContainer<IntermediateCACertGenerator> {
 
-    private static Logger logger = LoggerFactory.getLogger(IntermediateCACertGenerator.class);
     public static final String CA_IN_FOLDER = "/ca_in/";
     public static final String CSR_IN_FOLDER = "/csr_in/";
     public static final String KEYS_OUT_FOLDER = "/keys_out/";
@@ -25,15 +21,14 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
     private String domainName;
     private String csrPathOnHost;
 
-    public IntermediateCACertGenerator(Path dockerFilePath,
+    public IntermediateCACertGenerator(ImageFromDockerfile image,
                                        Path inputCsr,
                                        String domainName,
                                        Path caCert,
                                        Path caKey,
                                        String countryCode,
                                        Path targetPath) {
-        super(new ImageFromDockerfile("intermediate-ca-cert-generator")
-                .withFileFromPath(".",dockerFilePath));
+        super(image);
 
         this.domainName = domainName;
         csrPathOnHost = inputCsr.toString();
@@ -42,6 +37,21 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
         this.caKey = caKey;
         this.targetPath = targetPath;
         this.countryCode = countryCode;
+    }
+    public IntermediateCACertGenerator(Path inputCsr,
+                                       String domainName,
+                                       Path caCert,
+                                       Path caKey,
+                                       String countryCode,
+                                       Path targetPath) {
+        this(new ImageFromDockerfile("intermediate-ca-cert-generator")
+                .withFileFromClasspath(".", "rootca/sign_intermediate"),
+                inputCsr,
+                domainName,
+                caCert,
+                caKey,
+                countryCode,
+                targetPath);
     }
 
     /**
@@ -62,7 +72,6 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
         this.withFileSystemBind(targetPath.toString(), KEYS_OUT_FOLDER,BindMode.READ_WRITE);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
         this.withCommand(csrPathInContainer,domainName,caCertPathInContainer,caKeyPathInContainer,countryCode);
-        this.withLogConsumer(new Slf4jLogConsumer(logger));
     }
 
 

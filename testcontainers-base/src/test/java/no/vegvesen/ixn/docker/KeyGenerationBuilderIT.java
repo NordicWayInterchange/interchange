@@ -27,8 +27,7 @@ public class KeyGenerationBuilderIT {
                 .done()
                 .done();
         Cluster cluster = myCluster;
-        Path imageBaseFolder = DockerBaseIT.getFolderPath("keymaster");
-        ClusterKeyGenerator.generateKeys(cluster, imageBaseFolder,keysPath);
+        ClusterKeyGenerator.generateKeys(cluster, keysPath);
 
     }
 
@@ -44,8 +43,7 @@ public class KeyGenerationBuilderIT {
                 .interchange().intermediateDomain().domainName("b.bouvetinterchange.eu").ownerCountry("NO").done()
                 .serviceProvider().name("king_gustaf.bouvetinterchange.eu").country("SE").done()
                 .done().done();
-        Path imageBaseFolder = DockerBaseIT.getFolderPath("keymaster");
-        ClusterKeyGenerator.generateKeys(cluster,imageBaseFolder,keysPath);
+        ClusterKeyGenerator.generateKeys(cluster, keysPath);
     }
 
     private Cluster createSTMClusterModel() {

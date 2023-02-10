@@ -16,24 +16,6 @@ Input and output folders are expected to be exposed to the container at given fi
 container.
 
 ### TODO 
- * More stages
- * Known paths for containers
- * testcontainers for testing each step
  * Are there other files we should keep track of? index.txt-files are somehow used as database of issued keys.
 
-###Generate CA keys
-The container persists the keys to a volume bound to the ca_keys subfolder in this folder. 
-If this does not exist, you need to make it before running the container.
-Typical docker run:
-
-``
-docker run -it -v "$(pwd)"/ca_keys:/ca_keys --rm keymaster test.no NO
-``
-
-This will create files
-```
-ca/ca.test.no.crt.pem
-ca/ca.test.no.key.pem
-```
-under the ca_keys folder.
 

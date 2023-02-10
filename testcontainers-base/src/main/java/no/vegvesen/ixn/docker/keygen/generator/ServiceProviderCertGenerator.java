@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
+import no.vegvesen.ixn.docker.DockerBaseIT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -12,8 +13,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 
 public class ServiceProviderCertGenerator extends GenericContainer<ServiceProviderCertGenerator> {
-
-    private static Logger logger = LoggerFactory.getLogger(ServiceProviderCertGenerator.class);
 
     private static String INTERMEDIATE_CA_IN_FOLDER = "/int_ca_in/";
     private static String CSR_IN_PATH = "/csr_in/";
@@ -32,14 +31,14 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
     private String clientName;
 
 
-    public ServiceProviderCertGenerator(Path dockerfilePath,
+    public ServiceProviderCertGenerator(ImageFromDockerfile image,
                                         Path inputCsr,
                                         String clientName,
                                         Path intermediateCacertPath,
                                         Path intermediateCaKeyPath,
                                         Path intermediateCaCertChainPath,
                                         Path outputPath) {
-        super(new ImageFromDockerfile("sp-cert-generator").withFileFromPath(".",dockerfilePath));
+        super(image);
         this.hostCsrPath = inputCsr.toString();
         this.containerCsrPath = CSR_IN_PATH +inputCsr.getFileName().toString();
         this.clientName = clientName;
@@ -55,7 +54,23 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
 
     }
 
-    @Override
+    public ServiceProviderCertGenerator(Path inputCsr,
+                                        String clientName,
+                                        Path intermediateCacertPath,
+                                        Path intermediateCaKeyPath,
+                                        Path intermediateCaCertChainPath,
+                                        Path outputPath) {
+
+        this(new ImageFromDockerfile("sp-cert-generator").withFileFromClasspath(".", "intermediateca/sign_sp"),
+                inputCsr,
+                clientName,
+                intermediateCacertPath,
+                intermediateCaKeyPath,
+                intermediateCaCertChainPath,
+                outputPath);
+    }
+
+        @Override
     public void configure() {
         this.withFileSystemBind(hostCsrPath,containerCsrPath, BindMode.READ_ONLY);
         this.withFileSystemBind(hostCaCertPath,containerCaCertPath,BindMode.READ_ONLY);
@@ -64,7 +79,6 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
         this.withFileSystemBind(hostOutputPath,containerOutputPath,BindMode.READ_WRITE);
         this.withCommand(containerCsrPath,clientName,containerCaCertPath,containerCaKeyPath,containerCertChainPath);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
-        this.withLogConsumer(new Slf4jLogConsumer(logger));
 
     }
 

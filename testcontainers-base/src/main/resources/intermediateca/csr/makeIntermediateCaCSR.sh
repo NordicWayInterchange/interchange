@@ -1,71 +1,52 @@
 #!/bin/bash -eu
-set -x
 
-if [ "$#" -ne 5 ]; then
-	echo "Usage: $0 <path/to/csrFile.csr> <intermediateCA domain name> <path/to/ca_cert> <path_to_ca_key> <country code>"
-	exit 1
+if [ "$#" -ne 2 ]; then
+    echo "USAGE: $0 <intermediateCA domain name> <country code (upper case)>"
+    exit 1
 fi
 
-csrPath=$1
-if [ ! -f "$csrPath" ]; then
-  echo "Input file $1 not found. Exiting."
-	exit 1
-fi
+INTERNAL_KEYS_FOLDER="/int_keys"
 
-DOMAINNAME=$2
-
-CA_CERT=$3
-if [ ! -f "$CA_CERT" ]; then
-  echo "CA certificate not found. Exiting."
+if [ ! -d "$INTERNAL_KEYS_FOLDER" ]; then
+  echo "Output folder does not exist. Is it mapped properly?"
   exit 1
 fi
 
-CA_KEY=$4
-if [ ! -f "$CA_KEY" ]; then
-  echo "CA key not found. Exiting."
-  exit 1
-fi
-COUNTRY_CODE=$5
+mkdir -p ca/certs
 
-if [ ! -d "ca/newcerts" ]; then
-  mkdir -p ca/newcerts
-fi
+mkdir -p ca/intermediate/{certs,newcerts,clr,csr,private}
+touch ca/intermediate/index.txt
+touch ca/intermediate/index.txt.attr
+echo 1000 > ca/intermediate/crlnumber
+echo '1234' > ca/intermediate/serial
 
-if [ ! -d "ca/intermediate" ]; then
-	mkdir -p ca/intermediate/certs
-fi
+DOMAINNAME=$1
+COUNTRY=$2
 
-if [ ! -f "ca/index.txt" ]; then
-	touch ca/index.txt
-	touch ca/index.txt.attr
-	echo 'unique_subject = no' >> ca/index.txt.attr
-	echo '1000'  > ca/serial
-fi
-CERT_OUT_FILE=ca/intermediate/certs/int.$DOMAINNAME.crt.pem
-CERT_BUNDLE=ca/intermediate/certs/chain.$DOMAINNAME.crt.pem
-cat << EOF > openssl_root.cnf
-# OpenSSL root CA configuration file.
+cat << EOF > openssl_intermediate.cnf
+# OpenSSL intermediate CA configuration file.
+
 [ ca ]
-# man ca
+# 'man ca'
 default_ca = CA_default
 
 [ CA_default ]
 # Directory and file locations.
-dir               = ca
-certs             = ca/certs
-crl_dir           = ca/crl
-new_certs_dir     = ca/newcerts
-database          = ca/index.txt
-serial            = ca/serial
-RANDFILE          = ca/private/.rand
+dir               = ca/intermediate
+certs             = ca/intermediate/certs
+crl_dir           = ca/intermediate/crl
+new_certs_dir     = ca/intermediate/newcerts
+database          = ca/intermediate/index.txt
+serial            = ca/intermediate/serial
+RANDFILE          = ca/intermediate/private/.rand
 
 # The root key and root certificate.
-private_key       = $CA_KEY
-certificate       = $CA_CERT
+private_key       = ca/intermediate/private/int.$DOMAINNAME.key.pem
+certificate       = ca/intermediate/certs/int.$DOMAINNAME.crt.pem
 
 # For certificate revocation lists.
-crlnumber         = ca/crlnumber
-crl               = ca/crl/ca.$DOMAINNAME.crl.pem
+crlnumber         = ca/intermediate/crlnumber
+crl               = ca/intermediate/crl/int.$DOMAINNAME.crl.pem
 crl_extensions    = crl_ext
 default_crl_days  = 30
 
@@ -73,22 +54,22 @@ default_crl_days  = 30
 default_md        = sha512
 name_opt          = ca_default
 cert_opt          = ca_default
-default_days      = 375
+default_days      = 3650
 preserve          = no
-policy            = policy_strict
+policy            = policy_loose
+#Ensure that the extensione in the CSR make it to the signed certificate (like subjectAltNames)
+copy_extensions   = copy
 
 [ policy_strict ]
 # The root CA should only sign intermediate certificates that match.
 # See the POLICY FORMAT section of 'man ca'.
-#changed from match
-countryName             = optional
-#changed from match
-stateOrProvinceName     = optional
-#changed from match
-organizationName        = supplied
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
 organizationalUnitName  = optional
 commonName              = supplied
 emailAddress            = optional
+
 
 [ policy_loose ]
 # Allow the intermediate CA to sign a more diverse range of certificates.
@@ -101,17 +82,17 @@ organizationalUnitName  = optional
 commonName              = supplied
 emailAddress            = optional
 
+
 [ req ]
 # Options for the 'req' tool ('man req').
 default_bits        = 4096
 distinguished_name  = req_distinguished_name
 string_mask         = utf8only
-
 # SHA-1 is deprecated, so use SHA-2 instead.
 default_md          = sha512
-
 # Extension to add when the -x509 option is used.
 x509_extensions     = v3_ca
+
 
 [ req_distinguished_name ]
 countryName                     = Country Name (2 letter code)
@@ -121,14 +102,13 @@ localityName                    = Locality Name
 organizationalUnitName          = Organizational Unit Name
 commonName                      = Common Name
 emailAddress                    = Email Address
-
 # Optionally, specify some defaults.
-#countryName_default             = [2 letter contry code]
+#countryName_default             = [2 letter code]
 #stateOrProvinceName_default     = [State or Province]
 #localityName_default            = [City or Town]
-#0.organizationName_default      = [Name of the organization]
+#0.organizationName_default      = [Organization]
 #organizationalUnitName_default  = [Unit]
-#emailAddress_default            = [your email address]
+#emailAddress_default            = [Your email address]
 
 [ v3_ca ]
 # Extensions for a typical CA ('man x509v3_config').
@@ -144,6 +124,7 @@ authorityKeyIdentifier = keyid:always,issuer
 basicConstraints = critical, CA:true, pathlen:0
 keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 
+
 [ usr_cert ]
 # Extensions for client certificates ('man x509v3_config').
 basicConstraints = CA:FALSE
@@ -157,12 +138,12 @@ extendedKeyUsage = clientAuth, emailProtection
 [ server_cert ]
 # Extensions for server certificates ('man x509v3_config').
 basicConstraints = CA:FALSE
-nsCertType = server
+nsCertType = server, client
 nsComment = "OpenSSL Generated Server Certificate"
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer:always
-keyUsage = critical, digitalSignature, keyEncipherment
-extendedKeyUsage = serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment, nonRepudiation
+extendedKeyUsage = serverAuth, clientAuth
 
 [ crl_ext ]
 # Extension for CRLs ('man x509v3_config').
@@ -177,12 +158,9 @@ keyUsage = critical, digitalSignature
 extendedKeyUsage = critical, OCSPSigning
 EOF
 
-openssl ca -batch -config openssl_root.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha512 -in $csrPath -out "$CERT_OUT_FILE"
-
-cat "$CERT_OUT_FILE" "$CA_CERT" > "$CERT_BUNDLE"
-cp  "$CERT_BUNDLE" /keys_out/
-cp "$CERT_OUT_FILE" /keys_out/
-echo Cert signing complete.
-
-
-
+#create CSR:
+openssl req -nodes -config openssl_intermediate.cnf -new -newkey rsa:4096 -keyout ca/intermediate/private/int.$DOMAINNAME.key.pem -out ca/intermediate/csr/int.$DOMAINNAME.csr -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY}"
+cp ca/intermediate/private/int.$DOMAINNAME.key.pem $INTERNAL_KEYS_FOLDER/
+cp ca/intermediate/csr/int.$DOMAINNAME.csr $INTERNAL_KEYS_FOLDER/
+chmod ugo+rwx $INTERNAL_KEYS_FOLDER/*
+echo Certificate Signing Request file created: ca/intermediate/csr/int.$DOMAINNAME.csr

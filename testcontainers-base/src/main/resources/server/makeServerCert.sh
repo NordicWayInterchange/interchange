@@ -1,31 +1,72 @@
 #!/bin/bash -eu
-set -x
 
-if [ "$#" -ne 2 ]; then
-    echo "USAGE: $0 <intermediateCA domain name> <country code (upper case)>"
+if [ "$#" -ne 5 ]; then
+    echo "USAGE: $0 <server FQDN> <ca-key> <ca-cert> <ca-cart-chain> <country-code>"
     exit 1
 fi
 
-INTERNAL_KEYS_FOLDER="/int_keys"
+FQDN=$1
+CA_KEY=$2
+CA_CERT=$3
+CA_CHAIN=$4
+COUNTRY_CODE=$5
 
-if [ ! -d "$INTERNAL_KEYS_FOLDER" ]; then
-  echo "Output folder does not exist. Is it mapped properly?"
-  exit 1
+cat << EOF > openssl_csr_san.cnf
+[ req ]
+default_bits       = 2048
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+
+[ req_distinguished_name ]
+countryName                = Country Name (2 letter code)
+stateOrProvinceName        = State or Province Name (full name)
+localityName               = Locality Name (eg, city)
+organizationName           = Organization Name (eg, company)
+commonName                 = Common Name (e.g. server FQDN or YOUR name)
+
+# Optionally, specify some defaults.
+#countryName_default             = [2 letter country code]
+#stateOrProvinceName_default     = [State or Province]
+#0.organizationName_default      = [Organization]
+#organizationalUnitName_default  = [Fully Qualified Domain Name]
+#emailAddress_default            = [your email address]
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1	= $FQDN
+#DNS.2	= [Any variation of F.Q.D.N]
+#DNS.3	= [Any variation of F.Q.D.N]
+EOF
+
+
+
+if [ ! -f "$CA_KEY" ]; then
+	echo could not find key for intermediate CA. Exiting.
+	exit 1
 fi
 
-mkdir -p ca/certs
+if [ ! -f "$CA_CERT" ]; then
+	echo could not find cert for intermediate CA. Exiting.
+	exit 1
+fi
 
-mkdir -p ca/intermediate/{certs,newcerts,clr,csr,private}
-touch ca/intermediate/index.txt
-touch ca/intermediate/index.txt.attr
-echo 1000 > ca/intermediate/crlnumber
-echo '1234' > ca/intermediate/serial
+if [ ! -f "$CA_CHAIN" ]; then
+	echo could not find cert chain for intermediate CA. Exiting.
+	exit 1
+fi
 
-DOMAINNAME=$1
-COUNTRY=$2
+if [ ! -d ca ]; then
+  mkdir -p ca/intermediate/{private,newcerts,certs,csr}
+  touch ca/intermediate/index.txt
+	echo 'unique_subject = no' >> ca/intermediate/index.txt.attr
+  echo 1000 > ca/intermediate/serial
+fi
 
 cat << EOF > openssl_intermediate.cnf
 # OpenSSL intermediate CA configuration file.
+# Copy to '/root/ca/intermediate/openssl.cnf'.
 
 [ ca ]
 # 'man ca'
@@ -42,12 +83,12 @@ serial            = ca/intermediate/serial
 RANDFILE          = ca/intermediate/private/.rand
 
 # The root key and root certificate.
-private_key       = ca/intermediate/private/int.$DOMAINNAME.key.pem
-certificate       = ca/intermediate/certs/int.$DOMAINNAME.crt.pem
+private_key       = $CA_KEY
+certificate       = $CA_CERT
 
 # For certificate revocation lists.
 crlnumber         = ca/intermediate/crlnumber
-crl               = ca/intermediate/crl/int.$DOMAINNAME.crl.pem
+crl               = ca/intermediate/crl/int.$FQDN.crl.pem
 crl_extensions    = crl_ext
 default_crl_days  = 30
 
@@ -58,6 +99,7 @@ cert_opt          = ca_default
 default_days      = 3650
 preserve          = no
 policy            = policy_loose
+
 #Ensure that the extensione in the CSR make it to the signed certificate (like subjectAltNames)
 copy_extensions   = copy
 
@@ -71,7 +113,6 @@ organizationalUnitName  = optional
 commonName              = supplied
 emailAddress            = optional
 
-
 [ policy_loose ]
 # Allow the intermediate CA to sign a more diverse range of certificates.
 # See the POLICY FORMAT section of the 'ca' man page.
@@ -83,17 +124,17 @@ organizationalUnitName  = optional
 commonName              = supplied
 emailAddress            = optional
 
-
 [ req ]
 # Options for the 'req' tool ('man req').
 default_bits        = 4096
 distinguished_name  = req_distinguished_name
 string_mask         = utf8only
+
 # SHA-1 is deprecated, so use SHA-2 instead.
 default_md          = sha512
+
 # Extension to add when the -x509 option is used.
 x509_extensions     = v3_ca
-
 
 [ req_distinguished_name ]
 countryName                     = Country Name (2 letter code)
@@ -103,6 +144,7 @@ localityName                    = Locality Name
 organizationalUnitName          = Organizational Unit Name
 commonName                      = Common Name
 emailAddress                    = Email Address
+
 # Optionally, specify some defaults.
 #countryName_default             = [2 letter code]
 #stateOrProvinceName_default     = [State or Province]
@@ -125,7 +167,6 @@ authorityKeyIdentifier = keyid:always,issuer
 basicConstraints = critical, CA:true, pathlen:0
 keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 
-
 [ usr_cert ]
 # Extensions for client certificates ('man x509v3_config').
 basicConstraints = CA:FALSE
@@ -138,7 +179,6 @@ extendedKeyUsage = clientAuth, emailProtection
 
 [ server_cert ]
 # Extensions for server certificates ('man x509v3_config').
-basicConstraints = CA:FALSE
 nsCertType = server, client
 nsComment = "OpenSSL Generated Server Certificate"
 subjectKeyIdentifier = hash
@@ -159,9 +199,10 @@ keyUsage = critical, digitalSignature
 extendedKeyUsage = critical, OCSPSigning
 EOF
 
-#create CSR:
-openssl req -nodes -config openssl_intermediate.cnf -new -newkey rsa:4096 -keyout ca/intermediate/private/int.$DOMAINNAME.key.pem -out ca/intermediate/csr/int.$DOMAINNAME.csr -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY}"
-cp ca/intermediate/private/int.$DOMAINNAME.key.pem $INTERNAL_KEYS_FOLDER/
-cp ca/intermediate/csr/int.$DOMAINNAME.csr $INTERNAL_KEYS_FOLDER/
-chmod ugo+rwx $INTERNAL_KEYS_FOLDER/*
-echo Certificate Signing Request file created: ca/intermediate/csr/int.$DOMAINNAME.csr
+openssl req -out ca/intermediate/csr/$FQDN.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$FQDN.key.pem -config openssl_csr_san.cnf -subj "/CN=${FQDN}/O=Nordic Way/C=${COUNTRY_CODE}"
+openssl ca -batch -config openssl_intermediate.cnf -extensions server_cert -days 3750 -notext -md sha512 -in ca/intermediate/csr/$FQDN.csr.pem -out ca/intermediate/certs/$FQDN.crt.pem
+cat ca/intermediate/certs/$FQDN.crt.pem $CA_CHAIN > ca/intermediate/certs/chain.$FQDN.crt.pem
+chmod -R ugo+rwx ca/
+cp ca/intermediate/private/$FQDN.key.pem /keys_out/
+cp ca/intermediate/certs/$FQDN.crt.pem /keys_out/
+cp ca/intermediate/certs/chain.$FQDN.crt.pem /keys_out/

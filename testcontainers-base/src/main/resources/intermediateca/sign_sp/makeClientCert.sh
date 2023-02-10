@@ -1,76 +1,48 @@
 #!/bin/bash -eu
-set -x
 
+#Fully Qualified Domain Name
 if [ "$#" -ne 5 ]; then
-    echo "USAGE: $0 <server FQDN> <ca-key> <ca-cert> <ca-cart-chain> <country-code>"
+    echo Illegal number of arguments.
+    echo "USAGE: $0 <path/to/csrFile.csr> <client-identifier> <path/to/intermediate/ca.crt.pem> <path/to/intermediate/ca.key.pem> <path/to/intermediate/chain.crt.pem>"
     exit 1
 fi
-
-FQDN=$1
-CA_KEY=$2
-CA_CERT=$3
-CA_CHAIN=$4
-COUNTRY_CODE=$5
-
-cat << EOF > openssl_csr_san.cnf
-[ req ]
-default_bits       = 2048
-distinguished_name = req_distinguished_name
-req_extensions     = req_ext
-
-[ req_distinguished_name ]
-countryName                = Country Name (2 letter code)
-stateOrProvinceName        = State or Province Name (full name)
-localityName               = Locality Name (eg, city)
-organizationName           = Organization Name (eg, company)
-commonName                 = Common Name (e.g. server FQDN or YOUR name)
-
-# Optionally, specify some defaults.
-#countryName_default             = [2 letter country code]
-#stateOrProvinceName_default     = [State or Province]
-#0.organizationName_default      = [Organization]
-#organizationalUnitName_default  = [Fully Qualified Domain Name]
-#emailAddress_default            = [your email address]
-
-[ req_ext ]
-subjectAltName = @alt_names
-
-[alt_names]
-DNS.1	= $FQDN
-#DNS.2	= [Any variation of F.Q.D.N]
-#DNS.3	= [Any variation of F.Q.D.N]
-EOF
-
-
-
-if [ ! -f "$CA_KEY" ]; then
-	echo could not find key for intermediate CA. Exiting.
-	exit 1
+#TODO check the rest of the arguments
+CSRFILE=$1
+ident=$2
+INTERMEDIATE_CA_CERT=$3
+INTERMEDIATE_CA_KEY=$4
+INTERMEDIATE_CA_CHAIN=$5
+OUTPUT_PATH="/cert_out/"
+CERT_OUT="ca/intermediate/certs/$ident.crt.pem"
+SP_CERT_CHAIN="ca/intermediate/certs/chain.$ident.crt.pem"
+#if [ ! -f "$CRSFILE" ]; then
+#        echo could not find CRS for $ident. Exiting.
+#        exit 1
+#fi
+if [ ! -f "$INTERMEDIATE_CA_CERT" ]; then
+        echo could not find cert for intermediate CA. Exiting.
+        exit 1
 fi
 
-if [ ! -f "$CA_CERT" ]; then
-	echo could not find cert for intermediate CA. Exiting.
-	exit 1
+if [ ! -f "$INTERMEDIATE_CA_KEY" ]; then
+        echo could not find key for intermediate CA. Exiting.
+        exit 1
 fi
-
-if [ ! -f "$CA_CHAIN" ]; then
-	echo could not find cert chain for intermediate CA. Exiting.
-	exit 1
+if [ ! -d "$OUTPUT_PATH" ]; then
+        echo Output path does not exist. Is it mapped properly?
+        exit 1
 fi
-
-if [ ! -d ca ]; then
-  mkdir -p ca/intermediate/{private,newcerts,certs,csr}
+if [ ! -d "ca/intermediate" ]; then
+	mkdir -p ca/intermediate/{certs,newcerts,crl,private}
   touch ca/intermediate/index.txt
-	echo 'unique_subject = no' >> ca/intermediate/index.txt.attr
-  echo 1000 > ca/intermediate/serial
+	echo 'unique_subject = no' >> ca/index.txt.attr
+	echo '1000'  > ca/intermediate/serial
 fi
 
 cat << EOF > openssl_intermediate.cnf
 # OpenSSL intermediate CA configuration file.
-# Copy to '/root/ca/intermediate/openssl.cnf'.
-
 [ ca ]
-# 'man ca'
+# man ca
 default_ca = CA_default
 
 [ CA_default ]
@@ -83,26 +55,27 @@ database          = ca/intermediate/index.txt
 serial            = ca/intermediate/serial
 RANDFILE          = ca/intermediate/private/.rand
 
+
 # The root key and root certificate.
-private_key       = $CA_KEY
-certificate       = $CA_CERT
+private_key       = $INTERMEDIATE_CA_KEY
+certificate       = $INTERMEDIATE_CA_CERT
 
 # For certificate revocation lists.
 crlnumber         = ca/intermediate/crlnumber
-crl               = ca/intermediate/crl/int.$FQDN.crl.pem
-crl_extensions    = crl_ext
+crl               = ca/intermediate/crl/crlfile
 default_crl_days  = 30
 
 # SHA-1 is deprecated, so use SHA-2 instead.
 default_md        = sha512
+
 name_opt          = ca_default
 cert_opt          = ca_default
 default_days      = 3650
 preserve          = no
-policy            = policy_loose
 
 #Ensure that the extensione in the CSR make it to the signed certificate (like subjectAltNames)
 copy_extensions   = copy
+policy            = policy_loose
 
 [ policy_strict ]
 # The root CA should only sign intermediate certificates that match.
@@ -173,13 +146,13 @@ keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 basicConstraints = CA:FALSE
 nsCertType = client, email
 nsComment = "OpenSSL Generated Client Certificate"
-subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer
 keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage = clientAuth, emailProtection
 
 [ server_cert ]
 # Extensions for server certificates ('man x509v3_config').
+basicConstraints = CA:FALSE
 nsCertType = server, client
 nsComment = "OpenSSL Generated Server Certificate"
 subjectKeyIdentifier = hash
@@ -200,10 +173,11 @@ keyUsage = critical, digitalSignature
 extendedKeyUsage = critical, OCSPSigning
 EOF
 
-openssl req -out ca/intermediate/csr/$FQDN.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$FQDN.key.pem -config openssl_csr_san.cnf -subj "/CN=${FQDN}/O=Nordic Way/C=${COUNTRY_CODE}"
-openssl ca -batch -config openssl_intermediate.cnf -extensions server_cert -days 3750 -notext -md sha512 -in ca/intermediate/csr/$FQDN.csr.pem -out ca/intermediate/certs/$FQDN.crt.pem
-cat ca/intermediate/certs/$FQDN.crt.pem $CA_CHAIN > ca/intermediate/certs/chain.$FQDN.crt.pem
+openssl ca -batch -config openssl_intermediate.cnf -extensions usr_cert -days 3750 -notext -md sha512 -in $CSRFILE -out $CERT_OUT
+#TODO need both the cert and the chain from the CA
 chmod -R ugo+rwx ca/
-cp ca/intermediate/private/$FQDN.key.pem /keys_out/
-cp ca/intermediate/certs/$FQDN.crt.pem /keys_out/
-cp ca/intermediate/certs/chain.$FQDN.crt.pem /keys_out/
+cat $CERT_OUT $INTERMEDIATE_CA_CHAIN > $SP_CERT_CHAIN
+cp  $CERT_OUT $OUTPUT_PATH
+cp  $SP_CERT_CHAIN $OUTPUT_PATH
+echo Service Provider Cert signing complete
+

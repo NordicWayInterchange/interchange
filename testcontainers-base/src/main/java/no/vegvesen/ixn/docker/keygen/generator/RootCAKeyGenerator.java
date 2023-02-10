@@ -8,29 +8,34 @@ import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 
 public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
 
-    private static Logger logger = LoggerFactory.getLogger(RootCAKeyGenerator.class);
 
     private Path keysFolder;
     private String caDomain;
     private String countryCode;
 
-    public RootCAKeyGenerator(Path dockerFilePath, Path keysFolder, String caDomain, String countryCode) {
-        super(new ImageFromDockerfile("vinz-clortho")
-                .withFileFromPath(".",dockerFilePath));
+    public RootCAKeyGenerator(ImageFromDockerfile image, Path keysFolder, String caDomain, String countryCode) {
+        super(image);
         this.keysFolder = keysFolder;
         this.caDomain = caDomain;
         this.countryCode = countryCode;
+    }
+
+    public RootCAKeyGenerator(Path keysFolder, String caDomain, String countryCode) {
+        this(new ImageFromDockerfile("vinz-clortho")
+                .withFileFromClasspath(".", Paths.get("rootca","newca").toString()),
+                keysFolder,caDomain,countryCode);
+
     }
 
     @Override
     protected void configure() {
         this.withFileSystemBind(keysFolder.toString(),"/ca_keys");
         this.withCommand(caDomain,countryCode);
-        this.withLogConsumer(new Slf4jLogConsumer(logger));
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 
