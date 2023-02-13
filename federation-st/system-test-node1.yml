@@ -7,7 +7,6 @@ self:
   key_store_password: password
   trust_store: truststore.jks
   trust_store_password: password
-  key_password: password
   secret_mount_path: /jks/keys/
   service_provider_port: "4141"
 qpid:

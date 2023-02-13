@@ -45,8 +45,6 @@ spec:
           value: {{ .Values.self.secret_mount_path }}key_store.p12
         - name: KEY_STORE_PASSWORD
           value: {{ .Values.self.key_store_password | quote }}
-        - name: KEY_PASSWORD
-          value: {{ .Values.self.key_password | quote }}
         - name: LOG_LEVELS
           value: "{{- range .Values.neighbour_discoverer.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}

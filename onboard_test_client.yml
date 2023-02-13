@@ -11,7 +11,6 @@ services:
       - USER=kyrre
       - KEY_STORE=/jks/chain.kyrre.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
       - TRUST_STORE_PATH=/jks/truststore.jks
       - TRUST_STORE_PASSWORD=password
     networks:

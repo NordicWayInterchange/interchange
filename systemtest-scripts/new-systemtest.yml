@@ -129,7 +129,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     networks:
       - testing_net
 
@@ -154,7 +153,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     dns: 172.28.1.1
     networks:
       - testing_net
@@ -267,7 +265,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     networks:
       - testing_net
     dns: 172.28.1.1
@@ -319,7 +316,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     networks:
       - testing_net
 
@@ -431,7 +427,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/c.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     networks:
       - testing_net
     dns: 172.28.1.1
@@ -483,7 +478,6 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/c.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_PASSWORD=password
     networks:
       - testing_net
 

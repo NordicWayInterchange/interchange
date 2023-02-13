@@ -17,7 +17,7 @@ public class TestKeystoreHelper {
 
 	public static SSLContext sslContext(Path keystorePath, String keystore, String truststore) throws SSLContextFactory.InvalidSSLConfig {
 		String keystoreFilePath = keystorePath.resolve(keystore).toString();
-		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFilePath, TEST_KEYSTORE_PASSWORD, KEYSTORE_TYPE, TEST_KEYSTORE_PASSWORD);
+		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFilePath, TEST_KEYSTORE_PASSWORD, KEYSTORE_TYPE);
 
 		String trustStoreFilePath = keystorePath.resolve(truststore).toString();
 		KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStoreFilePath, TEST_KEYSTORE_PASSWORD, TRUSTSTORE_TYPE);
@@ -27,7 +27,7 @@ public class TestKeystoreHelper {
 
 	public static SSLContext sslContext(String keystore, String truststore) throws SSLContextFactory.InvalidSSLConfig {
 		String keystoreFilePath = getFilePath(keystore);
-		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFilePath, TEST_KEYSTORE_PASSWORD, KEYSTORE_TYPE, TEST_KEYSTORE_PASSWORD);
+		KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreFilePath, TEST_KEYSTORE_PASSWORD, KEYSTORE_TYPE);
 
 		String trustStoreFilePath = getFilePath(truststore);
 		KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStoreFilePath, TEST_KEYSTORE_PASSWORD, TRUSTSTORE_TYPE);

@@ -74,7 +74,7 @@ public class JmsClientSourceApplication implements Callable<Integer> {
     private SSLContext createSSLContext() {
         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
                 keystorePassword,
-                KeystoreType.PKCS12, keyPassword);
+                KeystoreType.PKCS12);
         KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
                 trustStorePassword,KeystoreType.JKS);
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);

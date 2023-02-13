@@ -30,7 +30,7 @@ public class JmsSource implements CommandLineRunner {
     public void run(String... args) throws Exception {
         KeystoreDetails keystoreDetails = new KeystoreDetails(properties.getKeystorePath(),
                 properties.getKeystorePass(),
-                KeystoreType.PKCS12, properties.getKeyPass());
+                KeystoreType.PKCS12);
         KeystoreDetails trustStoreDetails = new KeystoreDetails(properties.getTrustStorepath(),
                 properties.getTrustStorepass(),KeystoreType.JKS);
         SSLContext sslContext = SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
