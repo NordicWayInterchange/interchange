@@ -8,9 +8,10 @@ metadata:
     component: qpid
     release: {{ .Release.Name }}
 data:
+  # Taken out interchange_user and interchange_password from the passwd file.
+  # {{ .Values.qpid.interchange_user }}:{{ .Values.qpid.interchange_password }}
   passwd: |
     {{ .Values.qpid.admin_user }}:{{ .Values.qpid.admin_password }}
-    {{ .Values.qpid.interchange_user }}:{{ .Values.qpid.interchange_password }}
   groups: |
     service-providers.users={{ range .Values.qpid.users }}{{ .name }},{{ end }}
     federated-interchanges.users=
@@ -55,13 +56,6 @@ data:
           "type": "RuleBased",
           "defaultResult": "DENIED",
           "rules": [
-            {
-              "objectType": "ALL",
-              "identity": "{{ .Values.qpid.interchange_user }}",
-              "operation": "ALL",
-              "outcome": "ALLOW_LOG",
-              "attributes": {}
-            },
             {
               "objectType": "ALL",
               "identity": "administrators",
