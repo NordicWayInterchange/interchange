@@ -33,9 +33,6 @@ public class JmsClientSourceApplication implements Callable<Integer> {
     @Option(names = {"-s","--keystorepassword"}, description = "The password of the service provider keystore")
     String keystorePassword;
 
-    @Option(names = {"-p", "--keypassword"}, description = "The password of the service provider key")
-    String keyPassword;
-
     @Option(names = {"-t","--truststorepath"}, description = "The path of the jks trust store")
     String trustStorePath;
 
