@@ -15,7 +15,8 @@ import java.util.HashSet;
 public class SubscriptionTest {
     @Test
     public void createAddSubscriptionForTest0() throws IOException {
-        AddSubscription subscription = new AddSubscription(
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest("kyrre",Collections.singleton(
+        new AddSubscription(
         new SelectorBuilder()
                 .originatingCountry("FI")
                 .messageType("IVIM")
@@ -23,13 +24,14 @@ public class SubscriptionTest {
                 .publisherId("SE90009")
                 .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
                 .toSelector()
-        );
-        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
+        )));
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 
     @Test
     public void createAddSubscriptionForTest1() throws IOException {
-        AddSubscription subscription = new AddSubscription(
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest("kyrre",Collections.singleton(
+        new AddSubscription(
                 new SelectorBuilder()
                         .originatingCountry("FI")
                         .messageType("IVIM")
@@ -37,13 +39,13 @@ public class SubscriptionTest {
                         .publisherId("SE90009")
                         .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
                         .toSelector()
-        );
-        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
+        )));
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 
     @Test
     public void createAddSubscriptionForTest2() throws IOException {
-        AddSubscription subscription = new AddSubscription(
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest("kyrre",Collections.singleton(new AddSubscription(
                 new SelectorBuilder()
                         .originatingCountry("FI")
                         .messageType("IVIM")
@@ -51,13 +53,14 @@ public class SubscriptionTest {
                         .publisherId("SE90009")
                         .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
                         .toSelector()
-        );
-        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
+        )));
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 
     @Test
     public void createAddSubscriptionForTest3() throws IOException {
-        AddSubscription subscription = new AddSubscription(
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest("kyrre",Collections.singleton(
+        new AddSubscription(
                 new SelectorBuilder()
                         .originatingCountry("FI")
                         .messageType("IVIM")
@@ -65,8 +68,8 @@ public class SubscriptionTest {
                         .publisherId("SE90009")
                         .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
                         .toSelector()
-        );
-        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
+        )));
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 
     @Test
@@ -77,7 +80,6 @@ public class SubscriptionTest {
                         .messageType("DENM")
                         .toSelector()
         )));
-        //System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
-        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(Paths.get("c:\\interchange\\onboard-rest-client","no_kyrre_denm.json").toFile(),request);
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 }
