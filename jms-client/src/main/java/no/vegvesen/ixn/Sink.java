@@ -16,6 +16,7 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLContext;
+import java.util.Base64;
 import java.util.Enumeration;
 
 public class Sink implements AutoCloseable {
@@ -107,7 +108,7 @@ public class Sink implements AutoCloseable {
 					JmsBytesMessage bytesMessage = (JmsBytesMessage) message;
 					byte[] messageBytes = new byte[(int) bytesMessage.getBodyLength()];
 					bytesMessage.readBytes(messageBytes);
-					messageBody = new String(messageBytes);
+					messageBody = Base64.getEncoder().encodeToString(messageBytes);
 				}
 				else if (message instanceof JmsTextMessage) {
 					System.out.println(" TEXT message");

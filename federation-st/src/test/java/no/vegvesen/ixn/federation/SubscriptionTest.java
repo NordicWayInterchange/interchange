@@ -3,11 +3,13 @@ package no.vegvesen.ixn.federation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
+import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsRequest;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 public class SubscriptionTest {
@@ -65,5 +67,17 @@ public class SubscriptionTest {
                         .toSelector()
         );
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
+    }
+
+    @Test
+    public void createAddSubscriptionForLocalDenm() throws IOException {
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest("kyrre", Collections.singleton(new AddSubscription(
+                new SelectorBuilder()
+                        .originatingCountry("NO")
+                        .messageType("DENM")
+                        .toSelector()
+        )));
+        //System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
+        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(Paths.get("c:\\interchange\\onboard-rest-client","no_kyrre_denm.json").toFile(),request);
     }
 }

@@ -20,44 +20,48 @@ import java.util.concurrent.Callable;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 
-@Command(name = "onboardclient", description = "Onboard REST client",showAtFileInUsageHelp = true, subcommands = {
-        OnboardRestClientApplication.GetServiceProviderCapabilities.class,
-        OnboardRestClientApplication.AddServiceProviderCapability.class,
-        OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
-        OnboardRestClientApplication.AddServiceProviderSubscription.class,
-        OnboardRestClientApplication.DeleteServiceProviderCapability.class,
-        OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
-        OnboardRestClientApplication.AddDeliveries.class,
-        OnboardRestClientApplication.ListDeliveries.class,
-        OnboardRestClientApplication.GetDelivery.class,
-        OnboardRestClientApplication.DeleteDelivery.class,
-        OnboardRestClientApplication.GetSubscription.class,
-        OnboardRestClientApplication.AddPrivateChannel.class,
-        OnboardRestClientApplication.GetPrivateChannels.class,
-        OnboardRestClientApplication.DeletePrivateChannel.class,
-        OnboardRestClientApplication.FetchMatchingCapabilities.class
-})
+@Command(name = "onboardclient",
+        description = "Onboard REST client",
+        showAtFileInUsageHelp = true,
+        defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
+        subcommands = {
+                OnboardRestClientApplication.GetServiceProviderCapabilities.class,
+                OnboardRestClientApplication.AddServiceProviderCapability.class,
+                OnboardRestClientApplication.GetServiceProviderSubscriptions.class,
+                OnboardRestClientApplication.AddServiceProviderSubscription.class,
+                OnboardRestClientApplication.DeleteServiceProviderCapability.class,
+                OnboardRestClientApplication.DeleteServiceProviderSubscription.class,
+                OnboardRestClientApplication.AddDeliveries.class,
+                OnboardRestClientApplication.ListDeliveries.class,
+                OnboardRestClientApplication.GetDelivery.class,
+                OnboardRestClientApplication.DeleteDelivery.class,
+                OnboardRestClientApplication.GetSubscription.class,
+                OnboardRestClientApplication.AddPrivateChannel.class,
+                OnboardRestClientApplication.GetPrivateChannels.class,
+                OnboardRestClientApplication.DeletePrivateChannel.class,
+                OnboardRestClientApplication.FetchMatchingCapabilities.class
+        })
 public class OnboardRestClientApplication implements Callable<Integer> {
 
-    @Parameters(index = "0",description = "The onboard server address")
+    @Parameters(index = "0", paramLabel = "SERVER", description = "The onboard server address")
     private String server;
 
-    @Parameters(index = "1", description = "The service provider user")
+    @Parameters(index = "1", paramLabel = "USER",description = "The service provider user")
     private String user;
 
-    @Option(names = {"-k","--keystorepath"}, description = "Path to the service provider p12 keystore")
+    @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
     private String keystorePath;
 
-    @Option(names = {"-s","--keystorepassword"}, description = "The password of the service provider keystore")
+    @Option(names = {"-s","--keystorepassword"}, required = true,  description = "The password of the service provider keystore")
     String keystorePassword;
 
-    @Option(names = {"-p", "--keypassword"}, description = "The password of the service provider key")
+    @Option(names = {"-p", "--keypassword"}, required = true,  description = "The password of the service provider key")
     String keyPassword;
 
-    @Option(names = {"-t","--truststorepath"}, description = "The path of the jks trust store")
+    @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
     String trustStorePath;
 
-    @Option(names = {"-w","--truststorepassword"}, description = "The password of the jks trust store")
+    @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
     String trustStorePassword;
 
     @Command(name = "getcapabilities",description = "Get the service provider capabilities")
@@ -244,13 +248,13 @@ public class OnboardRestClientApplication implements Callable<Integer> {
     }
 
     @Command(name = "deletedelivery", description = "Delete a single delivery")
-   static class DeleteDelivery implements  Callable<Integer> {
+    static class DeleteDelivery implements  Callable<Integer> {
 
         @ParentCommand
-       OnboardRestClientApplication parentCommand;
+        OnboardRestClientApplication parentCommand;
 
-       @Parameters(index = "0", description = "The ID of the delivery to delete")
-       String deliveryId;
+        @Parameters(index = "0", description = "The ID of the delivery to delete")
+        String deliveryId;
 
 
         @Override
@@ -347,7 +351,7 @@ public class OnboardRestClientApplication implements Callable<Integer> {
     }
 
     private SSLContext createSSLContext() {
-         KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
+        KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
                 keystorePassword,
                 KeystoreType.PKCS12);
         KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
