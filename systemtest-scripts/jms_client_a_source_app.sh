@@ -11,7 +11,6 @@ docker run \
   -e QUEUE=onramp \
   -e KEY_STORE_PATH=/keys/king_olav.bouvetinterchange.eu.p12 \
   -e KEY_STORE_PASS=password \
-  -e KEY_PASS=password \
   -e TRUST_STORE_PATH=/keys/truststore.jks \
   -e TRUST_STORE_PASS=password \
   --link a_qpid:a.bouvetinterchange.eu \

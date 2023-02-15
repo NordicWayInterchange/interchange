@@ -13,7 +13,7 @@ public class SSLContextFactory {
 															 KeystoreDetails truststoreDetails){
 		KeyStore keystore = loadKeystoreFromFile(keystoreDetails);
 		KeyStore truststore = loadKeystoreFromFile(truststoreDetails);
-		return newSSLContext(keystore, keystoreDetails.getKeyPassword(), truststore);
+		return newSSLContext(keystore, keystoreDetails.getPassword(), truststore);
 	}
 
 	private static KeyStore loadKeystoreFromFile(KeystoreDetails details) {

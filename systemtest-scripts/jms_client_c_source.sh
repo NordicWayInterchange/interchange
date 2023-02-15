@@ -11,7 +11,6 @@ docker run \
     -e QUEUE=${1} \
     -e KEY_STORE_PATH=/keys/king_charles.bouvetinterchange.eu.p12 \
     -e KEY_STORE_PASS=password \
-    -e KEY_PASS=password \
     -e TRUST_STORE_PATH=/keys/truststore.jks \
     -e TRUST_STORE_PASS=password \
     --link c_qpid:c.bouvetinterchange.eu \

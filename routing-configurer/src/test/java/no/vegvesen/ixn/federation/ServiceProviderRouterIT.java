@@ -814,7 +814,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12, "password"),
+				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12),
 				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
 }

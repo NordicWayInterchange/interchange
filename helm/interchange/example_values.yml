@@ -7,7 +7,6 @@ self:                                                               # ------ Gen
   key_store_password: password                                      # Key store password
   trust_store: truststore.jks                                       # Name of trust store file
   trust_store_password: password                                    # Trust store password
-  key_password: password                                            # Password for the node's private key.
   secret_mount_path: /jks/keys/                                     # Location of certificates and keys
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
 

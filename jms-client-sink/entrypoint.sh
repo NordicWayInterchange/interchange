@@ -6,7 +6,6 @@ java \
     -Dsink.receiveQueue=${QUEUE} \
     -Dsink.keystorePath=${KEY_STORE_PATH} \
     -Dsink.keystorepass=${KEY_STORE_PASS} \
-    -Dsink.keypass=${KEY_PASS} \
     -Dsink.truststorepath=${TRUST_STORE_PATH} \
     -Dsink.truststorepass=${TRUST_STORE_PASS} \
     -jar jms-client-sink.jar
