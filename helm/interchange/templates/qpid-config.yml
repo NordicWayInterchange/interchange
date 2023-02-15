@@ -8,8 +8,6 @@ metadata:
     component: qpid
     release: {{ .Release.Name }}
 data:
-  # Taken out interchange_user and interchange_password from the passwd file.
-  # {{ .Values.qpid.interchange_user }}:{{ .Values.qpid.interchange_password }}
   passwd: |
     {{ .Values.qpid.admin_user }}:{{ .Values.qpid.admin_password }}
   groups: |
