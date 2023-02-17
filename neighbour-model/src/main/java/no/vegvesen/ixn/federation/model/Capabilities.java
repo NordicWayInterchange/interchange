@@ -6,9 +6,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -48,6 +46,7 @@ public class Capabilities {
 	}
 
 	public void addAllDatatypes(Set<Capability> newCapabilities) {
+		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
