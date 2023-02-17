@@ -19,8 +19,8 @@ public class SubscriptionTest {
         new AddSubscription(
         new SelectorBuilder()
                 .originatingCountry("FI")
-                .messageType("IVIM")
-                .protocolVersion("IVIM:0.0.0")
+                .messageType("SSEM")
+                .protocolVersion("SSEM:0.0.0")
                 .publisherId("SE90009")
                 .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
                 .toSelector()
@@ -34,8 +34,8 @@ public class SubscriptionTest {
         new AddSubscription(
                 new SelectorBuilder()
                         .originatingCountry("FI")
-                        .messageType("IVIM")
-                        .protocolVersion("IVIM:0.0.1")
+                        .messageType("SSEM")
+                        .protocolVersion("SSEM:0.0.1")
                         .publisherId("SE90009")
                         .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
                         .toSelector()
@@ -48,8 +48,8 @@ public class SubscriptionTest {
         AddSubscriptionsRequest request = new AddSubscriptionsRequest("kyrre",Collections.singleton(new AddSubscription(
                 new SelectorBuilder()
                         .originatingCountry("FI")
-                        .messageType("IVIM")
-                        .protocolVersion("IVIM:0.0.2")
+                        .messageType("SSEM")
+                        .protocolVersion("SSEM:0.0.2")
                         .publisherId("SE90009")
                         .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
                         .toSelector()
@@ -63,8 +63,8 @@ public class SubscriptionTest {
         new AddSubscription(
                 new SelectorBuilder()
                         .originatingCountry("FI")
-                        .messageType("IVIM")
-                        .protocolVersion("IVIM:0.0.3")
+                        .messageType("SSEM")
+                        .protocolVersion("SSEM:0.0.3")
                         .publisherId("SE90009")
                         .quadTree(new HashSet<>(Arrays.asList("0","1","2","3")))
                         .toSelector()
