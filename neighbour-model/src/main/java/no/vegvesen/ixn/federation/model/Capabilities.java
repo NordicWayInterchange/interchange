@@ -1,14 +1,11 @@
 package no.vegvesen.ixn.federation.model;
 
-import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -47,7 +44,8 @@ public class Capabilities {
 		setLastUpdated(LocalDateTime.now());
 	}
 
-	public void addAllDatatypes(Set<Capability> newCapabilities) {
+	public void replaceCapabilities(Set<Capability> newCapabilities) {
+		capabilities.retainAll(newCapabilities);
 		capabilities.addAll(newCapabilities);
 		if (hasDataTypes()) {
 			setStatus(CapabilitiesStatus.KNOWN);
