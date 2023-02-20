@@ -3,6 +3,7 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -38,6 +39,9 @@ public class OnboardRestControllerIT {
 
     @MockBean
     private CertService certService;
+
+    @Autowired
+    private InterchangeNodeProperties nodeProperties;
 
     @Autowired
     private OnboardRestController restController;
@@ -128,6 +132,17 @@ public class OnboardRestControllerIT {
 		assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
         verify(certService,times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
 	}
+
+    @Test
+    public void testAddingSubscriptionConsumerCommonNameAsIxnName() {
+        String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
+        String serviceProvider = "serviceprovider";
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(serviceProvider,Collections.singleton(new AddSubscription(selector, nodeProperties.getName())));
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceProvider,request);
+        assertThat(response.getSubscriptions()).hasSize(1);
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+    }
 
 	@Test
     public void testAddingSubscriptionWithEmptyConsumerCommonName() {
