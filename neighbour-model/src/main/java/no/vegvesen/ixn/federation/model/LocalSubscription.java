@@ -21,7 +21,7 @@ public class LocalSubscription {
 
     @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locsub_sel"))
     @Column(columnDefinition="TEXT", nullable = false)
-    private String selector = "";
+    private String selector;
 
     @Column
     @UpdateTimestamp
@@ -92,10 +92,6 @@ public class LocalSubscription {
         return selector;
     }
 
-    public void setSelector(String selector) {
-        this.selector = selector;
-    }
-
     public Set<LocalEndpoint> getLocalEndpoints() {
         return localEndpoints;
     }
@@ -121,10 +117,6 @@ public class LocalSubscription {
 
     public String getConsumerCommonName() {
         return consumerCommonName;
-    }
-
-    public void setConsumerCommonName(String consumerCommonName) {
-        this.consumerCommonName = consumerCommonName;
     }
 
     //TODO lag et objekt av selector??
