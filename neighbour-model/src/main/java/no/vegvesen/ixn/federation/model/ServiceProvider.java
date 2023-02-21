@@ -60,7 +60,7 @@ public class ServiceProvider {
 		this.id = id;
 		this.name = name;
 		this.capabilities = capabilities;
-		this.subscriptions = subscriptions;
+		this.subscriptions.addAll(subscriptions);
 		this.privateChannels = privateChannels;
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
@@ -73,7 +73,7 @@ public class ServiceProvider {
 
 		this.name = name;
 		this.capabilities = capabilities;
-		this.subscriptions = subscriptions;
+		this.subscriptions.addAll(subscriptions);
 		this.privateChannels = privateChannels;
 		this.subscriptionUpdated = subscriptionUpdated;
 	}

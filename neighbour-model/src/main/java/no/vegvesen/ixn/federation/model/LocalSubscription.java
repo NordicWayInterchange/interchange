@@ -20,14 +20,14 @@ public class LocalSubscription {
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
 
     @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locsub_sel"))
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition="TEXT", nullable = false)
     private String selector = "";
 
     @Column
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition="TEXT", nullable = false)
     private String consumerCommonName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -39,12 +39,11 @@ public class LocalSubscription {
     private Set<LocalConnection> connections = new HashSet<>();
 
     public LocalSubscription() {
-
     }
 
-    public LocalSubscription(LocalSubscriptionStatus status, String selector) {
-        this.status = status;
+    public LocalSubscription(String selector, String consumerCommonName) {
         this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName) {
@@ -53,25 +52,17 @@ public class LocalSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector) {
+    public LocalSubscription(Integer id, String selector, String consumerCommonName) {
         this.id = id;
-        this.status = status;
         this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated) {
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName) {
         this.id = id;
         this.status = status;
         this.selector = selector;
-        this.lastUpdated = lastUpdated;
-    }
-
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, Set<LocalEndpoint> localEndpoints) {
-        this.id = id;
-        this.status = status;
-        this.selector = selector;
-        this.lastUpdated = lastUpdated;
-        this.localEndpoints.addAll(localEndpoints);
+        this.consumerCommonName = consumerCommonName;
     }
 
     public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {

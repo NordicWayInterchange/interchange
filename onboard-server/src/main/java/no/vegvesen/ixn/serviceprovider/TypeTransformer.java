@@ -71,16 +71,17 @@ public class TypeTransformer {
 
 
     public LocalSubscription transformAddSubscriptionToLocalSubscription(AddSubscription addSubscription, String serviceProviderName, String nodeName) {
-        LocalSubscription newSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, addSubscription.getSelector());
+        String consumerCommonName;
         if (addSubscription.getConsumerCommonName() == null) {
-            newSubscription.setConsumerCommonName(nodeName);
+            consumerCommonName = nodeName;
         } else {
             if (!addSubscription.getConsumerCommonName().equals(serviceProviderName)) {
-                newSubscription.setConsumerCommonName(nodeName);
+                consumerCommonName = nodeName;
             } else {
-                newSubscription.setConsumerCommonName(serviceProviderName);
+                consumerCommonName = serviceProviderName;
             }
         }
+        LocalSubscription newSubscription = new LocalSubscription(addSubscription.getSelector(),consumerCommonName);
         return newSubscription;
     }
 

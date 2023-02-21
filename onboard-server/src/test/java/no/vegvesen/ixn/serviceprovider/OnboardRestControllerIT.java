@@ -107,6 +107,7 @@ public class OnboardRestControllerIT {
 
         assertThat(response.getSubscriptions()).hasSize(1);
         assertThat(addedSubscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -142,6 +143,7 @@ public class OnboardRestControllerIT {
         assertThat(response.getSubscriptions()).hasSize(1);
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+        verify(certService,times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProvider);
     }
 
 	@Test
@@ -155,6 +157,7 @@ public class OnboardRestControllerIT {
 
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -168,6 +171,34 @@ public class OnboardRestControllerIT {
 
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL);
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+    }
+
+    @Test
+    public void testAddingSubscriptionWhenAnIdenticalWithDifferentStatusAlreadyExists() {
+        String selector = "messageType = 'DATEX2' and originatingCountry = 'NO'";
+        String serviceproviderName = "serviceprovider";
+        ServiceProvider serviceProvider = new ServiceProvider(
+                serviceproviderName,
+                new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,Collections.emptySet()),
+                Collections.singleton(new LocalSubscription(LocalSubscriptionStatus.ILLEGAL, selector,nodeProperties.getName())),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
+
+        AddSubscriptionsRequest request = new AddSubscriptionsRequest(
+                serviceproviderName,
+                Collections.singleton(new AddSubscription(selector))
+        );
+        AddSubscriptionsResponse response = restController.addSubscriptions(serviceproviderName,request);
+        assertThat(response.getSubscriptions()).hasSize(1);
+        LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
+        assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ILLEGAL); //the original one should be the one there
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceproviderName);
+
+
+
     }
 
 	@Test
@@ -434,5 +465,6 @@ public class OnboardRestControllerIT {
 
         assertThat(response.getDeliveries()).hasSize(1);
         assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
+        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 }
