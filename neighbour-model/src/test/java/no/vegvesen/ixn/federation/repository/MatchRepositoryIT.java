@@ -49,7 +49,6 @@ public class MatchRepositoryIT {
 
     @Test
     public void saveNeighbourAndServiceProviderBeforeSavingMatch() {
-        //LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp");
         sp.addLocalSubscription(locSub);
 
@@ -69,7 +68,6 @@ public class MatchRepositoryIT {
 
     @Test
     public void deletingMatchFromDatabase() {
-        //LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp");
         sp.addLocalSubscription(locSub);
 
@@ -100,7 +98,6 @@ public class MatchRepositoryIT {
 
     @Test
     public void deleteSubscriptionAndLocalSubscriptionBeforeDeletingMatch() {
-        //LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp");
         sp.addLocalSubscription(locSub);
 
@@ -130,7 +127,6 @@ public class MatchRepositoryIT {
 
     @Test
     public void tryAddingTwoMatchesWithSameLocalSubscription() {
-        //LocalSubscription locSub = new LocalSubscription();
         ServiceProvider sp = new ServiceProvider("my-sp", new Capabilities(), Collections.singleton(locSub), Collections.emptySet(), LocalDateTime.now());
 
         serviceProviderRepository.save(sp);
