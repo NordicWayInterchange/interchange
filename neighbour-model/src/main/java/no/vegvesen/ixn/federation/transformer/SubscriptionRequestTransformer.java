@@ -52,11 +52,7 @@ public class SubscriptionRequestTransformer {
 		if (apiEndpoints != null) {
 			Set<Endpoint> endpoints = new HashSet<>();
 			for (EndpointApi endpointApi : apiEndpoints) {
-				Endpoint endpoint = new Endpoint(endpointApi.getSource(), endpointApi.getHost(), endpointApi.getPort());
-				if (endpointApi.getMaxBandwidth() != null && endpointApi.getMaxMessageRate() != null) {
-					endpoint.setMaxBandwidth(endpointApi.getMaxBandwidth());
-					endpoint.setMaxMessageRate(endpointApi.getMaxMessageRate());
-				}
+				Endpoint endpoint = new Endpoint(endpointApi.getSource(), endpointApi.getHost(), endpointApi.getPort(),endpointApi.getMaxBandwidth(),endpointApi.getMaxMessageRate());
 				endpoints.add(endpoint);
 			}
 			subscription.setEndpoints(endpoints);

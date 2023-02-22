@@ -63,7 +63,15 @@ public class Subscription {
 		this.selector = selector;
 		this.path = path;
 		this.consumerCommonName = consumerCommonName;
-		this.endpoints = endpoints;
+		this.endpoints.addAll(endpoints);
+	}
+
+	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName, Set<Endpoint> endpoints) {
+		this.subscriptionStatus = subscriptionStatus;
+		this.selector = selector;
+		this.path = path;
+		this.consumerCommonName = consumerCommonName;
+		this.endpoints.addAll(endpoints);
 	}
 
 	public Subscription(SubscriptionStatus subscriptionStatus, String selector, String path, String consumerCommonName) {
@@ -133,10 +141,11 @@ public class Subscription {
 		return endpoints;
 	}
 
+	//TODO test this!
 	public void setEndpoints(Set<Endpoint> newEndpoints) {
-		this.endpoints.clear();
 		if (newEndpoints != null) {
-			this.endpoints.addAll(newEndpoints);
+			endpoints.retainAll(newEndpoints);
+			endpoints.addAll(newEndpoints);
 		}
 	}
 

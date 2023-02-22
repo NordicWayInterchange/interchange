@@ -90,7 +90,7 @@ public class NeighbourEndpoint {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Endpoint)) return false;
+        if (!(o instanceof NeighbourEndpoint)) return false;
         NeighbourEndpoint endpoint = (NeighbourEndpoint) o;
         return source.equals(endpoint.source) &&
                 host.equals(endpoint.host) &&

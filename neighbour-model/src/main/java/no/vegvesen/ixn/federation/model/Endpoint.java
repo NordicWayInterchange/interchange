@@ -47,24 +47,12 @@ public class Endpoint {
         return source;
     }
 
-    public void setSource(String source) {
-        this.source = source;
-    }
-
     public String getHost() {
         return host;
     }
 
-    public void setHost(String host) {
-        this.host = host;
-    }
-
     public Integer getPort() {
         return port;
-    }
-
-    public void setPort(Integer port) {
-        this.port = port;
     }
 
     public Integer getMaxBandwidth() {
@@ -81,6 +69,10 @@ public class Endpoint {
 
     public void setMaxMessageRate(Integer maxMessageRate) {
         this.maxMessageRate = maxMessageRate;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public boolean isTheSameAsListenerEndpoint(ListenerEndpoint listenerEndpoint) {
