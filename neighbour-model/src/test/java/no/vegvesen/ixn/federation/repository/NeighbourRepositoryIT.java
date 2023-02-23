@@ -33,7 +33,7 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void storedInterchangeIsPossibleToFindByName() {
-		Neighbour firstInterchange = new Neighbour("another-interchange", new Capabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), new Connection());
+		Neighbour firstInterchange = new Neighbour("another-interchange", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), new Connection());
 		repository.save(firstInterchange);
 		Neighbour foundInterchange = repository.findByName("another-interchange");
 		assertThat(foundInterchange).isNotNull();
@@ -52,7 +52,7 @@ public class NeighbourRepositoryIT {
 		SubscriptionRequest inSubReq = new SubscriptionRequest();
 		inSubReq.setSubscriptions(inbound);
 
-		Neighbour inOutIxn = new Neighbour("in-out-interchange", new Capabilities(), outSubReq, inSubReq);
+		Neighbour inOutIxn = new Neighbour("in-out-interchange", new NeighbourCapabilities(), outSubReq, inSubReq);
 		Neighbour savedInOut = repository.save(inOutIxn);
 
 		Neighbour foundInOut = repository.findByName(savedInOut.getName());
@@ -70,12 +70,12 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void savedInterchangesCanBeUpdatedAndSavedAgain() {
-		Neighbour thirdInterchange = new Neighbour("Third Neighbour", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, Collections.emptySet()), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
+		Neighbour thirdInterchange = new Neighbour("Third Neighbour", new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.UNKNOWN, Collections.emptySet()), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
 		repository.save(thirdInterchange);
 
 		Neighbour update = repository.findByName("Third Neighbour");
 		Capability aCapability = new DatexCapability(null, "NO", null, null, null);
-		Capabilities firstCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(aCapability));
+		NeighbourCapabilities firstCapabilities = new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN, Collections.singleton(aCapability));
 		update.setCapabilities(firstCapabilities);
 		repository.save(update);
 		Neighbour updatedInterchange = repository.findByName("Third Neighbour");
@@ -86,7 +86,7 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void interchangeReadyToSetupRouting() {
-		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		NeighbourCapabilities caps = new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN, Collections.emptySet());
 		Set<NeighbourSubscription> requestedSubscriptions = new HashSet<>();
 		requestedSubscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'fish'", NeighbourSubscriptionStatus.ACCEPTED, ""));
 		requestedSubscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'bird'", NeighbourSubscriptionStatus.ACCEPTED, ""));
@@ -103,7 +103,7 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void interchangeReadyToTearDownRouting() {
-		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		NeighbourCapabilities caps = new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN, Collections.emptySet());
 		NeighbourSubscriptionRequest tearDownSubscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.TEAR_DOWN, Collections.emptySet());
 		SubscriptionRequest noIncomingSubscriptions = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, Collections.emptySet());
 		Neighbour tearDownIxn = new Neighbour("torry", caps, tearDownSubscriptionRequest, noIncomingSubscriptions);
@@ -117,7 +117,7 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void interchangeCanUpdateSubscriptionsSet() {
-		Capabilities caps = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		NeighbourCapabilities caps = new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN, Collections.emptySet());
 		Set<NeighbourSubscription> requestedSubscriptions = new HashSet<>();
 		requestedSubscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'fish'", NeighbourSubscriptionStatus.ACCEPTED, ""));
 		requestedSubscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'bird'", NeighbourSubscriptionStatus.REQUESTED, ""));
@@ -140,11 +140,11 @@ public class NeighbourRepositoryIT {
 		Set<NeighbourSubscription> subscriptions = new HashSet<>();
 		subscriptions.add(new NeighbourSubscription("originatingCountry = 'NO' and what = 'fish'", NeighbourSubscriptionStatus.CREATED, ""));
 		NeighbourSubscriptionRequest outgoing = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED, subscriptions);
-		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		NeighbourCapabilities capabilities = new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN, Collections.emptySet());
 		Neighbour ixnForwards = new Neighbour("norwegian-fish", capabilities, outgoing, null);
 		repository.save(ixnForwards);
 
-		Capabilities capabilitiesSe = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet());
+		NeighbourCapabilities capabilitiesSe = new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN, Collections.emptySet());
 		NeighbourSubscriptionRequest noOverlap = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
 		SubscriptionRequest noOverlapIn = new SubscriptionRequest(SubscriptionRequestStatus.NO_OVERLAP, Collections.emptySet());
 		Neighbour noForwards = new Neighbour("swedish-fish", capabilitiesSe, noOverlap, noOverlapIn);
@@ -160,7 +160,7 @@ public class NeighbourRepositoryIT {
 		HashSet<Capability> capabilities = new HashSet<>();
 		capabilities.add(new DatexCapability(null, "NO", null, Collections.emptySet(), Sets.newLinkedHashSet("SituationPublication", "MeasuredDataPublication")));
 		capabilities.add(new DatexCapability(null, "SE", null, Collections.emptySet(), Sets.newLinkedHashSet("SituationPublication", "MeasuredDataPublication")));
-		Neighbour anyNeighbour = new Neighbour("any", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.EMPTY, new HashSet<>()), new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()));
+		Neighbour anyNeighbour = new Neighbour("any", new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN, capabilities), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.EMPTY, new HashSet<>()), new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()));
 
 		Neighbour savedNeighbour = repository.save(anyNeighbour);
 		assertThat(savedNeighbour.getName()).isEqualTo("any");
@@ -190,7 +190,7 @@ public class NeighbourRepositoryIT {
 		SubscriptionRequest fedIn = new SubscriptionRequest();
 		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest();
 		subscriptions.setSuccessfulRequest(LocalDateTime.now());
-		Neighbour neighbour = new Neighbour("nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
+		Neighbour neighbour = new Neighbour("nice-neighbour", new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
 		Neighbour saved = repository.save(neighbour);
 		assertThat(saved).isNotNull();
 		assertThat(saved.getNeighbourRequestedSubscriptions().getSuccessfulRequest()).isNotNull();
@@ -200,7 +200,7 @@ public class NeighbourRepositoryIT {
 	public void subscriptionRequestWithNoSuccessfulDateTimeCanBeStored() {
 		SubscriptionRequest fedIn = new SubscriptionRequest();
 		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest();
-		Neighbour neighbour = new Neighbour("another-nice-neighbour", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
+		Neighbour neighbour = new Neighbour("another-nice-neighbour", new NeighbourCapabilities(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN, Sets.newLinkedHashSet()), subscriptions, fedIn);
 		Neighbour saved = repository.save(neighbour);
 		assertThat(saved).isNotNull();
 		assertThat(saved.getNeighbourRequestedSubscriptions().getSuccessfulRequest()).isEmpty();
@@ -243,7 +243,7 @@ public class NeighbourRepositoryIT {
 	public void addSubscriptionWhereConsumerCommonNameIsSameAsServiceProviderName() {
 		Set<NeighbourSubscription> subs = new HashSet<>(Collections.singleton(new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.ACCEPTED, "sp-true")));
 		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.MODIFIED, subs);
-		Neighbour neighbour = new Neighbour("neighbour-for-queue-true", new Capabilities(), subscriptions, new SubscriptionRequest());
+		Neighbour neighbour = new Neighbour("neighbour-for-queue-true", new NeighbourCapabilities(), subscriptions, new SubscriptionRequest());
 
 		repository.save(neighbour);
 
@@ -255,7 +255,7 @@ public class NeighbourRepositoryIT {
 	public void addSubscriptionWhereconsumerCommonNameIsSameAsIxnName() {
 		Set<NeighbourSubscription> subs = new HashSet<>(Collections.singleton(new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.ACCEPTED, "neighbour-for-queue-false")));
 		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.MODIFIED, subs);
-		Neighbour neighbour = new Neighbour("neighbour-for-queue-false", new Capabilities(), subscriptions, new SubscriptionRequest());
+		Neighbour neighbour = new Neighbour("neighbour-for-queue-false", new NeighbourCapabilities(), subscriptions, new SubscriptionRequest());
 
 		repository.save(neighbour);
 
@@ -270,7 +270,7 @@ public class NeighbourRepositoryIT {
 		Set<NeighbourSubscription> subs = Sets.newLinkedHashSet(sub1, sub2);
 
 		NeighbourSubscriptionRequest subscriptions = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.MODIFIED, subs);
-		Neighbour neighbour = new Neighbour("neighbour-for-queue-true-and-false", new Capabilities(), subscriptions, new SubscriptionRequest());
+		Neighbour neighbour = new Neighbour("neighbour-for-queue-true-and-false", new NeighbourCapabilities(), subscriptions, new SubscriptionRequest());
 
 		repository.save(neighbour);
 
@@ -289,7 +289,7 @@ public class NeighbourRepositoryIT {
 
 		Set<Subscription> subs = Sets.newLinkedHashSet(sub);
 		SubscriptionRequest subscriptions = new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subs);
-		Neighbour neighbour = new Neighbour("my-neighbour-1", new Capabilities(), new NeighbourSubscriptionRequest(), subscriptions);
+		Neighbour neighbour = new Neighbour("my-neighbour-1", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), subscriptions);
 
 		repository.save(neighbour);
 

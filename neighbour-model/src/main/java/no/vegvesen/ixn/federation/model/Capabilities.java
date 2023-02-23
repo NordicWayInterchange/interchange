@@ -20,16 +20,6 @@ public class Capabilities {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cap_seq")
 	private Integer id;
 
-	private LocalDateTime lastCapabilityExchange;
-
-	public LocalDateTime getLastCapabilityExchange() {
-		return lastCapabilityExchange;
-	}
-
-	public void setLastCapabilityExchange(LocalDateTime lastCapabilityExchange) {
-		this.lastCapabilityExchange = lastCapabilityExchange;
-	}
-
 	public Optional<LocalDateTime> getLastUpdated() {
 		return Optional.ofNullable(lastUpdated);
 	}
@@ -45,15 +35,6 @@ public class Capabilities {
 			setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		}
 		setLastUpdated(LocalDateTime.now());
-	}
-
-	public void addAllDatatypes(Set<Capability> newCapabilities) {
-		capabilities.addAll(newCapabilities);
-		if (hasDataTypes()) {
-			setStatus(CapabilitiesStatus.KNOWN);
-		}
-		setLastUpdated(LocalDateTime.now());
-
 	}
 
 	public void removeDataType(Integer capabilityId) {
@@ -133,7 +114,7 @@ public class Capabilities {
 				"id=" + id +
 				", status=" + status +
 				", dataTypes=" + capabilities +
-				", lastCapabilityExchange=" + lastCapabilityExchange +
+				", lastUpdated=" + lastUpdated +
 				'}';
 	}
 }

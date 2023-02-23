@@ -36,7 +36,7 @@ public class MatchDiscoveryServiceTest {
     public void noServiceProvidersAndOneNeighbourShouldNotCreateAMatch() {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.singletonList(new Neighbour(
                 "test",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest()
         )));
@@ -70,7 +70,7 @@ public class MatchDiscoveryServiceTest {
                 )),
                 Collections.singletonList(new Neighbour(
                         "neighbour",
-                        new Capabilities(),
+                        new NeighbourCapabilities(),
                         new NeighbourSubscriptionRequest(),
                         new SubscriptionRequest(
                                 SubscriptionRequestStatus.REQUESTED,
@@ -106,7 +106,7 @@ public class MatchDiscoveryServiceTest {
        );
        Neighbour neighbour = new Neighbour(
                "neighbour",
-               new Capabilities(),
+               new NeighbourCapabilities(),
                new NeighbourSubscriptionRequest(),
                new SubscriptionRequest(
                        SubscriptionRequestStatus.REQUESTED,
@@ -122,7 +122,7 @@ public class MatchDiscoveryServiceTest {
        );
         Neighbour otherNeighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.REQUESTED,
@@ -161,7 +161,7 @@ public class MatchDiscoveryServiceTest {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.REQUESTED,
@@ -201,7 +201,7 @@ public class MatchDiscoveryServiceTest {
 
         Neighbour neighbour = new Neighbour(
                 "neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.REQUESTED,
@@ -223,8 +223,4 @@ public class MatchDiscoveryServiceTest {
         verify(matchRepository,times(0)).findAllBySubscriptionId(any());
         verify(matchRepository,times(0)).save(any(Match.class));
     }
-
-
-
-    //TODO several subscriptions, one REQUESTED, or none REQUESTED
 }

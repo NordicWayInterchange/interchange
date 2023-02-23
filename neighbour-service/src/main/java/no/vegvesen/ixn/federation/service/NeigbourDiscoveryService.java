@@ -58,7 +58,7 @@ public class NeigbourDiscoveryService {
             if (neighbourRepository.findByName(neighbour.getName()) == null && !neighbour.getName().equals(interchangeNodeProperties.getName())) {
 
                 // Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
-                neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.UNKNOWN);
+                neighbour.getCapabilities().setStatus(NeighbourCapabilities.NeighbourCapabilitiesStatus.UNKNOWN);
                 logger.info("Found a new neighbour. Saving in database");
                 neighbourRepository.save(neighbour);
             }
@@ -69,9 +69,9 @@ public class NeigbourDiscoveryService {
     public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
-                Capabilities.CapabilitiesStatus.UNKNOWN,
-                Capabilities.CapabilitiesStatus.KNOWN,
-                Capabilities.CapabilitiesStatus.FAILED);
+                NeighbourCapabilities.NeighbourCapabilitiesStatus.UNKNOWN,
+                NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
+                NeighbourCapabilities.NeighbourCapabilitiesStatus.FAILED);
         capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
@@ -117,8 +117,8 @@ public class NeigbourDiscoveryService {
     private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<Capability> localCapabilities) {
         try {
             Set<Capability> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
-            Capabilities neighbourCapabilities = neighbour.getCapabilities();
-            neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
+            NeighbourCapabilities neighbourCapabilities = neighbour.getCapabilities();
+            neighbourCapabilities.setStatus(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN);
             neighbourCapabilities.setCapabilities(capabilities);
             neighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now());
             neighbour.getControlConnection().okConnection();
@@ -126,7 +126,7 @@ public class NeigbourDiscoveryService {
             logger.debug("Updated neighbour: {}", neighbour.toString());
         } catch (CapabilityPostException e) {
             logger.error("Capability post failed", e);
-            neighbour.getCapabilities().setStatus(Capabilities.CapabilitiesStatus.FAILED);
+            neighbour.getCapabilities().setStatus(NeighbourCapabilities.NeighbourCapabilitiesStatus.FAILED);
             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
         } finally {
             neighbour = neighbourRepository.save(neighbour);

@@ -14,9 +14,6 @@ import javax.transaction.Transactional;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,7 +64,7 @@ public class MatchDiscoveryServiceIT {
 
         Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.REQUESTED,
@@ -92,7 +89,7 @@ public class MatchDiscoveryServiceIT {
 
         Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.REQUESTED,
@@ -119,7 +116,7 @@ public class MatchDiscoveryServiceIT {
 
         Subscription subscription = new Subscription(SubscriptionStatus.CREATED, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.REQUESTED,
@@ -164,7 +161,7 @@ public class MatchDiscoveryServiceIT {
 
         Subscription subscription = new Subscription(SubscriptionStatus.TEAR_DOWN, selector, "", consumerCommonName);
         Neighbour neighbour = new Neighbour("neighbour",
-                new Capabilities(),
+                new NeighbourCapabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
                         SubscriptionRequestStatus.ESTABLISHED,

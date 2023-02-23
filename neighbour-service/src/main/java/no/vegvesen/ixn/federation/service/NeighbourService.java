@@ -51,7 +51,7 @@ public class NeighbourService {
 	}
 
 	public CapabilitiesApi incomingCapabilities(CapabilitiesApi neighbourCapabilities, Set<Capability> localCapabilities) {
-		Capabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToCapabilities(neighbourCapabilities);
+		NeighbourCapabilities incomingCapabilities = capabilitiesTransformer.capabilitiesApiToNeighbourCapabilities(neighbourCapabilities);
 		incomingCapabilities.setLastCapabilityExchange(LocalDateTime.now());
 
 		logger.info("Looking up neighbour in DB.");
@@ -62,8 +62,8 @@ public class NeighbourService {
 			neighbourToUpdate = findNeighbour(neighbourCapabilities.getName());
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
-		Capabilities capabilities = neighbourToUpdate.getCapabilities();
-		capabilities.addAllDatatypes(incomingCapabilities.getCapabilities());
+		NeighbourCapabilities capabilities = neighbourToUpdate.getCapabilities();
+		capabilities.addAllDataTypes(incomingCapabilities.getCapabilities());
 		logger.info("Saving updated Neighbour: {}", neighbourToUpdate.toString());
 		neighbourRepository.save(neighbourToUpdate);
 
@@ -177,7 +177,7 @@ public class NeighbourService {
 	}
 
 	public List<Neighbour> findNeighboursWithKnownCapabilities() {
-		return neighbourRepository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+		return neighbourRepository.findByCapabilities_Status(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN);
 	}
 
 	public List<Neighbour> getNeighboursFailedSubscriptionRequest() {

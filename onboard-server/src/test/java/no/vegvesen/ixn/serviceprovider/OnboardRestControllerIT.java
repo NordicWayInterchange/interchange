@@ -256,8 +256,8 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
+        neighbour.setCapabilities(new NeighbourCapabilities(
+                NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
                 Collections.singleton(new DenmCapability(
                         "DPRA",
                         "DK",
@@ -292,8 +292,8 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
+        neighbour.setCapabilities(new NeighbourCapabilities(
+                NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
                 Collections.singleton(new DenmCapability(
                         "DPRA",
                         "DK",
@@ -337,8 +337,8 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
+        neighbour.setCapabilities(new NeighbourCapabilities(
+                NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
                 Collections.singleton(new DenmCapability(
                         "DPRA",
                         "DK",
@@ -384,8 +384,8 @@ public class OnboardRestControllerIT {
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
-        neighbour.setCapabilities(new Capabilities(
-                Capabilities.CapabilitiesStatus.KNOWN,
+        neighbour.setCapabilities(new NeighbourCapabilities(
+                NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
                 Collections.singleton(new DenmCapability(
                         "DPRA",
                         "DK",

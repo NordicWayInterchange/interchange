@@ -24,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -143,8 +142,8 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
 						Collections.singleton(
 								new DatexCapability(
 										"NO0001",
@@ -154,8 +153,7 @@ public class NeighbourDiscovererIT {
 										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
-						),
-						LocalDateTime.now()
+						)
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest(
@@ -187,8 +185,8 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
 						Collections.singleton(
 								new DatexCapability(
 										"NO0001",
@@ -198,8 +196,7 @@ public class NeighbourDiscovererIT {
 										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
-						),
-						LocalDateTime.now()
+						)
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
@@ -231,8 +228,8 @@ public class NeighbourDiscovererIT {
 		));
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
 						new HashSet<>(Arrays.asList(
 								new DatexCapability(
 										"NO0001",
@@ -250,8 +247,7 @@ public class NeighbourDiscovererIT {
 										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
-						)),
-						LocalDateTime.now()
+						))
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
@@ -289,8 +285,8 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbour = new Neighbour(
 				"neighour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
 						Collections.singleton(
 								new DatexCapability(
 										"NO0001",
@@ -300,8 +296,7 @@ public class NeighbourDiscovererIT {
 										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
-						),
-						LocalDateTime.now().minusHours(1)
+						)
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
@@ -340,8 +335,8 @@ public class NeighbourDiscovererIT {
 		);
 		Neighbour neighbourA = new Neighbour(
 				"neighourA",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
 						Collections.singleton(
 								new DatexCapability(
 										"NO0001",
@@ -351,8 +346,7 @@ public class NeighbourDiscovererIT {
 										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
-						),
-						LocalDateTime.now().minusHours(1)
+						)
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
@@ -360,8 +354,8 @@ public class NeighbourDiscovererIT {
 		neighbourA.getCapabilities().setLastCapabilityExchange(LocalDateTime.now());
 		Neighbour neighbourB = new Neighbour(
 				"neighourB",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
 						Collections.singleton(
 								new DatexCapability(
 										"NO0002",
@@ -371,8 +365,7 @@ public class NeighbourDiscovererIT {
 										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
-						),
-						LocalDateTime.now().minusHours(1)
+						)
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
@@ -412,8 +405,8 @@ public class NeighbourDiscovererIT {
 
 		Neighbour neighbour = new Neighbour(
 				"neighbour",
-				new Capabilities(
-						Capabilities.CapabilitiesStatus.KNOWN,
+				new NeighbourCapabilities(
+						NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
 								new DenmCapability(
 										"NO0001",
@@ -423,8 +416,7 @@ public class NeighbourDiscovererIT {
 										RedirectStatus.OPTIONAL,
 										Collections.emptySet()
 								)
-						)),
-						LocalDateTime.now()
+						))
 				),
 				new NeighbourSubscriptionRequest(),
 				new SubscriptionRequest()
@@ -452,7 +444,7 @@ public class NeighbourDiscovererIT {
 
 	private void checkForNewNeighbours() {
 		neighbourDiscoveryService.checkForNewNeighbours();
-		List<Neighbour> unknown = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.UNKNOWN);
+		List<Neighbour> unknown = repository.findByCapabilities_Status(NeighbourCapabilities.NeighbourCapabilitiesStatus.UNKNOWN);
 		assertThat(unknown).hasSize(2);
 		assertThat(repository.findAll()).hasSize(2);
 	}
@@ -464,7 +456,7 @@ public class NeighbourDiscovererIT {
 		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.empty());
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
-		List<Neighbour> known = repository.findByCapabilities_Status(Capabilities.CapabilitiesStatus.KNOWN);
+		List<Neighbour> known = repository.findByCapabilities_Status(NeighbourCapabilities.NeighbourCapabilitiesStatus.KNOWN);
 		assertThat(known).hasSize(2);
 	}
 
