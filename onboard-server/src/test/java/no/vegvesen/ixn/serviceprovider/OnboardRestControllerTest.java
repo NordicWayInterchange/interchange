@@ -245,9 +245,9 @@ public class OnboardRestControllerTest {
 		// The existing subscriptions of the Service Provider
 		Set<LocalSubscription> serviceProviderSubscriptionRequest = new HashSet<>();
 		String se = "originatingCountry = 'SE'";
-		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se);
+		LocalSubscription seSubs = new LocalSubscription(1,LocalSubscriptionStatus.CREATED,se,"");
 		String fi = "originatingCountry = 'FI'";
-		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi);
+		LocalSubscription fiSubs = new LocalSubscription(2,LocalSubscriptionStatus.CREATED,fi,"");
 		ServiceProvider firstServiceProvider = new ServiceProvider();
 		firstServiceProvider.setName(firstServiceProviderName);
 		firstServiceProvider.updateSubscriptions(new HashSet<>(Arrays.asList(seSubs,fiSubs)));

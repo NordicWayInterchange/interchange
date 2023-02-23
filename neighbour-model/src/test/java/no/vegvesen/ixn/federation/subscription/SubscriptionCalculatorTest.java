@@ -18,9 +18,9 @@ public class SubscriptionCalculatorTest {
 
     @Test
     void calculateSelfSubscriptionsTest() {
-        LocalSubscription localSubA = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'FI'");
-        LocalSubscription localSubB = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'SE'");
-        LocalSubscription localSubC = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'NO'");
+        LocalSubscription localSubA = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'FI'",myName);
+        LocalSubscription localSubB = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'SE'",myName);
+        LocalSubscription localSubC = new LocalSubscription(LocalSubscriptionStatus.CREATED,"originatingCountry = 'NO'",myName);
 
         ServiceProvider firstServiceProvider = new ServiceProvider();
         firstServiceProvider.setName("First Service Provider");
@@ -52,7 +52,7 @@ public class SubscriptionCalculatorTest {
     @Test
     void calculateLastUpdatedSubscriptionOneSub() {
         ServiceProvider serviceProvider = new ServiceProvider();
-        LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'NO'");
+        LocalSubscription subscription = new LocalSubscription(1,LocalSubscriptionStatus.CREATED, "messageType = 'DATEX2' AND originatingCountry = 'NO'","");
         serviceProvider.addLocalSubscription(subscription);
         Optional<LocalDateTime> lastUpdated = serviceProvider.getSubscriptionUpdated();
         assertThat(lastUpdated).isPresent();
@@ -84,8 +84,8 @@ public class SubscriptionCalculatorTest {
 
     @Test
     void calculateLocalSubscriptionsShouldOnlyReturnDataTypesFromCreatedSubs() {
-        LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'");
-        LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'");
+        LocalSubscription shouldNotBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'",myName);
+        LocalSubscription shouldBeTakenIntoAccount = new LocalSubscription(LocalSubscriptionStatus.CREATED,"messageType = 'DATEX2' AND originatingCountry = 'NO'",myName);
         ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
         serviceProvider.setSubscriptions(Sets.newLinkedHashSet(shouldNotBeTakenIntoAccount,shouldBeTakenIntoAccount));
         Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(Arrays.asList(serviceProvider));
@@ -102,7 +102,7 @@ public class SubscriptionCalculatorTest {
         LocalDateTime before = SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProvidersBefore);
         assertThat(before).isNull();
 
-        serviceProviderBefore.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'"));
+        serviceProviderBefore.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "messageType = 'DATEX2'",myName));
         Optional<LocalDateTime> subscriptionUpdatedRequested = serviceProviderBefore.getSubscriptionUpdated();
         assertThat(subscriptionUpdatedRequested).isPresent();
 
@@ -138,7 +138,7 @@ public class SubscriptionCalculatorTest {
                 Collections.singleton(
                         new LocalSubscription(
                                 LocalSubscriptionStatus.REQUESTED,
-                                "originatinCountry = 'NO'"
+                                "originatinCountry = 'NO'",myName
                         )
                 ),
                 Collections.emptySet(), ""

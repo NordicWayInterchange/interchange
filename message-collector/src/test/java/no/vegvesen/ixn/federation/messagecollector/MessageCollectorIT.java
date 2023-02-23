@@ -59,11 +59,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 				queueName,
 				TestKeystoreHelper.sslContext(testKeysPath, keyStore, "truststore.jks"));
 	}
-	public Source createSource(Integer containerPort, String queue, String keystore) {
-		return new Source("amqps://localhost:" + containerPort,
-				queue,
-				TestKeystoreHelper.sslContext(testKeysPath, keystore, "truststore.jks"));
-	}
+
 	public Source createSource(String containerUrl, String queue, String keystore) {
 		return new Source(containerUrl,
 				queue,
@@ -82,7 +78,13 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		MatchRepository matchRepository = mock(MatchRepository.class);
 		MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(Arrays.asList(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT)));
+		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(Arrays.asList(
+				new Match(
+						new LocalSubscription(LocalSubscriptionStatus.CREATED,"a = b","consumer"),
+						new Subscription(),
+						MatchStatus.SETUP_ENDPOINT
+				)
+		));
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
@@ -131,7 +133,13 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		MatchRepository matchRepository = mock(MatchRepository.class);
 		MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(Arrays.asList(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT)));
+		when(matchDiscoveryService.findMatchesByExchangeName(any(String.class))).thenReturn(Arrays.asList(
+				new Match(
+						new LocalSubscription(LocalSubscriptionStatus.CREATED,"a=b","consumer"),
+						new Subscription(),
+						MatchStatus.SETUP_ENDPOINT
+				)
+		));
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(

@@ -44,7 +44,8 @@ public class ImportServiceProvidersIT {
             for (OldLocalActorSubscription localActorSubscription : subscriptions) {
                 //TODO have to generate queue name, as this was SP name before
                 serviceProvider.addLocalSubscription(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-                        localActorSubscription.getSelector())); //already have the user from the Service provider
+                        localActorSubscription.getSelector(),
+                       "my-interchange" )); //already have the user from the Service provider
             }
             repository.save(serviceProvider);
         }

@@ -110,9 +110,9 @@ class CapabilityMatcherTest {
 		LocalSubscription subscription = new LocalSubscription(
 				52,
 				LocalSubscriptionStatus.CREATED,
-				"((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = '6') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6')"
+				"((publisherId = 'NO-123') AND (quadTree like '%,12004%') AND (messageType = 'DENM') AND (causeCode = '6') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'NO')) AND (originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6')",
+				""
 		);
-		subscription.setConsumerCommonName("");
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(capability),
 				Sets.newLinkedHashSet(subscription), ""
@@ -123,10 +123,9 @@ class CapabilityMatcherTest {
 	@Test
 	public void matchIviSelectorWithQuadTree() {
 		IvimCapability capability = new IvimCapability("NO-12345", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")), RedirectStatus.OPTIONAL, Sets.newHashSet(Arrays.asList("6")));
-		LocalSubscription localSubscription = new LocalSubscription();
-		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType like '%,6,%'");
-		localSubscription.setConsumerCommonName("");
-		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)), "");
+		String consumerCommonName = "";
+		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType like '%,6,%'",consumerCommonName);
+		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)), consumerCommonName);
 	}
 
 	@Test
@@ -139,11 +138,10 @@ class CapabilityMatcherTest {
 				RedirectStatus.OPTIONAL,
 				Sets.newHashSet(Arrays.asList("1", "2"))
 		);
-		LocalSubscription localSubscription = new LocalSubscription();
-		localSubscription.setSelector("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id like '%,2,%' or id like '%,3,%'");
-		localSubscription.setConsumerCommonName("");
+		String consumerCommonName = "";
+		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id like '%,2,%' or id like '%,3,%'",consumerCommonName);
 		System.out.println(localSubscription.getSelector());
-		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), "");
+		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), consumerCommonName);
 		assertThat(localSubscriptions).isNotEmpty();
 	}
 
@@ -168,11 +166,10 @@ class CapabilityMatcherTest {
 				RedirectStatus.OPTIONAL,
 				Sets.newHashSet(Arrays.asList("1", "2"))
 		);
-		LocalSubscription localSubscription = new LocalSubscription();
-		localSubscription.setSelector("name = 'fish'");
-		localSubscription.setConsumerCommonName("");
+		String consumerCommonName = "";
+		LocalSubscription localSubscription = new LocalSubscription("name = 'fish'",consumerCommonName);
 		System.out.println(localSubscription.getSelector());
-		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), "");
+		Set<LocalSubscription> localSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Collections.singleton(localSubscription), consumerCommonName);
 		assertThat(localSubscriptions).isNotEmpty();
 	}
 

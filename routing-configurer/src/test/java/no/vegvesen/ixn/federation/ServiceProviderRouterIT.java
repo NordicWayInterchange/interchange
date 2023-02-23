@@ -66,9 +66,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Container
     public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
 			.dependsOn(keyContainer);
+	private static final String nodeName = "localhost";
 
 
- 	static class Initializer
+	static class Initializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
@@ -78,7 +79,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 					"routing-configurer.vhost=localhost",
 					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
 					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12"),
-					"interchange.node-provider.name=localhost"
+					"interchange.node-provider.name=" + nodeName
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -129,7 +130,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	private LocalSubscription createSubscription(String messageType, String originatingCountry) {
 		String selector = "messageType = '" + messageType + "' and originatingCountry = '" + originatingCountry +"'";
-		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, "my-node");
+		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, nodeName);
 	}
 
 	@Test
@@ -141,7 +142,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX2'",
 				LocalDateTime.now(),
-				"my-node",
+				nodeName,
 				Collections.emptySet(),
 				Collections.singleton(new LocalEndpoint(
 								source,
@@ -295,22 +296,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	@Disabled("This no longer applies, as we don't have consumercommonname on localsubscription")
-	public void doNotSetUpQueueWhenOnlySubscriptionHasSameConsumerCommonNameAsServiceProviderName() {
-		String queueName = "my-queue";
-		LocalSubscription sub = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
-				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
-						"AND messageType = 'DATEX2' " +
-						"AND originatingCountry = 'NO'");
-
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider-3");
-		serviceProvider.addLocalSubscription(sub);
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
-		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
-		assertThat(client.queueExists(serviceProvider.getName())).isFalse();
-	}
-
-	@Test
 	public void doSetUpQueueWhenSubscriptionHasConsumerCommonNameSameAsIxnNameAndServiceProviderName() {
 		LocalSubscription sub1 = new LocalSubscription(LocalSubscriptionStatus.REQUESTED,
 				"((quadTree like '%,01230122%') OR (quadTree like '%,01230123%'))" +
@@ -423,7 +408,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String queueName = "my-queue";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		String selector = "a=b";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector,"");
 		serviceProvider.addLocalSubscription(localSubscription);
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
 		subscription.setExchangeName("subscription-exchange");
@@ -443,7 +428,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void tearDownSubscriptionExchange() {
 		String serviceProviderName = "my-service-provider";
 		String selector = "a=b";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector);
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, nodeName);
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN);
 		subscription.setExchangeName("subscription-exchange");
 

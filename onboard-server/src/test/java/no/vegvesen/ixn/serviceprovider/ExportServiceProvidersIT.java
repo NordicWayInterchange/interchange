@@ -59,7 +59,8 @@ public class ExportServiceProvidersIT {
         serviceProvider.setSubscriptions(Collections.singleton(
                 new LocalSubscription(
                         LocalSubscriptionStatus.CREATED,
-                        "originatingCountry = 'NO' and messageType = 'DENM'")
+                        "originatingCountry = 'NO' and messageType = 'DENM'",
+                        "my-node")
                 )
         );
         repository.save(serviceProvider);

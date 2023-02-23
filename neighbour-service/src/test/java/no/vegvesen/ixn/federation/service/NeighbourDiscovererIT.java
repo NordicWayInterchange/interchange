@@ -335,7 +335,8 @@ public class NeighbourDiscovererIT {
 		Set<LocalSubscription> localSubscriptions = Collections.singleton(
 				new LocalSubscription(
 						LocalSubscriptionStatus.CREATED,
-						"originatingCountry = 'NO'"
+						"originatingCountry = 'NO'",
+						nodeProperties.getName()
 				)
 		);
 		Neighbour neighbourA = new Neighbour(

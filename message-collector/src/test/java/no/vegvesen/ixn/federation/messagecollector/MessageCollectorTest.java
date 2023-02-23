@@ -34,8 +34,24 @@ public class MessageCollectorTest {
 
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        Match match1 = new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT);
-        Match match2 = new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT);
+        Match match1 = new Match(
+                new LocalSubscription(
+                        LocalSubscriptionStatus.CREATED,
+                        "a = b",
+                        "consumer"
+                        ),
+                new Subscription(),
+                MatchStatus.SETUP_ENDPOINT
+        );
+        Match match2 = new Match(
+                new LocalSubscription(
+                        LocalSubscriptionStatus.CREATED,
+                        "a = b",
+                        "consumer2"
+                ),
+                new Subscription(),
+                MatchStatus.SETUP_ENDPOINT
+        );
         when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(match1));
         when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(match2));
 
@@ -71,8 +87,28 @@ public class MessageCollectorTest {
 
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT)));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT)));
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(
+                new Match(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.CREATED,
+                                "a = b",
+                                "consumer"
+                        ),
+                        new Subscription(),
+                        MatchStatus.SETUP_ENDPOINT
+                )
+        ));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(
+                new Match(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.CREATED,
+                                "a = b",
+                                "consumer2"
+                        ),
+                        new Subscription(),
+                        MatchStatus.SETUP_ENDPOINT
+                )
+        ));
 
 
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
@@ -103,8 +139,28 @@ public class MessageCollectorTest {
 
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT)));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT)));
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(
+                new Match(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.CREATED,
+                                "a = b",
+                                "consumer"
+                        ),
+                        new Subscription(),
+                        MatchStatus.SETUP_ENDPOINT
+                )
+        ));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(
+                new Match(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.CREATED,
+                                "a = b",
+                                "consumer2"
+                        ),
+                        new Subscription(),
+                        MatchStatus.SETUP_ENDPOINT
+                )
+        ));
 
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
         collector.runSchedule();
@@ -135,8 +191,28 @@ public class MessageCollectorTest {
 
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT)));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT)));
+        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(
+                new Match(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.CREATED,
+                                "a = b",
+                                "consumer"
+                        ),
+                        new Subscription(),
+                        MatchStatus.SETUP_ENDPOINT
+                )
+        ));
+        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(
+                new Match(
+                        new LocalSubscription(
+                                LocalSubscriptionStatus.CREATED,
+                                "a = b",
+                                "consumer2"
+                        ),
+                        new Subscription(),
+                        MatchStatus.SETUP_ENDPOINT
+                )
+        ));
 
         MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
         collector.runSchedule();
@@ -156,7 +232,15 @@ public class MessageCollectorTest {
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
 
-        Match match = new Match(new LocalSubscription(), new Subscription(), MatchStatus.TEARDOWN_ENDPOINT);
+        Match match = new Match(
+                new LocalSubscription(
+                       LocalSubscriptionStatus.TEAR_DOWN,
+                       "a = b",
+                       "consumer"
+                ),
+                new Subscription(),
+                MatchStatus.TEARDOWN_ENDPOINT
+        );
         when(matchDiscoveryService.findMatchesToTearDownEndpointsFor()).thenReturn(Collections.singletonList(match));
 
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
@@ -186,8 +270,24 @@ public class MessageCollectorTest {
         MatchRepository matchRepository = mock(MatchRepository.class);
         MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
 
-        Match match1 = new Match(new LocalSubscription(), new Subscription(), MatchStatus.TEARDOWN_ENDPOINT);
-        Match match2 = new Match(new LocalSubscription(), new Subscription(), MatchStatus.SETUP_ENDPOINT);
+        Match match1 = new Match(
+                new LocalSubscription(
+                        LocalSubscriptionStatus.TEAR_DOWN,
+                        "a = b",
+                        "consumer"
+                ),
+                new Subscription(),
+                MatchStatus.TEARDOWN_ENDPOINT
+        );
+        Match match2 = new Match(
+                new LocalSubscription(
+                        LocalSubscriptionStatus.CREATED,
+                        "a = b",
+                        "consumer"
+                ),
+                new Subscription(),
+                MatchStatus.SETUP_ENDPOINT
+        );
         when(matchDiscoveryService.findMatchesToTearDownEndpointsFor()).thenReturn(Collections.singletonList(match1));
         when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(match2));
 
