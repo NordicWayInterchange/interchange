@@ -64,4 +64,16 @@ public class EndpointTest {
 
     }
 
+    @Test
+    public void maxBandwidthAndMessageRateNull() {
+        Endpoint endpoint = new Endpoint(
+                "a",
+                "b",
+                123
+        );
+        assertThat(endpoint.getMaxMessageRate()).isNull();
+        assertThat(endpoint.getMaxBandwidth()).isNull();
+
+    }
+
 }

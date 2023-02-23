@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "endpoints")
+@Table(name = "endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"source","host","port"}, name = "uc_endpoint"))
 public class Endpoint {
 
     @Id
@@ -73,10 +73,6 @@ public class Endpoint {
 
     public Integer getId() {
         return id;
-    }
-
-    public boolean isTheSameAsListenerEndpoint(ListenerEndpoint listenerEndpoint) {
-        return source.equals(listenerEndpoint.getSource()) && host.equals(listenerEndpoint.getHost()) && port.equals(listenerEndpoint.getPort());
     }
 
     @Override

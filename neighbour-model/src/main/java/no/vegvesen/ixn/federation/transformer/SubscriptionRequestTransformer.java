@@ -75,7 +75,9 @@ public class SubscriptionRequestTransformer {
 				EndpointApi endpointApi = new EndpointApi(
 						endpoint.getSource(),
 						endpoint.getHost(),
-						endpoint.getPort()
+						endpoint.getPort(),
+						endpoint.getMaxBandwidth(),
+						endpoint.getMaxMessageRate()
 				);
 				newEndpoints.add(endpointApi);
 			}
