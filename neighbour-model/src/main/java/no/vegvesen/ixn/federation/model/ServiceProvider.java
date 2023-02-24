@@ -50,6 +50,12 @@ public class ServiceProvider {
 		this.name = name;
 	}
 
+	public ServiceProvider(String name,
+						   Set<LocalSubscription> subscriptions) {
+		this.name = name;
+		this.subscriptions.addAll(subscriptions);
+	}
+
 	public ServiceProvider(Integer id,
 						   String name,
 						   Capabilities capabilities,

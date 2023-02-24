@@ -7,6 +7,7 @@ public enum LocalSubscriptionStatus {
     RESUBSCRIBE, ILLEGAL;
 
 
+    //TODO this warrants its own test!!!!!!
     public static boolean isAlive(LocalSubscriptionStatus status) {
         return !TEAR_DOWN.equals(status) || ILLEGAL.equals(status);
     }
