@@ -1,8 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
+import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
 import java.time.LocalDateTime;
@@ -32,14 +31,14 @@ public class TypeTransformer {
         return new LocalActorCapability(
                 id,
                 createCapabilitiesPath(serviceProviderName, id),
-                capability.toApi());
+                capability.toSPApi());
     }
 
 
     public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(String serviceProviderName, String selector, Set<Capability> capabilities) {
         Set<FetchCapability> fetchCapabilities = new HashSet<>();
         for (Capability capability : capabilities) {
-            fetchCapabilities.add(new FetchCapability(capability.toApi()));
+            fetchCapabilities.add(new FetchCapability(capability.toSPApi()));
         }
         if (selector == null || selector.isEmpty()) {
             return new FetchMatchingCapabilitiesResponse(serviceProviderName, fetchCapabilities);
@@ -247,10 +246,10 @@ public class TypeTransformer {
         }
     }
 
-    public Set<Capability> capabilitiesRequestToCapabilities(CapabilityToCapabilityApiTransformer capabilityApiTransformer, AddCapabilitiesRequest capabilitiesRequest) {
+    public Set<Capability> capabilitiesRequestToCapabilities(CapabilityToSPCapabilityApiTransformer capabilityApiTransformer, AddCapabilitiesRequest capabilitiesRequest) {
         Set<Capability> capabilities = new HashSet<>();
-        for (CapabilityApi capabilityApi : capabilitiesRequest.getCapabilities()) {
-            Capability capability = capabilityApiTransformer.capabilityApiToCapability(capabilityApi);
+        for (SPCapabilityApi SPCapabilityApi : capabilitiesRequest.getCapabilities()) {
+            Capability capability = capabilityApiTransformer.capabilityApiToCapability(SPCapabilityApi);
             capabilities.add(capability);
 
         }
@@ -269,7 +268,7 @@ public class TypeTransformer {
         return new GetCapabilityResponse(
                 capabilityId,
                 createCapabilitiesPath(serviceProviderName,capabilityId),
-                capability.toApi()
+                capability.toSPApi()
         );
     }
 

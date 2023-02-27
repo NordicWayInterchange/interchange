@@ -8,7 +8,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ public class OnboardRestController {
 	private final NeighbourRepository neighbourRepository;
 	private final CertService certService;
 	private final InterchangeNodeProperties nodeProperties;
-	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
+	private CapabilityToSPCapabilityApiTransformer capabilityApiTransformer = new CapabilityToSPCapabilityApiTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
 

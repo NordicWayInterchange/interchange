@@ -3,6 +3,8 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
 import no.vegvesen.ixn.properties.MessageProperty;
+import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
+import no.vegvesen.ixn.serviceprovider.capability.SPRedirectStatusApi;
 
 import javax.persistence.*;
 import java.util.*;
@@ -157,7 +159,23 @@ public abstract class Capability {
 		}
 	}
 
+	public SPRedirectStatusApi toSPRedirectStatusApi(RedirectStatus status) {
+		if (status == null) {
+			return SPRedirectStatusApi.OPTIONAL;
+		}
+		switch (status) {
+			case MANDATORY:
+				return SPRedirectStatusApi.MANDATORY;
+			case NOT_AVAILABLE:
+				return SPRedirectStatusApi.NOT_AVAILABLE;
+			default:
+				return SPRedirectStatusApi.OPTIONAL;
+		}
+	}
+
 	public abstract CapabilityApi toApi();
+
+	public abstract SPCapabilityApi toSPApi();
 
 	public abstract String messageType();
 

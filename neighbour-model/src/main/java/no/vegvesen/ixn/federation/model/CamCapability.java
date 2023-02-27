@@ -3,7 +3,8 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.api.v1_0.CamCapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
+import no.vegvesen.ixn.serviceprovider.capability.CamSPCapabilityApi;
+import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -45,6 +46,11 @@ public class CamCapability extends Capability{
     @Override
     public CapabilityApi toApi() {
         return new CamCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getStationTypes());
+    }
+
+    @Override
+    public SPCapabilityApi toSPApi() {
+        return new CamSPCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toSPRedirectStatusApi(getRedirect()), getStationTypes());
     }
 
     @Override

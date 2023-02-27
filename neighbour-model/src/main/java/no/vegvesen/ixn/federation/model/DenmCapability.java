@@ -3,7 +3,8 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
+import no.vegvesen.ixn.serviceprovider.capability.DenmSPCapabilityApi;
+import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -40,6 +41,11 @@ public class DenmCapability extends Capability {
 	@Override
 	public CapabilityApi toApi() {
 		return new DenmCapabilityApi(this.getPublisherId(), this.getOriginatingCountry(), this.getProtocolVersion(), this.getQuadTree(), toRedirectStatusApi(this.getRedirect()), this.getCauseCodes());
+	}
+
+	@Override
+	public SPCapabilityApi toSPApi() {
+		return new DenmSPCapabilityApi(this.getPublisherId(), this.getOriginatingCountry(), this.getProtocolVersion(), this.getQuadTree(), toSPRedirectStatusApi(this.getRedirect()), this.getCauseCodes());
 	}
 
 	@Override

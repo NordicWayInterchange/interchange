@@ -1,7 +1,7 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.api.v1_0.DenmCapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.RedirectStatusApi;
+import no.vegvesen.ixn.serviceprovider.capability.DenmSPCapabilityApi;
+import no.vegvesen.ixn.serviceprovider.capability.SPRedirectStatusApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -134,12 +134,12 @@ public class OnboardRestAPIDocumentationTest {
     //TODO
     @Test
     public void createDENMCapability() throws JsonProcessingException {
-        DenmCapabilityApi api = new DenmCapabilityApi(
+        DenmSPCapabilityApi api = new DenmSPCapabilityApi(
                 "NPRA",
                 "NO",
                 "1.0",
                 Collections.singleton("1234"),
-                RedirectStatusApi.OPTIONAL,
+                SPRedirectStatusApi.OPTIONAL,
                 Collections.singleton("6")
         );
 
@@ -153,7 +153,7 @@ public class OnboardRestAPIDocumentationTest {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "sp-1",
                 Collections.singleton(
-                        new DenmCapabilityApi(
+                        new DenmSPCapabilityApi(
                                 "NPRA",
                                 "NO",
                                 "1.0",
@@ -173,7 +173,7 @@ public class OnboardRestAPIDocumentationTest {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "king_gustaf.bouvetinterchange.eu",
                 Collections.singleton(
-                        new DenmCapabilityApi(
+                        new DenmSPCapabilityApi(
                                 "STV",
                                 "SE",
                                 "1.0",
@@ -195,7 +195,7 @@ public class OnboardRestAPIDocumentationTest {
                         new LocalActorCapability(
                                 "1",
                                 "/sp-1/capabilities/1",
-                                new DenmCapabilityApi(
+                                new DenmSPCapabilityApi(
                                         "NPRA",
                                         "NO",
                                         "1.0",
@@ -217,7 +217,7 @@ public class OnboardRestAPIDocumentationTest {
                         new LocalActorCapability(
                                 "1",
                                 "/spi-1/capabilities/1",
-                                new DenmCapabilityApi(
+                                new DenmSPCapabilityApi(
                                         "NPRA",
                                         "NO",
                                         "1.0",
@@ -236,7 +236,7 @@ public class OnboardRestAPIDocumentationTest {
         GetCapabilityResponse response = new GetCapabilityResponse(
                 "1",
                 "/sp-1/capabilities/1",
-                new DenmCapabilityApi(
+                new DenmSPCapabilityApi(
                         "NPRA",
                         "NO",
                         "1.0",
@@ -320,7 +320,7 @@ public class OnboardRestAPIDocumentationTest {
                 "service-provider",
                 Collections.singleton(
                         new FetchCapability(
-                                new DenmCapabilityApi(
+                                new DenmSPCapabilityApi(
                                         "NPRA",
                                         "NO",
                                         "1.0",
@@ -342,7 +342,7 @@ public class OnboardRestAPIDocumentationTest {
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'",
                 Collections.singleton(
                         new FetchCapability(
-                                new DenmCapabilityApi(
+                                new DenmSPCapabilityApi(
                                         "NPRA",
                                         "NO",
                                         "1.0",

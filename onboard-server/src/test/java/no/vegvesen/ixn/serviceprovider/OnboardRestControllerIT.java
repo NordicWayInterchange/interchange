@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
+import no.vegvesen.ixn.serviceprovider.capability.DatexSPCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testDeletingCapability() {
-        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        DatexSPCapabilityApi datexNO = new DatexSPCapabilityApi("NO");
         String serviceProviderName = "serviceprovider";
 
         //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
@@ -74,7 +74,7 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testGettingCapability() {
-        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        DatexSPCapabilityApi datexNO = new DatexSPCapabilityApi("NO");
         String serviceProviderName = "serviceprovider";
 
         //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);

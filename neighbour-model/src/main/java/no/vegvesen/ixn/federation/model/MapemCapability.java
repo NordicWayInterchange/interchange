@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.serviceprovider.capability.MapemSPCapabilityApi;
+import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -42,6 +44,11 @@ public class MapemCapability extends Capability{
     @Override
     public CapabilityApi toApi() {
         return new MapemCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getIds());
+    }
+
+    @Override
+    public SPCapabilityApi toSPApi() {
+        return new MapemSPCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toSPRedirectStatusApi(getRedirect()), getIds());
     }
 
     @Override

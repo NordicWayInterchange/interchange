@@ -2,12 +2,12 @@ package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.ServiceProviderRouter;
-import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.serviceprovider.capability.DatexSPCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,7 +80,7 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DatexCapabilityApi datexNo = new DatexCapabilityApi("NO");
+		DatexSPCapabilityApi datexNo = new DatexSPCapabilityApi("NO");
 		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
 				firstServiceProvider,
 				Collections.singleton(datexNo)
@@ -142,7 +142,7 @@ public class OnboardRestControllerTest {
 
 		mockCertificate("First Service Provider");
 
-		DatexCapabilityApi datexFi = new DatexCapabilityApi("FI");
+		DatexSPCapabilityApi datexFi = new DatexSPCapabilityApi("FI");
 		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
 				"SecondServiceProvider",
                 Collections.singleton(datexFi)
