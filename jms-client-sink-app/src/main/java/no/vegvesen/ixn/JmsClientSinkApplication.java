@@ -1,5 +1,6 @@
 package no.vegvesen.ixn;
 
+import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,13 +32,13 @@ public class JmsClientSinkApplication implements Callable<Integer> {
 
 
     @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
-    private String keystorePath;
+    private Path keystorePath;
 
     @Option(names = {"-s","--keystorepassword"}, required = true, description = "The password of the service provider keystore")
     String keystorePassword;
 
     @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
-    String trustStorePath;
+    Path trustStorePath;
 
     @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
     String trustStorePassword;
@@ -110,10 +111,10 @@ public class JmsClientSinkApplication implements Callable<Integer> {
     }
 
     private SSLContext createSSLContext() {
-        KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
+        KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath.toString(),
                 keystorePassword,
                 KeystoreType.PKCS12);
-        KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
+        KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath.toString(),
                 trustStorePassword,KeystoreType.JKS);
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
     }
