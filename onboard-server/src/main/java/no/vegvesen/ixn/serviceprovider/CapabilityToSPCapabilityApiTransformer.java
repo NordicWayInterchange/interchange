@@ -56,4 +56,46 @@ public class CapabilityToSPCapabilityApiTransformer {
                 return RedirectStatus.OPTIONAL;
         }
     }
+
+    public SPCapabilityApi capabilityToSPCapabilityApi(Capability capability) {
+        if (capability instanceof DatexCapability) {
+            return new DatexSPCapabilityApi(capability.getPublisherId(), capability.getOriginatingCountry(), capability.getProtocolVersion(), capability.getQuadTree(), transformRedirectStatusToSPRedirectStatusApi(capability.getRedirect()), ((DatexCapability) capability).getPublicationTypes());
+        }
+        else if (capability instanceof DenmCapability) {
+            return new DenmSPCapabilityApi(capability.getPublisherId(), capability.getOriginatingCountry(), capability.getProtocolVersion(), capability.getQuadTree(), transformRedirectStatusToSPRedirectStatusApi(capability.getRedirect()), ((DenmCapability) capability).getCauseCodes());
+        }
+        else if (capability instanceof IvimCapability) {
+            return new IvimSPCapabilityApi(capability.getPublisherId(), capability.getOriginatingCountry(), capability.getProtocolVersion(), capability.getQuadTree(), transformRedirectStatusToSPRedirectStatusApi(capability.getRedirect()), ((IvimCapability) capability).getIviTypes());
+        }
+        else if (capability instanceof SpatemCapability) {
+            return new SpatemSPCapabilityApi(capability.getPublisherId(), capability.getOriginatingCountry(), capability.getProtocolVersion(), capability.getQuadTree(), transformRedirectStatusToSPRedirectStatusApi(capability.getRedirect()), ((SpatemCapability) capability).getIds());
+        }
+        else if (capability instanceof MapemCapability) {
+            return new MapemSPCapabilityApi(capability.getPublisherId(), capability.getOriginatingCountry(), capability.getProtocolVersion(), capability.getQuadTree(), transformRedirectStatusToSPRedirectStatusApi(capability.getRedirect()), ((MapemCapability) capability).getIds());
+        }
+        else if (capability instanceof SremCapability) {
+            return new SremSPCapabilityApi(capability.getPublisherId(), capability.getOriginatingCountry(), capability.getProtocolVersion(), capability.getQuadTree(), transformRedirectStatusToSPRedirectStatusApi(capability.getRedirect()), ((SremCapability) capability).getIds());
+        }
+        else if (capability instanceof SsemCapability) {
+            return new SsemSPCapabilityApi(capability.getPublisherId(), capability.getOriginatingCountry(), capability.getProtocolVersion(), capability.getQuadTree(), transformRedirectStatusToSPRedirectStatusApi(capability.getRedirect()), ((SsemCapability) capability).getIds());
+        }
+        else if (capability instanceof CamCapability) {
+            return new CamSPCapabilityApi(capability.getPublisherId(), capability.getOriginatingCountry(), capability.getProtocolVersion(), capability.getQuadTree(), transformRedirectStatusToSPRedirectStatusApi(capability.getRedirect()), ((CamCapability) capability).getStationTypes());
+        }
+        throw new RuntimeException("Subclass of Capability not possible to convert");
+    }
+
+    private SPRedirectStatusApi transformRedirectStatusToSPRedirectStatusApi(RedirectStatus status) {
+        if (status == null) {
+            return SPRedirectStatusApi.OPTIONAL;
+        }
+        switch (status) {
+            case MANDATORY:
+                return SPRedirectStatusApi.MANDATORY;
+            case NOT_AVAILABLE:
+                return SPRedirectStatusApi.NOT_AVAILABLE;
+            default:
+                return SPRedirectStatusApi.OPTIONAL;
+        }
+    }
 }

@@ -69,7 +69,7 @@ public class OnboardRestController {
 		Set<Capability> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
 		addedCapabilities.retainAll(newLocalCapabilities);
 
-		AddCapabilitiesResponse response = TypeTransformer.addCapabilitiesResponse(serviceProviderName,addedCapabilities);
+		AddCapabilitiesResponse response = TypeTransformer.addCapabilitiesResponse(capabilityApiTransformer, serviceProviderName,addedCapabilities);
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		OnboardMDCUtil.removeLogVariables();
 		return response;
@@ -81,7 +81,7 @@ public class OnboardRestController {
 		logger.info("List capabilities for service provider {}",serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(serviceProviderName,serviceProvider.getCapabilities().getCapabilities());
+		ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(capabilityApiTransformer, serviceProviderName,serviceProvider.getCapabilities().getCapabilities());
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}
@@ -98,7 +98,7 @@ public class OnboardRestController {
 				allCapabilities = getAllMatchingCapabilities(selector, allCapabilities);
 			}
 		}
-		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(serviceProviderName, selector, allCapabilities);
+		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(capabilityApiTransformer, serviceProviderName, selector, allCapabilities);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}
@@ -157,7 +157,7 @@ public class OnboardRestController {
 				c.getId().equals(Integer.parseInt(capabilityId)))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, serviceProviderName)));
-		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(serviceProviderName,capability);
+		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}

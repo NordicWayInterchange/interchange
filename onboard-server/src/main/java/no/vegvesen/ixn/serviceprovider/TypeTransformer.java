@@ -11,34 +11,35 @@ import java.util.*;
 
 public class TypeTransformer {
 
-    public static AddCapabilitiesResponse addCapabilitiesResponse(String serviceProviderName, Set<Capability> capabilities) {
+    public static AddCapabilitiesResponse addCapabilitiesResponse(CapabilityToSPCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<Capability> capabilities) {
         return new AddCapabilitiesResponse(
                serviceProviderName,
-               capabilitySetToLocalActorCapability(serviceProviderName,capabilities)
+               capabilitySetToLocalActorCapability(capabilityApiTransformer, serviceProviderName,capabilities)
         );
     }
 
-    private static Set<LocalActorCapability> capabilitySetToLocalActorCapability(String serviceProviderName, Set<Capability> capabilities) {
+    private static Set<LocalActorCapability> capabilitySetToLocalActorCapability(CapabilityToSPCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<Capability> capabilities) {
         Set<LocalActorCapability> result = new HashSet<>();
         for (Capability capability : capabilities) {
-            result.add(capabilityToLocalCapability(serviceProviderName,capability));
+            result.add(capabilityToLocalCapability(capabilityApiTransformer, serviceProviderName,capability));
         }
         return result;
     }
 
-    private static LocalActorCapability capabilityToLocalCapability(String serviceProviderName, Capability capability) {
+    private static LocalActorCapability capabilityToLocalCapability(CapabilityToSPCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Capability capability) {
         String id = capability.getId().toString();
         return new LocalActorCapability(
                 id,
                 createCapabilitiesPath(serviceProviderName, id),
-                capability.toSPApi());
+                capabilityApiTransformer.capabilityToSPCapabilityApi(capability));
+
     }
 
 
-    public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(String serviceProviderName, String selector, Set<Capability> capabilities) {
+    public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(CapabilityToSPCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, String selector, Set<Capability> capabilities) {
         Set<FetchCapability> fetchCapabilities = new HashSet<>();
         for (Capability capability : capabilities) {
-            fetchCapabilities.add(new FetchCapability(capability.toSPApi()));
+            fetchCapabilities.add(new FetchCapability(capabilityApiTransformer.capabilityToSPCapabilityApi(capability)));
         }
         if (selector == null || selector.isEmpty()) {
             return new FetchMatchingCapabilitiesResponse(serviceProviderName, fetchCapabilities);
@@ -256,19 +257,19 @@ public class TypeTransformer {
         return capabilities;
     }
 
-    public ListCapabilitiesResponse listCapabilitiesResponse(String serviceProviderName, Set<Capability> capabilities) {
+    public ListCapabilitiesResponse listCapabilitiesResponse(CapabilityToSPCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<Capability> capabilities) {
         return new ListCapabilitiesResponse(
                 serviceProviderName,
-                capabilitySetToLocalActorCapability(serviceProviderName,capabilities)
+                capabilitySetToLocalActorCapability(capabilityApiTransformer, serviceProviderName,capabilities)
         );
     }
 
-    public GetCapabilityResponse getCapabilityResponse(String serviceProviderName, Capability capability) {
+    public GetCapabilityResponse getCapabilityResponse(CapabilityToSPCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Capability capability) {
         String capabilityId = capability.getId().toString();
         return new GetCapabilityResponse(
                 capabilityId,
                 createCapabilitiesPath(serviceProviderName,capabilityId),
-                capability.toSPApi()
+                capabilityApiTransformer.capabilityToSPCapabilityApi(capability)
         );
     }
 

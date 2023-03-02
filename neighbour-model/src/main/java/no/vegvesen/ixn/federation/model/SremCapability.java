@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
-import no.vegvesen.ixn.serviceprovider.capability.SremSPCapabilityApi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -44,11 +42,6 @@ public class SremCapability extends Capability{
     @Override
     public CapabilityApi toApi() {
         return new SremCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getIds());
-    }
-
-    @Override
-    public SPCapabilityApi toSPApi() {
-        return new SremSPCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toSPRedirectStatusApi(getRedirect()), getIds());
     }
 
     @Override

@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
-import no.vegvesen.ixn.serviceprovider.capability.SpatemSPCapabilityApi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -44,11 +42,6 @@ public class SpatemCapability extends Capability{
     @Override
     public CapabilityApi toApi() {
         return new SpatemCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getIds());
-    }
-
-    @Override
-    public SPCapabilityApi toSPApi() {
-        return new SpatemSPCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toSPRedirectStatusApi(getRedirect()), getIds());
     }
 
     @Override

@@ -3,8 +3,6 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.IvimCapabilityApi;
-import no.vegvesen.ixn.serviceprovider.capability.IvimSPCapabilityApi;
-import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -45,11 +43,6 @@ public class IvimCapability extends Capability {
 	@Override
 	public CapabilityApi toApi() {
 		return new IvimCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getIviTypes());
-	}
-
-	@Override
-	public SPCapabilityApi toSPApi() {
-		return new IvimSPCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toSPRedirectStatusApi(getRedirect()), getIviTypes());
 	}
 
 	@Override

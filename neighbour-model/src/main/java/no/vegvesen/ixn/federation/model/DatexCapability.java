@@ -3,8 +3,6 @@ package no.vegvesen.ixn.federation.model;
 import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
-import no.vegvesen.ixn.serviceprovider.capability.DatexSPCapabilityApi;
-import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -56,11 +54,6 @@ public class DatexCapability extends Capability{
 	@Override
 	public CapabilityApi toApi() {
 		return new DatexCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toRedirectStatusApi(getRedirect()), getPublicationTypes());
-	}
-
-	@Override
-	public SPCapabilityApi toSPApi() {
-		return new DatexSPCapabilityApi(getPublisherId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), toSPRedirectStatusApi(getRedirect()), getPublicationTypes());
 	}
 
 	@Override
