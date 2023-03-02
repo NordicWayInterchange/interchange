@@ -147,6 +147,11 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
+	public void removeSubscription(LocalSubscription subscription) {
+		subscriptions.remove(subscription);
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
 	public boolean hasCapabilitiesOrActiveSubscriptions() {
 		return (capabilities.hasDataTypes() ||
 				!activeSubscriptions().isEmpty());

@@ -891,8 +891,64 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.processSubscription(serviceProvider,subscription,"myNode","5432");
 		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
 		verify(matchDiscoveryService).findMatchesByLocalSubscriptionId(1);
+	}
 
+	@Test
+	public void redirectSubscriptionStatusTearDownEmptyMatchList() {
+		LocalSubscription subscription = new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.TEAR_DOWN,
+				"",
+				"myNode"
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"sp1",
+				Collections.singleton(subscription)
+		);
+		when(matchDiscoveryService.findMatchesByLocalSubscriptionId(1)).thenReturn(Collections.emptyList());
+		router.processRedirectSubscription(serviceProvider,subscription);
+		assertThat(serviceProvider.getSubscriptions()).isEmpty();
+		verify(matchDiscoveryService).findMatchesByLocalSubscriptionId(1);
+	}
 
+	@Test
+	public void redirectSubscriptionStatusTearDownNonEmptyMatchList() {
+		LocalSubscription subscription = new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.TEAR_DOWN,
+				"",
+				"sp1"
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"sp1",
+				Collections.singleton(subscription)
+		);
+		Match match = new Match(
+				subscription,
+				new Subscription("",SubscriptionStatus.TEAR_DOWN),
+				MatchStatus.TEARDOWN_ENDPOINT
+		);
+		when(matchDiscoveryService.findMatchesByLocalSubscriptionId(1)).thenReturn(Arrays.asList(match));
+		router.redirectTearDown(serviceProvider,subscription);
+		assertThat(serviceProvider.getSubscriptions()).isNotEmpty().hasSize(1);
+		verify(matchDiscoveryService).findMatchesByLocalSubscriptionId(1);
+
+	}
+
+	@Test
+	public void redirectoSubscriptionStatusIllegal() {
+		LocalSubscription subscription = new LocalSubscription(
+				1,
+				LocalSubscriptionStatus.ILLEGAL,
+				"",
+				"sp1"
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"sp1",
+				Collections.singleton(subscription)
+		);
+		router.processRedirectSubscription(serviceProvider,subscription);
+		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
 
 	public SSLContext setUpTestSslContext(String s) {

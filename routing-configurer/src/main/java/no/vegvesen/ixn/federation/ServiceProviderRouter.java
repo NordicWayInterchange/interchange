@@ -100,7 +100,7 @@ public class ServiceProviderRouter {
                 break;
             case ILLEGAL:
                 // Remove the subscription from the ServiceProvider
-                serviceProvider.getSubscriptions().remove(subscription);
+                serviceProvider.removeSubscription(subscription);
                 break;
                 //needs testing.
             default:
@@ -125,7 +125,7 @@ public class ServiceProviderRouter {
         subscription.getLocalEndpoints().removeAll(endpointsToRemove);
         subscription.getConnections().clear();
         if (match.isEmpty()) {
-            serviceProvider.getSubscriptions().remove(subscription);
+            serviceProvider.removeSubscription(subscription);
         }
     }
 
@@ -141,17 +141,22 @@ public class ServiceProviderRouter {
         if (subscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED)) {
             subscription.setStatus(LocalSubscriptionStatus.CREATED);
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
+            //Just skip
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
-            redirectTearDown(subscription);
-            serviceProvider.getSubscriptions().remove(subscription);
+            redirectTearDown(serviceProvider,subscription);
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
+            serviceProvider.removeSubscription(subscription);
         } else {
             throw new IllegalStateException("Unknown subscription status encountered");
         }
     }
 
-    public void redirectTearDown(LocalSubscription subscription) {
+    public void redirectTearDown(ServiceProvider serviceProvider,LocalSubscription subscription) {
         subscription.getLocalEndpoints().clear();
+        List<Match> matches = matchDiscoveryService.findMatchesByLocalSubscriptionId(subscription.getId());
+        if (matches.isEmpty()) {
+            serviceProvider.removeSubscription(subscription);
+        }
     }
 
 
