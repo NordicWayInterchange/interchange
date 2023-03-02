@@ -99,6 +99,8 @@ public class ServiceProviderRouter {
                 onTearDown(serviceProvider, subscription);
                 break;
             case ILLEGAL:
+                // Remove the subscription from the ServiceProvider
+                serviceProvider.getSubscriptions().remove(subscription);
                 break;
                 //needs testing.
             default:
@@ -122,7 +124,9 @@ public class ServiceProviderRouter {
         }
         subscription.getLocalEndpoints().removeAll(endpointsToRemove);
         subscription.getConnections().clear();
-        serviceProvider.getSubscriptions().remove(subscription);
+        if (match.isEmpty()) {
+            serviceProvider.getSubscriptions().remove(subscription);
+        }
     }
 
     private void onRequested(String serviceProviderName, LocalSubscription subscription) {
