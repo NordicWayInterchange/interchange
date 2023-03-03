@@ -141,7 +141,6 @@ public class Subscription {
 		return endpoints;
 	}
 
-	//TODO test this!
 	public void setEndpoints(Set<Endpoint> newEndpoints) {
 		if (newEndpoints != null) {
 			endpoints.retainAll(newEndpoints);
