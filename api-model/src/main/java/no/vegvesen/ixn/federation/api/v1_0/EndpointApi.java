@@ -8,14 +8,16 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EndpointApi {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String source;
 
     private String host;
     private Integer port;
 
-    private Integer maxBandwidth = 0;
-    private Integer maxMessageRate = 0;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer maxBandwidth;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer maxMessageRate;
 
     public EndpointApi() {
 

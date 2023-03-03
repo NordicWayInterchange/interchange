@@ -35,9 +35,9 @@ public class CapabilitiesTest {
         DenmCapability firstCapability = new DenmCapability("NO00000", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton("1"));
         Capabilities capabilities = new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                new HashSet<>(Arrays.asList(
+                Collections.singleton(
                         firstCapability
-                )));
+                ));
         DenmCapability secondCapability = new DenmCapability("NO00001", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton("2"));
         capabilities.replaceCapabilities(Collections.singleton(secondCapability));
         assertThat(capabilities.getCapabilities()).hasSize(1);
@@ -50,9 +50,9 @@ public class CapabilitiesTest {
         DenmCapability firstCapability = new DenmCapability("NO00000", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton("1"));
         Capabilities capabilities = new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                new HashSet<>(Arrays.asList(
+                Collections.singleton(
                         firstCapability
-                )));
+                ));
         DenmCapability secondCapability = new DenmCapability("NO00001", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton("2"));
         DenmCapability thirdCapability = new DenmCapability("NO00002", "NO", "DENM:1.2.2", Collections.singleton("3"), Collections.singleton("3"));
 

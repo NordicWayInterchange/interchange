@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "neighbour_endpoints")
+@Table(name = "neighbour_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"source", "host", "port"}, name = "uc_neighbour_endpoint"))
 public class NeighbourEndpoint {
 
     @Id
@@ -47,24 +47,12 @@ public class NeighbourEndpoint {
         return source;
     }
 
-    public void setSource(String source) {
-        this.source = source;
-    }
-
     public String getHost() {
         return host;
     }
 
-    public void setHost(String host) {
-        this.host = host;
-    }
-
     public Integer getPort() {
         return port;
-    }
-
-    public void setPort(Integer port) {
-        this.port = port;
     }
 
     public Integer getMaxBandwidth() {
@@ -83,14 +71,14 @@ public class NeighbourEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
-    public boolean isTheSameAsListenerEndpoint(ListenerEndpoint listenerEndpoint) {
-        return source.equals(listenerEndpoint.getSource()) && host.equals(listenerEndpoint.getHost()) && port.equals(listenerEndpoint.getPort());
+    public Integer getId() {
+        return id;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Endpoint)) return false;
+        if (!(o instanceof NeighbourEndpoint)) return false;
         NeighbourEndpoint endpoint = (NeighbourEndpoint) o;
         return source.equals(endpoint.source) &&
                 host.equals(endpoint.host) &&
