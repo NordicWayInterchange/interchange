@@ -35,7 +35,7 @@ public class JMSSelectorFilterFactory {
 			JMSSelectorFilterFactory.get(selector);
 			return true;
 		} catch (InvalidSelectorException | SelectorAlwaysTrueException | HeaderNotFoundException e) {
-			logger.error("Invalid selector {}", selector, e);
+			logger.error("Invalid selector {}", selector);
 			return false;
 		}
 	}

@@ -156,7 +156,8 @@ public class LocalSubscription {
         if (newStatus.equals(this.status)) {
             return this;
         } else {
-            return new LocalSubscription(id,newStatus,selector,lastUpdated,consumerCommonName,connections,localEndpoints);
+            this.status = newStatus;
+            return this;
         }
     }
 

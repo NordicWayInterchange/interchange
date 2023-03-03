@@ -50,6 +50,12 @@ public class ServiceProvider {
 		this.name = name;
 	}
 
+	public ServiceProvider(String name,
+						   Set<LocalSubscription> subscriptions) {
+		this.name = name;
+		this.subscriptions.addAll(subscriptions);
+	}
+
 	public ServiceProvider(Integer id,
 						   String name,
 						   Capabilities capabilities,
@@ -138,6 +144,11 @@ public class ServiceProvider {
 
 	public void updateSubscriptions(Set<LocalSubscription> newSubscriptions) {
 		this.setSubscriptions(newSubscriptions);
+		this.subscriptionUpdated = LocalDateTime.now();
+	}
+
+	public void removeSubscription(LocalSubscription subscription) {
+		subscriptions.remove(subscription);
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
