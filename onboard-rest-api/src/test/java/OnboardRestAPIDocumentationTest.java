@@ -364,4 +364,11 @@ public class OnboardRestAPIDocumentationTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(selector));
     }
+
+    @Test
+    public void addPrivateChannelApi() throws JsonProcessingException {
+        PrivateChannelApi api = new PrivateChannelApi();
+        api.setPeerName("sp2");
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(api));
+    }
 }

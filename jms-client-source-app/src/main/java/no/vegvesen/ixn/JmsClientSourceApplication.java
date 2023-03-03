@@ -12,31 +12,32 @@ import picocli.CommandLine.Option;
 
 import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 /*
 TODO this app does not work as is. It should have a command per message type, taking positional parameters after.
 
  */
-@Command(name = "jmsclientsource", description = "JMS Client Source Application")
+@Command(name = "jmsclientsource", defaultValueProvider = CommandLine.PropertiesDefaultProvider.class, description = "JMS Client Source Application")
 public class JmsClientSourceApplication implements Callable<Integer> {
 
-    @Parameters(index = "0", description = "The url to the AMQP client")
+    @Parameters(index = "0", paramLabel = "URL", description = "The AMQPS url to connect to")
     private String url;
 
-    @Parameters(index = "1", description = "The queueName for the Service Provider")
+    @Parameters(index = "1", paramLabel =  "QUEUE",description = "The queueName to connect to")
     private String queueName;
 
-    @Option(names = {"-k","--keystorepath"}, description = "Path to the service provider p12 keystore")
-    private String keystorePath;
+    @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
+    private Path keystorePath;
 
-    @Option(names = {"-s","--keystorepassword"}, description = "The password of the service provider keystore")
+    @Option(names = {"-s","--keystorepassword"}, required = true, description = "The password of the service provider keystore")
     String keystorePassword;
 
-    @Option(names = {"-t","--truststorepath"}, description = "The path of the jks trust store")
-    String trustStorePath;
+    @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
+    Path trustStorePath;
 
-    @Option(names = {"-w","--truststorepassword"}, description = "The password of the jks trust store")
+    @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
     String trustStorePassword;
 
 
@@ -69,10 +70,10 @@ public class JmsClientSourceApplication implements Callable<Integer> {
     }
 
     private SSLContext createSSLContext() {
-        KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath,
+        KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath.toString(),
                 keystorePassword,
                 KeystoreType.PKCS12);
-        KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath,
+        KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath.toString(),
                 trustStorePassword,KeystoreType.JKS);
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
     }
