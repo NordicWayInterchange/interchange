@@ -158,7 +158,6 @@ public class LocalSubscription {
         } else {
             this.status = newStatus;
             return this;
-            //return new LocalSubscription(id,newStatus,selector,lastUpdated,consumerCommonName,connections,localEndpoints);
         }
     }
 
