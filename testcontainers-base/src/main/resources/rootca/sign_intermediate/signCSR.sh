@@ -38,7 +38,7 @@ if [ ! -f "ca/index.txt" ]; then
 	touch ca/index.txt
 	touch ca/index.txt.attr
 	echo 'unique_subject = no' >> ca/index.txt.attr
-	echo '1000'  > ca/serial
+	#echo '1000'  > ca/serial
 fi
 CERT_OUT_FILE=ca/intermediate/certs/int.$DOMAINNAME.crt.pem
 CERT_BUNDLE=ca/intermediate/certs/chain.$DOMAINNAME.crt.pem
@@ -56,7 +56,7 @@ crl_dir           = ca/crl
 new_certs_dir     = ca/newcerts
 database          = ca/index.txt
 serial            = ca/serial
-RANDFILE          = ca/private/.rand
+#RANDFILE          = ca/private/.rand
 
 # The root key and root certificate.
 private_key       = $CA_KEY
@@ -176,7 +176,7 @@ keyUsage = critical, digitalSignature
 extendedKeyUsage = critical, OCSPSigning
 EOF
 
-openssl ca -batch -config openssl_root.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha512 -in $csrPath -out "$CERT_OUT_FILE"
+openssl ca -batch -rand_serial -config openssl_root.cnf -extensions v3_intermediate_ca -days 3650 -notext -md sha512 -in $csrPath -out "$CERT_OUT_FILE"
 
 cat "$CERT_OUT_FILE" "$CA_CERT" > "$CERT_BUNDLE"
 cp  "$CERT_BUNDLE" /keys_out/

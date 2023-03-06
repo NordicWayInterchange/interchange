@@ -17,8 +17,6 @@ mkdir -p ca/certs
 mkdir -p ca/intermediate/{certs,newcerts,clr,csr,private}
 touch ca/intermediate/index.txt
 touch ca/intermediate/index.txt.attr
-echo 1000 > ca/intermediate/crlnumber
-echo '1234' > ca/intermediate/serial
 
 DOMAINNAME=$1
 COUNTRY=$2
@@ -37,8 +35,6 @@ certs             = ca/intermediate/certs
 crl_dir           = ca/intermediate/crl
 new_certs_dir     = ca/intermediate/newcerts
 database          = ca/intermediate/index.txt
-serial            = ca/intermediate/serial
-RANDFILE          = ca/intermediate/private/.rand
 
 # The root key and root certificate.
 private_key       = ca/intermediate/private/int.$DOMAINNAME.key.pem

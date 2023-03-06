@@ -14,9 +14,7 @@ fi
 mkdir -p ca/{newcerts,certs,crl,private,requests}
 touch ca/index.txt
 touch ca/index.txt.attr
-echo '1000' > ca/serial
 
-#echo Enter domain name for the rootCA:
 DOMAINNAME=$1
 COUNTRY_CODE=$2
 KEY_FILE=ca.$DOMAINNAME.key.pem
@@ -35,8 +33,6 @@ certs             = ca/certs
 crl_dir           = ca/crl
 new_certs_dir     = ca/newcerts
 database          = ca/index.txt
-serial            = ca/serial
-RANDFILE          = ca/private/.rand
 
 # The root key and root certificate.
 private_key       = ca/private/$KEY_FILE
@@ -157,7 +153,7 @@ extendedKeyUsage = critical, OCSPSigning
 EOF
 
 openssl genrsa -out ca/private/$KEY_FILE 4096
-openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/$KEY_FILE -out ca/certs/$CERT_FILE -days 3650 -set_serial 0 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY_CODE}"
+openssl req -config openssl_root.cnf -new -x509 -extensions v3_ca -key ca/private/$KEY_FILE -out ca/certs/$CERT_FILE -days 3650 -subj "/CN=${DOMAINNAME}/O=Nordic Way/C=${COUNTRY_CODE}"
 chmod -R ugo+rwx ca/
 
 cp ca/private/$KEY_FILE "$KEYS_OUT_DIR"

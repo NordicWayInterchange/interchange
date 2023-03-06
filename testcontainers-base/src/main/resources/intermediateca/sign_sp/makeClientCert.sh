@@ -15,10 +15,7 @@ INTERMEDIATE_CA_CHAIN=$5
 OUTPUT_PATH="/cert_out/"
 CERT_OUT="ca/intermediate/certs/$ident.crt.pem"
 SP_CERT_CHAIN="ca/intermediate/certs/chain.$ident.crt.pem"
-#if [ ! -f "$CRSFILE" ]; then
-#        echo could not find CRS for $ident. Exiting.
-#        exit 1
-#fi
+
 if [ ! -f "$INTERMEDIATE_CA_CERT" ]; then
         echo could not find cert for intermediate CA. Exiting.
         exit 1
@@ -36,7 +33,6 @@ if [ ! -d "ca/intermediate" ]; then
 	mkdir -p ca/intermediate/{certs,newcerts,crl,private}
   touch ca/intermediate/index.txt
 	echo 'unique_subject = no' >> ca/index.txt.attr
-	echo '1000'  > ca/intermediate/serial
 fi
 
 cat << EOF > openssl_intermediate.cnf
@@ -53,7 +49,6 @@ crl_dir           = ca/intermediate/crl
 new_certs_dir     = ca/intermediate/newcerts
 database          = ca/intermediate/index.txt
 serial            = ca/intermediate/serial
-RANDFILE          = ca/intermediate/private/.rand
 
 
 # The root key and root certificate.
@@ -173,8 +168,8 @@ keyUsage = critical, digitalSignature
 extendedKeyUsage = critical, OCSPSigning
 EOF
 
-openssl ca -batch -config openssl_intermediate.cnf -extensions usr_cert -days 3750 -notext -md sha512 -in $CSRFILE -out $CERT_OUT
-#TODO need both the cert and the chain from the CA
+openssl ca -batch -rand_serial -config openssl_intermediate.cnf -extensions usr_cert -days 3750 -notext -md sha512 -in $CSRFILE -out $CERT_OUT
+
 chmod -R ugo+rwx ca/
 cat $CERT_OUT $INTERMEDIATE_CA_CHAIN > $SP_CERT_CHAIN
 cp  $CERT_OUT $OUTPUT_PATH

@@ -61,7 +61,6 @@ if [ ! -d ca ]; then
   mkdir -p ca/intermediate/{private,newcerts,certs,csr}
   touch ca/intermediate/index.txt
 	echo 'unique_subject = no' >> ca/intermediate/index.txt.attr
-  echo 1000 > ca/intermediate/serial
 fi
 
 cat << EOF > openssl_intermediate.cnf
@@ -80,7 +79,6 @@ crl_dir           = ca/intermediate/crl
 new_certs_dir     = ca/intermediate/newcerts
 database          = ca/intermediate/index.txt
 serial            = ca/intermediate/serial
-RANDFILE          = ca/intermediate/private/.rand
 
 # The root key and root certificate.
 private_key       = $CA_KEY
@@ -200,7 +198,7 @@ extendedKeyUsage = critical, OCSPSigning
 EOF
 
 openssl req -out ca/intermediate/csr/$FQDN.csr.pem -newkey rsa:2048 -nodes -keyout ca/intermediate/private/$FQDN.key.pem -config openssl_csr_san.cnf -subj "/CN=${FQDN}/O=Nordic Way/C=${COUNTRY_CODE}"
-openssl ca -batch -config openssl_intermediate.cnf -extensions server_cert -days 3750 -notext -md sha512 -in ca/intermediate/csr/$FQDN.csr.pem -out ca/intermediate/certs/$FQDN.crt.pem
+openssl ca -batch -rand_serial -config openssl_intermediate.cnf -extensions server_cert -days 3750 -notext -md sha512 -in ca/intermediate/csr/$FQDN.csr.pem -out ca/intermediate/certs/$FQDN.crt.pem
 cat ca/intermediate/certs/$FQDN.crt.pem $CA_CHAIN > ca/intermediate/certs/chain.$FQDN.crt.pem
 chmod -R ugo+rwx ca/
 cp ca/intermediate/private/$FQDN.key.pem /keys_out/
