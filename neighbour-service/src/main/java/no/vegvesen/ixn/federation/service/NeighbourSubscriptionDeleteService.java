@@ -89,21 +89,6 @@ public class NeighbourSubscriptionDeleteService {
         matchRepository.saveAll(matchesToSave);
     }
 
-    public void tearDownListenerEndpoints(Neighbour neighbour) {
-        List<ListenerEndpoint> listenerEndpoints = listenerEndpointRepository.findAllByNeighbourName(neighbour.getName());
-        Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
-
-        Set<String> sourceList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getSource).collect(Collectors.toSet());
-        Set<String> hostList = subscriptions.stream().flatMap(subscription -> subscription.getEndpoints().stream()).map(Endpoint::getHost).collect(Collectors.toSet());
-
-        for (ListenerEndpoint listenerEndpoint : listenerEndpoints ) {
-            if (!sourceList.contains(listenerEndpoint.getSource()) && !hostList.contains(listenerEndpoint.getHost())) {
-                listenerEndpointRepository.delete(listenerEndpoint);
-                logger.info("Tearing down listenerEndpoint for neighbour {} with host {}, port {} and source {}", neighbour.getName(), listenerEndpoint.getHost(), listenerEndpoint.getPort(), listenerEndpoint.getSource());
-            }
-        }
-    }
-
     public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Subscription subscription) {
         Set<Endpoint> endpointsToRemove = new HashSet<>();
         for(Endpoint endpoint : subscription.getEndpoints()) {
