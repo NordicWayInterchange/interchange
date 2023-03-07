@@ -16,7 +16,7 @@ data:
     administrators.users={{ .Values.qpid.admin_user }},{{ .Values.external_name }}
     remote-service-providers.users=
     bi-consumers.users=
-    clients-private-channels=
+    clients-private-channels.users=
   default.json: |
     {{- $userlen := len .Values.qpid.users }}
     {{- $additionallen := len .Values.qpid.additional_queues }}
