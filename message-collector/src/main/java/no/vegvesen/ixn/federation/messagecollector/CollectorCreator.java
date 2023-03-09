@@ -52,7 +52,7 @@ public class CollectorCreator {
         String readUrl = String.format("amqps://%s:%s", listenerEndpoint.getHost(), listenerEndpoint.getPort());
         String readQueue = listenerEndpoint.getSource();
         Sink readSink = new Sink(readUrl, readQueue, sslContext);
-        logger.info("Fetching messages from {}, write to {}",readUrl,writeUrl);
+        logger.info("Fetching messages from URL {}, queue {} ; write to URL {} target {}", readUrl, readQueue, writeUrl, localExchange);
 
         MessageCollectorListener listener = new MessageCollectorListener(readSink, writeSource);
         try {
