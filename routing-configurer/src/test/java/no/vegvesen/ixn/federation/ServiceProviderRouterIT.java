@@ -21,7 +21,6 @@ import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,8 +182,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		localDelivery.addEndpoint(new LocalDeliveryEndpoint(
 				qpidContainer.getHost(),
 				qpidContainer.getAmqpsPort(),
-				exchangeName,
-				deliverySelector
+				exchangeName
 		));
 		king_gustaf.addDeliveries(Collections.singleton(localDelivery));
 

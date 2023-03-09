@@ -340,7 +340,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         String deliverySelector = "originatingCountry = 'NO'";
 
         String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("localhost", 5671, deliveryExchangeName, deliverySelector);
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("localhost", 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
                 1,
                 new HashSet<>(Collections.singletonList(endpoint)),
@@ -379,7 +379,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         String deliverySelector = "originatingCountry = 'SE'";
 
         String deliveryExchangeName = "del-" + UUID.randomUUID().toString();
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("localhost", 5671, deliveryExchangeName, deliverySelector);
+        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("localhost", 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
                 1,
                 new HashSet<>(Collections.singletonList(endpoint)),
