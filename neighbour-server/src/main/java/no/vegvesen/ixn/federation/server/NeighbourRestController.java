@@ -52,7 +52,7 @@ public class NeighbourRestController {
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourSubscriptionRequest.getName());
-		logger.info("Common name of certificate matched name in API object.");
+		logger.debug("Common name of certificate matched name in API object.");
 
 		SubscriptionResponseApi response = neighbourService.incomingSubscriptionRequest(neighbourSubscriptionRequest);
 		NeighbourMDCUtil.removeLogVariables();
@@ -66,7 +66,7 @@ public class NeighbourRestController {
 	    NeighbourMDCUtil.setLogVariables(properties.getName(),ixnName);
 	    logger.info("Received request for subscriptions for neighbour {}", ixnName);
 	    certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
-		logger.info("Common name matches Neighbour name in path.");
+		logger.debug("Common name matches Neighbour name in path.");
 
 		//fetch the list of neighbours
 		SubscriptionResponseApi reponse = neighbourService.findSubscriptions(ixnName);
@@ -81,11 +81,11 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
-		logger.info("Received poll of subscription from neighbour {}.", ixnName);
+		logger.info("Received poll of subscription {} from neighbour {}.",subscriptionId, ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
-		logger.info("Common name matches Neighbour name in path.");
+		logger.debug("Common name matches Neighbour name in path.");
 
 		NeighbourMDCUtil.removeLogVariables();
 		return neighbourService.incomingSubscriptionPoll(ixnName, subscriptionId);
@@ -102,7 +102,7 @@ public class NeighbourRestController {
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
-		logger.info("Common name of certificate matches Neighbour name in capability api object.");
+		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Set<Capability> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
@@ -117,11 +117,11 @@ public class NeighbourRestController {
 	@Secured("ROLE_USER")
 	public void deleteSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") Integer subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
-		logger.info("Received subscription to delete from neighbour {}.", ixnName);
+		logger.info("Received request to delete subscription {} from neighbour {}.",subscriptionId, ixnName);
 
 		// Check if CN of certificate matches name in api object. Reject if they do not match.
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
-		logger.info("Common name matches Neighbour name in path.");
+		logger.debug("Common name matches Neighbour name in path.");
 
 		neighbourService.incomingSubscriptionDelete(ixnName, subscriptionId);
 		NeighbourMDCUtil.removeLogVariables();
