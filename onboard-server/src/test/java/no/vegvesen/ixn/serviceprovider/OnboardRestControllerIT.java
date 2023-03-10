@@ -467,4 +467,33 @@ public class OnboardRestControllerIT {
         assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
         verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
+
+    @Test
+    public void testAddingMoreThanOneIdenticalDeliveries() {
+        String serviceProviderName = "my-service-provider";
+        String selector = "messageType = 'DENM'";
+        AddDeliveriesRequest request = new AddDeliveriesRequest(
+                serviceProviderName,
+                Collections.singleton(
+                        new SelectorApi(selector)
+                )
+        );
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName,request);
+        assertThat(response.getDeliveries()).hasSize(1);
+        assertThat(response.getDeliveries()).allMatch(d -> d.getStatus().equals(DeliveryStatus.REQUESTED));
+
+        //change the delivery status in the database
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        assertThat(serviceProvider.getDeliveries()).hasSize(1);
+        serviceProvider.getDeliveries().stream().forEach( d -> d.setStatus(LocalDeliveryStatus.CREATED));
+        serviceProviderRepository.save(serviceProvider);
+
+        //now, add the second delivery with original status
+        response = restController.addDeliveries(serviceProviderName,request);
+        assertThat(response.getDeliveries()).hasSize(1);
+
+        serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        assertThat(serviceProvider.getDeliveries()).hasSize(1);
+
+    }
 }

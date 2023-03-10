@@ -174,7 +174,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				1,
 				"/deliveries/1",
 				deliverySelector,
-				LocalDateTime.now(),
 				LocalDeliveryStatus.CREATED
 		);
 		String exchangeName = "myexchange";

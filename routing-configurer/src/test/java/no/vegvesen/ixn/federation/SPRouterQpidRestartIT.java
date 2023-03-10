@@ -346,7 +346,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 new HashSet<>(Collections.singletonList(endpoint)),
                 "/delivery/1",
                 deliverySelector,
-                LocalDateTime.now(),
                 LocalDeliveryStatus.CREATED);
 
         delivery.setExchangeName(deliveryExchangeName);
@@ -385,7 +384,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 new HashSet<>(Collections.singletonList(endpoint)),
                 "/delivery/1",
                 deliverySelector,
-                LocalDateTime.now(),
                 LocalDeliveryStatus.NO_OVERLAP);
 
         delivery.setExchangeName(deliveryExchangeName);
