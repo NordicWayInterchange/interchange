@@ -58,11 +58,17 @@ public class CollectorCreator {
         try {
             writeSource.start();
             writeSource.setExceptionListener(listener);
-            readSink.startWithMessageListener(listener);
-            readSink.setExceptionListener(listener);
         } catch (NamingException | JMSException e) {
             listener.teardown();
-            throw new MessageCollectorException("Tried to set up a new MessageCollectorListener, tearing down.", e);
+            throw new MessageCollectorException(String.format("Could not start source at URL '%s', exchange '%s', tearing down.",writeUrl,writeSource), e);
+        }
+        try {
+            readSink.startWithMessageListener(listener);
+            readSink.setExceptionListener(listener);
+
+        } catch (NamingException | JMSException e) {
+            listener.teardown();
+            throw new MessageCollectorException(String.format("Could not start sink at URL '%s', source '%s', tearing down.",readUrl,readQueue), e);
         }
         return listener;
     }
