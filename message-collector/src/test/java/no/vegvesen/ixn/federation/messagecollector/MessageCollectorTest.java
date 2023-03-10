@@ -4,8 +4,6 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -32,31 +30,7 @@ public class MessageCollectorTest {
 
         when(collectorCreator.setupCollection(eq(two))).thenReturn(new MessageCollectorListener(sink,source));
 
-        MatchRepository matchRepository = mock(MatchRepository.class);
-        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        Match match1 = new Match(
-                new LocalSubscription(
-                        LocalSubscriptionStatus.CREATED,
-                        "a = b",
-                        "consumer"
-                        ),
-                new Subscription(),
-                MatchStatus.SETUP_ENDPOINT
-        );
-        Match match2 = new Match(
-                new LocalSubscription(
-                        LocalSubscriptionStatus.CREATED,
-                        "a = b",
-                        "consumer2"
-                ),
-                new Subscription(),
-                MatchStatus.SETUP_ENDPOINT
-        );
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(match1));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(match2));
-
-
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
         collector.runSchedule();
 
         verify(collectorCreator,times(2)).setupCollection(any());
@@ -85,33 +59,7 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(one))).thenThrow(new MessageCollectorException("Expected exception"));
         when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
 
-        MatchRepository matchRepository = mock(MatchRepository.class);
-        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(
-                new Match(
-                        new LocalSubscription(
-                                LocalSubscriptionStatus.CREATED,
-                                "a = b",
-                                "consumer"
-                        ),
-                        new Subscription(),
-                        MatchStatus.SETUP_ENDPOINT
-                )
-        ));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(
-                new Match(
-                        new LocalSubscription(
-                                LocalSubscriptionStatus.CREATED,
-                                "a = b",
-                                "consumer2"
-                        ),
-                        new Subscription(),
-                        MatchStatus.SETUP_ENDPOINT
-                )
-        ));
-
-
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
         collector.runSchedule();
 
         verify(messageConnectionOne,times(1)).failedConnection(anyInt());
@@ -137,32 +85,7 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(one))).thenReturn(mock(MessageCollectorListener.class));
         when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
 
-        MatchRepository matchRepository = mock(MatchRepository.class);
-        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(
-                new Match(
-                        new LocalSubscription(
-                                LocalSubscriptionStatus.CREATED,
-                                "a = b",
-                                "consumer"
-                        ),
-                        new Subscription(),
-                        MatchStatus.SETUP_ENDPOINT
-                )
-        ));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(
-                new Match(
-                        new LocalSubscription(
-                                LocalSubscriptionStatus.CREATED,
-                                "a = b",
-                                "consumer2"
-                        ),
-                        new Subscription(),
-                        MatchStatus.SETUP_ENDPOINT
-                )
-        ));
-
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(2);
@@ -189,32 +112,7 @@ public class MessageCollectorTest {
         when(collectorCreator.setupCollection(eq(one))).thenThrow(new MessageCollectorException("Expected exception"));
         when(collectorCreator.setupCollection(eq(two))).thenReturn(mock(MessageCollectorListener.class));
 
-        MatchRepository matchRepository = mock(MatchRepository.class);
-        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(
-                new Match(
-                        new LocalSubscription(
-                                LocalSubscriptionStatus.CREATED,
-                                "a = b",
-                                "consumer"
-                        ),
-                        new Subscription(),
-                        MatchStatus.SETUP_ENDPOINT
-                )
-        ));
-        when(matchDiscoveryService.findMatchesByExchangeName(two.getExchangeName())).thenReturn(Arrays.asList(
-                new Match(
-                        new LocalSubscription(
-                                LocalSubscriptionStatus.CREATED,
-                                "a = b",
-                                "consumer2"
-                        ),
-                        new Subscription(),
-                        MatchStatus.SETUP_ENDPOINT
-                )
-        ));
-
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(1);
@@ -229,27 +127,12 @@ public class MessageCollectorTest {
         ListenerEndpointRepository listenerEndpointRepository = mock(ListenerEndpointRepository.class);
         when(listenerEndpointRepository.findAll()).thenReturn(Collections.emptyList());
 
-        MatchRepository matchRepository = mock(MatchRepository.class);
-        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-
-        Match match = new Match(
-                new LocalSubscription(
-                       LocalSubscriptionStatus.TEAR_DOWN,
-                       "a = b",
-                       "consumer"
-                ),
-                new Subscription(),
-                MatchStatus.TEARDOWN_ENDPOINT
-        );
-        when(matchDiscoveryService.findMatchesToTearDownEndpointsFor()).thenReturn(Collections.singletonList(match));
-
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
 
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(0);
-        assertThat(match.getStatus()).isEqualTo(MatchStatus.TEARDOWN_EXCHANGE);
     }
 
     @Test
@@ -267,37 +150,10 @@ public class MessageCollectorTest {
         CollectorCreator collectorCreator = mock(CollectorCreator.class);
         when(collectorCreator.setupCollection(eq(one))).thenReturn(mock(MessageCollectorListener.class));
 
-        MatchRepository matchRepository = mock(MatchRepository.class);
-        MatchDiscoveryService matchDiscoveryService = new MatchDiscoveryService(matchRepository);
-
-        Match match1 = new Match(
-                new LocalSubscription(
-                        LocalSubscriptionStatus.TEAR_DOWN,
-                        "a = b",
-                        "consumer"
-                ),
-                new Subscription(),
-                MatchStatus.TEARDOWN_ENDPOINT
-        );
-        Match match2 = new Match(
-                new LocalSubscription(
-                        LocalSubscriptionStatus.CREATED,
-                        "a = b",
-                        "consumer"
-                ),
-                new Subscription(),
-                MatchStatus.SETUP_ENDPOINT
-        );
-        when(matchDiscoveryService.findMatchesToTearDownEndpointsFor()).thenReturn(Collections.singletonList(match1));
-        when(matchDiscoveryService.findMatchesByExchangeName(one.getExchangeName())).thenReturn(Arrays.asList(match2));
-
-
-        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties, matchDiscoveryService);
+        MessageCollector collector = new MessageCollector(listenerEndpointRepository, collectorCreator, backoffProperties);
         collector.runSchedule();
 
         assertThat(collector.getListeners()).size().isEqualTo(1);
-        assertThat(match1.getStatus()).isEqualTo(MatchStatus.TEARDOWN_EXCHANGE);
-        assertThat(match2.getStatus()).isEqualTo(MatchStatus.UP);
         verify(messageConnectionOne,times(1)).okConnection();
     }
 }

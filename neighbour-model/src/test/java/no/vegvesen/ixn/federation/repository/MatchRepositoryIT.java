@@ -59,7 +59,7 @@ public class MatchRepositoryIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub, sub, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(locSub, sub, "my-sp");
         matchRepository.save(match);
 
         List<Match> allMatches = matchRepository.findAll();
@@ -78,7 +78,7 @@ public class MatchRepositoryIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub,sub,MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(locSub,sub, "my-sp");
         matchRepository.save(match);
 
         matchRepository.delete(match);
@@ -108,7 +108,7 @@ public class MatchRepositoryIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match = new Match(locSub, sub, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(locSub, sub, "my-sp");
         matchRepository.save(match);
 
         matchRepository.deleteAll();
@@ -142,17 +142,16 @@ public class MatchRepositoryIT {
 
         assertThat(locSub.getId()).isNotNull(); //in other words, no need to assign it to a new variable, the original one has been updated.
 
-        Match match = new Match(locSub, sub, MatchStatus.SETUP_EXCHANGE);
-        Match match1 = new Match(locSub, sub1, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(locSub, sub, "my-sp");
+        Match match1 = new Match(locSub, sub1, "my-sp");
         matchRepository.save(match);
         matchRepository.save(match1);
 
         List<Match> allMatches = matchRepository.findAll();
         assertThat(allMatches).hasSize(2);
 
-
-        //TODO test that we can use this method with more than one matches with a local subscription.
         List<Match> byLocalSubscriptionId = matchRepository.findAllByLocalSubscriptionId(locSub.getId());
+        assertThat(byLocalSubscriptionId).hasSize(2);
     }
 
     @Test
@@ -170,12 +169,11 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
 
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
-
     }
 
     @Test
@@ -193,7 +191,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
 
         matchRepository.save(match);
 
@@ -226,8 +224,8 @@ public class MatchRepositoryIT {
         Subscription savedSubscription1 = savedNeighbour1.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
-        Match match1 = new Match(savedLocalSubscription, savedSubscription1, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
+        Match match1 = new Match(savedLocalSubscription, savedSubscription1, "my-sp");
         matchRepository.save(match);
         matchRepository.save(match1);
 
@@ -251,7 +249,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -282,7 +280,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -313,7 +311,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -347,7 +345,7 @@ public class MatchRepositoryIT {
         Neighbour savedNeighbour = neighbourRepository.findByName("neighbour");
         Subscription savedSubscription = savedNeighbour.getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get();
 
-        Match match = new Match(savedLocalSubscription, savedSubscription, MatchStatus.SETUP_EXCHANGE);
+        Match match = new Match(savedLocalSubscription, savedSubscription, "my-sp");
         matchRepository.save(match);
 
         assertThat(matchRepository.findAll()).hasSize(1);
@@ -388,8 +386,8 @@ public class MatchRepositoryIT {
 
         neighbourRepository.save(neighbour);
 
-        Match match1 = new Match(locSub1, sub, serviceProviderName1, MatchStatus.UP);
-        Match match2 = new Match(locSub2, sub, serviceProviderName2, MatchStatus.UP);
+        Match match1 = new Match(locSub1, sub, serviceProviderName1);
+        Match match2 = new Match(locSub2, sub, serviceProviderName2);
 
         matchRepository.save(match1);
         matchRepository.save(match2);

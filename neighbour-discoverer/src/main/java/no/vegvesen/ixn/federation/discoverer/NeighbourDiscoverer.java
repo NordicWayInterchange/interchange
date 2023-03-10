@@ -141,18 +141,14 @@ public class NeighbourDiscoverer {
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void updateMatchesWithRedirectToDeleted() {
-		matchDiscoveryService.synLocalSubscriptionAndSubscriptionsToTearDownMatchWithRedirect();
-	}
-
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void updateOutgoingMatchesToTearDown() {
 		outgoingMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToTearDownOutgoingMatchResources();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void removeMatchesThatAreDeleted() {
-		matchDiscoveryService.removeMatchesThatAreDeleted();
+	public void syncExistingMatches() {
+		//TODO: Implement
+		//matchDiscoveryService.removeMatchesThatAreDeleted();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")

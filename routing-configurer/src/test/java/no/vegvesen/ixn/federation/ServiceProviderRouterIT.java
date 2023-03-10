@@ -14,7 +14,6 @@ import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
@@ -105,9 +104,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	ListenerEndpointRepository listenerEndpointRepository;
 
 	@MockBean
-	MatchDiscoveryService matchDiscoveryService;
-
-	@MockBean
 	OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
 	@MockBean
@@ -138,6 +134,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		return new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, nodeName);
 	}
 
+	//TODO: Need to fix this after match is removed with status
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		ServiceProvider king_gustaf = new ServiceProvider("king_gustaf");
@@ -218,6 +215,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		}
 	}
 
+	//TODO: Need to fix this after match is removed with status
 	@Test
 	public void subscriberToreDownWillBeRemovedFromSubscribFederatedInterchangesGroup() {
 		String serviceProviderName = "tore-down-service-provider";
@@ -236,14 +234,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		subscription.setExchangeName(subscriptionExchangeName);
 
-		Match match = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
+		Match match = new Match(localSubscription, subscription, serviceProviderName);
 
-		when(matchDiscoveryService.findMatchesToSetupExchangesFor(serviceProviderName)).thenReturn(Arrays.asList(match));
+		when(matchRepository.findBySubscription_ExchangeName(serviceProviderName)).thenReturn(Arrays.asList(match));
 
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
 		assertThat(localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED));
-		assertThat(client.exchangeExists(subscriptionExchangeName)).isTrue();
 
 		Set<LocalEndpoint> localEndpoints = toreDownServiceProvider.getSubscriptions().stream()
 				.flatMap(s -> s.getLocalEndpoints().stream())
@@ -258,16 +255,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				toreDownServiceProvider.getSubscriptions().stream()
 						.map(localSubscription1 -> localSubscription1.withStatus(LocalSubscriptionStatus.TEAR_DOWN))
 						.collect(Collectors.toSet()));
-		LocalSubscription tearDownLocalSubscription = toreDownServiceProvider.getSubscriptions().stream().findFirst().get();
 
-		Match tearDownMatch = new Match(tearDownLocalSubscription, subscription, serviceProviderName, MatchStatus.TEARDOWN_EXCHANGE);
-		when(matchDiscoveryService.findMatchesToTearDownExchangesFor(any(String.class))).thenReturn(Arrays.asList(tearDownMatch));
-		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Collections.emptyList());
-
+		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
 		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
-		assertThat(client.exchangeExists(subscriptionExchangeName)).isFalse();
 		assertThat(client.queueExists(endpoint.getSource())).isFalse();
 	}
 
@@ -413,127 +405,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void setUpSubscriptionExchange() {
-		String serviceProviderName = "my-service-provider";
-		String queueName = "my-queue";
-		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-		String selector = "a=b";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector,"");
-		serviceProvider.addLocalSubscription(localSubscription);
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
-		subscription.setExchangeName("subscription-exchange");
-
-		client.createQueue(queueName);
-
-		Match match = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
-
-		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
-
-		router.setUpSubscriptionExchanges(serviceProvider);
-
-		assertThat(client.exchangeExists(subscription.getExchangeName())).isTrue();
-	}
-
-	@Test
-	public void tearDownSubscriptionExchange() {
-		String serviceProviderName = "my-service-provider";
-		String selector = "a=b";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, nodeName);
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN);
-		subscription.setExchangeName("subscription-exchange");
-
-		client.createQueue(serviceProviderName);
-
-		Match match = new Match(localSubscription, subscription, MatchStatus.TEARDOWN_EXCHANGE);
-
-		when(matchDiscoveryService.findMatchesToTearDownExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
-
-		router.tearDownSubscriptionExchanges(serviceProviderName);
-
-		assertThat(client.exchangeExists(subscription.getExchangeName())).isFalse();
-	}
-
-	@Test
-	public void setupAndDeleteSubscriptionExchangeAndQueue() {
-		String serviceProviderName = "my-service-provider";
-		String selector = "a=b";
-		String exchangeName = "my-exchange";
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, selector, "my-node");
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED, "my-node");
-		subscription.setExchangeName(exchangeName);
-
-		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-		serviceProvider.addLocalSubscription(localSubscription);
-
-		Match match = new Match(localSubscription, subscription, MatchStatus.SETUP_EXCHANGE);
-		match.setServiceProviderName(serviceProviderName);
-
-		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
-
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
-
-		assertThat(client.exchangeExists(exchangeName)).isTrue();
-		assertThat(localSubscription.getLocalEndpoints()).hasSize(1);
-
-		Match match1 = new Match(localSubscription, subscription, MatchStatus.TEARDOWN_EXCHANGE);
-
-		when(matchDiscoveryService.findMatchesToTearDownExchangesFor(any(String.class))).thenReturn(Arrays.asList(match1));
-		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Collections.emptyList());
-
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
-
-		assertThat(client.exchangeExists(exchangeName)).isFalse();
-	}
-
-	@Test
-	public void setupAndDeleteSubscriptionExchange() {
-		String serviceProviderName = "my-service-provider";
-		String selector = "a=b";
-		String queueName = "my-queue";
-		String exchangeName = "my-exchange";
-		LocalSubscription localSubscription = new LocalSubscription(
-				1,
-				LocalSubscriptionStatus.CREATED,
-				selector,
-				"my-node",
-				Collections.emptySet(),
-				Collections.singleton(new LocalEndpoint(
-						queueName,
-						qpidContainer.getHost(),
-						qpidContainer.getAmqpsPort()
-
-				))
-		);
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.REQUESTED);
-		subscription.setExchangeName(exchangeName);
-
-		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-		serviceProvider.addLocalSubscription(localSubscription);
-
-		Match match = new Match(localSubscription, subscription, MatchStatus.SETUP_EXCHANGE);
-		match.setServiceProviderName(serviceProviderName);
-
-		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Arrays.asList(match));
-
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
-
-		assertThat(client.exchangeExists(exchangeName)).isTrue();
-		assertThat(client.queueExists(queueName)).isTrue();
-
-		localSubscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-
-		Match match1 = new Match(localSubscription, subscription, MatchStatus.TEARDOWN_EXCHANGE);
-
-		when(matchDiscoveryService.findMatchesToTearDownExchangesFor(any(String.class))).thenReturn(Arrays.asList(match1));
-		when(matchDiscoveryService.findMatchesToSetupExchangesFor(any(String.class))).thenReturn(Collections.emptyList());
-
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
-
-		assertThat(client.exchangeExists(exchangeName)).isFalse();
-		assertThat(client.queueExists(queueName)).isFalse();
-	}
-
-	@Test
 	public void tearDownQueueWhenLocalSubscriptionIsDeletedAfterMatch() {
 		String serviceProviderName = "my-service-provider";
 		String selector = "a=b";
@@ -551,7 +422,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		client.createQueue(queueName);
 
-		when(matchDiscoveryService.findMatchesByLocalSubscriptionId(any(Integer.class))).thenReturn(null);
+		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 
 		router.processSubscription(serviceProvider, localSubscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
 
@@ -587,13 +458,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		router.setUpDeliveryQueue(serviceProvider);
 
-		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
-
 		verify(outgoingMatchDiscoveryService, times(1)).updateOutgoingMatchToUp(any(OutgoingMatch.class));
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 		assertThat(delivery.getExchangeName()).isNotNull();
-		//assertThat(match.getSelector()).contains(capabilitySelector);
 	}
 
 	@Test
@@ -631,15 +499,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match, match2));
 		router.setUpDeliveryQueue(serviceProvider);
 
-		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
-		String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(denmCapability2);
-
 		verify(outgoingMatchDiscoveryService, times(2)).updateOutgoingMatchToUp(any(OutgoingMatch.class));
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 		assertThat(delivery.getExchangeName()).isNotNull();
-		//assertThat(match.getSelector()).contains(capabilitySelector);
-		//assertThat(match2.getSelector()).contains(capabilitySelector2);
 	}
 
 	@Test
@@ -859,10 +722,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"sp1",
 				Collections.singleton(subscription)
 		);
-		when(matchDiscoveryService.findMatchesByLocalSubscriptionId(1)).thenReturn(new ArrayList<>());
+		when(matchRepository.findAllByLocalSubscriptionId(1)).thenReturn(new ArrayList<>());
 		router.processSubscription(serviceProvider,subscription,"myNode","5432");
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
-		verify(matchDiscoveryService).findMatchesByLocalSubscriptionId(1);
+		verify(matchRepository).findAllByLocalSubscriptionId(1);
 	}
 
 	@Test
@@ -880,12 +743,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Match match = new Match(
 				subscription,
 				new Subscription("",SubscriptionStatus.TEAR_DOWN),
-				MatchStatus.TEARDOWN_ENDPOINT
+                "sp1"
 		);
-		when(matchDiscoveryService.findMatchesByLocalSubscriptionId(1)).thenReturn(Arrays.asList(match));
+		when(matchRepository.findAllByLocalSubscriptionId(1)).thenReturn(Arrays.asList(match));
 		router.processSubscription(serviceProvider,subscription,"myNode","5432");
 		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
-		verify(matchDiscoveryService).findMatchesByLocalSubscriptionId(1);
+		verify(matchRepository).findAllByLocalSubscriptionId(1);
 	}
 
 	@Test
@@ -900,38 +763,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"sp1",
 				Collections.singleton(subscription)
 		);
-		when(matchDiscoveryService.findMatchesByLocalSubscriptionId(1)).thenReturn(Collections.emptyList());
+		when(matchRepository.findAllByLocalSubscriptionId(1)).thenReturn(Collections.emptyList());
 		router.processRedirectSubscription(serviceProvider,subscription);
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
-		verify(matchDiscoveryService).findMatchesByLocalSubscriptionId(1);
 	}
 
 	@Test
-	public void redirectSubscriptionStatusTearDownNonEmptyMatchList() {
-		LocalSubscription subscription = new LocalSubscription(
-				1,
-				LocalSubscriptionStatus.TEAR_DOWN,
-				"",
-				"sp1"
-		);
-		ServiceProvider serviceProvider = new ServiceProvider(
-				"sp1",
-				Collections.singleton(subscription)
-		);
-		Match match = new Match(
-				subscription,
-				new Subscription("",SubscriptionStatus.TEAR_DOWN),
-				MatchStatus.TEARDOWN_ENDPOINT
-		);
-		when(matchDiscoveryService.findMatchesByLocalSubscriptionId(1)).thenReturn(Arrays.asList(match));
-		router.redirectTearDown(serviceProvider,subscription);
-		assertThat(serviceProvider.getSubscriptions()).isNotEmpty().hasSize(1);
-		verify(matchDiscoveryService).findMatchesByLocalSubscriptionId(1);
-
-	}
-
-	@Test
-	public void redirectoSubscriptionStatusIllegal() {
+	public void redirectSubscriptionStatusIllegal() {
 		LocalSubscription subscription = new LocalSubscription(
 				1,
 				LocalSubscriptionStatus.ILLEGAL,

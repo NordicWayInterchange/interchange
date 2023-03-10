@@ -28,7 +28,7 @@ public class MatchDiscoveryService {
             Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
             String serviceProviderName = serviceProvider.getName();
             for (LocalSubscription localSubscription : localSubscriptions) {
-                if (!serviceProviderName.equals(localSubscription.getConsumerCommonName())) {
+                //if (!serviceProviderName.equals(localSubscription.getConsumerCommonName())) {
                     for (Neighbour neighbour : neighbours) {
                         for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                             if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
@@ -40,7 +40,7 @@ public class MatchDiscoveryService {
                                     //Here, we could return an object, and check if we have a matching... well, match, in the database at a later stage.
                                     //this would make a method that is completely independent on the repos.
                                     if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {
-                                        Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.SETUP_EXCHANGE);
+                                        Match newMatch = new Match(localSubscription, subscription, serviceProviderName);
                                         matchRepository.save(newMatch);
                                         logger.info("Saved new Match {}", newMatch);
                                     }
@@ -48,14 +48,14 @@ public class MatchDiscoveryService {
                             }
                         }
                     }
-                } else {
-                    for (Neighbour neighbour : neighbours) {
+                //} else {
+                /*    for (Neighbour neighbour : neighbours) {
                         for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                             if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
                                 if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
                                         Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
                                     if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {
-                                        Match newMatch = new Match(localSubscription, subscription, serviceProviderName, MatchStatus.REDIRECT);
+                                        Match newMatch = new Match(localSubscription, subscription, serviceProviderName);
                                         matchRepository.save(newMatch);
                                         logger.info("Saved new Match {}", newMatch);
                                     }
@@ -63,69 +63,14 @@ public class MatchDiscoveryService {
                             }
                         }
                     }
-                }
+                }*/
             }
         }
     }
 
-    public List<Match> findMatchesToSetupExchangesFor(String serviceProviderName) {
-        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.SETUP_EXCHANGE);
-    }
-
-    public void updateMatchToSetupEndpoint(Match match) {
-        match.setStatus(MatchStatus.SETUP_ENDPOINT);
-        matchRepository.save(match);
-        logger.info("Saved match {} with status SETUP_ENDPOINT", match);
-    }
-
-    public List<Match> findMatchesByExchangeName(String exchangeName) {
-        return matchRepository.findBySubscription_ExchangeName(exchangeName);
-    }
-
-    public void updateMatchToUp(Match match) {
-        match.setStatus(MatchStatus.UP);
-        matchRepository.save(match);
-        logger.info("Saved match {} with status UP", match);
-    }
-
-    public void synLocalSubscriptionAndSubscriptionsToTearDownMatchWithRedirect() {
-        List<Match> matches = matchRepository.findAllByStatus(MatchStatus.REDIRECT);
-        for (Match match : matches) {
-            if(! LocalSubscriptionStatus.isAlive(match.getLocalSubscription().getStatus()) ||
-                    SubscriptionStatus.shouldTearDown(match.getSubscription().getSubscriptionStatus())) {
-                match.setStatus(MatchStatus.DELETED);
-                matchRepository.save(match);
-                logger.info("Saved match {} with status DELETED", match);
-            }
-        }
-    }
-
-    public List<Match> findMatchesToTearDownEndpointsFor() {
-        return matchRepository.findAllByStatus(MatchStatus.TEARDOWN_ENDPOINT);
-    }
-
-    public void updateMatchToTearDownExchange(Match match) {
-        match.setStatus(MatchStatus.TEARDOWN_EXCHANGE);
-        matchRepository.save(match);
-        logger.info("Saved match {} with status TEARDOWN_EXCHANGE", match);
-    }
-
-    public List<Match> findMatchesToTearDownExchangesFor(String serviceProviderName) {
-        return matchRepository.findAllByServiceProviderNameAndStatus(serviceProviderName, MatchStatus.TEARDOWN_EXCHANGE);
-    }
-
-    public void updateMatchToDeleted(Match match) {
-        match.setStatus(MatchStatus.DELETED);
-        matchRepository.save(match);
-        logger.info("Saved match {} with status DELETED", match);
-    }
-
-    public void removeMatchesThatAreDeleted() {
-        List<Match> matchesToRemove = matchRepository.findAllByStatus(MatchStatus.DELETED);
-        if (!matchesToRemove.isEmpty()) {
-            matchRepository.deleteAll(matchesToRemove);
-            logger.info("Removed deleted Matches");
-        }
+    //TODO: Remove match if either subscription endpoint or local subscription endpoint is gone?
+    public void syncMatches(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours) {
+        //TODO: Implement
     }
 
     public List<Match> findMatchesByLocalSubscriptionId(Integer id) {

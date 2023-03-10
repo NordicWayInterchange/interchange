@@ -33,7 +33,7 @@ public class Subscription {
 
 	private long lastUpdatedTimestamp;
 
-	private String exchangeName;
+	private String exchangeName = "";
 
 	public Subscription() {
 	}
@@ -154,6 +154,18 @@ public class Subscription {
 
 	public void setExchangeName(String exchangeName) {
 		this.exchangeName = exchangeName;
+	}
+
+	public boolean exchangeIsCreated() {
+		return !exchangeName.isEmpty();
+	}
+
+	public boolean exchangeIsRemoved() {
+		return exchangeName.isEmpty();
+	}
+
+	public void removeExchangeName() {
+		this.exchangeName = "";
 	}
 
 	//TODO this is really quite unusual, and really shows that the Subscription needs to be changed

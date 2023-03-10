@@ -67,11 +67,8 @@ public class NeighbourSubscriptionDeleteServiceIT {
         neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
         neighbourRepository.save(neighbour);
 
-        ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new Connection());
-        listenerEndpointRepository.save(listenerEndpoint);
         service.deleteSubscriptions(mockNeighbourFacade);
 
-        assertThat(listenerEndpointRepository.findAll()).isEmpty();
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
     }

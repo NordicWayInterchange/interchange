@@ -3,7 +3,9 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
+import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +31,17 @@ public class RoutingConfigurer {
 	private final QpidClient qpidClient;
 	private final ServiceProviderRouter serviceProviderRouter;
 
+	private final InterchangeNodeProperties interchangeNodeProperties;
+
+	private final ListenerEndpointRepository listenerEndpointRepository;
+
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
+		this.interchangeNodeProperties = interchangeNodeProperties;
+		this.listenerEndpointRepository = listenerEndpointRepository;
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -149,6 +157,7 @@ public class RoutingConfigurer {
 						bindRemoteServiceProvider(cap.getCapabilityExchangeName(), redirectQueue, subscription);
 					}
 				}
+				//TODO: Move 3 lines inside if over here
 				NeighbourEndpoint endpoint = createEndpoint(neighbourService.getNodeName(), neighbourService.getMessagePort(), redirectQueue);
 				subscription.setEndpoints(Collections.singleton(endpoint));
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
@@ -158,6 +167,62 @@ public class RoutingConfigurer {
 				subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.NO_OVERLAP);
 			}
 			subscription.setLastUpdatedTimestamp(Instant.now().toEpochMilli());
+		}
+	}
+
+	//TODO: Write tests to assure that listenerEndpoints are created
+	@Scheduled(fixedRateString = "${create-subscriptions-exchange.interval}")
+	public void setUpSubscriptionExchanges() {
+		logger.debug("Looking for new subscriptions to set up exchanges for");
+		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		for (Neighbour neighbour : neighbours) {
+			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
+				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
+				for (Subscription subscription : ourSubscriptions) {
+					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+						if (!subscription.exchangeIsCreated()) {
+							String exchangeName = UUID.randomUUID().toString();
+							subscription.setExchangeName(exchangeName);
+							qpidClient.createTopicExchange(exchangeName);
+							logger.debug("Set up exchange for subscription {}", subscription.toString());
+						}
+						createListenerEndpointFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
+					}
+				}
+			}
+		}
+	}
+
+	public void createListenerEndpointFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
+		for(Endpoint endpoint : endpoints) {
+			createListenerEndpoint(endpoint.getHost(),endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour);
+		}
+	}
+
+	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, Neighbour neighbour) {
+		if(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), host, port, source) == null){
+			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbour.getName(), source, host, port, new Connection(), exchangeName));
+			logger.info("ListenerEndpoint was saved: {}", savedListenerEndpoint.toString());
+		}
+	}
+
+	@Scheduled(fixedRateString = "${tear-down-subscriptions-exchange.interval}")
+	public void tearDownSubscriptionExchanges() {
+		logger.debug("Looking for new subscriptions to set up exchanges for");
+		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
+		for (Neighbour neighbour : neighbours) {
+			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
+				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getTearDownSubscriptions();
+				for (Subscription subscription : ourSubscriptions) {
+					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+						if (!subscription.exchangeIsRemoved()) {
+							qpidClient.removeExchange(subscription.getExchangeName());
+							subscription.removeExchangeName();
+							logger.debug("Removed exchange for subscription {}", subscription.toString());
+						}
+					}
+				}
+			}
 		}
 	}
 

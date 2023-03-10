@@ -86,6 +86,12 @@ public class SubscriptionRequest {
 				.collect(Collectors.toSet());
 	}
 
+	public Set<Subscription> getTearDownSubscriptions() {
+		return getSubscriptions().stream()
+				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN))
+				.collect(Collectors.toSet());
+	}
+
 	public Optional<LocalDateTime> getSuccessfulRequest() {
 		return Optional.ofNullable(successfulRequest);
 	}

@@ -8,8 +8,8 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -93,7 +93,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     ServiceProviderRepository serviceProviderRepository;
 
     @MockBean
-    MatchDiscoveryService matchDiscoveryService;
+    MatchRepository matchRepository;
 
     @MockBean
     OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
@@ -167,7 +167,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(matchDiscoveryService.findMatchesByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.queueExists(queueName)).isFalse();
         assertThat(serviceProvider.getSubscriptions()).hasSize(0);
@@ -213,7 +213,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(matchDiscoveryService.findMatchesByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.queueExists(queueName)).isFalse();
     }
@@ -236,7 +236,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(matchDiscoveryService.findMatchesByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.queueExists(queueName)).isFalse();
     }
