@@ -99,6 +99,15 @@ data:
               }
             },
             {
+              "objectType": "VIRTUALHOST",
+              "identity": clients-private-channels",
+              "operation": "ACCESS",
+              "outcome": "ALLOW_LOG",
+              "attributes": {
+                "NAME": "{{ .Values.external_name }}"
+              }
+            },
+            {
               "objectType": "QUEUE",
               "identity": "ALL",
               "operation": "CONSUME",
