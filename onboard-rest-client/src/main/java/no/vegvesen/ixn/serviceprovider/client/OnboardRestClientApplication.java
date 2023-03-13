@@ -56,9 +56,6 @@ public class OnboardRestClientApplication implements Callable<Integer> {
     @Option(names = {"-s","--keystorepassword"}, required = true,  description = "The password of the service provider keystore")
     String keystorePassword;
 
-    @Option(names = {"-p", "--keypassword"}, required = true,  description = "The password of the service provider key")
-    String keyPassword;
-
     @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
     Path trustStorePath;
 
