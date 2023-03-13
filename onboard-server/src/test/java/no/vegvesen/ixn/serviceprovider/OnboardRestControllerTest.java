@@ -417,10 +417,8 @@ public class OnboardRestControllerTest {
 		serviceProvider.addDeliveries(Collections.singleton(
 				new LocalDelivery(
 						1,
-						Collections.emptySet(),
 						"/mydelivery",
 						"originatingCountry = 'NO'",
-						LocalDateTime.now(),
 						LocalDeliveryStatus.REQUESTED
 				)
 		));
@@ -454,7 +452,6 @@ public class OnboardRestControllerTest {
 						Collections.emptySet(),
 						"/mydelivery",
 						"originatingCountry = 'NO'",
-						LocalDateTime.now(),
 						LocalDeliveryStatus.REQUESTED
 				)
 		));

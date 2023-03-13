@@ -42,7 +42,6 @@ public class ServiceProviderServiceTest {
                 1,
                 "",
                 selector,
-                LocalDateTime.now(),
                 LocalDeliveryStatus.CREATED
         );
         localDelivery.setExchangeName("my-exchange");
@@ -72,7 +71,6 @@ public class ServiceProviderServiceTest {
                 1,
                 "",
                 selector,
-                LocalDateTime.now(),
                 LocalDeliveryStatus.CREATED
         );
         localDelivery.setExchangeName("my-exchange");
@@ -112,7 +110,6 @@ public class ServiceProviderServiceTest {
                 1,
                 "",
                 selector,
-                LocalDateTime.now(),
                 LocalDeliveryStatus.CREATED
         );
         sp.addDeliveries(Collections.singleton(localDelivery));
