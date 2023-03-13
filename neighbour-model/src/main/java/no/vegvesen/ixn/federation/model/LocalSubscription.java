@@ -65,11 +65,11 @@ public class LocalSubscription {
         this.consumerCommonName = consumerCommonName;
     }
 
-    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, LocalDateTime lastUpdated, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
+
+    public LocalSubscription(Integer id, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
         this.id = id;
         this.status = status;
         this.selector = selector;
-        this.lastUpdated = lastUpdated;
         this.consumerCommonName = consumerCommonName;
         this.connections.addAll(connections);
         this.localEndpoints.addAll(localEndpoints);

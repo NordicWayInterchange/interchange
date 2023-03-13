@@ -146,7 +146,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				1,
 				LocalSubscriptionStatus.REQUESTED,
 				"messageType = 'DATEX2'",
-				LocalDateTime.now(),
 				nodeName,
 				Collections.emptySet(),
 				Collections.singleton(new LocalEndpoint(
@@ -496,7 +495,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				1,
 				LocalSubscriptionStatus.CREATED,
 				selector,
-				LocalDateTime.now(),
 				"my-node",
 				Collections.emptySet(),
 				Collections.singleton(new LocalEndpoint(
