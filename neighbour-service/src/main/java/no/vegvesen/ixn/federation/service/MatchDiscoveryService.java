@@ -72,8 +72,4 @@ public class MatchDiscoveryService {
     public void syncMatches(List<ServiceProvider> serviceProviders, List<Neighbour> neighbours) {
         //TODO: Implement
     }
-
-    public List<Match> findMatchesByLocalSubscriptionId(Integer id) {
-        return matchRepository.findAllByLocalSubscriptionId(id);
-    }
 }

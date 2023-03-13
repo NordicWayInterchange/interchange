@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +21,13 @@ public class ServiceProviderService {
 
     private ServiceProviderRepository serviceProviderRepository;
     private OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
-    private MatchDiscoveryService matchDiscoveryService;
+    private MatchRepository matchRepository;
 
     @Autowired
-    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService, MatchDiscoveryService matchDiscoveryService) {
+    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService, MatchRepository matchRepository) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
-        this.matchDiscoveryService = matchDiscoveryService;
+        this.matchRepository = matchRepository;
     }
 
     public void syncServiceProviders(String host, Integer port) {
@@ -50,7 +51,7 @@ public class ServiceProviderService {
         for (LocalSubscription localSubscription : redirectSubscriptions) {
             Set<LocalEndpoint> newEndpoints = new HashSet<>();
             if (localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
-                List<Match> matches = matchDiscoveryService.findMatchesByLocalSubscriptionId(localSubscription.getId());
+                List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                 for (Match match : matches) {
                     newEndpoints.addAll(transformEndpointsToLocalEndpoints(match.getSubscription().getEndpoints()));
                 }

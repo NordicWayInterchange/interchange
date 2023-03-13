@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceProviderServiceTest {
@@ -24,13 +24,13 @@ public class ServiceProviderServiceTest {
     OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
     @Mock
-    MatchDiscoveryService matchDiscoveryService;
+    MatchRepository matchRepository;
 
     ServiceProviderService service;
 
     @BeforeEach
     void setUp() {
-        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchDiscoveryService, matchDiscoveryService);
+        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchDiscoveryService, matchRepository);
     }
 
     @Test
