@@ -52,17 +52,23 @@ public class CollectorCreator {
         String readUrl = String.format("amqps://%s:%s", listenerEndpoint.getHost(), listenerEndpoint.getPort());
         String readQueue = listenerEndpoint.getSource();
         Sink readSink = new Sink(readUrl, readQueue, sslContext);
-        logger.info("Fetching messages from {}, write to {}",readUrl,writeUrl);
+        logger.info("Fetching messages from URL {}, queue {} ; write to URL {} target {}", readUrl, readQueue, writeUrl, localExchange);
 
         MessageCollectorListener listener = new MessageCollectorListener(readSink, writeSource);
         try {
             writeSource.start();
             writeSource.setExceptionListener(listener);
-            readSink.startWithMessageListener(listener);
-            readSink.setExceptionListener(listener);
         } catch (NamingException | JMSException e) {
             listener.teardown();
-            throw new MessageCollectorException("Tried to set up a new MessageCollectorListener, tearing down.", e);
+            throw new MessageCollectorException(String.format("Could not start source at URL '%s', exchange '%s', tearing down.",writeUrl,writeSource), e);
+        }
+        try {
+            readSink.startWithMessageListener(listener);
+            readSink.setExceptionListener(listener);
+
+        } catch (NamingException | JMSException e) {
+            listener.teardown();
+            throw new MessageCollectorException(String.format("Could not start sink at URL '%s', source '%s', tearing down.",readUrl,readQueue), e);
         }
         return listener;
     }
