@@ -179,8 +179,8 @@ public class RoutingConfigurer {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
 				for (Subscription subscription : ourSubscriptions) {
-					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-						if (!subscription.exchangeIsCreated()) {
+					if (!subscription.exchangeIsCreated()) {
+						if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 							String exchangeName = UUID.randomUUID().toString();
 							subscription.setExchangeName(exchangeName);
 							qpidClient.createTopicExchange(exchangeName);
@@ -190,6 +190,7 @@ public class RoutingConfigurer {
 					}
 				}
 			}
+			neighbourService.saveNeighbour(neighbour);
 		}
 	}
 
@@ -223,6 +224,7 @@ public class RoutingConfigurer {
 					}
 				}
 			}
+			neighbourService.saveNeighbour(neighbour);
 		}
 	}
 

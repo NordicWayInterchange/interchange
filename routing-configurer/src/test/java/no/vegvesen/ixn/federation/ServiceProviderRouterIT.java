@@ -769,6 +769,166 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionCreated() {
+		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
+		String consumerCommonName = "my-node";
+
+		String queueName = "loc-sub-queue";
+		String exchangeName = "sub-exchange";
+
+		client.createQueue(queueName);
+		client.createTopicExchange(exchangeName);
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		serviceProvider.addLocalSubscription(localSubscription);
+
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
+		subscription.setExchangeName(exchangeName);
+
+		Match match = new Match(localSubscription, subscription, "my-service-provider");
+
+		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
+		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
+		router.createBindingsWithMatches();
+
+		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
+		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName, queueName));
+	}
+
+	@Test
+	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionsCreated() {
+		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
+		String consumerCommonName = "my-node";
+
+		String queueName = "loc-sub-queue-1";
+		String exchangeName = "sub-exchange-1";
+		String exchangeName2 = "sub-exchange-2";
+
+		client.createQueue(queueName);
+		client.createTopicExchange(exchangeName);
+		client.createTopicExchange(exchangeName2);
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		serviceProvider.addLocalSubscription(localSubscription);
+
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
+		subscription.setExchangeName(exchangeName);
+
+		Subscription subscription2 = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
+		subscription2.setExchangeName(exchangeName2);
+
+		Match match = new Match(localSubscription, subscription, "my-service-provider");
+		Match match2 = new Match(localSubscription, subscription2, "my-service-provider");
+
+		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
+		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match, match2));
+		router.createBindingsWithMatches();
+
+		assertThat(client.getQueueBindKeys(queueName)).hasSize(2);
+		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName, queueName));
+		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName2, queueName));
+	}
+
+	@Test
+	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionCreatedBindKeyAlreadyExists() {
+		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
+		String consumerCommonName = "my-node";
+
+		String queueName = "loc-sub-queue-4";
+		String exchangeName = "sub-exchange-4";
+
+		client.createQueue(queueName);
+		client.createTopicExchange(exchangeName);
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		serviceProvider.addLocalSubscription(localSubscription);
+
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
+		subscription.setExchangeName(exchangeName);
+
+		Match match = new Match(localSubscription, subscription, "my-service-provider");
+
+		//Mocking that binding already exists and isn't created again
+		client.bindSubscriptionExchange(selector, exchangeName, queueName);
+
+		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
+		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
+		router.createBindingsWithMatches();
+
+		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
+		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName, queueName));
+	}
+
+	@Test
+	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionTearDown() {
+		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
+		String consumerCommonName = "my-node";
+
+		String queueName = "loc-sub-queue-3";
+		String exchangeName = "sub-exchange-3";
+
+		client.createQueue(queueName);
+		client.createTopicExchange(exchangeName);
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		serviceProvider.addLocalSubscription(localSubscription);
+
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN, consumerCommonName);
+		subscription.setExchangeName(exchangeName);
+
+		Match match = new Match(localSubscription, subscription, "my-service-provider");
+
+		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
+		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
+		router.createBindingsWithMatches();
+
+		assertThat(client.getQueueBindKeys(queueName)).hasSize(0);
+		assertThat(client.getQueueBindKeys(queueName)).doesNotContain(client.createBindKey(exchangeName, queueName));
+	}
+
+	@Test
+	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionCreatedButNoMatchYet() {
+		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
+		String consumerCommonName = "my-node";
+
+		String queueName = "loc-sub-queue-5";
+		String exchangeName = "sub-exchange-5";
+
+		client.createQueue(queueName);
+		client.createTopicExchange(exchangeName);
+
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, consumerCommonName);
+		localSubscription.setLocalEndpoints(Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		serviceProvider.addLocalSubscription(localSubscription);
+
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
+		subscription.setExchangeName(exchangeName);
+
+		Match match = new Match(localSubscription, subscription, "my-service-provider");
+
+		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
+		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
+		router.createBindingsWithMatches();
+
+		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
+		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName, queueName));
+	}
+
+	@Test
 	public void redirectSubscriptionStatusIllegal() {
 		LocalSubscription subscription = new LocalSubscription(
 				1,

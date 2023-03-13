@@ -89,6 +89,11 @@ public class Subscription {
 		this.subscriptionStatus = status;
 	}
 
+	public boolean isSubscriptionWanted() {
+		return subscriptionStatus.equals(SubscriptionStatus.REQUESTED)
+				|| subscriptionStatus.equals(SubscriptionStatus.CREATED);
+	}
+
 	public String getSelector() {
 		return selector;
 	}

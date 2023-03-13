@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -259,6 +260,7 @@ public class ServiceProviderRouter {
         }
     }
 
+    //@Scheduled(fixedRateString = "${create-capability-exchange.interval}")
     public void setUpCapabilityExchanges(ServiceProvider serviceProvider) {
         if (serviceProvider.hasCapabilities()) {
             for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
@@ -371,7 +373,7 @@ public class ServiceProviderRouter {
         return MessageValidatingSelectorCreator.makeSelectorJoinedWithCapabilitySelector(selector,capability);
     }
 
-    //TODO: Schedule this
+    @Scheduled(fixedRateString = "${create-bindings-subscriptions-exchange.interval}")
     public void createBindingsWithMatches() {
         List<ServiceProvider> serviceProviders = repository.findAll();
         for (ServiceProvider serviceProvider : serviceProviders) {
@@ -380,9 +382,12 @@ public class ServiceProviderRouter {
                     if (!localSubscription.getLocalEndpoints().isEmpty()) {
                         List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                         for (Match match : matches) {
-                            if (match.getSubscription().exchangeIsCreated()) {
+                            if (match.getSubscription().isSubscriptionWanted() && match.getSubscription().exchangeIsCreated()) {
                                 for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
-                                    bindQueueToSubscriptionExchange(queueName, match.getSubscription().getExchangeName(), localSubscription);
+                                    String exchangeName = match.getSubscription().getExchangeName();
+                                    if (!qpidClient.getQueueBindKeys(queueName).contains(qpidClient.createBindKey(exchangeName, queueName))) {
+                                        bindQueueToSubscriptionExchange(queueName, exchangeName, localSubscription);
+                                    }
                                 }
                             }
                         }
@@ -394,7 +399,7 @@ public class ServiceProviderRouter {
 
     private void bindQueueToSubscriptionExchange(String queueName, String exchangeName, LocalSubscription localSubscription) {
         logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
-        qpidClient.bindTopicExchange(localSubscription.getSelector(), exchangeName, queueName);
+        qpidClient.bindSubscriptionExchange(localSubscription.getSelector(), exchangeName, queueName);
     }
 
     public void syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, Iterable<ServiceProvider> serviceProviders) {
