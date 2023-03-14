@@ -302,8 +302,7 @@ public class OnboardRestAPIDocumentationTest {
                 Collections.singleton(new DeliveryEndpoint(
                         "amqps://sp-1",
                         5671,
-                        "sp1-1",
-                        "originatingCountry = 'NO' and messageType = 'DENM'"
+                        "sp1-1"
                 )),
                 "/sp-1/deliveries/1",
                 "originatingCountry = 'NO' and messageType = 'DENM'",

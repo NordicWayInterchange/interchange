@@ -6,27 +6,24 @@ public class DeliveryEndpoint {
     private String host;
     private int port;
     private String target;
-    private String selector;
     private int maxBandwidth;
     private int maxMessageRate;
 
     public DeliveryEndpoint() {
     }
 
-    public DeliveryEndpoint(String host, int port, String target, String selector, Integer maxBandwidth, Integer maxMessageRate) {
+    public DeliveryEndpoint(String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate) {
         this.host = host;
         this.port = port;
         this.target = target;
-        this.selector = selector;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
     }
 
-    public DeliveryEndpoint(String host, int port, String target, String selector) {
+    public DeliveryEndpoint(String host, int port, String target) {
         this.host = host;
         this.port = port;
         this.target = target;
-        this.selector = selector;
     }
 
     public String getHost() {
@@ -53,14 +50,6 @@ public class DeliveryEndpoint {
         this.target = target;
     }
 
-    public String getSelector() {
-        return selector;
-    }
-
-    public void setSelector(String selector) {
-        this.selector = selector;
-    }
-
     public Integer getMaxBandwidth() {
         return maxBandwidth;
     }
@@ -82,12 +71,12 @@ public class DeliveryEndpoint {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryEndpoint that = (DeliveryEndpoint) o;
-        return Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(target, that.target) && Objects.equals(selector, that.selector) && Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate);
+        return Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(target, that.target) &&  Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(host, port, target, selector, maxBandwidth, maxMessageRate);
+        return Objects.hash(host, port, target, maxBandwidth, maxMessageRate);
     }
 
     @Override
@@ -96,7 +85,6 @@ public class DeliveryEndpoint {
                 "url='" + host + '\'' +
                 ", port='" + port + '\'' +
                 ", target='" + target + '\'' +
-                ", selector='" + selector + '\'' +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
                 '}';

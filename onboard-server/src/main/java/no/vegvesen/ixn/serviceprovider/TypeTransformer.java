@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -185,7 +184,7 @@ public class TypeTransformer {
         String id = localDelivery.getId().toString();
         return new GetDeliveryResponse(
                 id,
-                transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints(), localDelivery.getSelector()),
+                transformLocalDeliveryEndpointToDeliveryEndpoint(localDelivery.getEndpoints()),
                 createDeliveryPath(serviceProviderName, id, localDelivery.getStatus()),
                 localDelivery.getSelector(),
                 transformLocalDateTimeToEpochMili(localDelivery.getLastUpdatedTimestamp()),
@@ -205,14 +204,13 @@ public class TypeTransformer {
         return result;
     }
 
-    private Set<DeliveryEndpoint> transformLocalDeliveryEndpointToDeliveryEndpoint(Set<LocalDeliveryEndpoint> endpoints, String selector) {
+    private Set<DeliveryEndpoint> transformLocalDeliveryEndpointToDeliveryEndpoint(Set<LocalDeliveryEndpoint> endpoints) {
         Set<DeliveryEndpoint> result = new HashSet<>();
         for (LocalDeliveryEndpoint endpoint : endpoints) {
             result.add(new DeliveryEndpoint(
                     endpoint.getHost(),
                     endpoint.getPort(),
                     endpoint.getTarget(),
-                    selector,
                     0,
                     0
             ));
