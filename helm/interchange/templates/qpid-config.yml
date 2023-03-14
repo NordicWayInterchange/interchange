@@ -100,7 +100,7 @@ data:
             },
             {
               "objectType": "VIRTUALHOST",
-              "identity": clients-private-channels",
+              "identity": "clients-private-channels",
               "operation": "ACCESS",
               "outcome": "ALLOW_LOG",
               "attributes": {
