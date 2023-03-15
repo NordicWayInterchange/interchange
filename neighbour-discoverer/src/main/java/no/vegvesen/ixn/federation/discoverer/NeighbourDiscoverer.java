@@ -146,9 +146,8 @@ public class NeighbourDiscoverer {
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void syncExistingMatches() {
-		//TODO: Implement
-		//matchDiscoveryService.removeMatchesThatAreDeleted();
+	public void syncMatchesToDelete() {
+		matchDiscoveryService.syncMatchesToDelete();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")

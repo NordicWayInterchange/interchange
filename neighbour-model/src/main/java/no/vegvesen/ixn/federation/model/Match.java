@@ -54,6 +54,14 @@ public class Match {
         this.serviceProviderName = serviceProviderName;
     }
 
+    public boolean subscriptionIsTearDown() {
+        return !subscription.isSubscriptionWanted();
+    }
+
+    public boolean localSubscriptionIsTearDown() {
+        return !localSubscription.isSubscriptionWanted();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
