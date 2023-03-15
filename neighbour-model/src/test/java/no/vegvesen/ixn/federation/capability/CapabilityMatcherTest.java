@@ -173,4 +173,19 @@ class CapabilityMatcherTest {
 		assertThat(localSubscriptions).isNotEmpty();
 	}
 
+	@Test
+	void matchCapabilityWithSSEM() {
+		SsemCapability capability = new SsemCapability(
+				"NO99999",
+				"FI",
+				"SSEM:0.0.0",
+				new HashSet<>(Arrays.asList("0","1","2","3")),
+				RedirectStatus.OPTIONAL,
+				Collections.emptySet()
+		);
+		String selector = "protocolVersion='SSEM:0.0.0' AND publisherId='NO99999'";
+		assertThat(CapabilityMatcher.matchCapabilityToSelector(capability,selector)).isTrue();
+
+//protocolVersion='SSEM:0.0.2' AND publisherId='NO99999'
+	}
 }
