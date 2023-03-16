@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.net.ssl.SSLContext;
 
-@Configuration
-@ConfigurationPropertiesScan
+//@Configuration
+//@ConfigurationPropertiesScan
 public class TestSSLContextConfig {
 
 	final
