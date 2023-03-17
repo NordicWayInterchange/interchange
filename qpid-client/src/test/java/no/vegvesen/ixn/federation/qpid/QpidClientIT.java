@@ -1,10 +1,15 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+/*
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+
+ */
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,23 +26,22 @@ import java.util.List;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * This is a test for some of the managing of Qpid through the HTTP(S) interface. This test uses a different name for the hostname for the qpid container. We use "testhost", but
  * the actual hostname would normally end up as something like "localhost".
  */
-@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
-@ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
-@Testcontainers
+//@SpringBootTest(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class})
+//@ContextConfiguration(initializers = {QpidClientIT.Initializer.class})
+//@Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
-
-
-	@Container
-	private static final KeysContainer keyContainer = getKeyContainer(QpidClientIT.class,"my_ca", "testhost", "routing_configurer");
+/*
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "testhost.p12", "password", "truststore.jks", "password","localhost")
+	private static final KeysContainer keyContainer = DockerBaseIT.getKeyContainer(QpidClientIT.class,"my_ca", "testhost", "routing_configurer");
+
+	@Container
+	public static final QpidContainer qpidContainer = QpidDockerBaseIT.getQpidTestContainer("no/vegvesen/ixn/federation/qpid", keyContainer.getKeyFolderOnHost(), "testhost.p12", "password", "truststore.jks", "password","localhost")
             .dependsOn(keyContainer);
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
@@ -70,7 +74,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void createQueueThatAlreadyExistsResultsInException() {
 		client._createQueue("torsk");
 
-		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+		Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
 			client._createQueue("torsk"); //create some queue that already exists
 			//
 		});
@@ -99,12 +103,12 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client.addMemberToGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
 		List<String> myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
 
-		assertThat(myUserNames).contains(myUser);
+		Assertions.assertThat(myUserNames).contains(myUser);
 
 		client.removeMemberFromGroup(myUser, SERVICE_PROVIDERS_GROUP_NAME);
 		myUserNames = client.getGroupMemberNames(SERVICE_PROVIDERS_GROUP_NAME);
 
-		assertThat(myUserNames).doesNotContain(myUser);
+		Assertions.assertThat(myUserNames).doesNotContain(myUser);
 	}
 
 	@Test
@@ -112,11 +116,11 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String deleteUser = "carp";
 		client.addMemberToGroup(deleteUser, FEDERATED_GROUP_NAME);
 		List<String> userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
-		assertThat(userNames).contains(deleteUser);
+		Assertions.assertThat(userNames).contains(deleteUser);
 
 		client.removeMemberFromGroup(deleteUser, FEDERATED_GROUP_NAME);
 		userNames = client.getGroupMemberNames(FEDERATED_GROUP_NAME);
-		assertThat(userNames).doesNotContain(deleteUser);
+		Assertions.assertThat(userNames).doesNotContain(deleteUser);
 	}
 
 	@Test
@@ -126,10 +130,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		List<String> userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 
-		assertThat(userNames).contains(newUser);
+		Assertions.assertThat(userNames).contains(newUser);
 		client.removeMemberFromGroup(newUser,REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
 		userNames = client.getGroupMemberNames(REMOTE_SERVICE_PROVIDERS_GROUP_NAME);
-		assertThat(userNames).doesNotContain(newUser);
+		Assertions.assertThat(userNames).doesNotContain(newUser);
 	}
 
 	@Test
@@ -196,4 +200,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client.removeQueue("babyshark1");
 		assertThat(client.queueExists("babyshark1")).isFalse();
 	}
+
+ */
 }

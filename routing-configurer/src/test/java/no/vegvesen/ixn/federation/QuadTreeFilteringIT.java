@@ -1,14 +1,17 @@
-package no.vegvesen.ixn.federation.qpid;
+package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.federation.qpid.QpidClient;
+import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.federation.SelectorBuilder;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -19,6 +22,7 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -36,10 +40,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(QuadTreeFilteringIT.class);
-	private static Path testKeysPath = generateKeys(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+	private static Path testKeysPath = DockerBaseIT.generateKeys(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
+	public static final QpidContainer qpidContainer = QpidDockerBaseIT.getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+			.withLogConsumer(new Slf4jLogConsumer(logger));
 
 	static class Initializer  implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
@@ -70,7 +75,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String selector = "(originatingCountry = 'NO') and (quadTree like '%,abcdefgh%')";
 		String kingGustaf = "king_gustaf";
 		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
-		assertThat(receivedMessage).isNotNull();
+		Assertions.assertThat(receivedMessage).isNotNull();
 	}
 
 	@Test
@@ -80,7 +85,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String kingGustaf = "king_gustaf";
 		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
 		Message message = receivedMessage;
-		assertThat(message).isNull();
+		Assertions.assertThat(message).isNull();
 	}
 
 	@Test
@@ -89,7 +94,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String selector = "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')";
 		String kingGustaf = "king_gustaf";
 		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
-		assertThat(receivedMessage).isNotNull();
+		Assertions.assertThat(receivedMessage).isNotNull();
 	}
 
 	@Test
@@ -98,7 +103,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String selector = "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')";
 		String kingGustaf = "king_gustaf";
 		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
-		assertThat(receivedMessage).isNull();
+		Assertions.assertThat(receivedMessage).isNull();
 	}
 
 	@Test
@@ -107,7 +112,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String selector = "(originatingCountry = 'SE') and (quadTree like '%,cdefghij%')";
 		String kingGustaf = "king_gustaf";
 		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf);
-		assertThat(receivedMessage).isNull();
+		Assertions.assertThat(receivedMessage).isNull();
 	}
 
 	@Test
@@ -120,7 +125,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String kingGustaf = "king_gustaf";
 		String messageQuadTreeTiles = ",abcdefghijklmno,cdefghijklmnop";
 		Message receivedMessage = sendMessageServiceProvider(kingGustaf, dataTypeSelector, messageQuadTreeTiles);
-		assertThat(receivedMessage).isNotNull();
+		Assertions.assertThat(receivedMessage).isNotNull();
 	}
 
 	@Test
@@ -133,7 +138,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		String kingGustaf = "king_gustaf";
 		String messageQuadTreeTiles = ",abcdefghijklmnopqrs,cdefghijklmnop";
 		Message receivedMessage = sendMessageServiceProvider(kingGustaf, selector, messageQuadTreeTiles);
-		assertThat(receivedMessage).isNotNull();
+		Assertions.assertThat(receivedMessage).isNotNull();
 	}
 
 	private Message sendMessageServiceProvider(String serviceProviderName, String selector, String messageQuadTreeTiles) throws Exception {

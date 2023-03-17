@@ -245,5 +245,6 @@
         <module>jms-client-image-source</module>
         <module>jms-client-sink-app</module>
         <module>jms-client-source-app</module>
+        <module>qpid-client</module>
     </modules>
 </project>

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import no.vegvesen.ixn.federation.qpid.AclRule;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

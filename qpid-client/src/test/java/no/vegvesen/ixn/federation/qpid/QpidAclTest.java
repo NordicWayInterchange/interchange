@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import no.vegvesen.ixn.federation.qpid.AclRule;
+import no.vegvesen.ixn.federation.qpid.QpidAcl;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
