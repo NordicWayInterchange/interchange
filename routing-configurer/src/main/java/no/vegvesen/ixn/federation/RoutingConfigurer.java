@@ -179,8 +179,8 @@ public class RoutingConfigurer {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
 				for (Subscription subscription : ourSubscriptions) {
-					if (!subscription.exchangeIsCreated()) {
-						if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+						if (!subscription.exchangeIsCreated()) {
 							String exchangeName = UUID.randomUUID().toString();
 							subscription.setExchangeName(exchangeName);
 							qpidClient.createTopicExchange(exchangeName);

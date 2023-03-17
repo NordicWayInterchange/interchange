@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Configuration;
 import javax.net.ssl.SSLContext;
 import java.security.NoSuchAlgorithmException;
 
-//@Configuration
+@Configuration
 public class DefaultSSLContextConfig {
 
-	//@Bean
+	@Bean
 	public SSLContext defaultSslContext() throws NoSuchAlgorithmException {
 		return SSLContext.getDefault();
 	}

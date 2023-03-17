@@ -35,7 +35,6 @@ public class NeighbourSubscriptionDeleteService {
         this.matchRepository = matchRepository;
     }
 
-    //TODO: Remove subscription endpoints so the match can be taken down before deleting subscription
     public void deleteSubscriptions (NeighbourFacade neighbourFacade) {
         List<Neighbour> neighbours = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.TEAR_DOWN);
         for (Neighbour neighbour : neighbours) {
@@ -51,13 +50,13 @@ public class NeighbourSubscriptionDeleteService {
                             }
                         } catch(SubscriptionDeleteException e) {
                             subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription);
-                            List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
+                            //tearDownListenerEndpointsFromEndpointsList(neighbour, subscription);
+                            //List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                             logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
                         } catch(SubscriptionNotFoundException e) {
                             logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
-                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription);
+                            //tearDownListenerEndpointsFromEndpointsList(neighbour, subscription);
                             subscriptionsToDelete.add(subscription);
                         }
                     }

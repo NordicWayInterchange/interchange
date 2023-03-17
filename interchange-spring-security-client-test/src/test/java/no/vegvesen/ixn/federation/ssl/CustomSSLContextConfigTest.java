@@ -10,11 +10,11 @@ import javax.net.ssl.SSLContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//@SpringBootTest(classes = {SslJavaxSettingsApp.class})
+@SpringBootTest(classes = {SslJavaxSettingsApp.class})
 class CustomSSLContextConfigTest {
 
-	//@Qualifier("getTestSslContext")
-	//@Autowired
+	@Qualifier("getTestSslContext")
+	@Autowired
 	SSLContext sslContext;
 
 	@Test

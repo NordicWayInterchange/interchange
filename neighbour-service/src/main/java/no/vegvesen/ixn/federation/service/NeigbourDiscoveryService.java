@@ -174,7 +174,9 @@ public class NeigbourDiscoveryService {
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
             for (Subscription subscription : subscriptionPostCalculator.getSubscriptionsToRemove()) {
                 if (!subscription.getEndpoints().isEmpty()) {
-                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    }
                     subscription.getEndpoints().clear();
                 }
                 subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -270,9 +272,11 @@ public class NeigbourDiscoveryService {
                         logger.info("Successfully polled subscription. Subscription status: {}  - Number of polls: {}", subscription.getSubscriptionStatus(), subscription.getNumberOfPolls());
                     } else {
                         // Number of poll attempts exceeds allowed number of poll attempts.
-                        subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        }
                         subscription.getEndpoints().clear();
+                        subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                     }
                 } catch (SubscriptionPollException e) {
@@ -282,7 +286,9 @@ public class NeigbourDiscoveryService {
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 } catch (SubscriptionNotFoundException e) {
-                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    }
                     subscription.getEndpoints().clear();
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                     logger.error("Subscription {} is gone from neighbour", subscription,e);
@@ -303,7 +309,9 @@ public class NeigbourDiscoveryService {
                     if (subscription.getNumberOfPolls() < discovererProperties.getSubscriptionPollingNumberOfAttempts()) {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
                         if (lastUpdatedSubscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)) {
-                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                            if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                                tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                            }
                             subscription.getEndpoints().clear();
                             subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                         } else {
@@ -324,7 +332,9 @@ public class NeigbourDiscoveryService {
                         }
                     } else {
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        }
                         subscription.getEndpoints().clear();
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                     }
@@ -334,9 +344,11 @@ public class NeigbourDiscoveryService {
                     neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 } catch (SubscriptionNotFoundException e) {
-                    subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
-                    tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                    }
                     subscription.getEndpoints().clear();
+                    subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
                     logger.error("Subscription {} is gone from neighbour {}", subscription,neighbour.getName());
                 }
             }
