@@ -9,10 +9,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceProviderServiceTest {
@@ -57,7 +58,8 @@ public class ServiceProviderServiceTest {
         capability.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability);
 
-        service.updateNewLocalDeliveryEndpoints(sp, "host", 5671);
+        when(serviceProviderRepository.findByName(any())).thenReturn(sp);
+        service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
 
         assertThat(localDelivery.getEndpoints()).hasSize(1);
     }
@@ -96,7 +98,8 @@ public class ServiceProviderServiceTest {
         capability1.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability1);
 
-        service.updateNewLocalDeliveryEndpoints(sp, "host", 5671);
+        when(serviceProviderRepository.findByName(any())).thenReturn(sp);
+        service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
 
         assertThat(localDelivery.getEndpoints()).hasSize(1);
     }
@@ -114,7 +117,8 @@ public class ServiceProviderServiceTest {
         );
         sp.addDeliveries(Collections.singleton(localDelivery));
 
-        service.updateNewLocalDeliveryEndpoints(sp, "host", 5671);
+        when(serviceProviderRepository.findByName(any())).thenReturn(sp);
+        service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
 
         assertThat(localDelivery.getEndpoints()).hasSize(0);
     }

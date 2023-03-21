@@ -34,6 +34,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {
         QpidClient.class,
@@ -109,6 +111,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 ),
                 Collections.emptySet(),
                 LocalDateTime.now());
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         router.syncServiceProviders(Collections.singleton(serviceProvider));
         LocalEndpoint actualEndpoint = null;
         for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {

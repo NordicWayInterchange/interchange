@@ -147,8 +147,8 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void removeSubscription(LocalSubscription subscription) {
-		subscriptions.remove(subscription);
+	public void removeSubscriptions(Set<LocalSubscription> subscriptionsToRemove) {
+		subscriptions.removeAll(subscriptionsToRemove);
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 

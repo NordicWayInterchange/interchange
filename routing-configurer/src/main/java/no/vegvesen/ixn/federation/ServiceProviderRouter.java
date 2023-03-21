@@ -53,18 +53,11 @@ public class ServiceProviderRouter {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
-            syncPrivateChannels(serviceProvider);
-            tearDownDeliveryQueues(serviceProvider);
-            tearDownCapabilityExchanges(serviceProvider);
-            for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-                if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
-                    processSubscription(serviceProvider, subscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
-                }
-                else {
-                    processRedirectSubscription(serviceProvider,subscription);
-                }
-            }
-
+            syncPrivateChannels(name);
+            tearDownDeliveryQueues(name);
+            tearDownCapabilityExchanges(name);
+            syncSubscriptions(name);
+            removeUnwantedSubscriptions(name);
 
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 optionallyAddServiceProviderToGroup(groupMemberNames,name);
@@ -73,13 +66,26 @@ public class ServiceProviderRouter {
                     removeServiceProviderFromGroup(name,SERVICE_PROVIDERS_GROUP_NAME);
                 }
             }
-            setUpCapabilityExchanges(serviceProvider);
-            bindCapabilityExchangesToBiQueue(serviceProvider);
-            syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, serviceProviders);
-            setUpDeliveryQueue(serviceProvider);
 
-            repository.save(serviceProvider);
+            setUpCapabilityExchanges(name);
+            bindCapabilityExchangesToBiQueue(name);
+            syncLocalSubscriptionsToServiceProviderCapabilities(name, serviceProviders);
+            setUpDeliveryQueue(name);
         }
+    }
+
+    public void syncSubscriptions(String serviceProviderName) {
+        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
+        //TODO: Check for subscriptions
+        for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
+            if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
+                processSubscription(serviceProvider, subscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+            }
+            else {
+                processRedirectSubscription(subscription);
+            }
+        }
+        repository.save(serviceProvider);
     }
 
     public void processSubscription(ServiceProvider serviceProvider, LocalSubscription subscription, String nodeName, String messageChannelPort) {
@@ -99,7 +105,6 @@ public class ServiceProviderRouter {
                 break;
             case ILLEGAL:
                 // Remove the subscription from the ServiceProvider
-                serviceProvider.removeSubscription(subscription);
                 break;
                 //needs testing.
             default:
@@ -108,7 +113,6 @@ public class ServiceProviderRouter {
     }
 
     private void onTearDown(ServiceProvider serviceProvider, LocalSubscription subscription) {
-        List<Match> match = matchRepository.findAllByLocalSubscriptionId(subscription.getId());
         Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
         for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
             String source = endpoint.getSource();
@@ -123,9 +127,23 @@ public class ServiceProviderRouter {
             subscription.getLocalEndpoints().removeAll(endpointsToRemove);
         }
         subscription.getConnections().clear();
-        if (match.isEmpty()) {
-            serviceProvider.removeSubscription(subscription);
+    }
+
+    public void removeUnwantedSubscriptions(String serviceProviderName) {
+        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
+        //TODO: Check for subscriptions
+        Set<LocalSubscription> localSubscriptions = serviceProvider.getSubscriptions();
+        Set<LocalSubscription> subscriptionsToRemove = new HashSet<>();
+        for (LocalSubscription localSubscription : localSubscriptions) {
+            if (!localSubscription.isSubscriptionWanted()) {
+                List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
+                if (matches.isEmpty() && localSubscription.getLocalEndpoints().isEmpty()) {
+                    subscriptionsToRemove.add(localSubscription);
+                }
+            }
         }
+        serviceProvider.removeSubscriptions(subscriptionsToRemove);
+        repository.save(serviceProvider);
     }
 
     private void onRequested(String serviceProviderName, LocalSubscription subscription) {
@@ -136,28 +154,20 @@ public class ServiceProviderRouter {
         subscription.setStatus(LocalSubscriptionStatus.CREATED);
     }
 
-    public void processRedirectSubscription(ServiceProvider serviceProvider, LocalSubscription subscription) {
+    public void processRedirectSubscription(LocalSubscription subscription) {
         if (subscription.getStatus().equals(LocalSubscriptionStatus.REQUESTED)) {
             subscription.setStatus(LocalSubscriptionStatus.CREATED);
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
             //Just skip
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
-            redirectTearDown(serviceProvider,subscription);
+            subscription.getLocalEndpoints().clear();
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
-            serviceProvider.removeSubscription(subscription);
+            subscription.getLocalEndpoints().clear();
+            subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
         } else {
             throw new IllegalStateException("Unknown subscription status encountered");
         }
     }
-
-    public void redirectTearDown(ServiceProvider serviceProvider,LocalSubscription subscription) {
-        subscription.getLocalEndpoints().clear();
-        List<Match> matches = matchRepository.findAllByLocalSubscriptionId(subscription.getId());
-        if (matches.isEmpty()) {
-            serviceProvider.removeSubscription(subscription);
-        }
-    }
-
 
     private void optionallyCreateQueue(String queueName, String serviceProviderName) {
         if (!qpidClient.queueExists(queueName)) {
@@ -179,12 +189,12 @@ public class ServiceProviderRouter {
         qpidClient.removeMemberFromGroup(name,groupName);
     }
 
-    public void syncPrivateChannels(ServiceProvider serviceProvider) {
+    public void syncPrivateChannels(String serviceProviderName) {
+        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
         Set<PrivateChannel> privateChannels = new HashSet<>();
         privateChannels.addAll(serviceProvider.getPrivateChannels());
-        String name = serviceProvider.getName();
         if(!privateChannels.isEmpty()) {
-            syncPrivateChannelsWithQpid(privateChannels, name);
+            syncPrivateChannelsWithQpid(privateChannels, serviceProviderName);
             Set<PrivateChannel> privateChannelsToRemove = privateChannels
                     .stream()
                     .filter(s -> s.getStatus().equals(PrivateChannelStatus.TEAR_DOWN))
@@ -247,28 +257,15 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void removeLocalSubscriptionQueue(LocalSubscription subscription, String serviceProviderName) {
-        if (subscription.getStatus().equals(LocalSubscriptionStatus.TEAR_DOWN)) {
-            for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
-                String queueName = endpoint.getSource();
-                if (qpidClient.queueExists(queueName)) {
-                    qpidClient.removeReadAccess(serviceProviderName, queueName);
-                    qpidClient.removeQueue(queueName);
-                    logger.info("Removed queue for LocalSubscription {}", subscription);
-                }
-            }
-        }
-    }
-
-    //@Scheduled(fixedRateString = "${create-capability-exchange.interval}")
-    public void setUpCapabilityExchanges(ServiceProvider serviceProvider) {
+    public void setUpCapabilityExchanges(String serviceProviderName) {
+        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
         if (serviceProvider.hasCapabilities()) {
             for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
                 if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
                     if (!capability.exchangeExists()) {
                         String exchangeName = "cap-" + UUID.randomUUID();
                         capability.setCapabilityExchangeName(exchangeName);
-                        repository.save(serviceProvider);
+                        //repository.save(serviceProvider);
                     }
                     if (!qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
                         qpidClient.createTopicExchange(capability.getCapabilityExchangeName());
@@ -276,10 +273,12 @@ public class ServiceProviderRouter {
                     }
                 }
             }
+            repository.save(serviceProvider);
         }
     }
 
-    public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider) {
+    public void bindCapabilityExchangesToBiQueue(String serviceProviderName) {
+        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
         for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
             if (capability.exchangeExists()) {
                 if (!qpidClient.getQueueBindKeys("bi-queue").contains(capability.getCapabilityExchangeName())) {
@@ -290,11 +289,12 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void tearDownCapabilityExchanges(ServiceProvider serviceProvider) {
+    public void tearDownCapabilityExchanges(String serviceProviderName) {
+        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
         Set<Capability> tearDownCapabilities = serviceProvider.getCapabilities().getCapabilities().stream()
                 .filter(capability -> capability.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
-
+        //TODO: Check for capabilities
         for (Capability capability : tearDownCapabilities) {
             if (capability.exchangeExists()) {
                 if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
@@ -307,8 +307,10 @@ public class ServiceProviderRouter {
         repository.save(serviceProvider);
     }
 
-    public void setUpDeliveryQueue(ServiceProvider serviceProvider) {
+    public void setUpDeliveryQueue(String serviceProviderName) {
+        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
         List<OutgoingMatch> deliveriesToSetupQueueFor = outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(serviceProvider.getName());
+        //TODO: Check for outgoingMatches
         for (OutgoingMatch match : deliveriesToSetupQueueFor) {
             if (match.getCapability().getStatus().equals(CapabilityStatus.CREATED)) {
                 LocalDelivery delivery = match.getLocalDelivery();
@@ -327,9 +329,12 @@ public class ServiceProviderRouter {
                 }
             }
         }
+        repository.save(serviceProvider);
     }
 
-    public void tearDownDeliveryQueues(ServiceProvider serviceProvider) {
+    public void tearDownDeliveryQueues(String serviceProviderName) {
+        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
+        //TODO: Check for deliveries
         List<OutgoingMatch> matchesToTearDownEndpointsFor = outgoingMatchDiscoveryService.findMatchesToTearDownEndpointsFor(serviceProvider.getName());
         for (OutgoingMatch match : matchesToTearDownEndpointsFor) {
             if (match.getLocalDelivery().getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
@@ -367,6 +372,7 @@ public class ServiceProviderRouter {
                 }
             }
         }
+        repository.save(serviceProvider);
     }
 
     public String joinDeliverySelectorWithCapabilitySelector(Capability capability, String selector) {
@@ -402,7 +408,8 @@ public class ServiceProviderRouter {
         qpidClient.bindSubscriptionExchange(localSubscription.getSelector(), exchangeName, queueName);
     }
 
-    public void syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, Iterable<ServiceProvider> serviceProviders) {
+    public void syncLocalSubscriptionsToServiceProviderCapabilities(String serviceProviderName, Iterable<ServiceProvider> serviceProviders) {
+        ServiceProvider serviceProvider = repository.findByName(serviceProviderName);
         if (serviceProvider.hasActiveSubscriptions()) {
             Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
