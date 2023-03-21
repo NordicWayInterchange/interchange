@@ -37,11 +37,6 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>interchange-spring-security-client</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
             <artifactId>neighbour-service</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
