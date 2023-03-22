@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.qpid.BrokerClient;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
@@ -26,11 +27,11 @@ public class RoutingConfigurer {
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurer.class);
 
 	private final NeighbourService neighbourService;
-	private final QpidClient qpidClient;
+	private final BrokerClient qpidClient;
 	private final ServiceProviderRouter serviceProviderRouter;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter) {
+	public RoutingConfigurer(NeighbourService neighbourService, BrokerClient qpidClient, ServiceProviderRouter serviceProviderRouter) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;

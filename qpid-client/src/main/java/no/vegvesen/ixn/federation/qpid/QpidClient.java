@@ -20,7 +20,7 @@ import java.util.*;
 
 @Service
 @ConfigurationPropertiesScan
-public class QpidClient {
+public class QpidClient implements BrokerClient {
 
 	public static final String FEDERATED_GROUP_NAME = "federated-interchanges";
 	public static final String SERVICE_PROVIDERS_GROUP_NAME = "service-providers";

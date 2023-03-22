@@ -4,8 +4,7 @@ import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.QpidAcl;
-import no.vegvesen.ixn.federation.qpid.QpidClient;
+import no.vegvesen.ixn.federation.qpid.BrokerClient;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
@@ -28,13 +27,13 @@ public class ServiceProviderRouter {
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
 
     private final ServiceProviderRepository repository;
-    private final QpidClient qpidClient;
+    private final BrokerClient qpidClient;
     private final MatchDiscoveryService matchDiscoveryService;
     private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
     private final InterchangeNodeProperties nodeProperties;
 
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, QpidClient qpidClient, MatchDiscoveryService matchDiscoveryService, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService, InterchangeNodeProperties nodeProperties) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, BrokerClient qpidClient, MatchDiscoveryService matchDiscoveryService, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService, InterchangeNodeProperties nodeProperties) {
         this.repository = repository;
         this.qpidClient = qpidClient;
         this.matchDiscoveryService = matchDiscoveryService;
@@ -220,12 +219,19 @@ public class ServiceProviderRouter {
                 logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 qpidClient.createQueue(queueName);
                 logger.info("Creating queue {}", queueName);
+                /*
                 QpidAcl acl = qpidClient.getQpidAcl();
                 acl.addQueueWriteAccess(name,queueName);
                 acl.addQueueWriteAccess(peerName,queueName);
                 acl.addQueueReadAccess(name, queueName);
                 acl.addQueueReadAccess(peerName,queueName);
                 qpidClient.postQpidAcl(acl);
+
+                 */
+                qpidClient.addReadAccess(name,queueName);
+                qpidClient.addWriteAccess(peerName,queueName);
+                qpidClient.addReadAccess(name,queueName);
+                qpidClient.addWriteAccess(peerName,queueName);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
                 logger.info("Creating queue {} for client {}", queueName, peerName);
             }
@@ -236,12 +242,19 @@ public class ServiceProviderRouter {
                 }
                 qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
+                /*
                 QpidAcl acl = qpidClient.getQpidAcl();
                 acl.removeQueueWriteAccess(peerName,queueName);
                 acl.removeQueueWriteAccess(name, queueName);
                 acl.removeQueueReadAccess(peerName,queueName);
                 acl.removeQueueReadAccess(name, queueName);
                 qpidClient.postQpidAcl(acl);
+
+                 */
+                qpidClient.removeReadAccess(peerName,queueName);
+                qpidClient.removeWriteAccess(peerName,queueName);
+                qpidClient.removeReadAccess(name,queueName);
+                qpidClient.removeWriteAccess(name,queueName);
                 logger.info("Tearing down queue {} for client {}", queueName, peerName);
                 qpidClient.removeQueue(queueName);
             }
