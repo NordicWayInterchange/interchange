@@ -18,7 +18,7 @@ class CustomSSLContextConfigTest {
 	SSLContext sslContext;
 
 	@Test
-	@Disabled
+	@Disabled("Disabled due to access restrictions in Java > 8")
 	void defaultSSLContextWithSystemParametersSetContainsCustomKey() {
 		assertThat(sslContext).isNotNull();
 		assertThat(sslContext)

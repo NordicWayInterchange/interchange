@@ -17,7 +17,7 @@ class DefaultSSLContextConfigTest {
 	@Autowired
 	SSLContext sslContext;
 
-	@Disabled
+	@Disabled("Extracting private fields is restricted in Java > 8")
 	@Test
 	void defaultSSLContextWithSystemParametersSetContainsCustomKey()  {
 		assertThat(sslContext).isNotNull();
