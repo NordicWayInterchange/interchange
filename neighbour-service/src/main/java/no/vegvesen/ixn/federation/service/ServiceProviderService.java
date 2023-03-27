@@ -51,6 +51,7 @@ public class ServiceProviderService {
 
         for (LocalSubscription localSubscription : redirectSubscriptions) {
             Set<LocalEndpoint> newEndpoints = new HashSet<>();
+            Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
             if (localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
                 List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                 for (Match match : matches) {
@@ -61,10 +62,21 @@ public class ServiceProviderService {
                                 newEndpoints.add(endpoint);
                             }
                         }
+
+                        for (LocalEndpoint endpoint : localSubscription.getLocalEndpoints()) {
+                            if (endpoints.contains(endpoint)) {
+                                endpointsToRemove.add(endpoint);
+                            }
+                        }
                     }
                 }
+                if (matches.isEmpty()) {
+                    localSubscription.getLocalEndpoints().clear();
+                }
             }
-            localSubscription.setLocalEndpoints(newEndpoints);
+            localSubscription.getLocalEndpoints().removeAll(endpointsToRemove);
+            localSubscription.getLocalEndpoints().addAll(newEndpoints);
+
         }
         serviceProviderRepository.save(serviceProvider);
     }
@@ -181,10 +193,6 @@ public class ServiceProviderService {
 
     public List<ServiceProvider> getServiceProviders() {
         return serviceProviderRepository.findAll();
-    }
-
-    public void saveAllServiceProviders(List<ServiceProvider> serviceProviders) {
-        serviceProviderRepository.saveAll(serviceProviders);
     }
 
     public Set<LocalEndpoint> transformEndpointsToLocalEndpoints(Set<Endpoint> endpoints) {

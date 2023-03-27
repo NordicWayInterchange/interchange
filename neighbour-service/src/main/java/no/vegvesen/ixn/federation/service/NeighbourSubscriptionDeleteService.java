@@ -22,15 +22,13 @@ public class NeighbourSubscriptionDeleteService {
 
     private Logger logger = LoggerFactory.getLogger(NeighbourSubscriptionDeleteService.class);
     private final NeighbourRepository neighbourRepository;
-    private final ListenerEndpointRepository listenerEndpointRepository;
     private final GracefulBackoffProperties backoffProperties;
     private final MatchRepository matchRepository;
 
 
     @Autowired
-    public NeighbourSubscriptionDeleteService(NeighbourRepository neighbourRepository, ListenerEndpointRepository listenerEndpointRepository, GracefulBackoffProperties backoffProperties, MatchRepository matchRepository) {
+    public NeighbourSubscriptionDeleteService(NeighbourRepository neighbourRepository, GracefulBackoffProperties backoffProperties, MatchRepository matchRepository) {
         this.neighbourRepository = neighbourRepository;
-        this.listenerEndpointRepository = listenerEndpointRepository;
         this.backoffProperties = backoffProperties;
         this.matchRepository = matchRepository;
     }
@@ -50,13 +48,10 @@ public class NeighbourSubscriptionDeleteService {
                             }
                         } catch(SubscriptionDeleteException e) {
                             subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                            //tearDownListenerEndpointsFromEndpointsList(neighbour, subscription);
-                            //List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                             neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                             logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
                         } catch(SubscriptionNotFoundException e) {
                             logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
-                            //tearDownListenerEndpointsFromEndpointsList(neighbour, subscription);
                             subscriptionsToDelete.add(subscription);
                         }
                     }
@@ -66,20 +61,9 @@ public class NeighbourSubscriptionDeleteService {
                     neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.EMPTY);
                     logger.info("SubscriptionRequest is empty, setting SubscriptionRequestStatus to SubscriptionRequestStatus.EMPTY");
                 }
-                //tearDownListenerEndpoints(neighbour);
                 neighbourRepository.save(neighbour);
                 logger.debug("Saving updated neighbour: {}", neighbour.toString());
             }
-        }
-    }
-
-    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Subscription subscription) {
-        for(Endpoint endpoint : subscription.getEndpoints()) {
-            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource());
-            if (listenerEndpoint != null) {
-                listenerEndpointRepository.delete(listenerEndpoint);
-            }
-            logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", neighbour.getName(), endpoint.getHost(), endpoint.getSource());
         }
     }
 }

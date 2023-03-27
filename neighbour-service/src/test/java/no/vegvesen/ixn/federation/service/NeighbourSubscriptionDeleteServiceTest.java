@@ -31,9 +31,6 @@ public class NeighbourSubscriptionDeleteServiceTest {
     NeighbourRepository neighbourRepository;
 
     @Mock
-    ListenerEndpointRepository listenerEndpointRepository;
-
-    @Mock
     MatchRepository matchRepository;
 
     @Mock
@@ -46,7 +43,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
     @BeforeEach
     public void setUp() {
-        neighbourSubscriptionDeleteService = new NeighbourSubscriptionDeleteService(neighbourRepository, listenerEndpointRepository, backoffProperties, matchRepository);
+        neighbourSubscriptionDeleteService = new NeighbourSubscriptionDeleteService(neighbourRepository, backoffProperties, matchRepository);
 
     }
 
