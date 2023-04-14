@@ -167,5 +167,97 @@ public class ApiModelRestDocumentationTest {
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
+    @Test
+    public void testMetadataApplicationSplit() throws JsonProcessingException {
+        CapabilityApplicationApi application = new CapabilityApplicationApi(
+                Constants.DENM,
+                "NO00000",
+                "BOUV01",
+                "NO",
+                "DENM:1.3.1",
+                new HashSet<>(Collections.singleton("02312"))
+        );
+
+        CapabilityMetadataApi metadata = new CapabilityMetadataApi(
+                1,
+                "https://info.no",
+                RedirectStatusApi.OPTIONAL,
+                0,
+                0,
+                0
+        );
+
+        CapabilitySplitApi capabilityApi = new CapabilitySplitApi(
+                application,
+                metadata
+        );
+
+        CapabilitiesSplitApi capabilities = new CapabilitiesSplitApi(
+                "my-node",
+                new HashSet<>(Collections.singleton(capabilityApi))
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
+    }
+
+    @Test
+    public void testDenmMetadataApplicationSplit() throws JsonProcessingException {
+        DenmCapabilityApplicationApi application = new DenmCapabilityApplicationApi(
+                "NO00000",
+                "BOUV01",
+                "NO",
+                "DENM:1.3.1",
+                new HashSet<>(Collections.singleton("02312")),
+                new HashSet<>(Collections.singleton("6"))
+        );
+
+        CapabilityMetadataApi metadata = new CapabilityMetadataApi(
+                1,
+                "https://info.no",
+                RedirectStatusApi.OPTIONAL,
+                0,
+                0,
+                0
+        );
+
+        CapabilitySplitApi capabilityApi = new CapabilitySplitApi(
+                application,
+                metadata
+        );
+
+        CapabilitiesSplitApi capabilities = new CapabilitiesSplitApi(
+                "my-node",
+                new HashSet<>(Collections.singleton(capabilityApi))
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
+    }
+
+    @Test
+    public void testDenmMetadataApplicationSplitWithoutAllProps() throws JsonProcessingException {
+        DenmCapabilityApplicationApi application = new DenmCapabilityApplicationApi(
+                "NO00000",
+                "BOUV01",
+                "NO",
+                "DENM:1.3.1",
+                new HashSet<>(Collections.singleton("02312")),
+                new HashSet<>(Collections.singleton("6"))
+        );
+
+        CapabilityMetadataApi metadata = new CapabilityMetadataApi();
+        metadata.setInfoUrl("https://info.no");
+
+        CapabilitySplitApi capabilityApi = new CapabilitySplitApi(
+                application,
+                metadata
+        );
+
+        CapabilitiesSplitApi capabilities = new CapabilitiesSplitApi(
+                "my-node",
+                new HashSet<>(Collections.singleton(capabilityApi))
+        );
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
+    }
 
 }
