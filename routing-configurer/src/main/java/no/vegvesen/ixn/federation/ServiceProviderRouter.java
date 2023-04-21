@@ -3,6 +3,8 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidAcl;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
@@ -317,7 +319,7 @@ public class ServiceProviderRouter {
 
     public void setUpCapabilityExchanges(ServiceProvider serviceProvider) {
         if (serviceProvider.hasCapabilities()) {
-            for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
+            for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
                 if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
                     if (!capability.exchangeExists()) {
                         String exchangeName = "cap-" + UUID.randomUUID();
@@ -334,7 +336,7 @@ public class ServiceProviderRouter {
     }
 
     public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider) {
-        for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
+        for (CapabilitySplit capability : serviceProvider.getCapabilities().getCapabilities()) {
             if (capability.exchangeExists()) {
                 if (!qpidClient.getQueueBindKeys("bi-queue").contains(capability.getCapabilityExchangeName())) {
                     String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability);
@@ -345,11 +347,11 @@ public class ServiceProviderRouter {
     }
 
     public void tearDownCapabilityExchanges(ServiceProvider serviceProvider) {
-        Set<Capability> tearDownCapabilities = serviceProvider.getCapabilities().getCapabilities().stream()
+        Set<CapabilitySplit> tearDownCapabilities = serviceProvider.getCapabilities().getCapabilities().stream()
                 .filter(capability -> capability.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
 
-        for (Capability capability : tearDownCapabilities) {
+        for (CapabilitySplit capability : tearDownCapabilities) {
             if (capability.exchangeExists()) {
                 if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
                     qpidClient.removeExchange(capability.getCapabilityExchangeName());
@@ -423,7 +425,7 @@ public class ServiceProviderRouter {
         }
     }
 
-    public String joinDeliverySelectorWithCapabilitySelector(Capability capability, String selector) {
+    public String joinDeliverySelectorWithCapabilitySelector(CapabilitySplit capability, String selector) {
         return MessageValidatingSelectorCreator.makeSelectorJoinedWithCapabilitySelector(selector,capability);
     }
 
@@ -438,7 +440,7 @@ public class ServiceProviderRouter {
 
     public void syncLocalSubscriptionsToServiceProviderCapabilities(ServiceProvider serviceProvider, Iterable<ServiceProvider> serviceProviders) {
         if (serviceProvider.hasActiveSubscriptions()) {
-            Set<Capability> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+            Set<CapabilitySplit> allCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider.activeSubscriptions();
             for (LocalSubscription subscription : serviceProviderSubscriptions) {
                 if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
@@ -449,9 +451,9 @@ public class ServiceProviderRouter {
                                     .map(LocalConnection::getSource)
                                     .collect(Collectors.toSet());
 
-                            Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
+                            Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, subscription.getSelector());
 
-                            for (Capability capability : matchingCapabilities) {
+                            for (CapabilitySplit capability : matchingCapabilities) {
                                 if (capability.exchangeExists() && !existingConnections.contains(capability.getCapabilityExchangeName())) {
                                     if (qpidClient.exchangeExists(capability.getCapabilityExchangeName())) {
                                         LocalEndpoint endpoint = subscription.getLocalEndpoints().stream().findFirst().get();
@@ -469,9 +471,9 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
+    public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<CapabilitySplit> capabilities) {
         Set<String> existingConnections = capabilities.stream()
-                .map(Capability::getCapabilityExchangeName)
+                .map(CapabilitySplit::getCapabilityExchangeName)
                 .collect(Collectors.toSet());
 
         Set<LocalConnection> unwantedConnections = new HashSet<>();

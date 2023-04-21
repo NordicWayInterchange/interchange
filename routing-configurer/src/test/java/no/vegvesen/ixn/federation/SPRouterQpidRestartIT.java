@@ -4,6 +4,10 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
@@ -245,9 +249,19 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testCapabilityExchangesAreAutomaticallyAddedToQpidAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -265,9 +279,18 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testCapabilityExchangesAreNotAutomaticallyAddedToQpidAfterRestartWhenStatusIsTearDown() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
 
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -285,9 +308,18 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testConnectionBetweenLocalSubscriptionAndCapabilityIsAutomaticallyAddedAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         ServiceProvider serviceProvider1 = new ServiceProvider(
                 "my-service-provider",
@@ -326,9 +358,18 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testDeliveryExchangesAreAutomaticallyAddedToQpidAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -364,9 +405,18 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testDeliveryExchangeIsNotAutomaticallyAddedToQpidAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",

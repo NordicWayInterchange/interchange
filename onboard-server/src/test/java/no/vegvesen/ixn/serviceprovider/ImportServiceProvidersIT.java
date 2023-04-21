@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import org.junit.jupiter.api.Disabled;
@@ -36,7 +37,7 @@ public class ImportServiceProvidersIT {
         OldServiceProviderApi[] serviceProviderApis = ServiceProviderImport.getOldServiceProviderApis(Files.newInputStream(path));
         for (OldServiceProviderApi serviceProviderApi : serviceProviderApis) {
             ServiceProvider serviceProvider = new ServiceProvider(serviceProviderApi.getName());
-            Set<Capability> capabilities = transformer.capabilitiesApiToCapabilities(serviceProviderApi.getCapabilities());
+            Set<CapabilitySplit> capabilities = transformer.capabilitiesSplitApiToCapabilitiesSplit(serviceProviderApi.getCapabilities());
             Capabilities capabilities1 = new Capabilities();
             capabilities1.setCapabilities(capabilities);
             serviceProvider.setCapabilities(capabilities1);

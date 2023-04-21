@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
@@ -66,7 +67,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
+    public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         logger.info("Checking for any neighbours with UNKNOWN capabilities for capability exchange");
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByCapabilities_StatusIn(
                 Capabilities.CapabilitiesStatus.UNKNOWN,
@@ -75,7 +76,7 @@ public class NeigbourDiscoveryService {
         capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
-    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
+    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         for (Neighbour neighbour : neighboursForCapabilityExchange) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
@@ -97,7 +98,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void retryUnreachable(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities) {
+    public void retryUnreachable(NeighbourFacade neighbourFacade, Set<CapabilitySplit> localCapabilities) {
         List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatus(ConnectionStatus.UNREACHABLE);
         if (!unreachableNeighbours.isEmpty()) {
             logger.info("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
@@ -114,9 +115,9 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<Capability> localCapabilities) {
+    private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<CapabilitySplit> localCapabilities) {
         try {
-            Set<Capability> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
+            Set<CapabilitySplit> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             Capabilities neighbourCapabilities = neighbour.getCapabilities();
             neighbourCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
             neighbourCapabilities.setCapabilities(capabilities);
@@ -167,7 +168,7 @@ public class NeigbourDiscoveryService {
                 //So, this is really a n-to-1 relationship.
     public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
         String neighbourName = neighbour.getName();
-        Set<Capability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
+        Set<CapabilitySplit> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
         logger.info("Found neighbour for subscription request: {}", neighbourName);
         Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, interchangeNodeProperties.getName());

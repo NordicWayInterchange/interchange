@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.capability;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -16,16 +17,22 @@ class CapabilityMatcherTest {
 
 	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
-		DenmCapability denm_a_b_causeCode_1_2 = new DenmCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, Collections.singleton(6));
+		CapabilitySplit capability = new CapabilitySplit();
+		capability.setApplication(denm_a_b_causeCode_1_2);
+		capability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
-				Sets.newLinkedHashSet(denm_a_b_causeCode_1_2),
+				Sets.newLinkedHashSet(capability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'", "")), "");
 		assertThat(commonInterest).isEmpty();
 	}
 
 	@Test
 	void datexCapabilitiesMatchDatexSelector() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "SituationPublication");
+		CapabilitySplit datexCapability = new CapabilitySplit();
+		datexCapability.setApplication(datexApplication);
+		datexCapability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2'", "")), "");
@@ -34,7 +41,10 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesDoesNotMatchDatexSelectorOutsideQuadTree() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "SituationPublication");
+		CapabilitySplit datexCapability = new CapabilitySplit();
+		datexCapability.setApplication(datexApplication);
+		datexCapability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,12234%'", "")), "");
@@ -43,7 +53,10 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTree() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "", "NO", null, QUAD_TREE_0121_0122, "SituationBublication");
+		CapabilitySplit datexCapability = new CapabilitySplit();
+		datexCapability.setApplication(datexApplication);
+		datexCapability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012233%'", "")), "");
@@ -52,7 +65,10 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeLongerInFilter() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "SituationPublication");
+		CapabilitySplit datexCapability = new CapabilitySplit();
+		datexCapability.setApplication(datexApplication);
+		datexCapability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012100%'", "")), "");
@@ -61,7 +77,10 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndPublicationType() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "MeasuredDataPublication");
+		CapabilitySplit datexCapability = new CapabilitySplit();
+		datexCapability.setApplication(datexApplication);
+		datexCapability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012100%' and publicationType = 'MeasuredDataPublication'", "")), "");
@@ -70,7 +89,10 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeAndOtherPublicationTypeDoesNotMatch() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-213", "NO", null, QUAD_TREE_0121_0122, "MeasuredDataPublication");
+		CapabilitySplit datexCapability = new CapabilitySplit();
+		datexCapability.setApplication(datexApplication);
+		datexCapability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,012100%' and publicationType = 'Obstruction'", "")), "");
@@ -79,7 +101,10 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorOutsideQuadTreeLongerInFilter() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122,"Obstruction");
+		CapabilitySplit datexCapability = new CapabilitySplit();
+		datexCapability.setApplication(datexApplication);
+		datexCapability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' and quadTree like '%,121000%'", "")), "");
@@ -88,7 +113,10 @@ class CapabilityMatcherTest {
 
 	@Test
 	void datexCapabilitiesMatchDatexSelectorInsideQuadTreeWithExtraWhitespace() {
-		DatexCapability datexCapability = new DatexCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, PUBL_TYPES_SITUATION_MEASURED_DATA);
+		DatexApplication datexApplication = new DatexApplication("publ-id-1", "pub-123", "NO", null, QUAD_TREE_0121_0122, "Obstruction");
+		CapabilitySplit datexCapability = new CapabilitySplit();
+		datexCapability.setApplication(datexApplication);
+		datexCapability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(datexCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED," \n\t\n\n messageType = 'DATEX2' and \tquadTree \r\n\t\n\n like \t\t '%,01210%'\r\n", "")), "");
@@ -99,14 +127,12 @@ class CapabilityMatcherTest {
 	public void testDenmCapability() {
 		Set<String> quadTreeTiles = new HashSet<>();
 		quadTreeTiles.add("12004");
-		DenmCapability capability = new DenmCapability(
-				"NO-123",
-				"NO",
-				"DENM:1.2.2",
-				quadTreeTiles,
-				RedirectStatus.OPTIONAL,
-				Collections.singleton("6")
-		);
+		DenmApplication application = new DenmApplication("NO-123", "pub-123", "NO", "DENM:1.2.2", quadTreeTiles, Collections.singleton(6));
+
+		CapabilitySplit capability = new CapabilitySplit();
+		capability.setApplication(application);
+		capability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
+
 		LocalSubscription subscription = new LocalSubscription(
 				52,
 				LocalSubscriptionStatus.CREATED,
@@ -122,7 +148,11 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void matchIviSelectorWithQuadTree() {
-		IvimCapability capability = new IvimCapability("NO-12345", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")), RedirectStatus.OPTIONAL, Sets.newHashSet(Arrays.asList("6")));
+		IvimApplication application = new IvimApplication("NO-12345", "pub-2131", "NO", "IVI:1.0", Sets.newHashSet(Collections.singleton("12004")));
+		CapabilitySplit capability = new CapabilitySplit();
+		capability.setApplication(application);
+		capability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
+
 		String consumerCommonName = "";
 		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'IVIM' and protocolVersion = 'IVI:1.0' and quadTree like '%,12004%' and iviType like '%,6,%'",consumerCommonName);
 		CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(Sets.newHashSet(Collections.singleton(capability)), Sets.newHashSet(Collections.singleton(localSubscription)), consumerCommonName);
@@ -130,14 +160,16 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void matchSpatemSelectorWithQuadTree() {
-		SpatemCapability capability = new SpatemCapability(
+		SpatemApplication application = new SpatemApplication(
 				"NO-12345",
+				"pub-123",
 				"NO",
 				"SPATEM:1.0",
-				Sets.newHashSet(Collections.singleton("12003")),
-				RedirectStatus.OPTIONAL,
-				Sets.newHashSet(Arrays.asList("1", "2"))
+				Sets.newHashSet(Collections.singleton("12003"))
 		);
+		CapabilitySplit capability = new CapabilitySplit();
+		capability.setApplication(application);
+		capability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		String consumerCommonName = "";
 		LocalSubscription localSubscription = new LocalSubscription("originatingCountry = 'NO' and messageType = 'SPATEM' and protocolVersion = 'SPATEM:1.0' and quadTree like '%,12003%' and id like '%,2,%' or id like '%,3,%'",consumerCommonName);
 		System.out.println(localSubscription.getSelector());
@@ -147,8 +179,10 @@ class CapabilityMatcherTest {
 
 	@Test
 	void camCapabilitiesMatchCamSelectorInsideQuadTreeAndStationType() {
-		Set<String> statTypes = Sets.newLinkedHashSet("pedestrian", "cyclist", "moped");
-		CamCapability camCapability = new CamCapability("publ-id-1", "NO", null, QUAD_TREE_0121_0122, RedirectStatus.OPTIONAL, statTypes);
+		CamApplication camApplication = new CamApplication("publ-id-1", "pub-1", "NO", null, QUAD_TREE_0121_0122);
+		CapabilitySplit camCapability = new CapabilitySplit();
+		camCapability.setApplication(camApplication);
+		camCapability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		Set<LocalSubscription> commonInterest = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(
 				Sets.newLinkedHashSet(camCapability),
 				Sets.newLinkedHashSet(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'CAM' and quadTree like '%,012100%' and stationType = 'cyclist'", "")), "");
@@ -158,14 +192,16 @@ class CapabilityMatcherTest {
 	@Test
 	@Disabled("At the moment, it's not possible to filter on optional fields that are not a part of the set of properties")
 	void mathcCapabilityWithSelectorOfOnlyOptionalField() {
-		SpatemCapability capability = new SpatemCapability(
+		SpatemApplication application = new SpatemApplication(
 				"NO-12345",
+				"pub-1",
 				"NO",
 				"SPATEM:1.0",
-				Sets.newHashSet(Collections.singleton("12003")),
-				RedirectStatus.OPTIONAL,
-				Sets.newHashSet(Arrays.asList("1", "2"))
+				Sets.newHashSet(Collections.singleton("12003"))
 		);
+		CapabilitySplit capability = new CapabilitySplit();
+		capability.setApplication(application);
+		capability.getMetadata().setRedirectPolicy(RedirectStatus.OPTIONAL);
 		String consumerCommonName = "";
 		LocalSubscription localSubscription = new LocalSubscription("name = 'fish'",consumerCommonName);
 		System.out.println(localSubscription.getSelector());

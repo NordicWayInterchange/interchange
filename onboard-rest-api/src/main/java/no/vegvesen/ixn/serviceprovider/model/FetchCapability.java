@@ -1,23 +1,23 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 
 public class FetchCapability {
-    SPCapabilityApi definition;
+    CapabilitySplitApi definition;
 
     public FetchCapability() {
 
     }
 
-    public FetchCapability(SPCapabilityApi definition) {
+    public FetchCapability(CapabilitySplitApi definition) {
         this.definition = definition;
     }
 
-    public SPCapabilityApi getDefinition() {
+    public CapabilitySplitApi getDefinition() {
         return definition;
     }
 
-    public void setDefinition(SPCapabilityApi definition) {
+    public void setDefinition(CapabilitySplitApi definition) {
         this.definition = definition;
     }
 

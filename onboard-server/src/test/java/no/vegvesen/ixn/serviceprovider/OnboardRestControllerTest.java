@@ -2,12 +2,14 @@ package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.ServiceProviderRouter;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.serviceprovider.capability.DatexSPCapabilityApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,7 +82,10 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DatexSPCapabilityApi datexNo = new DatexSPCapabilityApi("NO");
+		DatexApplicationApi app = new DatexApplicationApi();
+		app.setOriginatingCountry("NO");
+		CapabilitySplitApi datexNo = new CapabilitySplitApi();
+		datexNo.setApplication(app);
 		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
 				firstServiceProvider,
 				Collections.singleton(datexNo)
@@ -90,9 +95,9 @@ public class OnboardRestControllerTest {
 		when(serviceProviderRepository.save(any())).thenAnswer(i -> {
 			Object argument = i.getArgument(0);
 			ServiceProvider s = (ServiceProvider) argument;
-			Set<Capability> capabilities = s.getCapabilities().getCapabilities();
+			Set<CapabilitySplit> capabilities = s.getCapabilities().getCapabilities();
 			int id = 0;
-			for (Capability capability : capabilities) {
+			for (CapabilitySplit capability : capabilities) {
 				if (capability.getId() == null) {
 					capability.setId(id++);
 				}
@@ -117,9 +122,9 @@ public class OnboardRestControllerTest {
 		// Create Capabilities API object for capabilities to delete, convert to JSON string and POST to server.
 
 		// Mock existing service provider with three capabilities in database
-		DatexCapability capability42 = mock(DatexCapability.class);
+		CapabilitySplit capability42 = mock(CapabilitySplit.class);
 		when(capability42.getId()).thenReturn(42);
-		Set<Capability> capabilities = Sets.newLinkedHashSet(capability42, mock(Capability.class), mock(Capability.class));
+		Set<CapabilitySplit> capabilities = Sets.newLinkedHashSet(capability42, mock(CapabilitySplit.class), mock(CapabilitySplit.class));
 		Capabilities secondServiceProviderCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities);
 
 		ServiceProvider secondServiceProvider = new ServiceProvider(serviceProviderName);
@@ -142,7 +147,11 @@ public class OnboardRestControllerTest {
 
 		mockCertificate("First Service Provider");
 
-		DatexSPCapabilityApi datexFi = new DatexSPCapabilityApi("FI");
+		DatexApplicationApi app = new DatexApplicationApi();
+		app.setOriginatingCountry("FI");
+		CapabilitySplitApi datexFi = new CapabilitySplitApi();
+		datexFi.setApplication(app);
+
 		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
 				"SecondServiceProvider",
                 Collections.singleton(datexFi)

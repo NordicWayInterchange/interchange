@@ -1,6 +1,10 @@
 package no.vegvesen.ixn.federation.subscription;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 
@@ -149,7 +153,7 @@ public class SubscriptionCalculatorTest {
 
     @Test
     public void calculateCustomSubscriptionForNeighbour_emptyLocalSubscriptionGivesEmptySet() {
-        Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<CapabilitySplit> capabilities = Collections.singleton(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 Collections.emptySet(),
                 capabilities, ""
@@ -168,13 +172,15 @@ public class SubscriptionCalculatorTest {
                         )
                 ),
                 Collections.singleton(
-                        new DatexCapability(
-                                "NO0001",
-                                "NO",
-                                "1.0",
-                                Collections.emptySet(),
-                                RedirectStatus.OPTIONAL,
-                                Collections.emptySet()
+                        new CapabilitySplit(
+                            new DatexApplication(
+                                    "NO0001",
+                                    "",
+                                    "NO",
+                                    "1.0",
+                                    Collections.emptySet(),
+                                    ""
+                            ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
         );
@@ -194,22 +200,25 @@ public class SubscriptionCalculatorTest {
                         )
                 ),
                 new HashSet<>(Arrays.asList(
-                        new DatexCapability(
-                                "NO0001",
-                                "NO",
-                                "1.0",
-                                Collections.emptySet(),
-                                RedirectStatus.OPTIONAL,
-                                Collections.emptySet()
+                        new CapabilitySplit(
+                                new DatexApplication(
+                                        "NO0001",
+                                        "",
+                                        "NO",
+                                        "1.0",
+                                        Collections.emptySet(),
+                                        ""
+                                ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
-                        new DenmCapability(
+                        new CapabilitySplit(
+                            new DenmApplication(
                                 "NO0001",
+                                "pub-123",
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
-                                RedirectStatus.OPTIONAL,
                                 Collections.emptySet()
-                        )
+                        ),  new Metadata(RedirectStatus.OPTIONAL))
                 )), ""
         );
         assertThat(calculatedSubscriptions)
@@ -233,13 +242,15 @@ public class SubscriptionCalculatorTest {
                         )
                 )),
                 Collections.singleton(
-                        new DatexCapability(
-                                "NO0001",
-                                "NO",
-                                "1.0",
-                                Collections.emptySet(),
-                                RedirectStatus.OPTIONAL,
-                                Collections.emptySet()
+                        new CapabilitySplit(
+                                new DatexApplication(
+                                        "NO0001",
+                                        "",
+                                        "NO",
+                                        "1.0",
+                                        Collections.emptySet(),
+                                        ""
+                                ), new Metadata(RedirectStatus.OPTIONAL)
                         )
                 ), ""
         );
@@ -263,22 +274,25 @@ public class SubscriptionCalculatorTest {
                         )
                 )),
                 new HashSet<>(Arrays.asList(
-                        new DatexCapability(
-                                "NO0001",
-                                "SE",
-                                "1.0",
-                                Collections.emptySet(),
-                                RedirectStatus.OPTIONAL,
-                                Collections.emptySet()
+                        new CapabilitySplit(
+                                new DatexApplication(
+                                        "NO0001",
+                                        "",
+                                        "NO",
+                                        "1.0",
+                                        Collections.emptySet(),
+                                        ""
+                                ), new Metadata(RedirectStatus.OPTIONAL)
                         ),
-                        new DenmCapability(
-                                "NO0001",
-                                "NO",
-                                "1.0",
-                                Collections.emptySet(),
-                                RedirectStatus.OPTIONAL,
-                                Collections.emptySet()
-                        )
+                        new CapabilitySplit(
+                                new DenmApplication(
+                                        "NO0001",
+                                        "pub-123",
+                                        "NO",
+                                        "1.0",
+                                        Collections.emptySet(),
+                                        Collections.emptySet()
+                                ),  new Metadata(RedirectStatus.OPTIONAL))
                 )), ""
         );
         assertThat(calculatedSubscriptions)
@@ -291,7 +305,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", ""));
 
-        Set<Capability> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
+        Set<CapabilitySplit> capabilities = org.mockito.internal.util.collections.Sets.newSet(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, capabilities, "");
 
         assertThat(calculatedSubscription).hasSize(1);
@@ -303,7 +317,7 @@ public class SubscriptionCalculatorTest {
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
         localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", ""));
 
-        Set<Capability> capabilities = Collections.singleton(getDatexCapability("NO"));
+        Set<CapabilitySplit> capabilities = Collections.singleton(getDatexCapability("NO"));
         Set<Subscription> calculatedSubscription = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(
                 localSubscriptions,
                 capabilities, "");
@@ -315,8 +329,10 @@ public class SubscriptionCalculatorTest {
                 .contains("messageType = 'DATEX2'");
     }
 
-    private Capability getDatexCapability(String country) {
-        return new DatexCapability(null, country, null, null, RedirectStatus.OPTIONAL, null);
+    private CapabilitySplit getDatexCapability(String country) {
+        return new CapabilitySplit(
+                new DatexApplication(null, null, country, null, null, null),
+                new Metadata(RedirectStatus.OPTIONAL));
     }
 
 }

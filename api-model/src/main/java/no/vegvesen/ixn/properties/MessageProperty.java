@@ -13,7 +13,7 @@ public class MessageProperty {
 	/* Is this to be removed? */
 	public static final MessageProperty USER_ID = new MessageProperty("JMSXUserID", true, true, MessagePropertyType.STRING);
 
-	//TODO: publicationId --> String
+	public static final MessageProperty PUBLICATION_ID = new MessageProperty("publicationId", true, true, MessagePropertyType.STRING);
 
 	public static final MessageProperty ORIGINATING_COUNTRY = new MessageProperty("originatingCountry", true, true, MessagePropertyType.STRING);
 	public static final MessageProperty PUBLISHER_ID = new MessageProperty("publisherId", true, true, MessagePropertyType.STRING);
@@ -27,6 +27,7 @@ public class MessageProperty {
 	public static final List<MessageProperty> commonApplicationProperties = Arrays.asList(
 			MESSAGE_TYPE,
 			QUAD_TREE,
+			PUBLICATION_ID,
 			PUBLISHER_ID,
 			ORIGINATING_COUNTRY,
 			PROTOCOL_VERSION,

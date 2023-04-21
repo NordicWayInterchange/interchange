@@ -5,7 +5,9 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.model.DenmCapability;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
@@ -72,12 +74,16 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createTopicExchange(exchangeName);
 
-        DenmCapability capability = new DenmCapability(
-                "NO-123",
-                "NO",
-                "1.0",
-                new HashSet<>(Arrays.asList("12","13")),
-                new HashSet<>(Arrays.asList("5","6"))
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        new HashSet<>(Arrays.asList("12", "13")),
+                        new HashSet<>(Arrays.asList(5, 6))
+                ),
+                new Metadata()
         );
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
@@ -113,12 +119,16 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createTopicExchange(exchangeName);
 
-        DenmCapability capability = new DenmCapability(
-                "NO-123",
-                "NO",
-                "1.0",
-                new HashSet<>(Arrays.asList("12","13")),
-                new HashSet<>(Arrays.asList("5","6"))
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        new HashSet<>(Arrays.asList("12", "13")),
+                        new HashSet<>(Arrays.asList(5, 6))
+                ),
+                new Metadata()
         );
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
@@ -156,12 +166,16 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
         qpidClient.createTopicExchange(exchangeName);
 
-        DenmCapability capability = new DenmCapability(
-                "NO-123",
-                "NO",
-                "1.0",
-                new HashSet<>(Arrays.asList("12","13")),
-                new HashSet<>(Arrays.asList("5","6"))
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO-123",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        new HashSet<>(Arrays.asList("12", "13")),
+                        new HashSet<>(Arrays.asList(5, 6))
+                ),
+                new Metadata()
         );
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);

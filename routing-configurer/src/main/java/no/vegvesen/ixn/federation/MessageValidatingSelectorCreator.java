@@ -1,36 +1,32 @@
 package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.model.Capability;
-import no.vegvesen.ixn.federation.model.DatexCapability;
-import no.vegvesen.ixn.federation.model.DenmCapability;
-import no.vegvesen.ixn.federation.model.IvimCapability;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 
 public class MessageValidatingSelectorCreator {
 
 
-    public static String makeSelector(Capability capability) {
-        String messageType = capability.messageType();
+    public static String makeSelector(CapabilitySplit capability) {
+        String messageType = capability.getApplication().messageType();
         SelectorBuilder builder = new SelectorBuilder()
-                .publisherId(capability.getPublisherId())
-                .originatingCountry(capability.getOriginatingCountry())
-                .protocolVersion(capability.getProtocolVersion())
-                .quadTree(capability.getQuadTree())
+                .publisherId(capability.getApplication().getPublisherId())
+                .originatingCountry(capability.getApplication().getOriginatingCountry())
+                .protocolVersion(capability.getApplication().getProtocolVersion())
+                .quadTree(capability.getApplication().getQuadTree())
                 .messageType(messageType);
-        if (messageType.equals(Constants.IVIM)) {
-            IvimCapability ivimCapability = (IvimCapability) capability;
-            builder.iviTypes(ivimCapability.getIviTypes());
-        } else if (messageType.equals(Constants.DENM)) {
-            DenmCapability denmCapability = (DenmCapability) capability;
-            builder.causeCodes(denmCapability.getCauseCodes());
+        if (messageType.equals(Constants.DENM)) {
+            DenmApplication denmApplication = (DenmApplication) capability.getApplication();
+            builder.causeCodes(denmApplication.getCauseCodes());
         } else if (messageType.equals(Constants.DATEX_2)) {
-            DatexCapability datexCapability = (DatexCapability) capability;
-            builder.publicationTypes(datexCapability.getPublicationTypes());
+            DatexApplication datexApplication = (DatexApplication) capability.getApplication();
+            builder.publicationTypes(datexApplication.getPublicationType());
         }
         return builder.toSelector();
     }
 
-    public static String makeSelectorJoinedWithCapabilitySelector(String selector, Capability capability) {
+    public static String makeSelectorJoinedWithCapabilitySelector(String selector, CapabilitySplit capability) {
         return String.format("(%s) AND (%s)", makeSelector(capability), selector);
     }
 }

@@ -7,6 +7,10 @@ import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
@@ -106,7 +110,17 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithOneBindingIsCreated() {
-		Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
 		cap.setCapabilityExchangeName("cap-ex10");
 		client.createDirectExchange("cap-ex10");
 
@@ -135,11 +149,31 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithTwoBindingsIsCreated() {
-		Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap1 = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
 		cap1.setCapabilityExchangeName("cap-ex11");
 		client.createDirectExchange("cap-ex11");
 
-		Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap2 = new CapabilitySplit(
+				new DatexApplication(
+						"SE-1234",
+						"pub-1",
+						"SE",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
 		cap2.setCapabilityExchangeName("cap-ex11");
 		client.createDirectExchange("cap-ex11");
 
@@ -160,7 +194,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"AND messageType = 'DATEX2' " +
 						"AND originatingCountry = 'SE' " +
 						"AND protocolVersion = '1.0' " +
-						"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "halibut");
+						"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "halibut");
 
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
 		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions);
@@ -178,11 +212,31 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void neighbourWithTwoBindingsAndOnlyOneIsAcceptedIsCreated() {
-		Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap1 = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
 		cap1.setCapabilityExchangeName("cap-ex12");
 		client.createDirectExchange("cap-ex12");
 
-		Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap2 = new CapabilitySplit(
+				new DatexApplication(
+						"SE-1234",
+						"pub-1",
+						"SE",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
 		cap2.setCapabilityExchangeName("cap-ex13");
 		client.createDirectExchange("cap-ex13");
 
@@ -203,7 +257,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"AND messageType = 'DATEX2' " +
 						"AND originatingCountry = 'SE' " +
 						"AND protocolVersion = '1.0' " +
-						"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.REJECTED, "salmon");
+						"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.REJECTED, "salmon");
 
 		//Just to ensure the timestamp is updated by RoutingConfigurer
 		assertThat(s1.getLastUpdatedTimestamp()).isEqualTo(0);
@@ -272,7 +326,17 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void newNeighbourCanNeitherWriteToIncomingExchangeNorOnramp() throws JMSException, NamingException {
-		Capability cap = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap = new CapabilitySplit(
+				new DatexApplication(
+						"SE-1234",
+						"pub-1",
+						"SE",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.NOT_AVAILABLE)
+		);
 		cap.setCapabilityExchangeName("cap-ex14");
 		client.createDirectExchange("cap-ex14");
 
@@ -286,7 +350,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'SE' " +
 				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "nordea");
+				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "nordea");
 		subscriptions.add(subscription);
 
 		Neighbour nordea = new Neighbour(
@@ -366,7 +430,17 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void addingOneSubscriptionResultsInOneBindKey() {
-		Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
+		CapabilitySplit cap = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.NOT_AVAILABLE)
+		);
 		cap.setCapabilityExchangeName("cap-ex1");
 		client.createDirectExchange("cap-ex1");
 
@@ -393,11 +467,31 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void addingTwoSubscriptionsResultsInTwoBindKeys() {
-		Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
+		CapabilitySplit cap1 = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.NOT_AVAILABLE)
+		);
 		cap1.setCapabilityExchangeName("cap-ex2");
 		client.createDirectExchange("cap-ex2");
 
-		Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
+		CapabilitySplit cap2 = new CapabilitySplit(
+				new DatexApplication(
+						"SE-1234",
+						"pub-1",
+						"SE",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
 		cap2.setCapabilityExchangeName("cap-ex3");
 		client.createDirectExchange("cap-ex3");
 
@@ -425,7 +519,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'SE' " +
 				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
+				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
 		subs.add(sub2);
 
 		tigershark.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs));
@@ -442,11 +536,31 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void addingTwoSubscriptionsAndOneCapabilityResultsInTwoBindKeys() {
-		Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Collections.singletonList("01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap1 = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.NOT_AVAILABLE)
+		);
 		cap1.setCapabilityExchangeName("cap-ex4");
 		client.createDirectExchange("cap-ex4");
 
-		Capability cap2 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Collections.singletonList("01230122")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap2 = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.NOT_AVAILABLE)
+		);
 		cap2.setCapabilityExchangeName("cap-ex5");
 		client.createDirectExchange("cap-ex5");
 
@@ -475,7 +589,17 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setUpQueueForServiceProvider() {
-		Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.MANDATORY, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.MANDATORY)
+		);
 		cap.setCapabilityExchangeName("cap-ex6");
 		client.createDirectExchange("cap-ex6");
 
@@ -501,11 +625,31 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setUpQueueForServiceProviderAndNeighbour() {
-		Capability cap1 = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.MANDATORY, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap1 = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.MANDATORY)
+		);
 		cap1.setCapabilityExchangeName("cap-ex7");
 		client.createDirectExchange("cap-ex7");
 
-		Capability cap2 = new DatexCapability("NO-1234", "SE", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap2 = new CapabilitySplit(
+				new DatexApplication(
+						"SE-1234",
+						"pub-1",
+						"SE",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.NOT_AVAILABLE)
+		);
 		cap2.setCapabilityExchangeName("cap-ex8");
 		client.createDirectExchange("cap-ex8");
 
@@ -524,7 +668,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'SE' " +
 				"AND protocolVersion = '1.0' " +
-				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "neigh-true-and-false");
+				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "neigh-true-and-false");
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		subs.add(sub1);
@@ -542,8 +686,17 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void routingIsNotSetUpWhenTryingToRedirect() {
-		Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.NOT_AVAILABLE, new HashSet<>(Arrays.asList("Road Block")));
-
+		CapabilitySplit cap = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.NOT_AVAILABLE)
+		);
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
 				"AND publicationType = 'Road Block' " +
 				"AND messageType = 'DATEX2' " +
@@ -581,7 +734,17 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@Test
 	public void setUpQueueForServiceProviderAndNeighbourForOneCapability() {
-		Capability cap = new DatexCapability("NO-1234", "NO", "1.0", new HashSet<>(Arrays.asList("01230122", "01230123")), RedirectStatus.OPTIONAL, new HashSet<>(Collections.singletonList("Road Block")));
+		CapabilitySplit cap = new CapabilitySplit(
+				new DatexApplication(
+						"NO-1234",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("01230122", "01230123")),
+						"RoadBlock"
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
+		);
 		cap.setCapabilityExchangeName("cap-ex9");
 		client.createDirectExchange("cap-ex9");
 
@@ -624,14 +787,17 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		);
 		String deliveryExchangeName = "del-ex10";
 
-		DenmCapability cap = new DenmCapability(
-				"NO-123",
-				"NO",
-				"DENM:1.2.2",
-				new HashSet<>(Arrays.asList("12004")),
-				new HashSet<>(Arrays.asList("6"))
+		CapabilitySplit cap = new CapabilitySplit(
+				new DenmApplication(
+						"NO-123",
+						"pub-1",
+						"NO",
+						"DENM:1.2.2",
+						new HashSet<>(Arrays.asList("12004")),
+						new HashSet<>(Arrays.asList(6))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
-		cap.setRedirect(RedirectStatus.OPTIONAL);
 		cap.setCapabilityExchangeName("cap-ex10");
 		client.createTopicExchange("cap-ex10");
 

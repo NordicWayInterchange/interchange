@@ -1,7 +1,9 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.serviceprovider.capability.DenmSPCapabilityApi;
-import no.vegvesen.ixn.serviceprovider.capability.SPRedirectStatusApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -131,16 +133,17 @@ public class OnboardRestAPIDocumentationTest {
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
-    //TODO
     @Test
     public void createDENMCapability() throws JsonProcessingException {
-        DenmSPCapabilityApi api = new DenmSPCapabilityApi(
+        CapabilitySplitApi api = new CapabilitySplitApi(
+                new DenmApplicationApi(
                 "NPRA",
+                "pub-1",
                 "NO",
                 "1.0",
                 Collections.singleton("1234"),
-                SPRedirectStatusApi.OPTIONAL,
-                Collections.singleton("6")
+                Collections.singleton(6)),
+                new MetadataApi(RedirectStatusApi.OPTIONAL)
         );
 
         ObjectMapper mapper = new ObjectMapper();
@@ -153,13 +156,15 @@ public class OnboardRestAPIDocumentationTest {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "sp-1",
                 Collections.singleton(
-                        new DenmSPCapabilityApi(
-                                "NPRA",
-                                "NO",
-                                "1.0",
-                                Collections.singleton("1234"),
-                                Collections.singleton("6")
-                        )
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NPRA",
+                                        "pub-1",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("1234"),
+                                        Collections.singleton(6)
+                                ), new MetadataApi())
                 )
         );
         ObjectMapper mapper = new ObjectMapper();
@@ -173,13 +178,15 @@ public class OnboardRestAPIDocumentationTest {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "king_gustaf.bouvetinterchange.eu",
                 Collections.singleton(
-                        new DenmSPCapabilityApi(
-                                "STV",
-                                "SE",
-                                "1.0",
-                                Collections.emptySet(),
-                                Collections.emptySet()
-                        )
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "SVT",
+                                        "pub-1",
+                                        "SE",
+                                        "1.0",
+                                        Collections.singleton("1234"),
+                                        Collections.singleton(6)
+                                ), new MetadataApi())
                 )
         );
         ObjectMapper mapper = new ObjectMapper();
@@ -195,13 +202,15 @@ public class OnboardRestAPIDocumentationTest {
                         new LocalActorCapability(
                                 "1",
                                 "/sp-1/capabilities/1",
-                                new DenmSPCapabilityApi(
+                                new CapabilitySplitApi(
+                                    new DenmApplicationApi(
                                         "NPRA",
+                                        "pub-1",
                                         "NO",
                                         "1.0",
                                         Collections.singleton("1234"),
-                                        Collections.singleton("6")
-                                )
+                                        Collections.singleton(6)
+                                ), new MetadataApi())
                         )
                 )
         );
@@ -217,13 +226,15 @@ public class OnboardRestAPIDocumentationTest {
                         new LocalActorCapability(
                                 "1",
                                 "/spi-1/capabilities/1",
-                                new DenmSPCapabilityApi(
-                                        "NPRA",
-                                        "NO",
-                                        "1.0",
-                                        Collections.singleton("1234"),
-                                        Collections.singleton("6")
-                                )
+                                new CapabilitySplitApi(
+                                        new DenmApplicationApi(
+                                                "NPRA",
+                                                "pub-1",
+                                                "NO",
+                                                "1.0",
+                                                Collections.singleton("1234"),
+                                                Collections.singleton(6)
+                                        ), new MetadataApi())
                         )
                 )
         );
@@ -236,13 +247,15 @@ public class OnboardRestAPIDocumentationTest {
         GetCapabilityResponse response = new GetCapabilityResponse(
                 "1",
                 "/sp-1/capabilities/1",
-                new DenmSPCapabilityApi(
-                        "NPRA",
-                        "NO",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
-                )
+                new CapabilitySplitApi(
+                        new DenmApplicationApi(
+                                "NPRA",
+                                "pub-1",
+                                "NO",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)
+                        ), new MetadataApi())
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
@@ -320,13 +333,15 @@ public class OnboardRestAPIDocumentationTest {
                 "service-provider",
                 Collections.singleton(
                         new FetchCapability(
-                                new DenmSPCapabilityApi(
-                                        "NPRA",
-                                        "NO",
-                                        "1.0",
-                                        Collections.singleton("1234"),
-                                        Collections.singleton("6")
-                                )
+                                new CapabilitySplitApi(
+                                        new DenmApplicationApi(
+                                                "NPRA",
+                                                "pub-1",
+                                                "NO",
+                                                "1.0",
+                                                Collections.singleton("1234"),
+                                                Collections.singleton(6)
+                                        ), new MetadataApi())
                         )
                 )
         );
@@ -342,13 +357,15 @@ public class OnboardRestAPIDocumentationTest {
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'",
                 Collections.singleton(
                         new FetchCapability(
-                                new DenmSPCapabilityApi(
-                                        "NPRA",
-                                        "NO",
-                                        "1.0",
-                                        Collections.singleton("1234"),
-                                        Collections.singleton("6")
-                                )
+                                new CapabilitySplitApi(
+                                        new DenmApplicationApi(
+                                                "NPRA",
+                                                "pub-1",
+                                                "NO",
+                                                "1.0",
+                                                Collections.singleton("1234"),
+                                                Collections.singleton(6)
+                                        ), new MetadataApi())
                         )
                 )
         );

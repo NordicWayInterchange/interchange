@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-import no.vegvesen.ixn.serviceprovider.capability.SPCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 
 import java.util.Objects;
 import java.util.Set;
@@ -8,12 +8,12 @@ import java.util.Set;
 public class AddCapabilitiesRequest {
     String name;
     String version = "1.0";
-    Set<? extends SPCapabilityApi> capabilities;
+    Set<? extends CapabilitySplitApi> capabilities;
 
     public AddCapabilitiesRequest() {
     }
 
-    public AddCapabilitiesRequest(String name, Set<? extends SPCapabilityApi> capabilities) {
+    public AddCapabilitiesRequest(String name, Set<? extends CapabilitySplitApi> capabilities) {
         this.name = name;
         this.capabilities = capabilities;
     }
@@ -34,11 +34,11 @@ public class AddCapabilitiesRequest {
         this.version = version;
     }
 
-    public Set<? extends SPCapabilityApi> getCapabilities() {
+    public Set<? extends CapabilitySplitApi> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(Set<? extends SPCapabilityApi> capabilities) {
+    public void setCapabilities(Set<? extends CapabilitySplitApi> capabilities) {
         this.capabilities = capabilities;
     }
 

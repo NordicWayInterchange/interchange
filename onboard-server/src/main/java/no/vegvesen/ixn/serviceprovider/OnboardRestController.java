@@ -5,9 +5,11 @@ import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +29,7 @@ public class OnboardRestController {
 	private final NeighbourRepository neighbourRepository;
 	private final CertService certService;
 	private final InterchangeNodeProperties nodeProperties;
-	private CapabilityToSPCapabilityApiTransformer capabilityApiTransformer = new CapabilityToSPCapabilityApiTransformer();
+	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
 
@@ -54,11 +56,11 @@ public class OnboardRestController {
 		}
 
 
-		Set<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
+		Set<CapabilitySplit> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
-		for (Capability newLocalCapability : newLocalCapabilities) {
+		for (CapabilitySplit newLocalCapability : newLocalCapabilities) {
 			capabilities.addDataType(newLocalCapability);
 		}
 		logger.debug("Service provider to update: {}", serviceProviderToUpdate.toString());
@@ -66,7 +68,7 @@ public class OnboardRestController {
 		// Save the Service Provider representation in the database.
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		//TODO test this with regard to ID's
-		Set<Capability> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
+		Set<CapabilitySplit> addedCapabilities = new HashSet<>(saved.getCapabilities().getCapabilities());
 		addedCapabilities.retainAll(newLocalCapabilities);
 
 		AddCapabilitiesResponse response = TypeTransformer.addCapabilitiesResponse(capabilityApiTransformer, serviceProviderName,addedCapabilities);
@@ -91,7 +93,7 @@ public class OnboardRestController {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List network capabilities for serivce provider {}",serviceProviderName);
-		Set<Capability> allCapabilities = getAllNeighbourCapabilities();
+		Set<CapabilitySplit> allCapabilities = getAllNeighbourCapabilities();
 		allCapabilities.addAll(getAllLocalCapabilities());
 		if (selector != null) {
 			if (!selector.isEmpty()) {
@@ -103,12 +105,12 @@ public class OnboardRestController {
 		return response;
 	}
 
-	private Set<Capability> getAllMatchingCapabilities(String selector, Set<Capability> allCapabilities) {
+	private Set<CapabilitySplit> getAllMatchingCapabilities(String selector, Set<CapabilitySplit> allCapabilities) {
 		return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
 	}
 
-	private Set<Capability> getAllLocalCapabilities() {
-		Set<Capability> capabilities = new HashSet<>();
+	private Set<CapabilitySplit> getAllLocalCapabilities() {
+		Set<CapabilitySplit> capabilities = new HashSet<>();
 		List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 		for (ServiceProvider otherServiceProvider : serviceProviders) {
 			capabilities.addAll(otherServiceProvider.getCapabilities().getCapabilities());
@@ -116,8 +118,8 @@ public class OnboardRestController {
 		return capabilities;
 	}
 
-	private Set<Capability> getAllNeighbourCapabilities() {
-		Set<Capability> capabilities = new HashSet<>();
+	private Set<CapabilitySplit> getAllNeighbourCapabilities() {
+		Set<CapabilitySplit> capabilities = new HashSet<>();
 		List<Neighbour> neighbours = neighbourRepository.findAll();
 		for (Neighbour neighbour : neighbours) {
 			capabilities.addAll(neighbour.getCapabilities().getCapabilities());
@@ -153,7 +155,7 @@ public class OnboardRestController {
 		logger.info("Received GET request for capability {} for service provider {}", capabilityId,serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		Capability capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
+		CapabilitySplit capability = serviceProvider.getCapabilities().getCapabilities().stream().filter(c ->
 				c.getId().equals(Integer.parseInt(capabilityId)))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, serviceProviderName)));

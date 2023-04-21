@@ -1,6 +1,10 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,11 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceProviderServiceTest {
@@ -47,12 +49,16 @@ public class ServiceProviderServiceTest {
         localDelivery.setExchangeName("my-exchange");
         sp.addDeliveries(Collections.singleton(localDelivery));
 
-        DenmCapability capability = new DenmCapability(
-                "publisher-1",
-                "NO",
-                "DENM:1.1.0",
-                Collections.singleton("123"),
-                Collections.singleton("1")
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "publisher-1",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singleton("123"),
+                        Collections.singleton(1)
+                ),
+                new Metadata()
         );
         capability.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability);
@@ -76,22 +82,30 @@ public class ServiceProviderServiceTest {
         localDelivery.setExchangeName("my-exchange");
         sp.addDeliveries(Collections.singleton(localDelivery));
 
-        DenmCapability capability = new DenmCapability(
-                "publisher-1",
-                "NO",
-                "DENM:1.1.0",
-                Collections.singleton("123"),
-                Collections.singleton("1")
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "publisher-1",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singleton("123"),
+                        Collections.singleton(1)
+                ),
+                new Metadata()
         );
         capability.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability);
 
-        DenmCapability capability1 = new DenmCapability(
-                "publisher-1",
-                "NO",
-                "DENM:1.1.0",
-                Collections.singleton("122"),
-                Collections.singleton("1")
+        CapabilitySplit capability1 = new CapabilitySplit(
+                new DenmApplication(
+                        "publisher-1",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singleton("122"),
+                        Collections.singleton(1)
+                ),
+                new Metadata()
         );
         capability1.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability1);

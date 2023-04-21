@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -16,7 +18,7 @@ public class OutgoingMatch {
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "cap", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_out_match_capability"))
-    private Capability capability;
+    private CapabilitySplit capability;
 
     @Enumerated(EnumType.STRING)
     private OutgoingMatchStatus status;
@@ -31,7 +33,7 @@ public class OutgoingMatch {
 
     }
 
-    public OutgoingMatch(LocalDelivery localDelivery, Capability capability, String serviceProviderName, OutgoingMatchStatus status) {
+    public OutgoingMatch(LocalDelivery localDelivery, CapabilitySplit capability, String serviceProviderName, OutgoingMatchStatus status) {
         this.localDelivery = localDelivery;
         this.capability = capability;
         this.serviceProviderName = serviceProviderName;
@@ -50,11 +52,11 @@ public class OutgoingMatch {
         this.localDelivery = localDelivery;
     }
 
-    public Capability getCapability() {
+    public CapabilitySplit getCapability() {
         return capability;
     }
 
-    public void setCapability(Capability capability) {
+    public void setCapability(CapabilitySplit capability) {
         this.capability = capability;
     }
 

@@ -1,5 +1,8 @@
 package no.vegvesen.ixn.federation.model;
 
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -12,9 +15,9 @@ public class CapabilitiesTest {
 
     @Test
     public void testAddAllDatatypesRetainsExistingObjects() {
-        DenmCapability firstCapability = new DenmCapability("NO00000", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton("1"));
+        CapabilitySplit firstCapability = new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton(1)), new Metadata());
         firstCapability.setId(1);
-        DenmCapability secondCapability = new DenmCapability("NO00001", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton("2"));
+        CapabilitySplit secondCapability = new CapabilitySplit(new DenmApplication("NO00001", "pub-2", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton(2)), new Metadata());
         secondCapability.setId(2);
         Capabilities capabilities = new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
@@ -22,7 +25,7 @@ public class CapabilitiesTest {
                         firstCapability,
                         secondCapability
                 )));
-        capabilities.replaceCapabilities(Collections.singleton(new DenmCapability("NO00000", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton("1"))));
+        capabilities.replaceCapabilities(Collections.singleton(new CapabilitySplit(new DenmApplication("NO00000", "pub-3", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton(1)), new Metadata())));
         assertThat(capabilities.getCapabilities()).hasSize(1);
         //Test that the original object is the one retained
         assertThat(capabilities.getCapabilities().stream().findFirst().get().getId()).isEqualTo(1);
@@ -32,13 +35,13 @@ public class CapabilitiesTest {
     @Test
     public void testAddingNewCapabilityToExistingSetReplacesIt() {
 
-        DenmCapability firstCapability = new DenmCapability("NO00000", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton("1"));
+        CapabilitySplit firstCapability = new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton(1)), new Metadata());
         Capabilities capabilities = new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(
                         firstCapability
                 ));
-        DenmCapability secondCapability = new DenmCapability("NO00001", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton("2"));
+        CapabilitySplit secondCapability = new CapabilitySplit(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton(2)), new Metadata());
         capabilities.replaceCapabilities(Collections.singleton(secondCapability));
         assertThat(capabilities.getCapabilities()).hasSize(1);
         assertThat(capabilities.getCapabilities().stream().findFirst().get()).isEqualTo(secondCapability);
@@ -47,14 +50,14 @@ public class CapabilitiesTest {
     @Test
     public void testAddingSeveralCapabilitiesToSingeltonSet() {
 
-        DenmCapability firstCapability = new DenmCapability("NO00000", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton("1"));
+        CapabilitySplit firstCapability = new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton(1)), new Metadata());
         Capabilities capabilities = new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(
                         firstCapability
                 ));
-        DenmCapability secondCapability = new DenmCapability("NO00001", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton("2"));
-        DenmCapability thirdCapability = new DenmCapability("NO00002", "NO", "DENM:1.2.2", Collections.singleton("3"), Collections.singleton("3"));
+        CapabilitySplit secondCapability = new CapabilitySplit(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton(2)), new Metadata());
+        CapabilitySplit thirdCapability = new CapabilitySplit(new DenmApplication("NO00002", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("3"), Collections.singleton(3)), new Metadata());
 
         capabilities.replaceCapabilities(new HashSet<>(Arrays.asList(secondCapability,thirdCapability)));
         assertThat(capabilities.getCapabilities()).hasSize(2);
@@ -66,8 +69,8 @@ public class CapabilitiesTest {
         Capabilities capabilities = new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.emptySet());
-        DenmCapability firstCapability = new DenmCapability("NO00000", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton("1"));
-        DenmCapability secondCapability = new DenmCapability("NO00001", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton("2"));
+        CapabilitySplit firstCapability = new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton(1)), new Metadata());
+        CapabilitySplit secondCapability = new CapabilitySplit(new DenmApplication("NO00001", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton(2)), new Metadata());
 
         capabilities.replaceCapabilities(new HashSet<>(Arrays.asList(firstCapability,secondCapability)));
         assertThat(capabilities.getCapabilities()).hasSize(2);

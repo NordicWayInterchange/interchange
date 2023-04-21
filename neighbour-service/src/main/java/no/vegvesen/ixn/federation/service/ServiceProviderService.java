@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,12 +123,12 @@ public class ServiceProviderService {
     }
 
     public void removeTearDownCapabilities(ServiceProvider serviceProvider) {
-        Set<Capability> capabilitiesToTearDown = serviceProvider.getCapabilities().getCapabilities().stream()
+        Set<CapabilitySplit> capabilitiesToTearDown = serviceProvider.getCapabilities().getCapabilities().stream()
                 .filter(c -> c.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
 
         Capabilities currentServiceProviderCapabilities = serviceProvider.getCapabilities();
-        for (Capability capability : capabilitiesToTearDown) {
+        for (CapabilitySplit capability : capabilitiesToTearDown) {
             List<OutgoingMatch> possibleMatches = outgoingMatchDiscoveryService.findMatchesFromCapabilityId(capability.getId());
             if (possibleMatches.isEmpty()) {
                 if (!capability.exchangeExists()) {

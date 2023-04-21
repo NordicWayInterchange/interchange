@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.discoverer;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
@@ -78,7 +79,7 @@ public class NeighbourDiscoverer {
 	public void scheduleCapabilityExchangeWithNeighbours() {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<Capability> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
+		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
 		Optional<LocalDateTime> lastUpdatedLocalCapabilities = CapabilityCalculator.calculateLastUpdatedCapabilitiesOptional(serviceProviders);
 		neigbourDiscoveryService.capabilityExchangeWithNeighbours(neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
 	}
@@ -86,7 +87,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
 	public void scheduleUnreachableRetry() {
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<Capability> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
+		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
 		neigbourDiscoveryService.retryUnreachable(neighbourFacade, localCapabilities);
 	}
 

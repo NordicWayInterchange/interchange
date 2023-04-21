@@ -1,12 +1,19 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
@@ -61,9 +68,9 @@ class NeighbourServiceTest {
 
 	@Test
 	void postDatexDataTypeCapability() {
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilityApi ericssonDataType = new DatexCapabilityApi("myPublisherId", "NO", null, Sets.newSet(), Sets.newSet("myPublicationType"));
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", null, Sets.newSet(), "myPublicationType"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -71,7 +78,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-        CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, Collections.emptySet());
+        CapabilitiesSplitApi response = neighbourService.incomingCapabilities(ericsson, Collections.emptySet());
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
@@ -100,9 +107,9 @@ class NeighbourServiceTest {
 	@Test
 	void postingDatexCapabilitiesReturnsStatusCreated() {
 		// incoming capabiity API
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilityApi ericssonDataType = new DatexCapabilityApi("NO");
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", Collections.emptySet(), ""), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -118,9 +125,9 @@ class NeighbourServiceTest {
 	@Test
 	public void postingCapabilitiesUnknownInDNSReturnsError() {
 		// Mock the incoming API object.
-		CapabilitiesApi unknownNeighbour = new CapabilitiesApi();
+		CapabilitiesSplitApi unknownNeighbour = new CapabilitiesSplitApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new DatexCapabilityApi("NO")));
+		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", Collections.emptySet(), ""), new MetadataApi())));
 
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
@@ -357,8 +364,8 @@ class NeighbourServiceTest {
 		assertThat(subscription.getEndpoints()).isEmpty();
 	}
 
-	private Capability getDatexCapability(String country) {
-		return new DatexCapability(null, country, null, null, RedirectStatus.OPTIONAL, null);
+	private CapabilitySplit getDatexCapability(String country) {
+		return new CapabilitySplit(new DatexApplication(null, null, "NO", null, Collections.emptySet(), null), new Metadata());
 	}
 
 }

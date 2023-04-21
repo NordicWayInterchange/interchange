@@ -4,6 +4,9 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
@@ -27,6 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.UUID;
@@ -95,9 +99,19 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     public void testSetupRegularNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         client.createTopicExchange(exchangeName);
 
@@ -130,9 +144,19 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     public void testSetupRedirectNeighbourSubscriptionRoutingAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO2345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         client.createTopicExchange(exchangeName);
 

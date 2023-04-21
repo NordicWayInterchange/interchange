@@ -1,8 +1,8 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.model.Capabilities;
-import no.vegvesen.ixn.federation.model.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -12,17 +12,17 @@ public class CapabilitiesTransformer {
 
 	private final CapabilityToCapabilityApiTransformer dataTypeTransformer = new CapabilityToCapabilityApiTransformer();
 
-	public Capabilities capabilitiesApiToCapabilities(CapabilitiesApi capabilitiesApi) {
+	public Capabilities capabilitiesApiToCapabilities(CapabilitiesSplitApi capabilitiesApi) {
 		Capabilities capabilities = new Capabilities();
-		capabilities.setCapabilities(dataTypeTransformer.capabilitiesApiToCapabilities(capabilitiesApi.getCapabilities()));
+		capabilities.setCapabilities(dataTypeTransformer.capabilitiesSplitApiToCapabilitiesSplit(capabilitiesApi.getCapabilities()));
 		capabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
 		return capabilities;
 	}
 
-	public CapabilitiesApi selfToCapabilityApi(String name, Set<Capability> localCapabilities) {
-		CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
+	public CapabilitiesSplitApi selfToCapabilityApi(String name, Set<CapabilitySplit> localCapabilities) {
+		CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi();
 		capabilitiesApi.setName(name);
-		capabilitiesApi.setCapabilities(dataTypeTransformer.capabilitiesToCapabilityApis(localCapabilities));
+		capabilitiesApi.setCapabilities(dataTypeTransformer.capabilitiesSplitToCapabilitiesSplitApi(localCapabilities));
 		return capabilitiesApi;
 	}
 

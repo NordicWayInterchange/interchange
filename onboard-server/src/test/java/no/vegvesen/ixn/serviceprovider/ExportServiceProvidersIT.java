@@ -1,7 +1,10 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -46,12 +49,16 @@ public class ExportServiceProvidersIT {
                 new Capabilities(
                         Capabilities.CapabilitiesStatus.UNKNOWN,
                         Collections.singleton(
-                                new DatexCapability(
-                                        "NO-0001",
-                                        "NO",
-                                        "1.0",
-                                        Collections.singleton("123"),
-                                        Collections.singleton("6")
+                                new CapabilitySplit(
+                                        new DenmApplication(
+                                                "NO-0001",
+                                                "pub-1",
+                                                "NO",
+                                                "1.0",
+                                                Collections.singleton("123"),
+                                                Collections.singleton(6)
+                                        ),
+                                        new Metadata()
                                 )
                         )
                 )
@@ -80,7 +87,7 @@ public class ExportServiceProvidersIT {
         for (ServiceProvider serviceProvider : serviceProviderList) {
             ServiceProviderApi serviceProviderApi = new ServiceProviderApi();
             serviceProviderApi.setName(serviceProvider.getName());
-            Set<CapabilityApi> capabilityApis = capabilityApiTransformer.capabilitiesToCapabilityApis(serviceProvider.getCapabilities().getCapabilities());
+            Set<CapabilitySplitApi> capabilityApis = capabilityApiTransformer.capabilitiesSplitToCapabilitiesSplitApi(serviceProvider.getCapabilities().getCapabilities());
             serviceProviderApi.setCapabilities(capabilityApis);
 
             Set<GetSubscriptionResponse> spSubscriptions = new HashSet<>();

@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.subscription;
 
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class SubscriptionCalculator {
         return result;
     }
 
-    public static Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<Capability> neighbourCapabilities, String ixnName) {
+    public static Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<CapabilitySplit> neighbourCapabilities, String ixnName) {
         //logger.info("Calculating custom subscription for neighbour: {}", neighbourName);
         //logger.debug("Neighbour capabilities {}", neighbourCapabilities);
         //logger.debug("Local subscriptions {}", localSubscriptions);

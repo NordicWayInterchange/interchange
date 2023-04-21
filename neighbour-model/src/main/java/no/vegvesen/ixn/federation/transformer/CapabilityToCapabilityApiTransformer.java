@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.federation.transformer;
 
-import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,45 +17,80 @@ public class CapabilityToCapabilityApiTransformer {
 	public CapabilityToCapabilityApiTransformer() {
 	}
 
-	public Set<CapabilityApi> capabilitiesToCapabilityApis(Set<Capability> capabilities) {
-		Set<CapabilityApi> apis = new HashSet<>();
-		for (Capability capability : capabilities) {
-			CapabilityApi capabilityApi = capability.toApi();
-			if (capabilityApi != null) {
-				apis.add(capabilityApi);
-			}
+	public Set<CapabilitySplitApi> capabilitiesSplitToCapabilitiesSplitApi(Set<CapabilitySplit> capabilitySplits) {
+		Set<CapabilitySplitApi> capabilitySplitApis = new HashSet<>();
+		for (CapabilitySplit capabilitySplit : capabilitySplits) {
+			CapabilitySplitApi capabilitySplitApi = new CapabilitySplitApi(
+					capabilitySplit.getApplication().toApi(),
+					capabilitySplit.getMetadata().toApi()
+			);
+			capabilitySplitApis.add(capabilitySplitApi);
 		}
-		return apis;
+		return capabilitySplitApis;
 	}
 
-	public Set<Capability> capabilitiesApiToCapabilities(Set<? extends CapabilityApi> capabilityApis) {
-		Set<Capability> capabilities = new HashSet<>();
-		for (CapabilityApi capability : capabilityApis) {
-			logger.debug("Converting message type {}", capability.getMessageType());
-			capabilities.add(capabilityApiToCapability(capability));
-		}
-		return capabilities;
+	public CapabilitySplit capabilitySplitApiToCapabilitySplit(CapabilitySplitApi capabilitySplitApi) {
+		return new CapabilitySplit(
+				applicationApiToApplication(capabilitySplitApi.getApplication()),
+				metadataApiToMetadata(capabilitySplitApi.getMetadata())
+		);
 	}
 
-	public Capability capabilityApiToCapability(CapabilityApi capabilityApi) {
-		if (capabilityApi instanceof DatexCapabilityApi){
-			return new DatexCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((DatexCapabilityApi) capabilityApi).getPublicationType());
-		} else if (capabilityApi instanceof DenmCapabilityApi) {
-			return new DenmCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((DenmCapabilityApi) capabilityApi).getCauseCode());
-		} else if (capabilityApi instanceof IvimCapabilityApi) {
-			return new IvimCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((IvimCapabilityApi) capabilityApi).getIviType());
-		} else if (capabilityApi instanceof SpatemCapabilityApi) {
-			return new SpatemCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((SpatemCapabilityApi) capabilityApi).getIds());
-		} else if (capabilityApi instanceof MapemCapabilityApi) {
-			return new MapemCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((MapemCapabilityApi) capabilityApi).getIds());
-		} else if (capabilityApi instanceof SremCapabilityApi) {
-			return new SremCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((SremCapabilityApi) capabilityApi).getIds());
-		} else if (capabilityApi instanceof SsemCapabilityApi) {
-			return new SsemCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((SsemCapabilityApi) capabilityApi).getIds());
-		} else if (capabilityApi instanceof CamCapabilityApi) {
-			return new CamCapability(capabilityApi.getPublisherId(), capabilityApi.getOriginatingCountry(), capabilityApi.getProtocolVersion(), capabilityApi.getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getRedirect()), ((CamCapabilityApi) capabilityApi).getStationTypes());
+	public Set<CapabilitySplit> capabilitiesSplitApiToCapabilitiesSplit(Set<CapabilitySplitApi> capabilitySplitApis) {
+		Set<CapabilitySplit> capabilitySplits = new HashSet<>();
+		for (CapabilitySplitApi capabilitySplitApi : capabilitySplitApis) {
+			logger.debug("Converting message type {}", capabilitySplitApi.getApplication().getMessageType());
+			capabilitySplits.add(new CapabilitySplit(
+					applicationApiToApplication(capabilitySplitApi.getApplication()),
+					metadataApiToMetadata(capabilitySplitApi.getMetadata())
+			));
 		}
-		throw new RuntimeException("Subclass of CapabilityApi not possible to convert: " + capabilityApi.getClass().getSimpleName());
+		return capabilitySplits;
+	}
+
+	public CapabilitySplitApi capabilitySplitToCapabilitySplitApi(CapabilitySplit capability) {
+		return new CapabilitySplitApi(
+				capability.getApplication().toApi(),
+				capability.getMetadata().toApi()
+		);
+	}
+
+	public Application applicationApiToApplication(ApplicationApi applicationApi) {
+		if (applicationApi instanceof DatexApplicationApi) {
+			return new DatexApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree(), ((DatexApplicationApi) applicationApi).getPublicationType());
+		} else if (applicationApi instanceof DenmApplicationApi) {
+			return new DenmApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree(), ((DenmApplicationApi) applicationApi).getCauseCodes());
+		} else if (applicationApi instanceof IvimApplicationApi) {
+			return new IvimApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree());
+		} else if (applicationApi instanceof SpatemApplicationApi) {
+			return new SpatemApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree());
+		} else if (applicationApi instanceof MapemApplicationApi) {
+			return new MapemApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree());
+		} else if (applicationApi instanceof SremApplicationApi) {
+			return new SremApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree());
+		} else if (applicationApi instanceof SsemApplicationApi) {
+			return new SsemApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree());
+		} else if (applicationApi instanceof CamApplicationApi) {
+			return new CamApplication(applicationApi.getPublisherId(), applicationApi.getPublicationId(), applicationApi.getOriginatingCountry(), applicationApi.getProtocolVersion(), applicationApi.getQuadTree());
+		}
+		throw new RuntimeException("Subclass of Capability not possible to convert: " + applicationApi.getClass().getSimpleName());
+	}
+
+	public Metadata metadataApiToMetadata(MetadataApi metadataApi) {
+		Metadata metadata = new Metadata();
+		if (metadataApi.getShardCount() != null)
+			metadata.setShardCount(metadataApi.getShardCount());
+		if (metadataApi.getInfoUrl() != null)
+			metadata.setInfoUrl(metadataApi.getInfoUrl());
+		if (metadataApi.getMaxBandwidth() != null)
+			metadata.setMaxBandwidth(metadataApi.getMaxBandwidth());
+		if (metadataApi.getMaxMessageRate() != null)
+			metadata.setMaxMessageRate(metadataApi.getMaxMessageRate());
+		if (metadataApi.getRepetitionInterval() != null)
+			metadata.setRepetitionInterval(metadataApi.getRepetitionInterval());
+
+		metadata.setRedirectPolicy(transformRedirectStatusApiToRedirectStatus(metadataApi.getRedirectPolicy()));
+		return metadata;
 	}
 
 	private RedirectStatus transformRedirectStatusApiToRedirectStatus(RedirectStatusApi status) {
@@ -71,26 +106,4 @@ public class CapabilityToCapabilityApiTransformer {
 				return RedirectStatus.OPTIONAL;
 		}
 	}
-
-	public Capability splitCapabilityApiToCapability(CapabilitySplitApi capabilityApi) {
-		if (capabilityApi.getApplication() instanceof DatexCapabilityApplicationApi) {
-			return new DatexCapability(capabilityApi.getApplication().getPublisherId(), capabilityApi.getApplication().getOriginatingCountry(), capabilityApi.getApplication().getProtocolVersion(), capabilityApi.getApplication().getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getMetadata().getRedirectPolicy()), new HashSet<>(Collections.singleton(((DatexCapabilityApplicationApi) capabilityApi.getApplication()).getPublicationType())));
-		} else if (capabilityApi.getApplication() instanceof DenmCapabilityApplicationApi) {
-			return new DenmCapability(capabilityApi.getApplication().getPublisherId(), capabilityApi.getApplication().getOriginatingCountry(), capabilityApi.getApplication().getProtocolVersion(), capabilityApi.getApplication().getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getMetadata().getRedirectPolicy()), ((DenmCapabilityApplicationApi) capabilityApi.getApplication()).getCauseCode());
-		} else if (capabilityApi.getApplication() instanceof IvimCapabilityApplicationApi) {
-			return new IvimCapability(capabilityApi.getApplication().getPublisherId(), capabilityApi.getApplication().getOriginatingCountry(), capabilityApi.getApplication().getProtocolVersion(), capabilityApi.getApplication().getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getMetadata().getRedirectPolicy()), ((IvimCapabilityApplicationApi) capabilityApi.getApplication()).getIviType());
-		} else if (capabilityApi.getApplication() instanceof SpatemCapabilityApplicationApi) {
-			return new SpatemCapability(capabilityApi.getApplication().getPublisherId(), capabilityApi.getApplication().getOriginatingCountry(), capabilityApi.getApplication().getProtocolVersion(), capabilityApi.getApplication().getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getMetadata().getRedirectPolicy()), ((SpatemCapabilityApplicationApi) capabilityApi.getApplication()).getIds());
-		} else if (capabilityApi.getApplication() instanceof MapemCapabilityApplicationApi) {
-			return new MapemCapability(capabilityApi.getApplication().getPublisherId(), capabilityApi.getApplication().getOriginatingCountry(), capabilityApi.getApplication().getProtocolVersion(), capabilityApi.getApplication().getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getMetadata().getRedirectPolicy()), ((MapemCapabilityApplicationApi) capabilityApi.getApplication()).getIds());
-		} else if (capabilityApi.getApplication() instanceof SremCapabilityApplicationApi) {
-			return new SremCapability(capabilityApi.getApplication().getPublisherId(), capabilityApi.getApplication().getOriginatingCountry(), capabilityApi.getApplication().getProtocolVersion(), capabilityApi.getApplication().getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getMetadata().getRedirectPolicy()), ((SremCapabilityApplicationApi) capabilityApi.getApplication()).getIds());
-		} else if (capabilityApi.getApplication() instanceof SsemCapabilityApplicationApi) {
-			return new SsemCapability(capabilityApi.getApplication().getPublisherId(), capabilityApi.getApplication().getOriginatingCountry(), capabilityApi.getApplication().getProtocolVersion(), capabilityApi.getApplication().getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getMetadata().getRedirectPolicy()), ((SsemCapabilityApplicationApi) capabilityApi.getApplication()).getIds());
-		} else if (capabilityApi.getApplication() instanceof CamCapabilityApplicationApi) {
-			return new CamCapability(capabilityApi.getApplication().getPublisherId(), capabilityApi.getApplication().getOriginatingCountry(), capabilityApi.getApplication().getProtocolVersion(), capabilityApi.getApplication().getQuadTree(), transformRedirectStatusApiToRedirectStatus(capabilityApi.getMetadata().getRedirectPolicy()), ((CamCapabilityApplicationApi) capabilityApi.getApplication()).getStationTypes());
-		}
-		throw new RuntimeException("Subclass of Capability not possible to convert: " + capabilityApi.getClass().getSimpleName());
-	}
-
 }

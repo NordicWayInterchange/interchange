@@ -6,6 +6,7 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
@@ -155,12 +156,17 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						)
 				)
 		));
-		DatexCapability capability = new DatexCapability(
-				"NO-123",
-				"NO",
-				"1.0",
-				Collections.emptySet(),
-				Collections.emptySet()
+
+		CapabilitySplit capability = new CapabilitySplit(
+				new DatexApplication(
+						"NO-123",
+						"pub-1",
+						"NO",
+						"1.0",
+						Collections.emptySet(),
+						"publicationType"
+				),
+				new Metadata()
 		);
 		Capabilities capabilities = new Capabilities(
 				Capabilities.CapabilitiesStatus.KNOWN,
@@ -280,7 +286,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderWithCapabiltiesShouldNotHaveQueuButExistInServiceProvidersGroup() {
 		ServiceProvider onlyCaps = new ServiceProvider("onlyCaps");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new DatexCapability(null,"NO", null, null, null)));
+				Collections.singleton(new CapabilitySplit(new DatexApplication(null, null,"NO", null, null, null), new Metadata())));
 		onlyCaps.setCapabilities(capabilities);
 		router.syncServiceProviders(Arrays.asList(onlyCaps));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
@@ -294,7 +300,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new DatexCapability(null,"NO", null, null, null)));
+				Collections.singleton(new CapabilitySplit(new DatexApplication(null, null,"NO", null, null, null), new Metadata())));
 		serviceProvider.setCapabilities(capabilities);
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
@@ -401,7 +407,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new DatexCapability(null, "NO", null, null, null)));
+				Collections.singleton(new CapabilitySplit(new DatexApplication(null, null, "NO", null, null, null), new Metadata())));
 		serviceProvider.setCapabilities(capabilities);
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
@@ -564,12 +570,16 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Capability denmCapability = new DenmCapability(
-				"NPRA",
-				"NO",
-				"1.0",
-				Collections.singleton("1234"),
-				Collections.singleton("6")
+		CapabilitySplit denmCapability = new CapabilitySplit(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("1234")),
+						new HashSet<>(Arrays.asList(6))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
 
 		denmCapability.setStatus(CapabilityStatus.CREATED);
@@ -601,22 +611,30 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Capability denmCapability = new DenmCapability(
-				"NPRA",
-				"NO",
-				"1.0",
-				Collections.singleton("1234"),
-				Collections.singleton("6")
+		CapabilitySplit denmCapability = new CapabilitySplit(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("1234")),
+						new HashSet<>(Arrays.asList(6))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability.setCapabilityExchangeName("cap-ex2");
 		client.createTopicExchange("cap-ex2");
 
-		Capability denmCapability2 = new DenmCapability(
-				"NPRA",
-				"NO",
-				"1.0",
-				Collections.singleton("1234"),
-				Collections.singleton("5")
+		CapabilitySplit denmCapability2 = new CapabilitySplit(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("1234")),
+						new HashSet<>(Arrays.asList(5))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability2.setCapabilityExchangeName("cap-ex3");
 		client.createTopicExchange("cap-ex3");
@@ -630,9 +648,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Arrays.asList(match, match2));
 		router.setUpDeliveryQueue(serviceProvider);
-
-		String capabilitySelector = MessageValidatingSelectorCreator.makeSelector(denmCapability);
-		String capabilitySelector2 = MessageValidatingSelectorCreator.makeSelector(denmCapability2);
 
 		verify(outgoingMatchDiscoveryService, times(2)).updateOutgoingMatchToUp(any(OutgoingMatch.class));
 
@@ -648,12 +663,16 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		String exchangeName = "my-exchange8";
 
-		Capability denmCapability = new DenmCapability(
-				"NPRA",
-				"NO",
-				"1.0",
-				Collections.singleton("1234"),
-				Collections.singleton("6")
+		CapabilitySplit denmCapability = new CapabilitySplit(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("1234")),
+						new HashSet<>(Arrays.asList(6))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex4");
@@ -687,12 +706,16 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Capability denmCapability = new DenmCapability(
-				"NPRA",
-				"NO",
-				"1.0",
-				Collections.singleton("1234"),
-				Collections.singleton("6")
+		CapabilitySplit denmCapability = new CapabilitySplit(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("1234")),
+						new HashSet<>(Arrays.asList(6))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex5");
@@ -726,23 +749,31 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		String serviceProviderName = "my-service-provider";
 		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 
-		Capability denmCapability1 = new DenmCapability(
-				"NPRA",
-				"NO",
-				"1.0",
-				Collections.singleton("1234"),
-				Collections.singleton("6")
+		CapabilitySplit denmCapability1 = new CapabilitySplit(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("1234")),
+						new HashSet<>(Arrays.asList(6))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability1.setStatus(CapabilityStatus.CREATED);
 		denmCapability1.setCapabilityExchangeName("cap-ex6");
 		client.createDirectExchange("cap-ex6");
 
-		Capability denmCapability2 = new DenmCapability(
-				"NPRA",
-				"NO",
-				"1.0",
-				Collections.singleton("1233"),
-				Collections.singleton("6")
+		CapabilitySplit denmCapability2 = new CapabilitySplit(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("1233")),
+						new HashSet<>(Arrays.asList(6))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability2.setStatus(CapabilityStatus.CREATED);
 		denmCapability2.setCapabilityExchangeName("cap-ex7");
@@ -785,12 +816,16 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		endpoint.setSource("my-queue12");
 		subscription.setLocalEndpoints(Collections.singleton(endpoint));
 
-		Capability denmCapability = new DenmCapability(
-				"NPRA",
-				"NO",
-				"1.0",
-				Collections.singleton("1234"),
-				Collections.singleton("6")
+		CapabilitySplit denmCapability = new CapabilitySplit(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						new HashSet<>(Arrays.asList("1234")),
+						new HashSet<>(Arrays.asList(6))
+				),
+				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		denmCapability.setStatus(CapabilityStatus.CREATED);
 		denmCapability.setCapabilityExchangeName("cap-ex8");

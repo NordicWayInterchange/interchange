@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public class RoutingConfigurer {
 		try {
 			logger.debug("Setting up routing for neighbour {}", neighbour.getName());
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
-			Set<Capability> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
 				Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
 				Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
@@ -109,15 +110,15 @@ public class RoutingConfigurer {
 		}
 	}
 
-	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<Capability> capabilities, String neighbourName) {
+	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<CapabilitySplit> capabilities, String neighbourName) {
 		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
-			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getRedirect().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
+			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				String queueName = "sub-" + UUID.randomUUID();
 				createQueue(queueName, neighbourName);
 				subscription.setQueueName(queueName);
 				addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
-				for (Capability cap : matchingCaps) {
+				for (CapabilitySplit cap : matchingCaps) {
 					if (cap.exchangeExists()) {
 						if (qpidClient.exchangeExists(cap.getCapabilityExchangeName())) {
 							bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
@@ -136,14 +137,14 @@ public class RoutingConfigurer {
 		logger.info("Set up routing for neighbour {}", neighbourName);
 	}
 
-	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<Capability> capabilities) {
+	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<CapabilitySplit> capabilities) {
 		for(NeighbourSubscription subscription : redirectSubscriptions){
-			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getRedirect().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
+			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				String redirectQueue = "re-" + UUID.randomUUID();
 				createQueue(redirectQueue, subscription.getConsumerCommonName());
 				subscription.setQueueName(redirectQueue);
-				for (Capability cap : matchingCaps) {
+				for (CapabilitySplit cap : matchingCaps) {
 					if (cap.exchangeExists()) {
 						addSubscriberToGroup(REMOTE_SERVICE_PROVIDERS_GROUP_NAME, subscription.getConsumerCommonName());
 						bindRemoteServiceProvider(cap.getCapabilityExchangeName(), redirectQueue, subscription);
