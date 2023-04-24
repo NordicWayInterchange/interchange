@@ -174,7 +174,6 @@ public class OnboardRestAPIDocumentationTest {
 
     @Test
     public void addCapabilitiesRequestForSystemtest() throws JsonProcessingException {
-        //TODO for remote
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "king_gustaf.bouvetinterchange.eu",
                 Collections.singleton(
@@ -186,7 +185,7 @@ public class OnboardRestAPIDocumentationTest {
                                         "1.0",
                                         Collections.singleton("1234"),
                                         Collections.singleton(6)
-                                ), new MetadataApi())
+                                ), new MetadataApi(RedirectStatusApi.OPTIONAL))
                 )
         );
         ObjectMapper mapper = new ObjectMapper();
