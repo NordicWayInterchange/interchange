@@ -76,8 +76,10 @@ public class NeighbourRESTFacadeTest {
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDatexCapabilities()throws Exception{
 
 		CapabilitySplitApi capabilityApi = new CapabilitySplitApi();
-		ApplicationApi app = new DatexApplicationApi();
-		app.setOriginatingCountry("NO");
+		ApplicationApi app = new DatexApplicationApi("NO-123123","pub-123", "NO", "P1", Sets.newSet("aaa"), "SituationPublication");
+		capabilityApi.setApplication(app);
+		MetadataApi meta = new MetadataApi();
+		capabilityApi.setMetadata(meta);
 
 		CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("ericsson.itsinterchange.eu", Collections.singleton(capabilityApi));
 
@@ -101,9 +103,11 @@ public class NeighbourRESTFacadeTest {
 
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithDenmCapabilities() throws Exception {
-		DenmApplicationApi app = new DenmApplicationApi("NO-123123","pub-123", "NO", "P1", Sets.newSet("aaa"), Sets.newSet(6));
 		CapabilitySplitApi capability = new CapabilitySplitApi();
+		DenmApplicationApi app = new DenmApplicationApi("NO-123123","pub-123", "NO", "P1", Sets.newSet("aaa"), Sets.newSet(6));
 		capability.setApplication(app);
+		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+		capability.setMetadata(meta);
 		CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("ericsson.itsinterchange.eu", Collections.singleton(capability));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
@@ -121,15 +125,17 @@ public class NeighbourRESTFacadeTest {
 		Iterator<CapabilitySplit> dataTypes = res.iterator();
 		CapabilitySplit capabilityNext = dataTypes.next();
 
-		assertThat(capability.getApplication()).isInstanceOf(DenmApplication.class);
+		assertThat(capability.getApplication()).isInstanceOf(DenmApplicationApi.class);
 		assertThat(capabilityNext.getApplication().getOriginatingCountry()).isEqualTo(capability.getApplication().getOriginatingCountry());
 	}
 
 	@Test
 	public void successfulPostOfCapabilitiesReturnsInterchangeWithIviCapabilities() throws Exception {
-		IvimApplicationApi dataType = new IvimApplicationApi("NO-123123", "pub-123", "NO", "P1", Sets.newSet("aaa"));
 		CapabilitySplitApi capability = new CapabilitySplitApi();
+		IvimApplicationApi dataType = new IvimApplicationApi("NO-123123", "pub-123", "NO", "P1", Sets.newSet("aaa"));
 		capability.setApplication(dataType);
+		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+		capability.setMetadata(meta);
 		CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi("remote server", Collections.singleton(capability));
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(capabilitiesApi);
