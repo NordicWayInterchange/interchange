@@ -21,6 +21,7 @@ public class MessagePropertyTest {
 
         Set<MessageProperty> mandatoryCommonProperties = new HashSet<>(Arrays.asList(
                         MessageProperty.PUBLISHER_ID,
+                        MessageProperty.PUBLICATION_ID,
                         MessageProperty.ORIGINATING_COUNTRY,
                         MessageProperty.PROTOCOL_VERSION,
                         MessageProperty.MESSAGE_TYPE,
