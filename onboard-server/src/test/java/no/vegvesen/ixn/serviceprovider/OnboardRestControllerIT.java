@@ -2,6 +2,8 @@ package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
@@ -52,10 +54,11 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testDeletingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi();
-        app.setOriginatingCountry("NO");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
         String serviceProviderName = "serviceprovider";
 
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
@@ -80,10 +83,11 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testGettingCapability() {
-        DatexApplicationApi app = new DatexApplicationApi();
-        app.setOriginatingCountry("NO");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
         CapabilitySplitApi datexNO = new CapabilitySplitApi();
         datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
         String serviceProviderName = "serviceprovider";
 
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
