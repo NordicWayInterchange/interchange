@@ -78,12 +78,12 @@ public class NeighbourRepositoryIT {
 		Neighbour update = repository.findByName("Third Neighbour");
 		CapabilitySplit aCapability = new CapabilitySplit(
 				new DatexApplication(
-						null,
-						null,
+						"NO-123",
+						"NO-pub",
 						"NO",
-						null,
-						null,
-						null),
+						"1.0",
+						Collections.emptySet(),
+						"SituationPublication"),
 				new Metadata()
 		);
 		Capabilities firstCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(aCapability));
