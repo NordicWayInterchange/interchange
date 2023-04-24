@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
@@ -82,10 +84,11 @@ public class OnboardRestControllerTest {
 		mockCertificate(firstServiceProvider);
 
 		// Create Capabilities API object for capabilities to add, convert to JSON string and POST to server.
-		DatexApplicationApi app = new DatexApplicationApi();
-		app.setOriginatingCountry("NO");
+		DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		CapabilitySplitApi datexNo = new CapabilitySplitApi();
 		datexNo.setApplication(app);
+		datexNo.setMetadata(meta);
 		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
 				firstServiceProvider,
 				Collections.singleton(datexNo)
@@ -147,10 +150,11 @@ public class OnboardRestControllerTest {
 
 		mockCertificate("First Service Provider");
 
-		DatexApplicationApi app = new DatexApplicationApi();
-		app.setOriginatingCountry("FI");
+		DatexApplicationApi app = new DatexApplicationApi("FI-123", "FI-pub", "FI", "1.0", Collections.emptySet(), "SituationPublication");
+		MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
 		CapabilitySplitApi datexFi = new CapabilitySplitApi();
 		datexFi.setApplication(app);
+		datexFi.setMetadata(meta);
 
 		AddCapabilitiesRequest request = new AddCapabilitiesRequest(
 				"SecondServiceProvider",
