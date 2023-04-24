@@ -2,10 +2,7 @@ package no.vegvesen.ixn.federation.service;
 
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.model.*;
@@ -109,7 +106,7 @@ public class NeighbourDiscovererIT {
 	}
 
 	private CapabilitySplit getDatexCapability(String originatingCountry) {
-		return new CapabilitySplit(new DatexApplication(null, null, originatingCountry, null, null,null), new Metadata(RedirectStatus.OPTIONAL));
+		return new CapabilitySplit(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.emptySet(),"SituationPublication"), new Metadata(RedirectStatus.OPTIONAL));
 	}
 
 	@Test
@@ -128,7 +125,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi(null, null, "NO", null, Collections.emptySet(), null), new MetadataApi()))), Collections.emptySet());
+		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -160,7 +157,7 @@ public class NeighbourDiscovererIT {
 										Collections.emptySet(),
 										""
 								),
-								new Metadata()
+								new Metadata(RedirectStatus.OPTIONAL)
 						)),
 						LocalDateTime.now()
 				),
@@ -205,7 +202,7 @@ public class NeighbourDiscovererIT {
 										Collections.emptySet(),
 										""
 								),
-								new Metadata()
+								new Metadata(RedirectStatus.OPTIONAL)
 						)),
 						LocalDateTime.now()
 				),
@@ -251,7 +248,7 @@ public class NeighbourDiscovererIT {
 												Collections.emptySet(),
 												""
 										),
-										new Metadata()
+										new Metadata(RedirectStatus.OPTIONAL)
 								),
 								new CapabilitySplit(
 										new DenmApplication(
@@ -262,7 +259,7 @@ public class NeighbourDiscovererIT {
 												Collections.emptySet(),
 												Collections.emptySet()
 									),
-										new Metadata())
+										new Metadata(RedirectStatus.OPTIONAL))
 						)),
 						LocalDateTime.now()
 				),
@@ -313,7 +310,7 @@ public class NeighbourDiscovererIT {
 										Collections.emptySet(),
 										""
 								),
-								new Metadata()
+								new Metadata(RedirectStatus.OPTIONAL)
 						)),
 						LocalDateTime.now().minusHours(1)
 				),
@@ -366,7 +363,7 @@ public class NeighbourDiscovererIT {
 										Collections.emptySet(),
 										""
 								),
-								new Metadata()
+								new Metadata(RedirectStatus.OPTIONAL)
 						)),
 						LocalDateTime.now().minusHours(1)
 				),
@@ -387,7 +384,7 @@ public class NeighbourDiscovererIT {
 										Collections.emptySet(),
 										""
 								),
-								new Metadata()
+								new Metadata(RedirectStatus.OPTIONAL)
 						)),
 						LocalDateTime.now().minusHours(1)
 				),
@@ -441,7 +438,7 @@ public class NeighbourDiscovererIT {
 												Collections.emptySet(),
 												Collections.emptySet()
 										),
-										new Metadata())
+										new Metadata(RedirectStatus.OPTIONAL))
 						)),
 						LocalDateTime.now()
 				),
