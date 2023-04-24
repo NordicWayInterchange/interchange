@@ -331,7 +331,7 @@ public class SubscriptionCalculatorTest {
 
     private CapabilitySplit getDatexCapability(String country) {
         return new CapabilitySplit(
-                new DatexApplication(null, null, country, null, null, null),
+                new DatexApplication(country + "-123", country + "-pub", country, "1.0", Collections.emptySet(), "SituationPublication"),
                 new Metadata(RedirectStatus.OPTIONAL));
     }
 
