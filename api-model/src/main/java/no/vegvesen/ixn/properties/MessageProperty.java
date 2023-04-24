@@ -140,7 +140,10 @@ public class MessageProperty {
 			datex2ApplicationProperties,
 			itsG5ApplicationProperties,
 			denmApplicationProperties,
-			ivimApplicationProperties).flatMap(Collection::stream)
+			ivimApplicationProperties,
+					spatemMapemApplicationProperties,
+					sremSsemApplicationProperties,
+					camApplicationProperties).flatMap(Collection::stream)
 			.collect(Collectors.toSet());
 
 	public static Set<MessageProperty> filterableProperties = Stream.of(
