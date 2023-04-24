@@ -145,7 +145,7 @@ class NeighbourRestControllerTest {
 		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
 
-		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi(), new MetadataApi());
+		CapabilitySplitApi capability = new CapabilitySplitApi(new IvimApplicationApi("NO-123", "NO-pub", "NO", "IVIM:1.0", Collections.emptySet()), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(capability));
 
 		// Create JSON string of capability api object to send to the server
