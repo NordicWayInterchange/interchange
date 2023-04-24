@@ -23,9 +23,9 @@ public class CapabilityCalculatorTest {
     @Test
     void calculateSelfCapabilitiesTest() {
 
-        CapabilitySplit a = new CapabilitySplit(new DatexApplication(null, null, "SE", null, null, null), new Metadata());
-        CapabilitySplit b = new CapabilitySplit(new DatexApplication(null, null, "FI", null, null, null), new Metadata());
-        CapabilitySplit c = new CapabilitySplit(new DatexApplication(null, null, "NO", null, null, null), new Metadata());
+        CapabilitySplit a = new CapabilitySplit(new DatexApplication("SE-213", "se-pub", "SE", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata());
+        CapabilitySplit b = new CapabilitySplit(new DatexApplication("FI-213", "fi-pub", "FI", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata());
+        CapabilitySplit c = new CapabilitySplit(new DatexApplication("NO-213", "no-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata());
 
         ServiceProvider firstServiceProvider = new ServiceProvider();
         firstServiceProvider.setName("First Service Provider");
@@ -59,12 +59,12 @@ public class CapabilityCalculatorTest {
         Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
                 Sets.newLinkedHashSet(new CapabilitySplit(
                         new DatexApplication(
-                                null,
-                                null,
+                                "NO-123",
+                                "no-pub",
                                 "NO",
-                                null,
-                                null,
-                                null),
+                                "1.0",
+                                Collections.emptySet(),
+                                "SituationPublication"),
                         new Metadata())),
                 lastUpdated);
         serviceProvider.setCapabilities(capabilities);
@@ -79,23 +79,23 @@ public class CapabilityCalculatorTest {
         Capabilities earliestCap = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DatexApplication(
-                                null,
-                                null,
+                                "NO-123",
+                                "no-pub-1",
                                 "NO",
-                                null,
-                                null,
-                                null),
+                                "1.0",
+                                Collections.emptySet(),
+                                "SituationPublication"),
                         new Metadata())),
                 earliest);
         Capabilities latestCap = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN,
                 Collections.singleton(new CapabilitySplit(
                         new DatexApplication(
-                                null,
-                                null,
+                                "NO-123",
+                                "no-pub-2",
                                 "NO",
-                                null,
-                                null,
-                                null),
+                                "1.0",
+                                Collections.emptySet(),
+                                "SituationPublication"),
                         new Metadata())),
                 latest);
         ServiceProvider earliestSP = new ServiceProvider();
@@ -134,7 +134,7 @@ public class CapabilityCalculatorTest {
     }
 
     private CapabilitySplit getDatexCapability(String originatingCountry) {
-        return new CapabilitySplit(new DatexApplication(null, null, originatingCountry, null, Collections.emptySet(), null), new Metadata());
+        return new CapabilitySplit(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.emptySet(), "SituationPublication"), new Metadata());
     }
 
 }
