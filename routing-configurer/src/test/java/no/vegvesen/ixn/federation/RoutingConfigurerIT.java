@@ -129,7 +129,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
@@ -182,7 +182,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		NeighbourSubscription s1 = new NeighbourSubscription(
 				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
@@ -190,7 +190,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		NeighbourSubscription s2 = new NeighbourSubscription(
 				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-						"AND publicationType = 'Road Block' " +
+						"AND publicationType = 'RoadBlock' " +
 						"AND messageType = 'DATEX2' " +
 						"AND originatingCountry = 'SE' " +
 						"AND protocolVersion = '1.0' " +
@@ -245,7 +245,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		NeighbourSubscription s1 = new NeighbourSubscription(
 				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-						"AND publicationType = 'Road Block' " +
+						"AND publicationType = 'RoadBlock' " +
 						"AND messageType = 'DATEX2' " +
 						"AND originatingCountry = 'NO' " +
 						"AND protocolVersion = '1.0' " +
@@ -253,7 +253,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		NeighbourSubscription s2 = new NeighbourSubscription(
 				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-						"AND publicationType = 'Road Block' " +
+						"AND publicationType = 'RoadBlock' " +
 						"AND messageType = 'DATEX2' " +
 						"AND originatingCountry = 'SE' " +
 						"AND protocolVersion = '1.0' " +
@@ -346,7 +346,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		HashSet<NeighbourSubscription> subscriptions = new HashSet<>();
 		NeighbourSubscription subscription = new NeighbourSubscription(
 				"(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'SE' " +
 				"AND protocolVersion = '1.0' " +
@@ -372,6 +372,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 					.quadTreeTiles(",123,")
 					.publicationType("Test")
 					.publisherId("NO-123")
+					.publicationId("pub-1")
 					.originatingCountry("SE")
 					.protocolVersion("1.0")
 					.build();
@@ -386,6 +387,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 					.textMessage("Make Nordea great again!")
 					.messageType(Constants.DATEX_2)
 					.publisherId("NO-123")
+					.publicationId("pub-1")
 					.publicationType("Test")
 					.quadTreeTiles(",123,")
 					.originatingCountry("NO")
@@ -449,7 +451,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
@@ -500,7 +502,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
@@ -515,7 +517,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.getQueueBindKeys(sub1.getQueueName()).size()).isEqualTo(1);
 
 		NeighbourSubscription sub2 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'SE' " +
 				"AND protocolVersion = '1.0' " +
@@ -569,7 +571,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
@@ -608,7 +610,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		NeighbourSubscription sub = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
@@ -657,14 +659,14 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, new HashSet<>(Arrays.asList(cap1, cap2))));
 
 		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "remote-service-provider");
 
 		NeighbourSubscription sub2 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'SE' " +
 				"AND protocolVersion = '1.0' " +
@@ -698,7 +700,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.NOT_AVAILABLE)
 		);
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
@@ -719,7 +721,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	@Test
 	public void routingIsNotSetUpWhenRedirectIsNotAvailable() {
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
@@ -752,14 +754,14 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		sp.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(cap)));
 
 		NeighbourSubscription sub1 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "remote-sp");
 
 		NeighbourSubscription sub2 = new NeighbourSubscription("(quadTree like '%,01230123%' OR quadTree like '%,01230122%') " +
-				"AND publicationType = 'Road Block' " +
+				"AND publicationType = 'RoadBlock' " +
 				"AND messageType = 'DATEX2' " +
 				"AND originatingCountry = 'NO' " +
 				"AND protocolVersion = '1.0' " +
@@ -840,6 +842,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						.bytesMessage(bytemessage)
 						.userId("kong_olav")
 						.publisherId("NO-123")
+						.publicationId("pub-1")
 						.messageType(Constants.DENM)
 						.causeCode("6")
 						.subCauseCode("61")
