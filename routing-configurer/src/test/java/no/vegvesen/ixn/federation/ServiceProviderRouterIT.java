@@ -286,7 +286,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderWithCapabiltiesShouldNotHaveQueuButExistInServiceProvidersGroup() {
 		ServiceProvider onlyCaps = new ServiceProvider("onlyCaps");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new CapabilitySplit(new DatexApplication(null, null,"NO", null, null, null), new Metadata())));
+				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata())));
 		onlyCaps.setCapabilities(capabilities);
 		router.syncServiceProviders(Arrays.asList(onlyCaps));
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
@@ -300,7 +300,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new CapabilitySplit(new DatexApplication(null, null,"NO", null, null, null), new Metadata())));
+				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata())));
 		serviceProvider.setCapabilities(capabilities);
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
@@ -407,7 +407,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed");
 		Capabilities capabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN,
-				Collections.singleton(new CapabilitySplit(new DatexApplication(null, null, "NO", null, null, null), new Metadata())));
+				Collections.singleton(new CapabilitySplit(new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptySet(), "SituationPublication"), new Metadata())));
 		serviceProvider.setCapabilities(capabilities);
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider));
