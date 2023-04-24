@@ -59,6 +59,11 @@ public class MessageBuilder {
         return this;
     }
 
+    public MessageBuilder publicationId(String publicationId) throws JMSException {
+        message.setStringProperty(MessageProperty.PUBLICATION_ID.getName(), publicationId);
+        return this;
+    }
+
     public MessageBuilder protocolVersion(String version) throws JMSException {
         message.setStringProperty(MessageProperty.PROTOCOL_VERSION.getName(), version);
         return this;
