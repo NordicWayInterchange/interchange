@@ -153,7 +153,10 @@ public class SelectorBuilder {
 	}
 
 	public SelectorBuilder causeCodes(Set<Integer> causeCodes) {
-		values.put(MessageProperty.CAUSE_CODE.getName(), String.join(",",causeCodes.toString()));
+		String strings = causeCodes.stream()
+				.map(n -> String.valueOf(n))
+				.collect(Collectors.joining(","));
+		values.put(MessageProperty.CAUSE_CODE.getName(), strings);
 		return this;
 	}
 

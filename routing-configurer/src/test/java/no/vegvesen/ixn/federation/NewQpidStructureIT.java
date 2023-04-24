@@ -92,7 +92,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         //2.1 Create a Capability to base a Validating selector on
         CapabilitySplit capability = new CapabilitySplit(
                 new DenmApplication(
-                        "NO-213",
+                        "NO-123",
                         "pub-1",
                         "NO",
                         "1.0",
@@ -134,6 +134,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .userId("anna")
                 .messageType(Constants.DENM)
                 .publisherId("NO-123")
+                .publicationId("pub-1")
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
                 .quadTreeTiles(",12003,")
@@ -148,6 +149,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 .userId("localhost")
                 .messageType(Constants.DATEX_2)
                 .publisherId("NO-123")
+                .publicationId("pub-1")
                 .publicationType("Obstruction")
                 .protocolVersion("DATEX2;2.3")
                 .latitude(60.352374)
@@ -200,6 +202,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         //3. Making Capability selector and joining with delivery selector.
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String capabilitySelector = creator.makeSelector(capability);
+        System.out.println(capabilitySelector);
 
         String deliverySelector = delivery.getSelector();
 
@@ -244,6 +247,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .bytesMessage(bytemessage)
                         .userId("kong_olav")
                         .publisherId("NO-123")
+                        .publicationId("pub-1")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")
@@ -289,6 +293,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .bytesMessage(bytemessage)
                         .userId("king_gustaf")
                         .publisherId("NO-123")
+                        .publicationId("NO-123-pub")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")
@@ -389,6 +394,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .bytesMessage(bytemessage)
                         .userId("kong_olav")
                         .publisherId("NO-123")
+                        .publicationId("pub-1")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")
@@ -464,6 +470,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .bytesMessage(bytemessage)
                         .userId("")
                         .publisherId("NO-123")
+                        .publicationId("pub-1")
                         .messageType(Constants.DENM)
                         .causeCode("6")
                         .subCauseCode("61")
