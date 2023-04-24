@@ -15,9 +15,9 @@ public class CapabilitiesTest {
 
     @Test
     public void testAddAllDatatypesRetainsExistingObjects() {
-        CapabilitySplit firstCapability = new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton(1)), new Metadata());
+        CapabilitySplit firstCapability = new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton(1)), new Metadata(RedirectStatus.OPTIONAL));
         firstCapability.setId(1);
-        CapabilitySplit secondCapability = new CapabilitySplit(new DenmApplication("NO00001", "pub-2", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton(2)), new Metadata());
+        CapabilitySplit secondCapability = new CapabilitySplit(new DenmApplication("NO00001", "pub-2", "NO", "DENM:1.2.2", Collections.singleton("2"), Collections.singleton(2)), new Metadata(RedirectStatus.OPTIONAL));
         secondCapability.setId(2);
         Capabilities capabilities = new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
@@ -25,7 +25,7 @@ public class CapabilitiesTest {
                         firstCapability,
                         secondCapability
                 )));
-        capabilities.replaceCapabilities(Collections.singleton(new CapabilitySplit(new DenmApplication("NO00000", "pub-3", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton(1)), new Metadata())));
+        capabilities.replaceCapabilities(Collections.singleton(new CapabilitySplit(new DenmApplication("NO00000", "pub-1", "NO", "DENM:1.2.2", Collections.singleton("1"), Collections.singleton(1)), new Metadata(RedirectStatus.OPTIONAL))));
         assertThat(capabilities.getCapabilities()).hasSize(1);
         //Test that the original object is the one retained
         assertThat(capabilities.getCapabilities().stream().findFirst().get().getId()).isEqualTo(1);
