@@ -228,6 +228,11 @@ public class NeighbourService {
 		logger.debug("Saved neighbour {} with subscription request status ESTABLISHED", neighbour.getName());
 	}
 
+	public void saveNeighbour(Neighbour neighbour) {
+		neighbourRepository.save(neighbour);
+	}
+
+
 	public SubscriptionResponseApi findSubscriptions(String ixnName) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();

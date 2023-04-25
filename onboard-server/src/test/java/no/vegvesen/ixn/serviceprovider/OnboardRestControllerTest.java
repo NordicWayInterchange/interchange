@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
@@ -48,9 +47,6 @@ public class OnboardRestControllerTest {
 
 	@MockBean
 	private ServiceProviderRepository serviceProviderRepository;
-
-	@MockBean
-	private ServiceProviderRouter serviceProviderRouter;
 
 	@MockBean
 	private NeighbourRepository neighbourRepository;

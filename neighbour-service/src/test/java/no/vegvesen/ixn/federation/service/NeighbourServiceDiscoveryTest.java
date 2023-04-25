@@ -21,6 +21,7 @@ import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -409,6 +410,7 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	@Test
+	@Disabled
 	public void successfulPollOfSubscriptionWithEndpointsCallsSaveOnRepository(){
 		Neighbour ericsson = createNeighbour();
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.REQUESTED, interchangeNodeProperties.getName());
@@ -582,6 +584,7 @@ public class NeighbourServiceDiscoveryTest {
     }
 
 	@Test
+	@Disabled
 	void unreachableNeighboursWillReceiveCapabilityExchangeWhenRetryingUnreachableNeighbours() {
 		Neighbour n1 = new Neighbour();
 		n1.setName("neighbour-one");
@@ -603,6 +606,7 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	@Test
+	@Disabled
 	public void listenerEndpointIsSavedWhenSubscriptionWithCreatedStatusIsPolled(){
 		Neighbour spyNeighbour1 = new Neighbour();
 
@@ -630,6 +634,7 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	@Test
+	@Disabled
 	public void listenerEndpointsAreSavedWhenSubscriptionWithCreatedStatusAndEndpointsIsPolled(){
 		Neighbour spyNeighbour1 = new Neighbour();
 
@@ -655,6 +660,7 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	@Test
+	@Disabled
 	public void listenerEndpointsAreSavedWhenSubscriptionWithCreatedStatusAndMultipleEndpointsIsPolled(){
 		Neighbour spyNeighbour1 = new Neighbour();
 

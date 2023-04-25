@@ -92,6 +92,14 @@ public class QpidClient {
 		addBinding(selector, source, destination,source);
 	}
 
+	public void bindSubscriptionExchange(String selector, String source, String destination) {
+		addBinding(selector, source, destination, createBindKey(source, destination));
+	}
+
+	public String createBindKey(String source, String destination) {
+		return source + "_" + destination;
+	}
+
 	public void bindTopicExchange(String selector, String source, String destination) {
 		addBinding(selector,source,destination,Integer.toString(selector.hashCode()));
 	}

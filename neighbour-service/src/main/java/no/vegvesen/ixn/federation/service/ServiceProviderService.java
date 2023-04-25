@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,47 +23,69 @@ public class ServiceProviderService {
 
     private ServiceProviderRepository serviceProviderRepository;
     private OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
-    private MatchDiscoveryService matchDiscoveryService;
+    private MatchRepository matchRepository;
 
     @Autowired
-    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService, MatchDiscoveryService matchDiscoveryService) {
+    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService, MatchRepository matchRepository) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
-        this.matchDiscoveryService = matchDiscoveryService;
+        this.matchRepository = matchRepository;
     }
 
     public void syncServiceProviders(String host, Integer port) {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         for (ServiceProvider serviceProvider : serviceProviders) {
-            updateLocalSubscriptionWithRedirectEndpoints(serviceProvider);
-            updateDeliveryStatus(serviceProvider);
-            updateNewLocalDeliveryEndpoints(serviceProvider, host, port);
-            updateTearDownLocalDeliveryEndpoints(serviceProvider);
-            removeTearDownCapabilities(serviceProvider);
-            removeTearDownAndIllegalDeliveries(serviceProvider);
-            serviceProviderRepository.save(serviceProvider);
+            String name = serviceProvider.getName();
+            updateLocalSubscriptionWithRedirectEndpoints(name);
+            updateDeliveryStatus(name);
+            updateNewLocalDeliveryEndpoints(name, host, port);
+            updateTearDownLocalDeliveryEndpoints(name);
+            removeTearDownCapabilities(name);
+            removeTearDownAndIllegalDeliveries(name);
         }
     }
 
-    public void updateLocalSubscriptionWithRedirectEndpoints(ServiceProvider serviceProvider) {
+    public void updateLocalSubscriptionWithRedirectEndpoints(String serviceProviderName) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalSubscription> redirectSubscriptions = serviceProvider.getSubscriptions().stream()
                 .filter(l -> l.getConsumerCommonName().equals(serviceProvider.getName()))
                 .collect(Collectors.toSet());
 
         for (LocalSubscription localSubscription : redirectSubscriptions) {
             Set<LocalEndpoint> newEndpoints = new HashSet<>();
+            Set<LocalEndpoint> endpointsToRemove = new HashSet<>();
             if (localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
-                List<Match> matches = matchDiscoveryService.findMatchesByLocalSubscriptionId(localSubscription.getId());
+                List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
                 for (Match match : matches) {
-                    newEndpoints.addAll(transformEndpointsToLocalEndpoints(match.getSubscription().getEndpoints()));
+                    Set<LocalEndpoint> endpoints = transformEndpointsToLocalEndpoints(match.getSubscription().getEndpoints());
+                    if (!localSubscription.getLocalEndpoints().equals(endpoints)) {
+                        for (LocalEndpoint endpoint : endpoints) {
+                            if (!localSubscription.getLocalEndpoints().contains(endpoint)) {
+                                newEndpoints.add(endpoint);
+                            }
+                        }
+
+                        for (LocalEndpoint endpoint : localSubscription.getLocalEndpoints()) {
+                            if (endpoints.contains(endpoint)) {
+                                endpointsToRemove.add(endpoint);
+                            }
+                        }
+                    }
+                }
+                if (matches.isEmpty()) {
+                    localSubscription.getLocalEndpoints().clear();
                 }
             }
-            localSubscription.setLocalEndpoints(newEndpoints);
+            localSubscription.getLocalEndpoints().removeAll(endpointsToRemove);
+            localSubscription.getLocalEndpoints().addAll(newEndpoints);
+
         }
+        serviceProviderRepository.save(serviceProvider);
     }
 
-    public void updateNewLocalDeliveryEndpoints(ServiceProvider serviceProvider, String host, Integer port) {
-        if (serviceProvider.hasDeliveries()) {
+    public void updateNewLocalDeliveryEndpoints(String serviceProviderName, String host, Integer port) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        if (!serviceProvider.getDeliveries().isEmpty()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (!delivery.getStatus().equals(LocalDeliveryStatus.ILLEGAL)) {
                     Set<String> targets = new HashSet<>();
@@ -83,11 +106,13 @@ public class ServiceProviderService {
                     }
                 }
             }
+            serviceProviderRepository.save(serviceProvider);
         }
     }
 
-    public void updateDeliveryStatus(ServiceProvider serviceProvider) {
-        if (serviceProvider.hasDeliveries()) {
+    public void updateDeliveryStatus(String serviceProviderName) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        if (!serviceProvider.getDeliveries().isEmpty()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
                         || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
@@ -104,11 +129,13 @@ public class ServiceProviderService {
                     }
                 }
             }
+            serviceProviderRepository.save(serviceProvider);
         }
     }
 
-    public void updateTearDownLocalDeliveryEndpoints(ServiceProvider serviceProvider) {
-        if (serviceProvider.hasDeliveries()) {
+    public void updateTearDownLocalDeliveryEndpoints(String serviceProviderName) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+        if (!serviceProvider.getDeliveries().isEmpty()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 Set<LocalDeliveryEndpoint> endpointsToRemove = new HashSet<>();
                 for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
@@ -119,10 +146,12 @@ public class ServiceProviderService {
                 }
                 delivery.removeAllEndpoints(endpointsToRemove);
             }
+            serviceProviderRepository.save(serviceProvider);
         }
     }
 
-    public void removeTearDownCapabilities(ServiceProvider serviceProvider) {
+    public void removeTearDownCapabilities(String serviceProviderName) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<CapabilitySplit> capabilitiesToTearDown = serviceProvider.getCapabilities().getCapabilities().stream()
                 .filter(c -> c.getStatus().equals(CapabilityStatus.TEAR_DOWN))
                 .collect(Collectors.toSet());
@@ -144,12 +173,14 @@ public class ServiceProviderService {
         } else {
             currentServiceProviderCapabilities.setStatus(Capabilities.CapabilitiesStatus.KNOWN);
         }
+        serviceProviderRepository.save(serviceProvider);
     }
 
-    public void removeTearDownAndIllegalDeliveries(ServiceProvider serviceProvider) {
+    public void removeTearDownAndIllegalDeliveries(String serviceProviderName) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalDelivery> deliveriesToTearDown = serviceProvider.getDeliveries().stream()
                 .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)
-                || d.getStatus().equals(LocalDeliveryStatus.ILLEGAL))
+                        || d.getStatus().equals(LocalDeliveryStatus.ILLEGAL))
                 .collect(Collectors.toSet());
 
         for (LocalDelivery delivery : deliveriesToTearDown) {
@@ -159,14 +190,11 @@ public class ServiceProviderService {
                 serviceProvider.getDeliveries().remove(delivery);
             }
         }
+        serviceProviderRepository.save(serviceProvider);
     }
 
     public List<ServiceProvider> getServiceProviders() {
         return serviceProviderRepository.findAll();
-    }
-
-    public void saveAllServiceProviders(List<ServiceProvider> serviceProviders) {
-        serviceProviderRepository.saveAll(serviceProviders);
     }
 
     public Set<LocalEndpoint> transformEndpointsToLocalEndpoints(Set<Endpoint> endpoints) {

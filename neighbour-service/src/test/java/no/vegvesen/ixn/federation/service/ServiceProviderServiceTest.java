@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceProviderServiceTest {
@@ -26,13 +29,13 @@ public class ServiceProviderServiceTest {
     OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
     @Mock
-    MatchDiscoveryService matchDiscoveryService;
+    MatchRepository matchRepository;
 
     ServiceProviderService service;
 
     @BeforeEach
     void setUp() {
-        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchDiscoveryService, matchDiscoveryService);
+        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchDiscoveryService, matchRepository);
     }
 
     @Test
@@ -63,7 +66,8 @@ public class ServiceProviderServiceTest {
         capability.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability);
 
-        service.updateNewLocalDeliveryEndpoints(sp, "host", 5671);
+        when(serviceProviderRepository.findByName(any())).thenReturn(sp);
+        service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
 
         assertThat(localDelivery.getEndpoints()).hasSize(1);
     }
@@ -110,7 +114,8 @@ public class ServiceProviderServiceTest {
         capability1.setStatus(CapabilityStatus.CREATED);
         sp.getCapabilities().addDataType(capability1);
 
-        service.updateNewLocalDeliveryEndpoints(sp, "host", 5671);
+        when(serviceProviderRepository.findByName(any())).thenReturn(sp);
+        service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
 
         assertThat(localDelivery.getEndpoints()).hasSize(1);
     }
@@ -128,7 +133,8 @@ public class ServiceProviderServiceTest {
         );
         sp.addDeliveries(Collections.singleton(localDelivery));
 
-        service.updateNewLocalDeliveryEndpoints(sp, "host", 5671);
+        when(serviceProviderRepository.findByName(any())).thenReturn(sp);
+        service.updateNewLocalDeliveryEndpoints(sp.getName(), "host", 5671);
 
         assertThat(localDelivery.getEndpoints()).hasSize(0);
     }
