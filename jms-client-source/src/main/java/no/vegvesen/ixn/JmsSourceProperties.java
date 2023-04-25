@@ -30,11 +30,6 @@ public class JmsSourceProperties {
     private String keystorePass;
 
     /**
-     * Password for the key
-     */
-    private String keyPass;
-
-    /**
      * Path of the trust store
      */
     private  String trustStorepath;
@@ -60,10 +55,6 @@ public class JmsSourceProperties {
         return keystorePass;
     }
 
-    public String getKeyPass() {
-        return keyPass;
-    }
-
     public String getTrustStorepath() {
         return trustStorepath;
     }
@@ -86,10 +77,6 @@ public class JmsSourceProperties {
 
     public void setKeystorePass(String keystorePass) {
         this.keystorePass = keystorePass;
-    }
-
-    public void setKeyPass(String keyPass) {
-        this.keyPass = keyPass;
     }
 
     public void setTrustStorepath(String trustStorepath) {

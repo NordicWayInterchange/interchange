@@ -28,11 +28,6 @@ public class JmsSinkProperties {
     private String keystorePass;
 
     /**
-     * Password for the private key
-     */
-    private String keyPass;
-
-    /**
      * The path of the trust store
      */
     private String trustStorePath;
@@ -58,10 +53,6 @@ public class JmsSinkProperties {
         return keystorePass;
     }
 
-    public String getKeyPass() {
-        return keyPass;
-    }
-
     public String getTrustStorePath() {
         return trustStorePath;
     }
@@ -84,10 +75,6 @@ public class JmsSinkProperties {
 
     public void setKeystorePass(String keystorePass) {
         this.keystorePass = keystorePass;
-    }
-
-    public void setKeyPass(String keyPass) {
-        this.keyPass = keyPass;
     }
 
     public void setTrustStorePath(String trustStorePath) {
