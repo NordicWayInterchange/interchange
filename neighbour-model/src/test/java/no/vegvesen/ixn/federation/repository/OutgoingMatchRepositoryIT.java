@@ -72,7 +72,7 @@ public class OutgoingMatchRepositoryIT {
         sp.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         serviceProviderRepository.save(sp);
 
-        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp", OutgoingMatchStatus.SETUP_ENDPOINT);
+        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp");
         outgoingMatchRepository.save(match);
 
         List<OutgoingMatch> allMatches = outgoingMatchRepository.findAll();
@@ -108,7 +108,7 @@ public class OutgoingMatchRepositoryIT {
         sp.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         serviceProviderRepository.save(sp);
 
-        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp", OutgoingMatchStatus.SETUP_ENDPOINT);
+        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp");
         outgoingMatchRepository.save(match);
 
         outgoingMatchRepository.delete(match);
@@ -150,7 +150,7 @@ public class OutgoingMatchRepositoryIT {
 
         Integer capabilityId = sp.getCapabilities().getCapabilities().stream().findFirst().get().getId();
 
-        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp", OutgoingMatchStatus.SETUP_ENDPOINT);
+        OutgoingMatch match = new OutgoingMatch(delivery, cap, "my-sp");
         outgoingMatchRepository.save(match);
 
         sp.setCapabilities(new Capabilities());

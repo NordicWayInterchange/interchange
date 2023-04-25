@@ -4,6 +4,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,13 +23,13 @@ public class ServiceProviderService {
     private static Logger logger = LoggerFactory.getLogger(ServiceProviderService.class);
 
     private ServiceProviderRepository serviceProviderRepository;
-    private OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+    private OutgoingMatchRepository outgoingMatchRepository;
     private MatchRepository matchRepository;
 
     @Autowired
-    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService, MatchRepository matchRepository) {
+    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchRepository outgoingMatchRepository, MatchRepository matchRepository) {
         this.serviceProviderRepository = serviceProviderRepository;
-        this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
+        this.outgoingMatchRepository = outgoingMatchRepository;
         this.matchRepository = matchRepository;
     }
 
@@ -117,7 +118,7 @@ public class ServiceProviderService {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
                         || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
                         || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
-                    if (outgoingMatchDiscoveryService.findMatchesFromDeliveryId(delivery.getId()).isEmpty()) {
+                    if (outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId()).isEmpty()) {
                         delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                     } else {
                         if (!delivery.exchangeExists()) {
@@ -139,7 +140,7 @@ public class ServiceProviderService {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 Set<LocalDeliveryEndpoint> endpointsToRemove = new HashSet<>();
                 for (LocalDeliveryEndpoint endpoint : delivery.getEndpoints()) {
-                    List<OutgoingMatch> matches = outgoingMatchDiscoveryService.findByDeliveryQueueName(endpoint.getTarget());
+                    List<OutgoingMatch> matches = outgoingMatchRepository.findAllByLocalDelivery_ExchangeName(endpoint.getTarget());
                     if (matches.isEmpty()) {
                         endpointsToRemove.add(endpoint);
                     }
@@ -158,7 +159,7 @@ public class ServiceProviderService {
 
         Capabilities currentServiceProviderCapabilities = serviceProvider.getCapabilities();
         for (CapabilitySplit capability : capabilitiesToTearDown) {
-            List<OutgoingMatch> possibleMatches = outgoingMatchDiscoveryService.findMatchesFromCapabilityId(capability.getId());
+            List<OutgoingMatch> possibleMatches = outgoingMatchRepository.findAllByCapability_Id(capability.getId());
             if (possibleMatches.isEmpty()) {
                 if (!capability.exchangeExists()) {
                     logger.info("Removing capability with id {} and status TEAR_DOWN", capability.getId());
@@ -184,7 +185,7 @@ public class ServiceProviderService {
                 .collect(Collectors.toSet());
 
         for (LocalDelivery delivery : deliveriesToTearDown) {
-            List<OutgoingMatch> possibleMatches = outgoingMatchDiscoveryService.findMatchesFromDeliveryId(delivery.getId());
+            List<OutgoingMatch> possibleMatches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
             if (possibleMatches.isEmpty()) {
                 logger.info("Removing delivery with id {}", delivery.getId());
                 serviceProvider.getDeliveries().remove(delivery);

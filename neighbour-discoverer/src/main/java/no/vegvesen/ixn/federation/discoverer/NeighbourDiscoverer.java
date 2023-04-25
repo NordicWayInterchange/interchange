@@ -143,7 +143,7 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void updateOutgoingMatchesToTearDown() {
-		outgoingMatchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToTearDownOutgoingMatchResources();
+		outgoingMatchDiscoveryService.syncOutgoingMatchesToDelete();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
@@ -151,8 +151,8 @@ public class NeighbourDiscoverer {
 		matchDiscoveryService.syncMatchesToDelete();
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	/*@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void removeOutgoingMatchesThatAreDeleted() {
 		outgoingMatchDiscoveryService.removeMatchesThatAreDeleted();
-	}
+	}*/
 }

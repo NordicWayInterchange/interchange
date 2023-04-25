@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.model;
 
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -20,24 +21,16 @@ public class OutgoingMatch {
     @JoinColumn(name = "cap", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_out_match_capability"))
     private CapabilitySplit capability;
 
-    @Enumerated(EnumType.STRING)
-    private OutgoingMatchStatus status;
-
     private String serviceProviderName;
-
-    //@Column(length = 1024)
-    //@Column(columnDefinition = "TEXT")
-    //private String selector;
 
     public OutgoingMatch() {
 
     }
 
-    public OutgoingMatch(LocalDelivery localDelivery, CapabilitySplit capability, String serviceProviderName, OutgoingMatchStatus status) {
+    public OutgoingMatch(LocalDelivery localDelivery, CapabilitySplit capability, String serviceProviderName) {
         this.localDelivery = localDelivery;
         this.capability = capability;
         this.serviceProviderName = serviceProviderName;
-        this.status = status;
     }
 
     public Integer getId() {
@@ -60,14 +53,6 @@ public class OutgoingMatch {
         this.capability = capability;
     }
 
-    public OutgoingMatchStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(OutgoingMatchStatus status) {
-        this.status = status;
-    }
-
     public String getServiceProviderName() {
         return serviceProviderName;
     }
@@ -76,17 +61,13 @@ public class OutgoingMatch {
         this.serviceProviderName = serviceProviderName;
     }
 
-    //public String getSelector() {
-    //    return selector;
-    //}
+    public boolean capabilityIsTearDown() {
+        return capability.getStatus().equals(CapabilityStatus.TEAR_DOWN);
+    }
 
-    //public void setSelector(String selector) {
-     //   this.selector = selector;
-    //}
-
-    //public String bindKey() {
-    //    return "" + selector.hashCode();
-    //}
+    public boolean deliveryIsTearDown() {
+        return localDelivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN);
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class ServiceProviderServiceTest {
     ServiceProviderRepository serviceProviderRepository;
 
     @Mock
-    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+    OutgoingMatchRepository outgoingMatchRepository;
 
     @Mock
     MatchRepository matchRepository;
@@ -35,7 +36,7 @@ public class ServiceProviderServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchDiscoveryService, matchRepository);
+        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchRepository, matchRepository);
     }
 
     @Test

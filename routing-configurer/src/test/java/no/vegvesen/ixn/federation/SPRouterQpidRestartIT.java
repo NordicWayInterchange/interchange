@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -101,7 +102,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     MatchRepository matchRepository;
 
     @MockBean
-    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+    OutgoingMatchRepository outgoingMatchRepository;
 
     @Autowired
     QpidClient client;
@@ -404,9 +405,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 
-        OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider", OutgoingMatchStatus.SETUP_ENDPOINT);
-        when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Collections.singletonList(match));
-        when(outgoingMatchDiscoveryService.findMatchesFromDeliveryId(any())).thenReturn(Collections.singletonList(match));
+        OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider");
+        when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.singletonList(match));
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
 
@@ -452,8 +452,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 
-        when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Collections.emptyList());
-        when(outgoingMatchDiscoveryService.findMatchesFromDeliveryId(any())).thenReturn(Collections.emptyList());
+        when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
 
