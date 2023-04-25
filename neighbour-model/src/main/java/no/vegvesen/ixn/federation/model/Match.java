@@ -40,6 +40,12 @@ public class Match {
         this.status = status;
     }
 
+    public Match(LocalSubscription localSubscription, Subscription subscription, String serviceProviderName) {
+        this.localSubscription = localSubscription;
+        this.subscription = subscription;
+        this.serviceProviderName = serviceProviderName;
+    }
+
     public LocalSubscription getLocalSubscription() {
         return localSubscription;
     }
@@ -70,6 +76,14 @@ public class Match {
 
     public void setServiceProviderName(String serviceProviderName) {
         this.serviceProviderName = serviceProviderName;
+    }
+
+    public boolean subscriptionIsTearDown() {
+        return !subscription.isSubscriptionWanted();
+    }
+
+    public boolean localSubscriptionIsTearDown() {
+        return !localSubscription.isSubscriptionWanted();
     }
 
     @Override

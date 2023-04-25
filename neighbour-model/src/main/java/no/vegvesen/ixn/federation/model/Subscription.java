@@ -156,6 +156,12 @@ public class Subscription {
 		this.exchangeName = exchangeName;
 	}
 
+	public boolean isSubscriptionWanted() {
+		return subscriptionStatus.equals(SubscriptionStatus.REQUESTED)
+				|| subscriptionStatus.equals(SubscriptionStatus.CREATED);
+	}
+
+
 	//TODO this is really quite unusual, and really shows that the Subscription needs to be changed
 	//The Selector is the main thing here, actually!
 	@Override
