@@ -48,7 +48,7 @@ public class ServiceProviderRouter {
 
 
     public Iterable<ServiceProvider> findServiceProviders() {
-		return repository.findAll();
+        return repository.findAll();
     }
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders) {
@@ -100,7 +100,7 @@ public class ServiceProviderRouter {
             case CREATED:
                 onRequested(serviceProvider.getName(), subscription);
                 break;
-			case TEAR_DOWN:
+            case TEAR_DOWN:
                 //	Check that the binding exist, if so, delete it
                 onTearDown(serviceProvider, subscription);
                 break;
@@ -413,10 +413,10 @@ public class ServiceProviderRouter {
                             }
                         }
                     }
-                    repository.save(serviceProvider);
                 }
             }
         }
+        repository.save(serviceProvider);
     }
 
     public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<CapabilitySplit> capabilities) {
