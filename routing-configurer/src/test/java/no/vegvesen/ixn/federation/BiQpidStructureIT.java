@@ -135,6 +135,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
                 .userId("anna")
                 .messageType(Constants.DENM)
                 .publisherId("NO-123")
+                .publicationId("NO-123-pub")
                 .originatingCountry("NO")
                 .protocolVersion("1.0")
                 .quadTreeTiles(",12003,")

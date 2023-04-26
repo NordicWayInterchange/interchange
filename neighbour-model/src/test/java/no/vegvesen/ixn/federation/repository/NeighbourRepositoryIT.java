@@ -2,6 +2,9 @@ package no.vegvesen.ixn.federation.repository;
 
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
 import no.vegvesen.ixn.properties.MessageProperty;
 import org.junit.jupiter.api.Test;
@@ -73,7 +76,16 @@ public class NeighbourRepositoryIT {
 		repository.save(thirdInterchange);
 
 		Neighbour update = repository.findByName("Third Neighbour");
-		Capability aCapability = new DatexCapability(null, "NO", null, null, null);
+		CapabilitySplit aCapability = new CapabilitySplit(
+				new DatexApplication(
+						"NO-123",
+						"NO-pub",
+						"NO",
+						"1.0",
+						Collections.emptySet(),
+						"SituationPublication"),
+				new Metadata()
+		);
 		Capabilities firstCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(aCapability));
 		update.setCapabilities(firstCapabilities);
 		repository.save(update);
@@ -156,9 +168,9 @@ public class NeighbourRepositoryIT {
 
 	@Test
 	public void neighbourWithDatex2SpecificCapabilitiesCanBeStoredAndRetrieved() {
-		HashSet<Capability> capabilities = new HashSet<>();
-		capabilities.add(new DatexCapability(null, "NO", null, Collections.emptySet(), new HashSet<>(Arrays.asList("SituationPublication", "MeasuredDataPublication"))));
-		capabilities.add(new DatexCapability(null, "SE", null, Collections.emptySet(), new HashSet<>(Arrays.asList("SituationPublication", "MeasuredDataPublication"))));
+		HashSet<CapabilitySplit> capabilities = new HashSet<>();
+		capabilities.add(new CapabilitySplit(new DatexApplication(null, null, "NO", null, Collections.emptySet(), "SituationPublication"), new Metadata()));
+		capabilities.add(new CapabilitySplit(new DatexApplication(null, null, "SE", null, Collections.emptySet(), "MeasuredDataPublication"), new Metadata()));
 		Neighbour anyNeighbour = new Neighbour("any", new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, capabilities), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.EMPTY, new HashSet<>()), new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, new HashSet<>()));
 
 		Neighbour savedNeighbour = repository.save(anyNeighbour);

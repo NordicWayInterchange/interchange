@@ -4,10 +4,16 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -93,10 +99,10 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     ServiceProviderRepository serviceProviderRepository;
 
     @MockBean
-    MatchDiscoveryService matchDiscoveryService;
+    MatchRepository matchRepository;
 
     @MockBean
-    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+    OutgoingMatchRepository outgoingMatchRepository;
 
     @Autowired
     QpidClient client;
@@ -122,6 +128,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.queueExists(queueName)).isTrue();
     }
@@ -144,6 +151,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.queueExists(queueName)).isFalse();
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
@@ -167,7 +175,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(matchDiscoveryService.findMatchesByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.queueExists(queueName)).isFalse();
         assertThat(serviceProvider.getSubscriptions()).hasSize(0);
@@ -191,6 +200,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.queueExists(queueName)).isTrue();
     }
@@ -213,7 +223,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(matchDiscoveryService.findMatchesByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.queueExists(queueName)).isFalse();
     }
@@ -236,7 +247,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(matchDiscoveryService.findMatchesByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.queueExists(queueName)).isFalse();
     }
@@ -245,9 +257,19 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testCapabilityExchangesAreAutomaticallyAddedToQpidAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -256,6 +278,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.exchangeExists(exchangeName)).isTrue();
         assertThat(client.getQueueBindKeys("bi-queue")).hasSize(1);
@@ -265,9 +288,18 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testCapabilityExchangesAreNotAutomaticallyAddedToQpidAfterRestartWhenStatusIsTearDown() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
 
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -277,6 +309,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
         assertThat(client.exchangeExists(exchangeName)).isFalse();
     }
@@ -285,9 +318,18 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testConnectionBetweenLocalSubscriptionAndCapabilityIsAutomaticallyAddedAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         ServiceProvider serviceProvider1 = new ServiceProvider(
                 "my-service-provider",
@@ -296,6 +338,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider1);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider1));
 
         assertThat(client.exchangeExists(exchangeName)).isTrue();
@@ -316,6 +359,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider2);
         serviceProviderRouter.syncServiceProviders(new HashSet<>(Arrays.asList(serviceProvider1, serviceProvider2)));
 
         assertThat(client.queueExists(queueName)).isTrue();
@@ -326,9 +370,18 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testDeliveryExchangesAreAutomaticallyAddedToQpidAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -352,9 +405,9 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 
-        OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider", OutgoingMatchStatus.SETUP_ENDPOINT);
-        when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Collections.singletonList(match));
-        when(outgoingMatchDiscoveryService.findMatchesFromDeliveryId(any())).thenReturn(Collections.singletonList(match));
+        OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider");
+        when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.singletonList(match));
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
 
         assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
@@ -364,9 +417,18 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     public void testDeliveryExchangeIsNotAutomaticallyAddedToQpidAfterRestart() {
         String exchangeName = "cap-" + UUID.randomUUID().toString();
 
-        Capability capability = new DenmCapability("NO12345", "NO", "1.2.2", new HashSet<>(Collections.singletonList("0123")),  new HashSet<>(Collections.singletonList("5")));
+        CapabilitySplit capability = new CapabilitySplit(
+                new DenmApplication(
+                        "NO12345",
+                        "pub-1",
+                        "NO",
+                        "1.2.2",
+                        new HashSet<>(Arrays.asList("0123")),
+                        new HashSet<>(Arrays.asList(5))
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
         capability.setCapabilityExchangeName(exchangeName);
-        capability.setRedirect(RedirectStatus.OPTIONAL);
 
         ServiceProvider serviceProvider = new ServiceProvider(
                 "my-service-provider",
@@ -390,8 +452,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         serviceProvider.setDeliveries(new HashSet<>(Collections.singleton(delivery)));
 
-        when(outgoingMatchDiscoveryService.findMatchesToSetupEndpointFor(any(String.class))).thenReturn(Collections.emptyList());
-        when(outgoingMatchDiscoveryService.findMatchesFromDeliveryId(any())).thenReturn(Collections.emptyList());
+        when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
 
         assertThat(client.exchangeExists(deliveryExchangeName)).isFalse();

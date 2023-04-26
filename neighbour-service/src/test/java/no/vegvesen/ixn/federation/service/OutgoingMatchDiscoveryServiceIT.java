@@ -1,6 +1,10 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -40,21 +44,28 @@ public class OutgoingMatchDiscoveryServiceIT {
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-        Capability cap1 = new DenmCapability(
-                "NPRA",
-                "NO",
-                "1.0",
-                Collections.singleton("1234"),
-                Collections.singleton("6")
+        CapabilitySplit cap1 = new CapabilitySplit(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singleton("1234"),
+                        Collections.singleton(6)
+                ),
+                new Metadata()
         );
-        cap1.setStatus(CapabilityStatus.CREATED);
 
-        Capability cap2 = new DenmCapability(
-                "NPRA",
-                "SE",
-                "1.0",
-                Collections.singleton("1234"),
-                Collections.singleton("5")
+        CapabilitySplit cap2 = new CapabilitySplit(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "SE",
+                        "DENM:1.2.2",
+                        Collections.singleton("1234"),
+                        Collections.singleton(5)
+                ),
+                new Metadata()
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -79,21 +90,29 @@ public class OutgoingMatchDiscoveryServiceIT {
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-        Capability cap1 = new DenmCapability(
-                "NPRA",
-                "NO",
-                "1.0",
-                Collections.singleton("1234"),
-                Collections.singleton("6")
+        CapabilitySplit cap1 = new CapabilitySplit(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singleton("1234"),
+                        Collections.singleton(6)
+                ),
+                new Metadata()
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
-        Capability cap2 = new DenmCapability(
-                "NPRA",
-                "SE",
-                "1.0",
-                Collections.singleton("1234"),
-                Collections.singleton("5")
+        CapabilitySplit cap2 = new CapabilitySplit(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "SE",
+                        "DENM:1.2.2",
+                        Collections.singleton("1234"),
+                        Collections.singleton(5)
+                ),
+                new Metadata()
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 
@@ -118,21 +137,29 @@ public class OutgoingMatchDiscoveryServiceIT {
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 
-        Capability cap1 = new DenmCapability(
-                "NPRA",
-                "NO",
-                "1.0",
-                Collections.singleton("1234"),
-                Collections.singleton("6")
+        CapabilitySplit cap1 = new CapabilitySplit(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "DENM:1.2.2",
+                        Collections.singleton("1234"),
+                        Collections.singleton(6)
+                ),
+                new Metadata()
         );
         cap1.setStatus(CapabilityStatus.CREATED);
 
-        Capability cap2 = new DenmCapability(
-                "NPRA",
-                "SE",
-                "1.0",
-                Collections.singleton("1234"),
-                Collections.singleton("5")
+        CapabilitySplit cap2 = new CapabilitySplit(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "SE",
+                        "DENM:1.2.2",
+                        Collections.singleton("1234"),
+                        Collections.singleton(5)
+                ),
+                new Metadata()
         );
         cap2.setStatus(CapabilityStatus.CREATED);
 

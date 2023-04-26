@@ -1,10 +1,11 @@
 package no.vegvesen.ixn.federation.discoverer.facade;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.federation.transformer.SubscriptionRequestTransformer;
@@ -46,13 +47,13 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 
 
 	@Override
-	public Set<Capability> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities) {
+	public Set<CapabilitySplit> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<CapabilitySplit> localCapabilities) {
 		String controlChannelUrl = neighbour.getControlChannelUrl(CAPABILITIES_PATH);
 		String name = neighbour.getName();
 		logger.info("Posting capabilities to {} on URL: {}", name, controlChannelUrl);
-		CapabilitiesApi selfCapability = capabilitiesTransformer.selfToCapabilityApi(selfName, localCapabilities);
-		CapabilitiesApi result = neighbourRESTClient.doPostCapabilities(controlChannelUrl, name, selfCapability);
-		return capabilityTransformer.capabilitiesApiToCapabilities(result.getCapabilities());
+		CapabilitiesSplitApi selfCapability = capabilitiesTransformer.selfToCapabilityApi(selfName, localCapabilities);
+		CapabilitiesSplitApi result = neighbourRESTClient.doPostCapabilities(controlChannelUrl, name, selfCapability);
+		return capabilityTransformer.capabilitiesSplitApiToCapabilitiesSplit(result.getCapabilities());
 	}
 
 	@Override

@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Match;
-import no.vegvesen.ixn.federation.model.MatchStatus;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -13,8 +11,6 @@ import java.util.List;
 public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     List<Match> findAll();
-
-    List<Match> findAllByStatus(MatchStatus status);
 
     List<Match> findAllBySubscriptionId(Integer subscriptionId);
 
@@ -27,8 +23,4 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     List<Match> findAllBySubscription_SubscriptionStatusIn(SubscriptionStatus... subscription_subscriptionStatus);
 
     List<Match> findBySubscription_ExchangeName(String exchangeName);
-
-    List<Match> findAllByServiceProviderNameAndStatus(String serviceProviderName, MatchStatus status);
-
-    List<Match> findAllByServiceProviderName(String serviceProviderName);
 }

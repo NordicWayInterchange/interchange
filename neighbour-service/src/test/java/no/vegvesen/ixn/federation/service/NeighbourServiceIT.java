@@ -1,8 +1,13 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DenmApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.transformer.SubscriptionTransformer;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -214,19 +219,22 @@ public class NeighbourServiceIT {
         String name = "neighbour-with-incoming-capabilities-twice";
         neighbour.setName(name);
         repository.save(neighbour);
-        CapabilitiesApi capabilitiesApi = new CapabilitiesApi(
+        CapabilitiesSplitApi capabilitiesApi = new CapabilitiesSplitApi(
                 name,
                 Collections.singleton(
-                        new DenmCapabilityApi(
+                        new CapabilitySplitApi(
+                            new DenmApplicationApi(
                                 "NO-123",
+                                "pub-1",
                                 "NO",
                                 "1.0",
                                 Collections.emptySet(),
-                                Collections.singleton("1")
-                        )
-                )
+                                Collections.singleton(1)
+                            ),
+                            new MetadataApi()
+                ))
         );
-        Set<Capability> localCapabilities = Collections.emptySet();
+        Set<CapabilitySplit> localCapabilities = Collections.emptySet();
         service.incomingCapabilities(capabilitiesApi, localCapabilities);
         assertThat(repository.findByName(name).getCapabilities().getCapabilities()).hasSize(1);
         //Now, try again, with the same capabilties, to simulate double post.

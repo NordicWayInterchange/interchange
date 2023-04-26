@@ -2,10 +2,7 @@ package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
-import no.vegvesen.ixn.federation.model.Match;
-import no.vegvesen.ixn.federation.model.MatchStatus;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,20 +19,17 @@ public class MessageCollector {
     private final CollectorCreator collectorCreator;
     private GracefulBackoffProperties backoffProperties;
     private ListenerEndpointRepository listenerEndpointRepository;
-    private MatchDiscoveryService matchDiscoveryService;
-
     //NOTE: This is implicitly thread safe. If more than one thread can access the listeners map, the implementation of the listener Map will have to change.
     private Map<ListenerEndpoint, MessageCollectorListener> listeners;
     private Logger logger = LoggerFactory.getLogger(MessageCollector.class);
 
 
     @Autowired
-    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties, MatchDiscoveryService matchDiscoveryService) {
+    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties) {
         this.listenerEndpointRepository = listenerEndpointRepository;
         this.collectorCreator = collectorCreator;
         this.listeners = new HashMap<>();
         this.backoffProperties = backoffProperties;
-        this.matchDiscoveryService = matchDiscoveryService;
     }
 
     @Scheduled(fixedRateString = "${collector.fixeddelay}")
@@ -43,7 +37,6 @@ public class MessageCollector {
         checkListenerList();
         setupConnectionsToNewNeighbours();
     }
-
 
     private void checkListenerList() {
         Set<ListenerEndpoint> listenerEndpoints = listeners.keySet();
@@ -54,7 +47,6 @@ public class MessageCollector {
                 logger.info("Removed stopped listener {} with host {} and port {}", listenerEndpoint.getNeighbourName(), listenerEndpoint.getHost(), listenerEndpoint.getPort());
             }
         }
-
     }
 
     public void setupConnectionsToNewNeighbours() {
@@ -63,67 +55,30 @@ public class MessageCollector {
 
         for (ListenerEndpoint listenerEndpoint : listenerEndpoints) {
             String neighbourName = listenerEndpoint.getNeighbourName();
+            String hostName = listenerEndpoint.getHost();
             interchangeListenerEndpoints.add(listenerEndpoint);
             if (!listeners.containsKey(listenerEndpoint)) {
-                List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName()).stream()
-                        .filter(m -> m.getStatus().equals(MatchStatus.SETUP_ENDPOINT))
-                        .collect(Collectors.toList());
-                if (!matches.isEmpty()) {
-                    setUpConnectionToNeighbour(listenerEndpoint);
-                }
-                for (Match match : matches) {
-                    matchDiscoveryService.updateMatchToUp(match);
-                }
+                setUpConnectionToNeighbour(listenerEndpoint);
             }
             else {
                 if (listeners.get(listenerEndpoint).isRunning()) {
-                    List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName()).stream()
-                            .filter(m -> m.getStatus().equals(MatchStatus.SETUP_ENDPOINT))
-                            .collect(Collectors.toList());
-                    for (Match match : matches) {
-                        matchDiscoveryService.updateMatchToUp(match);
-                    }
-                    logger.debug("Listener for {} with host {} and port {} is still running with no changes", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
+                    logger.debug("Listener for {} with host {} is still running with no changes", neighbourName, hostName);
                 } else {
-                    logger.debug("Non-running listener detected, name {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
+                    logger.debug("Non-running listener detected, name {} with host {}", neighbourName, hostName);
                 }
             }
-
         }
 
         List<ListenerEndpoint> listenerKeysToRemove = new ArrayList<>();
-        List<Match> tearDownEndpointMatches = matchDiscoveryService.findMatchesToTearDownEndpointsFor();
-        //Removing matches that has not been properly removed
-        Set<String> listenerEndpointExchanges = listeners.keySet().stream().map(ListenerEndpoint::getExchangeName).collect(Collectors.toSet());
-        for (Match match : tearDownEndpointMatches) {
-            if (!listenerEndpointExchanges.contains(match.getSubscription().getExchangeName())) {
-                matchDiscoveryService.updateMatchToTearDownExchange(match);
-            }
-        }
 
         for (ListenerEndpoint listenerEndpoint : listeners.keySet()) {
             if (!interchangeListenerEndpoints.contains(listenerEndpoint)) {
-                List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName()).stream()
-                        .filter(m -> m.getStatus().equals(MatchStatus.TEARDOWN_ENDPOINT))
-                        .collect(Collectors.toList());
-
                 String neighbourName = listenerEndpoint.getNeighbourName();
                 logger.info("Listener for {} with host {} and port {} is now being removed", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 MessageCollectorListener toRemove = listeners.get(listenerEndpoint);
                 logger.debug("Tearing down listener for {} with host {} and port {}", neighbourName, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 toRemove.teardown();
                 listenerKeysToRemove.add(listenerEndpoint);
-
-                for (Match match : matches) {
-                    matchDiscoveryService.updateMatchToTearDownExchange(match);
-                }
-            } else {
-                List<Match> matches = matchDiscoveryService.findMatchesByExchangeName(listenerEndpoint.getExchangeName()).stream()
-                        .filter(m -> m.getStatus().equals(MatchStatus.TEARDOWN_ENDPOINT))
-                        .collect(Collectors.toList());
-                for (Match match : matches) {
-                    matchDiscoveryService.updateMatchToTearDownExchange(match);
-                }
             }
         }
 

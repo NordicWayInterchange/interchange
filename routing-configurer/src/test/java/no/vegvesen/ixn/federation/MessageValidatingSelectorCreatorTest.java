@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation;
 
-import no.vegvesen.ixn.federation.model.DatexCapability;
-import no.vegvesen.ixn.federation.model.DenmCapability;
-import no.vegvesen.ixn.federation.model.IvimCapability;
+import no.vegvesen.ixn.federation.model.capability.*;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -14,17 +12,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MessageValidatingSelectorCreatorTest {
     @Test
     public void testCreatingDENMValidator() {
-        String selector = MessageValidatingSelectorCreator.makeSelector(new DenmCapability(
-                "NO-123",
-                "NO",
-                "1.0",
-                new HashSet<>(Arrays.asList("123","122")),
-                Collections.singleton("6")
-        ));
+        String selector = MessageValidatingSelectorCreator.makeSelector(
+                new CapabilitySplit(
+                        new DenmApplication(
+                                "NO-123",
+                                "pub-1",
+                                "NO",
+                                "DENM:1.2.2",
+                                new HashSet<>(Arrays.asList("123","122")),
+                                Collections.singleton(6)
+                        ),
+                        new Metadata()
+                )
+        );
         assertThat(selector).contains("publisherId = 'NO-123'");
         assertThat(selector).contains("messageType = 'DENM'");
         assertThat(selector).contains("originatingCountry = 'NO'");
-        assertThat(selector).contains("protocolVersion = '1.0'");
+        assertThat(selector).contains("protocolVersion = 'DENM:1.2.2'");
         assertThat(selector).contains("quadTree like");
         assertThat(selector).contains("causeCode =");
         System.out.println(selector);
@@ -32,31 +36,39 @@ public class MessageValidatingSelectorCreatorTest {
 
     @Test
     public void createIviMessageValidator() {
-        String selector = MessageValidatingSelectorCreator.makeSelector(new IvimCapability(
-                "NO-123",
-                "NO",
-                "1.0",
-                new HashSet<>(Arrays.asList("122,123")),
-               new HashSet<>(Arrays.asList("5","6"))
-        ));
+        String selector = MessageValidatingSelectorCreator.makeSelector(
+                new CapabilitySplit(
+                        new IvimApplication(
+                                "NO-123",
+                                "pub-1",
+                                "NO",
+                                "1.0",
+                                new HashSet<>(Arrays.asList("122,123"))
+                        ),
+                        new Metadata()
+                )
+        );
         assertThat(selector).contains("messageType = 'IVIM'");
         assertThat(selector).contains("publisherId = 'NO-123'");
         assertThat(selector).contains("originatingCountry = 'NO'");
         assertThat(selector).contains("protocolVersion = '1.0'");
         assertThat(selector).contains("quadTree like");
-        assertThat(selector).contains("iviType like ");
         System.out.println(selector);
     }
 
     @Test
     public void createDatexMessageValidator() {
         String selector = MessageValidatingSelectorCreator.makeSelector(
-                new DatexCapability(
-                        "NO-123",
-                        "NO",
-                        "1.0",
-                        new HashSet<>(Arrays.asList("1")),
-                        new HashSet<>(Arrays.asList("Weather","OtherStuff"))
+                new CapabilitySplit(
+                        new DatexApplication(
+                                "NO-123",
+                                "pub-1",
+                                "NO",
+                                "1.0",
+                                new HashSet<>(Arrays.asList("1")),
+                                "Weather"
+                        ),
+                        new Metadata()
                 )
         );
         assertThat(selector).contains("messageType = 'DATEX2'");

@@ -1,17 +1,25 @@
-{
-  "messageType": "DATEX2",
-  "publisherId": "SE-12345",
-  "publisherName": "Some Swedish publisher",
-  "originatingCountry": "SE",
-  "protocolVersion": "DATEX2:2.3",
-  "contentType": "application/xml",
-  "quadTree": [
-    "01230122",
-    "01230123"
-  ],
-  "publicationType": "SituationPublication",
-  "publicationSubType": [
-    "WinterDrivingManagement",
-    "ReroutingManagement"
-  ]
+{	"name" : "king_olav",
+  "version" : "1.0",
+  "capabilities" : [ {
+    "application" : {
+      "messageType" : "DATEX",
+      "publisherId" : "SE12345",
+      "publicationId" : "SE12345-pub-1",
+      "originatingCountry" : "SE",
+      "protocolVersion" : "DENM:1.2.2",
+      "quadTree" : [
+        "01230122",
+        "01230123"
+      ],
+      "publicationType": "SituationPublication"
+    },
+    "metadata" : {
+      "shardCount" : 1,
+      "infoUrl" : "https://king_olav.info.no",
+      "redirectPolicy" : "OPTIONAL",
+      "maxBandwidth" : 0,
+      "maxMessageRate" : 0,
+      "repetitionInterval" : 0
+    }
+  }]
 }

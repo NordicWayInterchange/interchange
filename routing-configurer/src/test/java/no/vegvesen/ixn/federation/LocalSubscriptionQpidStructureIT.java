@@ -10,13 +10,11 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import no.vegvesen.ixn.ssl.KeystoreDetails;
-import no.vegvesen.ixn.ssl.KeystoreType;
-import no.vegvesen.ixn.ssl.SSLContextFactory;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +35,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {
         QpidClient.class,
@@ -87,10 +87,10 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
     ServiceProviderRepository serviceProviderRepository;
 
     @MockBean
-    MatchDiscoveryService matchDiscoveryService;
+    MatchRepository matchRepository;
 
     @MockBean
-    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+    OutgoingMatchRepository outgoingMatchRepository;
 
     @Autowired
     ServiceProviderRouter router;
@@ -112,6 +112,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 ),
                 Collections.emptySet(),
                 LocalDateTime.now());
+        when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
         router.syncServiceProviders(Collections.singleton(serviceProvider));
         LocalEndpoint actualEndpoint = null;
         for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {

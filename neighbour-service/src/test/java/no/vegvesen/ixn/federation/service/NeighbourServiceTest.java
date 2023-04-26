@@ -1,12 +1,19 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesSplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
@@ -36,8 +43,6 @@ class NeighbourServiceTest {
 	DNSFacade dnsFacade;
 	@Mock
 	NeighbourFacade neighbourFacade;
-	@Mock
-	MatchRepository matchRepository;
 
 	private NeighbourDiscovererProperties discovererProperties = new NeighbourDiscovererProperties();
 	private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
@@ -50,7 +55,7 @@ class NeighbourServiceTest {
 	void setUp() {
 		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
 		neighbourService = new NeighbourService(neighbourRepository, dnsFacade,interchangeNodeProperties);
-		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository,interchangeNodeProperties,backoffProperties,discovererProperties, matchRepository);
+		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository,interchangeNodeProperties,backoffProperties,discovererProperties);
 	}
 
 	@Test
@@ -61,9 +66,9 @@ class NeighbourServiceTest {
 
 	@Test
 	void postDatexDataTypeCapability() {
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilityApi ericssonDataType = new DatexCapabilityApi("myPublisherId", "NO", null, Sets.newSet(), Sets.newSet("myPublicationType"));
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("myPublisherId", "pub-1", "NO", null, Sets.newSet(), "myPublicationType"), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -71,7 +76,7 @@ class NeighbourServiceTest {
 		ericssonNeighbour.setName("ericsson");
 		doReturn(Lists.list(ericssonNeighbour)).when(dnsFacade).lookupNeighbours();
 
-        CapabilitiesApi response = neighbourService.incomingCapabilities(ericsson, Collections.emptySet());
+        CapabilitiesSplitApi response = neighbourService.incomingCapabilities(ericsson, Collections.emptySet());
 
 		verify(dnsFacade, times(1)).lookupNeighbours();
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
@@ -100,9 +105,9 @@ class NeighbourServiceTest {
 	@Test
 	void postingDatexCapabilitiesReturnsStatusCreated() {
 		// incoming capabiity API
-		CapabilitiesApi ericsson = new CapabilitiesApi();
+		CapabilitiesSplitApi ericsson = new CapabilitiesSplitApi();
 		ericsson.setName("ericsson");
-		CapabilityApi ericssonDataType = new DatexCapabilityApi("NO");
+		CapabilitySplitApi ericssonDataType = new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", Collections.emptySet(), ""), new MetadataApi());
 		ericsson.setCapabilities(Collections.singleton(ericssonDataType));
 
 		// Mock dns lookup
@@ -118,9 +123,9 @@ class NeighbourServiceTest {
 	@Test
 	public void postingCapabilitiesUnknownInDNSReturnsError() {
 		// Mock the incoming API object.
-		CapabilitiesApi unknownNeighbour = new CapabilitiesApi();
+		CapabilitiesSplitApi unknownNeighbour = new CapabilitiesSplitApi();
 		unknownNeighbour.setName("unknownNeighbour");
-		unknownNeighbour.setCapabilities(Collections.singleton(new DatexCapabilityApi("NO")));
+		unknownNeighbour.setCapabilities(Collections.singleton(new CapabilitySplitApi(new DatexApplicationApi("", "", "NO", "", Collections.emptySet(), ""), new MetadataApi())));
 
 		Neighbour ericssonNeighbour = new Neighbour();
 		ericssonNeighbour.setName("ericsson");
@@ -309,30 +314,6 @@ class NeighbourServiceTest {
 	}
 
 	@Test
-	public void listenerEndpointsAreSavedFromEndpointsList() {
-		Neighbour neighbour = new Neighbour();
-		neighbour.setName("my-neighbour");
-
-		Endpoint endpoint1 = new Endpoint("my-source-1", "host-1", 5671);
-		Endpoint endpoint2 = new Endpoint("my-source-2", "host-2", 5671);
-
-		Set<Endpoint> endpoints = new HashSet<>(Sets.newSet(endpoint1, endpoint2));
-
-		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "host-1", 5671, "my-source-1")).thenReturn(null);
-		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "host-2", 5671, "my-source-2")).thenReturn(null);
-
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "host-1", 5671, new Connection());
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "host-2", 5671, new Connection());
-
-		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
-		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
-
-		neigbourDiscoveryService.createListenerEndpointFromEndpointsList(neighbour, endpoints, "");
-
-		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
-	}
-
-	@Test
 	public void listenerEndpointsAreRemovedFromEndpointsList() {
 		Neighbour neighbour = new Neighbour();
 		neighbour.setName("my-neighbour");
@@ -351,14 +332,13 @@ class NeighbourServiceTest {
 		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "my-endpoint-1", 5671, "my-source-1")).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "my-endpoint-2", 5671, "my-source-2")).thenReturn(listenerEndpoint2);
 
-		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbour, subscription, endpoints);
+		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbour, endpoints);
 
 		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
-		assertThat(subscription.getEndpoints()).isEmpty();
 	}
 
-	private Capability getDatexCapability(String country) {
-		return new DatexCapability(null, country, null, null, RedirectStatus.OPTIONAL, null);
+	private CapabilitySplit getDatexCapability(String country) {
+		return new CapabilitySplit(new DatexApplication(country + "-123", country + "-pub", country, "1.0", Collections.emptySet(), "SituationPublication"), new Metadata(RedirectStatus.OPTIONAL));
 	}
 
 }

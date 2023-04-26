@@ -2,13 +2,17 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class OutgoingMatchDiscoveryService {
@@ -30,15 +34,13 @@ public class OutgoingMatchDiscoveryService {
                         if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
                                 || delivery.getStatus().equals(LocalDeliveryStatus.CREATED)
                                 || delivery.getStatus().equals(LocalDeliveryStatus.NO_OVERLAP)) {
-                            for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
+                            Set<CapabilitySplit> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(serviceProvider.getCapabilities().getCapabilities(), delivery.getSelector());
+                            for (CapabilitySplit capability : matchingCapabilities) {
                                 if (repository.findByCapability_IdAndLocalDelivery_Id(capability.getId(), delivery.getId()) == null) {
                                     if (capability.getStatus().equals(CapabilityStatus.CREATED)) {
-                                        boolean match = CapabilityMatcher.matchCapabilityToSelector(capability, delivery.getSelector());
-                                        if (match) {
-                                            OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName(), OutgoingMatchStatus.SETUP_ENDPOINT);
-                                            logger.info("Delivery with id {} saved with status CREATED", delivery.getId());
-                                            repository.save(outgoingMatch);
-                                        }
+                                        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, capability, serviceProvider.getName());
+                                        logger.info("Match saved for delivery with id {}", delivery.getId());
+                                        repository.save(outgoingMatch);
                                     }
                                 }
                             }
@@ -49,67 +51,18 @@ public class OutgoingMatchDiscoveryService {
         }
     }
 
-    public List<OutgoingMatch> findMatchesToSetupEndpointFor(String serviceProviderName) {
-        return repository.findAllByServiceProviderNameAndStatus(serviceProviderName, OutgoingMatchStatus.SETUP_ENDPOINT);
-    }
-
-    public List<OutgoingMatch> findMatchesToTearDownEndpointsFor(String serviceProviderName) {
-        return repository.findAllByServiceProviderNameAndStatus(serviceProviderName, OutgoingMatchStatus.TEARDOWN_ENDPOINT);
-    }
-
-    public List<OutgoingMatch> findMatchesWithNewEndpoints(String serviceProviderName, Integer deliveryId) {
-        return repository.findAllByServiceProviderNameAndLocalDelivery_IdAndStatus(serviceProviderName, deliveryId, OutgoingMatchStatus.UP);
-    }
-
-    public OutgoingMatch findMatchFromDeliveryId(Integer deliveryId) {
-        return repository.findByLocalDelivery_Id(deliveryId);
-    }
-
-    public List<OutgoingMatch> findMatchesFromDeliveryId(Integer deliveryId) {
-        return repository.findAllByLocalDelivery_Id(deliveryId);
-    }
-
-    public List<OutgoingMatch> findByDeliveryQueueName(String deliveryExchangeName) {
-        return repository.findAllByLocalDelivery_ExchangeName(deliveryExchangeName);
-    }
-
-    public List<OutgoingMatch> findMatchesFromCapabilityId(Integer capabilityId) {
-        return repository.findAllByCapability_Id(capabilityId);
-    }
-
-    public void updateOutgoingMatchToUp(OutgoingMatch match) {
-        match.setStatus(OutgoingMatchStatus.UP);
-        logger.info("Saving match {} with status UP", match);
-        repository.save(match);
-    }
-
-    public void syncLocalSubscriptionAndSubscriptionsToTearDownOutgoingMatchResources() {
-        List<OutgoingMatch> matches = repository.findAllByStatus(OutgoingMatchStatus.UP);
-        for (OutgoingMatch match : matches) {
-            if(match.getCapability().getStatus().equals(CapabilityStatus.TEAR_DOWN) ||
-                match.getLocalDelivery().getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
-                match.setStatus(OutgoingMatchStatus.TEARDOWN_ENDPOINT);
-                repository.save(match);
-                logger.info("Saved match {} with status TEARDOWN_ENDPOINT", match);
+    public void syncOutgoingMatchesToDelete() {
+        List<OutgoingMatch> existingMatches = repository.findAll();
+        Set<OutgoingMatch> matchesToDelete = new HashSet<>();
+        for (OutgoingMatch match : existingMatches) {
+            if (match.capabilityIsTearDown()) {
+                logger.info("Removing OutgoingMatch {}", match);
+                matchesToDelete.add(match);
+            } else if (match.deliveryIsTearDown()) {
+                logger.info("Removing OutgoingMatch {}", match);
+                matchesToDelete.add(match);
             }
         }
-    }
-
-    public void updateOutgoingMatchToDeleted(OutgoingMatch match) {
-        match.setStatus(OutgoingMatchStatus.DELETED);
-        repository.save(match);
-        logger.info("Saved match {} with status DELETED", match);
-    }
-
-    public void removeMatchesThatAreDeleted() {
-        List<OutgoingMatch> matchesToRemove = repository.findAllByStatus(OutgoingMatchStatus.DELETED);
-        if (!matchesToRemove.isEmpty()) {
-            repository.deleteAll(matchesToRemove);
-            logger.info("Removed deleted OutgoingMatches");
-        }
-    }
-
-    public OutgoingMatch findByOutgoingMatchId(Integer id) {
-        return repository.findById(id).get();
+        repository.deleteAll(matchesToDelete);
     }
 }

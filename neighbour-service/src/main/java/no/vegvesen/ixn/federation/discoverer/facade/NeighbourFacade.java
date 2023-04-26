@@ -1,11 +1,12 @@
 package no.vegvesen.ixn.federation.discoverer.facade;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 
 import java.util.Set;
 
 public interface NeighbourFacade {
-	Set<Capability> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities);
+	Set<CapabilitySplit> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<CapabilitySplit> localCapabilities);
 
 	Set<Subscription> postSubscriptionRequest(Neighbour neighbour, Set<Subscription> subscriptions, String selfName);
 

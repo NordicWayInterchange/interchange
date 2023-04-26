@@ -1,8 +1,14 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -48,10 +54,13 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testDeletingCapability() {
-        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
         String serviceProviderName = "serviceprovider";
 
-        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
                 serviceProviderName,
                 Collections.singleton(datexNO)
@@ -74,10 +83,13 @@ public class OnboardRestControllerIT {
 
     @Test
     public void testGettingCapability() {
-        DatexCapabilityApi datexNO = new DatexCapabilityApi("NO");
+        DatexApplicationApi app = new DatexApplicationApi("NO-123", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication");
+        MetadataApi meta = new MetadataApi(RedirectStatusApi.OPTIONAL);
+        CapabilitySplitApi datexNO = new CapabilitySplitApi();
+        datexNO.setApplication(app);
+        datexNO.setMetadata(meta);
         String serviceProviderName = "serviceprovider";
 
-        //LocalCapability addedCapability = restController.addCapabilities(serviceProviderName, datexNO);
         AddCapabilitiesResponse addedCapability = restController.addCapabilities(serviceProviderName, new AddCapabilitiesRequest(
                 serviceProviderName,
                 Collections.singleton(datexNO)
@@ -281,35 +293,44 @@ public class OnboardRestControllerIT {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "NPRA",
+                        "pub-1",
                         "NO",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "SPRA",
+                        "pub-2",
                         "SE",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "DPRA",
+                        "pub-3",
                         "DK",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
@@ -328,24 +349,30 @@ public class OnboardRestControllerIT {
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "SPRA",
+                        "pub-1",
                         "SE",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
                         "DPRA",
+                        "pub-2",
                         "DK",
                         "1.0",
                         Collections.singleton("1234"),
-                        Collections.singleton("6")
+                        Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(1);
@@ -362,35 +389,44 @@ public class OnboardRestControllerIT {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "NPRA",
-                        "NO",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "NPRA",
+                                "pub-1",
+                                "NO",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "SPRA",
-                        "SE",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "SPRA",
+                                "pub-2",
+                                "SE",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "DPRA",
-                        "DK",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "DPRA",
+                                "pub-3",
+                                "DK",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
@@ -409,35 +445,44 @@ public class OnboardRestControllerIT {
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         serviceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "NPRA",
-                        "NO",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "NPRA",
+                                "pub-1",
+                                "NO",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(serviceProvider);
         ServiceProvider otherServiceProvider = new ServiceProvider();
         otherServiceProvider.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "SPRA",
-                        "SE",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "SPRA",
+                                "pub-2",
+                                "SE",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         serviceProviderRepository.save(otherServiceProvider);
 
         Neighbour neighbour = new Neighbour();
         neighbour.setCapabilities(new Capabilities(
                 Capabilities.CapabilitiesStatus.KNOWN,
-                Collections.singleton(new DenmCapability(
-                        "DPRA",
-                        "DK",
-                        "1.0",
-                        Collections.singleton("1234"),
-                        Collections.singleton("6")
+                Collections.singleton(new CapabilitySplit(
+                        new DenmApplication(
+                                "DPRA",
+                                "pub-3",
+                                "DK",
+                                "1.0",
+                                Collections.singleton("1234"),
+                                Collections.singleton(6)),
+                        new Metadata(RedirectStatus.OPTIONAL)
                 ))));
         neighbourRepository.save(neighbour);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);

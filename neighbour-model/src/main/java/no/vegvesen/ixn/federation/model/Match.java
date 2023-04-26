@@ -18,26 +18,21 @@ public class Match {
     @JoinColumn(name = "sub", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_match_subscription"))
     private Subscription subscription;
 
-    @Enumerated(EnumType.STRING)
-    private MatchStatus status;
-
     private String serviceProviderName;
 
     public Match() {
 
     }
 
-    public Match(LocalSubscription localSubscription, Subscription subscription, MatchStatus status) {
+    public Match(LocalSubscription localSubscription, Subscription subscription) {
         this.localSubscription = localSubscription;
         this.subscription = subscription;
-        this.status = status;
     }
 
-    public Match(LocalSubscription localSubscription, Subscription subscription, String serviceProviderName, MatchStatus status) {
+    public Match(LocalSubscription localSubscription, Subscription subscription, String serviceProviderName) {
         this.localSubscription = localSubscription;
         this.subscription = subscription;
         this.serviceProviderName = serviceProviderName;
-        this.status = status;
     }
 
     public LocalSubscription getLocalSubscription() {
@@ -56,20 +51,20 @@ public class Match {
         this.subscription = subscription;
     }
 
-    public MatchStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(MatchStatus status) {
-        this.status = status;
-    }
-
     public String getServiceProviderName() {
         return serviceProviderName;
     }
 
     public void setServiceProviderName(String serviceProviderName) {
         this.serviceProviderName = serviceProviderName;
+    }
+
+    public boolean subscriptionIsTearDown() {
+        return !subscription.isSubscriptionWanted();
+    }
+
+    public boolean localSubscriptionIsTearDown() {
+        return !localSubscription.isSubscriptionWanted();
     }
 
     @Override

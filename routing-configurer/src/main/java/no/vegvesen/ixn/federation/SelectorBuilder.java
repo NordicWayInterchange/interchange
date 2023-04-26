@@ -152,13 +152,16 @@ public class SelectorBuilder {
 		return this;
 	}
 
-	public SelectorBuilder causeCodes(Set<String> causeCodes) {
-		values.put(MessageProperty.CAUSE_CODE.getName(), String.join(",",causeCodes));
+	public SelectorBuilder causeCodes(Set<Integer> causeCodes) {
+		String strings = causeCodes.stream()
+				.map(n -> String.valueOf(n))
+				.collect(Collectors.joining(","));
+		values.put(MessageProperty.CAUSE_CODE.getName(), strings);
 		return this;
 	}
 
-	public SelectorBuilder publicationTypes(Set<String> publicationTypes) {
-		values.put(MessageProperty.PUBLICATION_TYPE.getName(), String.join(",",publicationTypes));
+	public SelectorBuilder publicationTypes(String publicationType) {
+		values.put(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
 		return this;
 	}
 }

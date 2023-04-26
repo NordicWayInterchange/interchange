@@ -1,7 +1,8 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
@@ -12,34 +13,35 @@ import java.util.*;
 
 public class TypeTransformer {
 
-    public static AddCapabilitiesResponse addCapabilitiesResponse(String serviceProviderName, Set<Capability> capabilities) {
+    public static AddCapabilitiesResponse addCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<CapabilitySplit> capabilities) {
         return new AddCapabilitiesResponse(
                serviceProviderName,
-               capabilitySetToLocalActorCapability(serviceProviderName,capabilities)
+               capabilitySetToLocalActorCapability(capabilityApiTransformer, serviceProviderName,capabilities)
         );
     }
 
-    private static Set<LocalActorCapability> capabilitySetToLocalActorCapability(String serviceProviderName, Set<Capability> capabilities) {
+    private static Set<LocalActorCapability> capabilitySetToLocalActorCapability(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<CapabilitySplit> capabilities) {
         Set<LocalActorCapability> result = new HashSet<>();
-        for (Capability capability : capabilities) {
-            result.add(capabilityToLocalCapability(serviceProviderName,capability));
+        for (CapabilitySplit capability : capabilities) {
+            result.add(capabilityToLocalCapability(capabilityApiTransformer, serviceProviderName,capability));
         }
         return result;
     }
 
-    private static LocalActorCapability capabilityToLocalCapability(String serviceProviderName, Capability capability) {
+    private static LocalActorCapability capabilityToLocalCapability(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, CapabilitySplit capability) {
         String id = capability.getId().toString();
         return new LocalActorCapability(
                 id,
                 createCapabilitiesPath(serviceProviderName, id),
-                capability.toApi());
+                capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability));
+
     }
 
 
-    public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(String serviceProviderName, String selector, Set<Capability> capabilities) {
+    public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, String selector, Set<CapabilitySplit> capabilities) {
         Set<FetchCapability> fetchCapabilities = new HashSet<>();
-        for (Capability capability : capabilities) {
-            fetchCapabilities.add(new FetchCapability(capability.toApi()));
+        for (CapabilitySplit capability : capabilities) {
+            fetchCapabilities.add(new FetchCapability(capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability)));
         }
         if (selector == null || selector.isEmpty()) {
             return new FetchMatchingCapabilitiesResponse(serviceProviderName, fetchCapabilities);
@@ -247,29 +249,29 @@ public class TypeTransformer {
         }
     }
 
-    public Set<Capability> capabilitiesRequestToCapabilities(CapabilityToCapabilityApiTransformer capabilityApiTransformer, AddCapabilitiesRequest capabilitiesRequest) {
-        Set<Capability> capabilities = new HashSet<>();
-        for (CapabilityApi capabilityApi : capabilitiesRequest.getCapabilities()) {
-            Capability capability = capabilityApiTransformer.capabilityApiToCapability(capabilityApi);
+    public Set<CapabilitySplit> capabilitiesRequestToCapabilities(CapabilityToCapabilityApiTransformer capabilityApiTransformer, AddCapabilitiesRequest capabilitiesRequest) {
+        Set<CapabilitySplit> capabilities = new HashSet<>();
+        for (CapabilitySplitApi capabilityApi : capabilitiesRequest.getCapabilities()) {
+            CapabilitySplit capability = capabilityApiTransformer.capabilitySplitApiToCapabilitySplit(capabilityApi);
             capabilities.add(capability);
 
         }
         return capabilities;
     }
 
-    public ListCapabilitiesResponse listCapabilitiesResponse(String serviceProviderName, Set<Capability> capabilities) {
+    public ListCapabilitiesResponse listCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<CapabilitySplit> capabilities) {
         return new ListCapabilitiesResponse(
                 serviceProviderName,
-                capabilitySetToLocalActorCapability(serviceProviderName,capabilities)
+                capabilitySetToLocalActorCapability(capabilityApiTransformer, serviceProviderName,capabilities)
         );
     }
 
-    public GetCapabilityResponse getCapabilityResponse(String serviceProviderName, Capability capability) {
+    public GetCapabilityResponse getCapabilityResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, CapabilitySplit capability) {
         String capabilityId = capability.getId().toString();
         return new GetCapabilityResponse(
                 capabilityId,
                 createCapabilitiesPath(serviceProviderName,capabilityId),
-                capability.toApi()
+                capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability)
         );
     }
 

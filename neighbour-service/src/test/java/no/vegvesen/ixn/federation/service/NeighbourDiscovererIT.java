@@ -1,12 +1,15 @@
 package no.vegvesen.ixn.federation.service;
 
 
-import no.vegvesen.ixn.federation.api.v1_0.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.DatexCapabilityApi;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
+import no.vegvesen.ixn.federation.model.capability.DatexApplication;
+import no.vegvesen.ixn.federation.model.capability.DenmApplication;
+import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.postgresinit.PostgresTestcontainerInitializer;
@@ -102,8 +105,8 @@ public class NeighbourDiscovererIT {
 		assertThat(toConsumeMessagesFrom).contains(neighbour1);
 	}
 
-	private Capability getDatexCapability(String originatingCountry) {
-		return new DatexCapability(null, originatingCountry, null, null, RedirectStatus.OPTIONAL,null);
+	private CapabilitySplit getDatexCapability(String originatingCountry) {
+		return new CapabilitySplit(new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", Collections.emptySet(),"SituationPublication"), new Metadata(RedirectStatus.OPTIONAL));
 	}
 
 	@Test
@@ -122,7 +125,7 @@ public class NeighbourDiscovererIT {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Sets.newLinkedHashSet(new DatexCapabilityApi("NO"))), Collections.emptySet());
+		neighbourService.incomingCapabilities(new CapabilitiesSplitApi("neighbour-one", Sets.newLinkedHashSet(new CapabilitySplitApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", Collections.emptySet(), "SituationPublication"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
 		List<Neighbour> toConsumeMessagesFrom = neighbourService.listNeighboursToConsumeMessagesFrom();
 		assertThat(toConsumeMessagesFrom).hasSize(1);
 	}
@@ -145,16 +148,17 @@ public class NeighbourDiscovererIT {
 				"neighour",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0001",
+										"pub-1",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now()
 				),
 				new NeighbourSubscriptionRequest(),
@@ -189,16 +193,17 @@ public class NeighbourDiscovererIT {
 				"neighour",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0001",
+										"pub-1",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now()
 				),
 				new NeighbourSubscriptionRequest(),
@@ -234,22 +239,27 @@ public class NeighbourDiscovererIT {
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Arrays.asList(
-								new DatexCapability(
-										"NO0001",
-										"NO",
-										"1.0",
-										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
+								new CapabilitySplit(
+										new DatexApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												""
+										),
+										new Metadata(RedirectStatus.OPTIONAL)
 								),
-								new DenmCapability(
-										"NO0001",
-										"NO",
-										"1.0",
-										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-2",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												Collections.emptySet()
+									),
+										new Metadata(RedirectStatus.OPTIONAL))
 						)),
 						LocalDateTime.now()
 				),
@@ -291,16 +301,17 @@ public class NeighbourDiscovererIT {
 				"neighour",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0001",
+										"pub-1",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now().minusHours(1)
 				),
 				new NeighbourSubscriptionRequest(),
@@ -343,16 +354,17 @@ public class NeighbourDiscovererIT {
 				"neighourA",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0001",
+										"pub-1",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now().minusHours(1)
 				),
 				new NeighbourSubscriptionRequest(),
@@ -363,16 +375,17 @@ public class NeighbourDiscovererIT {
 				"neighourB",
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
-						Collections.singleton(
-								new DatexCapability(
+						Collections.singleton(new CapabilitySplit(
+								new DatexApplication(
 										"NO0002",
+										"pub-2",
 										"NO",
 										"1.0",
 										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
-						),
+										""
+								),
+								new Metadata(RedirectStatus.OPTIONAL)
+						)),
 						LocalDateTime.now().minusHours(1)
 				),
 				new NeighbourSubscriptionRequest(),
@@ -416,14 +429,16 @@ public class NeighbourDiscovererIT {
 				new Capabilities(
 						Capabilities.CapabilitiesStatus.KNOWN,
 						new HashSet<>(Collections.singletonList(
-								new DenmCapability(
-										"NO0001",
-										"NO",
-										"1.0",
-										Collections.emptySet(),
-										RedirectStatus.OPTIONAL,
-										Collections.emptySet()
-								)
+								new CapabilitySplit(
+										new DenmApplication(
+												"NO0001",
+												"pub-1",
+												"NO",
+												"1.0",
+												Collections.emptySet(),
+												Collections.emptySet()
+										),
+										new Metadata(RedirectStatus.OPTIONAL))
 						)),
 						LocalDateTime.now()
 				),
