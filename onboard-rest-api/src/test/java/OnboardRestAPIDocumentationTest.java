@@ -331,17 +331,15 @@ public class OnboardRestAPIDocumentationTest {
         FetchMatchingCapabilitiesResponse response = new FetchMatchingCapabilitiesResponse(
                 "service-provider",
                 Collections.singleton(
-                        new FetchCapability(
-                                new CapabilitySplitApi(
-                                        new DenmApplicationApi(
-                                                "NPRA",
-                                                "pub-1",
-                                                "NO",
-                                                "1.0",
-                                                Collections.singleton("1234"),
-                                                Collections.singleton(6)
-                                        ), new MetadataApi())
-                        )
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NPRA",
+                                        "pub-1",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("1234"),
+                                        Collections.singleton(6)
+                                ), new MetadataApi())
                 )
         );
 
@@ -355,18 +353,17 @@ public class OnboardRestAPIDocumentationTest {
                 "service-provider",
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'",
                 Collections.singleton(
-                        new FetchCapability(
-                                new CapabilitySplitApi(
-                                        new DenmApplicationApi(
-                                                "NPRA",
-                                                "pub-1",
-                                                "NO",
-                                                "1.0",
-                                                Collections.singleton("1234"),
-                                                Collections.singleton(6)
-                                        ), new MetadataApi())
+                        new CapabilitySplitApi(
+                                new DenmApplicationApi(
+                                        "NPRA",
+                                        "pub-1",
+                                        "NO",
+                                        "1.0",
+                                        Collections.singleton("1234"),
+                                        Collections.singleton(6)
+                                ), new MetadataApi())
                         )
-                )
+
         );
 
         ObjectMapper mapper = new ObjectMapper();

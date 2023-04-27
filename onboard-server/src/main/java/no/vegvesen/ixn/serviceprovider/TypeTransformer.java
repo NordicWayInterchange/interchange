@@ -39,9 +39,9 @@ public class TypeTransformer {
 
 
     public FetchMatchingCapabilitiesResponse transformCapabilitiesToFetchMatchingCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, String selector, Set<CapabilitySplit> capabilities) {
-        Set<FetchCapability> fetchCapabilities = new HashSet<>();
+        Set<CapabilitySplitApi> fetchCapabilities = new HashSet<>();
         for (CapabilitySplit capability : capabilities) {
-            fetchCapabilities.add(new FetchCapability(capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability)));
+            fetchCapabilities.add(capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability));
         }
         if (selector == null || selector.isEmpty()) {
             return new FetchMatchingCapabilitiesResponse(serviceProviderName, fetchCapabilities);
