@@ -263,6 +263,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         }
         System.out.println(qpidClient.getQpidAcl().aclAsString());
         assertThat(numMessages.get()).isEqualTo(1);
+
+        //qpidClient.getAllQueues();
     }
 
     @Test

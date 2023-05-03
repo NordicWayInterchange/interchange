@@ -36,12 +36,18 @@ public class QpidClient {
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
 	private static final String ACL_RULE_PATTERN = "%s/api/latest/virtualhostaccesscontrolprovider/default/%s/default";
 
+	private static final String ALL_QUEUES_URL = "%s/api/latest/queue/default/";
+
+	private static final String ALL_EXCHANGES_URL = "%s/api/latest/exchange/default/";
+
 	private final String exchangesURL;
 	private final String queuesURL;
 	private final String pingURL;
 	private final String groupsUrl;
 	private final RestTemplate restTemplate;
 	private final String aclRulesUrl;
+
+	private final String allQueuesUrl;
 
 	public QpidClient(String baseUrl,
 					  String vhostName,
@@ -52,6 +58,7 @@ public class QpidClient {
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
 		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
 		this.restTemplate = restTemplate;
+		this.allQueuesUrl = String.format(ALL_QUEUES_URL, baseUrl, vhostName);
 	}
 
 	/**
@@ -340,6 +347,12 @@ public class QpidClient {
 		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
 		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
 		logger.info("Rules posted to qpid");
+	}
+
+	public void getAllQueues() {
+		ResponseEntity<String> allQueuesResponse = restTemplate.getForEntity(allQueuesUrl, String.class);
+		String allQueues = allQueuesResponse.getBody();
+		System.out.println(allQueues);
 	}
 
 }
