@@ -29,7 +29,7 @@ public class ServerCertGeneratorIT {
 
     @Test
     public void checkContainerOutput() {
-        Path chain = containerOutPath.resolve("chain.testserver.test2.no.crt.pem");
+        Path chain = generator.getCertOnHost();
         assertThat(chain).exists();
     }
 

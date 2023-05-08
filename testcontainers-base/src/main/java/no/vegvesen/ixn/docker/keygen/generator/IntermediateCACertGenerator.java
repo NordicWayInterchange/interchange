@@ -87,4 +87,8 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
         return targetPath.resolve(String.format("chain.%s.crt.pem",domainName));
     }
 
+    public CertChainAndKey getCertChainAndKeyOnHost() {
+        return new CertChainAndKey(getSingleCertOnHost(),getChainCertOnHost(),getIntermediateKeyOnHost());
+    }
+
 }

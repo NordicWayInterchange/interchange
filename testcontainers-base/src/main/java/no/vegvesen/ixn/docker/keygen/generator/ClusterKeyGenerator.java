@@ -62,8 +62,7 @@ public class ClusterKeyGenerator {
         return spCert;
     }
 
-    @NotNull
-    private static ServiceProviderCSRGenerator generateCsrForServiceProvider(Path outputFolder, ServicProviderDescription description) {
+    public static ServiceProviderCSRGenerator generateCsrForServiceProvider(Path outputFolder, ServicProviderDescription description) {
         ServiceProviderCSRGenerator spCsr = new ServiceProviderCSRGenerator(
                 outputFolder,
                 description.getName(),
@@ -97,8 +96,7 @@ public class ClusterKeyGenerator {
         keystoreGenerator.start();
     }
 
-    @NotNull
-    private static IntermediateCACertGenerator generateIntermediateCaCert(Path outputFolder, IntermediateDomain domain, Path csrOnHost, Path caCertOnHost, Path caKeyOnHost) {
+    public static IntermediateCACertGenerator generateIntermediateCaCert(Path outputFolder, IntermediateDomain domain, Path csrOnHost, Path caCertOnHost, Path caKeyOnHost) {
         IntermediateCACertGenerator certGenerator = new IntermediateCACertGenerator(
                 csrOnHost,
                 domain.getDomainName(),
@@ -111,8 +109,7 @@ public class ClusterKeyGenerator {
         return certGenerator;
     }
 
-    @NotNull
-    private static IntermediateCaCSRGenerator generateIntermediateCaCsr(Path outputFolder, IntermediateDomain domain) {
+    public static IntermediateCaCSRGenerator generateIntermediateCaCsr(Path outputFolder, IntermediateDomain domain) {
         IntermediateCaCSRGenerator csrGenerator = new IntermediateCaCSRGenerator(
                 outputFolder,
                 domain.getDomainName(),
@@ -122,7 +119,7 @@ public class ClusterKeyGenerator {
         return csrGenerator;
     }
 
-    private static void generateTrustore(Path caGenerator, String topDomainTrustStorePassword, Path outputFolder, String truststoreName) {
+    public static void generateTrustore(Path caGenerator, String topDomainTrustStorePassword, Path outputFolder, String truststoreName) {
         TruststoreGenerator topDomainTrustStoreGenerator = new TruststoreGenerator(
                 caGenerator,
                 topDomainTrustStorePassword, //For now
@@ -131,8 +128,7 @@ public class ClusterKeyGenerator {
         topDomainTrustStoreGenerator.start();
     }
 
-    @NotNull
-    private static RootCAKeyGenerator generateRootCA(Path outputFolder, TopDomain topDomain) {
+    public static RootCAKeyGenerator generateRootCA(Path outputFolder, TopDomain topDomain) {
         RootCAKeyGenerator caGenerator = new RootCAKeyGenerator(
                 outputFolder,
                 topDomain.getDomainName(),

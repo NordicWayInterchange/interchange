@@ -48,4 +48,9 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
         return keysFolder.resolve(String.format("ca.%s.crt.pem",caDomain));
     }
 
+
+    public CertKeyPair getCertKeyPairOnHost() {
+        return new CertKeyPair(getCaCertOnHost(),getCaKeyOnHost());
+    }
+
 }
