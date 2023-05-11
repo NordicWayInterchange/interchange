@@ -37,6 +37,10 @@ public class LocalDelivery {
     @Enumerated(EnumType.STRING)
     private LocalDeliveryStatus status = LocalDeliveryStatus.REQUESTED;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "loc_del_con_id", foreignKey = @ForeignKey(name = "fk_loc_del_con"))
+    private Set<LocalDeliveryConnection> connections = new HashSet<>();
+
     public LocalDelivery() {
     }
 
@@ -130,6 +134,22 @@ public class LocalDelivery {
 
     public void removeEndpoint(LocalDeliveryEndpoint endpoint) {
         this.endpoints.remove(endpoint);
+    }
+
+    public Set<LocalDeliveryConnection> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(Set<LocalDeliveryConnection> connections) {
+        this.connections = connections;
+    }
+
+    public void addConnection(LocalDeliveryConnection connection) {
+        connections.add(connection);
+    }
+
+    public void removeConnections(Set<LocalDeliveryConnection> connectionsToRemove) {
+        this.connections.removeAll(connectionsToRemove);
     }
 
     public boolean exchangeExists() {

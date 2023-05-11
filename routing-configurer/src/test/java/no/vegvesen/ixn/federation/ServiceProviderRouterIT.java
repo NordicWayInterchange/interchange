@@ -526,6 +526,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 		assertThat(delivery.getExchangeName()).isNotNull();
+		assertThat(delivery.getConnections()).isNotEmpty();
 	}
 
 	@Test
@@ -614,6 +615,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(delivery.exchangeExists()).isFalse();
 		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
+		assertThat(delivery.getConnections()).isEmpty();
 	}
 
 	@Test
@@ -666,6 +668,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.setUpDeliveryQueue(serviceProvider.getName());
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
+		assertThat(delivery.getConnections().size()).isEqualTo(2);
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match2));
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
@@ -675,6 +678,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.CREATED);
+		assertThat(delivery.getConnections().size()).isEqualTo(1);
 	}
 
 	@Test

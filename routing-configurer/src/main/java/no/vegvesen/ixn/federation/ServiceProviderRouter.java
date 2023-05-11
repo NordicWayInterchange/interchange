@@ -11,7 +11,6 @@ import no.vegvesen.ixn.federation.qpid.QpidAcl;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -315,11 +314,20 @@ public class ServiceProviderRouter {
                     qpidClient.createDirectExchange(delivery.getExchangeName());
                     qpidClient.addWriteAccess(serviceProvider.getName(), delivery.getExchangeName());
                 }
+
+                Set<String> existingConnections = delivery.getConnections().stream()
+                        .map(LocalDeliveryConnection::getDestination)
+                        .collect(Collectors.toSet());
+
                 for (OutgoingMatch match : matches) {
                     if (match.getCapability().getStatus().equals(CapabilityStatus.CREATED) &&
                             match.getCapability().exchangeExists()) {
-                        String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
-                        qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
+                        if (!existingConnections.contains(match.getCapability().getCapabilityExchangeName())) {
+                            LocalDeliveryConnection connection = new LocalDeliveryConnection(delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
+                            String joinedSelector = joinDeliverySelectorWithCapabilitySelector(match.getCapability(), delivery.getSelector());
+                            qpidClient.bindDirectExchange(joinedSelector, delivery.getExchangeName(), match.getCapability().getCapabilityExchangeName());
+                            delivery.addConnection(connection);
+                        }
                     }
                 }
             }
@@ -342,10 +350,26 @@ public class ServiceProviderRouter {
                             qpidClient.removeExchange(target);
                         }
                         delivery.setExchangeName("");
+                        delivery.removeConnections(delivery.getConnections());
                     }
                     if (!delivery.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)) {
                         delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                     }
+                } else {
+                    Set<String> capabilityConnections = matches.stream()
+                            .filter(m -> m.getCapability().getStatus().equals(CapabilityStatus.CREATED))
+                            .map(m -> m.getCapability().getCapabilityExchangeName())
+                            .collect(Collectors.toSet());
+
+                    Set<LocalDeliveryConnection> connectionsToRemove = new HashSet<>();
+
+                    for (LocalDeliveryConnection connection : delivery.getConnections()) {
+                        if (!capabilityConnections.contains(connection.getDestination())) {
+                            connectionsToRemove.add(connection);
+                        }
+                    }
+
+                    delivery.removeConnections(connectionsToRemove);
                 }
             }
         }
