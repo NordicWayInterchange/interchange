@@ -31,6 +31,8 @@ public class QpidClient {
 
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
 	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s";
+
+	private static final String ALL_EXCHANGES_URL_PATTERN = "%s/api/latest/exchange/default/";
 	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
 	private static final String GROUPS_URL_PATTERN = "%s/api/latest/groupmember/default/";
