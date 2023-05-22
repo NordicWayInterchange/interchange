@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 if [ "$#" -ne 2 ]; then
   echo "USAGE $0 <user ident> <country code (upper case)>"
@@ -56,8 +56,6 @@ EOF
 ident=$1
 country=$2
 
-openssl req -out client/csr/$ident.csr.pem -newkey rsa:2048 -nodes -keyout client/private/$ident.key.pem -config openssl_csr_san.cnf -subj "/emailAddress=test@test.no/CN=${ident}/O=Nordic Way/C=$country"
-cp client/private/$ident.key.pem $INTERNAL_KEYS_FOLDER/
-cp client/csr/$ident.csr.pem $INTERNAL_KEYS_FOLDER/
+openssl req -out "$INTERNAL_KEYS_FOLDER/$ident.csr.pem" -newkey rsa:2048 -nodes -keyout "$INTERNAL_KEYS_FOLDER/$ident.key.pem" -config openssl_csr_san.cnf -subj "/emailAddress=test@test.no/CN=${ident}/O=Nordic Way/C=$country"
 chmod ugo+rwx $INTERNAL_KEYS_FOLDER/*
 echo Key and CSR created
