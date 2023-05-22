@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class CertSignerTest {
 
@@ -18,6 +20,7 @@ public class CertSignerTest {
     public void testFoo() {
         //generate CA, intermediate CA, certs and keys, and CSR for SP
         //TODO should have something that just gives the paths to the different things.
+        fail("This must be implemented");
         CertKeyPair rootCa = ClusterKeyGenerator.generateRootCA(
                 containerOutPath,
                 new TopDomain("testdomain.no", "NO")
@@ -36,9 +39,15 @@ public class CertSignerTest {
         ).getCertChainAndKeyOnHost();
         CsrKeyPair serviceProviderCsr = ClusterKeyGenerator.generateCsrForServiceProvider(containerOutPath,
                 new ServicProviderDescription("testSP", "NO")).getCsrKeyPairOnHost();
-        //Instanciate the certsigner, give the csr, intermediate key and cert, and cert chain.
-
-
+        //Instantiate the certsigner, give the csr, intermediate key and cert, and cert chain.
+        //SPM:
+        //Skal vi lage en ny container for napcore?
+        /*
+        CertSigner signer = new CertSigner(
+                intermediateCert.getSingleCertOnHost(),
+                intermediateCert.getChainCertOnHost(),
+                intermediateCert.getIntermediateKeyOnHost());
+*/
 
     }
 }
