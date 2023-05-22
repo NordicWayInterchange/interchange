@@ -12,15 +12,6 @@ if [ ! -d "$INTERNAL_KEYS_FOLDER" ]; then
   exit 1
 fi
 
-if [ ! -d "client/csr" ]; then
-  mkdir -p client/csr
-fi
-
-if [ ! -d "client/private" ]; then
-  mkdir -p client/private
-fi
-
-
 cat << EOF > openssl_csr_san.cnf
 [ req ]
 default_bits       = 2048
