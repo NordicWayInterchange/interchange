@@ -5,7 +5,7 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
-INTERNAL_KEYS_FOLDER="/int_keys"
+INTERNAL_KEYS_FOLDER="int_keys"
 
 if [ ! -d "$INTERNAL_KEYS_FOLDER" ]; then
   echo "Output folder does not exist. Is it mapped properly?"
