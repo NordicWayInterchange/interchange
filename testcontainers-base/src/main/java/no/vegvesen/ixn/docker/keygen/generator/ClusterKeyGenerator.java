@@ -9,16 +9,16 @@ public class ClusterKeyGenerator {
     public static void generateKeys(Cluster cluster, Path outputFolder) {
 
         TopDomain topDomain = cluster.getTopDomain();
-        RootCAKeyGenerator caGenerator = generateRootCA(outputFolder, topDomain);
+        CertKeyPair certKeyPair  = generateRootCA(outputFolder, topDomain);
         String topDomainTrustStorePassword = "password";
-        generateTrustore(caGenerator.getCaCertOnHost(), topDomainTrustStorePassword, outputFolder, topDomain.getDomainName() + "_truststore.jks");
+        generateTrustore(certKeyPair.getCaCertOnHost(), topDomainTrustStorePassword, outputFolder, topDomain.getDomainName() + "_truststore.jks");
         for (Interchange interchange : cluster.getInterchanges()) {
             IntermediateDomain domain = interchange.getDomain();
             IntermediateCaCSRGenerator csrGenerator = generateIntermediateCaCsr(outputFolder, domain);
-            IntermediateCACertGenerator certGenerator = generateIntermediateCaCert(outputFolder, domain, csrGenerator.getCsrOnHost(), caGenerator.getCaCertOnHost(), caGenerator.getCaKeyOnHost());
+            IntermediateCACertGenerator certGenerator = generateIntermediateCaCert(outputFolder, domain, csrGenerator.getCsrOnHost(), certKeyPair.getCaCertOnHost(), certKeyPair.getCaKeyOnHost());
             String intermediateCaKeystorePassword = "password";
             String keystoreName = domain.getDomainName() + ".p12";
-            generateKeystore(outputFolder, domain, intermediateCaKeystorePassword, keystoreName, csrGenerator.getKeyOnHost(), certGenerator.getChainCertOnHost(), caGenerator.getCaCertOnHost());
+            generateKeystore(outputFolder, domain, intermediateCaKeystorePassword, keystoreName, csrGenerator.getKeyOnHost(), certGenerator.getChainCertOnHost(), certKeyPair.getCaCertOnHost());
             generateTrustore(certGenerator.getSingleCertOnHost(), "password", outputFolder, domain.getDomainName() + "_truststore.jks");
             for (AdditionalHost host : interchange.getAdditionalHosts()) {
                 generateServerCertForHost(outputFolder, host, certGenerator.getSingleCertOnHost(), certGenerator.getChainCertOnHost(), csrGenerator.getKeyOnHost());
@@ -128,14 +128,14 @@ public class ClusterKeyGenerator {
         topDomainTrustStoreGenerator.start();
     }
 
-    public static RootCAKeyGenerator generateRootCA(Path outputFolder, TopDomain topDomain) {
+    public static CertKeyPair generateRootCA(Path outputFolder, TopDomain topDomain) {
         RootCAKeyGenerator caGenerator = new RootCAKeyGenerator(
                 outputFolder,
                 topDomain.getDomainName(),
                 topDomain.getOwnerCountry()
         );
         caGenerator.start();
-        return caGenerator;
+        return caGenerator.getCertKeyPairOnHost();
     }
 
 }

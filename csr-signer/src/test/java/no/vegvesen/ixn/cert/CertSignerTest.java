@@ -24,7 +24,7 @@ public class CertSignerTest {
         CertKeyPair rootCa = ClusterKeyGenerator.generateRootCA(
                 containerOutPath,
                 new TopDomain("testdomain.no", "NO")
-        ).getCertKeyPairOnHost();
+        );
         IntermediateDomain interchangeDomain = new IntermediateDomain("interchangetestdomain.no", "NO");
         CsrKeyPair intermediateCsr = ClusterKeyGenerator.generateIntermediateCaCsr(
                 containerOutPath,
