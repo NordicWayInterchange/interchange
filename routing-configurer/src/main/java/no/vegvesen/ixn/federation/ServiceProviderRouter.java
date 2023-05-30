@@ -6,12 +6,11 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.qpid.VirtualHostAccessControlProvider;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
-import no.vegvesen.ixn.federation.qpid.QpidAcl;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,12 +228,12 @@ public class ServiceProviderRouter {
                 logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 qpidClient.createQueue(queueName);
                 logger.info("Creating queue {}", queueName);
-                QpidAcl acl = qpidClient.getQpidAcl();
-                acl.addQueueWriteAccess(name,queueName);
-                acl.addQueueWriteAccess(peerName,queueName);
-                acl.addQueueReadAccess(name, queueName);
-                acl.addQueueReadAccess(peerName,queueName);
-                qpidClient.postQpidAcl(acl);
+                VirtualHostAccessControlProvider provider = qpidClient.getNewQpidAcl();
+                provider.addQueueWriteAccess(name,queueName);
+                provider.addQueueWriteAccess(peerName,queueName);
+                provider.addQueueReadAccess(name,queueName);
+                provider.addQueueReadAccess(peerName,queueName);
+                qpidClient.postNewQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
                 logger.info("Creating queue {} for client {}", queueName, peerName);
             }
@@ -245,12 +244,11 @@ public class ServiceProviderRouter {
                 }
                 qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                QpidAcl acl = qpidClient.getQpidAcl();
-                acl.removeQueueWriteAccess(peerName,queueName);
-                acl.removeQueueWriteAccess(name, queueName);
-                acl.removeQueueReadAccess(peerName,queueName);
-                acl.removeQueueReadAccess(name, queueName);
-                qpidClient.postQpidAcl(acl);
+                VirtualHostAccessControlProvider provider = qpidClient.getNewQpidAcl();
+                provider.removeQueueWriteAccess(peerName,queueName);
+                provider.removeQueueWriteAccess(name,queueName);
+                provider.removeQueueReadAccess(peerName,queueName);
+                provider.removeQueueReadAccess(name,queueName);
                 logger.info("Tearing down queue {} for client {}", queueName, peerName);
                 qpidClient.removeQueue(queueName);
             }
