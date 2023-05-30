@@ -304,44 +304,47 @@ public class QpidClient {
 	}
 
 	public void addReadAccess(String subscriberName, String queue) {
-        QpidAcl qpidAcl = getQpidAcl();
-        qpidAcl.addQueueReadAccess(subscriberName, queue);
-        postQpidAcl(qpidAcl);
+		VirtualHostAccessControlProvider provider = getNewQpidAcl();
+		provider.addQueueReadAccess(subscriberName,queue);
+		postNewQpidAcl(provider);
+
 	}
 
 	public void addWriteAccess(String subscriberName, String queue) {
-        QpidAcl qpidAcl = getQpidAcl();
-        qpidAcl.addQueueWriteAccess(subscriberName, queue);
-        postQpidAcl(qpidAcl);
+		VirtualHostAccessControlProvider provider = getNewQpidAcl();
+		provider.addQueueWriteAccess(subscriberName, queue);
+		postNewQpidAcl(provider);
 	}
 
 	public void removeReadAccess(String subscriberName, String queue) {
-		QpidAcl qpidAcl = getQpidAcl();
-		qpidAcl.removeQueueReadAccess(subscriberName, queue);
-		postQpidAcl(qpidAcl);
+		VirtualHostAccessControlProvider provider = getNewQpidAcl();
+		provider.removeQueueReadAccess(subscriberName,queue);
+		postNewQpidAcl(provider);
 	}
 
 	public void removeWriteAccess(String subscriberName, String queue) {
-		QpidAcl qpidAcl = getQpidAcl();
-		qpidAcl.removeQueueWriteAccess(subscriberName, queue);
-		postQpidAcl(qpidAcl);
+		VirtualHostAccessControlProvider provider = getNewQpidAcl();
+		provider.removeQueueWriteAccess(subscriberName,queue);
+		postNewQpidAcl(provider);
 
 	}
 
-	public QpidAcl getQpidAcl() {
-		ResponseEntity<String> aclRulesResponse = restTemplate.getForEntity(aclRulesUrl + "/extractRules", String.class);
-		String aclRulesS = aclRulesResponse.getBody();
-		logger.debug("acl extractRules return code {}, body {}", aclRulesResponse.getStatusCodeValue(), aclRulesS);
-		return QpidAcl.parseRules(aclRulesS);
-
+	public VirtualHostAccessControlProvider getNewQpidAcl() {
+		ResponseEntity<VirtualHostAccessControlProvider> response = restTemplate.getForEntity(aclRulesUrl,VirtualHostAccessControlProvider.class);
+		logger.debug("acl extractRules return code {}", response.getStatusCodeValue());
+		return response.getBody();
 	}
 
-	public void postQpidAcl(QpidAcl acl) {
-		JSONObject base64EncodedAcl = new JSONObject();
-		base64EncodedAcl.put("path", "data:text/plain;base64," + Base64.getEncoder().encodeToString(acl.aclAsString().getBytes()));
-		logger.debug("sending new acl to qpid {}", base64EncodedAcl.toString());
-		postQpid(aclRulesUrl, base64EncodedAcl.toString(), "/loadFromFile");
-		logger.info("Rules posted to qpid");
+	public void postNewQpidAcl(VirtualHostAccessControlProvider provider) {
+		ResponseEntity<String> response = restTemplate.postForEntity(aclRulesUrl, provider, String.class);
+		logger.debug("Resonse code for POST to {} with is {}", aclRulesUrl,response.getStatusCodeValue());
+		if (response.getStatusCode().isError()) {
+			String errorMessage = String.format("Error posting to QPID REST API %s, cause: %s",
+					aclRulesUrl,
+					response.getStatusCode().getReasonPhrase());
+			logger.error(errorMessage);
+			throw new RoutingConfigurerException(errorMessage);
+		}
 	}
 
 }
