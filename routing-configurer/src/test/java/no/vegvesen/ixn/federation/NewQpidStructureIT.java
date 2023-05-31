@@ -6,7 +6,6 @@ import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
@@ -16,7 +15,6 @@ import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -258,7 +256,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
             System.out.println();
             Thread.sleep(200);
         }
-        System.out.println(qpidClient.getNewQpidAcl());
+        System.out.println(qpidClient.getQpidAcl());
         assertThat(numMessages.get()).isEqualTo(1);
     }
 
