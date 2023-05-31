@@ -304,38 +304,38 @@ public class QpidClient {
 	}
 
 	public void addReadAccess(String subscriberName, String queue) {
-		VirtualHostAccessControlProvider provider = getNewQpidAcl();
+		VirtualHostAccessControlProvider provider = getQpidAcl();
 		provider.addQueueReadAccess(subscriberName,queue);
-		postNewQpidAcl(provider);
+		postQpidAcl(provider);
 
 	}
 
 	public void addWriteAccess(String subscriberName, String queue) {
-		VirtualHostAccessControlProvider provider = getNewQpidAcl();
+		VirtualHostAccessControlProvider provider = getQpidAcl();
 		provider.addQueueWriteAccess(subscriberName, queue);
-		postNewQpidAcl(provider);
+		postQpidAcl(provider);
 	}
 
 	public void removeReadAccess(String subscriberName, String queue) {
-		VirtualHostAccessControlProvider provider = getNewQpidAcl();
+		VirtualHostAccessControlProvider provider = getQpidAcl();
 		provider.removeQueueReadAccess(subscriberName,queue);
-		postNewQpidAcl(provider);
+		postQpidAcl(provider);
 	}
 
 	public void removeWriteAccess(String subscriberName, String queue) {
-		VirtualHostAccessControlProvider provider = getNewQpidAcl();
+		VirtualHostAccessControlProvider provider = getQpidAcl();
 		provider.removeQueueWriteAccess(subscriberName,queue);
-		postNewQpidAcl(provider);
+		postQpidAcl(provider);
 
 	}
 
-	public VirtualHostAccessControlProvider getNewQpidAcl() {
+	public VirtualHostAccessControlProvider getQpidAcl() {
 		ResponseEntity<VirtualHostAccessControlProvider> response = restTemplate.getForEntity(aclRulesUrl,VirtualHostAccessControlProvider.class);
 		logger.debug("acl extractRules return code {}", response.getStatusCodeValue());
 		return response.getBody();
 	}
 
-	public void postNewQpidAcl(VirtualHostAccessControlProvider provider) {
+	public void postQpidAcl(VirtualHostAccessControlProvider provider) {
 		ResponseEntity<String> response = restTemplate.postForEntity(aclRulesUrl, provider, String.class);
 		logger.debug("Resonse code for POST to {} with is {}", aclRulesUrl,response.getStatusCodeValue());
 		if (response.getStatusCode().isError()) {

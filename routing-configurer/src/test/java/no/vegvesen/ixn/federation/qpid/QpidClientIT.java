@@ -151,13 +151,13 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		NewAclRule queueReadAccessRule = VirtualHostAccessControlProvider.createQueueReadAccessRule(subscriberName, queueName);
 
-		VirtualHostAccessControlProvider provider = client.getNewQpidAcl();
+		VirtualHostAccessControlProvider provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueReadAccessRule)).isTrue();
 
 		client.removeReadAccess(subscriberName, queueName);
 
 		//acl = client.getQpidAcl();
-		provider = client.getNewQpidAcl();
+		provider = client.getQpidAcl();
 
 		assertThat(provider.containsRule(queueReadAccessRule)).isFalse();
 	}
@@ -170,12 +170,12 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client.addWriteAccess(subscriberName, queueName);
 
 		NewAclRule queueWriteAccessRule = VirtualHostAccessControlProvider.createQueueWriteAccessRule(subscriberName, queueName);
-		VirtualHostAccessControlProvider provider = client.getNewQpidAcl();
+		VirtualHostAccessControlProvider provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueWriteAccessRule)).isTrue();
 
 		client.removeWriteAccess(subscriberName, queueName);
 
-		provider = client.getNewQpidAcl();
+		provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueWriteAccessRule)).isFalse();
 	}
 
