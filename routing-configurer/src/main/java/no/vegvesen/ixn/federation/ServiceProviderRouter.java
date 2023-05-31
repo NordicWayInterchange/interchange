@@ -228,12 +228,12 @@ public class ServiceProviderRouter {
                 logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 qpidClient.createQueue(queueName);
                 logger.info("Creating queue {}", queueName);
-                VirtualHostAccessControlProvider provider = qpidClient.getNewQpidAcl();
+                VirtualHostAccessControlProvider provider = qpidClient.getQpidAcl();
                 provider.addQueueWriteAccess(name,queueName);
                 provider.addQueueWriteAccess(peerName,queueName);
                 provider.addQueueReadAccess(name,queueName);
                 provider.addQueueReadAccess(peerName,queueName);
-                qpidClient.postNewQpidAcl(provider);
+                qpidClient.postQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
                 logger.info("Creating queue {} for client {}", queueName, peerName);
             }
@@ -244,11 +244,12 @@ public class ServiceProviderRouter {
                 }
                 qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                VirtualHostAccessControlProvider provider = qpidClient.getNewQpidAcl();
+                VirtualHostAccessControlProvider provider = qpidClient.getQpidAcl();
                 provider.removeQueueWriteAccess(peerName,queueName);
                 provider.removeQueueWriteAccess(name,queueName);
                 provider.removeQueueReadAccess(peerName,queueName);
                 provider.removeQueueReadAccess(name,queueName);
+                qpidClient.postQpidAcl(provider);
                 logger.info("Tearing down queue {} for client {}", queueName, peerName);
                 qpidClient.removeQueue(queueName);
             }
