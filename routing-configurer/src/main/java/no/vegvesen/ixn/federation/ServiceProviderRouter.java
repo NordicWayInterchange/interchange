@@ -6,7 +6,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.VirtualHostAccessControlProvider;
+import no.vegvesen.ixn.federation.qpid.VirtualHostAccessController;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
@@ -228,7 +228,7 @@ public class ServiceProviderRouter {
                 logger.debug("Adding member {} to group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 qpidClient.createQueue(queueName);
                 logger.info("Creating queue {}", queueName);
-                VirtualHostAccessControlProvider provider = qpidClient.getQpidAcl();
+                VirtualHostAccessController provider = qpidClient.getQpidAcl();
                 provider.addQueueWriteAccess(name,queueName);
                 provider.addQueueWriteAccess(peerName,queueName);
                 provider.addQueueReadAccess(name,queueName);
@@ -244,7 +244,7 @@ public class ServiceProviderRouter {
                 }
                 qpidClient.removeMemberFromGroup(peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
                 logger.info("Removing member {} from group {}", peerName, CLIENTS_PRIVATE_CHANNELS_GROUP_NAME);
-                VirtualHostAccessControlProvider provider = qpidClient.getQpidAcl();
+                VirtualHostAccessController provider = qpidClient.getQpidAcl();
                 provider.removeQueueWriteAccess(peerName,queueName);
                 provider.removeQueueWriteAccess(name,queueName);
                 provider.removeQueueReadAccess(peerName,queueName);
