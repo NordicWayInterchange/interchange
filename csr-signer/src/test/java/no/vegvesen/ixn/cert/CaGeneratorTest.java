@@ -16,7 +16,7 @@ public class CaGeneratorTest {
     @Test
     @Disabled
     public void testGeneratingCAUsingBouncyCastle() {
-        Security.addProvider(new BouncyCastleProvider());
+        Security.insertProviderAt(new BouncyCastleProvider(),0);
         CaGenerator.generateRootCA_BC();
     }
 }
