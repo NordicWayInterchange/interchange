@@ -188,8 +188,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
         //2. Creating read queue and adding read access.
         qpidClient.createQueue(outQueueName);
-        //qpidClient.addReadAccess("king_gustaf", outQueueName);
-        qpidClient.addReadAccess("king_gustav",outQueueName);
+        qpidClient.addReadAccess("king_gustaf", outQueueName);
 
         //Create intermediate exchange. No ACL needed for this.
         qpidClient.createTopicExchange(exchangeName);
