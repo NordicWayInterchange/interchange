@@ -7,18 +7,18 @@ import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VirtualHostAccessControlProvider {
+public class VirtualHostAccessController {
 
     private String id;
 
     private String name;
 
-    private List<NewAclRule> rules;
+    private List<AclRule> rules;
 
-    public VirtualHostAccessControlProvider() {
+    public VirtualHostAccessController() {
     }
 
-    public VirtualHostAccessControlProvider(String id, List<NewAclRule> rules) {
+    public VirtualHostAccessController(String id, List<AclRule> rules) {
         this.id = id;
         this.rules = rules;
     }
@@ -27,7 +27,7 @@ public class VirtualHostAccessControlProvider {
         this.id = id;
     }
 
-    public void setRules(List<NewAclRule> rules) {
+    public void setRules(List<AclRule> rules) {
         this.rules = rules;
     }
 
@@ -39,30 +39,30 @@ public class VirtualHostAccessControlProvider {
         this.name = name;
     }
 
-    public static NewAclRule createQueueReadAccessRule(String memberOrGroupName, String queueName) {
+    public static AclRule createQueueReadAccessRule(String memberOrGroupName, String queueName) {
         Map<String, String> props = new HashMap<>();
         props.put("NAME", queueName);
-        return new NewAclRule(memberOrGroupName,"CONSUME","ALLOW_LOG","QUEUE",props);
+        return new AclRule(memberOrGroupName,"CONSUME","ALLOW_LOG","QUEUE",props);
     }
 
-    public static NewAclRule createQueueWriteAccessRule(String memberOrGroupName, String queue)  {
+    public static AclRule createQueueWriteAccessRule(String memberOrGroupName, String queue)  {
         Map<String,String> props = new HashMap<>();
         props.put("ROUTING_KEY",queue);
         props.put("NAME","");
-        return new NewAclRule(memberOrGroupName,"PUBLISH","ALLOW_LOG","EXCHANGE",props);
+        return new AclRule(memberOrGroupName,"PUBLISH","ALLOW_LOG","EXCHANGE",props);
     }
 
-    public static NewAclRule createQueuePublishToExchangeRule(String memberName, String queue) {
+    public static AclRule createQueuePublishToExchangeRule(String memberName, String queue) {
         Map<String, String> props = new HashMap<>();
         props.put("routingkey", queue);
         props.put("NAME", "");
-        return new NewAclRule(memberName,"PUBLISH","ALLOW-LOG","EXCHANGE",props);
+        return new AclRule(memberName,"PUBLISH","ALLOW-LOG","EXCHANGE",props);
     }
 
-    public static NewAclRule createExchangeConsumeOnQueueRule(String queue) {
+    public static AclRule createExchangeConsumeOnQueueRule(String queue) {
         Map<String, String> props = new HashMap<>();
         props.put("NAME", queue);
-        return new NewAclRule("interchange","CONSUME","ALLOW_LOG","QUEUE",props);
+        return new AclRule("interchange","CONSUME","ALLOW_LOG","QUEUE",props);
 
     }
 
@@ -70,7 +70,7 @@ public class VirtualHostAccessControlProvider {
         return id;
     }
 
-    public List<NewAclRule> getRules() {
+    public List<AclRule> getRules() {
         return rules;
     }
 
@@ -90,7 +90,7 @@ public class VirtualHostAccessControlProvider {
         rules.remove(createQueueWriteAccessRule(subscriberName,queue));
     }
 
-    public boolean containsRule(NewAclRule rule) {
+    public boolean containsRule(AclRule rule) {
         return rules.contains(rule);
 
     }
