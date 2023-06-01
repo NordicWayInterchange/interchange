@@ -304,38 +304,38 @@ public class QpidClient {
 	}
 
 	public void addReadAccess(String subscriberName, String queue) {
-		VirtualHostAccessControlProvider provider = getQpidAcl();
+		VirtualHostAccessController provider = getQpidAcl();
 		provider.addQueueReadAccess(subscriberName,queue);
 		postQpidAcl(provider);
 
 	}
 
 	public void addWriteAccess(String subscriberName, String queue) {
-		VirtualHostAccessControlProvider provider = getQpidAcl();
+		VirtualHostAccessController provider = getQpidAcl();
 		provider.addQueueWriteAccess(subscriberName, queue);
 		postQpidAcl(provider);
 	}
 
 	public void removeReadAccess(String subscriberName, String queue) {
-		VirtualHostAccessControlProvider provider = getQpidAcl();
+		VirtualHostAccessController provider = getQpidAcl();
 		provider.removeQueueReadAccess(subscriberName,queue);
 		postQpidAcl(provider);
 	}
 
 	public void removeWriteAccess(String subscriberName, String queue) {
-		VirtualHostAccessControlProvider provider = getQpidAcl();
+		VirtualHostAccessController provider = getQpidAcl();
 		provider.removeQueueWriteAccess(subscriberName,queue);
 		postQpidAcl(provider);
 
 	}
 
-	public VirtualHostAccessControlProvider getQpidAcl() {
-		ResponseEntity<VirtualHostAccessControlProvider> response = restTemplate.getForEntity(aclRulesUrl,VirtualHostAccessControlProvider.class);
+	public VirtualHostAccessController getQpidAcl() {
+		ResponseEntity<VirtualHostAccessController> response = restTemplate.getForEntity(aclRulesUrl, VirtualHostAccessController.class);
 		logger.debug("acl extractRules return code {}", response.getStatusCodeValue());
 		return response.getBody();
 	}
 
-	public void postQpidAcl(VirtualHostAccessControlProvider provider) {
+	public void postQpidAcl(VirtualHostAccessController provider) {
 		ResponseEntity<String> response = restTemplate.postForEntity(aclRulesUrl, provider, String.class);
 		logger.debug("Resonse code for POST to {} with is {}", aclRulesUrl,response.getStatusCodeValue());
 		if (response.getStatusCode().isError()) {
