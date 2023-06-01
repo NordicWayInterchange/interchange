@@ -42,7 +42,7 @@ public class VirtualHostAccessControlProvider {
     public static NewAclRule createQueueReadAccessRule(String memberOrGroupName, String queueName) {
         Map<String, String> props = new HashMap<>();
         props.put("NAME", queueName);
-        return new NewAclRule(memberOrGroupName,"ACCESS","ALLOW_LOG","QUEUE",props);
+        return new NewAclRule(memberOrGroupName,"CONSUME","ALLOW_LOG","QUEUE",props);
     }
 
     public static NewAclRule createQueueWriteAccessRule(String memberOrGroupName, String queue)  {

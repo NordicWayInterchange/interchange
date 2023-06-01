@@ -143,12 +143,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		client.addReadAccess(subscriberName, queueName);
 
-		/*
-		QpidAcl acl = client.getQpidAcl();
-		assertThat(acl.containsRule(QpidAcl.createQeueReadAccessRule(subscriberName,queueName))).isTrue();
-
-		 */
-
 		NewAclRule queueReadAccessRule = VirtualHostAccessControlProvider.createQueueReadAccessRule(subscriberName, queueName);
 
 		VirtualHostAccessControlProvider provider = client.getQpidAcl();
@@ -156,9 +150,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		client.removeReadAccess(subscriberName, queueName);
 
-		//acl = client.getQpidAcl();
 		provider = client.getQpidAcl();
-
 		assertThat(provider.containsRule(queueReadAccessRule)).isFalse();
 	}
 
@@ -168,7 +160,6 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String queueName = "catfish";
 
 		client.addWriteAccess(subscriberName, queueName);
-
 		NewAclRule queueWriteAccessRule = VirtualHostAccessControlProvider.createQueueWriteAccessRule(subscriberName, queueName);
 		VirtualHostAccessControlProvider provider = client.getQpidAcl();
 		assertThat(provider.containsRule(queueWriteAccessRule)).isTrue();
