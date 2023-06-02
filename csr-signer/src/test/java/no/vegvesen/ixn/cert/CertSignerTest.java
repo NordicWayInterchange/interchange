@@ -1,53 +1,33 @@
 package no.vegvesen.ixn.cert;
 
 import no.vegvesen.ixn.docker.DockerBaseIT;
-import no.vegvesen.ixn.docker.keygen.IntermediateDomain;
-import no.vegvesen.ixn.docker.keygen.ServicProviderDescription;
-import no.vegvesen.ixn.docker.keygen.TopDomain;
-import no.vegvesen.ixn.docker.keygen.generator.*;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-
-import static org.assertj.core.api.Assertions.fail;
-
 
 public class CertSignerTest {
 
-    private static Path containerOutPath = DockerBaseIT.getTargetFolderPathForTestClass(CertSignerTest.class);
-
     @Test
-    public void testFoo() {
-        //generate CA, intermediate CA, certs and keys, and CSR for SP
-        //TODO should have something that just gives the paths to the different things.
-        fail("This must be implemented");
-        CertKeyPair rootCa = ClusterKeyGenerator.generateRootCA(
-                containerOutPath,
-                new TopDomain("testdomain.no", "NO")
-        );
-        IntermediateDomain interchangeDomain = new IntermediateDomain("interchangetestdomain.no", "NO");
-        CsrKeyPair intermediateCsr = ClusterKeyGenerator.generateIntermediateCaCsr(
-                containerOutPath,
-                interchangeDomain
-        ).getCsrKeyPairOnHost();
-        CertChainAndKey intermediateCert = ClusterKeyGenerator.generateIntermediateCaCert(
-                containerOutPath,
-                interchangeDomain,
-                intermediateCsr.getCsrOnHost(),
-                rootCa.getCaCertOnHost(),
-                rootCa.getCaKeyOnHost()
-        ).getCertChainAndKeyOnHost();
-        CsrKeyPair serviceProviderCsr = ClusterKeyGenerator.generateCsrForServiceProvider(containerOutPath,
-                new ServicProviderDescription("testSP", "NO")).getCsrKeyPairOnHost();
-        //Instantiate the certsigner, give the csr, intermediate key and cert, and cert chain.
-        //SPM:
-        //Skal vi lage en ny container for napcore?
+    public void testSigningCsr() throws IOException {
+        //TODO copy this to a better location
+        Path path = DockerBaseIT.getTargetFolderPathForTestClass(CertSignerIT.class);
+        String intermediateCaCertAsString = Files.readString(path.resolve("int.interchangetestdomain.no.crt.pem"));
+        String intermediateKeyAsString = Files.readString(path.resolve("int.interchangetestdomain.no.key.pem"));
+
+        String csrAsString = Files.readString(path.resolve("testSP.csr.pem"));
         /*
-        CertSigner signer = new CertSigner(
-                intermediateCert.getSingleCertOnHost(),
-                intermediateCert.getChainCertOnHost(),
-                intermediateCert.getIntermediateKeyOnHost());
+        Path chainPath = path.resolve("chain.interchangetestdomain.crt.pem");
+        if (! Files.exists(chainPath)) {
+            System.out.println("Does not exist for some reason");
+        }
+        String intermediateCertChainAsString = Files.readString(chainPath);
 */
+        CertSigner signer = new CertSigner(intermediateCaCertAsString,intermediateKeyAsString);
+
+        String CertificateAsString = signer.sign(csrAsString,"testSP");
+
 
     }
 }
