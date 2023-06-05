@@ -4,10 +4,6 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitySplitApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.napcore.model.*;
-import no.vegvesen.ixn.napcore.model.Subscription;
-import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
-import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
 import java.time.LocalDateTime;
@@ -277,47 +273,5 @@ public class TypeTransformer {
                 createCapabilitiesPath(serviceProviderName,capabilityId),
                 capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability)
         );
-    }
-
-
-    //NapCore
-
-    public LocalSubscription transformNapSubscriptionToLocalSubscription(SubscriptionRequest subscription, String nodeName) {
-        return new LocalSubscription(subscription.getSelector(), nodeName);
-    }
-
-    public Subscription transformLocalSubscriptionToNapSubscription(LocalSubscription localSubscription) {
-        return new Subscription();
-    }
-
-    public Set<SubscriptionEndpoint> transformLocalEndpointsToNapSubscriptionEndpoints(Set<LocalEndpoint> localEndpoints) {
-        Set<SubscriptionEndpoint> endpoints = new HashSet<>();
-        for (LocalEndpoint endpoint : localEndpoints) {
-            endpoints.add( new SubscriptionEndpoint(
-                    endpoint.getHost(),
-                    endpoint.getPort(),
-                    endpoint.getSource(),
-                    endpoint.getMaxBandwidth(),
-                    endpoint.getMaxMessageRate()
-            ));
-        }
-        return endpoints;
-    }
-
-    public SubscriptionStatus transformLocalSubscriptionStatusToNapSubscriptionStatus(LocalSubscriptionStatus status) {
-        switch(status) {
-            case REQUESTED:
-                return SubscriptionStatus.REQUESTED;
-            case CREATED:
-                return SubscriptionStatus.CREATED;
-            case TEAR_DOWN:
-                return SubscriptionStatus.NOT_VALID;
-            default:
-                return SubscriptionStatus.ILLEGAL;
-        }
-    }
-
-    public GetMatchingCapabilitiesResponse transformCapabilitiesToGetMatchingCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String selector, Set<CapabilitySplit> capabilities) {
-        return null;
     }
 }

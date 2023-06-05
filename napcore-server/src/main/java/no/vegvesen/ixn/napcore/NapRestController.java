@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.serviceprovider;
+package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
@@ -9,14 +9,12 @@ import no.vegvesen.ixn.federation.model.LocalSubscriptionStatus;
 import no.vegvesen.ixn.federation.model.Neighbour;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
-import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.napcore.model.GetSubscriptionsResponse;
-import no.vegvesen.ixn.napcore.model.GetMatchingCapabilitiesResponse;
-import no.vegvesen.ixn.napcore.model.Subscription;
-import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
+import no.vegvesen.ixn.napcore.model.*;
+import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
+import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Provider;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +33,7 @@ public class NapRestController {
     private final ServiceProviderRepository serviceProviderRepository;
     private final NeighbourRepository neighbourRepository;
     private final CertService certService;
-    private final InterchangeNodeProperties nodeProperties;
+    private final NapCoreProperties napCoreProperties;
     private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
     private TypeTransformer typeTransformer = new TypeTransformer();
@@ -46,20 +43,20 @@ public class NapRestController {
             ServiceProviderRepository serviceProviderRepository,
             NeighbourRepository neighbourRepository,
             CertService certService,
-            InterchangeNodeProperties nodeProperties) {
+            NapCoreProperties napCoreProperties) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.neighbourRepository = neighbourRepository;
         this.certService = certService;
-        this.nodeProperties = nodeProperties;
+        this.napCoreProperties = napCoreProperties;
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/{actorCommonName}/x509/csr", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String addCsrRequest() {
+    @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/x509/csr", produces = MediaType.APPLICATION_JSON_VALUE)
+    public CertificateSignResponse addCsrRequest(@PathVariable String actorCommonName, @RequestBody CertificateSignRequest signRequest) {
         //Check NapCore certificate
-        return null;
+        return new CertificateSignResponse("there should be a signed certificate chain in here");
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public Subscription addSubscription(@PathVariable String actorCommonName, @RequestBody SubscriptionRequest subscriptionRequest) {
         logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
         //Check NapCore certificate
@@ -68,7 +65,7 @@ public class NapRestController {
             throw new SubscriptionRequestException("Bad api object for Subscription Request, Subscription has no selector.");
         }
 
-        LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, nodeProperties.getName());
+        LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
         if (JMSSelectorFilterFactory.isValidSelector(localSubscription.getSelector())) {
             localSubscription.setStatus(LocalSubscriptionStatus.REQUESTED);
         } else {
@@ -88,21 +85,20 @@ public class NapRestController {
                 .findFirst()
                 .get();
 
-        return null;
+        return typeTransformer.transformLocalSubscriptionToNapSubscription(savedSubscription);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public GetSubscriptionsResponse getSubscriptions(@PathVariable String actorCommonName) {
+    @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Subscription> getSubscriptions(@PathVariable String actorCommonName) {
         logger.info("Listing subscription for service provider {}", actorCommonName);
         //Check NapCore certificate
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
-
-        return null;
+        return typeTransformer.transformLocalSubscriptionsToNapSubscriptions(serviceProvider.getSubscriptions());
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/{actorCommonName}/subscriptions/{subscriptionId}")
+    @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions/{subscriptionId}")
     public Subscription getSubscription(@PathVariable String actorCommonName, @PathVariable String subscriptionId) {
         logger.info("Getting subscription {} for service provider {}", subscriptionId, actorCommonName);
         //Check NapCore certificate
@@ -117,7 +113,7 @@ public class NapRestController {
         return typeTransformer.transformLocalSubscriptionToNapSubscription(localSubscription);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, path = "/{actorCommonName}/subscriptions/{subscriptionId}")
+    @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/subscriptions/{subscriptionId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteSubscription(@PathVariable String actorCommonName, @PathVariable String subscriptionId) {
         logger.info("Service Provider {}, DELETE subscription {}", actorCommonName, subscriptionId);
@@ -130,8 +126,8 @@ public class NapRestController {
         logger.debug("Updated Service Provider: {}", saved.toString());
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/{actorCommonName}/subscriptions/capabilites")
-    public GetMatchingCapabilitiesResponse getMatchingSubscriptionCapabilities(@PathVariable String actorCommonName, @RequestParam(required = false) String selector) {
+    @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions/capabilities")
+    public List<Capability> getMatchingSubscriptionCapabilities(@PathVariable String actorCommonName, @RequestParam(required = false) String selector) {
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
         //Check NapCore certificate
 
@@ -143,7 +139,7 @@ public class NapRestController {
             }
         }
 
-        return null;
+        return typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities);
     }
 
     private ServiceProvider getOrCreateServiceProvider(String serviceProviderName) {

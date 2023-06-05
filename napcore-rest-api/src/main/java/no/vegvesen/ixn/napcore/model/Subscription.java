@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.napcore.model;
 
-import java.util.HashSet;
+import java.util.Set;
 
 public class Subscription {
 
@@ -10,7 +10,7 @@ public class Subscription {
 
     String selector;
 
-    HashSet<SubscriptionEndpoint> endpoints;
+    Set<SubscriptionEndpoint> endpoints;
 
     Integer lastUpdatedTimestamp;
 
@@ -18,7 +18,7 @@ public class Subscription {
 
     }
 
-    public Subscription(Integer id, SubscriptionStatus status, HashSet<SubscriptionEndpoint> endpoints, Integer lastUpdatedTimestamp) {
+    public Subscription(Integer id, SubscriptionStatus status, Set<SubscriptionEndpoint> endpoints, Integer lastUpdatedTimestamp) {
         this.id = id;
         this.status = status;
         this.endpoints = endpoints;
@@ -41,11 +41,11 @@ public class Subscription {
         this.status = status;
     }
 
-    public HashSet<SubscriptionEndpoint> getEndpoints() {
+    public Set<SubscriptionEndpoint> getEndpoints() {
         return endpoints;
     }
 
-    public void setEndpoints(HashSet<SubscriptionEndpoint> endpoints) {
+    public void setEndpoints(Set<SubscriptionEndpoint> endpoints) {
         this.endpoints = endpoints;
     }
 
