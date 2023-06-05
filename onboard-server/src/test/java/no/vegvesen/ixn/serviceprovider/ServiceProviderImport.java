@@ -137,7 +137,8 @@ public class ServiceProviderImport {
                     "spring.datasource.url: jdbc:postgresql://localhost:5432/federation",
                     "spring.datasource.username: federation",
                     "spring.datasource.password: federation",
-                    "spring.datasource.driver-class-name: org.postgresql.Driver"
+                    "spring.datasource.driver-class-name: org.postgresql.Driver",
+                    "spring.jpa.hibernate.ddl-auto = update"
             ).applyTo(configurableApplicationContext.getEnvironment());        }
     }
 
