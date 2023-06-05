@@ -245,6 +245,10 @@
         <module>jms-client-image-source</module>
         <module>jms-client-sink-app</module>
         <module>jms-client-source-app</module>
+        <module>napcore-rest-api</module>
+        <module>napcore-server</module>
+        <module>napcore-server-app</module>
+        <module>napcore-rest-client</module>
         <module>csr-signer</module>
     </modules>
 </project>
