@@ -13,5 +13,6 @@ docker run \
   -e TRUST_STORE_PASSWORD=password \
   -e NAP_SERVER=https://a.bouvetinterchange.eu:8898/ \
   -e USER=king_olav.bouvetinterchange.eu \
+  -e NAP=nap.bouvetinterchange.eu \
   --link a_napcore_server:a.bouvetinterchange.eu \
   --entrypoint bash napcore_rest_client

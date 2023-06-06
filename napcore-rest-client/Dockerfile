@@ -6,4 +6,6 @@ COPY target/napcore-rest-client-1.0.3-SNAPSHOT.jar napcore-rest-client.jar
 ADD entrypoint.sh /
 RUN chmod u+x /entrypoint.sh
 
+ADD sub_king_olav.json /
+
 ENTRYPOINT ["/entrypoint.sh"]
