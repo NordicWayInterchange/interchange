@@ -26,6 +26,8 @@ public class CertSignerTest {
 
         String certificateAsString = signer.sign(csrAsString,"testSP");
         assertThat(certificateAsString).isNotNull();
+        assertThat(certificateAsString).isNotEmpty();
+        Files.writeString(path.resolve("generatedCert.crt.pem"),certificateAsString);
 
 
     }

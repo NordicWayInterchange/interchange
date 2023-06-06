@@ -76,6 +76,7 @@ public class CertSigner {
         StringWriter certWriter = new StringWriter();
         JcaPEMWriter writer = new JcaPEMWriter(certWriter);
         writer.writeObject(certificate);
+        writer.close();
         return certWriter.toString();
     }
 }
