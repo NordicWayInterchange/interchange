@@ -3,6 +3,8 @@ package no.vegvesen.ixn.napcore.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import no.vegvesen.ixn.napcore.model.Capability;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
@@ -39,8 +41,11 @@ public class NapRestClientApplication implements Callable<Integer> {
     @Parameters(index = "0", paramLabel = "SERVER", description = "The NAP server address")
     private String server;
 
-    @Parameters(index = "1", paramLabel = "USER",description = "The service provider user")
+    @Parameters(index = "1", paramLabel = "USER", description = "The service provider user")
     private String user;
+
+    @Parameters(index = "2", paramLabel = "NAP", description = "The name of the NAP")
+    private String nap;
 
     @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
     private Path keystorePath;
@@ -69,7 +74,7 @@ public class NapRestClientApplication implements Callable<Integer> {
             ObjectMapper mapper = new ObjectMapper();
             SubscriptionRequest request = mapper.readValue(file, SubscriptionRequest.class);
             Subscription result = client.addSubscription(request);
-            System.out.println(mapper.writeValueAsString(result));
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
             return 0;
         }
     }
@@ -83,9 +88,9 @@ public class NapRestClientApplication implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
             NapRESTClient client = parentCommand.createClient();
-            List<Subscription> subscriptions = client.getSubscriptions();
             ObjectMapper mapper = new ObjectMapper();
-            System.out.println(mapper.writeValueAsString(subscriptions));
+            List<Subscription> subscriptions = client.getSubscriptions();
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscriptions));
             return 0;
         }
     }
@@ -104,7 +109,7 @@ public class NapRestClientApplication implements Callable<Integer> {
             NapRESTClient client = parentCommand.createClient();
             Subscription subscription = client.getSubscription(subscriptionId);
             ObjectMapper mapper = new ObjectMapper();
-            System.out.println(mapper.writeValueAsString(subscription));
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
             return 0;
         }
     }
@@ -140,8 +145,8 @@ public class NapRestClientApplication implements Callable<Integer> {
         public Integer call() throws JsonProcessingException {
             NapRESTClient client = parentCommand.createClient();
             ObjectMapper mapper = new ObjectMapper();
-            List<Capability> matchingCapabilities = client.getMatchingCapabilities(selector);
-            System.out.println(mapper.writeValueAsString(matchingCapabilities));
+            List<Capability> capabilities = client.getMatchingCapabilities(selector);
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
             return 0;
         }
     }
@@ -166,6 +171,6 @@ public class NapRestClientApplication implements Callable<Integer> {
     }
 
     public NapRESTClient createClient() {
-        return new NapRESTClient(createSSLContext(), server, user);
+        return new NapRESTClient(createSSLContext(), server, user, nap);
     }
 }

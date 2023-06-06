@@ -52,14 +52,14 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/x509/csr", produces = MediaType.APPLICATION_JSON_VALUE)
     public CertificateSignResponse addCsrRequest(@PathVariable String actorCommonName, @RequestBody CertificateSignRequest signRequest) {
-        //Check NapCore certificate
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         return new CertificateSignResponse("there should be a signed certificate chain in here");
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public Subscription addSubscription(@PathVariable String actorCommonName, @RequestBody SubscriptionRequest subscriptionRequest) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Subscription - Received POST from Service Provider: {}", actorCommonName);
-        //Check NapCore certificate
 
         if (Objects.isNull(subscriptionRequest)) {
             throw new SubscriptionRequestException("Bad api object for Subscription Request, Subscription has no selector.");
@@ -90,8 +90,8 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Subscription> getSubscriptions(@PathVariable String actorCommonName) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing subscription for service provider {}", actorCommonName);
-        //Check NapCore certificate
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
@@ -100,8 +100,8 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions/{subscriptionId}")
     public Subscription getSubscription(@PathVariable String actorCommonName, @PathVariable String subscriptionId) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Getting subscription {} for service provider {}", subscriptionId, actorCommonName);
-        //Check NapCore certificate
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalSubscription localSubscription = serviceProvider.getSubscriptions()
@@ -116,8 +116,8 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/subscriptions/{subscriptionId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteSubscription(@PathVariable String actorCommonName, @PathVariable String subscriptionId) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE subscription {}", actorCommonName, subscriptionId);
-        //Check NapCore certificate
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         serviceProviderToUpdate.removeLocalSubscription(Integer.parseInt(subscriptionId));
@@ -128,8 +128,8 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/nap/{actorCommonName}/subscriptions/capabilities")
     public List<Capability> getMatchingSubscriptionCapabilities(@PathVariable String actorCommonName, @RequestParam(required = false) String selector) {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
-        //Check NapCore certificate
 
         Set<CapabilitySplit> allCapabilities = getAllNeighbourCapabilities();
         allCapabilities.addAll(getAllLocalCapabilities());

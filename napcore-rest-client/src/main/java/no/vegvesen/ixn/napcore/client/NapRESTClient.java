@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.napcore.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -25,7 +26,9 @@ public class NapRESTClient {
 
     private final String user;
 
-    public NapRESTClient(SSLContext sslContext, String server, String user) {
+    private final String nap;
+
+    public NapRESTClient(SSLContext sslContext, String server, String user, String nap) {
         this.restTemplate = new RestTemplate(
                 new HttpComponentsClientHttpRequestFactory(
                         HttpClients
@@ -36,6 +39,7 @@ public class NapRESTClient {
         );
         this.server = server;
         this.user = user;
+        this.nap = nap;
     }
 
     public CertificateSignResponse requestCertificate(CertificateSignRequest signingRequest) {
@@ -62,18 +66,18 @@ public class NapRESTClient {
     public List<Subscription> getSubscriptions() {
         String url = String.format("%s/nap/%s/subscriptions", server, user);
         ResponseEntity<Subscription[]> response = restTemplate.getForEntity(url, Subscription[].class);
-        return Arrays.stream(response.getBody()).collect(Collectors.toList());
+        return Arrays.asList(response.getBody());
     }
 
     public void deleteSubscription(String subscriptionId) {
         restTemplate.delete(String.format("%s/nap/%s/subscriptions/%s", server, user, subscriptionId));
     }
 
-    public List<Capability> getMatchingCapabilities(String selector) {
+    public List<Capability> getMatchingCapabilities(String selector) throws JsonProcessingException {
         String url = String.format("%s/nap/%s/subscriptions/capabilities", server, user);
         Map<String,String> parameters = new HashMap<>();
         parameters.put("selector",selector);
         ResponseEntity<Capability[]> response = restTemplate.getForEntity(url, Capability[].class, parameters);
-        return Arrays.stream(response.getBody()).collect(Collectors.toList());
+        return Arrays.asList(response.getBody());
     }
 }
