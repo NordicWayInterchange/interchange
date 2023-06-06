@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -126,9 +125,9 @@ public class ServiceProviderImport {
             ).applyTo(configurableApplicationContext.getEnvironment());        }
     }
         /*
-        Used to import/export from a locally runnning database
+        Used to import to a locally runnning database
          */
-    public static class LocalhostInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    public static class LocalhostImportInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
@@ -139,6 +138,21 @@ public class ServiceProviderImport {
                     "spring.datasource.password: federation",
                     "spring.datasource.driver-class-name: org.postgresql.Driver",
                     "spring.jpa.hibernate.ddl-auto = update"
+            ).applyTo(configurableApplicationContext.getEnvironment());        }
+    }
+    /*
+    Used to export a locally runnning database
+     */
+    public static class LocalhostExportInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+
+            TestPropertyValues.of(
+                    "spring.datasource.url: jdbc:postgresql://localhost:5432/federation",
+                    "spring.datasource.username: federation",
+                    "spring.datasource.password: federation",
+                    "spring.datasource.driver-class-name: org.postgresql.Driver"
             ).applyTo(configurableApplicationContext.getEnvironment());        }
     }
 
