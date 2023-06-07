@@ -32,6 +32,8 @@ public class QpidClient {
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
 	private static final String EXCHANGE_URL_PATTERN = "%s/api/latest/exchange/default/%s";
 
+	private static final String ALL_QUEUES_URL_PATTERN = "%s/api/latest/queue/default/";
+
 	private static final String ALL_EXCHANGES_URL_PATTERN = "%s/api/latest/exchange/default/";
 	private static final String QUEUES_URL_PATTERN = "%s/api/latest/queue/default/%s";
 	private static final String PING_URL_PATTERN = "%s/api/latest/virtualhost/default/%s";
@@ -44,6 +46,8 @@ public class QpidClient {
 	private final String groupsUrl;
 	private final RestTemplate restTemplate;
 	private final String aclRulesUrl;
+	private final String allQueuesUrl;
+	private final String allExchangesUrl;
 
 	public QpidClient(String baseUrl,
 					  String vhostName,
@@ -54,6 +58,8 @@ public class QpidClient {
 		this.groupsUrl = String.format(GROUPS_URL_PATTERN, baseUrl);
 		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
 		this.restTemplate = restTemplate;
+		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl, vhostName);
+		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl, vhostName);
 	}
 
 	/**
@@ -347,4 +353,13 @@ public class QpidClient {
 		}
 	}
 
+	public String getAllQueues() {
+		ResponseEntity<String> allQueuesResponse = restTemplate.getForEntity(allQueuesUrl, String.class);
+		return allQueuesResponse.getBody();
+	}
+
+	public String getAllExchanges() {
+		ResponseEntity<String> allExchangesResponse = restTemplate.getForEntity(allExchangesUrl, String.class);
+		return allExchangesResponse.getBody();
+	}
 }
