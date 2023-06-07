@@ -303,4 +303,20 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		List<Exchange> result = mapper.readValue(file, collectionType);
 		assertThat(result.size()).isEqualTo(4);
 	}
+
+	@Test
+	public void readExchangesFromQpid() throws IOException {
+		client.createTopicExchange("test-exchange");
+		client.createQueue("test-queue");
+		client.bindTopicExchange("originatingCountry = 'NO'", "test-exchange", "test-queue");
+
+		ObjectMapper mapper = new ObjectMapper();
+		TypeFactory typeFactory = mapper.getTypeFactory();
+
+		CollectionType collectionType = typeFactory.constructCollectionType(
+				List.class, Exchange.class);
+
+		List<Exchange> result = mapper.readValue(client.getAllExchanges(), collectionType);
+		System.out.println(result);
+	}
 }
