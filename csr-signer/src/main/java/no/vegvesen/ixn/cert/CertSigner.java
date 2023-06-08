@@ -1,8 +1,14 @@
 package no.vegvesen.ixn.cert;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 //import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -24,10 +30,7 @@ import java.io.ObjectInput;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -66,6 +69,20 @@ public class CertSigner {
                 csr.getSubject(),
                 csr.getSubjectPublicKeyInfo()
         );
+        //ASN1ObjectIdentifier basicConstraints = Extension.basicConstraints;
+        //new BasicConstraints(false);
+        //TODO critical??
+        certificateBuilder.addExtension(Extension.basicConstraints,false,new BasicConstraints(false));
+        /*
+            X509v3 Key Usage: critical
+                Digital Signature, Non Repudiation, Key Encipherment
+
+                Obtained by ORing the ints together.
+         */
+        KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation);
+        certificateBuilder.addExtension(Extension.keyUsage,true,keyUsage);
+
+
         JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA256withRSA");
 
         ContentSigner signer = signerBuilder.build(privateKey);
