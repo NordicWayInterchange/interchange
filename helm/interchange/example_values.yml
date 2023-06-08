@@ -1,12 +1,19 @@
+# Secrets:
+key_store_password: password                                      # Key store password
+trust_store_password: password                                    # Trust store password
+interchange_password: not-a-secure-password                       # Password for the user that the interchange app uses to validate messages arriving on Qpid
+admin_password: not-a-secure-password                             # Password for a Qpid administrative user
+postgres_user: federation                                         # Database user
+postgres_password: federation                                     # Database password
+key_store: "test"                                                 # Name of key store file
+trust_store: truststore.jks                                       # Name of trust store file
+
+# Values:
 external_name: example-node.itsinterchange.eu
 self:                                                               # ------ General node settings ----------------
   domain_name: itsinterchange.eu
   tls_secret_name: example-node                                     # Name of the secret created with kubectl that contains the certificates and keys.
   control_channel_port: 443                                         # Specify the control channel port  for the Node
-  key_store: example-node.itsinterchange.eu.p12                     # Name of key store file
-  key_store_password: password                                      # Key store password
-  trust_store: truststore.jks                                       # Name of trust store file
-  trust_store_password: password                                    # Trust store password
   secret_mount_path: /jks/keys/                                     # Location of certificates and keys
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
 
@@ -16,8 +23,6 @@ qpid:                                                               # Apache Qpi
     repository: eu.gcr.io/nordic-way-aad182cc/qpid                  # Public container registry for Nordic Way where the docker images are located
     tag: "074e6bd"                                                  # Image tag for the Qpid-image
   expose_amqps: true                                                # Expose the AMPQS port for incoming messages.
-  interchange_password: not-a-secure-password                       # Password for the user that the interchange app uses to validate messages arriving on Qpid
-  admin_password: not-a-secure-password                             # Password for a Qpid administrative user
   persistence:                                                      # Configure persistence of queues in Qpid
     enabled: true
     storageClassName: standard
@@ -44,8 +49,6 @@ database:                                                           # Database o
   image:
     repository: postgres
     tag: 15.1
-  postgres_user: federation                                         # Database user
-  postgres_password: federation                                     # Database password
   postgres_db: federation                                           # Database name
   persistence:                                                      # Persistence settings for the database.
     enabled: true
@@ -90,5 +93,3 @@ onboard_server:                                                     # Java appli
   logging:
   - logger_name: .root
     level: info
-secret_dev_no:
-  key_store: "test"

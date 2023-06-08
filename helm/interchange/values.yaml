@@ -1,7 +1,6 @@
 self:                                                               # ------ General node settings ----------------
   control_channel_port: 443                                         # Specify the control channel port  for the Node
   message_channel_port: 5671                                        # Specify the message channel port  for the Node
-  trust_store: truststore.jks                                       # Name of trust store file
   secret_mount_path: /jks/keys/                                     # Location of certificates and keys
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
 
@@ -28,11 +27,9 @@ qpid:
 
   ## credentials used by the interchange server(s)
   interchange_user: interchange
-  interchange_password: c81b984cd23adb8bada75135ee6bb3e9
 
   ## admin credentials
   admin_user: qpid-admin
-  admin_password: d5779aa9d01f422db0b3d1b12b916e09
 
   ## each user specified here will receive access to the onramp queue as well as their own queue/binding
   users: []
