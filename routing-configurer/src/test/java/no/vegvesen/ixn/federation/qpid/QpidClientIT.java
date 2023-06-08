@@ -22,6 +22,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.type.TypeFactory
 
 import java.io.*;
 import java.util.List;
+import java.util.Set;
 
 import static no.vegvesen.ixn.federation.qpid.QpidClient.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -306,17 +307,33 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void readExchangesFromQpid() throws IOException {
-		client.createTopicExchange("test-exchange");
+		client.createTopicExchange("test-exchange1");
+		client.createTopicExchange("test-exchange2");
 		client.createQueue("test-queue");
-		client.bindTopicExchange("originatingCountry = 'NO'", "test-exchange", "test-queue");
+		client.bindTopicExchange("originatingCountry = 'NO'", "test-exchange1", "test-queue");
+		client.bindTopicExchange("originatingCountry = 'NO'", "test-exchange2", "test-queue");
 
+		assertThat(client.getAllExchanges().size()).isEqualTo(2);
+	}
+
+	@Test
+	public void readQueuesFromJsonFile() throws IOException {
+		File file = new File("src/test/resources/queues.json");
 		ObjectMapper mapper = new ObjectMapper();
 		TypeFactory typeFactory = mapper.getTypeFactory();
 
 		CollectionType collectionType = typeFactory.constructCollectionType(
-				List.class, Exchange.class);
+				List.class, Queue.class);
 
-		List<Exchange> result = mapper.readValue(client.getAllExchanges(), collectionType);
-		System.out.println(result);
+		List<Queue> result = mapper.readValue(file, collectionType);
+		assertThat(result.size()).isEqualTo(4);
+	}
+
+	@Test
+	public void readQueuesFromQpid() throws IOException {
+		client.createQueue("test-queue");
+
+		Set<Queue> result = client.getAllQueues();
+		assertThat(result.size()).isEqualTo(3);
 	}
 }
