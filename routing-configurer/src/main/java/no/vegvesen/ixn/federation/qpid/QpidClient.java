@@ -1,5 +1,9 @@
 package no.vegvesen.ixn.federation.qpid;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -353,13 +357,43 @@ public class QpidClient {
 		}
 	}
 
-	public String getAllQueues() {
+	public Set<Queue> getAllQueues() throws JsonProcessingException {
 		ResponseEntity<String> allQueuesResponse = restTemplate.getForEntity(allQueuesUrl, String.class);
-		return allQueuesResponse.getBody();
+
+		ObjectMapper mapper = new ObjectMapper();
+		TypeFactory typeFactory = mapper.getTypeFactory();
+
+		CollectionType collectionType = typeFactory.constructCollectionType(
+				List.class, Queue.class);
+
+		List<Queue> result = mapper.readValue(allQueuesResponse.getBody(), collectionType);
+		return new HashSet<>(result);
 	}
 
-	public String getAllExchanges() {
+	public Set<Exchange> getAllExchanges() throws JsonProcessingException {
 		ResponseEntity<String> allExchangesResponse = restTemplate.getForEntity(allExchangesUrl, String.class);
-		return allExchangesResponse.getBody();
+
+		ObjectMapper mapper = new ObjectMapper();
+		TypeFactory typeFactory = mapper.getTypeFactory();
+
+		CollectionType collectionType = typeFactory.constructCollectionType(
+				List.class, Exchange.class);
+
+		List<Exchange> result = mapper.readValue(allExchangesResponse.getBody(), collectionType);
+		return new HashSet<>(result);
+	}
+
+	public QpidDelta getQpidDelta() {
+		QpidDelta qpidDelta = new QpidDelta();
+		try {
+			Set<Queue> allQueues = getAllQueues();
+			Set<Exchange> allExchanges = getAllExchanges();
+			qpidDelta.setExchanges(allExchanges);
+			qpidDelta.setQueues(allQueues);
+		} catch (JsonProcessingException e) {
+			logger.error("Could not parse qpid delta");
+			throw new RuntimeException(e);
+		}
+		return qpidDelta;
 	}
 }
