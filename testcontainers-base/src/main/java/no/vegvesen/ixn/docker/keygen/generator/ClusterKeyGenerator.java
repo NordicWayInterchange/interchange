@@ -3,23 +3,38 @@ package no.vegvesen.ixn.docker.keygen.generator;
 import no.vegvesen.ixn.docker.keygen.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 
 public class ClusterKeyGenerator {
-    public static void generateKeys(Cluster cluster, Path outputFolder) {
 
+    private static final char[] allowedChars = {
+            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+            'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+            '0','1','2','3','4','5','6','7','8','9',
+            '*','-','_','$','+'
+    };
+
+
+    public static void generateKeys(Cluster cluster, Path outputFolder) throws IOException {
+        SecureRandom random = new SecureRandom();
         TopDomain topDomain = cluster.getTopDomain();
         CertKeyPair certKeyPair  = generateRootCA(outputFolder, topDomain);
-        String topDomainTrustStorePassword = "password";
+        String topDomainTrustStorePassword = generatePassword(random,24);
+        String passwordFile = topDomain.getDomainName() + "_truststore.txt";
+        Files.writeString(outputFolder.resolve(passwordFile),topDomainTrustStorePassword);
         generateTrustore(certKeyPair.getCaCertOnHost(), topDomainTrustStorePassword, outputFolder, topDomain.getDomainName() + "_truststore.jks");
         for (Interchange interchange : cluster.getInterchanges()) {
             IntermediateDomain domain = interchange.getDomain();
             IntermediateCaCSRGenerator csrGenerator = generateIntermediateCaCsr(outputFolder, domain);
             IntermediateCACertGenerator certGenerator = generateIntermediateCaCert(outputFolder, domain, csrGenerator.getCsrOnHost(), certKeyPair.getCaCertOnHost(), certKeyPair.getCaKeyOnHost());
-            String intermediateCaKeystorePassword = "password";
+            String intermediateCaKeystorePassword = generatePassword(random,24);
             String keystoreName = domain.getDomainName() + ".p12";
             generateKeystore(outputFolder, domain, intermediateCaKeystorePassword, keystoreName, csrGenerator.getKeyOnHost(), certGenerator.getChainCertOnHost(), certKeyPair.getCaCertOnHost());
-            generateTrustore(certGenerator.getSingleCertOnHost(), "password", outputFolder, domain.getDomainName() + "_truststore.jks");
+            Files.writeString(outputFolder.resolve(domain.getDomainName() + ".txt"),intermediateCaKeystorePassword);
+            //generateTrustore(certGenerator.getSingleCertOnHost(), "password", outputFolder, domain.getDomainName() + "_truststore.jks");
             for (AdditionalHost host : interchange.getAdditionalHosts()) {
                 generateServerCertForHost(outputFolder, host, certGenerator.getSingleCertOnHost(), certGenerator.getChainCertOnHost(), csrGenerator.getKeyOnHost());
                 //TODO create keyStore for host (using chain, I expect)
@@ -27,8 +42,9 @@ public class ClusterKeyGenerator {
             for (ServicProviderDescription description : interchange.getServiceProviders()) {
                 ServiceProviderCSRGenerator spCsr = generateCsrForServiceProvider(outputFolder, description);
                 ServiceProviderCertGenerator spCert = generateServiceProviderCert(outputFolder, description, certGenerator.getSingleCertOnHost(), certGenerator.getIntermediateKeyOnHost(), certGenerator.getChainCertOnHost(), spCsr.getCsrOnHost());
-                String serviceProviderKeystorePassword = "password";
+                String serviceProviderKeystorePassword = generatePassword(random,24);
                 String serviceProviderKeystoreName = description.getName() + ".p12";
+                Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
                 generateServiceProviderKeyStore(outputFolder, description, serviceProviderKeystorePassword, serviceProviderKeystoreName, spCsr.getKeyOnHost(), spCert.getCertChainOnHost(), certGenerator.getSingleCertOnHost());
 
             }
@@ -136,6 +152,14 @@ public class ClusterKeyGenerator {
         );
         caGenerator.start();
         return caGenerator.getCertKeyPairOnHost();
+    }
+
+    private static String generatePassword(SecureRandom random, int length) {
+        StringBuilder builder = new StringBuilder();
+        for (int i =  0; i < length; i++) {
+            builder.append(allowedChars[random.nextInt(allowedChars.length)]);
+        }
+        return builder.toString();
     }
 
 }

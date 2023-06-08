@@ -5,6 +5,7 @@ import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class KeyGenerationBuilderIT {
@@ -13,7 +14,7 @@ public class KeyGenerationBuilderIT {
 
     //TODO need to finish generation and testing with extra hosts
     @Test
-    public void generate() {
+    public void generate() throws IOException {
         Cluster myCluster = Cluster.builder()
                 .topDomain().domainName("top-domain.eu").ownerCountry("NO").done()
                 .interchange()
@@ -33,7 +34,7 @@ public class KeyGenerationBuilderIT {
 
     @Test
     @Disabled
-    public void generateModelForDockerComposeRedirect() {
+    public void generateModelForDockerComposeRedirect() throws IOException {
 
         Cluster cluster = Cluster.builder()
                 .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO").done()
@@ -62,8 +63,6 @@ public class KeyGenerationBuilderIT {
                 .serviceProvider().name("mette@boble.stminterchange.com").country("NO").done()
                 .done().done();
         return cluster;
-
-
     }
 
 
