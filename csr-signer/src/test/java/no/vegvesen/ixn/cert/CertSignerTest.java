@@ -31,4 +31,10 @@ public class CertSignerTest {
 
 
     }
+
+
+   //Test that:
+   //SP name is correct in CSR, ie the same that is passed in.
+   //We use the correct extensions.
+
 }
