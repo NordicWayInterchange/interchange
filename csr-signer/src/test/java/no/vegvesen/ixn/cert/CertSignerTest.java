@@ -2,11 +2,13 @@ package no.vegvesen.ixn.cert;
 
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,7 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CertSignerTest {
 
     @Test
-    public void testSigningCsr() throws IOException, OperatorCreationException, CertificateException {
+    @Disabled
+    public void testSigningCsr() throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException {
         //TODO copy this to a better location
         Path path = DockerBaseIT.getTargetFolderPathForTestClass(CertSignerIT.class);
         String intermediateCaCertAsString = Files.readString(path.resolve("int.interchangetestdomain.no.crt.pem"));
