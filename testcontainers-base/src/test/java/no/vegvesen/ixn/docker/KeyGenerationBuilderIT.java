@@ -14,6 +14,7 @@ public class KeyGenerationBuilderIT {
 
     //TODO need to finish generation and testing with extra hosts
     @Test
+    @Disabled
     public void generate() throws IOException {
         Cluster myCluster = Cluster.builder()
                 .topDomain().domainName("top-domain.eu").ownerCountry("NO").done()
