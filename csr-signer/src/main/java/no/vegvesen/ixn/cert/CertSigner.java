@@ -36,10 +36,10 @@ public class CertSigner {
     private final SecureRandom secureRandom;
     private X500Name intermediateSubject;
 
-    public CertSigner(String caCert, String key) throws IOException, CertificateException {
+    public CertSigner(String intermediateCaCert, String intermediateCaKey) throws IOException, CertificateException {
         secureRandom = new SecureRandom();
-        privateKey = getPrivateKey(key);
-        X509CertificateHolder certificateHolder = parseCertPem(caCert);
+        privateKey = getPrivateKey(intermediateCaKey);
+        X509CertificateHolder certificateHolder = parseCertPem(intermediateCaCert);
         intermediateSubject = certificateHolder.getSubject();
         intermediateCert = convertToX509Certificate(certificateHolder);
     }

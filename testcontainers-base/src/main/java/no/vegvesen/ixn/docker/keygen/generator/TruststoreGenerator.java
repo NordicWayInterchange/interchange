@@ -1,6 +1,9 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -11,6 +14,8 @@ public class TruststoreGenerator extends GenericContainer<TruststoreGenerator> {
     private Path caCertPath;
     private String password;
     private Path targetPath;
+
+    Logger logger = LoggerFactory.getLogger(TruststoreGenerator.class);
 
     public TruststoreGenerator(ImageFromDockerfile image, Path caCertPath, String password, Path outputFile) {
         super(image);
@@ -34,5 +39,6 @@ public class TruststoreGenerator extends GenericContainer<TruststoreGenerator> {
         String keystoreInContainer = "/out/" + targetPath.getFileName();
         this.withCommand(certPathInContainer, keystoreInContainer, password);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
+        this.withLogConsumer(new Slf4jLogConsumer(logger));
     }
 }
