@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 
@@ -23,9 +24,9 @@ public class ClusterKeyGenerator {
         TopDomain topDomain = cluster.getTopDomain();
         CertKeyPair certKeyPair  = generateRootCA(outputFolder, topDomain);
         String topDomainTrustStorePassword = generatePassword(random,24);
+        generateTrustore(certKeyPair.getCaCertOnHost(), topDomainTrustStorePassword, outputFolder, topDomain.getDomainName() + "_truststore.jks");
         String passwordFile = topDomain.getDomainName() + "_truststore.txt";
         Files.writeString(outputFolder.resolve(passwordFile),topDomainTrustStorePassword);
-        generateTrustore(certKeyPair.getCaCertOnHost(), topDomainTrustStorePassword, outputFolder, topDomain.getDomainName() + "_truststore.jks");
         for (Interchange interchange : cluster.getInterchanges()) {
             IntermediateDomain domain = interchange.getDomain();
             IntermediateCaCSRGenerator csrGenerator = generateIntermediateCaCsr(outputFolder, domain);
