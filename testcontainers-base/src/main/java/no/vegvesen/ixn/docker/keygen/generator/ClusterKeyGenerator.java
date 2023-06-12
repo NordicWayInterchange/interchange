@@ -33,16 +33,22 @@ public class ClusterKeyGenerator {
             IntermediateCACertGenerator certGenerator = generateIntermediateCaCert(outputFolder, domain, csrGenerator.getCsrOnHost(), certKeyPair.getCaCertOnHost(), certKeyPair.getCaKeyOnHost());
             String intermediateCaKeystorePassword = generatePassword(random,24);
             String keystoreName = domain.getDomainName() + ".p12";
-            generateKeystore(outputFolder, domain, intermediateCaKeystorePassword, keystoreName, csrGenerator.getKeyOnHost(), certGenerator.getChainCertOnHost(), certKeyPair.getCaCertOnHost());
+            generateKeystore(outputFolder,
+                    domain,
+                    intermediateCaKeystorePassword,
+                    keystoreName,
+                    csrGenerator.getKeyOnHost(),
+                    certGenerator.getChainCertOnHost(),
+                    certKeyPair.getCaCertOnHost()
+            );
             Files.writeString(outputFolder.resolve(domain.getDomainName() + ".txt"),intermediateCaKeystorePassword);
-            //generateTrustore(certGenerator.getSingleCertOnHost(), "password", outputFolder, domain.getDomainName() + "_truststore.jks");
             for (AdditionalHost host : interchange.getAdditionalHosts()) {
                 generateServerCertForHost(outputFolder, host, certGenerator.getSingleCertOnHost(), certGenerator.getChainCertOnHost(), csrGenerator.getKeyOnHost());
                 //TODO create keyStore for host (using chain, I expect)
             }
             for (ServicProviderDescription description : interchange.getServiceProviders()) {
                 ServiceProviderCSRGenerator spCsr = generateCsrForServiceProvider(outputFolder, description);
-                ServiceProviderCertGenerator spCert = generateServiceProviderCert(outputFolder, description, certGenerator.getSingleCertOnHost(), certGenerator.getIntermediateKeyOnHost(), certGenerator.getChainCertOnHost(), spCsr.getCsrOnHost());
+                CertAndCertChain spCert = generateServiceProviderCert(outputFolder, description, certGenerator.getSingleCertOnHost(), certGenerator.getIntermediateKeyOnHost(), certGenerator.getChainCertOnHost(), spCsr.getCsrOnHost());
                 String serviceProviderKeystorePassword = generatePassword(random,24);
                 String serviceProviderKeystoreName = description.getName() + ".p12";
                 Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
@@ -53,20 +59,19 @@ public class ClusterKeyGenerator {
         }
     }
 
-    private static void generateServiceProviderKeyStore(Path outputFolder, ServicProviderDescription description, String serviceProviderKeystorePassword, String serviceProviderKeystoreName, Path keyOnHost, Path certChainOnHost, Path singleCertOnHost) {
+    public static void generateServiceProviderKeyStore(Path outputFolder, ServicProviderDescription description, String serviceProviderKeystorePassword, String serviceProviderKeystoreName, Path keyOnHost, Path certChainOnHost, Path signingCertOnHost) {
         KeystoreGenerator spKeystore = new KeystoreGenerator(
                 keyOnHost,
                 certChainOnHost,
                 description.getName(),
-                singleCertOnHost, //TODO check this! This is what I used for the systems test
+                signingCertOnHost, //TODO check this! This is what I used for the systems test
                 serviceProviderKeystorePassword,
                 outputFolder.resolve(serviceProviderKeystoreName)
         );
         spKeystore.start();
     }
 
-    @NotNull
-    private static ServiceProviderCertGenerator generateServiceProviderCert(Path outputFolder, ServicProviderDescription description, Path singleCertOnHost, Path intermediateKeyOnHost, Path chainCertOnHost, Path csrOnHost) {
+    public static CertAndCertChain generateServiceProviderCert(Path outputFolder, ServicProviderDescription description, Path singleCertOnHost, Path intermediateKeyOnHost, Path chainCertOnHost, Path csrOnHost) {
         ServiceProviderCertGenerator spCert = new ServiceProviderCertGenerator(
                 csrOnHost,
                 description.getName(),
@@ -76,8 +81,9 @@ public class ClusterKeyGenerator {
                 outputFolder
         );
         spCert.start();
-        return spCert;
+        return spCert.getCertAndCertChainOnHost();
     }
+
 
     public static ServiceProviderCSRGenerator generateCsrForServiceProvider(Path outputFolder, ServicProviderDescription description) {
         ServiceProviderCSRGenerator spCsr = new ServiceProviderCSRGenerator(
@@ -101,16 +107,19 @@ public class ClusterKeyGenerator {
         serverCertGenerator.start();
     }
 
-    private static void generateKeystore(Path outputFolder, IntermediateDomain domain, String intermediateCaKeystorePassword, String keystoreName, Path keyOnHost, Path chainCertOnHost, Path caCertOnHost) {
+    public static Path generateKeystore(Path outputFolder, IntermediateDomain domain, String intermediateCaKeystorePassword, String keystoreName, Path keyOnHost, Path chainCertOnHost, Path caCertOnHost) {
+        //TODO this should be done inside the KeystoreGenerator class to be consistent.
+        Path keystoreOnHost = outputFolder.resolve(keystoreName);
         KeystoreGenerator keystoreGenerator = new KeystoreGenerator(
                 keyOnHost,
                 chainCertOnHost,
                 domain.getDomainName(),
                 caCertOnHost,
                 intermediateCaKeystorePassword,
-                outputFolder.resolve(keystoreName)
+                keystoreOnHost
         );
         keystoreGenerator.start();
+        return keystoreOnHost;
     }
 
     public static IntermediateCACertGenerator generateIntermediateCaCert(Path outputFolder, IntermediateDomain domain, Path csrOnHost, Path caCertOnHost, Path caKeyOnHost) {
@@ -136,9 +145,9 @@ public class ClusterKeyGenerator {
         return csrGenerator;
     }
 
-    public static void generateTrustore(Path caGenerator, String topDomainTrustStorePassword, Path outputFolder, String truststoreName) {
+    public static void generateTrustore(Path caCertPath, String topDomainTrustStorePassword, Path outputFolder, String truststoreName) {
         TruststoreGenerator topDomainTrustStoreGenerator = new TruststoreGenerator(
-                caGenerator,
+                caCertPath,
                 topDomainTrustStorePassword, //For now
                 outputFolder.resolve(truststoreName)
         );

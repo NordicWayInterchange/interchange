@@ -90,4 +90,8 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
         return outputPath.resolve(String.format("chain.%s.crt.pem",clientName));
     }
 
+    public CertAndCertChain getCertAndCertChainOnHost() {
+        return new CertAndCertChain(getCertOnHost(),getCertChainOnHost());
+
+    }
 }

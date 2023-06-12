@@ -5,19 +5,26 @@ import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
+import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -32,17 +39,19 @@ import java.util.Date;
 
 public class CertSigner {
     private final PrivateKey privateKey;
-    private final X509Certificate intermediateCert;
     private final SecureRandom secureRandom;
-    private X500Name intermediateSubject;
+    private final X500Name intermediateSubject;
+    private final X509Certificate intermediateCertificate;
 
-    public CertSigner(String intermediateCaCert, String intermediateCaKey) throws IOException, CertificateException {
+
+    public CertSigner(KeyStore keyStore, String keyAlias, String keystorePassword) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
         secureRandom = new SecureRandom();
-        privateKey = getPrivateKey(intermediateCaKey);
-        X509CertificateHolder certificateHolder = parseCertPem(intermediateCaCert);
-        intermediateSubject = certificateHolder.getSubject();
-        intermediateCert = convertToX509Certificate(certificateHolder);
+        this.privateKey = (PrivateKey) keyStore.getKey(keyAlias, keystorePassword.toCharArray());
+        intermediateCertificate = (X509Certificate) keyStore.getCertificate(keyAlias);
+        X500Principal issuerX500Principal = intermediateCertificate.getIssuerX500Principal();
+        intermediateSubject = new X500Name(issuerX500Principal.getName(X500Principal.RFC1779));
     }
+
 
     public String sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException {
 
@@ -53,6 +62,8 @@ public class CertSigner {
         //But could probably just read it later from the cert.
         BigInteger serialNumber = new BigInteger(Long.toString(secureRandom.nextLong()));
         Date startDate = new Date();
+        Date toDate = Date.from(LocalDateTime.now().plus(1, ChronoUnit.YEARS).atZone(ZoneId.systemDefault()).toInstant());
+
         X500Name csrSubject = csr.getSubject();
         RDN csrCnRdn = csrSubject.getRDNs(BCStyle.CN)[0];
 
@@ -61,11 +72,11 @@ public class CertSigner {
         String csrCn = IETFUtils.valueToString(csrCnRdn.getFirst().getValue());
         System.out.println(csrCn);
 
-        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(
+        JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(
                 intermediateSubject,
                 serialNumber,
                 startDate,
-                Date.from(LocalDateTime.now().plus(1, ChronoUnit.YEARS).atZone(ZoneId.systemDefault()).toInstant()),
+                toDate,
                 csrSubject,
                 csrSubjectPublicKeyInfo
         );
@@ -78,7 +89,7 @@ public class CertSigner {
         //NOTE this only gives the keyId for the key identifier. Could also use the cert,
         //which gives keyid, dirname (subject) and serial number of signee
         JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
-        AuthorityKeyIdentifier authorityKeyIdentifier = extensionUtils.createAuthorityKeyIdentifier(intermediateCert.getPublicKey());
+        AuthorityKeyIdentifier authorityKeyIdentifier = extensionUtils.createAuthorityKeyIdentifier(intermediateCertificate.getPublicKey());
         certificateBuilder.addExtension(Extension.authorityKeyIdentifier,false, authorityKeyIdentifier);
         /*
             X509v3 Key Usage: critical
@@ -103,23 +114,18 @@ public class CertSigner {
 
         X509CertificateHolder issuedCertHolder = certificateBuilder.build(signer);
         X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
+        return certificatesToString(certificate,intermediateCertificate);
+    }
+
+    public static String certificatesToString(X509Certificate certificate, X509Certificate ... certificates) throws IOException {
         StringWriter certWriter = new StringWriter();
         JcaPEMWriter writer = new JcaPEMWriter(certWriter);
         writer.writeObject(certificate);
+        for (X509Certificate cert : certificates) {
+            writer.writeObject(cert);
+        }
         writer.close();
         return certWriter.toString();
-    }
-
-    private X509Certificate convertToX509Certificate(X509CertificateHolder certificateHolder) throws CertificateException {
-        JcaX509CertificateConverter jcaX509CertificateConverter = new JcaX509CertificateConverter();
-        return jcaX509CertificateConverter.getCertificate(certificateHolder);
-    }
-
-    private X509CertificateHolder parseCertPem(String caCert) throws IOException {
-        final X509CertificateHolder intermediateCertHolder;
-        PEMParser certParser = new PEMParser(new StringReader(caCert));
-        intermediateCertHolder = (X509CertificateHolder) certParser.readObject();
-        return intermediateCertHolder;
     }
 
     private PKCS10CertificationRequest getPkcs10CertificationRequest(String csrAsString) throws IOException {
@@ -128,12 +134,4 @@ public class CertSigner {
         return csr;
     }
 
-    private PrivateKey getPrivateKey(String key) throws IOException {
-        final PrivateKey privateKey;
-        PEMParser keyParser = new PEMParser(new StringReader(key));
-        PrivateKeyInfo privateKeyInfo = PrivateKeyInfo.getInstance(keyParser.readObject());
-        JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-        privateKey = converter.getPrivateKey(privateKeyInfo);
-        return privateKey;
-    }
 }

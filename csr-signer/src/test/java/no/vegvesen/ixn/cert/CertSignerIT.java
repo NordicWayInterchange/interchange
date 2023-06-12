@@ -6,12 +6,17 @@ import no.vegvesen.ixn.docker.keygen.ServicProviderDescription;
 import no.vegvesen.ixn.docker.keygen.TopDomain;
 import no.vegvesen.ixn.docker.keygen.generator.*;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,15 +27,21 @@ public class CertSignerIT {
     private static Path containerOutPath = DockerBaseIT.getTargetFolderPathForTestClass(CertSignerIT.class);
 
     @Test
-    public void testFoo() throws IOException, CertificateException, NoSuchAlgorithmException, OperatorCreationException {
+    @Disabled("This test is already done in CertSignerTest")
+    public void testFoo() throws IOException, CertificateException, NoSuchAlgorithmException, OperatorCreationException, KeyStoreException, UnrecoverableKeyException {
         //generate CA, intermediate CA, certs and keys, and CSR for SP
-        //TODO should have something that just gives the paths to the different things.
-        //fail("This must be implemented");
         CertKeyPair rootCa = ClusterKeyGenerator.generateRootCA(
                 containerOutPath,
                 new TopDomain("testdomain.no", "NO")
         );
-        IntermediateDomain interchangeDomain = new IntermediateDomain("interchangetestdomain.no", "NO");
+        ClusterKeyGenerator.generateTrustore(
+                rootCa.getCaCertOnHost(),
+                "trustpassword",
+                containerOutPath,
+                "truststore.jks"
+        );
+        String domainName = "interchangetestdomain.no";
+        IntermediateDomain interchangeDomain = new IntermediateDomain(domainName, "NO");
         CsrKeyPair intermediateCsr = ClusterKeyGenerator.generateIntermediateCaCsr(
                 containerOutPath,
                 interchangeDomain
@@ -42,14 +53,34 @@ public class CertSignerIT {
                 rootCa.getCaCertOnHost(),
                 rootCa.getCaKeyOnHost()
         ).getCertChainAndKeyOnHost();
+        String keystorePassword = "password";
+        Path keystorePath = ClusterKeyGenerator.generateKeystore(
+                containerOutPath,
+                interchangeDomain,
+                keystorePassword,
+                "keystore.p12",
+                intermediateCert.getIntermediateKeyOnHost(),
+                intermediateCert.getChainCertOnHost(),
+                rootCa.getCaCertOnHost());
         CsrKeyPair serviceProviderCsr = ClusterKeyGenerator.generateCsrForServiceProvider(containerOutPath,
                 new ServicProviderDescription("testSP", "NO")).getCsrKeyPairOnHost();
-        String intermediateCertAsString = Files.readString(intermediateCert.getSingleCertOnHost());
-        String intermediateKeyAsString = Files.readString(intermediateCert.getIntermediateKeyOnHost());
-        CertSigner signer = new CertSigner(intermediateCertAsString,intermediateKeyAsString);
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(new FileInputStream(keystorePath.toString()),keystorePassword.toCharArray());
+        CertSigner signer = new CertSigner(keyStore,domainName, keystorePassword);
         String csrAsString = Files.readString(serviceProviderCsr.getCsrOnHost());
         String certAsString = signer.sign(csrAsString, "testSP");
+        Path spCertFile = containerOutPath.resolve("testSP.crt.pem");
+        Files.writeString(spCertFile,certAsString);
+        ClusterKeyGenerator.generateServiceProviderKeyStore(
+                containerOutPath,
+                new ServicProviderDescription("testSP","NO"),
+                "sppassword",
+                "testSP.p12",
+                serviceProviderCsr.getKeyOnHost(),
+                spCertFile,
+                intermediateCert.getSingleCertOnHost()
+        );
         assertThat(certAsString).startsWith("-----BEGIN CERTIFICATE-----");
-        //TODO should return the chain!
+        //Now, we need to actually test using the certificate
     }
 }

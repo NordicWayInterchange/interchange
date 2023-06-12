@@ -8,6 +8,10 @@ import java.nio.file.Path;
 import java.time.Duration;
 
 public class KeystoreGenerator extends GenericContainer<KeystoreGenerator> {
+    public static final String IN_KEY_PATH = "/keys/in-key";
+    public static final String IN_CERT_PATH = "/chain/cert";
+    public static final String CA_CERT_PATH = "/ca/cert";
+    public static final String OUT_FOLDER = "/out/";
     private Path keyOnHost;
     private Path chainCertOnHost;
     private String domainName;
@@ -50,12 +54,12 @@ public class KeystoreGenerator extends GenericContainer<KeystoreGenerator> {
 
         @Override
     protected void configure() {
-        this.withFileSystemBind(keyOnHost.toString(), "/keys/in-key");
-        this.withFileSystemBind(chainCertOnHost.toString(), "/chain/cert");
-        this.withFileSystemBind(caCertOnHost.toString(), "/ca/cert");
-        this.withFileSystemBind(outputFile.getParent().toString(), "/out/");
-        String outputFileInContainer = "/out/" + outputFile.getFileName();
-        this.withCommand("/keys/in-key", "/chain/cert", domainName, "/ca/cert", password, outputFileInContainer);
+        this.withFileSystemBind(keyOnHost.toString(), IN_KEY_PATH);
+        this.withFileSystemBind(chainCertOnHost.toString(), IN_CERT_PATH);
+        this.withFileSystemBind(caCertOnHost.toString(), CA_CERT_PATH);
+        this.withFileSystemBind(outputFile.getParent().toString(), OUT_FOLDER);
+        String outputFileInContainer = OUT_FOLDER + outputFile.getFileName();
+        this.withCommand(IN_KEY_PATH, IN_CERT_PATH, domainName, CA_CERT_PATH, password, outputFileInContainer);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 }
