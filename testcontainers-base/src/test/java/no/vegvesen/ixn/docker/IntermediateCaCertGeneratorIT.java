@@ -1,10 +1,8 @@
 package no.vegvesen.ixn.docker;
 
-import org.junit.jupiter.api.BeforeAll;
+import no.vegvesen.ixn.docker.keygen.generator.IntermediateCACertGenerator;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -27,7 +25,6 @@ public class IntermediateCaCertGeneratorIT {
     private static String countryCode = "NO";
     @Container
     private static IntermediateCACertGenerator generator =new IntermediateCACertGenerator(
-            DockerBaseIT.getFolderPath("keymaster").resolve("rootca/sign_intermediate"),
             crsPath,
             "test2.no",
             cakeysPath.resolve("ca.test.no.crt.pem"),

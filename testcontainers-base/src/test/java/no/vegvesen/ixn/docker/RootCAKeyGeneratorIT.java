@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.docker;
 
+import no.vegvesen.ixn.docker.keygen.generator.RootCAKeyGenerator;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,7 +18,6 @@ public class RootCAKeyGeneratorIT {
 
     @Container
     private RootCAKeyGenerator keysGenerator = new RootCAKeyGenerator(
-            DockerBaseIT.getFolderPath("keymaster").resolve("rootca/newca"),
             targetPath,
             "test.no",
             "NO");
@@ -28,7 +28,6 @@ public class RootCAKeyGeneratorIT {
         assertThat(certPath).exists();
         assertThat(Files.size(certPath)).isGreaterThan(0);
         assertThat(targetPath.resolve("ca.test.no.key.pem")).exists();
-
     }
 
 

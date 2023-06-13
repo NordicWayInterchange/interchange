@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.docker;
 
+import no.vegvesen.ixn.docker.keygen.generator.ServiceProviderCSRGenerator;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -14,7 +16,6 @@ public class ServiceProviderCSRGeneratorIT {
 
     @Container
     private static ServiceProviderCSRGenerator generator = new ServiceProviderCSRGenerator(
-            DockerBaseIT.getFolderPath("keymaster").resolve("serviceprovider/csr"),
             targetPath,
             "testprovider",
             "NO"

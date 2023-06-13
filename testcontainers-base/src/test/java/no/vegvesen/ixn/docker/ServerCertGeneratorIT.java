@@ -1,10 +1,7 @@
 package no.vegvesen.ixn.docker;
 
-import org.junit.jupiter.api.BeforeAll;
+import no.vegvesen.ixn.docker.keygen.generator.ServerCertGenerator;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -22,7 +19,6 @@ public class ServerCertGeneratorIT {
 
     @Container
     private static ServerCertGenerator generator = new ServerCertGenerator(
-            DockerBaseIT.getFolderPath("keymaster").resolve("server"),
             "testserver.test2.no",
             intermediateCaKeysPath.resolve("int.test2.no.crt.pem"),
             intermediateCaKeysPath.resolve("int.test2.no.key.pem"),
@@ -33,7 +29,7 @@ public class ServerCertGeneratorIT {
 
     @Test
     public void checkContainerOutput() {
-        Path chain = containerOutPath.resolve("chain.testserver.test2.no.crt.pem");
+        Path chain = generator.getCertOnHost();
         assertThat(chain).exists();
     }
 

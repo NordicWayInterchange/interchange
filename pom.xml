@@ -249,5 +249,6 @@
         <module>napcore-server</module>
         <module>napcore-server-app</module>
         <module>napcore-rest-client</module>
+        <module>csr-signer</module>
     </modules>
 </project>
