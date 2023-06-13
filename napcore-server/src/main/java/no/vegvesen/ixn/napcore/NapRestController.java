@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.napcore;
 
+import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
@@ -15,13 +16,23 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +49,23 @@ public class NapRestController {
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
     private TypeTransformer typeTransformer = new TypeTransformer();
 
+    @Value("#{systemProperties['server.ssl.key-store']}")
+    private String keystoreLocation;
+
+    @Value("#{systemProperties['server.ssl.key-store-password']}")
+    private String keyStorePassword;
+
+    @Value("#{systemProperties['server.ssl.key-alias']}")
+    private String keyAlias;
+
+    @Value("#{systemProperties['server.ssl.trust-store']}")
+    private String truststoreLocation;
+
+    @Value("#systemProperties['server.ssl.trust-store-password]")
+    private String truststorePassword;
+
+    private CertSigner certSigner;
+
     @Autowired
     public NapRestController(
             ServiceProviderRepository serviceProviderRepository,
@@ -48,12 +76,36 @@ public class NapRestController {
         this.neighbourRepository = neighbourRepository;
         this.certService = certService;
         this.napCoreProperties = napCoreProperties;
+        try {
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(new FileInputStream(keystoreLocation),keyStorePassword.toCharArray());
+            KeyStore trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(new FileInputStream(truststoreLocation),truststorePassword.toCharArray());
+            certSigner = new CertSigner(keyStore,keyAlias,keyStorePassword,trustStore,"myKey");
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
+                 UnrecoverableKeyException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/x509/csr", produces = MediaType.APPLICATION_JSON_VALUE)
     public CertificateSignResponse addCsrRequest(@PathVariable String actorCommonName, @RequestBody CertificateSignRequest signRequest) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        return new CertificateSignResponse("there should be a signed certificate chain in here");
+        String signedCert;
+        try {
+            signedCert = certSigner.sign(signRequest.getCsr(),actorCommonName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (OperatorCreationException e) {
+            throw new RuntimeException(e);
+        } catch (CertificateException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        return new CertificateSignResponse(signedCert);
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)

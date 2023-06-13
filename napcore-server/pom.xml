@@ -45,6 +45,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>csr-signer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
             <scope>test</scope>
