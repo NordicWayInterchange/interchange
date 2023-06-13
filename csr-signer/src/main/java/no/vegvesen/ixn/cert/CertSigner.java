@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.cert;
 
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -42,14 +41,20 @@ public class CertSigner {
     private final SecureRandom secureRandom;
     private final X500Name intermediateSubject;
     private final X509Certificate intermediateCertificate;
+    private final X509Certificate caCertificate;
 
 
-    public CertSigner(KeyStore keyStore, String keyAlias, String keystorePassword) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
+    public CertSigner(KeyStore keyStore,
+                      String keyAlias,
+                      String keystorePassword,
+                      KeyStore truststore,
+                      String caCertAlias) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
         secureRandom = new SecureRandom();
         this.privateKey = (PrivateKey) keyStore.getKey(keyAlias, keystorePassword.toCharArray());
         intermediateCertificate = (X509Certificate) keyStore.getCertificate(keyAlias);
         X500Principal issuerX500Principal = intermediateCertificate.getIssuerX500Principal();
         intermediateSubject = new X500Name(issuerX500Principal.getName(X500Principal.RFC1779));
+        caCertificate = (X509Certificate) truststore.getCertificate(caCertAlias);
     }
 
 
@@ -114,7 +119,7 @@ public class CertSigner {
 
         X509CertificateHolder issuedCertHolder = certificateBuilder.build(signer);
         X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
-        return certificatesToString(certificate,intermediateCertificate);
+        return certificatesToString(certificate,intermediateCertificate,caCertificate);
     }
 
     public static String certificatesToString(X509Certificate certificate, X509Certificate ... certificates) throws IOException {

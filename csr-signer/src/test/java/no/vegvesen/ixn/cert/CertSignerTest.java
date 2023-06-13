@@ -27,8 +27,9 @@ public class CertSignerTest {
 
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(new FileInputStream(path.resolve("keystore.p12").toString()),"password".toCharArray());
-
-        CertSigner signer = new CertSigner(keyStore,"interchangetestdomain.no","password");
+        KeyStore trustStore = KeyStore.getInstance("JKS");
+        trustStore.load(new FileInputStream(path.resolve("truststore.jks").toString()),"trustpassword".toCharArray());
+        CertSigner signer = new CertSigner(keyStore,"interchangetestdomain.no","password",trustStore,"myKey");
 
         String certificateAsString = signer.sign(csrAsString,"testSP");
         assertThat(certificateAsString).isNotNull();

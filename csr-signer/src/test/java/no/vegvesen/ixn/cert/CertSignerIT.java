@@ -34,11 +34,13 @@ public class CertSignerIT {
                 containerOutPath,
                 new TopDomain("testdomain.no", "NO")
         );
+        String truststoreName = "truststore.jks";
+        String trustpassword = "trustpassword";
         ClusterKeyGenerator.generateTrustore(
                 rootCa.getCaCertOnHost(),
-                "trustpassword",
+                trustpassword,
                 containerOutPath,
-                "truststore.jks"
+                truststoreName
         );
         String domainName = "interchangetestdomain.no";
         IntermediateDomain interchangeDomain = new IntermediateDomain(domainName, "NO");
@@ -66,7 +68,9 @@ public class CertSignerIT {
                 new ServicProviderDescription("testSP", "NO")).getCsrKeyPairOnHost();
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(new FileInputStream(keystorePath.toString()),keystorePassword.toCharArray());
-        CertSigner signer = new CertSigner(keyStore,domainName, keystorePassword);
+        KeyStore trustStore = KeyStore.getInstance("JKS");
+        trustStore.load(new FileInputStream(containerOutPath.resolve(truststoreName).toString()),trustpassword.toCharArray());
+        CertSigner signer = new CertSigner(keyStore,domainName, keystorePassword,trustStore,"myKey");
         String csrAsString = Files.readString(serviceProviderCsr.getCsrOnHost());
         String certAsString = signer.sign(csrAsString, "testSP");
         Path spCertFile = containerOutPath.resolve("testSP.crt.pem");
