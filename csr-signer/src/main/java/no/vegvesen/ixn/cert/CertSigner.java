@@ -34,7 +34,9 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class CertSigner {
     private final PrivateKey privateKey;
@@ -58,7 +60,7 @@ public class CertSigner {
     }
 
 
-    public String sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException {
+    public List<String> sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException {
 
         PKCS10CertificationRequest csr = getPkcs10CertificationRequest(csrAsString);
 
@@ -122,15 +124,23 @@ public class CertSigner {
         return certificatesToString(certificate,intermediateCertificate,caCertificate);
     }
 
-    public static String certificatesToString(X509Certificate certificate, X509Certificate ... certificates) throws IOException {
+    public static List<String> certificatesToString(X509Certificate certificate, X509Certificate ... certificates) throws IOException {
+        List<String> pemList = new ArrayList<>();
+        String pem = certificateAsString(certificate);
+        pemList.add(pem);
+        for (X509Certificate cert : certificates) {
+            pemList.add(certificateAsString(cert));
+        }
+        return pemList;
+    }
+
+    public static String certificateAsString(X509Certificate certificate) throws IOException {
         StringWriter certWriter = new StringWriter();
         JcaPEMWriter writer = new JcaPEMWriter(certWriter);
         writer.writeObject(certificate);
-        for (X509Certificate cert : certificates) {
-            writer.writeObject(cert);
-        }
         writer.close();
-        return certWriter.toString();
+        String pem = certWriter.toString();
+        return pem;
     }
 
     private PKCS10CertificationRequest getPkcs10CertificationRequest(String csrAsString) throws IOException {

@@ -13,7 +13,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,20 +31,10 @@ public class CertSignerTest {
         trustStore.load(new FileInputStream(path.resolve("truststore.jks").toString()),"trustpassword".toCharArray());
         CertSigner signer = new CertSigner(keyStore,"interchangetestdomain.no","password",trustStore,"myKey");
 
-        String certificateAsString = signer.sign(csrAsString,"testSP");
-        assertThat(certificateAsString).isNotNull();
-        assertThat(certificateAsString).isNotEmpty();
-        assertThat(certificateAsString).startsWith("-----BEGIN CERTIFICATE-----");
-    }
-
-    @Test
-    public void pemFromTruststore() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
-        KeyStore trustStore = KeyStore.getInstance("JKS");
-        trustStore.load(new FileInputStream(path.resolve("truststore.jks").toString()),"trustpassword".toCharArray());
-        X509Certificate caCertificate = (X509Certificate) trustStore.getCertificate("myKey");
-
-        String certAsString = CertSigner.certificatesToString(caCertificate);
-        assertThat(certAsString).startsWith("-----BEGIN CERTIFICATE-----");
+        List<String> certificatesAsString = signer.sign(csrAsString,"testSP");
+        assertThat(certificatesAsString).isNotNull();
+        assertThat(certificatesAsString).isNotEmpty();
+        assertThat(certificatesAsString).hasSize(3);
     }
 
    //Test that:

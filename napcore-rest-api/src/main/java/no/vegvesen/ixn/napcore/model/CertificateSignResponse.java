@@ -1,32 +1,34 @@
 package no.vegvesen.ixn.napcore.model;
 
+import java.util.List;
+
 public class CertificateSignResponse {
 
     /*
     PEM encoded certificate chain
      */
-    String chain;
+    List<String> certificates;
 
     public CertificateSignResponse() {
 
     }
 
-    public CertificateSignResponse(String chain) {
-        this.chain = chain;
+    public CertificateSignResponse(List<String> certificates) {
+        this.certificates = certificates;
     }
 
-    public String getChain() {
-        return chain;
+    public List<String> getChain() {
+        return certificates;
     }
 
-    public void setChain(String chain) {
-        this.chain = chain;
+    public void setChain(List<String> chain) {
+        this.certificates = chain;
     }
 
     @Override
     public String toString() {
         return "CertificateSignResponse{" +
-                "chain='" + chain + '\'' +
+                "chain='" + certificates + '\'' +
                 '}';
     }
 }

@@ -18,6 +18,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +28,7 @@ public class CertSignerIT {
     private static Path containerOutPath = DockerBaseIT.getTargetFolderPathForTestClass(CertSignerIT.class);
 
     @Test
-    @Disabled("This test is already done in CertSignerTest")
+    @Disabled("This test is already done in CertSignerTest, should eventually be extended to include connecting to a server to check if the certs can be used")
     public void testFoo() throws IOException, CertificateException, NoSuchAlgorithmException, OperatorCreationException, KeyStoreException, UnrecoverableKeyException {
         //generate CA, intermediate CA, certs and keys, and CSR for SP
         CertKeyPair rootCa = ClusterKeyGenerator.generateRootCA(
@@ -72,9 +73,9 @@ public class CertSignerIT {
         trustStore.load(new FileInputStream(containerOutPath.resolve(truststoreName).toString()),trustpassword.toCharArray());
         CertSigner signer = new CertSigner(keyStore,domainName, keystorePassword,trustStore,"myKey");
         String csrAsString = Files.readString(serviceProviderCsr.getCsrOnHost());
-        String certAsString = signer.sign(csrAsString, "testSP");
+        List<String> certsAsString = signer.sign(csrAsString, "testSP");
         Path spCertFile = containerOutPath.resolve("testSP.crt.pem");
-        Files.writeString(spCertFile,certAsString);
+        Files.write(spCertFile,certsAsString);
         ClusterKeyGenerator.generateServiceProviderKeyStore(
                 containerOutPath,
                 new ServicProviderDescription("testSP","NO"),
@@ -84,7 +85,9 @@ public class CertSignerIT {
                 spCertFile,
                 intermediateCert.getSingleCertOnHost()
         );
-        assertThat(certAsString).startsWith("-----BEGIN CERTIFICATE-----");
+        assertThat(certsAsString).hasSize(3);
+        assertThat(certsAsString).allMatch(s -> s.startsWith("-----BEGIN CERTIFICATE-----"));
+        assertThat(certsAsString).allMatch(s -> s.endsWith("-----END CERTIFICATE-----\n"));
         //Now, we need to actually test using the certificate
     }
 }

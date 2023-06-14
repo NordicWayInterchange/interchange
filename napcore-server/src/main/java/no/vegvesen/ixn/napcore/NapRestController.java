@@ -34,10 +34,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class NapRestController {
@@ -70,9 +68,11 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/x509/csr", produces = MediaType.APPLICATION_JSON_VALUE)
     public CertificateSignResponse addCsrRequest(@PathVariable String actorCommonName, @RequestBody CertificateSignRequest signRequest) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        String signedCert;
+        List<String> certs;
+        String csr = new String(Base64.getDecoder().decode(signRequest.getCsr()));
+        //TODO make a single, better runtimeException to signal that something went wrong with signing.
         try {
-            signedCert = certSigner.sign(signRequest.getCsr(),actorCommonName);
+            certs = certSigner.sign(csr,actorCommonName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (OperatorCreationException e) {
@@ -82,7 +82,8 @@ public class NapRestController {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        return new CertificateSignResponse(signedCert);
+        List<String> encodedCerts = certs.stream().map(s -> Base64.getEncoder().encodeToString(s.getBytes())).collect(Collectors.toList());
+        return new CertificateSignResponse(encodedCerts);
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
