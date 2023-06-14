@@ -1,8 +1,12 @@
 package no.vegvesen.ixn.docker.keygen;
 
 public class ServicProviderDescription {
-    private final String name;
-    private final String country;
+    private String name;
+    private String country;
+
+    public ServicProviderDescription() {
+
+    }
 
     public ServicProviderDescription(String name, String country) {
         this.name = name;

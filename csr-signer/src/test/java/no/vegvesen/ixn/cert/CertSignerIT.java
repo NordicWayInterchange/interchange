@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.cert;
 
 import no.vegvesen.ixn.docker.DockerBaseIT;
-import no.vegvesen.ixn.docker.keygen.IntermediateDomain;
 import no.vegvesen.ixn.docker.keygen.ServicProviderDescription;
 import no.vegvesen.ixn.docker.keygen.TopDomain;
 import no.vegvesen.ixn.docker.keygen.generator.*;
@@ -18,6 +17,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,34 +44,34 @@ public class CertSignerIT {
                 truststoreName
         );
         String domainName = "interchangetestdomain.no";
-        IntermediateDomain interchangeDomain = new IntermediateDomain(domainName, "NO");
+        String owningCountry = "NO";
         CsrKeyPair intermediateCsr = ClusterKeyGenerator.generateIntermediateCaCsr(
                 containerOutPath,
-                interchangeDomain
+                domainName,
+                owningCountry
         ).getCsrKeyPairOnHost();
         CertChainAndKey intermediateCert = ClusterKeyGenerator.generateIntermediateCaCert(
                 containerOutPath,
-                interchangeDomain,
                 intermediateCsr.getCsrOnHost(),
                 rootCa.getCaCertOnHost(),
-                rootCa.getCaKeyOnHost()
+                rootCa.getCaKeyOnHost(), domainName, owningCountry
         ).getCertChainAndKeyOnHost();
         String keystorePassword = "password";
         Path keystorePath = ClusterKeyGenerator.generateKeystore(
                 containerOutPath,
-                interchangeDomain,
                 keystorePassword,
                 "keystore.p12",
                 intermediateCert.getIntermediateKeyOnHost(),
                 intermediateCert.getChainCertOnHost(),
-                rootCa.getCaCertOnHost());
+                rootCa.getCaCertOnHost(),
+                domainName);
         CsrKeyPair serviceProviderCsr = ClusterKeyGenerator.generateCsrForServiceProvider(containerOutPath,
                 new ServicProviderDescription("testSP", "NO")).getCsrKeyPairOnHost();
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(new FileInputStream(keystorePath.toString()),keystorePassword.toCharArray());
         KeyStore trustStore = KeyStore.getInstance("JKS");
         trustStore.load(new FileInputStream(containerOutPath.resolve(truststoreName).toString()),trustpassword.toCharArray());
-        CertSigner signer = new CertSigner(keyStore,domainName, keystorePassword,trustStore,"myKey");
+        CertSigner signer = new CertSigner(keyStore, "interchangetestdomain.no", keystorePassword,trustStore,"myKey");
         String csrAsString = Files.readString(serviceProviderCsr.getCsrOnHost());
         List<String> certsAsString = signer.sign(csrAsString, "testSP");
         Path spCertFile = containerOutPath.resolve("testSP.crt.pem");

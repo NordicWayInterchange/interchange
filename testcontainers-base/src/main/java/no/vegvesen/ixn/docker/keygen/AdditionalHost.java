@@ -1,9 +1,12 @@
 package no.vegvesen.ixn.docker.keygen;
 
 public class AdditionalHost {
-    private final String hostname;
-    private final String owningCountry;
+    private String hostname;
+    private String owningCountry;
 
+    public AdditionalHost() {
+
+    }
     public AdditionalHost(String hostname, String owningCountry) {
         this.hostname = hostname;
         this.owningCountry = owningCountry;

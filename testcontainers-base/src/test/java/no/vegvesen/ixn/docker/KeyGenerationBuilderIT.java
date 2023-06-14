@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.docker;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.docker.keygen.Cluster;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator;
 import org.junit.jupiter.api.Disabled;
@@ -7,6 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class KeyGenerationBuilderIT {
 
@@ -17,15 +22,24 @@ public class KeyGenerationBuilderIT {
     @Disabled
     public void generate() throws IOException {
         Cluster myCluster = Cluster.builder()
-                .topDomain().domainName("top-domain.eu").ownerCountry("NO").done()
-                .interchange()
-                    .intermediateDomain().domainName("node-domain.no").ownerCountry("NO").done()
-                    .additionalHost()
-                        .hostName("messages.node-domain.no")
+                .topDomain().domainName("top-domain.eu").ownerCountry("NO")
+                .intermediateDomain().domainName("node-domain.no").ownerCountry("NO")
+                    .interchange()
+                        .additionalHost()
+                            .hostName("messages.node-domain.no").done()
+                        .additionalHost()
+                            .hostName("onboard.node-domain.no")
+                            .ownerCountry("NO")
                         .done()
-                    .additionalHost().hostName("onboard.node-domain.no").ownerCountry("NO").done()
-                    .serviceProvider().name("service-provider-1").done()
-                    .serviceProvider().name("service-provider-2").country("NO").done()
+                        .serviceProvider()
+                            .name("service-provider-1")
+                        .done()
+                        .serviceProvider()
+                            .name("service-provider-2")
+                            .country("NO")
+                        .done()
+                    .done()
+                .done()
                 .done()
                 .done();
         Cluster cluster = myCluster;
@@ -34,37 +48,92 @@ public class KeyGenerationBuilderIT {
     }
 
     @Test
+    public void createClusterJson() throws IOException {
+        Cluster myCluster = Cluster.builder()
+                .topDomain().domainName("top-domain.eu").ownerCountry("NO")
+                .intermediateDomain().domainName("node-domain.no").ownerCountry("NO")
+                .interchange()
+                .additionalHost()
+                .hostName("messages.node-domain.no")
+                .done()
+                .additionalHost().hostName("onboard.node-domain.no").ownerCountry("NO").done()
+                .serviceProvider().name("service-provider-1").done()
+                .serviceProvider().name("service-provider-2").country("NO").done()
+                .done()
+                .done()
+                .done()
+                .done();
+        System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(myCluster));
+    }
+
+
+    @Test
+    public void readClusterFromJson() throws IOException {
+        Path jsonPath = Paths.get("src", "test", "resources", "cluster.json");
+        Cluster cluster = new ObjectMapper().readValue(jsonPath.toFile(), Cluster.class);
+        assertThat(cluster.getTopDomain().getDomainName()).isEqualTo("top-domain.eu");
+        assertThat(cluster.getTopDomain().getIntermediateDomains()).hasSize(1);
+        assertThat(cluster.getTopDomain().getIntermediateDomains().get(0).getInterchange().getServiceProviders()).hasSize(2);
+    }
+
+    @Test
     @Disabled
     public void generateModelForDockerComposeRedirect() throws IOException {
 
         Cluster cluster = Cluster.builder()
-                .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO").done()
-                .interchange().intermediateDomain().domainName("a.bouvetinterchange.eu").ownerCountry("NO").done()
-                .serviceProvider().name("king_olav.bouvetinterchange.eu").country("NO").done()
+                .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO")
+                .intermediateDomain().domainName("a.bouvetinterchange.eu").ownerCountry("NO")
+                    .interchange()
+                        .serviceProvider().name("king_olav.bouvetinterchange.eu").country("NO").done()
+                    .done()
                 .done()
-                .interchange().intermediateDomain().domainName("b.bouvetinterchange.eu").ownerCountry("NO").done()
-                .serviceProvider().name("king_gustaf.bouvetinterchange.eu").country("SE").done()
+                .intermediateDomain().domainName("b.bouvetinterchange.eu").ownerCountry("NO")
+                    .interchange()
+                        .serviceProvider().name("king_gustaf.bouvetinterchange.eu").country("SE").done()
+                    .done()
+                .done()
                 .done().done();
         ClusterKeyGenerator.generateKeys(cluster, keysPath);
     }
 
     private Cluster createSTMClusterModel() {
         Cluster cluster = Cluster.builder()
-                .topDomain().domainName("stminterchange.com").ownerCountry("NO").done()
-                .interchange()
-                    .intermediateDomain().domainName("belle.stminterchange.com").ownerCountry("NO").done()
-                .serviceProvider().name("mary@belle.stminterchange.com").country("NO").done()
+                .topDomain().domainName("stminterchange.com").ownerCountry("NO")
+                .intermediateDomain().domainName("belle.stminterchange.com").ownerCountry("NO")
+                    .interchange()
+                        .serviceProvider().name("mary@belle.stminterchange.com").country("NO").done()
+                    .done()
                 .done()
-                .interchange()
-                    .intermediateDomain().domainName("blomst.stminterchange.com").ownerCountry("NO").done()
-                .serviceProvider().name("victoria@blomst.stminterchange.com").country("NO").done()
+                .intermediateDomain().domainName("blomst.stminterchange.com").ownerCountry("NO")
+                    .interchange()
+                        .serviceProvider().name("victoria@blomst.stminterchange.com").country("NO").done()
+                    .done()
                 .done()
-                .interchange()
-                    .intermediateDomain().domainName("boble.stminterchange.com").ownerCountry("NO").done()
-                .serviceProvider().name("mette@boble.stminterchange.com").country("NO").done()
+                .intermediateDomain().domainName("boble.stminterchange.com").ownerCountry("NO")
+                    .interchange()
+                        .serviceProvider().name("mette@boble.stminterchange.com").country("NO").done()
+                    .done()
+                .done()
                 .done().done();
         return cluster;
     }
 
+
+    @Test
+    public void testNewStructure() {
+        Cluster cluster = Cluster.builder()
+                .topDomain().domainName("top-domain.com").ownerCountry("NO")
+                    .intermediateDomain().domainName("interchange.domain.com").ownerCountry("NO")
+                        .interchange()
+                            .serviceProvider().name("test-sp").country("NO")
+                            .done()
+                            .additionalHost().hostName("additionalhost.interchange.domain.com").ownerCountry("NO")
+                            .done()
+                        .done()
+                    .done()
+                .done()
+                .done();
+
+    }
 
 }

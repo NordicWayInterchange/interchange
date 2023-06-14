@@ -5,12 +5,14 @@ import no.vegvesen.ixn.docker.keygen.builder.ClusterBuilder;
 import java.util.List;
 
 public class Cluster {
-    private final TopDomain topDomain;
-    private final List<Interchange> interchanges;
+    private TopDomain topDomain;
 
-    public Cluster(TopDomain topDomain, List<Interchange> interchanges) {
+    public Cluster() {
+
+    }
+
+    public Cluster(TopDomain topDomain) {
         this.topDomain = topDomain;
-        this.interchanges = interchanges;
     }
 
     public static ClusterBuilder builder() {
@@ -21,7 +23,4 @@ public class Cluster {
         return topDomain;
     }
 
-    public List<Interchange> getInterchanges() {
-        return interchanges;
-    }
 }

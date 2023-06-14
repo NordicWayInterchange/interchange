@@ -1,11 +1,9 @@
 package no.vegvesen.ixn.docker.keygen.generator;
 
 import no.vegvesen.ixn.docker.keygen.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 
@@ -27,21 +25,20 @@ public class ClusterKeyGenerator {
         generateTrustore(certKeyPair.getCaCertOnHost(), topDomainTrustStorePassword, outputFolder, topDomain.getDomainName() + "_truststore.jks");
         String passwordFile = topDomain.getDomainName() + "_truststore.txt";
         Files.writeString(outputFolder.resolve(passwordFile),topDomainTrustStorePassword);
-        for (Interchange interchange : cluster.getInterchanges()) {
-            IntermediateDomain domain = interchange.getDomain();
-            IntermediateCaCSRGenerator csrGenerator = generateIntermediateCaCsr(outputFolder, domain);
-            IntermediateCACertGenerator certGenerator = generateIntermediateCaCert(outputFolder, domain, csrGenerator.getCsrOnHost(), certKeyPair.getCaCertOnHost(), certKeyPair.getCaKeyOnHost());
+        for (IntermediateDomain domain : topDomain.getIntermediateDomains()) {
+            IntermediateCaCSRGenerator csrGenerator = generateIntermediateCaCsr(outputFolder, domain.getDomainName(), domain.getOwningCountry());
+            IntermediateCACertGenerator certGenerator = generateIntermediateCaCert(outputFolder, csrGenerator.getCsrOnHost(), certKeyPair.getCaCertOnHost(), certKeyPair.getCaKeyOnHost(), domain.getDomainName(), domain.getOwningCountry());
             String intermediateCaKeystorePassword = generatePassword(random,24);
             String keystoreName = domain.getDomainName() + ".p12";
             generateKeystore(outputFolder,
-                    domain,
                     intermediateCaKeystorePassword,
                     keystoreName,
                     csrGenerator.getKeyOnHost(),
                     certGenerator.getChainCertOnHost(),
-                    certKeyPair.getCaCertOnHost()
+                    certKeyPair.getCaCertOnHost(), domain.getDomainName()
             );
             Files.writeString(outputFolder.resolve(domain.getDomainName() + ".txt"),intermediateCaKeystorePassword);
+            Interchange interchange = domain.getInterchange();
             for (AdditionalHost host : interchange.getAdditionalHosts()) {
                 generateServerCertForHost(outputFolder, host, certGenerator.getSingleCertOnHost(), certGenerator.getChainCertOnHost(), csrGenerator.getKeyOnHost());
                 //TODO create keyStore for host (using chain, I expect)
@@ -53,7 +50,6 @@ public class ClusterKeyGenerator {
                 String serviceProviderKeystoreName = description.getName() + ".p12";
                 Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
                 generateServiceProviderKeyStore(outputFolder, description, serviceProviderKeystorePassword, serviceProviderKeystoreName, spCsr.getKeyOnHost(), spCert.getCertChainOnHost(), certGenerator.getSingleCertOnHost());
-
             }
 
         }
@@ -107,13 +103,13 @@ public class ClusterKeyGenerator {
         serverCertGenerator.start();
     }
 
-    public static Path generateKeystore(Path outputFolder, IntermediateDomain domain, String intermediateCaKeystorePassword, String keystoreName, Path keyOnHost, Path chainCertOnHost, Path caCertOnHost) {
+    public static Path generateKeystore(Path outputFolder, String intermediateCaKeystorePassword, String keystoreName, Path keyOnHost, Path chainCertOnHost, Path caCertOnHost, String domainName) {
         //TODO this should be done inside the KeystoreGenerator class to be consistent.
         Path keystoreOnHost = outputFolder.resolve(keystoreName);
         KeystoreGenerator keystoreGenerator = new KeystoreGenerator(
                 keyOnHost,
                 chainCertOnHost,
-                domain.getDomainName(),
+                domainName,
                 caCertOnHost,
                 intermediateCaKeystorePassword,
                 keystoreOnHost
@@ -122,24 +118,24 @@ public class ClusterKeyGenerator {
         return keystoreOnHost;
     }
 
-    public static IntermediateCACertGenerator generateIntermediateCaCert(Path outputFolder, IntermediateDomain domain, Path csrOnHost, Path caCertOnHost, Path caKeyOnHost) {
+    public static IntermediateCACertGenerator generateIntermediateCaCert(Path outputFolder, Path csrOnHost, Path caCertOnHost, Path caKeyOnHost, String domainName, String owningCountry) {
         IntermediateCACertGenerator certGenerator = new IntermediateCACertGenerator(
                 csrOnHost,
-                domain.getDomainName(),
+                domainName,
                 caCertOnHost,
                 caKeyOnHost,
-                domain.getOwningCountry(),
+                owningCountry,
                 outputFolder
         );
         certGenerator.start();
         return certGenerator;
     }
 
-    public static IntermediateCaCSRGenerator generateIntermediateCaCsr(Path outputFolder, IntermediateDomain domain) {
+    public static IntermediateCaCSRGenerator generateIntermediateCaCsr(Path outputFolder, String domainName, String owningCountry) {
         IntermediateCaCSRGenerator csrGenerator = new IntermediateCaCSRGenerator(
                 outputFolder,
-                domain.getDomainName(),
-                domain.getOwningCountry()
+                domainName,
+                owningCountry
         );
         csrGenerator.start();
         return csrGenerator;

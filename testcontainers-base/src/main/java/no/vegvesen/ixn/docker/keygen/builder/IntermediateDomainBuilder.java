@@ -1,16 +1,18 @@
 package no.vegvesen.ixn.docker.keygen.builder;
 
+import no.vegvesen.ixn.docker.keygen.Interchange;
 import no.vegvesen.ixn.docker.keygen.IntermediateDomain;
 
 public class IntermediateDomainBuilder {
 
-    private final InterchangeBuilder interchangeBuilder;
+    private final TopDomainBuilder parent;
     private String domainName;
     private String owningCountry;
 
-    public IntermediateDomainBuilder(InterchangeBuilder interchangeBuilder) {
+    Interchange interchange;
 
-        this.interchangeBuilder = interchangeBuilder;
+    public IntermediateDomainBuilder(TopDomainBuilder parent) {
+        this.parent = parent;
     }
 
     public IntermediateDomainBuilder domainName(String domainName) {
@@ -23,9 +25,17 @@ public class IntermediateDomainBuilder {
         return this;
     }
 
-    public InterchangeBuilder done() {
-        interchangeBuilder.setIntermediateDomain(new IntermediateDomain(domainName, owningCountry));
-        return interchangeBuilder;
+    public InterchangeBuilder interchange() {
+        return new InterchangeBuilder(this);
+    }
+
+    public IntermediateDomainBuilder addInterchange(Interchange interchange) {
+        this.interchange = interchange;
+        return this;
+    }
+
+    public TopDomainBuilder done() {
+        return parent.addIntermediateDomain(new IntermediateDomain(domainName,owningCountry,interchange));
     }
 
 }

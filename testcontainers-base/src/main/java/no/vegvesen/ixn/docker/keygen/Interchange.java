@@ -5,18 +5,16 @@ import java.util.List;
 public class Interchange {
 
 
-    private final IntermediateDomain domain;
-    private final List<AdditionalHost> additionalHosts;
-    private final List<ServicProviderDescription> serviceProviders;
+    private List<AdditionalHost> additionalHosts;
+    private List<ServicProviderDescription> serviceProviders;
 
-    public Interchange(IntermediateDomain domain, List<AdditionalHost> additionalHosts, List<ServicProviderDescription> serviceProviders) {
-        this.domain = domain;
-        this.additionalHosts = additionalHosts;
-        this.serviceProviders = serviceProviders;
+    public Interchange() {
+
     }
 
-    public IntermediateDomain getDomain() {
-        return domain;
+    public Interchange(List<AdditionalHost> additionalHosts, List<ServicProviderDescription> serviceProviders) {
+        this.additionalHosts = additionalHosts;
+        this.serviceProviders = serviceProviders;
     }
 
     public List<AdditionalHost> getAdditionalHosts() {

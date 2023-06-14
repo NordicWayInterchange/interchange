@@ -9,7 +9,6 @@ import java.util.List;
 
 public class ClusterBuilder {
     private TopDomain topDomain;
-    private List<Interchange> interchanges = new ArrayList<>();
 
 
     public TopDomainBuilder topDomain() {
@@ -20,16 +19,8 @@ public class ClusterBuilder {
         this.topDomain = topDomain;
     }
 
-    public InterchangeBuilder interchange() {
-        return new InterchangeBuilder(this);
-    }
-
-    public void addInterchange(Interchange interchange) {
-        interchanges.add(interchange);
-
-    }
 
     public Cluster done() {
-        return new Cluster(topDomain, interchanges);
+        return new Cluster(topDomain);
     }
 }
