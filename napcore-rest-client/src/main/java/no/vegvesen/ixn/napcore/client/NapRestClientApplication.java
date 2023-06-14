@@ -5,9 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import no.vegvesen.ixn.napcore.model.Capability;
-import no.vegvesen.ixn.napcore.model.Subscription;
-import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
+import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -22,8 +20,10 @@ import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 @Command(name = "napcoreclient",
 description = "NAPCore REST Client",
@@ -147,6 +147,29 @@ public class NapRestClientApplication implements Callable<Integer> {
             ObjectMapper mapper = new ObjectMapper();
             List<Capability> capabilities = client.getMatchingCapabilities(selector);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
+            return 0;
+        }
+    }
+
+    static class CreateKeys implements Callable<Integer> {
+        @ParentCommand
+        NapRestClientApplication parentCommand;
+
+        @Parameters(index = "0", paramLabel = "SERVICE_PROVIDER_NAME",description = "Service Provider name")
+        String spName;
+
+        @Parameters(index = "1", paramLabel = "SERVICE_PROVIDER_COUNTRY",description = "Service Provider country code")
+        String countryCode;
+
+
+        @Override
+        public Integer call() throws Exception {
+            NapRESTClient client = parentCommand.createClient();
+            NapRESTClient.KeyAndCSR keyAndCSR = client.generateKeyAndCSR(spName, countryCode);
+            CertificateSignResponse certificateSignResponse = client.requestCertificate(new CertificateSignRequest(Base64.getEncoder().encodeToString(keyAndCSR.getCsr().getBytes())));
+            System.out.println(keyAndCSR.getKey());
+            List<String> decodedChain = certificateSignResponse.getChain().stream().map(s -> new String(Base64.getDecoder().decode(s.getBytes()))).collect(Collectors.toList());
+            System.out.println(decodedChain);
             return 0;
         }
     }

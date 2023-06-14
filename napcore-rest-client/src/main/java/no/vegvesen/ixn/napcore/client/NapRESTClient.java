@@ -1,16 +1,12 @@
 package no.vegvesen.ixn.napcore.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import no.vegvesen.ixn.napcore.model.*;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -29,7 +25,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class NapRESTClient {
 
@@ -96,8 +91,7 @@ public class NapRESTClient {
 
 
 
-    //TODO this is too simple. Need to also return the keys for the client to handle in some way.
-    private String generateCSR(String serviceProviderName, String country) {
+    public KeyAndCSR generateKeyAndCSR(String serviceProviderName, String country) {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
@@ -113,14 +107,41 @@ public class NapRESTClient {
             JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder("SHA256withRSA");
             ContentSigner signer = signBuilder.build(keyPair.getPrivate());
             PKCS10CertificationRequest csr = builder.build(signer);
-            StringWriter outputWriter = new StringWriter();
-            JcaPEMWriter pemWriter = new JcaPEMWriter(outputWriter);
+            StringWriter csrWriter = new StringWriter();
+            JcaPEMWriter pemWriter = new JcaPEMWriter(csrWriter);
             pemWriter.writeObject(csr);
             pemWriter.close();
-            return outputWriter.toString();
+            String csrString = csrWriter.toString();
+            StringWriter keyWriter = new StringWriter();
+            pemWriter = new JcaPEMWriter(keyWriter);
+            pemWriter.writeObject(keyPair);
+            pemWriter.close();
+            String keyString = keyWriter.toString();
+            return new KeyAndCSR(keyString,csrString);
 
         } catch (NoSuchAlgorithmException | OperatorCreationException | IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+
+    public static class KeyAndCSR {
+        private String key;
+
+        private String csr;
+
+        public KeyAndCSR(String key, String csr) {
+            this.key = key;
+            this.csr = csr;
+        }
+
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getCsr() {
+            return csr;
         }
     }
 }
