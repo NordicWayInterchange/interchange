@@ -2,6 +2,7 @@ package no.vegvesen.ixn.napcore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.LocalEndpoint;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
@@ -41,6 +42,9 @@ public class NapRestControllerTest {
 
     @MockBean
     private NapCoreProperties napCoreProperties;
+
+    @MockBean
+    private CertSigner certSigner;
 
     @Autowired
     private NapRestController restController;

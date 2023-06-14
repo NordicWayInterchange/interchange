@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
+import no.vegvesen.ixn.napcore.properties.CertGeneratorProperties;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -49,20 +50,6 @@ public class NapRestController {
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
     private TypeTransformer typeTransformer = new TypeTransformer();
 
-    @Value("#{systemProperties['server.ssl.key-store']}")
-    private String keystoreLocation;
-
-    @Value("#{systemProperties['server.ssl.key-store-password']}")
-    private String keyStorePassword;
-
-    @Value("#{systemProperties['server.ssl.key-alias']}")
-    private String keyAlias;
-
-    @Value("#{systemProperties['server.ssl.trust-store']}")
-    private String truststoreLocation;
-
-    @Value("#systemProperties['server.ssl.trust-store-password]")
-    private String truststorePassword;
 
     private CertSigner certSigner;
 
@@ -71,23 +58,13 @@ public class NapRestController {
             ServiceProviderRepository serviceProviderRepository,
             NeighbourRepository neighbourRepository,
             CertService certService,
-            NapCoreProperties napCoreProperties) {
+            NapCoreProperties napCoreProperties,
+            CertSigner certSigner) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.neighbourRepository = neighbourRepository;
         this.certService = certService;
         this.napCoreProperties = napCoreProperties;
-        try {
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            keyStore.load(new FileInputStream(keystoreLocation),keyStorePassword.toCharArray());
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(new FileInputStream(truststoreLocation),truststorePassword.toCharArray());
-            certSigner = new CertSigner(keyStore,keyAlias,keyStorePassword,trustStore,"myKey");
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
-                 UnrecoverableKeyException e) {
-            throw new RuntimeException(e);
-        }
-
-
+        this.certSigner = certSigner;
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/x509/csr", produces = MediaType.APPLICATION_JSON_VALUE)
