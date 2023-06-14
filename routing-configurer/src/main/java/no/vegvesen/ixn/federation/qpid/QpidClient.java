@@ -100,27 +100,7 @@ public class QpidClient {
 		}
 	}
 
-	public void bindDirectExchange(String selector, String source, String destination) {
-		addBinding(selector, source, destination,source);
-	}
-
-	public void bindSubscriptionExchange(String selector, String source, String destination) {
-		addBinding(selector, source, destination, createBindKey(source, destination));
-	}
-
-	public String createBindKey(String source, String destination) {
-		return source + "_" + destination;
-	}
-
-	public void bindTopicExchange(String selector, String source, String destination) {
-		addBinding(selector,source,destination,Integer.toString(selector.hashCode()));
-	}
-
-	public void bindToBiQueue(String selector, String source) {
-		addBinding(selector,source,"bi-queue",source);
-	}
-
-	private void addBinding(String selector, String source, String destination, String bindingKey) {
+	public void addBinding(String selector, String source, String destination, String bindingKey) {
 		JSONObject json = new JSONObject();
 		json.put("destination", destination);
 		json.put("bindingKey", bindingKey);

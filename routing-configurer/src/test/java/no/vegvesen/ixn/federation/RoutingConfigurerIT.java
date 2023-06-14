@@ -34,7 +34,6 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -784,7 +783,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		client.createDirectExchange(deliveryExchangeName);
 		client.addWriteAccess(sp.getName(), deliveryExchangeName);
-		client.bindDirectExchange(joinedSelector, deliveryExchangeName, cap.getCapabilityExchangeName());
+		client.addBinding(joinedSelector, deliveryExchangeName, cap.getCapabilityExchangeName(), deliveryExchangeName);
 
 		NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = '6'", NeighbourSubscriptionStatus.ACCEPTED, "neigh10");
 

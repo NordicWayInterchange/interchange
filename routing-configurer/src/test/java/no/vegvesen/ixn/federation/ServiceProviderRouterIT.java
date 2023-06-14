@@ -15,8 +15,6 @@ import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -115,12 +113,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(nordea);
-		router.syncServiceProviders(Arrays.asList(nordea));
+		router.syncServiceProviders(Arrays.asList(nordea), client.getQpidDelta());
 		Set<LocalEndpoint> endpoints = nordea.getSubscriptions().stream().flatMap(s -> s.getLocalEndpoints().stream()).collect(Collectors.toSet());
 		assertThat(endpoints).hasSize(1);
 
 		nordea.addLocalSubscription(createSubscription("DATEX2", "FI"));
-		router.syncServiceProviders(Arrays.asList(nordea));
+		router.syncServiceProviders(Arrays.asList(nordea), client.getQpidDelta());
 		Set<LocalEndpoint> endpoints2 = nordea.getSubscriptions().stream()
 				.filter(s -> s.getSelector().contains("'FI'"))
 				.flatMap(s -> s.getLocalEndpoints().stream())
@@ -192,7 +190,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(outgoingMatch));
 		when(serviceProviderRepository.findByName(any())).thenReturn(king_gustaf);
-		router.syncServiceProviders(Arrays.asList(king_gustaf));
+		router.syncServiceProviders(Arrays.asList(king_gustaf), client.getQpidDelta());
 		verify(serviceProviderRepository, times(7)).save(any());
 
 		SSLContext kingGustafSslContext = setUpTestSslContext("king_gustaf.p12");
@@ -233,7 +231,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		toreDownServiceProvider.addLocalSubscription(localSubscription);
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(toreDownServiceProvider);
-		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
+		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(toreDownServiceProvider.getName());
 		assertThat(localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED));
 
@@ -252,7 +250,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						.collect(Collectors.toSet()));
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
-		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider));
+		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(toreDownServiceProvider.getName());
 		assertThat(client.queueExists(endpoint.getSource())).isFalse();
@@ -271,10 +269,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(onlyCaps);
 		onlyCaps.setCapabilities(capabilities);
-		router.syncServiceProviders(Arrays.asList(onlyCaps));
+		router.syncServiceProviders(Arrays.asList(onlyCaps), client.getQpidDelta());
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
 
-		router.syncServiceProviders(Arrays.asList(onlyCaps));
+		router.syncServiceProviders(Arrays.asList(onlyCaps), client.getQpidDelta());
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(onlyCaps.getName());
 		assertThat(client.queueExists(onlyCaps.getName())).isFalse();
 	}
@@ -287,11 +285,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.setCapabilities(capabilities);
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
 
 		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
 	}
 
@@ -313,7 +311,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addLocalSubscription(sub2);
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
 
 		assertThat(sub1.getLocalEndpoints()).hasSize(1);
@@ -331,7 +329,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addPrivateChannel("my-client");
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider.getName());
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
@@ -352,7 +350,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addPrivateChannel("my-client-1");
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider.getName());
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(1);
@@ -361,7 +359,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
 
-		router.syncPrivateChannels(serviceProvider.getName());
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		verify(serviceProviderRepository, times(2)).save(any());
 
 		assertThat(client.queueExists(privateChannel.getQueueName())).isFalse();
@@ -379,7 +377,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.addPrivateChannel("my-client-12");
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncPrivateChannels(serviceProvider.getName());
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		verify(serviceProviderRepository, times(1)).save(any());
 
 		assertThat(serviceProvider.getPrivateChannels().size()).isEqualTo(2);
@@ -388,7 +386,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
 
-		router.syncPrivateChannels(serviceProvider.getName());
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		verify(serviceProviderRepository, times(2)).save(any());
 
 		assertThat(client.queueExists(privateChannel.getQueueName())).isFalse();
@@ -405,13 +403,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.setCapabilities(capabilities);
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		Assertions.assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).contains(serviceProvider.getName());
 
 		serviceProvider.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, new HashSet<>()));
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Arrays.asList(serviceProvider));
+		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		Assertions.assertThat(client.getGroupMemberNames(QpidClient.SERVICE_PROVIDERS_GROUP_NAME)).doesNotContain(serviceProvider.getName());
 	}
 
@@ -435,7 +433,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
 
-		router.processSubscription(serviceProvider, localSubscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort());
+		router.processSubscription(serviceProvider, localSubscription, nodeProperties.getName(), nodeProperties.getMessageChannelPort(), client.getQpidDelta());
 
 		assertThat(client.queueExists(queueName)).isFalse();
 
@@ -471,7 +469,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.setUpDeliveryQueue(serviceProvider.getName());
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
 		verify(serviceProviderRepository, times(1)).save(any());
 
@@ -522,11 +520,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match, match2));
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.setUpDeliveryQueue(serviceProvider.getName());
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 		assertThat(delivery.getExchangeName()).isNotNull();
-		assertThat(delivery.getConnections()).isNotEmpty();
 	}
 
 	@Test
@@ -559,12 +556,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.setUpDeliveryQueue(serviceProvider.getName());
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
 		delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
-		router.tearDownDeliveryQueues(serviceProvider.getName());
+		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
 
 		verify(serviceProviderRepository, times(2)).save(any());
 
@@ -602,20 +599,19 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.setUpDeliveryQueue(serviceProvider.getName());
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 
 		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
-		router.tearDownDeliveryQueues(serviceProvider.getName());
+		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
 
 		verify(serviceProviderRepository, times(2)).save(any());
 
 		assertThat(delivery.exchangeExists()).isFalse();
 		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
-		assertThat(delivery.getConnections()).isEmpty();
 	}
 
 	@Test
@@ -665,20 +661,18 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match1, match2));
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.setUpDeliveryQueue(serviceProvider.getName());
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
-		assertThat(delivery.getConnections().size()).isEqualTo(2);
 
 		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match2));
 		when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-		router.tearDownDeliveryQueues(serviceProvider.getName());
+		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
 
 		verify(serviceProviderRepository, times(2)).save(any());
 
 		assertThat(client.exchangeExists(delivery.getExchangeName())).isTrue();
 		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.CREATED);
-		assertThat(delivery.getConnections().size()).isEqualTo(1);
 	}
 
 	@Test
@@ -711,7 +705,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		otherSP.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.singleton(denmCapability)));
 
 		when(serviceProviderRepository.findByName(any())).thenReturn(mySP);
-		router.syncLocalSubscriptionsToServiceProviderCapabilities(mySP.getName(), Collections.singleton(otherSP));
+		router.syncLocalSubscriptionsToServiceProviderCapabilities(mySP, client.getQpidDelta(), Collections.singleton(otherSP));
 
 		verify(serviceProviderRepository, times(1)).save(any());
 
@@ -739,7 +733,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 
 		when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);;
-		router.syncServiceProviders(Collections.singleton(serviceProvider));
+		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
 		assertThat(serviceProvider.getSubscriptions().stream().findFirst().get().getStatus()).isEqualTo(LocalSubscriptionStatus.CREATED);
 	}
@@ -757,8 +751,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton(subscription)
 		);
 		when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
-		router.syncSubscriptions(serviceProvider.getName());
-		router.removeUnwantedSubscriptions(serviceProvider.getName());
+		router.syncSubscriptions(serviceProvider, client.getQpidDelta());
+		router.removeUnwantedSubscriptions(serviceProvider);
 		verify(serviceProviderRepository, times(2)).save(any());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
@@ -777,8 +771,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(new ArrayList<>());
 		when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
-		router.syncSubscriptions(serviceProvider.getName());
-		router.removeUnwantedSubscriptions(serviceProvider.getName());
+		router.syncSubscriptions(serviceProvider, client.getQpidDelta());
+		router.removeUnwantedSubscriptions(serviceProvider);
 
 		verify(serviceProviderRepository, times(2)).save(any());
 		verify(matchRepository).findAllByLocalSubscriptionId(any());
@@ -805,8 +799,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match));
 		when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
-		router.syncSubscriptions(serviceProvider.getName());
-		router.removeUnwantedSubscriptions(serviceProvider.getName());
+		router.syncSubscriptions(serviceProvider, client.getQpidDelta());
+		router.removeUnwantedSubscriptions(serviceProvider);
 
 		verify(serviceProviderRepository, times(2)).save(any());
 		verify(matchRepository).findAllByLocalSubscriptionId(any());
@@ -829,7 +823,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(1)).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
 		router.processRedirectSubscription(subscription);
-		router.removeUnwantedSubscriptions(serviceProvider.getName());
+		router.removeUnwantedSubscriptions(serviceProvider);
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
 
@@ -860,7 +854,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
-		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName, queueName));
+		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
 	}
 
 	@Test
@@ -896,8 +890,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueueBindKeys(queueName)).hasSize(2);
-		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName, queueName));
-		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName2, queueName));
+		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
+		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName2);
 	}
 
 	@Test
@@ -923,14 +917,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Match match = new Match(localSubscription, subscription, "my-service-provider");
 
 		//Mocking that binding already exists and isn't created again
-		client.bindSubscriptionExchange(selector, exchangeName, queueName);
+		client.addBinding(selector, exchangeName, queueName, exchangeName);
 
 		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
-		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName, queueName));
+		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
 	}
 
 	@Test
@@ -960,7 +954,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueueBindKeys(queueName)).hasSize(0);
-		assertThat(client.getQueueBindKeys(queueName)).doesNotContain(client.createBindKey(exchangeName, queueName));
+		assertThat(client.getQueueBindKeys(queueName)).doesNotContain(exchangeName);
 	}
 
 	@Test
@@ -990,7 +984,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.createBindingsWithMatches();
 
 		assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
-		assertThat(client.getQueueBindKeys(queueName)).contains(client.createBindKey(exchangeName, queueName));
+		assertThat(client.getQueueBindKeys(queueName)).contains(exchangeName);
 	}
 
 	@Test
@@ -1008,7 +1002,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.emptyList());
 		when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
 		router.processRedirectSubscription(subscription);
-		router.removeUnwantedSubscriptions(serviceProvider.getName());
+		router.removeUnwantedSubscriptions(serviceProvider);
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
 
