@@ -24,7 +24,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.jms.JMSException;
 import javax.net.ssl.SSLContext;
-import javax.transaction.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -90,7 +89,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
 
-        qpidClient.bindTopicExchange(selector, exchangeName, queueName);
+        qpidClient.addBinding(selector, exchangeName, queueName, exchangeName);
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();
@@ -136,8 +135,8 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
 
-        qpidClient.bindTopicExchange(selector, exchangeName, queueOne);
-        qpidClient.bindTopicExchange(selector, exchangeName, queueTwo);
+        qpidClient.addBinding(selector, exchangeName, queueOne, exchangeName);
+        qpidClient.addBinding(selector, exchangeName, queueTwo, exchangeName);
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();
@@ -183,7 +182,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         MessageValidatingSelectorCreator creator = new MessageValidatingSelectorCreator();
         String selector = creator.makeSelector(capability);
 
-        qpidClient.bindTopicExchange(selector, exchangeName, queueName);
+        qpidClient.addBinding(selector, exchangeName, queueName, exchangeName);
 
         try (Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext)) {
             source.start();

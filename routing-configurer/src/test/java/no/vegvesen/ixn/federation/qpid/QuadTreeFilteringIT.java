@@ -139,7 +139,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	private Message sendMessageServiceProvider(String serviceProviderName, String selector, String messageQuadTreeTiles) throws Exception {
 		qpidClient.createQueue(serviceProviderName);
 		qpidClient.addReadAccess(serviceProviderName, serviceProviderName);
-		qpidClient.bindTopicExchange(selector, "outgoingExchange", serviceProviderName);
+		qpidClient.addBinding(selector, "outgoingExchange", serviceProviderName, "outgoingExchange");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 
@@ -172,7 +172,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.createQueue(spName);
 		qpidClient.addReadAccess(spName, spName);
 		qpidClient.createTopicExchange("outgoingExchange");
-		qpidClient.bindTopicExchange(selector, "outgoingExchange", spName);
+		qpidClient.addBinding(selector, "outgoingExchange", spName, "outgoingExchange");
 
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
 

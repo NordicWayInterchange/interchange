@@ -126,12 +126,12 @@ public class RoutingConfigurer {
 				//if any of the matching caps does not have the exchange set
 				if (matchingCaps.stream().filter(m -> ! m.exchangeExists()).count() == 0) {
 					String queueName = "sub-" + UUID.randomUUID();
-					createQueue(queueName, neighbourName);
+					createQueue(queueName, neighbourName, delta);
 					subscription.setQueueName(queueName);
 					addSubscriberToGroup(FEDERATED_GROUP_NAME, neighbourName);
 					for (CapabilitySplit cap : matchingCaps) {
-						if (qpidClient.exchangeExists(cap.getCapabilityExchangeName())) {
-							bindSubscriptionQueue(cap.getCapabilityExchangeName(), subscription);
+						if (delta.exchangeExists(cap.getCapabilityExchangeName())) {
+							qpidClient.addBinding(subscription.getSelector(), cap.getCapabilityExchangeName(), queueName, cap.getCapabilityExchangeName());
 						}
 					}
 					subscription.setSubscriptionStatus(NeighbourSubscriptionStatus.CREATED);
@@ -152,7 +152,7 @@ public class RoutingConfigurer {
 			Set<CapabilitySplit> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				String redirectQueue = "re-" + UUID.randomUUID();
-				createQueue(redirectQueue, subscription.getConsumerCommonName());
+				createQueue(redirectQueue, subscription.getConsumerCommonName(), delta);
 				subscription.setQueueName(redirectQueue);
 				for (CapabilitySplit cap : matchingCaps) {
 					if (cap.exchangeExists()) {
@@ -231,24 +231,22 @@ public class RoutingConfigurer {
 		}
 	}
 
-	private void bindSubscriptionQueue(String exchange, NeighbourSubscription subscription) {
-		qpidClient.bindDirectExchange(subscription.getSelector(), exchange, subscription.getQueueName());
-	}
-
-	private void bindRemoteServiceProvider(String exchange, String commonName, NeighbourSubscription acceptedSubscription) {
-		qpidClient.bindTopicExchange(acceptedSubscription.getSelector(),exchange,commonName);
+	private void bindRemoteServiceProvider(String exchange, String queueName, NeighbourSubscription acceptedSubscription) {
+		qpidClient.addBinding(acceptedSubscription.getSelector(),exchange,queueName, exchange);
 	}
 
 	@Scheduled(fixedRateString = "${service-provider-router.interval}")
 	public void checkForServiceProvidersToSetupRoutingFor() {
 		logger.debug("Checking for new service providers to setup routing");
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
-		serviceProviderRouter.syncServiceProviders(serviceProviders);
+		serviceProviderRouter.syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
 	}
 
-	private void createQueue(String queueName, String subscriberName) {
-		qpidClient.createQueue(queueName);
-		qpidClient.addReadAccess(subscriberName,queueName);
+	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
+		if (!delta.queueExists(queueName)) {
+			qpidClient.createQueue(queueName);
+			qpidClient.addReadAccess(subscriberName, queueName);
+		}
 	}
 
 	private void addSubscriberToGroup(String groupName, String subscriberName) {

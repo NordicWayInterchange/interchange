@@ -9,11 +9,11 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.federation.qpid.QpidDelta;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -113,7 +113,7 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        router.syncServiceProviders(Collections.singleton(serviceProvider));
+        router.syncServiceProviders(Collections.singleton(serviceProvider), new QpidDelta());
         LocalEndpoint actualEndpoint = null;
         for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
             for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
