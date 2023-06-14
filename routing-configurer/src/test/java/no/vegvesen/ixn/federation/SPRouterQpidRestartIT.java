@@ -129,7 +129,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
     }
 
@@ -152,7 +152,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
     }
@@ -177,7 +177,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
         assertThat(serviceProvider.getSubscriptions()).hasSize(0);
     }
@@ -201,7 +201,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
     }
 
@@ -225,7 +225,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
     }
 
@@ -249,7 +249,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
     }
 
@@ -279,7 +279,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(exchangeName)).isTrue();
         assertThat(client.getQueueBindKeys("bi-queue")).hasSize(1);
     }
@@ -310,7 +310,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(exchangeName)).isFalse();
     }
 
@@ -339,7 +339,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider1);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider1));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider1), client.getQpidDelta());
 
         assertThat(client.exchangeExists(exchangeName)).isTrue();
 
@@ -360,7 +360,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 LocalDateTime.now());
 
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider2);
-        serviceProviderRouter.syncServiceProviders(new HashSet<>(Arrays.asList(serviceProvider1, serviceProvider2)));
+        serviceProviderRouter.syncServiceProviders(new HashSet<>(Arrays.asList(serviceProvider1, serviceProvider2)), client.getQpidDelta());
 
         assertThat(client.queueExists(queueName)).isTrue();
         assertThat(client.getQueueBindKeys(queueName)).hasSize(1);
@@ -408,7 +408,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider");
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.singletonList(match));
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
 
         assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
     }
@@ -454,7 +454,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
         when(serviceProviderRepository.findByName(any())).thenReturn(serviceProvider);
-        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider));
+        serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
 
         assertThat(client.exchangeExists(deliveryExchangeName)).isFalse();
     }

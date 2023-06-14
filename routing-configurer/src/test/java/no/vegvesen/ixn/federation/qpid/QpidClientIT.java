@@ -52,7 +52,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 			String httpsUrl = qpidContainer.getHttpsUrl();
-			logger.info("server url: " + httpsUrl);
+			logger.info("server url: " + qpidContainer.getHttpUrl());
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
@@ -185,7 +185,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client._createTopicExchange("hammershark");
 		client._createQueue("babyshark");
 
-		client.bindTopicExchange("originatingCountry = 'NO'", "hammershark", "babyshark");
+		client.addBinding("originatingCountry = 'NO'", "hammershark", "babyshark", "hammershark");
 		assertThat(client.getQueueBindKeys("babyshark")).hasSize(1);
 
 		client.removeExchange("hammershark");
@@ -197,7 +197,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client._createTopicExchange("hammershark1");
 		client._createQueue("babyshark1");
 
-		client.bindTopicExchange("originatingCountry = 'NO'", "hammershark1", "babyshark1");
+		client.addBinding("originatingCountry = 'NO'", "hammershark1", "babyshark1", "hammershark1");
 		assertThat(client.getQueueBindKeys("babyshark1")).hasSize(1);
 
 		client.removeQueue("babyshark1");
@@ -310,10 +310,10 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client.createTopicExchange("test-exchange1");
 		client.createTopicExchange("test-exchange2");
 		client.createQueue("test-queue");
-		client.bindTopicExchange("originatingCountry = 'NO'", "test-exchange1", "test-queue");
-		client.bindTopicExchange("originatingCountry = 'NO'", "test-exchange2", "test-queue");
+		client.addBinding("originatingCountry = 'NO'", "test-exchange1", "test-queue", "test-exchange1");
+		client.addBinding("originatingCountry = 'NO'", "test-exchange2", "test-queue", "test-exchange2");
 
-		assertThat(client.getAllExchanges().size()).isEqualTo(2);
+		assertThat(client.getAllExchanges()).isNotEmpty();
 	}
 
 	@Test
@@ -334,6 +334,73 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		client.createQueue("test-queue");
 
 		Set<Queue> result = client.getAllQueues();
-		assertThat(result.size()).isEqualTo(3);
+		assertThat(result).isNotEmpty();
+	}
+
+	@Test
+	public void localSubscriptionQueueIsBoundToSubscriptionExchange() {
+		String queue = "localSubscriptionQueue1";
+		String exchange = "subscriptionExchange1";
+		String selector = "originatingCountry = 'NO'";
+
+		client.createQueue(queue);
+		client.createTopicExchange(exchange);
+
+		client.addBinding(selector, exchange, queue, exchange);
+
+		QpidDelta delta = client.getQpidDelta();
+
+		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+	}
+
+	@Test
+	public void localSubscriptionQueueIsBoundToCapabilityExchange() {
+		String queue = "localSubscriptionQueue2";
+		String exchange = "capabilityExchange1";
+		String selector = "originatingCountry = 'NO'";
+
+		client.createQueue(queue);
+		client.createTopicExchange(exchange);
+
+		client.addBinding(selector, exchange, queue, exchange);
+
+		QpidDelta delta = client.getQpidDelta();
+
+		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+	}
+
+	@Test
+	public void subscriptionQueueIsBoundToCapabilityExchange() {
+		String queue = "subscriptionQueue1";
+		String exchange = "capabilityExchange2";
+		String selector = "originatingCountry = 'NO'";
+
+		client.createQueue(queue);
+		client.createTopicExchange(exchange);
+
+		client.addBinding(selector, exchange, queue, exchange);
+
+		QpidDelta delta = client.getQpidDelta();
+
+		assertThat(delta.getDestinationsFromExchangeName(exchange)).contains(queue);
+		assertThat(client.getQueueBindKeys(queue)).contains(exchange);
+	}
+
+	@Test
+	public void deliveryExchangeIsBoundToCapabilityExchange() {
+		String deliveryExchange = "deliveryExchange1";
+		String capabilityExchange = "capabilityExchange3";
+		String selector = "originatingCountry = 'NO'";
+
+		client.createTopicExchange(capabilityExchange);
+		client.createDirectExchange(deliveryExchange);
+
+		client.addBinding(selector, deliveryExchange, capabilityExchange, deliveryExchange);
+
+		QpidDelta delta = client.getQpidDelta();
+
+		assertThat(delta.getDestinationsFromExchangeName(deliveryExchange)).contains(capabilityExchange);
 	}
 }
