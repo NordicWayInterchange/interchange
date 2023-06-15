@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-napcore-server
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: napcore-server
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    component: napcore-server
+    release: {{ .Release.Name }}
+  ports:
+    - name: napcore
+      port: {{ .Values.self.service_provider_port }}
+      targetPort: napcore

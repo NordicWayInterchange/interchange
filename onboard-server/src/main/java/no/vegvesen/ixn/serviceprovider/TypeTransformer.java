@@ -274,5 +274,4 @@ public class TypeTransformer {
                 capabilityApiTransformer.capabilitySplitToCapabilitySplitApi(capability)
         );
     }
-
 }

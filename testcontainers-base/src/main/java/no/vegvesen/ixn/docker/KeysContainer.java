@@ -29,7 +29,7 @@ public class KeysContainer extends GenericContainer<KeysContainer> {
         this.withEnv("CA_CN",caName);
         this.withEnv("KEY_CNS",String.join(" ",serverOrUserCns));
         this.withEnv("KEYS_DIR","/jks/keys");
-        this.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(5)));
+        this.withStartupCheckStrategy(new IndefiniteWaitOneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 
     public Path getKeyFolderOnHost() {
