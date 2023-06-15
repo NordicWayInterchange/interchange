@@ -90,5 +90,13 @@ onboard_server:                                                     # Java appli
   logging:
   - logger_name: .root
     level: info
+napcore_server:
+  replicas: 1
+  image:
+    repository: eu.gcr.io/nordic-way-aad182cc/napcore-server
+    tag: "074e6bd"
+  logging:
+  - logger_name: .root
+    level: info
 secret_dev_no:
   key_store: "test"

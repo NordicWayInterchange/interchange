@@ -14,5 +14,5 @@ spec:
     release: {{ .Release.Name }}
   ports:
     - name: napcore
-      port: {{ .Values.self.service_provider_port }}
+      port: {{ .Values.self.nap_provider_port }}
       targetPort: napcore
