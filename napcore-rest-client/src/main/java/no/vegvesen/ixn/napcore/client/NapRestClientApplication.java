@@ -3,8 +3,6 @@ package no.vegvesen.ixn.napcore.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
@@ -34,7 +32,8 @@ subcommands = {
         NapRestClientApplication.GetNapSubscriptions.class,
         NapRestClientApplication.GetNapSubscription.class,
         NapRestClientApplication.DeleteNapSubscription.class,
-        NapRestClientApplication.FetchMatchingCapabilities.class
+        NapRestClientApplication.FetchMatchingCapabilities.class,
+        NapRestClientApplication.CreateKeys.class
 })
 public class NapRestClientApplication implements Callable<Integer> {
 
@@ -151,6 +150,7 @@ public class NapRestClientApplication implements Callable<Integer> {
         }
     }
 
+    @Command(name = "requestcertificate", description = "Create a certificate for NAP user")
     static class CreateKeys implements Callable<Integer> {
         @ParentCommand
         NapRestClientApplication parentCommand;
