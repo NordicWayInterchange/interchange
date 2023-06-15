@@ -25,7 +25,7 @@ spec:
         - name: AMQP_USER
           value: {{ .Values.qpid.interchange_user }}
         - name: AMQP_PASSWORD
-          value: {{ .Values.qpid.interchange_password }}
+          value: {{ .Values.interchange_password }}
         - name: LOG_LEVELS
           value: "{{- range .Values.interchange.logging -}}
                      -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
