@@ -9,6 +9,8 @@ self:                                                               # ------ Gen
   trust_store_password: password                                    # Trust store password
   secret_mount_path: /jks/keys/                                     # Location of certificates and keys
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
+  nap_provider_port: "4242"                                         # Port of the onboarding server REST controller
+  nap_name: "nap.example-node.itsinterchange.eu"                    # Name of the napcore user connected to the napcore server
 
                                                                     # ------ Component specific settings ----------
 qpid:                                                               # Apache Qpid message broker
