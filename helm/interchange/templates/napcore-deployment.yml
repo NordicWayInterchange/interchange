@@ -34,7 +34,7 @@ spec:
             - name: SERVER_NAME
               value: {{ .Values.external_name | quote }}
             - name: NAP_NAME
-              value: { { .Values.nap_name | quote } }
+              value: { { .Values.self.nap_name | quote } }
             - name: NAP_CHNL_PORT
               value: { { .Values.self.nap_provider_port | quote } }
             - name: TRUST_STORE
