@@ -4,6 +4,7 @@ self:                                                               # ------ Gen
   secret_mount_path: /jks/keys/                                     # Location of certificates and keys
   service_provider_port: "4141"                                     # Port of the onboarding server REST controller
   nap_provider_port: "4242"                                         # Port of the napcore server REST controller
+  nap_name: "nap"
 
 ## the name which will be used to address the QPID server externally
 # external_name: test.nordic-way.io
