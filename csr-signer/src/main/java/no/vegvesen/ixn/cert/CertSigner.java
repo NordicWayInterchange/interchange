@@ -46,14 +46,14 @@ public class CertSigner {
     private final X509Certificate caCertificate;
 
 
-    public CertSigner(KeyStore keyStore,
+    public CertSigner(KeyStore intermediateKeyStore,
                       String keyAlias,
                       String keystorePassword,
                       KeyStore truststore,
                       String caCertAlias) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
         secureRandom = new SecureRandom();
-        this.privateKey = (PrivateKey) keyStore.getKey(keyAlias, keystorePassword.toCharArray());
-        intermediateCertificate = (X509Certificate) keyStore.getCertificate(keyAlias);
+        this.privateKey = (PrivateKey) intermediateKeyStore.getKey(keyAlias, keystorePassword.toCharArray());
+        intermediateCertificate = (X509Certificate) intermediateKeyStore.getCertificate(keyAlias);
         X500Principal issuerX500Principal = intermediateCertificate.getIssuerX500Principal();
         intermediateSubject = new X500Name(issuerX500Principal.getName(X500Principal.RFC1779));
         caCertificate = (X509Certificate) truststore.getCertificate(caCertAlias);

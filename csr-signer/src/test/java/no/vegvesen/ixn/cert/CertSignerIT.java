@@ -1,9 +1,11 @@
 package no.vegvesen.ixn.cert;
-
+/*
 import no.vegvesen.ixn.docker.DockerBaseIT;
 import no.vegvesen.ixn.docker.keygen.ServicProviderDescription;
 import no.vegvesen.ixn.docker.keygen.TopDomain;
 import no.vegvesen.ixn.docker.keygen.generator.*;
+
+ */
 import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -25,8 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CertSignerIT {
 
-    private static Path containerOutPath = DockerBaseIT.getTargetFolderPathForTestClass(CertSignerIT.class);
-
+    //private static Path containerOutPath = DockerBaseIT.getTargetFolderPathForTestClass(CertSignerIT.class);
+/*
     @Test
     @Disabled("This test is already done in CertSignerTest, should eventually be extended to include connecting to a server to check if the certs can be used")
     public void testFoo() throws IOException, CertificateException, NoSuchAlgorithmException, OperatorCreationException, KeyStoreException, UnrecoverableKeyException {
@@ -90,4 +92,5 @@ public class CertSignerIT {
         assertThat(certsAsString).allMatch(s -> s.endsWith("-----END CERTIFICATE-----\n"));
         //Now, we need to actually test using the certificate
     }
+ */
 }
