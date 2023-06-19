@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.CertificateException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +20,7 @@ public class ClusterKeyGeneratorIT {
     Path targetPath = DockerBaseIT.getTargetFolderPathForTestClass(ClusterKeyGeneratorIT.class);
 
     @Test
-    public void readClusterFromJson() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException {
+    public void readClusterFromJson() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, SignatureException, InvalidKeyException {
         Path jsonPath = Paths.get("src", "test", "resources", "cluster.json");
         Cluster cluster = new ObjectMapper().readValue(jsonPath.toFile(), Cluster.class);
         assertThat(cluster.getTopDomain().getDomainName()).isEqualTo("top-domain.eu");

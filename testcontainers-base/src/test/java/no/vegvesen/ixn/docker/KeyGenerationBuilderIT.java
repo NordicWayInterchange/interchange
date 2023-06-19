@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.CertificateException;
 
 
@@ -21,7 +20,7 @@ public class KeyGenerationBuilderIT {
     //TODO need to finish generation and testing with extra hosts
     @Test
     @Disabled
-    public void generate() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException {
+    public void generate() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, SignatureException, InvalidKeyException {
         Cluster myCluster = Cluster.builder()
                 .topDomain().domainName("top-domain.eu").ownerCountry("NO")
                 .intermediateDomain().domainName("node-domain.no").ownerCountry("NO")
@@ -71,7 +70,7 @@ public class KeyGenerationBuilderIT {
 
     @Test
     @Disabled
-    public void generateModelForDockerComposeRedirect() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException {
+    public void generateModelForDockerComposeRedirect() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, SignatureException, InvalidKeyException {
 
         Cluster cluster = Cluster.builder()
                 .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO")

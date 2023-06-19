@@ -8,10 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.List;
 
@@ -22,7 +19,7 @@ public class CertSignerTest {
     private Path path = Paths.get("src","test","resources");
 
     @Test
-    public void testSigningCsr() throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException {
+    public void testSigningCsr() throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, SignatureException, InvalidKeyException, NoSuchProviderException {
         String csrAsString = Files.readString(path.resolve("testSP.csr.pem"));
 
         KeyStore keyStore = KeyStore.getInstance("PKCS12");

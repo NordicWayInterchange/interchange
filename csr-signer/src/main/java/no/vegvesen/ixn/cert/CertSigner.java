@@ -60,7 +60,7 @@ public class CertSigner {
     }
 
 
-    public List<String> sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException {
+    public List<String> sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
 
         PKCS10CertificationRequest csr = getPkcs10CertificationRequest(csrAsString);
 
@@ -121,6 +121,7 @@ public class CertSigner {
 
         X509CertificateHolder issuedCertHolder = certificateBuilder.build(signer);
         X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
+        certificate.verify(intermediateCertificate.getPublicKey(),"BC");
         return certificatesToString(certificate,intermediateCertificate,caCertificate);
     }
 
