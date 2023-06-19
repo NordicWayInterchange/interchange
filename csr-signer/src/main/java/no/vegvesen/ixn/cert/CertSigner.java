@@ -12,7 +12,9 @@ import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX500NameUtil;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
@@ -35,6 +37,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -54,16 +57,30 @@ public class CertSigner {
         secureRandom = new SecureRandom();
         this.privateKey = (PrivateKey) intermediateKeyStore.getKey(keyAlias, keystorePassword.toCharArray());
         intermediateCertificate = (X509Certificate) intermediateKeyStore.getCertificate(keyAlias);
+        //TODO use Jcax500Utils.
         X500Principal issuerX500Principal = intermediateCertificate.getIssuerX500Principal();
         intermediateSubject = new X500Name(issuerX500Principal.getName(X500Principal.RFC1779));
         caCertificate = (X509Certificate) truststore.getCertificate(caCertAlias);
     }
 
+    public CertSigner(PrivateKey intermediateCaKey,
+                      X509Certificate intermediateCertificate,
+                      X509Certificate caCertificate) {
+        this.secureRandom = new SecureRandom();
+        this.privateKey = intermediateCaKey;
+        this.intermediateCertificate = intermediateCertificate;
+        this.intermediateSubject = JcaX500NameUtil.getSubject(intermediateCertificate);
+        this.caCertificate = caCertificate;
+    }
 
     public List<String> sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
 
         PKCS10CertificationRequest csr = getPkcs10CertificationRequest(csrAsString);
+        List<X509Certificate> certificates = sign(csr);
+        return certificatesToString(certificates);
+    }
 
+    public List<X509Certificate> sign(PKCS10CertificationRequest csr) throws CertIOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
         SubjectPublicKeyInfo csrSubjectPublicKeyInfo = csr.getSubjectPublicKeyInfo();
         //Note: We do not save the serial number of the cert at this stage, this should probably be done.
         //But could probably just read it later from the cert.
@@ -122,9 +139,18 @@ public class CertSigner {
         X509CertificateHolder issuedCertHolder = certificateBuilder.build(signer);
         X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
         certificate.verify(intermediateCertificate.getPublicKey(),"BC");
-        return certificatesToString(certificate,intermediateCertificate,caCertificate);
+        List<X509Certificate> certificates = Arrays.asList(certificate,intermediateCertificate,caCertificate);
+        return certificates;
     }
 
+
+    public static List<String> certificatesToString(List<X509Certificate> certificates) throws IOException {
+        List<String> pemList = new ArrayList<>();
+        for (X509Certificate certificate : certificates) {
+            pemList.add(certificateAsString(certificate));
+        }
+        return pemList;
+    }
     public static List<String> certificatesToString(X509Certificate certificate, X509Certificate ... certificates) throws IOException {
         List<String> pemList = new ArrayList<>();
         String pem = certificateAsString(certificate);
