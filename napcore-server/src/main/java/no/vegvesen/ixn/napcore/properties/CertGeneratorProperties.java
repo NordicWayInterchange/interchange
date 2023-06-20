@@ -7,11 +7,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 @Component
 public class CertGeneratorProperties {
@@ -55,15 +53,17 @@ public class CertGeneratorProperties {
     @Bean
     public CertSigner createBean() {
         try {
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            keyStore.load(new FileInputStream(keystoreLocation),keyStorePassword.toCharArray());
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(new FileInputStream(truststoreLocation),truststorePassword.toCharArray());
-            return new CertSigner(keyStore,keyAlias,keyStorePassword,trustStore,"myKey");
+            KeyStore keyStore = CertSigner.loadKeyStore(keystoreLocation,keyStorePassword,"PKCS12");
+            KeyStore trustStore = CertSigner.loadKeyStore(truststoreLocation,truststorePassword,"JKS");
+            PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyAlias, keyStorePassword.toCharArray());
+            X509Certificate intermediateCertificate = (X509Certificate) keyStore.getCertificate(keyAlias);
+            X509Certificate caCertificate = (X509Certificate) trustStore.getCertificate("myKey");
+            return new CertSigner(privateKey,intermediateCertificate,caCertificate);
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
                  UnrecoverableKeyException e) {
             throw new RuntimeException(e);
         }
 
     }
+
 }

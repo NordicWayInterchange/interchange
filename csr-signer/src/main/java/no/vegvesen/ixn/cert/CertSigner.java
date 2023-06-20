@@ -25,10 +25,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
-import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -48,20 +45,6 @@ public class CertSigner {
     private final X509Certificate intermediateCertificate;
     private final X509Certificate caCertificate;
 
-
-    public CertSigner(KeyStore intermediateKeyStore,
-                      String keyAlias,
-                      String keystorePassword,
-                      KeyStore truststore,
-                      String caCertAlias) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
-        secureRandom = new SecureRandom();
-        this.privateKey = (PrivateKey) intermediateKeyStore.getKey(keyAlias, keystorePassword.toCharArray());
-        intermediateCertificate = (X509Certificate) intermediateKeyStore.getCertificate(keyAlias);
-        //TODO use Jcax500Utils.
-        X500Principal issuerX500Principal = intermediateCertificate.getIssuerX500Principal();
-        intermediateSubject = new X500Name(issuerX500Principal.getName(X500Principal.RFC1779));
-        caCertificate = (X509Certificate) truststore.getCertificate(caCertAlias);
-    }
 
     public CertSigner(PrivateKey intermediateCaKey,
                       X509Certificate intermediateCertificate,
@@ -138,7 +121,8 @@ public class CertSigner {
 
         X509CertificateHolder issuedCertHolder = certificateBuilder.build(signer);
         X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
-        certificate.verify(intermediateCertificate.getPublicKey(),"BC");
+        //TODO do we need BC provider here?
+        certificate.verify(intermediateCertificate.getPublicKey());
         List<X509Certificate> certificates = Arrays.asList(certificate,intermediateCertificate,caCertificate);
         return certificates;
     }
@@ -174,6 +158,13 @@ public class CertSigner {
         PEMParser csrParser = new PEMParser(new StringReader(csrAsString));
         PKCS10CertificationRequest csr = (PKCS10CertificationRequest) csrParser.readObject();
         return csr;
+    }
+
+
+    public static KeyStore loadKeyStore(String keystoreLocation, String keyStorePassword, String storeType) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+        KeyStore keyStore = KeyStore.getInstance(storeType);
+        keyStore.load(new FileInputStream(keystoreLocation),keyStorePassword.toCharArray());
+        return keyStore;
     }
 
 }
