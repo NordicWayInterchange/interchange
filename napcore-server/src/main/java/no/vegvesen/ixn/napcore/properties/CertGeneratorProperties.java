@@ -28,7 +28,7 @@ public class CertGeneratorProperties {
     @Value("#{systemProperties['server.ssl.trust-store']}")
     private String truststoreLocation;
 
-    @Value("#systemProperties['server.ssl.trust-store-password]")
+    @Value("#{systemProperties['server.ssl.trust-store-password]}")
     private String truststorePassword;
 
     public String getKeystoreLocation() {
