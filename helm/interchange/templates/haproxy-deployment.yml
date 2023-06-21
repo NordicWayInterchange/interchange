@@ -33,6 +33,8 @@ spec:
           containerPort: {{ .Values.self.control_channel_port }}
         - name: onboard
           containerPort: {{ .Values.self.service_provider_port }}
+        - name: napcore
+          containerPort: {{ .Values.self.nap_provider_port }}
         volumeMounts:
         - name: config
           mountPath: /usr/local/etc/haproxy/
