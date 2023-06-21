@@ -59,6 +59,11 @@ public class CertSigner {
     public List<String> sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
 
         PKCS10CertificationRequest csr = getPkcs10CertificationRequest(csrAsString);
+        X500Name subject = csr.getSubject();
+        if (! cn.equals(getCN(subject))) {
+            //TODO make it's own exception class for this.
+            throw new RuntimeException("CSR CN does not match expected CN");
+        }
         List<X509Certificate> certificates = sign(csr);
         return certificatesToString(certificates);
     }
@@ -70,14 +75,10 @@ public class CertSigner {
         BigInteger serialNumber = new BigInteger(Long.toString(secureRandom.nextLong()));
         Date startDate = new Date();
         Date toDate = Date.from(LocalDateTime.now().plus(1, ChronoUnit.YEARS).atZone(ZoneId.systemDefault()).toInstant());
-
         X500Name csrSubject = csr.getSubject();
-        RDN csrCnRdn = csrSubject.getRDNs(BCStyle.CN)[0];
-
-
-        //TODO check the csrCn is correct. (Also other tings? Like org?)
-        String csrCn = IETFUtils.valueToString(csrCnRdn.getFirst().getValue());
+        String csrCn = getCN(csrSubject);
         System.out.println(csrCn);
+
 
         JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(
                 intermediateSubject,
@@ -121,10 +122,16 @@ public class CertSigner {
 
         X509CertificateHolder issuedCertHolder = certificateBuilder.build(signer);
         X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
-        //TODO do we need BC provider here?
         certificate.verify(intermediateCertificate.getPublicKey());
         List<X509Certificate> certificates = Arrays.asList(certificate,intermediateCertificate,caCertificate);
         return certificates;
+    }
+
+    private static String getCN(X500Name csrSubject) {
+        RDN csrCnRdn = csrSubject.getRDNs(BCStyle.CN)[0];
+        //TODO check the csrCn is correct. (Also other tings? Like org?)
+        String csrCn = IETFUtils.valueToString(csrCnRdn.getFirst().getValue());
+        return csrCn;
     }
 
 
@@ -132,15 +139,6 @@ public class CertSigner {
         List<String> pemList = new ArrayList<>();
         for (X509Certificate certificate : certificates) {
             pemList.add(certificateAsString(certificate));
-        }
-        return pemList;
-    }
-    public static List<String> certificatesToString(X509Certificate certificate, X509Certificate ... certificates) throws IOException {
-        List<String> pemList = new ArrayList<>();
-        String pem = certificateAsString(certificate);
-        pemList.add(pem);
-        for (X509Certificate cert : certificates) {
-            pemList.add(certificateAsString(cert));
         }
         return pemList;
     }
