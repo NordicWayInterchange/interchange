@@ -7,6 +7,8 @@ import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.federation.model.LocalEndpoint;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,12 +21,14 @@ public class TypeTransformer {
     }
 
     public Subscription transformLocalSubscriptionToNapSubscription(LocalSubscription localSubscription) {
-        Subscription subscription = new Subscription();
-        subscription.setId(localSubscription.getId());
-        subscription.setStatus(transformLocalSubscriptionStatusToNapSubscriptionStatus(localSubscription.getStatus()));
-        if (!localSubscription.getLocalEndpoints().isEmpty()) {
-            subscription.setEndpoints(transformLocalEndpointsToNapSubscriptionEndpoints(localSubscription.getLocalEndpoints()));
-        }
+        Subscription subscription = new Subscription(
+                localSubscription.getId(),
+                transformLocalSubscriptionStatusToNapSubscriptionStatus(localSubscription.getStatus()),
+                localSubscription.getSelector(),
+                transformLocalEndpointsToNapSubscriptionEndpoints(localSubscription.getLocalEndpoints()),
+                localSubscription.getLastUpdated().atZone(ZoneId.systemDefault()).toEpochSecond()
+
+        );
         return subscription;
     }
 
