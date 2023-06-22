@@ -68,6 +68,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.POST, path = "/nap/{actorCommonName}/x509/csr", produces = MediaType.APPLICATION_JSON_VALUE)
     public CertificateSignResponse addCsrRequest(@PathVariable String actorCommonName, @RequestBody CertificateSignRequest signRequest) {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("CSR - signing new cert for actor {}", actorCommonName);
         List<String> certs;
         String csr = new String(Base64.getDecoder().decode(signRequest.getCsr()));
         //TODO make a single, better runtimeException to signal that something went wrong with signing.
