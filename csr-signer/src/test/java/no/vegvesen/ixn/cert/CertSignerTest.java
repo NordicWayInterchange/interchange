@@ -1,10 +1,17 @@
 package no.vegvesen.ixn.cert;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,6 +44,32 @@ public class CertSignerTest {
         assertThat(certificatesAsString).isNotNull();
         assertThat(certificatesAsString).isNotEmpty();
         assertThat(certificatesAsString).hasSize(3);
+    }
+
+    @Test
+    public void testCsrByPKIjs() throws IOException {
+        String csrAsString = Files.readString(Paths.get("src", "test","resources", "csr.pem"), Charset.forName("UTF-8"));
+        PKCS10CertificationRequest csr = CertSigner.getPkcs10CertificationRequest(csrAsString);
+        X500Name subject = csr.getSubject();
+        for (RDN rdn : subject.getRDNs()) {
+            System.out.println(String.format("Multivalued? %s",rdn.isMultiValued()));
+            for (AttributeTypeAndValue typeAndValue : rdn.getTypesAndValues()) {
+                ASN1ObjectIdentifier type = typeAndValue.getType();
+                ASN1Encodable value = typeAndValue.getValue();
+                if (type.equals(BCStyle.CN)) {
+                    System.out.println(String.format("CN: %s", value.toString()));
+                } else if (type.equals(BCStyle.C)) {
+                    System.out.println(String.format("C: %s", value.toString()));
+                } else if (type.equals(BCStyle.O)) {
+                    System.out.println(String.format("O: %s",value.toString()));
+                } else {
+                    System.out.println("Skipping...");
+                }
+            }
+        }
+
+        System.out.println("----");
+        System.out.println(CertSigner.getCN(csr.getSubject()));
     }
 
    //Test that:

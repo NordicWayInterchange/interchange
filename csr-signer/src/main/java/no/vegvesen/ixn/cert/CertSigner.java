@@ -2,6 +2,7 @@ package no.vegvesen.ixn.cert;
 
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStrictStyle;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -127,7 +128,7 @@ public class CertSigner {
         return certificates;
     }
 
-    private static String getCN(X500Name csrSubject) {
+    public static String getCN(X500Name csrSubject) {
         RDN csrCnRdn = csrSubject.getRDNs(BCStyle.CN)[0];
         //TODO check the csrCn is correct. (Also other tings? Like org?)
         String csrCn = IETFUtils.valueToString(csrCnRdn.getFirst().getValue());
@@ -152,7 +153,7 @@ public class CertSigner {
         return pem;
     }
 
-    private PKCS10CertificationRequest getPkcs10CertificationRequest(String csrAsString) throws IOException {
+    public static PKCS10CertificationRequest getPkcs10CertificationRequest(String csrAsString) throws IOException {
         PEMParser csrParser = new PEMParser(new StringReader(csrAsString));
         PKCS10CertificationRequest csr = (PKCS10CertificationRequest) csrParser.readObject();
         return csr;
