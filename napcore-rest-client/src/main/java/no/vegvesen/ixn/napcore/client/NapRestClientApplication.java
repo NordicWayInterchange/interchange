@@ -169,7 +169,7 @@ public class NapRestClientApplication implements Callable<Integer> {
             CertificateSignResponse certificateSignResponse = client.requestCertificate(new CertificateSignRequest(Base64.getEncoder().encodeToString(keyAndCSR.getCsr().getBytes())));
             System.out.println(keyAndCSR.getKey());
             List<String> decodedChain = certificateSignResponse.getChain().stream().map(s -> new String(Base64.getDecoder().decode(s.getBytes()))).collect(Collectors.toList());
-            System.out.println(decodedChain);
+            System.out.println(String.join("",decodedChain));
             return 0;
         }
     }
