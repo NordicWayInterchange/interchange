@@ -58,6 +58,15 @@ public class Subscription {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
+    public String getSelector() {
+        return selector;
+    }
+
+    public void setSelector(String selector) {
+        this.selector = selector;
+    }
+
+
     @Override
     public String toString() {
         return "Subscription{" +
