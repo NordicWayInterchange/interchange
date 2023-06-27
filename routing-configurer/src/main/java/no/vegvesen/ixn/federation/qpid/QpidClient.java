@@ -1,11 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @ConfigurationPropertiesScan
@@ -83,36 +79,10 @@ public class QpidClient {
 		return response.getStatusCodeValue();
 	}
 
-	// A method that posts a json object to the Qpid REST api, using a given URI and a given command.
-	private void postQpid(String urlString, String message, String command) {
-		String url = urlString + command;
-		logger.debug("POST to QPID URL {} with message {} ", url, message);
-
-		ResponseEntity<String> response = restTemplate.postForEntity(url, message, String.class);
-		logger.debug("Resonse code for POST to {} with payload {} is {}", url, message, response.getStatusCodeValue());
-		if (response.getStatusCode().isError()) {
-			String errorMessage = String.format("Error posting to QPID REST API %s with message %s, cause: %s",
-					url,
-					message,
-					response.getStatusCode().getReasonPhrase());
-			logger.error(errorMessage);
-			throw new RoutingConfigurerException(errorMessage);
-		}
-	}
-
 	public void addBinding(String selector, String source, String destination, String bindingKey) {
-		JSONObject json = new JSONObject();
-		json.put("destination", destination);
-		json.put("bindingKey", bindingKey);
-		json.put("replaceExistingArguments", true);
+		AddBindingRequest request = new AddBindingRequest(destination,bindingKey,selector);
+		restTemplate.postForEntity(exchangesURL + "/" + source + "/bind",request,String.class);
 
-		JSONObject innerjson = new JSONObject();
-		innerjson.put("x-filter-jms-selector", selector);
-
-		json.put("arguments", innerjson);
-		String jsonString = json.toString();
-
-		postQpid(exchangesURL + "/" + source, jsonString, "/bind");
 	}
 
 	public void createQueue(String queueName) {
@@ -136,30 +106,18 @@ public class QpidClient {
 	}
 
 	void _createQueue(String queueName) {
-		JSONObject json = new JSONObject();
-		json.put("name", queueName);
-		json.put("durable", true);
-		json.put("maximumMessageTtl", MAX_TTL_8_DAYS);
-		String jsonString = json.toString();
-		postQpid(queuesURL, jsonString, "/");
+		CreateQueueRequest request = new CreateQueueRequest(queueName,MAX_TTL_8_DAYS);
+		restTemplate.postForEntity(queuesURL + "/",request,String.class);
 	}
 	public void _createDirectExchange(String exchangeName) {
-		JSONObject json = new JSONObject();
-		json.put("name", exchangeName);
-		json.put("durable", true);
-		json.put("type","direct");
-		String jsonString = json.toString();
-		postQpid(exchangesURL, jsonString, "/");
+		CreateExchangeRequest request = new CreateExchangeRequest(exchangeName,"direct");
+		restTemplate.postForEntity(exchangesURL + "/",request, String.class);
 		logger.debug("Created exchange {}", exchangeName);
 	}
 
 	public void _createTopicExchange(String exchangeName) {
-		JSONObject json = new JSONObject();
-		json.put("name", exchangeName);
-		json.put("durable", true);
-		json.put("type","headers");
-		String jsonString = json.toString();
-		postQpid(exchangesURL, jsonString, "/");
+		CreateExchangeRequest request = new CreateExchangeRequest(exchangeName,"headers");
+		restTemplate.postForEntity(exchangesURL + "/",request,String.class);
 		logger.debug("Created exchange {}", exchangeName);
 	}
 
@@ -219,19 +177,11 @@ public class QpidClient {
 		return null;
 	}
 
-	public void unbindBindKey(String interchange, String unwantedBindKey, String exchangeName) {
-		JSONObject json = new JSONObject();
-		json.put("destination", interchange);
-		json.put("bindingKey", unwantedBindKey);
-		String jsonString = json.toString();
-
-		postQpid(exchangesURL + "/" + exchangeName, jsonString, "/unbind");
-	}
-
 
 	public Set<String> getQueueBindKeys(String queueName) {
 		HashSet<String> existingBindKeys = new HashSet<>();
 		String url = queuesURL + "/" + queueName + "/getPublishingLinks";
+		System.out.println("Get publishing links for Queue on URL " + url);
 
 		ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
 				url,
@@ -263,20 +213,13 @@ public class QpidClient {
 
 	public List<String> getGroupMemberNames(String groupName) {
 		String url = groupsUrl + groupName;
-		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
-		logger.debug("Received members of group {} from Qpid: {}", groupName, response.getBody());
-
-		JSONArray jsonArray = new JSONArray(response.getBody());
-		ArrayList<String> groupMemberNames = new ArrayList<>();
-
-		for (int i = 0; i < jsonArray.length(); i++) {
-			JSONObject ob = jsonArray.getJSONObject(i);
-			String userName = ob.getString("name");
-			groupMemberNames.add(userName);
-		}
-
-		logger.debug("Returning list of group members: {}", groupMemberNames.toString());
+		ResponseEntity<List<GroupMember>> groupMembers = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<>() {
+				});
+		List<String> groupMemberNames = groupMembers.getBody().stream().map(GroupMember::getName).collect(Collectors.toList());
 		return groupMemberNames;
 	}
 
@@ -286,11 +229,8 @@ public class QpidClient {
 	}
 
 	public void addMemberToGroup(String memberName, String groupName) {
-		JSONObject groupJsonObject = new JSONObject();
-		groupJsonObject.put("name", memberName);
-		String jsonString = groupJsonObject.toString();
-
-		postQpid(groupsUrl, jsonString, groupName);
+		GroupMember groupMember = new GroupMember(memberName);
+		restTemplate.postForEntity(groupsUrl + groupName,groupMember,String.class);
 	}
 
 	public void addReadAccess(String subscriberName, String queue) {
@@ -338,29 +278,23 @@ public class QpidClient {
 	}
 
 	public Set<Queue> getAllQueues() throws JsonProcessingException {
-		ResponseEntity<String> allQueuesResponse = restTemplate.getForEntity(allQueuesUrl, String.class);
-
-		ObjectMapper mapper = new ObjectMapper();
-		TypeFactory typeFactory = mapper.getTypeFactory();
-
-		CollectionType collectionType = typeFactory.constructCollectionType(
-				List.class, Queue.class);
-
-		List<Queue> result = mapper.readValue(allQueuesResponse.getBody(), collectionType);
-		return new HashSet<>(result);
+		ResponseEntity<Set<Queue>> allQueuesResponse  = restTemplate.exchange(
+				allQueuesUrl,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<>() {
+				});
+		return allQueuesResponse.getBody();
 	}
 
 	public Set<Exchange> getAllExchanges() throws JsonProcessingException {
-		ResponseEntity<String> allExchangesResponse = restTemplate.getForEntity(allExchangesUrl, String.class);
-
-		ObjectMapper mapper = new ObjectMapper();
-		TypeFactory typeFactory = mapper.getTypeFactory();
-
-		CollectionType collectionType = typeFactory.constructCollectionType(
-				List.class, Exchange.class);
-
-		List<Exchange> result = mapper.readValue(allExchangesResponse.getBody(), collectionType);
-		return new HashSet<>(result);
+		ResponseEntity<Set<Exchange>> allExchangesResponse = restTemplate.exchange(
+				allExchangesUrl,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<>() {
+				});
+		return allExchangesResponse.getBody();
 	}
 
 	public QpidDelta getQpidDelta() {
