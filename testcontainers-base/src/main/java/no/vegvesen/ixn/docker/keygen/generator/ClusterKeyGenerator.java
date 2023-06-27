@@ -67,12 +67,15 @@ public class ClusterKeyGenerator {
             String keystoreName = domain.getDomainName() + ".p12";
             generateKeystoreBC(outputFolder,intermediateCaKeystorePassword,keystoreName, domain.getDomainName(), intermediateCsr.getKeyPair().getPrivate(), intermediateCert.getChain().toArray(new X509Certificate[0]));
             Files.writeString(outputFolder.resolve(domain.getDomainName() + ".txt"),intermediateCaKeystorePassword);
+            saveCert(outputFolder,String.format("int.%s.crt.pem",domain.getDomainName()),intermediateCert.getCertificate());
+            saveCertChain(outputFolder,String.format("chain.int.%s.crt.pem",domain.getDomainName()),intermediateCert.getChain());
+            saveKeyPair(outputFolder,String.format("int.%s.key.pem",domain.getDomainName()),intermediateCsr.getKeyPair());
             Interchange interchange = domain.getInterchange();
             for (AdditionalHost host : interchange.getAdditionalHosts()) {
                 CertificateCertificateChainAndKeys additionalhostKeys = generateServerCertForHost(host, intermediateCert.getCertificate(), intermediateCert.getChain(), intermediateCsr.getKeyPair().getPrivate());
                 saveCert(outputFolder, String.format("%s.crt.pem", host.getHostname()), additionalhostKeys.getCertificate());
                 saveCertChain(outputFolder, String.format("chain.%s.crt.pem", host.getHostname()), additionalhostKeys.getCertificateChain());
-                saveKeyPair(outputFolder, String.format("int.%s.key.pem", host.getHostname()),additionalhostKeys.getKeyPair());
+                saveKeyPair(outputFolder, String.format("%s.key.pem", host.getHostname()),additionalhostKeys.getKeyPair());
                 //generateServerCertForHost(outputFolder, host, intermediateCertOnHost, intermediateCertChainOnHost, intermediateKeyPath);
                 //TODO create keyStore for host (using chain, I expect)
             }
@@ -84,6 +87,9 @@ public class ClusterKeyGenerator {
                 Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
                 X509Certificate[] certChain = spCertChain.toArray(new X509Certificate[0]);
                 generateKeystoreBC(outputFolder,serviceProviderKeystorePassword,serviceProviderKeystoreName, description.getName(), spCsr.getKeyPair().getPrivate(), certChain);
+                saveCert(outputFolder,String.format("%s.crt.pem",description.getName()),spCertChain.get(0));
+                saveCertChain(outputFolder,String.format("chain.%s.crt.pem",description.getName()),spCertChain);
+                saveKeyPair(outputFolder,String.format("%s.key.pem",description.getName()),spCsr.getKeyPair());
             }
 
         }
