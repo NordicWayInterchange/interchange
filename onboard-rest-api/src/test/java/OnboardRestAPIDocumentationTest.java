@@ -1,5 +1,9 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import com.github.victools.jsonschema.generator.*;
+import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
@@ -23,6 +27,25 @@ public class OnboardRestAPIDocumentationTest {
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request));
+    }
+
+    @Test
+    public void addSubscriptionSchema() {
+        SchemaGeneratorConfigBuilder builder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);
+        SchemaGeneratorConfig config = builder.build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode node = generator.generateSchema(AddSubscriptionsRequest.class);
+        System.out.println(node.toPrettyString());
+    }
+
+    @Test
+    public void capabilities() {
+        SchemaGeneratorConfigBuilder builder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
+                .with(new JacksonModule());
+        SchemaGeneratorConfig config = builder.build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode node = generator.generateSchema(CapabilitiesSplitApi.class);
+        System.out.println(node.toPrettyString());
     }
 
     @Test
