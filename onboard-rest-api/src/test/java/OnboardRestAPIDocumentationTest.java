@@ -41,7 +41,8 @@ public class OnboardRestAPIDocumentationTest {
     @Test
     public void capabilities() {
         SchemaGeneratorConfigBuilder builder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
-                .with(new JacksonModule());
+                .with(new JacksonModule())
+                .with(Option.STRICT_TYPE_INFO);
         SchemaGeneratorConfig config = builder.build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode node = generator.generateSchema(CapabilitiesSplitApi.class);
