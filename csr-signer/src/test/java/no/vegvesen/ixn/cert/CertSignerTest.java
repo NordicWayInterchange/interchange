@@ -57,11 +57,11 @@ public class CertSignerTest {
                 ASN1ObjectIdentifier type = typeAndValue.getType();
                 ASN1Encodable value = typeAndValue.getValue();
                 if (type.equals(BCStyle.CN)) {
-                    System.out.println(String.format("CN: %s", value.toString()));
+                    System.out.println(String.format("CN:%s, %s", type,value.toString()));
                 } else if (type.equals(BCStyle.C)) {
-                    System.out.println(String.format("C: %s", value.toString()));
+                    System.out.println(String.format("C:%s, %s", type,value.toString()));
                 } else if (type.equals(BCStyle.O)) {
-                    System.out.println(String.format("O: %s",value.toString()));
+                    System.out.println(String.format("O:%s, %s",type,value.toString()));
                 } else {
                     System.out.println("Skipping...");
                 }
