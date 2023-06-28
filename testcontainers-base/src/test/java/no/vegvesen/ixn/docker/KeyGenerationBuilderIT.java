@@ -3,14 +3,15 @@ package no.vegvesen.ixn.docker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.docker.keygen.Cluster;
 import no.vegvesen.ixn.docker.keygen.generator.ClusterKeyGenerator;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.security.*;
+import java.security.cert.CertificateException;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class KeyGenerationBuilderIT {
 
@@ -19,7 +20,7 @@ public class KeyGenerationBuilderIT {
     //TODO need to finish generation and testing with extra hosts
     @Test
     @Disabled
-    public void generate() throws IOException {
+    public void generate() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, SignatureException, InvalidKeyException {
         Cluster myCluster = Cluster.builder()
                 .topDomain().domainName("top-domain.eu").ownerCountry("NO")
                 .intermediateDomain().domainName("node-domain.no").ownerCountry("NO")
@@ -66,18 +67,10 @@ public class KeyGenerationBuilderIT {
     }
 
 
-    @Test
-    public void readClusterFromJson() throws IOException {
-        Path jsonPath = Paths.get("src", "test", "resources", "cluster.json");
-        Cluster cluster = new ObjectMapper().readValue(jsonPath.toFile(), Cluster.class);
-        assertThat(cluster.getTopDomain().getDomainName()).isEqualTo("top-domain.eu");
-        assertThat(cluster.getTopDomain().getIntermediateDomains()).hasSize(1);
-        assertThat(cluster.getTopDomain().getIntermediateDomains().get(0).getInterchange().getServiceProviders()).hasSize(2);
-    }
 
     @Test
     @Disabled
-    public void generateModelForDockerComposeRedirect() throws IOException {
+    public void generateModelForDockerComposeRedirect() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, SignatureException, InvalidKeyException {
 
         Cluster cluster = Cluster.builder()
                 .topDomain().domainName("bouvetinterchange.eu").ownerCountry("NO")

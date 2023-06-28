@@ -5,11 +5,15 @@ import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.napcore.model.*;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class NapCoreAPIDocumentationTest {
 
@@ -58,6 +62,16 @@ public class NapCoreAPIDocumentationTest {
                 new MetadataApi()
         );
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(Arrays.asList(capability)));
+    }
+
+    @Test
+    public void testCertificateResponse() throws IOException {
+        CertificateSignResponse response = new ObjectMapper().readValue(Paths.get("src","test","resources","certChainResponse.json").toFile(), CertificateSignResponse.class);
+        assertThat(response.getChain()).hasSize(3);
+
+        List<String> decoded = response.getChain().stream().map(s -> new String(Base64.getDecoder().decode(s))).collect(Collectors.toList());
+        assertThat(decoded).allMatch(s -> s.startsWith("-----BEGIN CERTIFICATE-----\n")).allMatch(s -> s.endsWith("-----END CERTIFICATE-----\n"));
+
     }
 
 }
