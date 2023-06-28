@@ -1,8 +1,9 @@
 package no.vegvesen.ixn.cert;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.style.BCStrictStyle;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -61,15 +62,12 @@ public class CertSigner {
 
         PKCS10CertificationRequest csr = getPkcs10CertificationRequest(csrAsString);
         X500Name subject = csr.getSubject();
-        if (! cn.equals(getCN(subject))) {
-            //TODO make it's own exception class for this.
-            throw new RuntimeException("CSR CN does not match expected CN");
-        }
-        List<X509Certificate> certificates = sign(csr);
+
+        List<X509Certificate> certificates = sign(csr, cn);
         return certificatesToString(certificates);
     }
 
-    public List<X509Certificate> sign(PKCS10CertificationRequest csr) throws CertIOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
+    public List<X509Certificate> sign(PKCS10CertificationRequest csr, String cn) throws CertIOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
         SubjectPublicKeyInfo csrSubjectPublicKeyInfo = csr.getSubjectPublicKeyInfo();
         //Note: We do not save the serial number of the cert at this stage, this should probably be done.
         //But could probably just read it later from the cert.
@@ -77,9 +75,10 @@ public class CertSigner {
         Date startDate = new Date();
         Date toDate = Date.from(LocalDateTime.now().plus(1, ChronoUnit.YEARS).atZone(ZoneId.systemDefault()).toInstant());
         X500Name csrSubject = csr.getSubject();
-        String csrCn = getCN(csrSubject);
-        System.out.println(csrCn);
-
+        if (! cn.equals(getCN(csrSubject))) {
+            //TODO make it's own exception class for this.
+            throw new RuntimeException("CSR CN does not match expected CN");
+        }
 
         JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(
                 intermediateSubject,
@@ -130,8 +129,21 @@ public class CertSigner {
 
     public static String getCN(X500Name csrSubject) {
         RDN csrCnRdn = csrSubject.getRDNs(BCStyle.CN)[0];
-        //TODO check the csrCn is correct. (Also other tings? Like org?)
-        String csrCn = IETFUtils.valueToString(csrCnRdn.getFirst().getValue());
+        String csrCn = null;
+        if (csrCnRdn.isMultiValued()) {
+            for (AttributeTypeAndValue typeAndValue : csrCnRdn.getTypesAndValues()) {
+                ASN1ObjectIdentifier type = typeAndValue.getType();
+                if (BCStyle.CN.equals(type)) {
+                    csrCn = IETFUtils.valueToString(typeAndValue.getValue());
+                }
+            }
+            if (csrCnRdn == null) {
+                throw new RuntimeException("Could not find CN for Subject");
+            }
+        } else {
+            //TODO check the csrCn is correct. (Also other tings? Like org?)
+            csrCn = IETFUtils.valueToString(csrCnRdn.getFirst().getValue());
+        }
         return csrCn;
     }
 

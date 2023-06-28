@@ -81,7 +81,7 @@ public class ClusterKeyGenerator {
             }
             for (ServicProviderDescription description : interchange.getServiceProviders()) {
                 KeyPairAndCsr spCsr = generateCsrForServiceProviderBC(description);
-                List<X509Certificate> spCertChain = generateServiceProviderCertBC(spCsr.getCsr(), topCa.getCertificate(), intermediateCert.getCertificate(), intermediateCsr.getKeyPair().getPrivate());
+                List<X509Certificate> spCertChain = generateServiceProviderCertBC(spCsr.getCsr(), topCa.getCertificate(), intermediateCert.getCertificate(), intermediateCsr.getKeyPair().getPrivate(),description.getName());
                 String serviceProviderKeystorePassword = generatePassword(random,24);
                 String serviceProviderKeystoreName = description.getName() + ".p12";
                 Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
@@ -95,10 +95,10 @@ public class ClusterKeyGenerator {
         }
     }
 
-    public static List<X509Certificate> generateServiceProviderCertBC(PKCS10CertificationRequest certificationRequest, X509Certificate caCertificate, X509Certificate intermediateCertificate, PrivateKey privateKey) {
+    public static List<X509Certificate> generateServiceProviderCertBC(PKCS10CertificationRequest certificationRequest, X509Certificate caCertificate, X509Certificate intermediateCertificate, PrivateKey privateKey, String cn) {
         try {
             CertSigner certSigner = new CertSigner(privateKey, intermediateCertificate, caCertificate);
-            List<X509Certificate> certChain = certSigner.sign(certificationRequest);
+            List<X509Certificate> certChain = certSigner.sign(certificationRequest,cn);
             return certChain;
         } catch (IOException | NoSuchAlgorithmException | CertificateException |
                  OperatorCreationException e) {

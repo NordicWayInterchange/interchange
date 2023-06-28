@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ public class CertSignerTest {
                 ASN1ObjectIdentifier type = typeAndValue.getType();
                 ASN1Encodable value = typeAndValue.getValue();
                 if (type.equals(BCStyle.CN)) {
-                    System.out.println(String.format("CN:%s, %s", type,value.toString()));
+                    System.out.println(String.format("CN:%s, %s", type, IETFUtils.valueToString(value)));
                 } else if (type.equals(BCStyle.C)) {
                     System.out.println(String.format("C:%s, %s", type,value.toString()));
                 } else if (type.equals(BCStyle.O)) {
