@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.napcore;
 
+import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
@@ -44,6 +45,16 @@ public class NapServerErrorAdvice {
     @ExceptionHandler({NotFoundException.class})
     public ResponseEntity<ErrorDetails> unknownProperty(NotFoundException e){
         return error(NOT_FOUND, e);
+    }
+
+    @ExceptionHandler({IllegalSubjectException.class})
+    public ResponseEntity<ErrorDetails> illegalCsr(IllegalSubjectException e) {
+        return error(BAD_REQUEST,e);
+    }
+
+    @ExceptionHandler({SignExeption.class})
+    public ResponseEntity<ErrorDetails> cannotSign(SignExeption e) {
+        return error(INTERNAL_SERVER_ERROR,e);
     }
 
     private ResponseEntity<ErrorDetails> error(HttpStatus status, Exception e) {

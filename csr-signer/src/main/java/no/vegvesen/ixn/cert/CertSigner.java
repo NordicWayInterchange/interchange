@@ -61,8 +61,6 @@ public class CertSigner {
     public List<String> sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
 
         PKCS10CertificationRequest csr = getPkcs10CertificationRequest(csrAsString);
-        X500Name subject = csr.getSubject();
-
         List<X509Certificate> certificates = sign(csr, cn);
         return certificatesToString(certificates);
     }
@@ -76,8 +74,7 @@ public class CertSigner {
         Date toDate = Date.from(LocalDateTime.now().plus(1, ChronoUnit.YEARS).atZone(ZoneId.systemDefault()).toInstant());
         X500Name csrSubject = csr.getSubject();
         if (! cn.equals(getCN(csrSubject))) {
-            //TODO make it's own exception class for this.
-            throw new RuntimeException("CSR CN does not match expected CN");
+            throw new IllegalSubjectException();
         }
 
         JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(

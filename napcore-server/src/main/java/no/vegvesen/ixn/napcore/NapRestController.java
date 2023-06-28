@@ -71,20 +71,9 @@ public class NapRestController {
         //TODO make a single, better runtimeException to signal that something went wrong with signing.
         try {
             certs = certSigner.sign(csr,actorCommonName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (OperatorCreationException e) {
-            throw new RuntimeException(e);
-        } catch (CertificateException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (SignatureException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchProviderException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | OperatorCreationException | CertificateException | NoSuchAlgorithmException |
+                 SignatureException | InvalidKeyException | NoSuchProviderException e) {
+            throw new SignExeption("Could not sign csr",e);
         }
         List<String> encodedCerts = certs.stream().map(s -> Base64.getEncoder().encodeToString(s.getBytes())).collect(Collectors.toList());
         return new CertificateSignResponse(encodedCerts);
