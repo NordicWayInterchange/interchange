@@ -13,25 +13,32 @@ import no.vegvesen.ixn.federation.model.capability.CapabilitySplit;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
-import no.vegvesen.ixn.napcore.model.*;
-import no.vegvesen.ixn.napcore.properties.CertGeneratorProperties;
+import no.vegvesen.ixn.napcore.model.Capability;
+import no.vegvesen.ixn.napcore.model.CertificateSignRequest;
+import no.vegvesen.ixn.napcore.model.CertificateSignResponse;
+import no.vegvesen.ixn.napcore.model.Subscription;
+import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -68,11 +75,11 @@ public class NapRestController {
         logger.info("CSR - signing new cert for actor {}", actorCommonName);
         List<String> certs;
         String csr = new String(Base64.getDecoder().decode(signRequest.getCsr()));
-        //TODO make a single, better runtimeException to signal that something went wrong with signing.
         try {
             certs = certSigner.sign(csr,actorCommonName);
         } catch (IOException | OperatorCreationException | CertificateException | NoSuchAlgorithmException |
                  SignatureException | InvalidKeyException | NoSuchProviderException e) {
+            logger.info("Error signing CSR for Service Provider {}, {}", actorCommonName, e);
             throw new SignExeption("Could not sign csr",e);
         }
         List<String> encodedCerts = certs.stream().map(s -> Base64.getEncoder().encodeToString(s.getBytes())).collect(Collectors.toList());
