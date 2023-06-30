@@ -81,6 +81,7 @@ public class QpidClient {
 
 	public void addBinding(String selector, String source, String destination, String bindingKey) {
 		AddBindingRequest request = new AddBindingRequest(destination,bindingKey,selector);
+		logger.info("Add binding from {} to {} with binding key {} and selector {}", source,destination,bindingKey,selector);
 		restTemplate.postForEntity(exchangesURL + "/" + source + "/bind",request,String.class);
 
 	}
