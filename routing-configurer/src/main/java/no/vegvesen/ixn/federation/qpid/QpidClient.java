@@ -87,21 +87,22 @@ public class QpidClient {
 
 	public void createQueue(String queueName) {
 		if (!queueExists(queueName)) {
+			logger.info("Creating queue {}", queueName);
 			_createQueue(queueName);
 		}
 	}
 
 	public void createTopicExchange(String exchangeName) {
 		if (!exchangeExists(exchangeName)){
+			logger.info("Creating topic exchange {}", exchangeName);
 			_createTopicExchange(exchangeName);
-			logger.info("Created exchange with name {}", exchangeName);
 		}
 	}
 
 	public void createDirectExchange(String exchangeName) {
 		if (!exchangeExists(exchangeName)){
+			logger.info("Creating direct exchange {}", exchangeName);
 			_createDirectExchange(exchangeName);
-			logger.info("Created exchange with name {}", exchangeName);
 		}
 	}
 
@@ -203,11 +204,13 @@ public class QpidClient {
 
 	public void removeQueue(String queueName) {
 		String queueId = lookupQueueId(queueName);
+		logger.info("Removing queue {}", queueName);
 		restTemplate.delete(queuesURL + "?id=" + queueId);
 	}
 
 	public void removeExchange(String exchangeName) {
 		String exchangeId = lookupExchangeId(exchangeName);
+		logger.info("Removing exchange {}", exchangeName);
 		restTemplate.delete(exchangesURL + "?id=" + exchangeId);
 	}
 
@@ -225,36 +228,41 @@ public class QpidClient {
 
 	public void removeMemberFromGroup(String memberName, String groupName) {
 		String url = groupsUrl + groupName + "/" + memberName;
+		logger.info("Removing user {} from group {}",memberName,groupName);
 		restTemplate.delete(url);
 	}
 
 	public void addMemberToGroup(String memberName, String groupName) {
 		GroupMember groupMember = new GroupMember(memberName);
+		logger.info("Adding member {} to group {}",memberName,groupName);
 		restTemplate.postForEntity(groupsUrl + groupName,groupMember,String.class);
 	}
 
 	public void addReadAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
-		provider.addQueueReadAccess(subscriberName,queue);
-		postQpidAcl(provider);
-
+		provider.addQueueReadAccess(subscriberName, queue);
+		logger.info("Adding read access for {} to queue {}",subscriberName,queue);
+        postQpidAcl(provider);
 	}
 
 	public void addWriteAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
 		provider.addQueueWriteAccess(subscriberName, queue);
-		postQpidAcl(provider);
+		logger.info("Adding write access for {} to queue {}",subscriberName,queue);
+        postQpidAcl(provider);
 	}
 
 	public void removeReadAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
 		provider.removeQueueReadAccess(subscriberName,queue);
+		logger.info("Removing read access for {} to queue {}", subscriberName, queue);
 		postQpidAcl(provider);
 	}
 
 	public void removeWriteAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
 		provider.removeQueueWriteAccess(subscriberName,queue);
+		logger.info("Removing write access for {} to queue {}", subscriberName,queue);
 		postQpidAcl(provider);
 
 	}
