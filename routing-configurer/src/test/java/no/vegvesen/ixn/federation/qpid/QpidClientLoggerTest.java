@@ -4,7 +4,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -19,6 +18,26 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class QpidClientLoggerTest {
+
+
+    @Test
+    public void createQueue() {
+            RestTemplate template = mock(RestTemplate.class);
+            Logger logger = (Logger) LoggerFactory.getLogger(QpidClient.class);
+            ListAppender<ILoggingEvent> appender = new ListAppender<>();
+            appender.start();
+            logger.addAppender(appender);
+            QpidClient client = new QpidClient(
+                    "thisisaUrl",
+                    "thisisiaVhost",
+                    template
+            );
+            String queue = "MyQueueu";
+        when(template.getForEntity(any(), any())).thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        client.createQueue(queue);
+        assertThat(infoEvents(appender.list.stream())).hasSize(1);
+        assertThat(infoEvents(appender.list.stream()).anyMatch(formattedMessageContains(queue))).isTrue();
+    }
 
     @Test
     public void removeQueue() {
