@@ -275,7 +275,6 @@ public class NeigbourDiscoveryService {
                         }
                         subscription.getEndpoints().clear();
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
                     }
                 } catch (SubscriptionPollException e) {
