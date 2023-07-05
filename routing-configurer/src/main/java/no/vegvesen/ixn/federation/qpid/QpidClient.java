@@ -157,7 +157,7 @@ public class QpidClient {
 
 	private String lookupExchangeId(String exchangeName) {
 		String exchangeQueryUrl = exchangesURL + "/" + exchangeName;
-		logger.info("quering for exchange {} with url {}", exchangeName, exchangeQueryUrl);
+		logger.debug("quering for exchange {} with url {}", exchangeName, exchangeQueryUrl);
 		@SuppressWarnings("rawtypes")
 		ResponseEntity<HashMap> response;
 		try {
