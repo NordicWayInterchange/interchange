@@ -27,9 +27,9 @@ spec:
         image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag}}"
         env:
         - name: POSTGRES_USER
-          value: {{ .Values.database.postgres_user | quote }}
+          value: {{ .Values.postgres_user | quote }}
         - name: POSTGRES_PASSWORD
-          value: {{ .Values.database.postgres_password | quote }}
+          value: {{ .Values.postgres_password | quote }}
         - name: POSTGRES_DB
           value: {{ .Values.database.postgres_db | quote }}
         - name: PGDATA

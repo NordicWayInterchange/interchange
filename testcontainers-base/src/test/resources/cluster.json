@@ -1,0 +1,26 @@
+{
+  "topDomain" : {
+    "domainName" : "top-domain.eu",
+    "ownerCountry" : "NO",
+    "intermediateDomains" : [ {
+      "domainName" : "node-domain.no",
+      "owningCountry" : "NO",
+      "interchange" : {
+        "additionalHosts" : [ {
+          "hostname" : "messages.node-domain.no",
+          "owningCountry" : null
+        }, {
+          "hostname" : "onboard.node-domain.no",
+          "owningCountry" : "NO"
+        } ],
+        "serviceProviders" : [ {
+          "name" : "service-provider-1",
+          "country" : null
+        }, {
+          "name" : "service-provider-2",
+          "country" : "NO"
+        } ]
+      }
+    } ]
+  }
+}

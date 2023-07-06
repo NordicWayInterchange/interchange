@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.docker;
 
+import no.vegvesen.ixn.docker.keygen.generator.ServiceProviderCertGenerator;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -18,7 +20,6 @@ public class ServiceProviderCertGeneratorIT {
 
     @Container
     static ServiceProviderCertGenerator generator = new ServiceProviderCertGenerator(
-        DockerBaseIT.getFolderPath("keymaster").resolve("intermediateca/sign_sp"),
             resourcePath.resolve("serviceprovider/testprovider.csr.pem"),
             "testprovider",
             intermediateCaPath.resolve("int.test2.no.crt.pem"),

@@ -39,11 +39,11 @@ spec:
         - name: KEY_STORE
           value: {{ .Values.self.secret_mount_path }}key_store.p12
         - name: KEY_STORE_PASSWORD
-          value: {{ .Values.self.key_store_password | quote }}
+          value: {{ .Values.key_store_password | quote }}
         - name: TRUST_STORE
           value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
         - name: TRUST_STORE_PASSWORD
-          value: {{ .Values.self.trust_store_password | quote }}
+          value: {{ .Values.trust_store_password | quote }}
         - name: VHOST_FILE
           value: /work/default/config/default.json
         - name: STATIC_VHOST_FILE

@@ -24,7 +24,7 @@ data:
         bind *:{{ .Values.self.control_channel_port }}
         mode tcp
         default_backend neighbour-server
-
+    
     frontend qpid-messaging-frontend
         mode tcp
         log global
@@ -37,6 +37,12 @@ data:
         mode tcp
         default_backend onboard-server
 
+    frontend napcore-server-frontend
+        log global
+        bind *:{{ .Values.self.nap_provider_port }}
+        mode tcp
+        default_backend napcore-server  
+    
 
     backend neighbour-server
         mode tcp
@@ -49,3 +55,7 @@ data:
     backend onboard-server
         mode tcp
         server {{ .Release.Name }}-onboard-server {{ .Release.Name }}-onboard-server:{{ .Values.self.service_provider_port }} maxconn 32
+    
+    backend napcore-server  
+        mode tcp
+        server {{ .Release.Name }}-napcore-server {{ .Release.Name }}-napcore-server:{{ .Values.self.nap_provider_port }} maxconn 32

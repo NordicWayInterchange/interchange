@@ -9,7 +9,7 @@ metadata:
     release: {{ .Release.Name }}
 data:
   passwd: |
-    {{ .Values.qpid.admin_user }}:{{ .Values.qpid.admin_password }}
+    {{ .Values.qpid.admin_user }}:{{ .Values.admin_password }}
   groups: |
     service-providers.users={{ range .Values.qpid.users }}{{ .name }},{{ end }}
     federated-interchanges.users=
