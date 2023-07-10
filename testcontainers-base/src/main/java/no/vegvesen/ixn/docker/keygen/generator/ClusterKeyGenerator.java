@@ -283,7 +283,7 @@ public class ClusterKeyGenerator {
     }
 
 
-    private static Path makeTrustStore(String topDomainTruststorePassword, Path outputFolder, String truststoreName, String caCertAlias, X509Certificate certificate) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+    public static Path makeTrustStore(String topDomainTruststorePassword, Path outputFolder, String truststoreName, String caCertAlias, X509Certificate certificate) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         KeyStore trustStore = KeyStore.getInstance("JKS");
         trustStore.load(null,null);
         trustStore.setCertificateEntry(caCertAlias, certificate);
