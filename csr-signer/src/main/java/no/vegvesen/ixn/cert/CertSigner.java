@@ -126,22 +126,18 @@ public class CertSigner {
 
     public static String getCN(X500Name csrSubject) {
         RDN csrCnRdn = csrSubject.getRDNs(BCStyle.CN)[0];
-        String csrCn = null;
         if (csrCnRdn.isMultiValued()) {
             for (AttributeTypeAndValue typeAndValue : csrCnRdn.getTypesAndValues()) {
                 ASN1ObjectIdentifier type = typeAndValue.getType();
                 if (BCStyle.CN.equals(type)) {
-                    csrCn = IETFUtils.valueToString(typeAndValue.getValue());
+                    return IETFUtils.valueToString(typeAndValue.getValue());
                 }
             }
-            if (csrCnRdn == null) {
-                throw new RuntimeException("Could not find CN for Subject");
-            }
+            throw new RuntimeException("Could not find CN for Subject");
         } else {
             //TODO check the csrCn is correct. (Also other tings? Like org?)
-            csrCn = IETFUtils.valueToString(csrCnRdn.getFirst().getValue());
+            return IETFUtils.valueToString(csrCnRdn.getFirst().getValue());
         }
-        return csrCn;
     }
 
 
