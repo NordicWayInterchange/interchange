@@ -3,6 +3,7 @@ package no.vegvesen.ixn.napcore;
 import no.vegvesen.ixn.cert.IllegalSubjectException;
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
+import no.vegvesen.ixn.federation.exceptions.SelectorAlwaysTrueException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
@@ -23,8 +24,13 @@ public class NapServerErrorAdvice {
     private Logger logger = LoggerFactory.getLogger(NapServerErrorAdvice.class);
 
     @ExceptionHandler({SubscriptionRequestException.class})
-    public ResponseEntity<ErrorDetails> handleSubscriptionRequestException(RuntimeException e){
+    public ResponseEntity<ErrorDetails> handleSubscriptionRequestException(SubscriptionRequestException e){
         return error(BAD_REQUEST, e);
+    }
+
+    @ExceptionHandler({SelectorAlwaysTrueException.class})
+    public ResponseEntity<ErrorDetails> handleSelectorAleaysTrueException(SelectorAlwaysTrueException e) {
+        return error(BAD_REQUEST,e);
     }
 
     @ExceptionHandler({RuntimeException.class})
