@@ -85,4 +85,12 @@ public class ListenerEndpointIT {
 
         assertThat(repository.findAllByNeighbourName("neighbourName")).hasSize(2);
     }
+
+    @Test
+    public void saveListenerEndpointWithTwoDifferentTargetsForTheSameSource() {
+        ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("neighbour", "source", "host", 5671, new Connection(), "target1");
+        ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("neighbour", "source", "host", 5671, new Connection(), "target2");
+        repository.save(listenerEndpoint1);
+        assertThatExceptionOfType(DataIntegrityViolationException.class).isThrownBy(() -> repository.save(listenerEndpoint2));
+    }
 }
