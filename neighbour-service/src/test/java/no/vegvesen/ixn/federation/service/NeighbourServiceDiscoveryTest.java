@@ -691,6 +691,7 @@ public class NeighbourServiceDiscoveryTest {
 		Neighbour spyNeighbour1 = new Neighbour();
 
 		Subscription subscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
+		subscription.setExchangeName("target");
 		subscription.setNumberOfPolls(0);
 		subscription.setLastUpdatedTimestamp(0);
 		Endpoint endpoint = new Endpoint("spy-neighbour", "spy-neighbour", 5671);
@@ -704,10 +705,10 @@ public class NeighbourServiceDiscoveryTest {
 		Subscription createdSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
 		createdSubscription.setLastUpdatedTimestamp(2);
 
-		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(spyNeighbour1.getName(), "spy-neighbour", "spy-neighbour", 5671, new Connection());
+		ListenerEndpoint listenerEndpoint = new ListenerEndpoint(spyNeighbour1.getName(), "spy-neighbour", "spy-neighbour", 5671, new Connection(), "target");
 
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
-		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(spyNeighbour1.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource())).thenReturn(listenerEndpoint);
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", endpoint.getSource(), spyNeighbour1.getName())).thenReturn(listenerEndpoint);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);

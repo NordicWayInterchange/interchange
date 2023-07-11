@@ -7,7 +7,6 @@ import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -34,7 +33,7 @@ public class MessageCollectorRemoteListenerIT extends QpidDockerBaseIT {
 		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "localhost.p12", "truststore.jks");
 		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getAmqpsPort().toString(), "subscriptionExchange");
         ListenerEndpoint remote = mock(ListenerEndpoint.class);
-        when(remote.getExchangeName()).thenReturn("subscriptionExchange");
+        when(remote.getTarget()).thenReturn("subscriptionExchange");
         when(remote.getHost()).thenReturn("localhost");
         when(remote.getPort()).thenReturn(remoteContainer.getAmqpsPort());
         when(remote.getSource()).thenReturn("localhost");

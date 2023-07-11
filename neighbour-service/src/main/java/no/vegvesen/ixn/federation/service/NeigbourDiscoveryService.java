@@ -174,7 +174,7 @@ public class NeigbourDiscoveryService {
             for (Subscription subscription : subscriptionPostCalculator.getSubscriptionsToRemove()) {
                 if (!subscription.getEndpoints().isEmpty()) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                     }
                     subscription.getEndpoints().clear();
                 }
@@ -271,7 +271,7 @@ public class NeigbourDiscoveryService {
                     } else {
                         // Number of poll attempts exceeds allowed number of poll attempts.
                         if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                         }
                         subscription.getEndpoints().clear();
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
@@ -285,7 +285,7 @@ public class NeigbourDiscoveryService {
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 } catch (SubscriptionNotFoundException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                     }
                     subscription.getEndpoints().clear();
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -308,7 +308,7 @@ public class NeigbourDiscoveryService {
                         Subscription lastUpdatedSubscription = neighbourFacade.pollSubscriptionStatus(subscription, neighbour);
                         if (lastUpdatedSubscription.getSubscriptionStatus().equals(SubscriptionStatus.RESUBSCRIBE)) {
                             if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                                tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                             }
                             subscription.getEndpoints().clear();
                             subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -320,7 +320,7 @@ public class NeigbourDiscoveryService {
                                         lastUpdatedSubscription.getEndpoints()
                                 );
                                 if (lastUpdatedSubscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove());
+                                    tearDownListenerEndpointsFromEndpointsList(neighbour, endpointCalculator.getEndpointsToRemove(), subscription.getExchangeName());
                                     subscription.getEndpoints().removeAll(endpointCalculator.getEndpointsToRemove());
                                 }
                                 subscription.setEndpoints(endpointCalculator.getCalculatedEndpointsSet());
@@ -331,7 +331,7 @@ public class NeigbourDiscoveryService {
                     } else {
                         subscription.setSubscriptionStatus(SubscriptionStatus.GIVE_UP);
                         if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                         }
                         subscription.getEndpoints().clear();
                         logger.warn("Number of polls has exceeded number of allowed polls. Setting subscription status to GIVE_UP.");
@@ -344,7 +344,7 @@ public class NeigbourDiscoveryService {
                     logger.error("Error in polling for subscription status. Setting status of Subscription to FAILED.", e);
                 } catch (SubscriptionNotFoundException e) {
                     if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
-                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints());
+                        tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
                     }
                     subscription.getEndpoints().clear();
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
@@ -358,9 +358,9 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints) {
+    public void tearDownListenerEndpointsFromEndpointsList(Neighbour neighbour, Set<Endpoint> endpoints, String exchangeName) {
         for(Endpoint endpoint : endpoints) {
-            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource(neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getSource());
+            ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, endpoint.getSource(), neighbour.getName());
             if (listenerEndpoint != null) {
                 listenerEndpointRepository.delete(listenerEndpoint);
             }

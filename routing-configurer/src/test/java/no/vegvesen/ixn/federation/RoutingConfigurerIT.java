@@ -839,16 +839,16 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		Set<Endpoint> endpoints = new HashSet<>(org.mockito.internal.util.collections.Sets.newSet(endpoint1, endpoint2));
 
-		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "host-1", 5671, "my-source-1")).thenReturn(null);
-		when(listenerEndpointRepository.findByNeighbourNameAndHostAndPortAndSource("my-neighbour", "host-2", 5671, "my-source-2")).thenReturn(null);
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", "my-neighbour")).thenReturn(null);
+		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-2", "my-neighbour")).thenReturn(null);
 
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "host-1", 5671, new Connection());
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "host-2", 5671, new Connection());
+		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint("my-neighbour", "my-source-1", "host-1", 5671, new Connection(), "target");
+		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint("my-neighbour", "my-source-2", "host-2", 5671, new Connection(), "target");
 
 		when(listenerEndpointRepository.save(listenerEndpoint1)).thenReturn(listenerEndpoint1);
 		when(listenerEndpointRepository.save(listenerEndpoint2)).thenReturn(listenerEndpoint2);
 
-		routingConfigurer.createListenerEndpointFromEndpointsList(neighbour, endpoints, "");
+		routingConfigurer.createListenerEndpointFromEndpointsList(neighbour, endpoints, "target");
 
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
 	}

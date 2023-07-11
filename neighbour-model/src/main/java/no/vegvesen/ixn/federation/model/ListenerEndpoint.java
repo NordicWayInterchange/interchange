@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "listener_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"neighbourName", "source", "host", "port"}, name = "uk_listener_endpoint"))
+@Table(name = "listener_endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"neighbourName", "source", "target"}, name = "uk_listener_endpoint"))
 public class ListenerEndpoint {
 
     @Id
@@ -24,34 +24,29 @@ public class ListenerEndpoint {
     private int maxBandwidth;
     private int maxMessageRate;
 
-    private String exchangeName;
+    private String target;
 
 
-    public ListenerEndpoint() { }
+    public ListenerEndpoint() {
 
-    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection) {
-        this.neighbourName = neighbourName;
-        this.source = source;
-        this.host = host;
-        this.port = port;
-        this.messageConnection = messageConnection;
     }
 
-    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, String exchangeName) {
+    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, String target) {
         this.neighbourName = neighbourName;
         this.source = source;
         this.host = host;
         this.port = port;
         this.messageConnection = messageConnection;
-        this.exchangeName = exchangeName;
+        this.target = target;
     }
 
-    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, int maxBandwidth, int maxMessageRate) {
+    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, String target, int maxBandwidth, int maxMessageRate) {
         this.neighbourName = neighbourName;
         this.source = source;
         this.host = host;
         this.port = port;
         this.messageConnection = messageConnection;
+        this.target = target;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
     }
@@ -100,12 +95,12 @@ public class ListenerEndpoint {
         this.maxMessageRate = maxMessageRate;
     }
 
-    public String getExchangeName() {
-        return exchangeName;
+    public String getTarget() {
+        return target;
     }
 
-    public void setExchangeName(String exchangeName) {
-        this.exchangeName = exchangeName;
+    public void setTarget(String target) {
+        this.target = target;
     }
 
     @Override
@@ -117,6 +112,7 @@ public class ListenerEndpoint {
                 ", host='" + host + '\'' +
                 ", port=" + port +
                 ", messageConnection=" + messageConnection +
+                ", target=" + target +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
                 '}';
@@ -129,12 +125,11 @@ public class ListenerEndpoint {
         ListenerEndpoint that = (ListenerEndpoint) o;
         return neighbourName.equals(that.neighbourName) &&
                 source.equals(that.source) &&
-                host.equals(that.host) &&
-                port.equals(that.port);
+                target.equals(that.target);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(neighbourName, source, host, port);
+        return Objects.hash(neighbourName, source, target);
     }
 }
