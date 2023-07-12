@@ -470,7 +470,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
 
-		assertThat(spyNeighbour.getOurRequestedSubscriptions().getAcceptedSubscriptions()).isEmpty();
+		assertThat(spyNeighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.ACCEPTED)).isEmpty();
 	}
 
 	@Test
@@ -765,7 +765,7 @@ public class NeighbourServiceDiscoveryTest {
 				),
 				new Connection()
 		);
-		assertThat(neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()).hasSize(1);
+		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED)).hasSize(1);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1); //TODO what???
 		when(backoffProperties.getNumberOfAttempts()).thenReturn(1); //TODO this is the one in use!
 
@@ -811,7 +811,7 @@ public class NeighbourServiceDiscoveryTest {
 		returnSubscription.setPath(subscription.getPath());
 		returnSubscription.setConsumerCommonName(subscription.getConsumerCommonName());
 
-		assertThat(neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions()).hasSize(1);
+		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED)).hasSize(1);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1);
 		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
 

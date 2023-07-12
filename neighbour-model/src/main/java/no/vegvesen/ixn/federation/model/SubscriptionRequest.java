@@ -61,24 +61,11 @@ public class SubscriptionRequest {
 				'}';
 	}
 
-	public Set<Subscription> getAcceptedSubscriptions() {
+	public Set<Subscription> getSubscriptionsByStatus(SubscriptionStatus status) {
 		return getSubscriptions().stream()
-				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.ACCEPTED))
+				.filter(s -> s.getSubscriptionStatus().equals(status))
 				.collect(Collectors.toSet());
 	}
-
-	public Set<Subscription> getCreatedSubscriptions() {
-		return getSubscriptions().stream()
-				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.CREATED))
-				.collect(Collectors.toSet());
-	}
-
-	public Set<Subscription> getTearDownSubscriptions() {
-		return getSubscriptions().stream()
-				.filter(s -> s.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN))
-				.collect(Collectors.toSet());
-	}
-
 
 	public Optional<LocalDateTime> getSuccessfulRequest() {
 		return Optional.ofNullable(successfulRequest);

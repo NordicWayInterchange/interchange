@@ -177,7 +177,7 @@ public class RoutingConfigurer {
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
 		for (Neighbour neighbour : neighbours) {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
-				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getCreatedSubscriptions();
+				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED);
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsCreated()) {
@@ -213,7 +213,7 @@ public class RoutingConfigurer {
 		List<Neighbour> neighbours = neighbourService.findAllNeighbours();
 		for (Neighbour neighbour : neighbours) {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
-				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getTearDownSubscriptions();
+				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN);
 				for (Subscription subscription : ourSubscriptions) {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.exchangeIsRemoved()) {
