@@ -48,24 +48,24 @@ public class NeighbourRESTClient {
             if (response.getBody() != null) {
                 result = response.getBody();
 			} else {
-                throw new CapabilityPostException(String.format("Server returned http code %s with null capability response", response.getStatusCodeValue()));
+                throw new CapabilityPostException(String.format("Server %s returned http code %s with null capability response", name, response.getStatusCodeValue()));
             }
 
         } catch (HttpServerErrorException | HttpClientErrorException e) {
-            logger.error("Failed post of capabilities to neighbour with url {}\nRequest body: {} \nServer returned error code: {}", controlChannelUrl, entity.toString(), e.getStatusCode().toString());
+            logger.debug("Failed post of capabilities to neighbour with url {}\nRequest body: {} \nServer returned error code: {}", controlChannelUrl, entity, e.getStatusCode());
 
             byte[] errorResponse = e.getResponseBodyAsByteArray();
 
             try {
                 ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
-                logger.error("Received error object from server: {}", errorDetails.toString());
-                throw new CapabilityPostException("Error in posting capabilities to neighbour " + name + ". Received error response: " + errorDetails.toString());
+                logger.debug("Received error object from server: {}", errorDetails.toString());
+                throw new CapabilityPostException(name, errorDetails);
             } catch (IOException ioe) {
-                logger.error("Unable to cast error response as ErrorDetails object.", ioe);
-                throw new CapabilityPostException("Error in posting capabilities to neighbour " + name + ". Could not map server response to ErrorDetails object.");
+                logger.debug("Unable to cast error response as ErrorDetails object.", ioe);
+                throw new CapabilityPostException(name, e.getStatusCode().value(),e);
             }
         } catch (RestClientException e) {
-            logger.error("Failed post of capabilities to neighbour, network layer error", e);
+            logger.debug("Failed post of capabilities to neighbour, network layer error", e);
             throw new CapabilityPostException("Error in posting capabilities to neighbour " + name + " due to exception", e);
 
         }
@@ -77,7 +77,7 @@ public class NeighbourRESTClient {
 			Object body = entity.getBody();
 			assert body != null;
 			try {
-				logger.info("{} {} object: {}", logPrefix, body.getClass().getSimpleName(), mapper.writeValueAsString(body));
+				logger.debug("{} {} object: {}", logPrefix, body.getClass().getSimpleName(), mapper.writeValueAsString(body));
 			} catch (JsonProcessingException e) {
 				logger.warn("Could not convert {} to json string {}", body.getClass().getSimpleName(), body.toString(), e);
 			}
@@ -104,41 +104,42 @@ public class NeighbourRESTClient {
             logHttpEntity(response, "Received");
 
             if (response.getBody() == null) {
-                throw new SubscriptionRequestException("Returned empty response from subscription request");
+                throw new SubscriptionRequestException(String.format("%s returned empty response from subscription request",neighbourName));
             }
             responseApi = response.getBody();
             logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
 
+            //TODO this might actually warrant an exception of its own. A requested subscription is not accepted
+            //TODO or should it be handled at a higher level?
             if (!subscriptionRequestApi.getSubscriptions().isEmpty() && responseApi.getSubscriptions().isEmpty()) {
                 // we posted a non empty subscription request, but received an empty subscription request.
-                logger.error("Posted non empty subscription request to neighbour but received empty subscription request.");
-                throw new SubscriptionRequestException("Subscription request failed. Posted non-empty subscription request, but received response with empty subscription request from neighbour.");
+                logger.debug("Posted non empty subscription request to neighbour but received empty subscription request.");
+                throw new SubscriptionRequestException("Subscription request failed. Posted non-empty subscription request, but received response with empty subscription request from neighbour " + neighbourName + ".");
             }
 
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
 
             HttpStatus status = e.getStatusCode();
-            logger.error("Failed post of subscription request to neighbour with url {} \nRequest body: {} \nServer returned error code: {}", controlChannelUrl, entity.toString(), status.toString());
+            logger.debug("Failed post of subscription request to neighbour with url {} \nRequest body: {} \nServer returned error code: {}", controlChannelUrl, entity.toString(), status.toString());
 
             byte[] errorResponse = e.getResponseBodyAsByteArray();
 
             try {
                 ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
-                logger.error("Received error object from server: {}", errorDetails.toString());
-                throw new SubscriptionRequestException("Subscription request failed. Received error object from server: " + errorDetails.toString());
+                logger.debug("Received error object from server: {}", errorDetails.toString());
+                throw new SubscriptionRequestException(String.format("Subscription request to %s failed. Received error object from server: %s",neighbourName,errorDetails),e);
             } catch (IOException ioe) {
-                logger.error("Unable to cast response as ErrorDetails object.", ioe);
-                throw new SubscriptionRequestException("Subscription request failed. Could not map server response to Error object.");
+                logger.debug("Unable to cast response as ErrorDetails object.", ioe);
+                throw new SubscriptionRequestException(String.format("Subscription request to %s failed.",neighbourName),e);
             }
         } catch (RestClientException e) {
-            logger.error("Received network layer error", e);
+            logger.debug("Received network layer error", e);
             throw new SubscriptionRequestException("Error in posting capabilities to neighbour " + neighbourName + " due to exception", e);
         }
         return responseApi;
     }
 
-    //TODO need a class that indicates that the Subscription is not fount on neighbour node.
     SubscriptionPollResponseApi doPollSubscriptionStatus(String url, String name) {
         SubscriptionPollResponseApi subscriptionApi;
         try {
@@ -150,7 +151,7 @@ public class NeighbourRESTClient {
         } catch (HttpClientErrorException | HttpServerErrorException e) {
 
             HttpStatus status = e.getStatusCode();
-            logger.error("Failed polling subscription with url {}. Server returned error code: {}", url, status);
+            logger.debug("Failed polling subscription with url {}. Server returned error code: {}", url, status);
 
 
             byte[] errorResponse = e.getResponseBodyAsByteArray();
@@ -159,17 +160,17 @@ public class NeighbourRESTClient {
                 try {
                     ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
 
-                    logger.error("Received error object from server: {}", errorDetails.toString());
+                    logger.debug("Received error object from server: {}", errorDetails.toString());
                 } catch (IOException ioe) {
                     logger.error("Unable to cast response as ErrorDetails object.", ioe);
                 }
             }
-            if (e.getStatusCode().is4xxClientError()) {
+            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
                 throw new SubscriptionNotFoundException(String.format("Subscription not found when polling URL %s", url));
             }
             throw new SubscriptionPollException("Error in polling " + url + " for subscription status. Received error response from server: " + status.toString());
         } catch (RestClientException e) {
-            logger.error("Received network layer error", e);
+            logger.debug("Received network layer error", e);
             throw new SubscriptionPollException("Error in posting capabilities to neighbour " + name + " due to exception", e);
         }
         return subscriptionApi;
@@ -180,7 +181,7 @@ public class NeighbourRESTClient {
             restTemplate.delete(url);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             HttpStatus status = e.getStatusCode();
-            logger.error("Failed deleting subscription with url {}. Server returned error code {}", url, status.toString());
+            logger.debug("Failed deleting subscription with url {}. Server returned error code {}", url, status.toString());
             if (HttpStatus.NOT_FOUND.equals(status)) {
                 throw new SubscriptionNotFoundException("Error in deleting subscription to neighbour " + name + " due to exception", e);
             }

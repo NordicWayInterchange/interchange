@@ -78,6 +78,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.capabilities-update-interval}", initialDelayString = "${discoverer.capability-post-initial-delay}")
 	public void scheduleCapabilityExchangeWithNeighbours() {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
+		logger.debug("CapabilityExchangeWithNeighbours");
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Set<CapabilitySplit> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
 		Optional<LocalDateTime> lastUpdatedLocalCapabilities = CapabilityCalculator.calculateLastUpdatedCapabilitiesOptional(serviceProviders);
@@ -94,7 +95,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void performSubscriptionRequestWithKnownNeighbours() {
 		// Perform subscription request with all neighbours with capabilities KNOWN
-		logger.info("Checking for any Neighbours with KNOWN capabilities");
+		logger.debug("Checking for any Neighbours with KNOWN capabilities");
 		List<Neighbour> neighboursForSubscriptionRequest = neighbourService.findNeighboursWithKnownCapabilities();
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.ofNullable(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
