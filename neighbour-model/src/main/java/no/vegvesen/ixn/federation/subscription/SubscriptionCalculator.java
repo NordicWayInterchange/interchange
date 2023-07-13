@@ -19,20 +19,20 @@ public class SubscriptionCalculator {
     private static Logger logger = LoggerFactory.getLogger(SubscriptionCalculator.class);
 
     public static Set<LocalSubscription> calculateSelfSubscriptions(List<ServiceProvider> serviceProviders) {
-        logger.info("Calculating Self subscriptions...");
+        logger.debug("Calculating Self subscriptions...");
         Set<LocalSubscription> localSubscriptions = new HashSet<>();
 
         for (ServiceProvider serviceProvider : serviceProviders) {
-            logger.info("Service provider name: {}", serviceProvider.getName());
+            logger.debug("Service provider name: {}", serviceProvider.getName());
             Set<LocalSubscription> serviceProviderSubscriptions = serviceProvider
                     .getSubscriptions()
                     .stream()
                     .filter(subscription -> LocalSubscriptionStatus.CREATED.equals(subscription.getStatus()))
                     .collect(Collectors.toSet());
-            logger.info("Service Provider Subscriptions: {}", serviceProviderSubscriptions.toString());
+            logger.debug("Service Provider Subscriptions: {}", serviceProviderSubscriptions);
             localSubscriptions.addAll(serviceProviderSubscriptions);
         }
-        logger.info("Calculated Self subscriptions: {}", localSubscriptions.toString());
+        logger.debug("Calculated Self subscriptions: {}", localSubscriptions.toString());
         return localSubscriptions;
     }
 
@@ -50,9 +50,6 @@ public class SubscriptionCalculator {
     }
 
     public static Set<Subscription> calculateCustomSubscriptionForNeighbour(Set<LocalSubscription> localSubscriptions, Set<CapabilitySplit> neighbourCapabilities, String ixnName) {
-        //logger.info("Calculating custom subscription for neighbour: {}", neighbourName);
-        //logger.debug("Neighbour capabilities {}", neighbourCapabilities);
-        //logger.debug("Local subscriptions {}", localSubscriptions);
         Set<LocalSubscription> matchingSubscriptions = CapabilityMatcher.calculateNeighbourSubscriptionsFromSelectors(neighbourCapabilities, localSubscriptions, ixnName);
         Set<Subscription> calculatedSubscriptions = new HashSet<>();
         for (LocalSubscription subscription : matchingSubscriptions) {
@@ -63,7 +60,6 @@ public class SubscriptionCalculator {
                 calculatedSubscriptions.add(newSubscription);
             }
         }
-        //logger.info("Calculated custom subscription for neighbour {}: {}", neighbourName, calculatedSubscriptions);
         return calculatedSubscriptions;
     }
 }

@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.api.v1_0;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -9,14 +10,14 @@ import java.util.Set;
 public class SubscriptionRequestApi {
     private String version = ApiVersion.version;
     private String name;
-    private Set<RequestedSubscriptionApi> subscriptions;
+    private Set<RequestedSubscriptionApi> subscriptions = new HashSet<>();
 
     public SubscriptionRequestApi() {
     }
 
     public SubscriptionRequestApi(String name, Set<RequestedSubscriptionApi> subscriptions) {
         this.name = name;
-        this.subscriptions = subscriptions;
+        this.subscriptions.addAll(subscriptions);
     }
 
     public String getName() {
@@ -28,11 +29,11 @@ public class SubscriptionRequestApi {
     }
 
     public Set<RequestedSubscriptionApi> getSubscriptions() {
-        return subscriptions;
+        return Set.copyOf(subscriptions);
     }
 
     public void setSubscriptions(Set<RequestedSubscriptionApi> subscriptions) {
-        this.subscriptions = subscriptions;
+        this.subscriptions.addAll(subscriptions);
     }
 
     public String getVersion() {
