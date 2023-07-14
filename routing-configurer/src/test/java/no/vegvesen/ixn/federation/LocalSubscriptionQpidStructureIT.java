@@ -77,6 +77,8 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
 
     public static final String SP_NAME = "sp-1";
+
+    @Container
     private static KeysContainer keyContainer = getKeyContainer(LocalSubscriptionQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", SP_NAME);
 
     @Container

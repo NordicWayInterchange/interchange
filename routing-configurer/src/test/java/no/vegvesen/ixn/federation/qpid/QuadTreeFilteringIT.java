@@ -38,7 +38,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 	private static Logger logger = LoggerFactory.getLogger(QuadTreeFilteringIT.class);
 
 	@Container
-	private static KeysContainer keysContainer = getKeyContainer(QuadTreeFilteringIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
+	private static KeysContainer keysContainer = getKeyContainer(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
 	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")

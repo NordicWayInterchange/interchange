@@ -16,7 +16,7 @@ public class ServiceProviderCertGeneratorIT {
 
     static Path resourcePath = Paths.get("src/test/resources");
     static Path intermediateCaPath = resourcePath.resolve("intermediateca");
-    static Path testPrefixedOutputPath = DockerBaseIT.getTestPrefixedOutputPath(ServiceProviderCertGeneratorIT.class);
+    static Path testPrefixedOutputPath = DockerBaseIT.getTargetFolderPathForTestClass(ServiceProviderCertGeneratorIT.class);
 
     @Container
     static ServiceProviderCertGenerator generator = new ServiceProviderCertGenerator(
