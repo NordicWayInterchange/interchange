@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
+import org.apache.qpid.server.security.auth.database.HashedUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -354,6 +355,24 @@ public class NeigbourDiscoveryService {
         }
         finally {
             logger.info("Saving updated neighbour: {}", neighbour.toString());
+            neighbourRepository.save(neighbour);
+        }
+    }
+
+    public void setGiveUpSubscriptionsToTearDownForRemoval(){
+        List<Neighbour> neighbours = neighbourRepository.findNeighboursByOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(SubscriptionStatus.GIVE_UP);
+        for (Neighbour neighbour : neighbours) {
+            if (!neighbour.getControlConnection().canBeContacted(backoffProperties)) {
+                for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
+                    if (!subscription.getEndpoints().isEmpty()) {
+                        if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
+                            tearDownListenerEndpointsFromEndpointsList(neighbour, subscription.getEndpoints(), subscription.getExchangeName());
+                        }
+                        subscription.getEndpoints().clear();
+                    }
+                    subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
+                }
+            }
             neighbourRepository.save(neighbour);
         }
     }

@@ -24,9 +24,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.net.ssl.SSLContext;
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -501,8 +500,6 @@ public class NeighbourDiscovererIT {
 
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider");
 		serviceProvider.addLocalSubscription(subscription);
-		//se om vi oppdaterer neighbour capabilities før vi gjør en post subscriptionRequest, vi bruker bare det vi vet om naboen.
-		//postSubscriptionRequest --> SubscriptionStatus.REQUESTED
 
 		when(mockNeighbourFacade.postSubscriptionRequest(any(Neighbour.class),anySet(),anyString()))
 				.thenReturn(new HashSet<>( Arrays.asList(
@@ -530,7 +527,6 @@ public class NeighbourDiscovererIT {
 				.thenThrow(new SubscriptionPollException("Subscription poll gone wrong"));
 
 		neighbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, mockNeighbourFacade);
-		//assert
 
 		for (int i=0; i<8; i++) {
 			neighbour.getControlConnection().setLastFailedConnectionAttempt(LocalDateTime.now().minusHours(3));
@@ -538,22 +534,13 @@ public class NeighbourDiscovererIT {
 			neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
 		}
 
-		System.out.println("Subscription: " + repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptions().stream().findFirst().get());
 		neighbour.setCapabilities(new Capabilities(Capabilities.CapabilitiesStatus.KNOWN, Collections.emptySet(), LocalDateTime.now()));
 
 		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, neighbour.getCapabilities().getCapabilities());
 
-		System.out.println("Subscription: " + repository.findByName("neighbour").getControlConnection());
+		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
+		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN)).hasSize(1);
 
-		//ta bort Capability
-		//sjekke hva som skjer med backoff på nabo om det er flere Subscriptions som hver for seg går i FAILED, går det fortere ned til connection.UNREACHABLE da?
-
-	}
-
-	public void testGiveUpSubscriptionsDisappearsWhenNeighbourCapabilityIsGone() {
-		//create subscriptions from us on neighbour
-		//du a subscription post to neighbour with no matching capabilities
-		//check subscriptions disappear even though they are in GIVE_UP
 	}
 
 	@Test

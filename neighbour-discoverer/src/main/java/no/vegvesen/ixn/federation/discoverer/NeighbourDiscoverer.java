@@ -131,6 +131,11 @@ public class NeighbourDiscoverer {
 		neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
 	}
 
+	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
+	public void setGiveUpSubscriptionsToTearDownForRemoval(){
+		neigbourDiscoveryService.setGiveUpSubscriptionsToTearDownForRemoval();
+	}
+
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void createMatches() {
 		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderService.getServiceProviders(), neighbourService.findAllNeighbours());
