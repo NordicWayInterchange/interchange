@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
@@ -21,30 +22,34 @@ import static org.mockito.Mockito.when;
 public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(MessageCollectorLocalListenerIT.class);
-	static Path testKeysPath = generateKeys(MessageCollectorLocalListenerIT.class,"my_ca", "localhost");
+
+	@Container
+	static KeysContainer keysContainer = getKeyContainer(MessageCollectorLocalListenerIT.class,"my_ca", "localhost");
 
 	@Container
 	public QpidContainer localContainer = getQpidTestContainer("docker/consumer",
-			testKeysPath,
+			keysContainer.getKeyFolderOnHost(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost");
+			"localhost")
+			.dependsOn(keysContainer);
 
 
 	@Container
 	public QpidContainer remoteContainer = getQpidTestContainer("docker/producer",
-			testKeysPath,
+			keysContainer.getKeyFolderOnHost(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost");
+			"localhost")
+			.dependsOn(keysContainer);
 
 	@Test
 	public void stoppingLocalContainerStopsListener() {
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "localhost.p12", "truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "localhost.p12", "truststore.jks");
 		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getAmqpsPort().toString(), "subscriptionExchange");
 		ListenerEndpoint remote = mock(ListenerEndpoint.class);
 		when(remote.getTarget()).thenReturn("subscriptionExchange");

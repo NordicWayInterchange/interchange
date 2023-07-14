@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.qpid;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
@@ -36,18 +37,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(QuadTreeFilteringIT.class);
-	private static Path testKeysPath = generateKeys(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+	@Container
+	private static KeysContainer keysContainer = getKeyContainer(QuadTreeFilteringIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost");
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")
+			.dependsOn(keysContainer);
 
 	static class Initializer  implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12")
+					"test.ssl.trust-store=" + keysContainer.getKeyFolderOnHost().resolve("truststore.jks"),
+					"test.ssl.key-store=" +  keysContainer.getKeyFolderOnHost().resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}
@@ -141,7 +144,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.addReadAccess(serviceProviderName, serviceProviderName);
 		qpidClient.bindTopicExchange(selector, "outgoingExchange", serviceProviderName);
 
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "king_gustaf.p12", "truststore.jks");
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), serviceProviderName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
@@ -174,7 +177,7 @@ public class QuadTreeFilteringIT extends QpidDockerBaseIT {
 		qpidClient.createTopicExchange("outgoingExchange");
 		qpidClient.bindTopicExchange(selector, "outgoingExchange", spName);
 
-		SSLContext sslContext = TestKeystoreHelper.sslContext(testKeysPath, "king_gustaf.p12", "truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "king_gustaf.p12", "truststore.jks");
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), spName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
