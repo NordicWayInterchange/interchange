@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.messagecollector;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.TestKeystoreHelper;
+import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.api.v1_0.Constants;
@@ -30,38 +31,43 @@ import static org.mockito.Mockito.when;
 
 @Testcontainers
 public class MessageCollectorIT extends QpidDockerBaseIT {
-	static Path testKeysPath = generateKeys(MessageCollectorIT.class,"my_ca", "localhost", "sp_producer", "sp_consumer");
+	//static Path testKeysPath = generateKeys(MessageCollectorIT.class,"my_ca", "localhost", "sp_producer", "sp_consumer");
+
+	@Container
+	static KeysContainer keysContainer = getKeyContainer(MessageCollectorIT.class,"my_ca", "localhost", "sp_producer", "sp_consumer");
 
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer consumerContainer = getQpidTestContainer("docker/consumer",
-			testKeysPath,
+			keysContainer.getKeyFolderOnHost(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost");
+			"localhost")
+			.dependsOn(keysContainer);
 
 	@Container
 	//Container is not static and is not reused between tests
 	public QpidContainer producerContainer = getQpidTestContainer("docker/producer",
-			testKeysPath,
+			keysContainer.getKeyFolderOnHost(),
 			"localhost.p12",
 			"password",
 			"truststore.jks",
 			"password",
-			"localhost");
+			"localhost")
+			.dependsOn(keysContainer);
 
 	public Sink createSink(String containerUrl, String queueName, String keyStore) {
 		return new Sink(containerUrl,
 				queueName,
-				TestKeystoreHelper.sslContext(testKeysPath, keyStore, "truststore.jks"));
+				TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), keyStore, "truststore.jks"));
 	}
 
 	public Source createSource(String containerUrl, String queue, String keystore) {
 		return new Source(containerUrl,
 				queue,
-				TestKeystoreHelper.sslContext(testKeysPath, keystore, "truststore.jks"));
+				TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), keystore, "truststore.jks"));
 	}
 
 	@Test
@@ -76,7 +82,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
+				TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
@@ -124,7 +130,7 @@ public class MessageCollectorIT extends QpidDockerBaseIT {
 
 		String localIxnFederationPort = consumerContainer.getAmqpsPort().toString();
 		CollectorCreator collectorCreator = new CollectorCreator(
-				TestKeystoreHelper.sslContext(testKeysPath,"localhost.p12", "truststore.jks"),
+				TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(),"localhost.p12", "truststore.jks"),
 				"localhost",
 				localIxnFederationPort,
 				"subscriptionExchange");
