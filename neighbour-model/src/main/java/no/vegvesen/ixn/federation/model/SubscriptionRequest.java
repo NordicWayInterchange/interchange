@@ -21,9 +21,6 @@ public class SubscriptionRequest {
 	@Column(name = "id")
 	private Integer subreq_id;
 
-	@Enumerated(EnumType.STRING)
-	private SubscriptionRequestStatus status = SubscriptionRequestStatus.EMPTY;
-
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "subreq_id", foreignKey = @ForeignKey(name = "fk_sub_subreq"))
 	private Set<Subscription> subscription = new HashSet<>();
@@ -33,17 +30,8 @@ public class SubscriptionRequest {
 	public SubscriptionRequest() {
 	}
 
-	public SubscriptionRequest(SubscriptionRequestStatus status, Set<Subscription> subscription) {
-		this.status = status;
+	public SubscriptionRequest(Set<Subscription> subscription) {
 		this.subscription = subscription;
-	}
-
-	public SubscriptionRequestStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(SubscriptionRequestStatus status) {
-		this.status = status;
 	}
 
 	public Set<Subscription> getSubscriptions() {
@@ -69,7 +57,6 @@ public class SubscriptionRequest {
 	public String toString() {
 		return "SubscriptionRequest{" +
 				"subreq_id=" + subreq_id +
-				", status=" + status +
 				", subscription=" + subscription +
 				'}';
 	}

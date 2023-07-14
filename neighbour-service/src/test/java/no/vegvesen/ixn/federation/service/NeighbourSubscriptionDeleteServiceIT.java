@@ -64,13 +64,12 @@ public class NeighbourSubscriptionDeleteServiceIT {
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
+        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
         neighbourRepository.save(neighbour);
 
         service.deleteSubscriptions(mockNeighbourFacade);
 
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
-        assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
     }
 
     //Get back 404 - NOT FOUND
@@ -88,7 +87,7 @@ public class NeighbourSubscriptionDeleteServiceIT {
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
+        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
         neighbourRepository.save(neighbour);
 
         //ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new Connection());
@@ -98,7 +97,6 @@ public class NeighbourSubscriptionDeleteServiceIT {
         service.deleteSubscriptions(mockNeighbourFacade);
 
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
-        assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getStatus()).isEqualTo(SubscriptionRequestStatus.EMPTY);
     }
 
     //Get back 4xx - something else gone wrong
@@ -116,7 +114,7 @@ public class NeighbourSubscriptionDeleteServiceIT {
         Set<Subscription> subscriptions = new HashSet<>();
         subscriptions.add(ourSubscription);
 
-        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, subscriptions));
+        neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(subscriptions));
         neighbourRepository.save(neighbour);
 
         //ListenerEndpoint listenerEndpoint = new ListenerEndpoint(neighbourName, "my-source", "my-host", 5671, new Connection());

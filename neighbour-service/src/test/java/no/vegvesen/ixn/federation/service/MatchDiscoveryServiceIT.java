@@ -70,7 +70,6 @@ public class MatchDiscoveryServiceIT {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.REQUESTED,
                         Collections.singleton(subscription)
                 )
         );
@@ -95,7 +94,6 @@ public class MatchDiscoveryServiceIT {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.REQUESTED,
                         Collections.singleton(subscription)
                 )
         );
@@ -121,7 +119,6 @@ public class MatchDiscoveryServiceIT {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.REQUESTED,
                         Collections.singleton(subscription)
                 )
         );
@@ -166,7 +163,6 @@ public class MatchDiscoveryServiceIT {
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest(
-                        SubscriptionRequestStatus.ESTABLISHED,
                         Collections.singleton(subscription)
                 )
         );

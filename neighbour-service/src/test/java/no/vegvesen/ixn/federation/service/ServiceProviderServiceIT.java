@@ -68,7 +68,7 @@ public class ServiceProviderServiceIT {
                 "neighbour",
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
-                new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(subscription))
+                new SubscriptionRequest(Collections.singleton(subscription))
         );
 
         neighbourRepository.save(neighbour);
@@ -109,7 +109,7 @@ public class ServiceProviderServiceIT {
                 "neighbour",
                 new Capabilities(),
                 new NeighbourSubscriptionRequest(),
-                new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, Collections.singleton(subscription))
+                new SubscriptionRequest(Collections.singleton(subscription))
         );
 
         neighbourRepository.save(neighbour);

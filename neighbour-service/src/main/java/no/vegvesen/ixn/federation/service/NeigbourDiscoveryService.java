@@ -198,7 +198,6 @@ public class NeigbourDiscoveryService {
                     logger.info("Too soon to post subscription request to neighbour when backing off");
                 }
             } catch (SubscriptionRequestException e) {
-                ourRequestedSubscriptionsFromNeighbour.setStatus(SubscriptionRequestStatus.FAILED);
                 controlConnection.failedConnection(backoffProperties.getNumberOfAttempts());
                 logger.error("Failed subscription request. Setting status of neighbour fedIn to FAILED.", e);
             }

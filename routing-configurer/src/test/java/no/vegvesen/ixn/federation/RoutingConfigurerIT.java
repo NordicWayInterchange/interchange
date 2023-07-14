@@ -73,7 +73,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(RoutingConfigurerIT.class);
 
-	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(SubscriptionRequestStatus.EMPTY, emptySet());
+	private final SubscriptionRequest emptySubscriptionRequest = new SubscriptionRequest(emptySet());
 	private final Capabilities emptyCapabilities = new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet());
 
 	private static String AMQPS_URL;
@@ -862,7 +862,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 
 		Neighbour myNeighbour = new Neighbour();
-		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, singleton(subscription)));
+		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");
@@ -882,7 +882,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		client.createTopicExchange(exchangeName);
 
 		Neighbour myNeighbour = new Neighbour();
-		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(SubscriptionRequestStatus.ESTABLISHED, singleton(subscription)));
+		myNeighbour.setOurRequestedSubscriptions(new SubscriptionRequest(singleton(subscription)));
 
 		when(neighbourService.findAllNeighbours()).thenReturn(Arrays.asList(myNeighbour));
 		when(interchangeNodeProperties.getName()).thenReturn("my-node");

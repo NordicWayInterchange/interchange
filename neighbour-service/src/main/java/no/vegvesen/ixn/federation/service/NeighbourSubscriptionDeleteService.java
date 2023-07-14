@@ -58,7 +58,6 @@ public class NeighbourSubscriptionDeleteService {
                 }
                 neighbour.getOurRequestedSubscriptions().deleteSubscriptions(subscriptionsToDelete);
                 if (neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
-                    neighbour.getOurRequestedSubscriptions().setStatus(SubscriptionRequestStatus.EMPTY);
                     logger.info("SubscriptionRequest is empty, setting SubscriptionRequestStatus to SubscriptionRequestStatus.EMPTY");
                 }
                 neighbourRepository.save(neighbour);
