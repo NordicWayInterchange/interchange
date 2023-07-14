@@ -34,17 +34,15 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(BiQpidStructureIT.class);
 
-    private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
-
     @Container
-    private static KeysContainer keyContainer = getKeyContainer(testKeysPath, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+    private static KeysContainer keyContainer = getKeyContainer(BiQpidStructureIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
 
     SSLContext sslContext;
 
     QpidClient qpidClient;
 
     @Container
-    public QpidContainer qpidContainer = getQpidTestContainer("bi-qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password", "localhost")
+    public QpidContainer qpidContainer = getQpidTestContainer("bi-qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password", "localhost")
             .dependsOn(keyContainer);
 
 

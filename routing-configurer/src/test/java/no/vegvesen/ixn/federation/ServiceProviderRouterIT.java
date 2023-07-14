@@ -54,13 +54,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
 
-	private static Path testKeysPath = getFolderPath("target/test-keys" + ServiceProviderRouterIT.class.getSimpleName());
+	@Container
+	private static KeysContainer keyContainer = getKeyContainer(ServiceProviderRouterIT.class,"my_ca", "localhost", "routing_configurer", "king_gustaf");
 
 	@Container
-	private static KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", "king_gustaf");
-
-	@Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")
 			.dependsOn(keyContainer);
 	private static final String nodeName = "localhost";
 
@@ -73,8 +71,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + qpidContainer.getHttpsUrl(),
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-					"test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12"),
+					"test.ssl.trust-store=" + keyContainer.getKeyFolderOnHost().resolve("truststore.jks"),
+					"test.ssl.key-store=" +  keyContainer.getKeyFolderOnHost().resolve("routing_configurer.p12"),
 					"interchange.node-provider.name=" + nodeName
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
@@ -1118,7 +1116,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	public SSLContext setUpTestSslContext(String s) {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(testKeysPath.resolve(s).toString(), "password", KeystoreType.PKCS12),
-				new KeystoreDetails(testKeysPath.resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
+				new KeystoreDetails(keyContainer.getKeyFolderOnHost().resolve(s).toString(), "password", KeystoreType.PKCS12),
+				new KeystoreDetails(keyContainer.getKeyFolderOnHost().resolve("truststore.jks").toString(), "password", KeystoreType.JKS));
 	}
 }
