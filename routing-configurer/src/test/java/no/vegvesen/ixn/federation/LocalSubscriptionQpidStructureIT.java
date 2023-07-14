@@ -62,8 +62,8 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
             TestPropertyValues.of(
                     "routing-configurer.baseUrl=" + httpsUrl,
                     "routing-configurer.vhost=localhost",
-                    "test.ssl.trust-store=" + testKeysPath.resolve("truststore.jks"),
-                    "test.ssl.key-store=" +  testKeysPath.resolve("routing_configurer.p12"),
+                    "test.ssl.trust-store=" + keyContainer.getKeyFolderOnHost().resolve("truststore.jks"),
+                    "test.ssl.key-store=" +  keyContainer.getKeyFolderOnHost().resolve("routing_configurer.p12"),
                     "interchange.node-provider.name=" + qpidContainer.getHost(),
                     "interchange.node-provider.messageChannelPort=" + qpidContainer.getAmqpsPort()
             ).applyTo(configurableApplicationContext.getEnvironment());
@@ -72,13 +72,12 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(LocalSubscriptionQpidStructureIT.class);
 
-    private static Path testKeysPath = getFolderPath("target/test-keys" + LocalSubscriptionQpidStructureIT.class.getSimpleName());
 
     public static final String SP_NAME = "sp-1";
-    private static KeysContainer keyContainer = getKeyContainer(testKeysPath,"my_ca", "localhost", "routing_configurer", SP_NAME);
+    private static KeysContainer keyContainer = getKeyContainer(LocalSubscriptionQpidStructureIT.class,"my_ca", "localhost", "routing_configurer", SP_NAME);
 
     @Container
-    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password","localhost")
+    public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password","localhost")
             .dependsOn(keyContainer);
 
 
