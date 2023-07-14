@@ -178,7 +178,7 @@ public class ClusterKeyGenerator {
     public static Path generateKeystoreBC(Path outputFolder, String keystorePassword, String keystoreName, String entryName, PrivateKey privateKey, Certificate[] certificates) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null,null);
-        keyStore.setKeyEntry(entryName, privateKey,null, certificates);
+        keyStore.setKeyEntry(entryName, privateKey,keystorePassword.toCharArray(), certificates);
 
         Path outputPath = outputFolder.resolve(keystoreName);
         keyStore.store(new FileOutputStream(outputPath.toFile()),keystorePassword.toCharArray());
