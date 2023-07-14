@@ -37,17 +37,15 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
     private static Logger logger = LoggerFactory.getLogger(QueueDepthQpidStructureIT.class);
 
-    private static Path testKeysPath = getTestPrefixedOutputPath(QueueDepthQpidStructureIT.class);
-
     @Container
-    private static KeysContainer keyContainer = getKeyContainer(testKeysPath, "my_ca", "localhost", "routing_configurer", "king_gustaf");
+    private static KeysContainer keyContainer = getKeyContainer(QueueDepthQpidStructureIT.class, "my_ca", "localhost", "routing_configurer", "king_gustaf");
 
     SSLContext sslContext;
 
     QpidClient qpidClient;
 
     @Container
-    public QpidContainer qpidContainer = getQpidTestContainer("queue-qpid", testKeysPath, "localhost.p12", "password", "truststore.jks", "password", "localhost")
+    public QpidContainer qpidContainer = getQpidTestContainer("queue-qpid", keyContainer.getKeyFolderOnHost(), "localhost.p12", "password", "truststore.jks", "password", "localhost")
             .dependsOn(keyContainer);
 
 
