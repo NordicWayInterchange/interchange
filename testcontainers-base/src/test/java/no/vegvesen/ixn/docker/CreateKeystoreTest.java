@@ -67,7 +67,7 @@ public class CreateKeystoreTest {
         System.out.println(cn);
         ClusterKeyGenerator.generateKeystoreBC(outputPath,"password","henrik.p12",cn,privateKey,certificates.toArray(new X509Certificate[0]));
 
-        ClusterKeyGenerator.makeTrustStore("password",outputPath,"truststore.jks","stminterchange.com",certificates.get(certificates.size() -1));
+        ClusterKeyGenerator.makeTrustStore("password",outputPath,"truststore.jks","myKey",certificates.get(certificates.size() -1));
 
 
 
