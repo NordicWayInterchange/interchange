@@ -64,7 +64,7 @@ public class RoutingConfigurer {
 
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
-		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getTearDownSubscriptions();
+		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
 		try {
 			for (NeighbourSubscription sub : subscriptions) {
 				if (qpidClient.queueExists(sub.getQueueName())) {
@@ -76,7 +76,6 @@ public class RoutingConfigurer {
 			if (neighbour.getNeighbourRequestedSubscriptions().getStatus().equals(NeighbourSubscriptionRequestStatus.EMPTY)) {
 				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
 				logger.info("Removed routing for neighbour {}", name);
-				//neighbourService.saveTearDownRouting(neighbour, name);
 			}
 		} catch (Exception e) {
 			logger.error("Could not remove routing for neighbour {}", name, e);
@@ -98,7 +97,7 @@ public class RoutingConfigurer {
 			Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 			Set<CapabilitySplit> capabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
 			if(neighbour.getNeighbourRequestedSubscriptions().hasOtherConsumerCommonName(neighbour.getName())){
-				Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions());
+				Set<NeighbourSubscription> allAcceptedSubscriptions = new HashSet<>(neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED));
 				Set<NeighbourSubscription> acceptedRedirectSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptionsWithOtherConsumerCommonName(neighbour.getName());
 
 				setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities);
@@ -109,7 +108,7 @@ public class RoutingConfigurer {
 				}
 				neighbourService.saveSetupRouting(neighbour);
 			} else {
-				Set<NeighbourSubscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getAcceptedSubscriptions();
+				Set<NeighbourSubscription> acceptedSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED);
 				setUpRegularRouting(acceptedSubscriptions, capabilities, neighbour.getName());
 				neighbourService.saveSetupRouting(neighbour);
 			}

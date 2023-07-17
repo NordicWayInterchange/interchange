@@ -286,7 +286,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(queueBindKeys).hasSize(1);
 		assertThat(s2.getQueueName()).isNull();
 
-		Set<NeighbourSubscription> createdSubscriptions = salmon.getNeighbourRequestedSubscriptions().getCreatedSubscriptions();
+		Set<NeighbourSubscription> createdSubscriptions = salmon.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.CREATED);
 		assertThat(createdSubscriptions).hasSize(1);
 
 		//Showing that the timestamp have been changed for the ACCEPTED subscription, but not for the REJECTED one

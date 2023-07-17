@@ -96,32 +96,14 @@ public class NeighbourSubscriptionRequest {
                 '}';
     }
 
-    public Set<NeighbourSubscription> getAcceptedSubscriptions() {
+    public Set<NeighbourSubscription> getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus status) {
         return getSubscriptions().stream()
-                .filter(s -> s.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.ACCEPTED))
-                .collect(Collectors.toSet());
-    }
-
-    public Set<NeighbourSubscription> getCreatedSubscriptions() {
-        return getSubscriptions().stream()
-                .filter(s -> s.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED))
-                .collect(Collectors.toSet());
-    }
-
-    public Set<NeighbourSubscription> getResubscribeSubscriptions() {
-        return getSubscriptions().stream()
-                .filter(s -> s.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.RESUBSCRIBE))
-                .collect(Collectors.toSet());
-    }
-
-    public Set<NeighbourSubscription> getTearDownSubscriptions() {
-        return getSubscriptions().stream()
-                .filter(s -> s.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.TEAR_DOWN))
+                .filter(s -> s.getSubscriptionStatus().equals(status))
                 .collect(Collectors.toSet());
     }
 
     public boolean hasTearDownSubscriptions() {
-        return !getTearDownSubscriptions().isEmpty();
+        return !getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN).isEmpty();
     }
 
     public Optional<LocalDateTime> getSuccessfulRequest() {
@@ -132,38 +114,14 @@ public class NeighbourSubscriptionRequest {
         this.successfulRequest = successfulRequest;
     }
 
-    public Set<String> wantedBindings() {
-        Set<String> wantedBindings = new HashSet<>();
-        for (NeighbourSubscription subscription : getAcceptedSubscriptions()) {
-            wantedBindings.add(subscription.bindKey());
-        }
-        for (NeighbourSubscription subscription : getCreatedSubscriptions()) {
-            wantedBindings.add(subscription.bindKey());
-        }
-        return wantedBindings;
-    }
-
-    public Set<String> getUnwantedBindKeys(Set<String> existingBindKeys) {
-        Set<String> wantedBindKeys = this.wantedBindings();
-        Set<String> unwantedBindKeys = new HashSet<>(existingBindKeys);
-        unwantedBindKeys.removeAll(wantedBindKeys);
-        return unwantedBindKeys;
-    }
-
     public boolean hasOtherConsumerCommonName(String ixnName) {
         return subscription.stream()
                 .anyMatch(s -> !s.getConsumerCommonName().equals(ixnName));
     }
 
     public Set<NeighbourSubscription> getAcceptedSubscriptionsWithOtherConsumerCommonName(String ixnName) {
-        return getAcceptedSubscriptions().stream()
+        return getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.ACCEPTED).stream()
                 .filter(s -> !s.getConsumerCommonName().equals(ixnName))
-                .collect(Collectors.toSet());
-    }
-
-    public Set<NeighbourSubscription> getAcceptedSubscriptionsWithSameConsumerCommonNameAsIxn(String ixnName) {
-        return getAcceptedSubscriptions().stream()
-                .filter(s -> s.getConsumerCommonName().equals(ixnName))
                 .collect(Collectors.toSet());
     }
 }
