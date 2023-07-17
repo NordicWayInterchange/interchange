@@ -22,9 +22,6 @@ public class NeighbourSubscriptionRequest {
     @Column(name = "id")
     private Integer subreq_id;
 
-    @Enumerated(EnumType.STRING)
-    private NeighbourSubscriptionRequestStatus status = NeighbourSubscriptionRequestStatus.EMPTY;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "subreq_id", foreignKey = @ForeignKey(name = "fk_neigh_sub_subreq"))
     private Set<NeighbourSubscription> subscription = new HashSet<>();
@@ -34,17 +31,8 @@ public class NeighbourSubscriptionRequest {
     public NeighbourSubscriptionRequest() {
     }
 
-    public NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus status, Set<NeighbourSubscription> subscription) {
-        this.status = status;
+    public NeighbourSubscriptionRequest(Set<NeighbourSubscription> subscription) {
         this.subscription = subscription;
-    }
-
-    public NeighbourSubscriptionRequestStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(NeighbourSubscriptionRequestStatus status) {
-        this.status = status;
     }
 
     public Set<NeighbourSubscription> getSubscriptions() {
@@ -91,7 +79,6 @@ public class NeighbourSubscriptionRequest {
     public String toString() {
         return "SubscriptionRequest{" +
                 "subreq_id=" + subreq_id +
-                ", status=" + status +
                 ", subscription=" + subscription +
                 '}';
     }

@@ -36,7 +36,7 @@ public class SubscriptionRequestTransformer {
 
 
 	public  NeighbourSubscriptionRequest subscriptionRequestApiToSubscriptionRequest(SubscriptionRequestApi request) {
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 		return subscriptionRequest;
 	}
 

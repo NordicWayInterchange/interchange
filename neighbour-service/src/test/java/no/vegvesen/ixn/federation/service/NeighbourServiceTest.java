@@ -152,7 +152,7 @@ class NeighbourServiceTest {
 		firstSubscription.setId(1);
 		firstSubscription.setPath("/ericsson/");
 		Set<NeighbourSubscription> subscriptions = Sets.newSet(firstSubscription);
-		NeighbourSubscriptionRequest returnedSubscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions);
+		NeighbourSubscriptionRequest returnedSubscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
 		Neighbour updatedNeighbour = new Neighbour("ericsson", capabilities, returnedSubscriptionRequest, null);
 
 		when(neighbourRepository.save(updatedNeighbour)).thenAnswer(

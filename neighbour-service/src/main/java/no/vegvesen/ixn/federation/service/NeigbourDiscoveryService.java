@@ -136,7 +136,7 @@ public class NeigbourDiscoveryService {
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
-                if (neighbour.hasEstablishedSubscriptions() || neighbour.hasCapabilities()) {
+                if (neighbour.hasCapabilities()) {
                     if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
                         postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
                     } else {

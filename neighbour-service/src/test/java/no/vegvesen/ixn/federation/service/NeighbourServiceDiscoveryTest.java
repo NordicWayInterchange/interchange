@@ -530,13 +530,11 @@ public class NeighbourServiceDiscoveryTest {
 	}
 
 	private SubscriptionRequest getEmptySR() {
-		Set<Subscription> subscription = new HashSet<>();
-		return new SubscriptionRequest(subscription);
+		return new SubscriptionRequest(Collections.emptySet());
 	}
 
 	private NeighbourSubscriptionRequest getEmptyNeighSR() {
-		Set<NeighbourSubscription> subscription = new HashSet<>();
-		return new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.EMPTY, subscription);
+		return new NeighbourSubscriptionRequest(Collections.emptySet());
 	}
 
 	private Set<Subscription> getReturnedSubscriptionRequest() {
@@ -552,7 +550,7 @@ public class NeighbourServiceDiscoveryTest {
 		selfLocalSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "originatingCountry = 'NO'", interchangeNodeProperties.getName()));
 		LocalDateTime lastUpdatedLocalSubscriptions = LocalDateTime.now();
 
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED, Collections.emptySet());
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(Collections.emptySet());
 		CapabilitySplit neighbourCapability = getDatexCapability("NO");
 		Set<CapabilitySplit> capabilitySet = new HashSet<>();
 		capabilitySet.add(neighbourCapability);
@@ -563,7 +561,6 @@ public class NeighbourServiceDiscoveryTest {
 		neighbourFedInSubscription.add(new Subscription("originatingCountry = 'NO'",SubscriptionStatus.ACCEPTED, interchangeNodeProperties.getName()));
 		neighbour.setOurRequestedSubscriptions(new SubscriptionRequest(neighbourFedInSubscription));
 
-		assertThat(neighbour.hasEstablishedSubscriptions()).isTrue();
 		Set<Subscription> subscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(selfLocalSubscriptions, capabilitySet, interchangeNodeProperties.getName());
 		assertThat(subscriptions.isEmpty()).isFalse();
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEqualTo(subscriptions);
@@ -573,7 +570,7 @@ public class NeighbourServiceDiscoveryTest {
 		otherNeighbourCapabilities.setLastCapabilityExchange(LocalDateTime.now().minusHours(1));
 		Neighbour otherNeighbour = new Neighbour("otherNeighbour",
 				otherNeighbourCapabilities,
-				new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.ESTABLISHED,Collections.emptySet()),
+				new NeighbourSubscriptionRequest(Collections.emptySet()),
 				new SubscriptionRequest());
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(Collections.emptySet());

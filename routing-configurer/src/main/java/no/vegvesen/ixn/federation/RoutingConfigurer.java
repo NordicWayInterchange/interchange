@@ -73,7 +73,7 @@ public class RoutingConfigurer {
 			}
 			neighbourService.saveDeleteSubscriptions(neighbour.getName(), subscriptions);
 
-			if (neighbour.getNeighbourRequestedSubscriptions().getStatus().equals(NeighbourSubscriptionRequestStatus.EMPTY)) {
+			if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				removeSubscriberFromGroup(FEDERATED_GROUP_NAME, name);
 				logger.info("Removed routing for neighbour {}", name);
 			}

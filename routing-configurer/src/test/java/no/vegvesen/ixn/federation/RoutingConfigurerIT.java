@@ -146,7 +146,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "flounder");
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(subscription);
 
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions);
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
 		Neighbour flounder = new Neighbour("flounder", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
@@ -207,7 +207,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 						"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "halibut");
 
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions);
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
 		Neighbour halibut = new Neighbour("halibut", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
@@ -274,7 +274,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(s2.getLastUpdatedTimestamp()).isEqualTo(0);
 
 		Set<NeighbourSubscription> subscriptions = Sets.newLinkedHashSet(s1, s2);
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions);
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
 		Neighbour salmon = new Neighbour("salmon", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
@@ -326,7 +326,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		Neighbour nordea = new Neighbour(
 				"nordea",
 				new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()),
-				new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions),
+				new NeighbourSubscriptionRequest(subscriptions),
 				null);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
@@ -383,7 +383,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND protocolVersion = '1.0' " +
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tore-down-neighbour"));
 
-		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+		Neighbour toreDownNeighbour = new Neighbour("tore-down-neighbour", emptyCapabilities, new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 		routingConfigurer.setupNeighbourRouting(toreDownNeighbour);
 		assertThat(client.getGroupMemberNames(QpidClient.FEDERATED_GROUP_NAME)).contains(toreDownNeighbour.getName());
 
@@ -428,7 +428,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "hammershark");
 		subs.add(sub);
 
-		Neighbour hammershark = new Neighbour("hammershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+		Neighbour hammershark = new Neighbour("hammershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 
@@ -479,7 +479,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
 		subs.add(sub1);
 
-		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		routingConfigurer.setupNeighbourRouting(tigershark);
@@ -494,7 +494,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'SE-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
 		subs.add(sub2);
 
-		tigershark.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs));
+		tigershark.setNeighbourRequestedSubscriptions(new NeighbourSubscriptionRequest(subs));
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
@@ -548,7 +548,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "tigershark");
 		subs.add(sub);
 
-		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+		Neighbour tigershark = new Neighbour("tigershark", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
@@ -588,7 +588,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 		subs.add(sub);
 
-		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+		Neighbour neigh = new Neighbour("negih-true", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		routingConfigurer.setupNeighbourRouting(neigh);
@@ -646,7 +646,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		subs.add(sub1);
 		subs.add(sub2);
 
-		Neighbour neigh = new Neighbour("neigh-true-and-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+		Neighbour neigh = new Neighbour("neigh-true-and-false", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
@@ -676,7 +676,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND protocolVersion = '1.0' " +
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "remote-service-provider"));
 
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions);
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
 		Neighbour cod = new Neighbour("cod", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		ServiceProvider serviceProvider = new ServiceProvider();
@@ -697,7 +697,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				"AND protocolVersion = '1.0' " +
 				"AND publisherId = 'NO-1234'", NeighbourSubscriptionStatus.ACCEPTED, "no-clownfish"));
 
-		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subscriptions);
+		NeighbourSubscriptionRequest subscriptionRequest = new NeighbourSubscriptionRequest(subscriptions);
 		Neighbour clownfish = new Neighbour("clownfish", emptyCapabilities, subscriptionRequest, emptySubscriptionRequest);
 
 		routingConfigurer.setupNeighbourRouting(clownfish);
@@ -741,7 +741,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		subs.add(sub1);
 		subs.add(sub2);
 
-		Neighbour neigh = new Neighbour("neigh-both", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+		Neighbour neigh = new Neighbour("neigh-both", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
@@ -790,7 +790,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		HashSet<NeighbourSubscription> subs = new HashSet<>();
 		subs.add(sub);
 
-		Neighbour neigh = new Neighbour("neigh10", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(NeighbourSubscriptionRequestStatus.REQUESTED, subs), emptySubscriptionRequest);
+		Neighbour neigh = new Neighbour("neigh10", new Capabilities(Capabilities.CapabilitiesStatus.UNKNOWN, emptySet()), new NeighbourSubscriptionRequest(subs), emptySubscriptionRequest);
 
 		when(serviceProviderRouter.findServiceProviders()).thenReturn(singleton(sp));
 		when(neighbourService.getNodeName()).thenReturn("my-name");
