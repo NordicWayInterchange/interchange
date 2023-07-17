@@ -12,6 +12,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -65,9 +66,9 @@ public class CreateKeystoreTest {
         }
         String cn = CertSigner.getCN(new JcaX509CertificateHolder(certificates.get(0)).getSubject());
         System.out.println(cn);
-        ClusterKeyGenerator.generateKeystoreBC(outputPath,"password","henrik.p12",cn,privateKey,certificates.toArray(new X509Certificate[0]));
+        ClusterKeyGenerator.generateKeystoreBC("password", cn,privateKey,certificates.toArray(new X509Certificate[0]), outputPath.resolve("henrik.p12"));
 
-        ClusterKeyGenerator.makeTrustStore("password",outputPath,"truststore.jks","myKey",certificates.get(certificates.size() -1));
+        ClusterKeyGenerator.makeTrustStore("password", "myKey",certificates.get(certificates.size() -1), new FileOutputStream(outputPath.resolve("truststore.jks").toFile()));
 
 
 
