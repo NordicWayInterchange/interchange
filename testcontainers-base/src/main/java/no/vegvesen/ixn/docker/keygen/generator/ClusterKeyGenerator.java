@@ -52,30 +52,40 @@ public class ClusterKeyGenerator {
         SecureRandom random = new SecureRandom();
         TopDomain topDomain = cluster.getTopDomain();
         KeyPairAndCertificate topCa = generateTopCa(topDomain);
-        saveKeyPair(outputFolder,String.format("ca.%s.key.pem",topDomain.getDomainName()),topCa.getKeyPair());
-        saveCert(outputFolder,String.format("ca.%s.crt.pem",topDomain.getDomainName()),topCa.getCertificate());
+        Path caKeyPath = outputFolder.resolve(String.format("ca.%s.key.pem", topDomain.getDomainName()));
+        saveKeyPair(topCa.getKeyPair(), new FileWriter(caKeyPath.toFile()));
+        Path caCertPath = outputFolder.resolve(String.format("ca.%s.crt.pem", topDomain.getDomainName()));
+        saveCert(topCa.getCertificate(), new FileWriter(caCertPath.toFile()));
         String topDomainTrustStorePassword = generatePassword(random,24);
         String caCertAlias = "myKey";
-        makeTrustStore(topDomainTrustStorePassword,outputFolder,topDomain.getDomainName() + "_truststore.jks", caCertAlias,topCa.getCertificate());
+        Path truststorePath = outputFolder.resolve(topDomain.getDomainName() + "_truststore.jks");
+        makeTrustStore(topDomainTrustStorePassword, caCertAlias,topCa.getCertificate(), new FileOutputStream(truststorePath.toFile()));
 
         String passwordFile = topDomain.getDomainName() + "_truststore.txt";
-        Files.writeString(outputFolder.resolve(passwordFile),topDomainTrustStorePassword);
+        Path truststorePasswordPath = outputFolder.resolve(passwordFile);
+        Files.writeString(truststorePasswordPath,topDomainTrustStorePassword);
         for (IntermediateDomain domain : topDomain.getIntermediateDomains()) {
             KeyPairAndCsr intermediateCsr = generateIntermediateKeypairAndCsr(domain.getDomainName(), domain.getOwningCountry());
             CertificateAndCertificateChain intermediateCert = signIntermediateCsr(topCa.getCertificate(), topCa.getKeyPair(), intermediateCsr.getCsr());
             String intermediateCaKeystorePassword = generatePassword(random,24);
             String keystoreName = domain.getDomainName() + ".p12";
-            generateKeystoreBC(outputFolder,intermediateCaKeystorePassword,keystoreName, domain.getDomainName(), intermediateCsr.getKeyPair().getPrivate(), intermediateCert.getChain().toArray(new X509Certificate[0]));
+            generateKeystoreBC(intermediateCaKeystorePassword, domain.getDomainName(), intermediateCsr.getKeyPair().getPrivate(), intermediateCert.getChain().toArray(new X509Certificate[0]), outputFolder.resolve(keystoreName));
             Files.writeString(outputFolder.resolve(domain.getDomainName() + ".txt"),intermediateCaKeystorePassword);
-            saveCert(outputFolder,String.format("int.%s.crt.pem",domain.getDomainName()),intermediateCert.getCertificate());
-            saveCertChain(outputFolder,String.format("chain.int.%s.crt.pem",domain.getDomainName()),intermediateCert.getChain());
-            saveKeyPair(outputFolder,String.format("int.%s.key.pem",domain.getDomainName()),intermediateCsr.getKeyPair());
+            Path intermediateCertPath = outputFolder.resolve(String.format("int.%s.crt.pem", domain.getDomainName()));
+            saveCert(intermediateCert.getCertificate(), new FileWriter(intermediateCertPath.toFile()));
+            Path intermediateCertChainPath = outputFolder.resolve(String.format("chain.int.%s.crt.pem", domain.getDomainName()));
+            saveCertChain(intermediateCert.getChain(), new FileWriter(intermediateCertChainPath.toFile()));
+            Path intermediateKeyPath = outputFolder.resolve(String.format("int.%s.key.pem", domain.getDomainName()));
+            saveKeyPair(intermediateCsr.getKeyPair(), new FileWriter(intermediateKeyPath.toFile()));
             Interchange interchange = domain.getInterchange();
             for (AdditionalHost host : interchange.getAdditionalHosts()) {
                 CertificateCertificateChainAndKeys additionalhostKeys = generateServerCertForHost(host, intermediateCert.getCertificate(), intermediateCert.getChain(), intermediateCsr.getKeyPair().getPrivate());
-                saveCert(outputFolder, String.format("%s.crt.pem", host.getHostname()), additionalhostKeys.getCertificate());
-                saveCertChain(outputFolder, String.format("chain.%s.crt.pem", host.getHostname()), additionalhostKeys.getCertificateChain());
-                saveKeyPair(outputFolder, String.format("%s.key.pem", host.getHostname()),additionalhostKeys.getKeyPair());
+                Path hostCertPath = outputFolder.resolve(String.format("%s.crt.pem", host.getHostname()));
+                saveCert(additionalhostKeys.getCertificate(), new FileWriter(hostCertPath.toFile()));
+                Path hostChainCertPath = outputFolder.resolve(String.format("chain.%s.crt.pem", host.getHostname()));
+                saveCertChain(additionalhostKeys.getCertificateChain(), new FileWriter(hostChainCertPath.toFile()));
+                Path hostKeyPath = outputFolder.resolve(String.format("%s.key.pem", host.getHostname()));
+                saveKeyPair(additionalhostKeys.getKeyPair(), new FileWriter(hostKeyPath.toFile()));
                 //generateServerCertForHost(outputFolder, host, intermediateCertOnHost, intermediateCertChainOnHost, intermediateKeyPath);
                 //TODO create keyStore for host (using chain, I expect)
             }
@@ -86,10 +96,13 @@ public class ClusterKeyGenerator {
                 String serviceProviderKeystoreName = description.getName() + ".p12";
                 Files.writeString(outputFolder.resolve(description.getName() + ".txt"),serviceProviderKeystorePassword);
                 X509Certificate[] certChain = spCertChain.toArray(new X509Certificate[0]);
-                generateKeystoreBC(outputFolder,serviceProviderKeystorePassword,serviceProviderKeystoreName, description.getName(), spCsr.getKeyPair().getPrivate(), certChain);
-                saveCert(outputFolder,String.format("%s.crt.pem",description.getName()),spCertChain.get(0));
-                saveCertChain(outputFolder,String.format("chain.%s.crt.pem",description.getName()),spCertChain);
-                saveKeyPair(outputFolder,String.format("%s.key.pem",description.getName()),spCsr.getKeyPair());
+                generateKeystoreBC(serviceProviderKeystorePassword, description.getName(), spCsr.getKeyPair().getPrivate(), certChain, outputFolder.resolve(serviceProviderKeystoreName));
+                Path serviceProviderCertPath = outputFolder.resolve(String.format("%s.crt.pem", description.getName()));
+                saveCert(spCertChain.get(0), new FileWriter(serviceProviderCertPath.toFile()));
+                Path serviceProviderChainCertPath = outputFolder.resolve(String.format("chain.%s.crt.pem", description.getName()));
+                saveCertChain(spCertChain, new FileWriter(serviceProviderChainCertPath.toFile()));
+                Path serviceProviderKeyPath = outputFolder.resolve(String.format("%s.key.pem", description.getName()));
+                saveKeyPair(spCsr.getKeyPair(), new FileWriter(serviceProviderKeyPath.toFile()));
             }
 
         }
@@ -175,33 +188,27 @@ public class ClusterKeyGenerator {
     }
 
 
-    public static Path generateKeystoreBC(Path outputFolder, String keystorePassword, String keystoreName, String entryName, PrivateKey privateKey, Certificate[] certificates) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
+    public static void generateKeystoreBC(String keystorePassword, String entryName, PrivateKey privateKey, Certificate[] certificates, Path outputPath) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null,null);
         keyStore.setKeyEntry(entryName, privateKey,keystorePassword.toCharArray(), certificates);
 
-        Path outputPath = outputFolder.resolve(keystoreName);
         keyStore.store(new FileOutputStream(outputPath.toFile()),keystorePassword.toCharArray());
-        return outputPath;
     }
 
-    private static Path saveCertChain(Path outputFolder, String chainFileName, List<X509Certificate> certificateChain) throws IOException {
-        Path chain = outputFolder.resolve(chainFileName);
+    private static void saveCertChain(List<X509Certificate> certificateChain, Writer writer) throws IOException {
         JcaPEMWriter pemWriter;
-        pemWriter = new JcaPEMWriter(new FileWriter(chain.toFile()));
+        pemWriter = new JcaPEMWriter(writer);
         for (X509Certificate cert : certificateChain) {
             pemWriter.writeObject(cert);
         }
         pemWriter.close();
-        return chain;
     }
 
-    private static Path saveCert(Path outputFolder, String fileName, X509Certificate certificate) throws IOException {
-        Path singleCert = outputFolder.resolve(fileName);
-        JcaPEMWriter pemWriter = new JcaPEMWriter(new FileWriter(singleCert.toFile()));
+    private static void saveCert(X509Certificate certificate, Writer writer) throws IOException {
+        JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
         pemWriter.writeObject(certificate);
         pemWriter.close();
-        return singleCert;
     }
 
     private static CertificateAndCertificateChain signIntermediateCsr(X509Certificate caCert, KeyPair caKeyPair, PKCS10CertificationRequest csr) throws CertIOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
@@ -243,15 +250,11 @@ public class ClusterKeyGenerator {
     }
 
 
-    @NotNull
-    private static Path saveKeyPair(Path outputFolder, String fileName, KeyPair keyPair) throws IOException {
+    private static void saveKeyPair(KeyPair keyPair, Writer keyWriter) throws IOException {
         JcaPEMWriter pemWriter;
-        Path keyPath = outputFolder.resolve(fileName);
-        FileWriter keyWriter = new FileWriter(keyPath.toFile());
         pemWriter = new JcaPEMWriter(keyWriter);
         pemWriter.writeObject(keyPair);
         pemWriter.close();
-        return keyPath;
     }
 
     @NotNull
@@ -283,13 +286,11 @@ public class ClusterKeyGenerator {
     }
 
 
-    public static Path makeTrustStore(String topDomainTruststorePassword, Path outputFolder, String truststoreName, String caCertAlias, X509Certificate certificate) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+    public static void makeTrustStore(String topDomainTruststorePassword, String caCertAlias, X509Certificate certificate, OutputStream stream) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         KeyStore trustStore = KeyStore.getInstance("JKS");
         trustStore.load(null,null);
         trustStore.setCertificateEntry(caCertAlias, certificate);
-        Path storeLocation = outputFolder.resolve(truststoreName);
-        trustStore.store(new FileOutputStream(storeLocation.toFile()), topDomainTruststorePassword.toCharArray());
-        return storeLocation;
+        trustStore.store(stream, topDomainTruststorePassword.toCharArray());
     }
 
     private static KeyPairAndCertificate generateTopCa(TopDomain topDomain) throws NoSuchAlgorithmException, CertIOException, OperatorCreationException, CertificateException {
