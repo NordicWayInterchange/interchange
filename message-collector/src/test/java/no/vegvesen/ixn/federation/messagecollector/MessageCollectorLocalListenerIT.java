@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.messagecollector;
 
 import no.vegvesen.ixn.TestKeystoreHelper;
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
@@ -22,33 +21,32 @@ public class MessageCollectorLocalListenerIT extends QpidDockerBaseIT {
 
 	private static Logger logger = LoggerFactory.getLogger(MessageCollectorLocalListenerIT.class);
 
-	@Container
-	static KeysContainer keysContainer = getKeyContainer(MessageCollectorLocalListenerIT.class,"my_ca", "localhost");
+	//@Container
+	//static KeysContainer keysContainer = getKeyContainer(MessageCollectorLocalListenerIT.class,"my_ca", "localhost");
+	static KeysStructure keysStructure = generateKeys(MessageCollectorLocalListenerIT.class,"my_ca","localhost");
 
 	@Container
 	public QpidContainer localContainer = getQpidTestContainer("docker/consumer",
-			keysContainer.getKeyFolderOnHost(),
-			"localhost.p12",
-			"password",
-			"truststore.jks",
-			"password",
-			"localhost")
-			.dependsOn(keysContainer);
+			keysStructure.getKeysOutputPath(),
+			keysStructure.getServerKeystoreName(),
+			keysStructure.getKeystorePassword(),
+			keysStructure.getTruststoreName(),
+			keysStructure.getTruststorePassword(),
+			"localhost");
 
 
 	@Container
 	public QpidContainer remoteContainer = getQpidTestContainer("docker/producer",
-			keysContainer.getKeyFolderOnHost(),
-			"localhost.p12",
-			"password",
-			"truststore.jks",
-			"password",
-			"localhost")
-			.dependsOn(keysContainer);
+			keysStructure.getKeysOutputPath(),
+			keysStructure.getServerKeystoreName(),
+			keysStructure.getKeystorePassword(),
+			keysStructure.getTruststoreName(),
+			keysStructure.getTruststorePassword(),
+			"localhost");
 
 	@Test
 	public void stoppingLocalContainerStopsListener() {
-		SSLContext sslContext = TestKeystoreHelper.sslContext(keysContainer.getKeyFolderOnHost(), "localhost.p12", "truststore.jks");
+		SSLContext sslContext = TestKeystoreHelper.sslContext(keysStructure.getKeysOutputPath(), keysStructure.getServerKeystoreName(), keysStructure.getTruststoreName());
 		CollectorCreator collectorCreator = new CollectorCreator(sslContext, "localhost", localContainer.getAmqpsPort().toString(), "subscriptionExchange");
 		ListenerEndpoint remote = mock(ListenerEndpoint.class);
 		when(remote.getTarget()).thenReturn("subscriptionExchange");

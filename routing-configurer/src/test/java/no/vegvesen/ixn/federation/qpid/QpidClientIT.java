@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import no.vegvesen.ixn.docker.KeysContainer;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
@@ -39,12 +38,10 @@ import static org.assertj.core.api.Assertions.*;
 public class QpidClientIT extends QpidDockerBaseIT {
 
 
-	@Container
-	private static final KeysContainer keyContainer = getKeyContainer(QpidClientIT.class,"my_ca", "testhost", "routing_configurer");
+	private static KeysStructure keysStructure = generateKeys(QpidClientIT.class,"my_ca", "testhost", "routing_configurer");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keyContainer.getKeyFolderOnHost(), "testhost.p12", "password", "truststore.jks", "password","localhost")
-            .dependsOn(keyContainer);
+	public static final QpidContainer qpidContainer = getQpidTestContainer("qpid", keysStructure.getKeysOutputPath(), "testhost.p12", "password", "truststore.jks", "password","localhost");
 
 	private static Logger logger = LoggerFactory.getLogger(QpidClientIT.class);
 
@@ -57,8 +54,8 @@ public class QpidClientIT extends QpidDockerBaseIT {
 			TestPropertyValues.of(
 					"routing-configurer.baseUrl=" + httpsUrl,
 					"routing-configurer.vhost=localhost",
-					"test.ssl.trust-store=" + keyContainer.getKeyFolderOnHost().resolve("truststore.jks"),
-					"test.ssl.key-store=" +  keyContainer.getKeyFolderOnHost().resolve("routing_configurer.p12")
+					"test.ssl.trust-store=" + keysStructure.getKeysOutputPath().resolve("truststore.jks"),
+					"test.ssl.key-store=" +  keysStructure.getKeysOutputPath().resolve("routing_configurer.p12")
 			).applyTo(configurableApplicationContext.getEnvironment());
 		}
 	}

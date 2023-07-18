@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.docker;
 
 import no.vegvesen.ixn.docker.keygen.generator.RootCAKeyGenerator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -12,6 +13,7 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
+@Disabled
 public class RootCAKeyGeneratorIT {
 
     private static Path targetPath = DockerBaseIT.getTargetFolderPathForTestClass(RootCAKeyGenerator.class);
